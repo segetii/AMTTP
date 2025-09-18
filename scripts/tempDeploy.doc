@@ -1,0 +1,32 @@
+import pkg from "hardhat";
+const { ethers, upgrades } = pkg;
+
+(async () => {
+  const [deployer, buyer, seller] = await ethers.getSigners();
+  console.log("Deploying with deployer:", deployer.address);
+
+  const AMTTP = await ethers.getContractFactory("contracts/withnft.sol:AMTTP");
+  const amttp = await upgrades.deployProxy(AMTTP, [deployer.address, 1], {
+    initializer: "initialize",
+  });
+  await amttp.waitForDeployment();
+  console.log("AMTTP deployed at:", amttp.target ?? amttp.address);
+
+  const secret = "quick-secret";
+  const hash = ethers.keccak256(ethers.toUtf8Bytes(secret));
+  const timelock = Math.floor(Date.now() / 1000) + 60;
+  const risk = 0;
+  const kycHash = ethers.ZeroHash;
+
+  await amttp.connect(buyer).initiateSwap(seller.address, hash, timelock, risk, kycHash, "0x", {
+    value: ethers.parseEther("0.01"),
+  });
+
+  const swapId = ethers.keccak256(
+    ethers.solidityPacked(["address", "address", "bytes32", "uint256"], [buyer.address, seller.address, hash, timelock])
+  );
+  console.log("Swap initiated:", swapId);
+
+  await amttp.connect(seller).completeSwap(swapId, secret);
+  console.log("Swap completed successfully");
+})();

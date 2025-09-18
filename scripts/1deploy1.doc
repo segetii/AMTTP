@@ -1,0 +1,28 @@
+// scripts/1deploy.js
+const { ethers } = require("hardhat");
+
+async function main() {
+  // Get deployer account
+  const [deployer] = await ethers.getSigners();
+
+  console.log("🚀 Deploying contracts with:", deployer.address);
+  console.log("💰 Account balance:", (await deployer.getBalance()).toString());
+
+  // Replace "MyContract" with the actual contract name in contracts/
+  const Contract = await ethers.getContractFactory("MyContract");
+
+  // Deploy contract (add constructor args inside deploy(...) if needed)
+  const contract = await Contract.deploy();
+
+  console.log("⏳ Waiting for deployment...");
+  await contract.deployed();
+
+  console.log("✅ Contract deployed at:", contract.address);
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("❌ Deployment failed:", error);
+    process.exit(1);
+  });

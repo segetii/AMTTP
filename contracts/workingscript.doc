@@ -1,0 +1,639 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+/**
+ * @title AMTTPUpgradeable
+ * @notice Atomic Multi-Layer Trustless Transfer Protocol - upgradeable core contract
+ * @dev ETH / ERC20 / ERC721 HTLC, multisig gating, risk oracle verification, fees, partial release,
+ *      dispute escalation/resolution, evidence anchoring, rescue & whitelist execution.
+ */
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+
+contract AMTTPUpgradeable is
+    Initializable,
+    AccessControlUpgradeable,
+    UUPSUpgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
+    using AddressUpgradeable for address payable;
+    using ECDSAUpgradeable for bytes32;
+
+    // Roles
+    bytes32 public constant ARBITRATOR_ROLE = keccak256("ARBITRATOR_ROLE");
+    bytes32 public constant COMPLIANCE_ROLE = keccak256("COMPLIANCE_ROLE");
+    bytes32 public constant RISK_MANAGER_ROLE = keccak256("RISK_MANAGER_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+    // Asset type & risk enums
+    enum AssetType { ETH, ERC20, ERC721 }
+    enum RiskLevel { Unknown, Low, Medium, High }
+
+    // Swap struct
+    struct Swap {
+        AssetType assetType;
+        address payable buyer;
+        address payable seller;
+        address token;       // token address (0 for ETH)
+        uint256 tokenId;     // for ERC721
+        uint256 amount;      // for ETH/ERC20 (wei/units), 1 for ERC721
+        bytes32 hash;        // keccak256(secret)
+        uint256 timelock;    // unix timestamp
+        bool completed;
+        bool refunded;
+        bool frozen;
+        RiskLevel risk;
+        bytes32 kycHash;
+        uint256 released;    // for partial releases
+    }
+
+    // Approval structure with nested mapping
+    struct ApprovalState {
+        uint8 count;
+        mapping(address => bool) done;
+    }
+
+    // Storage
+    mapping(bytes32 => Swap) private swaps;
+    mapping(bytes32 => ApprovalState) private approvals;
+    mapping(address => uint8) public multisigThreshold;              // buyer => threshold
+    mapping(address => mapping(address => bool)) public isApprover;  // buyer => approver => bool
+    mapping(address => uint8) public approverCount;                  // buyer => approver count
+
+    // Locked accounting
+    uint256 public totalLockedETH;
+    mapping(address => uint256) public lockedERC20;                  // token => amount
+    mapping(address => mapping(uint256 => bool)) public lockedERC721; // token => tokenId => bool
+
+    // Fees
+    uint16 public protocolFeeBps; // basis points
+    address public feeRecipient;
+
+    // Risk oracle
+    address public riskOracle;
+    mapping(bytes32 => bool) public oracleSigUsed; // replay protection
+
+    // Evidence anchoring
+    mapping(bytes32 => uint256) public evidenceAnchoredAt; // evidenceHash => timestamp
+
+    // Exec whitelist
+    mapping(address => bool) public execWhitelist;
+
+    // Limits / constants
+    uint8 public constant MAX_THRESHOLD = 50;
+    uint16 public constant BPS_DENOM = 10000;
+
+    // Events
+    event SwapInitiated(
+        bytes32 indexed swapId,
+        AssetType assetType,
+        address indexed buyer,
+        address indexed seller,
+        address token,
+        uint256 amount,
+        uint256 tokenId,
+        uint256 timelock,
+        uint8 riskLevel,
+        bytes32 kycHash
+    );
+    event SwapApproved(bytes32 indexed swapId, address indexed approver);
+    event SwapCompleted(bytes32 indexed swapId, address indexed seller);
+    event SwapRefunded(bytes32 indexed swapId, address indexed buyer);
+    event SwapEscalated(bytes32 indexed swapId, address indexed escalator);
+    event SwapFrozen(bytes32 indexed swapId);
+    event SwapUnfrozen(bytes32 indexed swapId);
+    event PartialRelease(bytes32 indexed swapId, uint256 amountReleased, address indexed to);
+    event MultisigThresholdSet(address indexed buyer, uint8 threshold);
+    event ApproverAdded(address indexed buyer, address indexed approver);
+    event ApproverRemoved(address indexed buyer, address indexed approver);
+    event RiskOracleSet(address indexed oracle);
+    event FeeSet(uint16 bps, address recipient);
+    event ExecWhitelistSet(address indexed target, bool allowed);
+    event EvidenceAnchored(bytes32 indexed evidenceHash, uint256 timestamp);
+    event RescueETH(address indexed to, uint256 amount);
+    event RescueERC20(address indexed token, address indexed to, uint256 amount);
+    event RescueERC721(address indexed token, address indexed to, uint256 tokenId);
+    event Executed(address indexed target, uint256 value);
+
+    // Modifier: swap exists
+    modifier swapExists(bytes32 swapId) {
+        require(exists(swapId), "AMTTP: swap not found");
+        _;
+    }
+
+    // Initializer
+    function initialize(
+        address admin,
+        address initialRiskOracle,
+        address initialFeeRecipient,
+        uint16 initialFeeBps
+    ) public initializer {
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+        __Pausable_init();
+        __ReentrancyGuard_init();
+
+        address owner = admin == address(0) ? msg.sender : admin;
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(UPGRADER_ROLE, owner);
+        _grantRole(ARBITRATOR_ROLE, owner);
+        _grantRole(COMPLIANCE_ROLE, owner);
+        _grantRole(RISK_MANAGER_ROLE, owner);
+
+        riskOracle = initialRiskOracle;
+        feeRecipient = initialFeeRecipient == address(0) ? msg.sender : initialFeeRecipient;
+        protocolFeeBps = initialFeeBps;
+        emit RiskOracleSet(initialRiskOracle);
+        emit FeeSet(initialFeeBps, feeRecipient);
+    }
+
+    // UUPS authorize
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // ----------------------
+    // Helpers
+    // ----------------------
+    function computeSwapId(
+        address buyer,
+        address seller,
+        bytes32 hash,
+        uint256 timelock,
+        AssetType assetType,
+        address token,
+        uint256 tokenId,
+        uint256 amount
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(buyer, seller, hash, timelock, assetType, token, tokenId, amount));
+    }
+
+    function exists(bytes32 swapId) public view returns (bool) {
+        return swaps[swapId].buyer != address(0);
+    }
+
+    function _toRiskEnum(uint8 r) internal pure returns (RiskLevel) {
+        if (r == 1) return RiskLevel.Low;
+        if (r == 2) return RiskLevel.Medium;
+        if (r == 3) return RiskLevel.High;
+        return RiskLevel.Unknown;
+    }
+
+    // Verify oracle sig (if provided) and mark it used for swapId (replay protection)
+    function _verifyOracleIfProvided(bytes32 swapId, uint8 riskLevel, bytes calldata oracleSig) internal {
+        if (oracleSig.length == 0) return;
+        require(riskOracle != address(0), "AMTTP: oracle unset");
+        require(!oracleSigUsed[swapId], "AMTTP: oracle sig used");
+        bytes32 messageHash = keccak256(abi.encodePacked(swapId, riskLevel)).toEthSignedMessageHash();
+        address signer = messageHash.recover(oracleSig);
+        require(signer == riskOracle, "AMTTP: invalid oracle sig");
+        oracleSigUsed[swapId] = true;
+    }
+
+    // ----------------------
+    // Initiation: ETH / ERC20 / ERC721
+    // ----------------------
+    function initiateSwapETH(
+        address payable seller,
+        bytes32 hash,
+        uint256 timelock,
+        uint8 riskLevel,
+        bytes32 kycHash,
+        bytes calldata oracleSig
+    ) external payable whenNotPaused nonReentrant returns (bytes32 swapId) {
+        require(msg.value > 0, "AMTTP: zero value");
+        require(seller != address(0), "AMTTP: invalid seller");
+        require(timelock > block.timestamp, "AMTTP: invalid timelock");
+        require(riskLevel <= 3, "AMTTP: invalid risk");
+
+        swapId = computeSwapId(msg.sender, seller, hash, timelock, AssetType.ETH, address(0), 0, msg.value);
+        require(!exists(swapId), "AMTTP: swap exists");
+
+        _verifyOracleIfProvided(swapId, riskLevel, oracleSig);
+
+        // Save swap
+        Swap storage s = swaps[swapId];
+        s.assetType = AssetType.ETH;
+        s.buyer = payable(msg.sender);
+        s.seller = seller;
+        s.token = address(0);
+        s.tokenId = 0;
+        s.amount = msg.value;
+        s.hash = hash;
+        s.timelock = timelock;
+        s.completed = false;
+        s.refunded = false;
+        s.frozen = false;
+        s.risk = _toRiskEnum(riskLevel);
+        s.kycHash = kycHash;
+        s.released = 0;
+
+        totalLockedETH += msg.value;
+        emit SwapInitiated(swapId, AssetType.ETH, msg.sender, seller, address(0), msg.value, 0, timelock, riskLevel, kycHash);
+    }
+
+    function initiateSwapERC20(
+        address seller,
+        address token,
+        uint256 amount,
+        bytes32 hash,
+        uint256 timelock,
+        uint8 riskLevel,
+        bytes32 kycHash,
+        bytes calldata oracleSig
+    ) external whenNotPaused nonReentrant returns (bytes32 swapId) {
+        require(amount > 0, "AMTTP: zero amount");
+        require(seller != address(0), "AMTTP: invalid seller");
+        require(token != address(0), "AMTTP: invalid token");
+        require(timelock > block.timestamp, "AMTTP: invalid timelock");
+        require(riskLevel <= 3, "AMTTP: invalid risk");
+
+        swapId = computeSwapId(msg.sender, seller, hash, timelock, AssetType.ERC20, token, 0, amount);
+        require(!exists(swapId), "AMTTP: swap exists");
+
+        _verifyOracleIfProvided(swapId, riskLevel, oracleSig);
+
+        // Pull tokens (buyer must approve)
+        IERC20Upgradeable erc20 = IERC20Upgradeable(token);
+        require(erc20.transferFrom(msg.sender, address(this), amount), "AMTTP: transferFrom failed");
+
+        Swap storage s = swaps[swapId];
+        s.assetType = AssetType.ERC20;
+        s.buyer = payable(msg.sender);
+        s.seller = payable(seller);
+        s.token = token;
+        s.tokenId = 0;
+        s.amount = amount;
+        s.hash = hash;
+        s.timelock = timelock;
+        s.completed = false;
+        s.refunded = false;
+        s.frozen = false;
+        s.risk = _toRiskEnum(riskLevel);
+        s.kycHash = kycHash;
+        s.released = 0;
+
+        lockedERC20[token] += amount;
+        emit SwapInitiated(swapId, AssetType.ERC20, msg.sender, seller, token, amount, 0, timelock, riskLevel, kycHash);
+    }
+
+    function initiateSwapERC721(
+        address seller,
+        address token,
+        uint256 tokenId,
+        bytes32 hash,
+        uint256 timelock,
+        uint8 riskLevel,
+        bytes32 kycHash,
+        bytes calldata oracleSig
+    ) external whenNotPaused nonReentrant returns (bytes32 swapId) {
+        require(seller != address(0), "AMTTP: invalid seller");
+        require(token != address(0), "AMTTP: zero token");
+        require(timelock > block.timestamp, "AMTTP: invalid timelock");
+        require(riskLevel <= 3, "AMTTP: invalid risk");
+
+        swapId = computeSwapId(msg.sender, seller, hash, timelock, AssetType.ERC721, token, tokenId, 1);
+        require(!exists(swapId), "AMTTP: swap exists");
+
+        _verifyOracleIfProvided(swapId, riskLevel, oracleSig);
+
+        // Pull NFT (buyer must approve)
+        IERC721Upgradeable erc721 = IERC721Upgradeable(token);
+        erc721.transferFrom(msg.sender, address(this), tokenId);
+
+        Swap storage s = swaps[swapId];
+        s.assetType = AssetType.ERC721;
+        s.buyer = payable(msg.sender);
+        s.seller = payable(seller);
+        s.token = token;
+        s.tokenId = tokenId;
+        s.amount = 1;
+        s.hash = hash;
+        s.timelock = timelock;
+        s.completed = false;
+        s.refunded = false;
+        s.frozen = false;
+        s.risk = _toRiskEnum(riskLevel);
+        s.kycHash = kycHash;
+        s.released = 0;
+
+        lockedERC721[token][tokenId] = true;
+        emit SwapInitiated(swapId, AssetType.ERC721, msg.sender, seller, token, 1, tokenId, timelock, riskLevel, kycHash);
+    }
+
+    // ----------------------
+    // Complete / Refund / Partial
+    // ----------------------
+    function completeSwap(bytes32 swapId, string calldata secret) external whenNotPaused nonReentrant swapExists(swapId) {
+        Swap storage s = swaps[swapId];
+        require(!s.completed && !s.refunded, "AMTTP: finalized");
+        require(msg.sender == s.seller, "AMTTP: only seller");
+        require(block.timestamp <= s.timelock, "AMTTP: timelock expired");
+        require(!s.frozen, "AMTTP: frozen");
+
+        bytes32 computed = keccak256(abi.encodePacked(secret));
+        require(computed == s.hash, "AMTTP: invalid secret");
+
+        uint8 threshold = multisigThreshold[s.buyer];
+        if (threshold > 0 && s.risk >= RiskLevel.Medium) {
+            require(approvals[swapId].count >= threshold, "AMTTP: insufficient approvals");
+        }
+
+        s.completed = true;
+        _payoutOnComplete(s);
+        delete approvals[swapId];
+        emit SwapCompleted(swapId, s.seller);
+    }
+
+    function refundSwap(bytes32 swapId) external whenNotPaused nonReentrant swapExists(swapId) {
+        Swap storage s = swaps[swapId];
+        require(!s.completed && !s.refunded, "AMTTP: finalized");
+        require(msg.sender == s.buyer, "AMTTP: only buyer");
+        require(block.timestamp > s.timelock, "AMTTP: timelock not expired");
+        require(!s.frozen, "AMTTP: frozen");
+
+        s.refunded = true;
+        _payoutOnRefund(s);
+        delete approvals[swapId];
+        emit SwapRefunded(swapId, s.buyer);
+    }
+
+    function partialRelease(bytes32 swapId, uint256 amount, address payable to) external whenNotPaused nonReentrant swapExists(swapId) {
+        require(hasRole(ARBITRATOR_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AMTTP: not authorized");
+        Swap storage s = swaps[swapId];
+        require(!s.completed && !s.refunded, "AMTTP: finalized");
+        require(!s.frozen, "AMTTP: frozen");
+        require(amount > 0, "AMTTP: zero amount");
+        require(to != address(0), "AMTTP: zero to");
+
+        if (s.assetType == AssetType.ETH) {
+            uint256 available = s.amount - s.released;
+            require(amount <= available, "AMTTP: amount too high");
+            require(totalLockedETH >= amount, "AMTTP: accounting error");
+            s.released += amount;
+            totalLockedETH -= amount;
+            to.sendValue(amount);
+            emit PartialRelease(swapId, amount, to);
+        } else if (s.assetType == AssetType.ERC20) {
+            uint256 available = s.amount - s.released;
+            require(amount <= available, "AMTTP: amount too high");
+            require(lockedERC20[s.token] >= amount, "AMTTP: accounting error");
+            s.released += amount;
+            lockedERC20[s.token] -= amount;
+            require(IERC20Upgradeable(s.token).transfer(to, amount), "AMTTP: erc20 transfer failed");
+            emit PartialRelease(swapId, amount, to);
+        } else {
+            revert("AMTTP: partial not supported for ERC721");
+        }
+    }
+
+    // ----------------------
+    // Approval management
+    // ----------------------
+    function approveSwap(bytes32 swapId) external whenNotPaused swapExists(swapId) {
+        Swap storage s = swaps[swapId];
+        uint8 threshold = multisigThreshold[s.buyer];
+        require(threshold > 0, "AMTTP: multisig not required");
+        require(s.risk >= RiskLevel.Medium, "AMTTP: multisig only for medium/high risk");
+        require(isApprover[s.buyer][msg.sender], "AMTTP: not approver");
+        ApprovalState storage st = approvals[swapId];
+        require(!st.done[msg.sender], "AMTTP: already approved");
+        st.done[msg.sender] = true;
+        st.count += 1;
+        emit SwapApproved(swapId, msg.sender);
+    }
+
+    // ----------------------
+    // Escalation & resolution
+    // ----------------------
+    function escalateSwap(bytes32 swapId) external whenNotPaused swapExists(swapId) {
+        Swap storage s = swaps[swapId];
+        require(
+            msg.sender == s.buyer ||
+            msg.sender == s.seller ||
+            hasRole(ARBITRATOR_ROLE, msg.sender) ||
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+            "AMTTP: cannot escalate"
+        );
+        require(!s.frozen, "AMTTP: already frozen");
+        s.frozen = true;
+        emit SwapEscalated(swapId, msg.sender);
+        emit SwapFrozen(swapId);
+    }
+
+    function resolveSwap(bytes32 swapId, bool finalizeAsComplete, string calldata secretIfComplete) external whenNotPaused nonReentrant onlyRole(ARBITRATOR_ROLE) swapExists(swapId) {
+        Swap storage s = swaps[swapId];
+        require(s.frozen, "AMTTP: not frozen");
+
+        s.frozen = false; // unfreeze
+
+        if (finalizeAsComplete) {
+            bytes32 computed = keccak256(abi.encodePacked(secretIfComplete));
+            require(computed == s.hash, "AMTTP: invalid secret");
+            s.completed = true;
+            _payoutOnComplete(s);
+            emit SwapCompleted(swapId, s.seller);
+        } else {
+            s.refunded = true;
+            _payoutOnRefund(s);
+            emit SwapRefunded(swapId, s.buyer);
+        }
+
+        delete approvals[swapId];
+        emit SwapUnfrozen(swapId);
+    }
+
+    // ----------------------
+    // Payout internals (apply fee where applicable)
+    // ----------------------
+    function _payoutOnComplete(Swap storage s) internal {
+        if (s.assetType == AssetType.ETH) {
+            uint256 gross = s.amount - s.released;
+            uint256 fee = (protocolFeeBps > 0) ? ((gross * protocolFeeBps) / BPS_DENOM) : 0;
+            uint256 net = gross - fee;
+            require(totalLockedETH >= gross, "AMTTP: accounting error");
+            totalLockedETH -= gross;
+            if (fee > 0) payable(feeRecipient).sendValue(fee);
+            s.seller.sendValue(net);
+        } else if (s.assetType == AssetType.ERC20) {
+            uint256 gross = s.amount - s.released;
+            uint256 fee = (protocolFeeBps > 0) ? ((gross * protocolFeeBps) / BPS_DENOM) : 0;
+            uint256 net = gross - fee;
+            require(lockedERC20[s.token] >= gross, "AMTTP: accounting error");
+            lockedERC20[s.token] -= gross;
+            if (fee > 0) require(IERC20Upgradeable(s.token).transfer(feeRecipient, fee), "AMTTP: fee transfer failed");
+            require(IERC20Upgradeable(s.token).transfer(s.seller, net), "AMTTP: erc20 transfer failed");
+        } else {
+            // ERC721: transfer token to seller (no fee)
+            IERC721Upgradeable(s.token).transferFrom(address(this), s.seller, s.tokenId);
+            lockedERC721[s.token][s.tokenId] = false;
+        }
+    }
+
+    function _payoutOnRefund(Swap storage s) internal {
+        if (s.assetType == AssetType.ETH) {
+            uint256 gross = s.amount - s.released;
+            require(totalLockedETH >= gross, "AMTTP: accounting error");
+            totalLockedETH -= gross;
+            s.buyer.sendValue(gross);
+        } else if (s.assetType == AssetType.ERC20) {
+            uint256 gross = s.amount - s.released;
+            require(lockedERC20[s.token] >= gross, "AMTTP: accounting error");
+            lockedERC20[s.token] -= gross;
+            require(IERC20Upgradeable(s.token).transfer(s.buyer, gross), "AMTTP: erc20 refund failed");
+        } else {
+            IERC721Upgradeable(s.token).transferFrom(address(this), s.buyer, s.tokenId);
+            lockedERC721[s.token][s.tokenId] = false;
+        }
+    }
+
+    // ----------------------
+    // Admin & config
+    // ----------------------
+    function setMultisigThreshold(address buyer, uint8 threshold) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(threshold <= MAX_THRESHOLD, "AMTTP: threshold too high");
+        multisigThreshold[buyer] = threshold;
+        emit MultisigThresholdSet(buyer, threshold);
+    }
+
+    function addApprover(address buyer, address approver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(!isApprover[buyer][approver], "AMTTP: already approver");
+        isApprover[buyer][approver] = true;
+        approverCount[buyer] += 1;
+        emit ApproverAdded(buyer, approver);
+    }
+
+    function removeApprover(address buyer, address approver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(isApprover[buyer][approver], "AMTTP: not approver");
+        isApprover[buyer][approver] = false;
+        if (approverCount[buyer] > 0) approverCount[buyer] -= 1;
+        emit ApproverRemoved(buyer, approver);
+    }
+
+    function setRiskOracle(address oracle) external onlyRole(RISK_MANAGER_ROLE) {
+        riskOracle = oracle;
+        emit RiskOracleSet(oracle);
+    }
+
+    function setFee(uint16 bps, address recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(bps <= BPS_DENOM, "AMTTP: invalid bps");
+        protocolFeeBps = bps;
+        feeRecipient = recipient;
+        emit FeeSet(bps, recipient);
+    }
+
+    function setExecWhitelist(address target, bool allowed) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        execWhitelist[target] = allowed;
+        emit ExecWhitelistSet(target, allowed);
+    }
+
+    function anchorEvidence(bytes32 evidenceHash) external onlyRole(COMPLIANCE_ROLE) {
+        require(evidenceHash != bytes32(0), "AMTTP: zero evidence");
+        evidenceAnchoredAt[evidenceHash] = block.timestamp;
+        emit EvidenceAnchored(evidenceHash, block.timestamp);
+    }
+
+    // ----------------------
+    // Rescue & safety (cannot withdraw locked assets)
+    // ----------------------
+    function rescueETH(address payable to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        require(to != address(0), "AMTTP: zero addr");
+        uint256 balance = address(this).balance;
+        require(balance >= totalLockedETH, "AMTTP: inconsistent accounting");
+        uint256 freeBal = balance - totalLockedETH;
+        require(amount <= freeBal, "AMTTP: insufficient free");
+        to.sendValue(amount);
+        emit RescueETH(to, amount);
+    }
+
+    function rescueERC20(address token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        require(to != address(0), "AMTTP: zero addr");
+        uint256 balance = IERC20Upgradeable(token).balanceOf(address(this));
+        require(balance >= lockedERC20[token], "AMTTP: inconsistent accounting");
+        uint256 free = balance - lockedERC20[token];
+        require(amount <= free, "AMTTP: insufficient free");
+        require(IERC20Upgradeable(token).transfer(to, amount), "AMTTP: transfer failed");
+        emit RescueERC20(token, to, amount);
+    }
+
+    function rescueERC721(address token, address to, uint256 tokenId) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        require(to != address(0), "AMTTP: zero addr");
+        require(!lockedERC721[token][tokenId], "AMTTP: token locked");
+        IERC721Upgradeable(token).transferFrom(address(this), to, tokenId);
+        emit RescueERC721(token, to, tokenId);
+    }
+
+    // ----------------------
+    // Execute proxy (whitelisted targets only)
+    // ----------------------
+    function execute(address target, uint256 value, bytes calldata data) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused nonReentrant returns (bytes memory) {
+        require(target != address(0), "AMTTP: zero target");
+        require(execWhitelist[target], "AMTTP: not whitelisted");
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        require(success, "AMTTP: exec failed");
+        emit Executed(target, value);
+        return result;
+    }
+
+    // ----------------------
+    // Views
+    // ----------------------
+    function getSwap(bytes32 swapId) external view swapExists(swapId) returns (
+        AssetType assetType,
+        address buyer,
+        address seller,
+        address token,
+        uint256 tokenId,
+        uint256 amount,
+        bytes32 hash,
+        uint256 timelock,
+        bool completed,
+        bool refunded,
+        bool frozen,
+        uint8 riskLevel,
+        bytes32 kycHash,
+        uint256 released,
+        uint8 approvalCount,
+        uint8 threshold
+    ) {
+        Swap storage s = swaps[swapId];
+        assetType = s.assetType;
+        buyer = s.buyer;
+        seller = s.seller;
+        token = s.token;
+        tokenId = s.tokenId;
+        amount = s.amount;
+        hash = s.hash;
+        timelock = s.timelock;
+        completed = s.completed;
+        refunded = s.refunded;
+        frozen = s.frozen;
+        riskLevel = uint8(s.risk);
+        kycHash = s.kycHash;
+        released = s.released;
+        approvalCount = approvals[swapId].count;
+        threshold = multisigThreshold[s.buyer];
+    }
+
+    // Pause/unpause
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
+    // Fallbacks
+    receive() external payable {}
+    fallback() external payable {}
+
+    // Storage gap for upgradeability
+    uint256[50] private __gap;
+}

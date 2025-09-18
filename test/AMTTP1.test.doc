@@ -1,0 +1,176 @@
+import { expect } from "chai";
+import pkg from "hardhat";
+const { ethers, upgrades } = pkg;
+
+describe("AMTTP - full swap flows", function () {
+  let deployer, buyer, seller;
+  let AMTTP, amttp;
+  let MockERC20, token20;
+  let MockERC721, token721;
+
+  const ZERO = "0x0000000000000000000000000000000000000000";
+
+  beforeEach(async () => {
+    [deployer, buyer, seller] = await ethers.getSigners();
+
+    // Deploy ERC20 mock
+    MockERC20 = await ethers.getContractFactory("MockERC20");
+    token20 = await MockERC20.deploy("Mock20", "M20");
+    await token20.waitForDeployment();
+
+    // Deploy ERC721 mock
+    MockERC721 = await ethers.getContractFactory("MockERC721");
+    token721 = await MockERC721.deploy("Mock721", "M721");
+    await token721.waitForDeployment();
+
+    // Deploy AMTTP proxy using fully qualified name
+    AMTTP = await ethers.getContractFactory("contracts/withnft.sol:AMTTP");
+    amttp = await upgrades.deployProxy(AMTTP, [deployer.address, 1], {
+      initializer: "initialize",
+    });
+    await amttp.waitForDeployment();
+  });
+
+  // ---------------- Helper: generate ETH swap oracle signature ----------------
+  async function signOracleMessage(buyerAddr, sellerAddr, amount, risk, kycHash) {
+    const digest = ethers.solidityPackedKeccak256(
+      ["address", "address", "uint256", "uint8", "bytes32"],
+      [buyerAddr, sellerAddr, amount, risk, kycHash]
+    );
+    return await deployer.signMessage(ethers.getBytes(digest));
+  }
+
+  // ---------------- ETH swap ----------------
+  it("ETH swap: initiate -> complete", async () => {
+    const secret = "eth-secret";
+    const hash = ethers.keccak256(ethers.toUtf8Bytes(secret));
+    const timelock = Math.floor(Date.now() / 1000) + 3600;
+    const amount = ethers.parseEther("1");
+    const risk = 0;
+    const kycHash = ethers.ZeroHash;
+
+    const oracleSig = await signOracleMessage(buyer.address, seller.address, amount, risk, kycHash);
+
+    await amttp.connect(buyer).initiateSwap(
+      seller.address,
+      hash,
+      timelock,
+      risk,
+      kycHash,
+      oracleSig,
+      { value: amount }
+    );
+
+    const swapId = ethers.keccak256(
+      ethers.solidityPacked(["address", "address", "bytes32", "uint256"], [buyer.address, seller.address, hash, timelock])
+    );
+
+    const sellerBalBefore = await ethers.provider.getBalance(seller.address);
+    await amttp.connect(seller).completeSwap(swapId, secret);
+    const sellerBalAfter = await ethers.provider.getBalance(seller.address);
+
+    expect(sellerBalAfter).to.be.gt(sellerBalBefore);
+  });
+
+  // ---------------- ERC20 swap ----------------
+  it("ERC20 swap: initiate -> complete", async () => {
+    const secret = "erc20-secret";
+    const hash = ethers.keccak256(ethers.toUtf8Bytes(secret));
+    const timelock = Math.floor(Date.now() / 1000) + 3600;
+    const amount = ethers.parseUnits("1000", 18);
+    const risk = 0;
+    const kycHash = ethers.ZeroHash;
+
+    await token20.mint(buyer.address, amount);
+    await token20.connect(buyer).approve(amttp.target ?? amttp.address, amount);
+
+    await amttp.connect(buyer).initiateSwapERC20(
+      seller.address,
+      token20.address,
+      amount,
+      hash,
+      timelock,
+      risk,
+      kycHash,
+      "0x"
+    );
+
+    const swapId = ethers.keccak256(
+      ethers.solidityPacked(["address", "address", "bytes32", "uint256"], [buyer.address, seller.address, hash, timelock])
+    );
+
+    const sellerBalBefore = await token20.balanceOf(seller.address);
+    await amttp.connect(seller).completeSwap(swapId, secret);
+    const sellerBalAfter = await token20.balanceOf(seller.address);
+
+    expect(sellerBalAfter).to.be.gt(sellerBalBefore);
+  });
+
+  // ---------------- ERC721 swap ----------------
+  it("ERC721 swap: initiate -> complete -> rescue blocked", async () => {
+    const secret = "erc721-secret";
+    const hash = ethers.keccak256(ethers.toUtf8Bytes(secret));
+    const timelock = Math.floor(Date.now() / 1000) + 3600;
+    const risk = 0;
+    const kycHash = ethers.ZeroHash;
+
+    const tx = await token721.mint(buyer.address);
+    await tx.wait();
+    const tokenId = 1;
+    await token721.connect(buyer).approve(amttp.target ?? amttp.address, tokenId);
+
+    await amttp.connect(buyer).initiateSwapERC721(
+      seller.address,
+      token721.address,
+      tokenId,
+      hash,
+      timelock,
+      risk,
+      kycHash,
+      "0x"
+    );
+
+    // NFT is locked in contract
+    await expect(amttp.connect(deployer).rescueERC721(token721.address, deployer.address, tokenId)).to.not.be.reverted;
+
+    const swapId = ethers.keccak256(
+      ethers.solidityPacked(["address", "address", "bytes32", "uint256"], [buyer.address, seller.address, hash, timelock])
+    );
+
+    await amttp.connect(seller).completeSwap(swapId, secret);
+
+    const ownerAfter = await token721.ownerOf(tokenId);
+    expect(ownerAfter).to.equal(seller.address);
+  });
+
+  // ---------------- Refund after timelock (ETH) ----------------
+  it("ETH swap refund after timelock", async () => {
+    const secret = "refund-secret";
+    const hash = ethers.keccak256(ethers.toUtf8Bytes(secret));
+    const timelock = Math.floor(Date.now() / 1000) + 10; // +10s
+    const amount = ethers.parseEther("0.5");
+    const risk = 0;
+    const kycHash = ethers.ZeroHash;
+
+    const oracleSig = await signOracleMessage(buyer.address, seller.address, amount, risk, kycHash);
+
+    await amttp.connect(buyer).initiateSwap(
+      seller.address,
+      hash,
+      timelock,
+      risk,
+      kycHash,
+      oracleSig,
+      { value: amount }
+    );
+
+    const swapId = ethers.keccak256(
+      ethers.solidityPacked(["address", "address", "bytes32", "uint256"], [buyer.address, seller.address, hash, timelock])
+    );
+
+    await ethers.provider.send("evm_increaseTime", [20]);
+    await ethers.provider.send("evm_mine", []);
+
+    await expect(amttp.connect(buyer).refundSwap(swapId)).to.not.be.reverted;
+  });
+});

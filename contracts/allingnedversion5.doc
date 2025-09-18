@@ -1,0 +1,213 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+
+/**
+ * @title AMTTP - Adaptive Multisig Trusted Transaction Protocol
+ * Phase-complete Solidity implementation
+ */
+contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+    using ECDSAUpgradeable for bytes32;
+
+    enum RiskLevel {
+        None,
+        Low,
+        Medium,
+        High
+    }
+
+    struct Swap {
+        address buyer;
+        address seller;
+        uint256 amount;
+        bytes32 hashlock;
+        uint256 timelock;
+        uint8 riskLevel;
+        bytes32 kycHash;
+        bool completed;
+        bool refunded;
+        bool frozen;
+    }
+
+    mapping(bytes32 => Swap) public swaps;
+    mapping(bytes32 => mapping(address => bool)) public approvals;
+    mapping(bytes32 => uint256) public approvalCounts;
+
+    address[] public approvers;
+    uint256 public threshold;
+    address public oracle;
+
+    // canonical zero address used for ETH swaps (token = ZERO)
+    address constant ZERO = address(0);
+
+    event SwapInitiated(
+        bytes32 indexed swapId,
+        address indexed buyer,
+        address indexed seller,
+        uint256 amount,
+        uint8 riskLevel,
+        bytes32 kycHash
+    );
+    event SwapCompleted(bytes32 indexed swapId, address indexed seller);
+    event SwapRefunded(bytes32 indexed swapId, address indexed buyer);
+    event SwapEscalated(bytes32 indexed swapId);
+    event Approved(bytes32 indexed swapId, address indexed approver);
+    event ApproverAdded(address approver);
+    event ApproverRemoved(address approver);
+
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "Not oracle");
+        _;
+    }
+
+    function initialize(address _oracle, uint256 _threshold) public initializer {
+        __Ownable_init();
+        __ReentrancyGuard_init();
+
+        oracle = _oracle;
+        threshold = _threshold;
+    }
+
+    function initiateSwap(
+        address seller,
+        bytes32 hashlock,
+        uint256 timelock,
+        uint8 risk,
+        bytes32 kycHash,
+        bytes memory oracleSig
+    ) external payable nonReentrant {
+        require(msg.value > 0, "No ETH sent");
+        require(seller != address(0), "Invalid seller");
+        require(timelock > block.timestamp, "Invalid timelock");
+        require(risk <= uint8(RiskLevel.High), "Invalid risk");
+
+        bytes32 swapId = keccak256(
+            abi.encodePacked(msg.sender, seller, hashlock, timelock)
+        );
+        require(swaps[swapId].buyer == address(0), "Swap exists");
+
+        // Oracle validation (risk attestation)
+        bytes32 digest = keccak256(
+            abi.encodePacked(msg.sender, seller, msg.value, risk, kycHash)
+        ).toEthSignedMessageHash();
+        address signer = digest.recover(oracleSig);
+        require(signer == oracle, "Invalid oracle signature");
+
+        swaps[swapId] = Swap({
+            buyer: msg.sender,
+            seller: seller,
+            amount: msg.value,
+            hashlock: hashlock,
+            timelock: timelock,
+            riskLevel: risk,
+            kycHash: kycHash,
+            completed: false,
+            refunded: false,
+            frozen: false
+        });
+
+        emit SwapInitiated(swapId, msg.sender, seller, msg.value, risk, kycHash);
+    }
+
+    function completeSwap(bytes32 swapId, bytes32 preimage)
+        external
+        nonReentrant
+    {
+        Swap storage s = swaps[swapId];
+        require(!s.completed, "Already completed");
+        require(!s.refunded, "Already refunded");
+        require(!s.frozen, "Frozen");
+        require(block.timestamp < s.timelock, "Expired");
+        require(
+            keccak256(abi.encodePacked(preimage)) == s.hashlock,
+            "Invalid preimage"
+        );
+
+        if (RiskLevel(s.riskLevel) == RiskLevel.Medium || RiskLevel(s.riskLevel) == RiskLevel.High) {
+            require(approvalCounts[swapId] >= threshold, "Not enough approvals");
+        }
+
+        s.completed = true;
+        (bool sent, ) = s.seller.call{value: s.amount}("");
+        require(sent, "Transfer failed");
+
+        emit SwapCompleted(swapId, s.seller);
+    }
+
+    function refundSwap(bytes32 swapId) external nonReentrant {
+        Swap storage s = swaps[swapId];
+        require(!s.completed, "Already completed");
+        require(!s.refunded, "Already refunded");
+        require(!s.frozen, "Frozen");
+        require(block.timestamp >= s.timelock, "Not expired");
+
+        s.refunded = true;
+        (bool sent, ) = s.buyer.call{value: s.amount}("");
+        require(sent, "Refund failed");
+
+        emit SwapRefunded(swapId, s.buyer);
+    }
+
+    function approveSwap(bytes32 swapId) external {
+        require(isApprover(msg.sender), "Not approver");
+        require(!approvals[swapId][msg.sender], "Already approved");
+        Swap storage s = swaps[swapId];
+        require(!s.completed && !s.refunded, "Finalized");
+
+        approvals[swapId][msg.sender] = true;
+        approvalCounts[swapId] += 1;
+
+        emit Approved(swapId, msg.sender);
+    }
+
+    function escalateSwap(bytes32 swapId) external {
+        Swap storage s = swaps[swapId];
+        require(msg.sender == s.buyer || msg.sender == s.seller, "Not party");
+        require(!s.completed && !s.refunded, "Finalized");
+        s.frozen = true;
+
+        emit SwapEscalated(swapId);
+    }
+
+    // ----------------- Admin Controls -----------------
+
+    function addApprover(address a) external onlyOwner {
+        require(a != address(0), "Zero address");
+        approvers.push(a);
+        emit ApproverAdded(a);
+    }
+
+    function removeApprover(address a) external onlyOwner {
+        for (uint256 i = 0; i < approvers.length; i++) {
+            if (approvers[i] == a) {
+                approvers[i] = approvers[approvers.length - 1];
+                approvers.pop();
+                emit ApproverRemoved(a);
+                break;
+            }
+        }
+    }
+
+    function setThreshold(uint256 t) external onlyOwner {
+        require(t <= approvers.length, "Too high");
+        threshold = t;
+    }
+
+    function setOracle(address o) external onlyOwner {
+        require(o != address(0), "Zero address");
+        oracle = o;
+    }
+
+    // ----------------- Helpers -----------------
+
+    function isApprover(address a) public view returns (bool) {
+        for (uint256 i = 0; i < approvers.length; i++) {
+            if (approvers[i] == a) return true;
+        }
+        return false;
+    }
+}

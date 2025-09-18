@@ -1,0 +1,75 @@
+version: '3.9'
+services:
+  helia:
+    image: ipfs/kubo:latest
+    container_name: helia-node
+    ports: ['5001:5001','8080:8080']
+    volumes: ['./data/helia:/data/ipfs']
+    restart: unless-stopped
+
+  hardhat:
+    image: ghcr.io/nomicfoundation/hardhat:latest
+    container_name: hardhat-node
+    command: npx hardhat node
+    working_dir: /app
+    volumes:
+      - ./contracts:/app/contracts
+      - ./scripts:/app/scripts
+      - ./hardhat.config.js:/app/hardhat.config.js
+    ports: ['8545:8545']
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    container_name: mongo-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: changeme
+    ports: ['27017:27017']
+    volumes: ['./data/mongo:/data/db']
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio-server
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: localtest
+      MINIO_ROOT_PASSWORD: localtest123
+    ports: ['9000:9000','9001:9001']
+    volumes: ['./data/minio:/data']
+    restart: unless-stopped
+
+  vault:
+    image: vault:1.15
+    container_name: vault-server
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_ADDR: http://0.0.0.0:8200
+    ports: ['8200:8200']
+    cap_add: [IPC_LOCK]
+    restart: unless-stopped
+
+  vault-init:
+    image: vault:1.15
+    container_name: vault-init
+    depends_on:
+      - vault
+    volumes:
+      - ./scripts/vault-init.sh:/usr/local/bin/vault-init.sh
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+    command: "sh /usr/local/bin/vault-init.sh"
+
+  oracle-service:
+    build: ./backend/oracle-service
+    container_name: oracle-service
+    ports: ['3000:3000']
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+    restart: unless-stopped

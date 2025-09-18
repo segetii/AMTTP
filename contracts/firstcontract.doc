@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+contract MyContract {
+    string private message;
+
+    event MessageUpdated(string oldMessage, string newMessage);
+
+    constructor(string memory _message) {
+        message = _message;
+    }
+
+    function setMessage(string memory _newMessage) public {
+        emit MessageUpdated(message, _newMessage);
+        message = _newMessage;
+    }
+
+    function getMessage() public view returns (string memory) {
+        return message;
+    }
+}
