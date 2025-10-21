@@ -1,0 +1,13 @@
+{
+    "inlineChat.notebookAgent": true,
+    // Ensure VS Code shell integration is enabled to improve command detection
+    "terminal.integrated.shellIntegration.enabled": true,
+    // Default to Windows PowerShell as requested environment
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // Define the PowerShell profile explicitly
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell"
+        }
+    }
+}
