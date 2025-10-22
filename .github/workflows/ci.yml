@@ -1,0 +1,115 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:6
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: changeme
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'backend/oracle-service/package-lock.json'
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend/oracle-service
+        npm ci
+    
+    - name: Run backend tests
+      run: |
+        cd backend/oracle-service
+        npm test
+      env:
+        NODE_ENV: test
+        MONGO_URI: mongodb://admin:changeme@localhost:27017/amttp_test?authSource=admin
+    
+    - name: Build backend
+      run: |
+        cd backend/oracle-service
+        npm run build
+
+  test-contracts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'package-lock.json'
+    
+    - name: Install root dependencies
+      run: npm ci
+    
+    - name: Compile contracts
+      run: npx hardhat compile
+    
+    - name: Run contract tests
+      run: npx hardhat test
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-contracts]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Slither (Solidity Security)
+      uses: crytic/slither-action@v0.3.0
+      with:
+        target: 'contracts/'
+        slither-args: '--filter-paths "node_modules/"'
+      continue-on-error: true
+    
+    - name: Run npm audit (Backend)
+      run: |
+        cd backend/oracle-service
+        npm audit --audit-level moderate
+      continue-on-error: true
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-contracts]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Oracle Service
+      run: |
+        cd backend/oracle-service
+        docker build -t amttp-oracle-service:${{ github.sha }} .
+    
+    - name: Build Hardhat Node
+      run: |
+        docker build -f hardhat/Dockerfile -t amttp-hardhat:${{ github.sha }} .

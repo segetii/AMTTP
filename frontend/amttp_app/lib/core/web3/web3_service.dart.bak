@@ -1,0 +1,250 @@
+import 'package:http/http.dart';
+import '../constants/app_constants.dart';
+
+class Web3Service {
+  late Client _client;
+  late String _amttpStreamlinedAddress;
+  late String _amttpPolicyManagerAddress;
+  late String _amttpPolicyEngineAddress;
+  
+  // Contract ABIs (simplified - you'll need full ABIs from your compiled contracts)
+  static const String _amttpStreamlinedAbi = '''[
+    {
+      "inputs": [
+        {"name": "to", "type": "address"},
+        {"name": "amount", "type": "uint256"},
+        {"name": "riskScore", "type": "uint256"}
+      ],
+      "name": "secureTransfer",
+      "outputs": [{"name": "", "type": "bool"}],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"name": "account", "type": "address"}],
+      "name": "balanceOf",
+      "outputs": [{"name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"name": "txId", "type": "bytes32"}],
+      "name": "getTransaction",
+      "outputs": [
+        {"name": "from", "type": "address"},
+        {"name": "to", "type": "address"},
+        {"name": "amount", "type": "uint256"},
+        {"name": "riskScore", "type": "uint256"},
+        {"name": "status", "type": "uint8"},
+        {"name": "timestamp", "type": "uint256"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {"indexed": true, "name": "txId", "type": "bytes32"},
+        {"indexed": true, "name": "from", "type": "address"},
+        {"indexed": true, "name": "to", "type": "address"},
+        {"name": "amount", "type": "uint256"},
+        {"name": "riskScore", "type": "uint256"}
+      ],
+      "name": "TransferInitiated",
+      "type": "event"
+    }
+  ]''';
+
+  static const String _policyManagerAbi = '''[
+    {
+      "inputs": [
+        {"name": "from", "type": "address"},
+        {"name": "to", "type": "address"},
+        {"name": "amount", "type": "uint256"},
+        {"name": "riskScore", "type": "uint256"}
+      ],
+      "name": "validateTransaction",
+      "outputs": [{"name": "", "type": "bool"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"name": "user", "type": "address"},
+        {"name": "dailyLimit", "type": "uint256"},
+        {"name": "transactionLimit", "type": "uint256"},
+        {"name": "riskThreshold", "type": "uint256"}
+      ],
+      "name": "setUserPolicy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]''';
+
+  Web3Service() {
+    _initialize();
+  }
+
+  void _initialize() {
+    // Initialize Web3 client (you can switch between mainnet/testnet)
+    const rpcUrl = 'https://eth-goerli.g.alchemy.com/v2/YOUR_API_KEY'; // Update with your RPC
+    _client = Web3Client(rpcUrl, Client());
+    
+    // Contract addresses (update these after deployment)
+    _amttpStreamlinedAddress = EthereumAddress.fromHex(AppConstants.amttpStreamlinedAddress);
+    _amttpPolicyManagerAddress = EthereumAddress.fromHex(AppConstants.amttpPolicyManagerAddress);
+    _amttpPolicyEngineAddress = EthereumAddress.fromHex(AppConstants.amttpPolicyEngineAddress);
+  }
+
+  // Get AMTTP token balance
+  Future<BigInt> getBalance(EthereumAddress address) async {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(_amttpStreamlinedAbi, 'AMTTPStreamlined'),
+      _amttpStreamlinedAddress,
+    );
+    
+    final function = contract.function('balanceOf');
+    final result = await _client.call(
+      contract: contract,
+      function: function,
+      params: [address],
+    );
+    
+    return result.first as BigInt;
+  }
+
+  // Execute secure transfer
+  Future<String> secureTransfer({
+    required Credentials credentials,
+    required EthereumAddress to,
+    required BigInt amount,
+    required int riskScore,
+  }) async {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(_amttpStreamlinedAbi, 'AMTTPStreamlined'),
+      _amttpStreamlinedAddress,
+    );
+    
+    final function = contract.function('secureTransfer');
+    
+    final transaction = Transaction.callContract(
+      contract: contract,
+      function: function,
+      parameters: [to, amount, BigInt.from(riskScore)],
+      maxGas: 200000, // Estimated gas for secure transfer
+    );
+    
+    final txHash = await _client.sendTransaction(
+      credentials,
+      transaction,
+      chainId: AppConstants.testnetChainId,
+    );
+    
+    return txHash;
+  }
+
+  // Get transaction details
+  Future<Map<String, dynamic>?> getTransactionDetails(String txId) async {
+    try {
+      final contract = DeployedContract(
+        ContractAbi.fromJson(_amttpStreamlinedAbi, 'AMTTPStreamlined'),
+        _amttpStreamlinedAddress,
+      );
+      
+      final function = contract.function('getTransaction');
+      final txIdBytes = hexToBytes(txId);
+      
+      final result = await _client.call(
+        contract: contract,
+        function: function,
+        params: [txIdBytes],
+      );
+      
+      return {
+        'from': result[0] as EthereumAddress,
+        'to': result[1] as EthereumAddress,
+        'amount': result[2] as BigInt,
+        'riskScore': result[3] as BigInt,
+        'status': result[4] as BigInt,
+        'timestamp': result[5] as BigInt,
+      };
+    } catch (e) {
+      print('Error getting transaction details: $e');
+      return null;
+    }
+  }
+
+  // Validate transaction against policies
+  Future<bool> validateTransaction({
+    required EthereumAddress from,
+    required EthereumAddress to,
+    required BigInt amount,
+    required int riskScore,
+  }) async {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(_policyManagerAbi, 'AMTTPPolicyManager'),
+      _amttpPolicyManagerAddress,
+    );
+    
+    final function = contract.function('validateTransaction');
+    
+    final result = await _client.call(
+      contract: contract,
+      function: function,
+      params: [from, to, amount, BigInt.from(riskScore)],
+    );
+    
+    return result.first as bool;
+  }
+
+  // Listen to transfer events
+  Stream<FilterEvent> listenToTransferEvents() {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(_amttpStreamlinedAbi, 'AMTTPStreamlined'),
+      _amttpStreamlinedAddress,
+    );
+    
+    final event = contract.event('TransferInitiated');
+    
+    return _client.events(FilterOptions.events(
+      contract: contract,
+      event: event,
+    ));
+  }
+
+  // Set user policy
+  Future<String> setUserPolicy({
+    required Credentials credentials,
+    required EthereumAddress user,
+    required BigInt dailyLimit,
+    required BigInt transactionLimit,
+    required int riskThreshold,
+  }) async {
+    final contract = DeployedContract(
+      ContractAbi.fromJson(_policyManagerAbi, 'AMTTPPolicyManager'),
+      _amttpPolicyManagerAddress,
+    );
+    
+    final function = contract.function('setUserPolicy');
+    
+    final transaction = Transaction.callContract(
+      contract: contract,
+      function: function,
+      parameters: [user, dailyLimit, transactionLimit, BigInt.from(riskThreshold)],
+      maxGas: 100000,
+    );
+    
+    final txHash = await _client.sendTransaction(
+      credentials,
+      transaction,
+      chainId: AppConstants.testnetChainId,
+    );
+    
+    return txHash;
+  }
+
+  void dispose() {
+    _client.dispose();
+  }
+}

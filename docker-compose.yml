@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   helia:
     image: ipfs/kubo:latest
@@ -8,15 +7,16 @@ services:
     restart: unless-stopped
 
   hardhat:
-    image: ghcr.io/nomicfoundation/hardhat:latest
+    build:
+      context: .
+      dockerfile: ./hardhat/Dockerfile
     container_name: hardhat-node
-    command: npx hardhat node
-    working_dir: /app
+    ports: ['8545:8545']
     volumes:
       - ./contracts:/app/contracts
       - ./scripts:/app/scripts
-      - ./hardhat.config.js:/app/hardhat.config.js
-    ports: ['8545:8545']
+      - ./hardhat.config.cjs:/app/hardhat.config.cjs
+      - ./test:/app/test
     restart: unless-stopped
 
   mongo:
@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
   vault:
-    image: vault:1.15
+    image: hashicorp/vault:1.17.6
     container_name: vault-server
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: root
@@ -51,7 +51,7 @@ services:
     restart: unless-stopped
 
   vault-init:
-    image: vault:1.15
+    image: hashicorp/vault:1.17.6
     container_name: vault-init
     depends_on:
       - vault
@@ -63,13 +63,38 @@ services:
     command: "sh /usr/local/bin/vault-init.sh"
 
   oracle-service:
-    build: ./backend/oracle-service
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile
     container_name: oracle-service
+    env_file:
+      - ./backend/oracle-service/.env
+    dns:
+      - 8.8.8.8
     ports: ['3000:3000']
-    environment:
-      VAULT_ADDR: http://vault:8200
-      VAULT_TOKEN: root
     depends_on:
-      vault-init:
-        condition: service_completed_successfully
+      - hardhat
+      - mongo
+      - risk-engine
     restart: unless-stopped
+
+  risk-engine:
+    build:
+      context: ./cloud-training
+      dockerfile: Dockerfile
+    container_name: risk-engine
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - ./cloud-training/.env
+    ports: ['8001:8000']
+    volumes:
+      - ./cloud-training:/app
+      - ./cloud-training/models:/app/models
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+networks:
+  default:
+    name: amttp-network
