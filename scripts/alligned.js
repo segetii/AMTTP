@@ -1,11 +1,12 @@
 // scripts/deploy.js
-const { ethers, upgrades } = require("hardhat");
+import hre from "hardhat";
+const { ethers, upgrades } = hre;
 
 async function main() {
   const [deployer] = await ethers.getSigners();
 
   console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
 
   // Configuration
   const oracleAddress = deployer.address; // Use deployer as oracle for simplicity; change as needed
@@ -13,20 +14,20 @@ async function main() {
 
   // Deploy the upgradeable AMTTP contract via proxy
   const AMTTP = await ethers.getContractFactory("AMTTP");
-  const amttpProxy = await upgrades.deployProxy(AMTTP, [oracleAddress, threshold], {
-    initializer: "initialize",
-    kind: "uups", // Use UUPS proxy for upgradeability
-  });
+  console.log("Deploying AMTTP...");
 
-  await amttpProxy.waitForDeployment();
+  // Change the second argument from [deployer.address] to an empty array []
+  const amttp = await upgrades.deployProxy(AMTTP, [], { initializer: 'initialize' });
 
-  console.log("AMTTP Proxy deployed to:", await amttpProxy.getAddress());
-  console.log("Implementation address:", await upgrades.erc1967.getImplementationAddress(await amttpProxy.getAddress()));
-  console.log("Proxy admin address:", await upgrades.erc1967.getAdminAddress(await amttpProxy.getAddress()));
+  await amttp.waitForDeployment();
+
+  console.log("AMTTP Proxy deployed to:", await amttp.getAddress());
+  console.log("Implementation address:", await upgrades.erc1967.getImplementationAddress(await amttp.getAddress()));
+  console.log("Proxy admin address:", await upgrades.erc1967.getAdminAddress(await amttp.getAddress()));
 
   // Optional: Verify on Etherscan if on a supported network
   // await hre.run("verify:verify", {
-  //   address: await amttpProxy.getAddress(),
+  //   address: await amttp.getAddress(),
   //   constructorArguments: [],
   // });
 }

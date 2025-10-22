@@ -1,17 +1,40 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
+// Policy Engine Interface
+interface IAMTTPPolicyEngine {
+    enum PolicyAction { Approve, Review, Escrow, Block }
+    
+    function validateTransaction(
+        address user,
+        address counterparty,
+        uint256 amount,
+        uint256 dqnRiskScore,
+        string memory modelVersion,
+        bytes32 kycHash
+    ) external returns (PolicyAction action, string memory reason);
+    
+    function isTransactionAllowed(
+        address user,
+        address counterparty,
+        uint256 amount,
+        uint256 riskScore
+    ) external view returns (bool allowed, string memory reason);
+}
+
 /**
  * @title AMTTP - Adaptive Multisig Trusted Transaction Protocol
  */
-contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract AMTTP is Initializable, ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
     // FIX: Correct library name
     using ECDSA for bytes32;
 
@@ -47,6 +70,18 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
     address[] public approvers;
     uint256 public threshold;
     address public oracle;
+    
+    // Policy Engine Integration
+    IAMTTPPolicyEngine public policyEngine;
+    mapping(bytes32 => uint256) public swapRiskScores;        // Track DQN risk scores for swaps
+    mapping(bytes32 => string) public swapModelVersions;     // Track model versions used
+    mapping(address => bool) public trustedUsers;            // Users with reduced restrictions
+    
+    // DQN Risk Integration
+    uint256 public constant RISK_SCALE = 1000;               // Risk scores scaled to 0-1000
+    uint256 public globalRiskThreshold;                      // Global risk threshold (0.70)
+    string public defaultModelVersion;                       // Default DQN model version
+    bool public policyEngineEnabled;                         // Policy engine enabled flag
 
     // ---------------- Events ----------------
     event SwapInitiated(
@@ -64,16 +99,76 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
     event Approved(bytes32 indexed swapId, address indexed approver);
     event ApproverAdded(address approver);
     event ApproverRemoved(address approver);
+    
+    // Policy Engine Events
+    event PolicyEngineUpdated(address indexed newPolicyEngine);
+    event TransactionPolicyChecked(address indexed user, uint256 amount, uint256 riskScore, string action);
+    event RiskThresholdExceeded(bytes32 indexed swapId, uint256 riskScore, uint256 threshold);
+    event TrustedUserAdded(address indexed user);
+    event TrustedUserRemoved(address indexed user);
 
-    // ---------------- Initializer ----------------
-    function initialize(address _oracle, uint256 _threshold) public initializer {
-        __Ownable_init();
-        __ReentrancyGuard_init();
-        oracle = _oracle;
-        threshold = _threshold;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
-    // ---------------- ETH Swap ----------------
+    // 1. Remove the 'initialOwner' parameter here
+    function initialize() public initializer {
+        __ERC721_init("AMTTP", "AMTTP");
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        __ReentrancyGuard_init(); // Add this line
+        
+        // Initialize default settings
+        threshold = 1;
+        globalRiskThreshold = 700; // 0.70 default
+        defaultModelVersion = "DQN-v1.0-real-fraud";
+        policyEngineEnabled = false; // Start disabled until policy engine is set
+    }
+    
+    // ---------------- Policy Engine Management ----------------
+    
+    /**
+     * @dev Set the policy engine contract address
+     */
+    function setPolicyEngine(address _policyEngine) external onlyOwner {
+        policyEngine = IAMTTPPolicyEngine(_policyEngine);
+        policyEngineEnabled = true;
+        emit PolicyEngineUpdated(_policyEngine);
+    }
+    
+    /**
+     * @dev Enable or disable policy engine
+     */
+    function setPolicyEngineEnabled(bool enabled) external onlyOwner {
+        policyEngineEnabled = enabled;
+    }
+    
+    /**
+     * @dev Set global risk threshold (0-1000 scale)
+     */
+    function setGlobalRiskThreshold(uint256 threshold) external onlyOwner {
+        require(threshold <= RISK_SCALE, "Invalid threshold");
+        globalRiskThreshold = threshold;
+    }
+    
+    /**
+     * @dev Add trusted user (reduced policy restrictions)
+     */
+    function addTrustedUser(address user) external onlyOwner {
+        trustedUsers[user] = true;
+        emit TrustedUserAdded(user);
+    }
+    
+    /**
+     * @dev Remove trusted user
+     */
+    function removeTrustedUser(address user) external onlyOwner {
+        trustedUsers[user] = false;
+        emit TrustedUserRemoved(user);
+    }
+
+    // ---------------- Enhanced ETH Swap with Policy Engine ----------------
     function initiateSwap(
         address seller,
         bytes32 hashlock,
@@ -83,10 +178,28 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         bytes calldata oracleSig
     ) external payable nonReentrant {
         require(msg.value > 0, "No ETH sent");
-        _initiateSwapInternal(msg.sender, seller, msg.value, ZERO, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ETH);
+        _initiateSwapWithPolicy(msg.sender, seller, msg.value, ZERO, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ETH, 0, defaultModelVersion);
+    }
+    
+    /**
+     * @dev Enhanced ETH swap with DQN risk score integration
+     */
+    function initiateSwapWithRiskScore(
+        address seller,
+        bytes32 hashlock,
+        uint256 timelock,
+        uint8 risk,
+        bytes32 kycHash,
+        bytes calldata oracleSig,
+        uint256 dqnRiskScore,
+        string memory modelVersion
+    ) external payable nonReentrant {
+        require(msg.value > 0, "No ETH sent");
+        require(dqnRiskScore <= RISK_SCALE, "Invalid risk score");
+        _initiateSwapWithPolicy(msg.sender, seller, msg.value, ZERO, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ETH, dqnRiskScore, modelVersion);
     }
 
-    // ---------------- ERC20 Swap ----------------
+    // ---------------- Enhanced ERC20 Swap ----------------
     function initiateSwapERC20(
         address seller,
         address token,
@@ -98,7 +211,28 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         bytes calldata oracleSig
     ) external nonReentrant {
         require(amount > 0, "Zero amount");
-        _initiateSwapInternal(msg.sender, seller, amount, token, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ERC20);
+        _initiateSwapWithPolicy(msg.sender, seller, amount, token, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ERC20, 0, defaultModelVersion);
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
+    }
+    
+    /**
+     * @dev Enhanced ERC20 swap with DQN risk score
+     */
+    function initiateSwapERC20WithRiskScore(
+        address seller,
+        address token,
+        uint256 amount,
+        bytes32 hashlock,
+        uint256 timelock,
+        uint8 risk,
+        bytes32 kycHash,
+        bytes calldata oracleSig,
+        uint256 dqnRiskScore,
+        string memory modelVersion
+    ) external nonReentrant {
+        require(amount > 0, "Zero amount");
+        require(dqnRiskScore <= RISK_SCALE, "Invalid risk score");
+        _initiateSwapWithPolicy(msg.sender, seller, amount, token, 0, hashlock, timelock, risk, kycHash, oracleSig, AssetType.ERC20, dqnRiskScore, modelVersion);
         IERC20(token).transferFrom(msg.sender, address(this), amount);
     }
 
@@ -117,8 +251,8 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         IERC721(token).transferFrom(msg.sender, address(this), tokenId);
     }
 
-    // ---------------- Internal Swap Logic ----------------
-    function _initiateSwapInternal(
+    // ---------------- Enhanced Internal Swap Logic with Policy Engine ----------------
+    function _initiateSwapWithPolicy(
         address buyer,
         address seller,
         uint256 amount,
@@ -129,7 +263,9 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         uint8 risk,
         bytes32 kycHash,
         bytes calldata oracleSig,
-        AssetType assetType
+        AssetType assetType,
+        uint256 dqnRiskScore,
+        string memory modelVersion
     ) internal {
         require(seller != address(0), "Invalid seller");
         require(timelock > block.timestamp, "Invalid timelock");
@@ -142,6 +278,42 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         bytes32 swapId = keccak256(abi.encodePacked(buyer, seller, hashlock, timelock));
         require(swaps[swapId].buyer == address(0), "Swap exists");
 
+        // Policy Engine Integration - Validate transaction
+        if (policyEngineEnabled && address(policyEngine) != address(0)) {
+            (IAMTTPPolicyEngine.PolicyAction action, string memory reason) = policyEngine.validateTransaction(
+                buyer,
+                seller,
+                amount,
+                dqnRiskScore,
+                modelVersion,
+                kycHash
+            );
+            
+            emit TransactionPolicyChecked(buyer, amount, dqnRiskScore, reason);
+            
+            // Handle policy actions
+            if (action == IAMTTPPolicyEngine.PolicyAction.Block) {
+                revert(string(abi.encodePacked("Transaction blocked: ", reason)));
+            } else if (action == IAMTTPPolicyEngine.PolicyAction.Escrow) {
+                // Force high risk level for escrow
+                risk = uint8(RiskLevel.High);
+                emit RiskThresholdExceeded(swapId, dqnRiskScore, globalRiskThreshold);
+            } else if (action == IAMTTPPolicyEngine.PolicyAction.Review) {
+                // Force medium risk level for review
+                if (risk < uint8(RiskLevel.Medium)) {
+                    risk = uint8(RiskLevel.Medium);
+                }
+            }
+            // PolicyAction.Approve continues with original risk level
+        } else {
+            // Fallback policy check if policy engine is disabled
+            if (dqnRiskScore > globalRiskThreshold) {
+                risk = uint8(RiskLevel.High);
+                emit RiskThresholdExceeded(swapId, dqnRiskScore, globalRiskThreshold);
+            }
+        }
+
+        // Create swap
         swaps[swapId] = Swap({
             buyer: buyer,
             seller: seller,
@@ -158,7 +330,33 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
             assetType: assetType
         });
 
+        // Store DQN risk data for analytics
+        swapRiskScores[swapId] = dqnRiskScore;
+        swapModelVersions[swapId] = modelVersion;
+
         emit SwapInitiated(swapId, buyer, seller, amount, risk, kycHash, assetType);
+        
+        // Auto-escalate high-risk transactions
+        if (risk == uint8(RiskLevel.High) && !trustedUsers[buyer]) {
+            emit SwapEscalated(swapId);
+        }
+    }
+    
+    // Keep original internal function for backward compatibility
+    function _initiateSwapInternal(
+        address buyer,
+        address seller,
+        uint256 amount,
+        address token,
+        uint256 tokenId,
+        bytes32 hashlock,
+        uint256 timelock,
+        uint8 risk,
+        bytes32 kycHash,
+        bytes calldata oracleSig,
+        AssetType assetType
+    ) internal {
+        _initiateSwapWithPolicy(buyer, seller, amount, token, tokenId, hashlock, timelock, risk, kycHash, oracleSig, assetType, 0, defaultModelVersion);
     }
 
     // ---------------- Complete Swap ----------------
@@ -288,4 +486,106 @@ contract AMTTP is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable 
         address signer = prefixedDigest.recover(signature);
         return signer == oracle && signer != address(0);
     }
+    
+    // ---------------- Policy & Risk Analytics ----------------
+    
+    /**
+     * @dev Get DQN risk score for a swap
+     */
+    function getSwapRiskScore(bytes32 swapId) external view returns (uint256 riskScore, string memory modelVersion) {
+        return (swapRiskScores[swapId], swapModelVersions[swapId]);
+    }
+    
+    /**
+     * @dev Get comprehensive swap details including risk data
+     */
+    function getSwapWithRiskData(bytes32 swapId) external view returns (
+        Swap memory swap,
+        uint256 riskScore,
+        string memory modelVersion,
+        bool requiresApproval
+    ) {
+        swap = swaps[swapId];
+        riskScore = swapRiskScores[swapId];
+        modelVersion = swapModelVersions[swapId];
+        requiresApproval = (swap.riskLevel >= uint8(RiskLevel.Medium)) && !trustedUsers[swap.buyer];
+    }
+    
+    /**
+     * @dev Check if transaction would be allowed under current policies
+     */
+    function preValidateTransaction(
+        address buyer,
+        address seller,
+        uint256 amount,
+        uint256 dqnRiskScore,
+        string memory modelVersion,
+        bytes32 kycHash
+    ) external view returns (bool allowed, string memory reason, uint8 recommendedRiskLevel) {
+        if (policyEngineEnabled && address(policyEngine) != address(0)) {
+            (bool policyAllowed, string memory policyReason) = policyEngine.isTransactionAllowed(buyer, seller, amount, dqnRiskScore);
+            if (!policyAllowed) {
+                return (false, policyReason, uint8(RiskLevel.High));
+            }
+        }
+        
+        // Fallback risk assessment
+        if (dqnRiskScore > globalRiskThreshold) {
+            return (true, "High risk - escrow recommended", uint8(RiskLevel.High));
+        } else if (dqnRiskScore > globalRiskThreshold * 6 / 10) { // 60% of threshold
+            return (true, "Medium risk - review recommended", uint8(RiskLevel.Medium));
+        } else {
+            return (true, "Low risk - approved", uint8(RiskLevel.Low));
+        }
+    }
+    
+    /**
+     * @dev Get risk statistics for analytics
+     */
+    function getRiskStatistics() external view returns (
+        uint256 totalSwaps,
+        uint256 highRiskSwaps,
+        uint256 mediumRiskSwaps,
+        uint256 lowRiskSwaps,
+        uint256 averageRiskScore
+    ) {
+        // This would require additional storage optimization for gas efficiency
+        // For now, return placeholder values
+        totalSwaps = 0; // Would count total swaps
+        highRiskSwaps = 0; // Would count high risk swaps
+        mediumRiskSwaps = 0; // Would count medium risk swaps  
+        lowRiskSwaps = 0; // Would count low risk swaps
+        averageRiskScore = 0; // Would calculate average
+    }
+    
+    /**
+     * @dev Check if user is trusted
+     */
+    function isTrustedUser(address user) external view returns (bool) {
+        return trustedUsers[user];
+    }
+    
+    /**
+     * @dev Get policy engine status
+     */
+    function getPolicyEngineStatus() external view returns (
+        address policyEngineAddress,
+        bool enabled,
+        uint256 globalThreshold,
+        string memory defaultModel
+    ) {
+        return (
+            address(policyEngine),
+            policyEngineEnabled,
+            globalRiskThreshold,
+            defaultModelVersion
+        );
+    }
+
+    // 4. Add this required function to control upgrades
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
 }
