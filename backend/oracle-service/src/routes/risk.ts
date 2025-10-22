@@ -64,9 +64,10 @@ riskRouter.post("/score", async (req, res) => {
     
   } catch (error) {
     console.error('Enhanced risk scoring error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ 
       error: 'Risk scoring failed',
-      message: error.message 
+      message: msg 
     });
   }
 });
@@ -102,13 +103,13 @@ riskRouter.post("/dqn-score", async (req, res) => {
 
   } catch (error) {
     console.error('DQN scoring error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ 
       error: 'DQN scoring failed',
-      message: error.message 
+      message: msg 
     });
   }
 });
-
 // Get model status and performance
 riskRouter.get("/models/status", async (req, res) => {
   try {
@@ -116,9 +117,10 @@ riskRouter.get("/models/status", async (req, res) => {
     res.json(modelStatus);
   } catch (error) {
     console.error('Model status error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ 
       error: 'Failed to get model status',
-      message: error.message 
+      message: msg 
     });
   }
 });

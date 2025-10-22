@@ -95,7 +95,8 @@ export async function scoreDQNTransaction(transactionData: DQNTransactionData) {
     
   } catch (error) {
     console.error('DQN scoring error:', error);
-    throw new Error(`DQN scoring failed: ${error.message}`);
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(`DQN scoring failed: ${msg}`);
   }
 }
 

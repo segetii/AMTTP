@@ -86,7 +86,7 @@ services:
     environment:
       - PYTHONPATH=/app
     env_file:
-      - ./cloud-training/.env
+      - ./cloud-training/cloud-training/.env
     ports: ['8001:8000']
     volumes:
       - ./cloud-training/cloud-training:/app
