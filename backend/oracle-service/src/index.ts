@@ -9,6 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Basic health endpoint for container health checks
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use("/kyc", kycRouter);
 app.use("/risk", riskRouter);
 app.use("/tx", txRouter);
