@@ -80,7 +80,7 @@ services:
 
   risk-engine:
     build:
-      context: ./cloud-training
+      context: ./cloud-training/cloud-training
       dockerfile: Dockerfile
     container_name: risk-engine
     environment:
@@ -89,7 +89,7 @@ services:
       - ./cloud-training/.env
     ports: ['8001:8000']
     volumes:
-      - ./cloud-training:/app
+      - ./cloud-training/cloud-training:/app
       - ./cloud-training/models:/app/models
     depends_on:
       - mongo
