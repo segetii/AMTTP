@@ -1,0 +1,2096 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\AMTTPPolicyEngine.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> AMTTPPolicyEngine.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">23.48% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>31/132</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">16% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>24/150</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">41.67% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>15/36</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">30.63% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>49/160</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">43×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+&nbsp;
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+&nbsp;
+/**
+ * @title AMTTPPolicyEngine - Advanced policy management for AMTTP
+ * @dev Manages user-defined transaction policies, risk thresholds, and approval workflows
+ * @notice This contract has a richer implementation than the minimal IAMTTPPolicyEngine interface
+ * used by AMTTPRouter. The Router uses a minimal interface for gas efficiency.
+ */
+contract AMTTPPolicyEngine is 
+    Initializable, 
+    OwnableUpgradeable, 
+    UUPSUpgradeable, 
+    ReentrancyGuardUpgradeable
+{
+    
+    // ---------------- Enums ----------------
+    enum RiskLevel { Minimal, Low, Medium, High }
+    enum PolicyAction { Approve, Review, Escrow, Block }
+    enum VelocityWindow { Hour, Day, Week, Month }
+    
+    // ---------------- Structs ----------------
+    struct TransactionPolicy {
+        uint256 maxAmount;                    // Maximum transaction amount
+        uint256 dailyLimit;                   // 24-hour transaction limit
+        uint256 weeklyLimit;                  // 7-day transaction limit
+        uint256 monthlyLimit;                 // 30-day transaction limit
+        uint256 riskThreshold;                // Risk threshold (0-1000, representing 0-1.0)
+        address[] allowedCounterparties;      // Whitelist of addresses
+        address[] blockedCounterparties;      // Blacklist of addresses
+        bool autoApprove;                     // Auto-approve low risk transactions
+        bool enabled;                         // Policy is active
+        uint256 cooldownPeriod;               // Time between large transactions
+        uint256 lastLargeTransaction;         // Timestamp of last large transaction
+    }
+    
+    struct RiskPolicy {
+        uint256 minimalThreshold;             // 0-250 (0-0.25)
+        uint256 lowThreshold;                 // 250-400 (0.25-0.40)  
+        uint256 mediumThreshold;              // 400-700 (0.40-0.70)
+        uint256 highThreshold;                // 700-1000 (0.70-1.0)
+        PolicyAction minimalAction;
+        PolicyAction lowAction;
+        PolicyAction mediumAction;
+        PolicyAction highAction;
+        bool adaptiveThresholds;              // Adjust thresholds based on user behavior
+    }
+    
+    struct VelocityLimit {
+        uint256 maxTransactions;              // Max transactions in window
+        uint256 maxVolume;                    // Max volume in window
+        VelocityWindow window;                // Time window
+        bool enabled;
+    }
+    
+    struct ComplianceRule {
+        bool requireKYC;                      // KYC required for transactions
+        bool requireApproval;                 // Manual approval required
+        uint256 approvalThreshold;            // Amount requiring approval
+        address[] approvers;                  // List of approved addresses
+        uint256 approvalTimeout;              // Timeout for approvals
+        bool geofencing;                      // Geographic restrictions
+        string[] allowedCountries;            // Allowed country codes
+    }
+    
+    struct UserActivity {
+        uint256 dailyVolume;                  // Today's transaction volume
+        uint256 weeklyVolume;                 // This week's volume
+        uint256 monthlyVolume;                // This month's volume
+        uint256 dailyCount;                   // Today's transaction count
+        uint256 lastTransactionTime;         // Last transaction timestamp
+        uint256 lastResetTime;                // Last reset timestamp
+        uint256 suspiciousScore;              // Cumulative suspicious activity score
+        bool frozen;                          // Account frozen status
+    }
+    
+    // ---------------- State Variables ----------------
+    mapping(address =&gt; TransactionPolicy) public userPolicies;
+    mapping(address =&gt; RiskPolicy) public userRiskPolicies;
+    mapping(address =&gt; VelocityLimit[]) public userVelocityLimits;
+    mapping(address =&gt; ComplianceRule) public userComplianceRules;
+    mapping(address =&gt; UserActivity) public userActivity;
+    mapping(address =&gt; mapping(address =&gt; bool)) public trustedCounterparties;
+    mapping(address =&gt; bool) public globalApprovers;
+    
+    // Global settings
+    uint256 public globalRiskThreshold;
+    uint256 public globalMaxAmount;
+    bool public emergencyPause;
+    address public amttpContract;
+    address public oracleService;
+    
+    // Kleros Dispute Resolution
+    address public disputeResolver;  // AMTTPDisputeResolver contract
+    uint256 public escrowThreshold;  // Risk score threshold for escrow (default: 700)
+    
+    // DQN Model integration
+    mapping(string =&gt; uint256) public modelVersionScores; // Model version -&gt; F1 score
+    string public activeModelVersion;
+    uint256 public minimumModelScore;                     // Minimum F1 score (e.g., 669 for 0.669)
+    
+    // ---------------- Events ----------------
+    event PolicyUpdated(address indexed user, string policyType);
+    event TransactionValidated(address indexed user, address indexed counterparty, uint256 amount, PolicyAction action);
+    event RiskThresholdExceeded(address indexed user, uint256 riskScore, uint256 threshold);
+    event VelocityLimitExceeded(address indexed user, VelocityWindow window, uint256 amount);
+    event AccountFrozen(address indexed user, string reason);
+    event AccountUnfrozen(address indexed user);
+    event EmergencyPauseToggled(bool paused);
+    event ModelVersionUpdated(string version, uint256 f1Score);
+    event ComplianceViolation(address indexed user, string reason);
+    event TransactionEscrowedForDispute(bytes32 indexed txId, address indexed user, uint256 amount, uint256 riskScore);
+    event HighRiskAutoBlocked(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
+    event MediumRiskFlagged(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
+    event LowRiskAutoApproved(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
+    
+    // ---------------- Modifiers ----------------
+    modifier onlyAMTTP() {
+        <span class="missing-if-branch" title="if path not taken" >I</span>require(msg.sender == amttpContract, "Only AMTTP contract");
+        _;
+    }
+    
+<span class="fstat-no" title="function not covered" >    modifier notPaused() {</span>
+<span class="cstat-no" title="statement not covered" >        require(!emergencyPause, "System paused")</span>;
+        _;
+    }
+    
+<span class="fstat-no" title="function not covered" >    modifier notFrozen(address user) {</span>
+<span class="cstat-no" title="statement not covered" >        require(!userActivity[user].frozen, "Account frozen")</span>;
+        _;
+    }
+    
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
+    // ---------------- Initialization ----------------
+    function initialize(address _amttpContract, address _oracleService) public <span class="missing-if-branch" title="else path not taken" >E</span>initializer {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        __ReentrancyGuard_init();
+        
+        amttpContract = _amttpContract;
+        oracleService = _oracleService;
+        globalRiskThreshold = 700; // 0.70 default
+        globalMaxAmount = 100 ether; // 100 ETH default
+        activeModelVersion = "DQN-v1.0-real-fraud";
+        minimumModelScore = 669; // 0.669 F1 score minimum
+        
+        // Set default model score
+        modelVersionScores["DQN-v1.0-real-fraud"] = 669;
+    }
+    
+    // ---------------- Policy Management ----------------
+    
+    /**
+     * @dev Set transaction policy for a user
+     */
+    function setTransactionPolicy(
+        address user,
+        uint256 maxAmount,
+        uint256 dailyLimit,
+        uint256 weeklyLimit,
+        uint256 monthlyLimit,
+        uint256 riskThreshold,
+        bool autoApprove,
+        uint256 cooldownPeriod
+    ) external {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == user || <span class="branch-1 cbranch-no" title="branch not covered" >msg.sender == owner()</span>, "Unauthorized");
+        require(maxAmount &lt;= globalMaxAmount, "Exceeds global limit");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(riskThreshold &lt;= 1000, "Invalid risk threshold");
+        
+        userPolicies[user] = TransactionPolicy({
+            maxAmount: maxAmount,
+            dailyLimit: dailyLimit,
+            weeklyLimit: weeklyLimit,
+            monthlyLimit: monthlyLimit,
+            riskThreshold: riskThreshold,
+            allowedCounterparties: userPolicies[user].allowedCounterparties,
+            blockedCounterparties: userPolicies[user].blockedCounterparties,
+            autoApprove: autoApprove,
+            enabled: true,
+            cooldownPeriod: cooldownPeriod,
+            lastLargeTransaction: userPolicies[user].lastLargeTransaction
+        });
+        
+        emit PolicyUpdated(user, "transaction");
+    }
+    
+    /**
+     * @dev Set risk policy for a user  
+     */
+    function setRiskPolicy(
+        address user,
+        uint256[4] memory thresholds, // [minimal, low, medium, high]
+        PolicyAction[4] memory actions,
+        bool adaptiveThresholds
+    ) external {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == user || <span class="branch-1 cbranch-no" title="branch not covered" >msg.sender == owner()</span>, "Unauthorized");
+        require(thresholds[0] &lt; thresholds[1] &amp;&amp; thresholds[1] &lt; thresholds[2] &amp;&amp; thresholds[2] &lt; thresholds[3], "Invalid thresholds");
+        
+        userRiskPolicies[user] = RiskPolicy({
+            minimalThreshold: thresholds[0],
+            lowThreshold: thresholds[1],
+            mediumThreshold: thresholds[2],
+            highThreshold: thresholds[3],
+            minimalAction: actions[0],
+            lowAction: actions[1],
+            mediumAction: actions[2],
+            highAction: actions[3],
+            adaptiveThresholds: adaptiveThresholds
+        });
+        
+        emit PolicyUpdated(user, "risk");
+    }
+    
+    /**
+     * @dev Add velocity limit for a user
+     */
+    function addVelocityLimit(
+        address user,
+        uint256 maxTransactions,
+        uint256 maxVolume,
+        VelocityWindow window
+    ) external {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == user || <span class="branch-1 cbranch-no" title="branch not covered" >msg.sender == owner()</span>, "Unauthorized");
+        
+        userVelocityLimits[user].push(VelocityLimit({
+            maxTransactions: maxTransactions,
+            maxVolume: maxVolume,
+            window: window,
+            enabled: true
+        }));
+        
+        emit PolicyUpdated(user, "velocity");
+    }
+    
+    /**
+     * @dev Set compliance rules for a user
+     */
+    function setComplianceRules(
+        address user,
+        bool requireKYC,
+        bool requireApproval,
+        uint256 approvalThreshold,
+        uint256 approvalTimeout,
+        bool geofencing
+    ) external {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == user || <span class="branch-1 cbranch-no" title="branch not covered" >msg.sender == owner()</span>, "Unauthorized");
+        
+        userComplianceRules[user].requireKYC = requireKYC;
+        userComplianceRules[user].requireApproval = requireApproval;
+        userComplianceRules[user].approvalThreshold = approvalThreshold;
+        userComplianceRules[user].approvalTimeout = approvalTimeout;
+        userComplianceRules[user].geofencing = geofencing;
+        
+        emit PolicyUpdated(user, "compliance");
+    }
+    
+    // ---------------- Transaction Validation ----------------
+    
+    /**
+     * @dev Validate transaction against user policies and DQN risk score
+     */
+<span class="fstat-no" title="function not covered" >    function validateTransaction(</span>
+        address user,
+        address counterparty,
+        uint256 amount,
+        uint256 dqnRiskScore,        // Risk score from your DQN model (0-1000)
+        string memory modelVersion,
+        bytes32 kycHash
+    ) external <span class="missing-if-branch" title="if path not taken" >I</span>onlyAMTTP notPaused notFrozen(user) returns (PolicyAction action, string memory reason) {
+        
+        // Update user activity
+<span class="cstat-no" title="statement not covered" >        _updateUserActivity(user, amount)</span>;
+        
+        // Check model version
+<span class="cstat-no" title="statement not covered" >        require(modelVersionScores[modelVersion] &gt;= minimumModelScore, "Model version not approved")</span>;
+        
+        // Get user policies (with defaults if not set)
+<span class="cstat-no" title="statement not covered" >        TransactionPolicy memory policy = _getUserPolicyWithDefaults(user);</span>
+<span class="cstat-no" title="statement not covered" >        RiskPolicy memory riskPolicy = _getUserRiskPolicyWithDefaults(user);</span>
+<span class="cstat-no" title="statement not covered" >        ComplianceRule memory compliance = userComplianceRules[user];</span>
+        
+        // 1. Basic policy checks
+<span class="cstat-no" title="statement not covered" >        if (amount &gt; policy.maxAmount) {</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Block, "Exceeds maximum amount");</span>
+        }
+        
+        // 2. Velocity checks
+<span class="cstat-no" title="statement not covered" >        if (!_checkVelocityLimits(user, amount)) {</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Block, "Velocity limit exceeded");</span>
+        }
+        
+        // 3. Counterparty checks
+<span class="cstat-no" title="statement not covered" >        if (_isBlockedCounterparty(user, counterparty)) {</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Block, "Blocked counterparty");</span>
+        }
+        
+        // 4. KYC compliance
+<span class="cstat-no" title="statement not covered" >        if (compliance.requireKYC &amp;&amp; kycHash == bytes32(0)) {</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Block, "KYC required");</span>
+        }
+        
+        // 5. DQN Risk Assessment - Your trained model integration
+<span class="cstat-no" title="statement not covered" >        PolicyAction riskAction = _assessDQNRisk(dqnRiskScore, riskPolicy);</span>
+        
+        // 6. HIGH RISK: Auto-block and flag for Kleros dispute
+        // Transactions with risk score &gt;= 700 are auto-blocked
+<span class="cstat-no" title="statement not covered" >        if (riskAction == PolicyAction.Block) {</span>
+<span class="cstat-no" title="statement not covered" >            emit HighRiskAutoBlocked(user, counterparty, amount, dqnRiskScore);</span>
+<span class="cstat-no" title="statement not covered" >            emit RiskThresholdExceeded(user, dqnRiskScore, riskPolicy.mediumThreshold);</span>
+            // Caller should route to Kleros escrow via routeToKlerosEscrow()
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Block, "HIGH_RISK: Auto-blocked - route to Kleros for dispute");</span>
+        }
+        
+        // 7. MEDIUM RISK: Flag for human review
+        // Transactions with risk score 400-699 need manual verification
+<span class="cstat-no" title="statement not covered" >        if (riskAction == PolicyAction.Review) {</span>
+<span class="cstat-no" title="statement not covered" >            emit MediumRiskFlagged(user, counterparty, amount, dqnRiskScore);</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Review, "MEDIUM_RISK: Flagged for human review");</span>
+        }
+        
+        // 8. Special approval requirements
+<span class="cstat-no" title="statement not covered" >        if (compliance.requireApproval &amp;&amp; amount &gt;= compliance.approvalThreshold) {</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Review, "Manual approval required");</span>
+        }
+        
+        // 9. Cooldown period for large transactions
+<span class="cstat-no" title="statement not covered" >        if (amount &gt;= policy.maxAmount / 2 &amp;&amp; </span>
+            block.timestamp &lt; policy.lastLargeTransaction + policy.cooldownPeriod) {
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Review, "Cooldown period active");</span>
+        }
+        
+        // 10. Trusted counterparty override (only affects Review → Approve)
+<span class="cstat-no" title="statement not covered" >        if (trustedCounterparties[user][counterparty] &amp;&amp; riskAction == PolicyAction.Review) {</span>
+            riskAction = PolicyAction.Approve;
+        }
+        
+        // 11. LOW RISK: Auto-approval for low/minimal risk scores (&lt; 400)
+<span class="cstat-no" title="statement not covered" >        if (riskAction == PolicyAction.Approve) {</span>
+<span class="cstat-no" title="statement not covered" >            _recordSuccessfulTransaction(user, amount)</span>;
+<span class="cstat-no" title="statement not covered" >            emit LowRiskAutoApproved(user, counterparty, amount, dqnRiskScore);</span>
+<span class="cstat-no" title="statement not covered" >            emit TransactionValidated(user, counterparty, amount, PolicyAction.Approve);</span>
+<span class="cstat-no" title="statement not covered" >            return (PolicyAction.Approve, "LOW_RISK: Auto-approved");</span>
+        }
+        
+<span class="cstat-no" title="statement not covered" >        emit TransactionValidated(user, counterparty, amount, riskAction);</span>
+<span class="cstat-no" title="statement not covered" >        return (riskAction, _getRiskActionReason(dqnRiskScore, riskAction));</span>
+    }
+    
+    /**
+     * @dev Assess risk using your DQN model scores
+     */
+<span class="fstat-no" title="function not covered" >    function _assessDQNRisk(uint256 riskScore, RiskPolicy memory policy) internal pure returns (PolicyAction) {</span>
+<span class="cstat-no" title="statement not covered" >        if (riskScore &lt;= policy.minimalThreshold) {</span>
+<span class="cstat-no" title="statement not covered" >            return policy.minimalAction;</span>
+        } else <span class="cstat-no" title="statement not covered" >if (riskScore &lt;= policy.lowThreshold) {</span>
+<span class="cstat-no" title="statement not covered" >            return policy.lowAction;</span>
+        } else <span class="cstat-no" title="statement not covered" >if (riskScore &lt;= policy.mediumThreshold) {</span>
+<span class="cstat-no" title="statement not covered" >            return policy.mediumAction;</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >            return policy.highAction;</span>
+        }
+    }
+    
+    /**
+     * @dev Update user activity tracking
+     */
+<span class="fstat-no" title="function not covered" >    function _updateUserActivity(address user, uint256 amount) internal {</span>
+<span class="cstat-no" title="statement not covered" >        UserActivity storage activity = userActivity[user];</span>
+        
+        // Reset counters if new day/week/month
+<span class="cstat-no" title="statement not covered" >        if (block.timestamp &gt;= activity.lastResetTime + 1 days) {</span>
+            activity.dailyVolume = 0;
+            activity.dailyCount = 0;
+            activity.lastResetTime = block.timestamp;
+        }
+        
+<span class="cstat-no" title="statement not covered" >        if (block.timestamp &gt;= activity.lastResetTime + 7 days) {</span>
+            activity.weeklyVolume = 0;
+        }
+        
+<span class="cstat-no" title="statement not covered" >        if (block.timestamp &gt;= activity.lastResetTime + 30 days) {</span>
+            activity.monthlyVolume = 0;
+        }
+        
+        // Update counters
+        activity.dailyVolume += amount;
+        activity.weeklyVolume += amount;
+        activity.monthlyVolume += amount;
+        activity.dailyCount += 1;
+        activity.lastTransactionTime = block.timestamp;
+    }
+    
+    /**
+     * @dev Check velocity limits
+     */
+<span class="fstat-no" title="function not covered" >    function _checkVelocityLimits(address user, uint256 amount) internal view returns (bool) {</span>
+<span class="cstat-no" title="statement not covered" >        VelocityLimit[] memory limits = userVelocityLimits[user];</span>
+<span class="cstat-no" title="statement not covered" >        UserActivity memory activity = userActivity[user];</span>
+        
+<span class="cstat-no" title="statement not covered" >        for (uint i = 0; i &lt; limits.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >            if (!limits[i].enabled) continue;</span>
+            
+<span class="cstat-no" title="statement not covered" >            if (limits[i].window == VelocityWindow.Day) {</span>
+<span class="cstat-no" title="statement not covered" >                if (activity.dailyVolume + amount &gt; limits[i].maxVolume ||</span>
+                    activity.dailyCount + 1 &gt; limits[i].maxTransactions) {
+<span class="cstat-no" title="statement not covered" >                    return false;</span>
+                }
+            }
+            // Add other window checks as needed
+        }
+        
+<span class="cstat-no" title="statement not covered" >        return true;</span>
+    }
+    
+    /**
+     * @dev Get user policy with defaults
+     */
+    function _getUserPolicyWithDefaults(address user) internal view returns (TransactionPolicy memory) {
+        TransactionPolicy memory policy = userPolicies[user];
+        
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!policy.enabled) {
+            // Return default policy
+            policy = TransactionPolicy({
+                maxAmount: 10 ether,
+                dailyLimit: 50 ether,
+                weeklyLimit: 200 ether,
+                monthlyLimit: 500 ether,
+                riskThreshold: 700, // 0.70
+                allowedCounterparties: new address[](0),
+                blockedCounterparties: new address[](0),
+                autoApprove: true,
+                enabled: true,
+                cooldownPeriod: 1 hours,
+                lastLargeTransaction: 0
+            });
+        }
+        
+        return policy;
+    }
+    
+    /**
+     * @dev Get user risk policy with defaults
+     * 
+     * Default policy thresholds:
+     * - LOW (0-399): Auto-approve - trusted transactions
+     * - MEDIUM (400-699): Review - requires human verification  
+     * - HIGH (700-1000): Block - auto-blocked, routed to Kleros escrow
+     */
+    function _getUserRiskPolicyWithDefaults(address user) internal view returns (RiskPolicy memory) {
+        RiskPolicy memory policy = userRiskPolicies[user];
+        
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (policy.highThreshold == 0) {
+            // Default risk policy: HIGH = Block, MEDIUM = Review, LOW = Approve
+            policy = RiskPolicy({
+                minimalThreshold: 200,    // 0-200: Very low risk
+                lowThreshold: 400,        // 200-400: Low risk (auto-approve)
+                mediumThreshold: 700,     // 400-700: Medium risk (review)
+                highThreshold: 1000,      // 700-1000: High risk (auto-block)
+                minimalAction: PolicyAction.Approve,  // Very low → approve
+                lowAction: PolicyAction.Approve,      // Low → approve
+                mediumAction: PolicyAction.Review,    // Medium → human review
+                highAction: PolicyAction.Block,       // High → auto-block + Kleros
+                adaptiveThresholds: false
+            });
+        }
+        
+        return policy;
+    }
+    
+<span class="fstat-no" title="function not covered" >    function _isBlockedCounterparty(address user, address counterparty) internal view returns (bool) {</span>
+<span class="cstat-no" title="statement not covered" >        address[] memory blocked = userPolicies[user].blockedCounterparties;</span>
+<span class="cstat-no" title="statement not covered" >        for (uint i = 0; i &lt; blocked.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >            if (blocked[i] == counterparty) <span class="cstat-no" title="statement not covered" >return true;</span></span>
+        }
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+    }
+    
+<span class="fstat-no" title="function not covered" >    function _recordSuccessfulTransaction(address user, uint256 amount) internal {</span>
+<span class="cstat-no" title="statement not covered" >        if (amount &gt;= userPolicies[user].maxAmount / 2) {</span>
+            userPolicies[user].lastLargeTransaction = block.timestamp;
+        }
+    }
+    
+<span class="fstat-no" title="function not covered" >    function _getRiskActionReason(uint256 riskScore, PolicyAction action) internal pure returns (string memory) {</span>
+<span class="cstat-no" title="statement not covered" >        if (action == PolicyAction.Approve) <span class="cstat-no" title="statement not covered" >return "Low risk - approved";</span></span>
+<span class="cstat-no" title="statement not covered" >        if (action == PolicyAction.Review) <span class="cstat-no" title="statement not covered" >return "Medium risk - review required";</span></span>
+<span class="cstat-no" title="statement not covered" >        if (action == PolicyAction.Escrow) <span class="cstat-no" title="statement not covered" >return "High risk - escrow required";</span></span>
+<span class="cstat-no" title="statement not covered" >        return "Very high risk - blocked";</span>
+    }
+    
+    // ---------------- DQN Model Management ----------------
+    
+    /**
+     * @dev Update DQN model version and performance score
+     */
+    function updateModelVersion(string memory version, uint256 f1Score) external {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == oracleService || <span class="branch-1 cbranch-no" title="branch not covered" >msg.sender == owner()</span>, "Unauthorized");
+        require(f1Score &gt;= minimumModelScore, "Model performance too low");
+        
+        modelVersionScores[version] = f1Score;
+        activeModelVersion = version;
+        
+        emit ModelVersionUpdated(version, f1Score);
+    }
+    
+    /**
+     * @dev Set minimum model performance requirement
+     */
+<span class="fstat-no" title="function not covered" >    function setMinimumModelScore(uint256 score) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(score &lt;= 1000, "Invalid score")</span>;
+        minimumModelScore = score;
+    }
+    
+    // ---------------- Admin Functions ----------------
+    
+    function setEmergencyPause(bool paused) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        emergencyPause = paused;
+        emit EmergencyPauseToggled(paused);
+    }
+    
+    function freezeAccount(address user, string memory reason) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        userActivity[user].frozen = true;
+        emit AccountFrozen(user, reason);
+    }
+    
+<span class="fstat-no" title="function not covered" >    function unfreezeAccount(address user) external onlyOwner {</span>
+        userActivity[user].frozen = false;
+<span class="cstat-no" title="statement not covered" >        emit AccountUnfrozen(user);</span>
+    }
+    
+<span class="fstat-no" title="function not covered" >    function addTrustedCounterparty(address user, address counterparty) external {</span>
+<span class="cstat-no" title="statement not covered" >        require(msg.sender == user || msg.sender == owner(), "Unauthorized")</span>;
+        trustedCounterparties[user][counterparty] = true;
+    }
+    
+<span class="fstat-no" title="function not covered" >    function removeTrustedCounterparty(address user, address counterparty) external {</span>
+<span class="cstat-no" title="statement not covered" >        require(msg.sender == user || msg.sender == owner(), "Unauthorized")</span>;
+        trustedCounterparties[user][counterparty] = false;
+    }
+    
+    // ---------------- View Functions ----------------
+    
+    function getUserPolicy(address user) external view returns (TransactionPolicy memory) {
+        return _getUserPolicyWithDefaults(user);
+    }
+    
+    function getUserRiskPolicy(address user) external view returns (RiskPolicy memory) {
+        return _getUserRiskPolicyWithDefaults(user);
+    }
+    
+<span class="fstat-no" title="function not covered" >    function getUserActivity(address user) external view returns (UserActivity memory) {</span>
+<span class="cstat-no" title="statement not covered" >        return userActivity[user];</span>
+    }
+    
+    function getModelPerformance(string memory version) external view returns (uint256) {
+        return modelVersionScores[version];
+    }
+    
+<span class="fstat-no" title="function not covered" >    function isTransactionAllowed(</span>
+        address user,
+        address counterparty,
+        uint256 amount,
+        uint256 riskScore
+    ) external view returns (bool allowed, string memory reason) {
+<span class="cstat-no" title="statement not covered" >        if (emergencyPause) <span class="cstat-no" title="statement not covered" >return (false, "System paused");</span></span>
+<span class="cstat-no" title="statement not covered" >        if (userActivity[user].frozen) <span class="cstat-no" title="statement not covered" >return (false, "Account frozen");</span></span>
+        
+<span class="cstat-no" title="statement not covered" >        TransactionPolicy memory policy = _getUserPolicyWithDefaults(user);</span>
+        
+<span class="cstat-no" title="statement not covered" >        if (amount &gt; policy.maxAmount) <span class="cstat-no" title="statement not covered" >return (false, "Exceeds maximum amount");</span></span>
+<span class="cstat-no" title="statement not covered" >        if (_isBlockedCounterparty(user, counterparty)) <span class="cstat-no" title="statement not covered" >return (false, "Blocked counterparty");</span></span>
+        
+<span class="cstat-no" title="statement not covered" >        RiskPolicy memory riskPolicy = _getUserRiskPolicyWithDefaults(user);</span>
+<span class="cstat-no" title="statement not covered" >        PolicyAction action = _assessDQNRisk(riskScore, riskPolicy);</span>
+        
+<span class="cstat-no" title="statement not covered" >        if (action == PolicyAction.Block) <span class="cstat-no" title="statement not covered" >return (false, "Risk too high");</span></span>
+        
+<span class="cstat-no" title="statement not covered" >        return (true, "Transaction allowed");</span>
+    }
+    
+    // ============================================================
+    // KLEROS DISPUTE RESOLUTION INTEGRATION
+    // ============================================================
+    
+    /**
+     * @dev Set the Kleros dispute resolver contract address
+     * @param _disputeResolver Address of AMTTPDisputeResolver contract
+     */
+<span class="fstat-no" title="function not covered" >    function setDisputeResolver(address _disputeResolver) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_disputeResolver != address(0), "Invalid address")</span>;
+        disputeResolver = _disputeResolver;
+    }
+    
+    /**
+     * @dev Set the risk score threshold for escrow routing
+     * @param _threshold Risk score (0-1000) above which transactions go to escrow
+     */
+<span class="fstat-no" title="function not covered" >    function setEscrowThreshold(uint256 _threshold) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_threshold &lt;= 1000, "Invalid threshold")</span>;
+        escrowThreshold = _threshold;
+    }
+    
+    /**
+     * @dev Check if a transaction should be routed to Kleros escrow
+     * @param riskScore The risk score from ML model (0-1000)
+     * @return shouldEscrow Whether transaction should go to dispute resolver
+     */
+<span class="fstat-no" title="function not covered" >    function shouldRouteToKleros(uint256 riskScore) public view returns (bool shouldEscrow) {</span>
+<span class="cstat-no" title="statement not covered" >        if (disputeResolver == address(0)) <span class="cstat-no" title="statement not covered" >return false;</span></span>
+<span class="cstat-no" title="statement not covered" >        if (escrowThreshold == 0) <span class="cstat-no" title="statement not covered" >return false;</span></span>
+<span class="cstat-no" title="statement not covered" >        return riskScore &gt;= escrowThreshold;</span>
+    }
+    
+    /**
+     * @dev Get dispute resolver address
+     */
+<span class="fstat-no" title="function not covered" >    function getDisputeResolver() external view returns (address) {</span>
+<span class="cstat-no" title="statement not covered" >        return disputeResolver;</span>
+    }
+    
+    /**
+     * @dev Route a high-risk transaction to Kleros escrow for potential dispute
+     * @param txId Unique transaction identifier
+     * @param recipient Intended recipient
+     * @param riskScore Risk score from ML model
+     * @param evidenceURI IPFS URI containing ML evidence
+     * @return success Whether the escrow was created
+     */
+<span class="fstat-no" title="function not covered" >    function routeToKlerosEscrow(</span>
+        bytes32 txId,
+        address recipient,
+        uint256 riskScore,
+        string calldata evidenceURI
+    ) external payable nonReentrant returns (bool success) {
+<span class="cstat-no" title="statement not covered" >        require(disputeResolver != address(0), "Dispute resolver not set")</span>;
+<span class="cstat-no" title="statement not covered" >        require(msg.value &gt; 0, "No funds sent")</span>;
+<span class="cstat-no" title="statement not covered" >        require(riskScore &gt;= escrowThreshold, "Risk below threshold")</span>;
+        
+        // Call the dispute resolver to escrow funds
+<span class="cstat-no" title="statement not covered" >        (bool sent, ) = disputeResolver.call{value: msg.value}(</span>
+            abi.encodeWithSignature(
+                "escrowTransaction(bytes32,address,uint256,string)",
+                txId,
+                recipient,
+                riskScore,
+                evidenceURI
+            )
+        );
+        
+<span class="cstat-no" title="statement not covered" >        require(sent, "Escrow failed")</span>;
+        
+<span class="cstat-no" title="statement not covered" >        emit TransactionEscrowedForDispute(txId, msg.sender, msg.value, riskScore);</span>
+        
+<span class="cstat-no" title="statement not covered" >        return true;</span>
+    }
+    
+    // ---------------- Upgrade Authorization ----------------
+<span class="fstat-no" title="function not covered" >    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}</span>
+    
+    // ════════════════════════════════════════════════════════════════════
+    //              STORAGE GAP (Security Enhancement for Upgrades)
+    // ════════════════════════════════════════════════════════════════════
+    
+    /**
+     * @dev Reserved storage space for future upgrades.
+     * This allows adding new state variables without shifting storage layout.
+     */
+    uint256[50] private __gap;
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Jan 04 2026 18:05:09 GMT+0000 (Greenwich Mean Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

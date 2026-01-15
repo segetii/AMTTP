@@ -4,10 +4,10 @@ TypeScript SDK for integrating with the AMTTP (AI-powered Multi-signature Transa
 
 ## Features
 
-- 🤖 **AI-Powered Risk Scoring**: Integrates with your trained DQN model (F1=0.669+)
-- 🔒 **Atomic Swaps**: Secure transaction escrow for high-risk transactions
+- 🤖 **ML-Powered Risk Scoring**: XGBoost model (Test AP=0.685, AUC=0.983)
+- 🔒 **Smart Contract Integration**: Policy engine & manager contracts
 - 🆔 **KYC Integration**: Automatic compliance checking
-- 📊 **Real-time Monitoring**: Transaction risk assessment and logging
+- 📊 **Real-time Inference**: Sub-100ms transaction scoring
 - 🛡️ **Policy Engine**: User-defined transaction limits and risk thresholds
 - ⚡ **Multi-chain Ready**: Designed for Ethereum, Polygon, Arbitrum
 
@@ -21,6 +21,27 @@ yarn add @amttp/client-sdk
 
 ## Quick Start
 
+### Basic Risk Scoring
+
+```typescript
+import { MLService, PolicyAction, utils } from '@amttp/client-sdk';
+
+// Create ML service
+const mlService = new MLService('http://localhost:8000');
+
+// Score a transaction
+const risk = await mlService.scoreTransaction('tx_001', {
+  amount: 1.5,           // ETH
+  velocity_24h: 3,
+  account_age_days: 90,
+});
+
+console.log(`Risk: ${utils.formatRiskScore(risk.riskScore)}`);  // "97.2%"
+console.log(`Action: ${PolicyAction[risk.action]}`);            // "ESCROW"
+```
+
+### Full Client Integration
+
 ```typescript
 import { AMTTPClient } from '@amttp/client-sdk';
 
@@ -28,8 +49,9 @@ import { AMTTPClient } from '@amttp/client-sdk';
 const client = new AMTTPClient({
   rpcUrl: 'https://eth-mainnet.alchemyapi.io/v2/YOUR_KEY',
   contractAddress: '0x...', // Your deployed AMTTP contract
-  oracleUrl: 'https://api.amttp.io', // Your oracle service
-  privateKey: 'YOUR_PRIVATE_KEY' // Or connect to MetaMask
+  oracleUrl: 'https://oracle.amttp.io',
+  mlApiUrl: 'https://ml.amttp.io',  // ML inference API
+  privateKey: 'YOUR_PRIVATE_KEY'
 });
 
 // Submit a transaction with fraud protection

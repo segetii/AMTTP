@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMTTP Fraud Detection - Investor Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .title-page {
+            text-align: center;
+            padding: 80px 50px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        
+        .title-page h1 {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+        
+        .title-page h2 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .title-page h3 {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 50px;
+            opacity: 0.8;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 25px 40px;
+            text-align: center;
+        }
+        
+        .stat-box .value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .stat-box .label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        h2.section-title {
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .content-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .content-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content-box p, .content-box ul {
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .content-box ul {
+            padding-left: 25px;
+        }
+        
+        .content-box li {
+            margin: 8px 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .metric-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card .icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-card .metric-title {
+            color: #7f8c8d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .metric-card .metric-value {
+            font-size: 42px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .metric-card .metric-desc {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .metric-card.blue .metric-value { color: #3498db; }
+        .metric-card.purple .metric-value { color: #9b59b6; }
+        .metric-card.red .metric-value { color: #e74c3c; }
+        .metric-card.orange .metric-value { color: #f39c12; }
+        .metric-card.green .metric-value { color: #27ae60; }
+        
+        .visualization {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .visualization img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .visualization-caption {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4fd;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .visualization-caption h4 {
+            color: #2980b9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .visualization-caption ul {
+            color: #555;
+            padding-left: 25px;
+        }
+        
+        .visualization-caption li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .glossary-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .glossary-item h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .glossary-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .roadmap {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #3498db, #9b59b6, #27ae60);
+            border-radius: 3px;
+        }
+        
+        .roadmap-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 30px;
+        }
+        
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 3px solid #3498db;
+            border-radius: 50%;
+        }
+        
+        .roadmap-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .roadmap-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .print-break {
+            page-break-after: always;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Page 1: Title -->
+        <div class="page title-page">
+            <h1>AMTTP</h1>
+            <h2>Fraud Detection System</h2>
+            <h3>Ensemble ML Model Performance Report</h3>
+            <p style="opacity: 0.7;">January 2026 | VAE-GNN + LightGBM Stack</p>
+            
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="value">92.3%</div>
+                    <div class="label">ROC-AUC</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value">86.1%</div>
+                    <div class="label">PR-AUC</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value">7</div>
+                    <div class="label">Ensemble Models</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 50px; opacity: 0.6; font-style: italic;">Confidential - For Investor Review Only</p>
+        </div>
+        
+        <!-- Page 2: Executive Summary -->
+        <div class="page">
+            <h2 class="section-title">Executive Summary</h2>
+            <p class="subtitle">What This Report Shows (Non-Technical Overview)</p>
+            
+            <div class="content-box">
+                <h3>🎯 What We Built</h3>
+                <p>We developed an <strong>ensemble AI system</strong> that combines 7 different machine learning models to detect fraudulent cryptocurrency transactions on Ethereum. Think of it as having 7 specialized fraud experts who each analyze transactions differently, then vote together to make the final decision.</p>
+            </div>
+            
+            <div class="content-box">
+                <h3>📊 Our Ensemble Architecture</h3>
+                <ul>
+                    <li><strong>LightGBM ⭐</strong> - Our best performer (ROC-AUC: 0.9226) - 2,000 decision trees</li>
+                    <li><strong>XGBoost</strong> - Second best (ROC-AUC: 0.9170) - 1,999 decision trees</li>
+                    <li><strong>GraphSAGE</strong> - Analyzes transaction network connections</li>
+                    <li><strong>GATv2</strong> - Attention-based graph neural network</li>
+                    <li><strong>β-VAE</strong> - Detects anomalies using 64 latent dimensions</li>
+                    <li><strong>VGAE</strong> - Variational graph autoencoder</li>
+                    <li><strong>Meta-Learner</strong> - Combines all models optimally</li>
+                </ul>
+            </div>
+            
+            <div class="content-box">
+                <h3>💡 How It Works (Simple Explanation)</h3>
+                <p>Each model in our ensemble is an expert at detecting different fraud patterns:</p>
+                <ul>
+                    <li><strong>LightGBM/XGBoost:</strong> Learn from transaction features (amounts, frequency, behavior patterns)</li>
+                    <li><strong>Graph Neural Networks:</strong> Understand who transacts with whom (fraudsters often connect to other fraudsters)</li>
+                    <li><strong>VAE:</strong> Spots unusual/anomalous transactions that don't fit normal patterns</li>
+                    <li><strong>Meta-Learner:</strong> Weighs each expert's opinion and makes the final call</li>
+                </ul>
+            </div>
+            
+            <div class="content-box">
+                <h3>💰 Key Results</h3>
+                <ul>
+                    <li><strong>Ensemble ROC-AUC: 0.9229</strong> (excellent discrimination)</li>
+                    <li><strong>PR-AUC: 0.8609</strong> (strong precision-recall balance)</li>
+                    <li><strong>Trained on 1.67M transactions</strong> with 25% fraud rate</li>
+                    <li><strong>Optimal threshold: 0.727</strong> for production deployment</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 3: Metrics Explained -->
+        <div class="page">
+            <h2 class="section-title">Understanding Our Metrics</h2>
+            <p class="subtitle">Plain English Guide for Non-Technical Readers</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-card blue">
+                    <div class="icon">📈</div>
+                    <div class="metric-title">Ensemble ROC-AUC</div>
+                    <div class="metric-value">0.9229</div>
+                    <div class="metric-desc">
+                        If we randomly pick one fraud and one legitimate transaction, 
+                        our ensemble correctly identifies the fraud 92.3% of the time.
+                    </div>
+                </div>
+                
+                <div class="metric-card green" style="border-color: #27ae60;">
+                    <div class="icon">⭐</div>
+                    <div class="metric-title">LightGBM (Best Model)</div>
+                    <div class="metric-value" style="color: #27ae60;">0.9226</div>
+                    <div class="metric-desc">
+                        Our top-performing individual model. Uses 2,000 decision trees
+                        and accounts for 35% of the ensemble's decision power.
+                    </div>
+                </div>
+                
+                <div class="metric-card purple">
+                    <div class="icon">🎯</div>
+                    <div class="metric-title">PR-AUC</div>
+                    <div class="metric-value">0.8609</div>
+                    <div class="metric-desc">
+                        Measures how well we balance catching fraud (recall) with
+                        avoiding false alarms (precision). 86% is excellent.
+                    </div>
+                </div>
+                
+                <div class="metric-card orange">
+                    <div class="icon">⚖️</div>
+                    <div class="metric-title">Optimal Threshold</div>
+                    <div class="metric-value">0.727</div>
+                    <div class="metric-desc">
+                        Transactions with fraud probability above 72.7% are flagged.
+                        This balances catching fraud vs. false positives optimally.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-box" style="background: #fff3cd; border-left-color: #f39c12;">
+                <h3>💡 Why Ensemble is Better Than Single Models</h3>
+                <p><strong>Diversity:</strong> Each model sees fraud differently (features, graphs, anomalies)<br>
+                <strong>Robustness:</strong> If one model fails, others compensate<br>
+                <strong>Accuracy:</strong> Meta-learner finds the optimal way to combine all votes</p>
+            </div>
+        </div>
+        
+        <!-- Page 4: Model Architecture -->
+        <div class="page">
+            <h2 class="section-title">Ensemble Model Architecture</h2>
+            <p class="subtitle">7-Model Stack with Meta-Learner</p>
+            
+            <div class="visualization">
+                <img src="1_ensemble_architecture.png" alt="Ensemble Architecture">
+            </div>
+            
+            <div class="visualization-caption">
+                <h4>📝 What This Chart Shows (For Non-Technical Readers)</h4>
+                <ul>
+                    <li><strong>Input Data</strong> flows into 6 specialized models (VAE, GNNs, Gradient Boosting)</li>
+                    <li><strong>LightGBM ⭐</strong> is our best performer with ROC-AUC 0.9226</li>
+                    <li>All model predictions flow into a <strong>Meta-Learner</strong> that combines them optimally</li>
+                    <li>The ensemble achieves <strong>0.9229 ROC-AUC</strong> - slightly better than any single model</li>
+                    <li>Think of it as a <strong>committee of 7 experts voting</strong> on each transaction</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 5: Feature Importance -->
+        <div class="page">
+            <h2 class="section-title">Feature Importance & Model Contribution</h2>
+            <p class="subtitle">What Drives Fraud Detection Decisions</p>
+            
+            <div class="visualization">
+                <img src="2_feature_importance_ensemble.png" alt="Feature Importance">
+            </div>
+            
+            <div class="visualization-caption">
+                <h4>📝 What This Chart Shows (For Non-Technical Readers)</h4>
+                <ul>
+                    <li><strong>sender_hybrid_score</strong> is the #1 feature (35% importance) - combines multiple risk signals</li>
+                    <li><strong>GraphSAGE embeddings</strong> capture network relationships (who transacts with whom)</li>
+                    <li><strong>VAE reconstruction error</strong> spots anomalous/unusual transactions</li>
+                    <li>The pie chart shows <strong>LightGBM contributes 35%</strong> to the ensemble decision</li>
+                    <li>Features come from 3 sources: <span style="color:#3498db">Tabular</span>, <span style="color:#9b59b6">GNN</span>, and <span style="color:#3498db">VAE</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 6: Model Comparison -->
+        <div class="page">
+            <h2 class="section-title">Model Comparison & Training</h2>
+            <p class="subtitle">How Each Model in the Ensemble Performs</p>
+            
+            <div class="visualization">
+                <img src="3_model_comparison.png" alt="Model Comparison">
+            </div>
+            
+            <div class="visualization-caption">
+                <h4>📝 What This Chart Shows (For Non-Technical Readers)</h4>
+                <ul>
+                    <li><strong>LightGBM achieves 0.9226 ROC-AUC</strong> - our best individual model ⭐</li>
+                    <li><strong>Meta Ensemble (0.9229)</strong> slightly outperforms all individual models</li>
+                    <li><strong>GraphSAGE (0.8579)</strong> captures graph structure - valuable for ensemble diversity</li>
+                    <li>Training used <strong>1.67M transactions</strong> with <strong>25.15% fraud rate</strong></li>
+                    <li>The ensemble combines different model types for <strong>robust, diverse predictions</strong></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 7: Investor Dashboard -->
+        <div class="page">
+            <h2 class="section-title">Investor Performance Dashboard</h2>
+            <p class="subtitle">Key Metrics at a Glance</p>
+            
+            <div class="visualization">
+                <img src="4_investor_dashboard_ensemble.png" alt="Investor Dashboard">
+            </div>
+            
+            <div class="visualization-caption">
+                <h4>📝 What This Chart Shows (For Non-Technical Readers)</h4>
+                <ul>
+                    <li><strong>ROC Curve (top-left)</strong>: The curve hugging the top-left corner = 92.3% discrimination power</li>
+                    <li><strong>Model Comparison bars</strong>: Shows how each model contributes - LightGBM leads ⭐</li>
+                    <li><strong>Ensemble stacking diagram</strong>: Visualizes how 6 base models feed into meta-learner</li>
+                    <li><strong>Risk levels</strong>: CRITICAL (≥90%) → HIGH (≥75%) → MEDIUM (≥50%) → LOW (≥30%) → MINIMAL</li>
+                    <li><strong>Value cards</strong>: Business impact - $2.5M+ savings, &lt;50ms inference, 7 models working together</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 8: Explainability -->
+        <div class="page">
+            <h2 class="section-title">Model Explainability</h2>
+            <p class="subtitle">How Decisions Are Made (Transparency for Compliance)</p>
+            
+            <div class="visualization">
+                <img src="5_explainability_ensemble.png" alt="Explainability">
+            </div>
+            
+            <div class="visualization-caption">
+                <h4>📝 What This Chart Shows (For Non-Technical Readers)</h4>
+                <ul>
+                    <li><strong>Decision flow</strong>: Transaction data → 6 models → Meta-learner → Fraud score</li>
+                    <li><strong>Example prediction</strong>: Shows how each model votes for a specific transaction</li>
+                    <li><strong>Meta-learner weights</strong>: LightGBM (35%), XGBoost (28%), GraphSAGE (15%)</li>
+                    <li><strong>Why LightGBM leads</strong>: Best accuracy, 10x faster than XGBoost, efficient memory usage</li>
+                    <li>This transparency is <strong>crucial for regulatory compliance</strong> and audit trails</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page 9: Glossary -->
+        <div class="page">
+            <h2 class="section-title">Glossary of Terms</h2>
+            <p class="subtitle">Technical Terms Explained in Plain English</p>
+            
+            <div class="glossary-grid">
+                <div class="glossary-item">
+                    <h4>Ensemble Model</h4>
+                    <p>A technique that combines multiple machine learning models to make better predictions than any single model. Like asking 7 experts instead of 1.</p>
+                </div>
+                
+                <div class="glossary-item" style="border-left-color: #27ae60;">
+                    <h4>LightGBM ⭐</h4>
+                    <p>Our best-performing model. A gradient boosting algorithm that uses 2,000 decision trees. Faster and more memory-efficient than XGBoost.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>XGBoost</h4>
+                    <p>Another gradient boosting algorithm with 1,999 trees. Second-best performer in our ensemble (ROC-AUC: 0.9170).</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>Graph Neural Network (GNN)</h4>
+                    <p>AI that understands network connections. Analyzes who transacts with whom - fraudsters often connect to other fraudsters.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>GraphSAGE</h4>
+                    <p>A type of GNN that samples neighbor nodes. 3 layers, 128 hidden dimensions. Achieves 0.8579 ROC-AUC in our ensemble.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>GATv2</h4>
+                    <p>Graph Attention Network v2. Uses 4 attention heads to focus on important connections in the transaction network.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>β-VAE (Variational Autoencoder)</h4>
+                    <p>Learns to compress transactions into 64 dimensions, then reconstruct them. High reconstruction error = anomaly = potential fraud.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>Meta-Learner</h4>
+                    <p>The "chairman" that combines votes from all models. Uses Logistic Regression to find optimal weights for each model's prediction.</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>ROC-AUC</h4>
+                    <p>Area Under the ROC Curve. Measures how well the model separates fraud from legitimate. 0.9229 = excellent (1.0 = perfect).</p>
+                </div>
+                
+                <div class="glossary-item">
+                    <h4>Stacking</h4>
+                    <p>The technique of training a meta-model on the predictions of base models. Our ensemble uses 2-level stacking.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 9: Roadmap -->
+        <div class="page">
+            <h2 class="section-title">Next Steps & Roadmap</h2>
+            <p class="subtitle">Our Path Forward</p>
+            
+            <div class="roadmap">
+                <div class="roadmap-item">
+                    <h4>🚀 Q1 2026 - Immediate Priorities</h4>
+                    <p>
+                        <strong>Production Deployment:</strong> Deploy model to production with real-time monitoring<br>
+                        <strong>API Integration:</strong> Build REST API for partner platform integration<br>
+                        <strong>Dashboard Development:</strong> Real-time monitoring dashboard for operations team
+                    </p>
+                </div>
+                
+                <div class="roadmap-item">
+                    <h4>📈 Q2-Q3 2026 - Growth Phase</h4>
+                    <p>
+                        <strong>Continuous Learning:</strong> Automated model retraining with new fraud patterns<br>
+                        <strong>Multi-Chain Expansion:</strong> Extend to Polygon, Arbitrum, and other L2 networks<br>
+                        <strong>Partnership Integration:</strong> Integrate with major DeFi protocols and exchanges
+                    </p>
+                </div>
+                
+                <div class="roadmap-item">
+                    <h4>🎯 Long-Term Vision</h4>
+                    <p>
+                        • Become the industry standard for blockchain fraud detection<br>
+                        • Process 1M+ transactions daily<br>
+                        • Achieve &lt; 0.01% false positive rate<br>
+                        • Full regulatory compliance certification
+                    </p>
+                </div>
+            </div>
+            
+            <div class="content-box" style="margin-top: 40px; background: #e8f8f5; border-left-color: #27ae60;">
+                <h3>📞 Contact</h3>
+                <p>
+                    <strong>Technical Team:</strong> tech@amttp.io<br>
+                    <strong>Business Development:</strong> partnerships@amttp.io<br>
+                    <strong>Investor Relations:</strong> investors@amttp.io
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>AMTTP Fraud Detection System | Investor Report | January 2026</p>
+            <p style="margin-top: 10px;">© 2026 AMTTP. All rights reserved. Confidential.</p>
+        </div>
+        
+    </div>
+</body>
+</html>

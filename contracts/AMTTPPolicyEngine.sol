@@ -9,8 +9,15 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 /**
  * @title AMTTPPolicyEngine - Advanced policy management for AMTTP
  * @dev Manages user-defined transaction policies, risk thresholds, and approval workflows
+ * @notice This contract has a richer implementation than the minimal IAMTTPPolicyEngine interface
+ * used by AMTTPRouter. The Router uses a minimal interface for gas efficiency.
  */
-contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+contract AMTTPPolicyEngine is 
+    Initializable, 
+    OwnableUpgradeable, 
+    UUPSUpgradeable, 
+    ReentrancyGuardUpgradeable
+{
     
     // ---------------- Enums ----------------
     enum RiskLevel { Minimal, Low, Medium, High }
@@ -80,6 +87,7 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
     mapping(address => UserActivity) public userActivity;
     mapping(address => mapping(address => bool)) public trustedCounterparties;
     mapping(address => bool) public globalApprovers;
+    mapping(address => bool) public trustedUsers;  // Global trusted users list
     
     // Global settings
     uint256 public globalRiskThreshold;
@@ -87,6 +95,10 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
     bool public emergencyPause;
     address public amttpContract;
     address public oracleService;
+    
+    // Kleros Dispute Resolution
+    address public disputeResolver;  // AMTTPDisputeResolver contract
+    uint256 public escrowThreshold;  // Risk score threshold for escrow (default: 700)
     
     // DQN Model integration
     mapping(string => uint256) public modelVersionScores; // Model version -> F1 score
@@ -103,6 +115,10 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
     event EmergencyPauseToggled(bool paused);
     event ModelVersionUpdated(string version, uint256 f1Score);
     event ComplianceViolation(address indexed user, string reason);
+    event TransactionEscrowedForDispute(bytes32 indexed txId, address indexed user, uint256 amount, uint256 riskScore);
+    event HighRiskAutoBlocked(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
+    event MediumRiskFlagged(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
+    event LowRiskAutoApproved(address indexed user, address indexed counterparty, uint256 amount, uint256 riskScore);
     
     // ---------------- Modifiers ----------------
     modifier onlyAMTTP() {
@@ -296,27 +312,44 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
         // 5. DQN Risk Assessment - Your trained model integration
         PolicyAction riskAction = _assessDQNRisk(dqnRiskScore, riskPolicy);
         
-        // 6. Special approval requirements
+        // 6. HIGH RISK: Auto-block and flag for Kleros dispute
+        // Transactions with risk score >= 700 are auto-blocked
+        if (riskAction == PolicyAction.Block) {
+            emit HighRiskAutoBlocked(user, counterparty, amount, dqnRiskScore);
+            emit RiskThresholdExceeded(user, dqnRiskScore, riskPolicy.mediumThreshold);
+            // Caller should route to Kleros escrow via routeToKlerosEscrow()
+            return (PolicyAction.Block, "HIGH_RISK: Auto-blocked - route to Kleros for dispute");
+        }
+        
+        // 7. MEDIUM RISK: Flag for human review
+        // Transactions with risk score 400-699 need manual verification
+        if (riskAction == PolicyAction.Review) {
+            emit MediumRiskFlagged(user, counterparty, amount, dqnRiskScore);
+            return (PolicyAction.Review, "MEDIUM_RISK: Flagged for human review");
+        }
+        
+        // 8. Special approval requirements
         if (compliance.requireApproval && amount >= compliance.approvalThreshold) {
             return (PolicyAction.Review, "Manual approval required");
         }
         
-        // 7. Cooldown period for large transactions
+        // 9. Cooldown period for large transactions
         if (amount >= policy.maxAmount / 2 && 
             block.timestamp < policy.lastLargeTransaction + policy.cooldownPeriod) {
             return (PolicyAction.Review, "Cooldown period active");
         }
         
-        // 8. Trusted counterparty override
+        // 10. Trusted counterparty override (only affects Review → Approve)
         if (trustedCounterparties[user][counterparty] && riskAction == PolicyAction.Review) {
             riskAction = PolicyAction.Approve;
         }
         
-        // 9. Auto-approval for low risk
-        if (policy.autoApprove && riskAction == PolicyAction.Approve) {
+        // 11. LOW RISK: Auto-approval for low/minimal risk scores (< 400)
+        if (riskAction == PolicyAction.Approve) {
             _recordSuccessfulTransaction(user, amount);
+            emit LowRiskAutoApproved(user, counterparty, amount, dqnRiskScore);
             emit TransactionValidated(user, counterparty, amount, PolicyAction.Approve);
-            return (PolicyAction.Approve, "Auto-approved");
+            return (PolicyAction.Approve, "LOW_RISK: Auto-approved");
         }
         
         emit TransactionValidated(user, counterparty, amount, riskAction);
@@ -417,21 +450,26 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
     
     /**
      * @dev Get user risk policy with defaults
+     * 
+     * Default policy thresholds:
+     * - LOW (0-399): Auto-approve - trusted transactions
+     * - MEDIUM (400-699): Review - requires human verification  
+     * - HIGH (700-1000): Block - auto-blocked, routed to Kleros escrow
      */
     function _getUserRiskPolicyWithDefaults(address user) internal view returns (RiskPolicy memory) {
         RiskPolicy memory policy = userRiskPolicies[user];
         
         if (policy.highThreshold == 0) {
-            // Return default risk policy based on your DQN model performance
+            // Default risk policy: HIGH = Block, MEDIUM = Review, LOW = Approve
             policy = RiskPolicy({
-                minimalThreshold: 200,    // 0.20
-                lowThreshold: 400,        // 0.40  
-                mediumThreshold: 700,     // 0.70
-                highThreshold: 1000,      // 1.00
-                minimalAction: PolicyAction.Approve,
-                lowAction: PolicyAction.Approve,
-                mediumAction: PolicyAction.Review,
-                highAction: PolicyAction.Escrow,
+                minimalThreshold: 200,    // 0-200: Very low risk
+                lowThreshold: 400,        // 200-400: Low risk (auto-approve)
+                mediumThreshold: 700,     // 400-700: Medium risk (review)
+                highThreshold: 1000,      // 700-1000: High risk (auto-block)
+                minimalAction: PolicyAction.Approve,  // Very low → approve
+                lowAction: PolicyAction.Approve,      // Low → approve
+                mediumAction: PolicyAction.Review,    // Medium → human review
+                highAction: PolicyAction.Block,       // High → auto-block + Kleros
                 adaptiveThresholds: false
             });
         }
@@ -510,6 +548,29 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
         trustedCounterparties[user][counterparty] = false;
     }
     
+    // ---------------- Trusted User Management ----------------
+    
+    /**
+     * @dev Add a user to the global trusted users list
+     */
+    function addTrustedUser(address user) external onlyOwner {
+        trustedUsers[user] = true;
+    }
+    
+    /**
+     * @dev Remove a user from the global trusted users list
+     */
+    function removeTrustedUser(address user) external onlyOwner {
+        trustedUsers[user] = false;
+    }
+    
+    /**
+     * @dev Check if a user is in the trusted users list
+     */
+    function isTrustedUser(address user) external view returns (bool) {
+        return trustedUsers[user];
+    }
+    
     // ---------------- View Functions ----------------
     
     function getUserPolicy(address user) external view returns (TransactionPolicy memory) {
@@ -526,6 +587,25 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
     
     function getModelPerformance(string memory version) external view returns (uint256) {
         return modelVersionScores[version];
+    }
+    
+    /**
+     * @dev Get policy engine status for tests and UI
+     */
+    struct PolicyEngineStatus {
+        address policyEngineAddress;
+        bool enabled;
+        uint256 globalThreshold;
+        string defaultModel;
+    }
+    
+    function getPolicyEngineStatus() external view returns (PolicyEngineStatus memory) {
+        return PolicyEngineStatus({
+            policyEngineAddress: address(this),
+            enabled: !emergencyPause,
+            globalThreshold: globalRiskThreshold,
+            defaultModel: activeModelVersion
+        });
     }
     
     function isTransactionAllowed(
@@ -550,6 +630,92 @@ contract AMTTPPolicyEngine is Initializable, OwnableUpgradeable, UUPSUpgradeable
         return (true, "Transaction allowed");
     }
     
+    // ============================================================
+    // KLEROS DISPUTE RESOLUTION INTEGRATION
+    // ============================================================
+    
+    /**
+     * @dev Set the Kleros dispute resolver contract address
+     * @param _disputeResolver Address of AMTTPDisputeResolver contract
+     */
+    function setDisputeResolver(address _disputeResolver) external onlyOwner {
+        require(_disputeResolver != address(0), "Invalid address");
+        disputeResolver = _disputeResolver;
+    }
+    
+    /**
+     * @dev Set the risk score threshold for escrow routing
+     * @param _threshold Risk score (0-1000) above which transactions go to escrow
+     */
+    function setEscrowThreshold(uint256 _threshold) external onlyOwner {
+        require(_threshold <= 1000, "Invalid threshold");
+        escrowThreshold = _threshold;
+    }
+    
+    /**
+     * @dev Check if a transaction should be routed to Kleros escrow
+     * @param riskScore The risk score from ML model (0-1000)
+     * @return shouldEscrow Whether transaction should go to dispute resolver
+     */
+    function shouldRouteToKleros(uint256 riskScore) public view returns (bool shouldEscrow) {
+        if (disputeResolver == address(0)) return false;
+        if (escrowThreshold == 0) return false;
+        return riskScore >= escrowThreshold;
+    }
+    
+    /**
+     * @dev Get dispute resolver address
+     */
+    function getDisputeResolver() external view returns (address) {
+        return disputeResolver;
+    }
+    
+    /**
+     * @dev Route a high-risk transaction to Kleros escrow for potential dispute
+     * @param txId Unique transaction identifier
+     * @param recipient Intended recipient
+     * @param riskScore Risk score from ML model
+     * @param evidenceURI IPFS URI containing ML evidence
+     * @return success Whether the escrow was created
+     */
+    function routeToKlerosEscrow(
+        bytes32 txId,
+        address recipient,
+        uint256 riskScore,
+        string calldata evidenceURI
+    ) external payable nonReentrant returns (bool success) {
+        require(disputeResolver != address(0), "Dispute resolver not set");
+        require(msg.value > 0, "No funds sent");
+        require(riskScore >= escrowThreshold, "Risk below threshold");
+        
+        // Call the dispute resolver to escrow funds
+        (bool sent, ) = disputeResolver.call{value: msg.value}(
+            abi.encodeWithSignature(
+                "escrowTransaction(bytes32,address,uint256,string)",
+                txId,
+                recipient,
+                riskScore,
+                evidenceURI
+            )
+        );
+        
+        require(sent, "Escrow failed");
+        
+        emit TransactionEscrowedForDispute(txId, msg.sender, msg.value, riskScore);
+        
+        return true;
+    }
+    
     // ---------------- Upgrade Authorization ----------------
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    
+    // ════════════════════════════════════════════════════════════════════
+    //              STORAGE GAP (Security Enhancement for Upgrades)
+    // ════════════════════════════════════════════════════════════════════
+    
+    /**
+     * @dev Reserved storage space for future upgrades.
+     * This allows adding new state variables without shifting storage layout.
+     */
+    uint256[50] private __gap;
 }

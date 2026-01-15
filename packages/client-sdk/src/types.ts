@@ -5,6 +5,9 @@ export interface AMTTPConfig {
   rpcUrl: string;
   contractAddress: string;
   oracleUrl: string;
+  mlApiUrl?: string;  // ML inference API URL
+  policyEngineContract?: string;
+  policyManagerContract?: string;
   privateKey?: string;
   provider?: ethers.Provider;
   signer?: ethers.Signer;
@@ -23,15 +26,45 @@ export interface TransactionMetadata {
   category?: string;
   description?: string;
   riskOverride?: boolean;
+  // ML feature hints
+  velocity24h?: number;
+  accountAgeDays?: number;
+  countryRisk?: number;
+}
+
+// Policy action enum matching smart contract
+export enum PolicyAction {
+  APPROVE = 0,
+  REVIEW = 1,
+  ESCROW = 2,
+  BLOCK = 3
+}
+
+// Risk level enum matching smart contract
+export enum RiskLevel {
+  MINIMAL = 0,
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3
 }
 
 export interface RiskScore {
-  riskScore: number;
+  riskScore: number;          // 0-1 normalized
+  riskScoreInt: number;       // 0-1000 for contract
   riskCategory: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel: RiskLevel;
+  action: PolicyAction;
   confidence: number;
   recommendations: string[];
   modelVersion: string;
+  featuresHash?: string;
   f1Score?: number;
+  // Model metrics from training
+  modelMetrics?: {
+    testAP: number;
+    testAUC: number;
+    testF1: number;
+  };
 }
 
 export interface KYCStatus {

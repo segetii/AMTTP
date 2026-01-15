@@ -1,6 +1,7 @@
 // src/client.ts
 import { ethers } from 'ethers';
 import axios from 'axios';
+import { PolicyAction, RiskLevel } from './types.js';
 import { AMTTP_ABI } from './abi.js';
 export class AMTTPClient {
     constructor(config) {
@@ -82,7 +83,10 @@ export class AMTTPClient {
             // Fallback to basic risk assessment
             return {
                 riskScore: 0.5,
+                riskScoreInt: 500,
                 riskCategory: 'MEDIUM',
+                riskLevel: RiskLevel.MEDIUM,
+                action: PolicyAction.REVIEW,
                 confidence: 0.6,
                 recommendations: ['Manual review recommended'],
                 modelVersion: 'fallback-v1.0'

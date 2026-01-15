@@ -1,0 +1,14 @@
+# Minimal CPU dependencies for train_unified_binary.py
+# Tested on Python 3.10/3.11. Python 3.13 may not be supported by some packages yet (e.g., CatBoost).
+
+numpy>=1.24
+pandas>=2.1
+pyarrow>=14.0
+scikit-learn>=1.3
+xgboost>=2.0
+joblib>=1.3
+
+# Optional (skip if install fails on your Python version):
+catboost>=1.2 ; python_version < '3.13'
+# Optional, only used for GPU detection convenience (not required to run training):
+torch ; platform_system != 'Windows'

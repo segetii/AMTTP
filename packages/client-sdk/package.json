@@ -12,7 +12,10 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postpack": "node scripts/release-sign.js $(npm pack --dry-run | tail -1 | awk '{print $2}') && npm run sbom",
+    "audit": "npm audit --audit-level=high",
+    "sbom": "npx syft . -o spdx-json > sbom.json || echo 'Syft not installed, skipping SBOM'"
   },
   "keywords": [
     "amttp",

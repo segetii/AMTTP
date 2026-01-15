@@ -1,0 +1,32 @@
+{
+  "name": "@amttp/zknaf-circuits",
+  "version": "1.0.0",
+  "description": "AMTTP zkNAF Circom Circuits for Zero-Knowledge Compliance Proofs",
+  "scripts": {
+    "install:circom": "npm install -g circom@2.1.6 snarkjs@0.7.0",
+    "download:ptau": "node scripts/download-ptau.js",
+    "compile:all": "node scripts/compile-circuits.js",
+    "compile:sanctions": "circom circuits/sanctions_non_membership.circom --r1cs --wasm --sym -o build/sanctions",
+    "compile:risk": "circom circuits/risk_range_proof.circom --r1cs --wasm --sym -o build/risk",
+    "compile:kyc": "circom circuits/kyc_credential.circom --r1cs --wasm --sym -o build/kyc",
+    "setup:all": "node scripts/trusted-setup.js",
+    "setup:sanctions": "node scripts/trusted-setup.js sanctions",
+    "setup:risk": "node scripts/trusted-setup.js risk",
+    "setup:kyc": "node scripts/trusted-setup.js kyc",
+    "test": "node scripts/test-proofs.js",
+    "export:verifier": "node scripts/export-verifier.js",
+    "clean": "rimraf build trusted-setup"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.5",
+    "snarkjs": "^0.7.0"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "AMTTP Team",
+  "license": "MIT"
+}

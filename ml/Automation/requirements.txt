@@ -1,8 +1,16 @@
-polars==0.20.25; platform_system != 'Windows'
-pandas==2.1.3; platform_system == 'Windows'
+polars==0.20.25
+pandas==2.1.3
 numpy==1.24.3
 requests==2.31.0
+# Data and blockchain access for extended pipeline
+pyarrow==14.0.2
+web3==6.11.4
 # Optional for Bolt directly to Memgraph (skip if using HTTP proxy)
 # mgclient==1.4.0
 # Optional GPU libs
 # torch==2.1.0
+
+# ML training/inference
+scikit-learn==1.3.2
+joblib==1.3.2
+xgboost==1.7.6

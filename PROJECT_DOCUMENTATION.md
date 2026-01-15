@@ -221,86 +221,30 @@ class RiskService {
 
 ---
 
-### 🤖 **Machine Learning & Training** (`cloud-training/`)
+### 🤖 **Machine Learning** (`ml/Automation/`)
 
 ```
-cloud-training/
-├── AMTTP_DQN_Colab_Training.ipynb   # 🧠 Main DQN training notebook
-├── dqn_training_environment.py      # 🏋️ Training environment setup
-├── rl_implementation.py             # 🎯 Reinforcement learning logic
-├── sota_risk_engine.py              # 🏆 State-of-the-art risk engine
+ml/Automation/
+├── src/                         # Enrichment and pipeline helpers
+│   └── memgraph_enrich.py       # Memgraph feature enrichment client
+├── pipeline/
+│   └── label_ml_pipeline.py     # Labeling/training pipeline skeleton
+├── risk_engine/
+│   ├── integration_service.py   # FastAPI risk engine (/health, /score)
+│   ├── train_baseline.py        # Baseline sklearn trainer (joblib + meta)
+│   ├── requirements.txt         # Service dependencies
+│   └── Dockerfile               # Container for serving
 ├── models/
-│   ├── dqn_fraud_detection.h5       # 🎯 Trained DQN model (F1=0.669)
-│   ├── scaler.pkl                   # 📊 Feature normalization
-│   └── feature_columns.json         # 📋 Feature configuration
-├── data/
-│   ├── prepared_fraud_features.npy  # 🔢 Training features (28,457 samples)
-│   ├── prepared_fraud_labels.npy    # 🎯 Training labels
-│   └── validation_set.npy           # ✅ Validation data
-├── config/
-│   ├── remote_training_config.json  # ⚙️ Training hyperparameters
-│   └── model_architecture.json      # 🏗️ DQN architecture definition
-├── deployment/
-│   ├── deploy_dqn.py                # 🚀 Model deployment script
-│   ├── integration_service.py       # 🔗 Backend integration
-│   └── production_config.json       # 🏭 Production settings
-└── monitoring/
-    ├── training_logs/               # 📊 Training progress logs
-    ├── performance_metrics.json     # 📈 Model performance tracking
-    └── validation_results.json      # ✅ Validation outcomes
+│   └── cloud/                   # Persisted models + metadata (mounted in container)
+├── infra/
+│   └── cloudflared_*            # Optional Memgraph HTTP proxy setup
+└── archive/                     # Legacy scripts archived for reference
 ```
 
-#### **🧠 DQN Model Architecture:**
-
-**Training Configuration:**
-```python
-# DQN Hyperparameters:
-{
-  "learning_rate": 0.001,
-  "batch_size": 128,
-  "memory_size": 100000,
-  "epsilon_decay": 0.995,
-  "target_update_frequency": 1000,
-  "reward_structure": {
-    "correct_fraud_detection": +100,
-    "missed_fraud": -200,
-    "false_positive": -50,
-    "correct_legitimate": +10
-  }
-}
-```
-
-**Model Performance Metrics:**
-```
-📊 Training Results (28,457 transactions):
-- F1 Score: 0.669 ✅
-- Precision: 0.723
-- Recall: 0.625
-- Accuracy: 0.891
-- Training Time: 2.3 hours
-- Model Size: 15.2 MB
-```
-
-**🎯 Feature Engineering (15 Features):**
-```python
-features = [
-    'transaction_amount',        # Normalized transaction value
-    'user_frequency',           # User's transaction frequency
-    'geographic_risk',          # Location-based risk
-    'time_of_day',             # Time-based patterns
-    'account_age_days',        # Account maturity
-    'velocity_last_hour',      # Recent activity velocity
-    'cross_border_indicator',  # International transfer flag
-    'amount_deviation',        # Deviation from user's typical amounts
-    'recipient_reputation',    # Recipient trust score
-    'payment_method_risk',     # Payment method risk level
-    'device_fingerprint',      # Device-based risk
-    'behavioral_anomaly',      # Behavioral pattern analysis
-    'network_analysis',        # Social network risk
-    'compliance_score',        # Regulatory compliance
-    'historical_disputes'      # Historical dispute rate
-]
-```
+Notes:
+- The previous `cloud-training/` folder has been retired to avoid duplication. All AI/ML work lives under `ml/Automation/`.
+- Docker Compose now builds the risk engine from `ml/Automation/risk_engine` and mounts `ml/Automation/models` into the container at `/app/models`.
+- Baseline artifacts are saved to `ml/Automation/models/cloud` as `baseline_model.joblib` and `baseline_model_meta.json`.
 
 ---
 

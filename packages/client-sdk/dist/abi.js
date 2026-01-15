@@ -189,4 +189,140 @@ export const AMTTP_ABI = [
         "type": "event"
     }
 ];
+// Cross-chain contract ABI (LayerZero integration)
+export const CROSSCHAIN_ABI = [
+    {
+        "inputs": [
+            { "internalType": "address", "name": "_address", "type": "address" }
+        ],
+        "name": "getAggregatedRiskScore",
+        "outputs": [
+            { "internalType": "uint256", "name": "maxScore", "type": "uint256" },
+            { "internalType": "uint16", "name": "sourceChain", "type": "uint16" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "_address", "type": "address" }
+        ],
+        "name": "isGloballyBlocked",
+        "outputs": [
+            { "internalType": "bool", "name": "", "type": "bool" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "", "type": "address" },
+            { "internalType": "uint16", "name": "", "type": "uint16" }
+        ],
+        "name": "crossChainRiskScores",
+        "outputs": [
+            { "internalType": "uint256", "name": "", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "", "type": "address" }
+        ],
+        "name": "lastRiskUpdate",
+        "outputs": [
+            { "internalType": "uint256", "name": "", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint16", "name": "_dstChainId", "type": "uint16" },
+            { "internalType": "address", "name": "_targetAddress", "type": "address" },
+            { "internalType": "uint256", "name": "_riskScore", "type": "uint256" }
+        ],
+        "name": "estimateRiskScoreFee",
+        "outputs": [
+            { "internalType": "uint256", "name": "nativeFee", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint16", "name": "_dstChainId", "type": "uint16" },
+            { "internalType": "address", "name": "_targetAddress", "type": "address" },
+            { "internalType": "uint256", "name": "_riskScore", "type": "uint256" },
+            { "internalType": "bytes", "name": "_adapterParams", "type": "bytes" }
+        ],
+        "name": "sendRiskScore",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint16[]", "name": "_dstChainIds", "type": "uint16[]" },
+            { "internalType": "address", "name": "_targetAddress", "type": "address" },
+            { "internalType": "string", "name": "_reason", "type": "string" }
+        ],
+        "name": "blockAddressGlobally",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint16[]", "name": "_dstChainIds", "type": "uint16[]" },
+            { "internalType": "address", "name": "_targetAddress", "type": "address" }
+        ],
+        "name": "unblockAddressGlobally",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "uint16", "name": "dstChainId", "type": "uint16" },
+            { "indexed": true, "internalType": "address", "name": "targetAddress", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "riskScore", "type": "uint256" },
+            { "indexed": false, "internalType": "bytes32", "name": "messageId", "type": "bytes32" }
+        ],
+        "name": "RiskScoreSent",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "uint16", "name": "srcChainId", "type": "uint16" },
+            { "indexed": true, "internalType": "address", "name": "targetAddress", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "riskScore", "type": "uint256" },
+            { "indexed": false, "internalType": "uint64", "name": "nonce", "type": "uint64" }
+        ],
+        "name": "RiskScoreReceived",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "targetAddress", "type": "address" },
+            { "indexed": true, "internalType": "uint16", "name": "originChain", "type": "uint16" },
+            { "indexed": false, "internalType": "string", "name": "reason", "type": "string" }
+        ],
+        "name": "AddressBlockedGlobally",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "targetAddress", "type": "address" },
+            { "indexed": true, "internalType": "uint16", "name": "originChain", "type": "uint16" }
+        ],
+        "name": "AddressUnblockedGlobally",
+        "type": "event"
+    }
+];
 //# sourceMappingURL=abi.js.map

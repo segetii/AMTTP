@@ -1,0 +1,12 @@
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+aiohttp>=3.9.0
+aiofiles>=23.2.1
+python-dateutil>=2.8.2
+
+# Storage backends
+motor>=3.3.0               # MongoDB async driver
+redis>=5.0.0               # Redis async client
+minio>=7.2.0               # MinIO S3 client
+ipfshttpclient>=0.8.0      # IPFS HTTP client

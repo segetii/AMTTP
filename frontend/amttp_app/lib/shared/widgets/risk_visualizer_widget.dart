@@ -154,8 +154,8 @@ class RiskVisualizerWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final sortedFeatures = featureContributions!.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+      final sortedFeatures = List<MapEntry<String, double>>.from(featureContributions!.entries)
+        ..sort((a, b) => b.value.compareTo(a.value));
 
     return SizedBox(
       height: 200,

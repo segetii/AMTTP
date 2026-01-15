@@ -1,0 +1,9 @@
+version: "2"
+authtoken: # Your ngrok authtoken will be here
+tunnels:
+  flutter-app:
+    addr: 3003
+    proto: http
+  nextjs-dashboard:
+    addr: 3004
+    proto: http

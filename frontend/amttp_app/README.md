@@ -1,20 +1,45 @@
 # AMTTP Flutter App
 
-A cross-platform mobile and web application for the AMTTP protocol with DQN-powered fraud detection.
+**Cross-Platform DeFi Wallet with UI Integrity Protection**
+
+A secure mobile and desktop application for the AMTTP protocol with DQN-powered fraud detection and anti-Bybit UI manipulation protection.
 
 ## 🚀 Features
 
 - **Cross-Platform**: iOS, Android, Web, Windows, macOS, Linux
+- **🔐 UI Integrity Protection**: Prevents Bybit-style UI manipulation attacks
 - **Web3 Integration**: WalletConnect, MetaMask, smart contract interaction
 - **DQN Analytics**: Real-time fraud detection visualization
+- **Intent-Based Signing**: Users sign actual data, not UI display
+- **Server Verification**: Backend validates all transactions
 - **Beautiful UI**: Material Design 3 with custom AMTTP theme
 - **Real-time Updates**: Live transaction monitoring and risk scoring
 
-## 📱 Screenshots
+## � Security Features (NEW!)
+
+### Anti-Bybit UI Integrity Protection
+
+The app includes comprehensive protection against UI manipulation attacks:
+
+- ✅ **Widget Hashing** (SHA-256) - Detects UI tampering
+- ✅ **Intent Signing** - Sign actual transaction data, not display values
+- ✅ **State Validation** - Real-time integrity checks
+- ✅ **Server Verification** - Backend validates all transactions
+- ✅ **Visual Confirmation** - User sees hash-verified data
+
+**Documentation:** [Flutter Integrity Guide](docs/FLUTTER_INTEGRITY_GUIDE.md)
+
+### Protected Components
+
+- ✅ `SecureTransferWidget` - Integrity-protected payment flows
+- ✅ `transfer_page.dart` - Protected transfer screen
+- 🔄 Coming soon: Batch transfers, Safe transactions
+
+## �📱 Screenshots
 
 ### Dashboard
 - Wallet connection with balance display
-- Secure transfer interface with risk analysis
+- **Secure transfer interface with integrity protection** ⬅️ NEW!
 - Transaction history with risk visualization
 - Real-time DQN analytics
 

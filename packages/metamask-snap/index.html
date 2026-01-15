@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMTTP Risk Guard - MetaMask Snap</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .features {
+      margin: 30px 0;
+    }
+    .feature {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .feature-icon {
+      font-size: 24px;
+      margin-right: 15px;
+    }
+    .feature-text h3 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .feature-text p {
+      color: #666;
+      font-size: 14px;
+    }
+    .install-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .install-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    .install-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      text-align: center;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.success {
+      display: block;
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      display: block;
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .instructions {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .instructions h4 {
+      margin-bottom: 10px;
+    }
+    .instructions ol {
+      margin-left: 20px;
+    }
+    .instructions li {
+      margin-bottom: 10px;
+      color: #555;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🛡️</div>
+    <h1>AMTTP Risk Guard</h1>
+    <p class="subtitle">AI-Powered Transaction Risk Assessment for MetaMask</p>
+    
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">🔍</span>
+        <div class="feature-text">
+          <h3>Transaction Insights</h3>
+          <p>Get real-time risk scores before confirming any transaction</p>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⚙️</span>
+        <div class="feature-text">
+          <h3>Custom Policies</h3>
+          <p>Set your own risk thresholds and get warnings for high-risk transactions</p>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🤖</span>
+        <div class="feature-text">
+          <h3>ML-Powered</h3>
+          <p>Advanced machine learning models detect fraud patterns and anomalies</p>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔗</span>
+        <div class="feature-text">
+          <h3>Cross-Chain Ready</h3>
+          <p>Works across Ethereum, Polygon, Arbitrum, and more</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="install-btn" id="installBtn" onclick="installSnap()">
+      Connect with MetaMask Flask
+    </button>
+    
+    <div class="status" id="status"></div>
+
+    <div class="instructions">
+      <h4>📋 Installation Instructions</h4>
+      <ol>
+        <li>Install <a href="https://metamask.io/flask/" target="_blank">MetaMask Flask</a> (developer version)</li>
+        <li>Click the "Connect with MetaMask Flask" button above</li>
+        <li>Approve the Snap permissions when prompted</li>
+        <li>Make a transaction to see the risk assessment in action!</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const SNAP_ID = `local:${window.location.origin}`;
+    
+    async function installSnap() {
+      const btn = document.getElementById('installBtn');
+      const status = document.getElementById('status');
+      
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+      
+      try {
+        if (typeof window.ethereum === 'undefined') {
+          throw new Error('MetaMask Flask is not installed. Please install it first.');
+        }
+        
+        // Request Snap installation
+        const result = await window.ethereum.request({
+          method: 'wallet_requestSnaps',
+          params: {
+            [SNAP_ID]: {}
+          }
+        });
+        
+        console.log('Snap installed:', result);
+        status.className = 'status success';
+        status.textContent = '✅ AMTTP Risk Guard installed successfully!';
+        btn.textContent = 'Installed!';
+      } catch (err) {
+        console.error('Installation error:', err);
+        status.className = 'status error';
+        status.textContent = `❌ ${err.message}`;
+        btn.disabled = false;
+        btn.textContent = 'Try Again';
+      }
+    }
+    
+    // Check if MetaMask is available
+    window.addEventListener('load', async () => {
+      if (typeof window.ethereum === 'undefined') {
+        document.getElementById('installBtn').textContent = 'Install MetaMask Flask First';
+        document.getElementById('installBtn').disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>

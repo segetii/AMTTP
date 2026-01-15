@@ -15,14 +15,25 @@ class AppConstants {
   static const String amttpPolicyManagerAddress = '0x...'; // AMTTPPolicyManager  
   static const String amttpPolicyEngineAddress = '0x...'; // AMTTPPolicyEngine
   
-  // API Endpoints
-  static const String baseApiUrl = 'http://localhost:3001/api';
-  static const String riskScoringEndpoint = '/risk/dqn-score';
-  static const String kycEndpoint = '/kyc/verify';
-  static const String transactionEndpoint = '/transaction';
+  // API Endpoints - Use relative URLs for production (nginx proxies to services)
+  // When deployed, nginx proxies these paths to the correct backend services
+  // For local development, use the full URLs
   
-  // WebSocket
-  static const String wsUrl = 'ws://localhost:3001';
+  // Base URL - empty string means use same origin (works with nginx proxy)
+  static const String baseApiUrl = '';  // Nginx proxies /api/ to orchestrator:8007
+  // Risk Engine endpoint (proxied through /risk/)
+  static const String riskEngineUrl = '';  // Nginx proxies /risk/ to risk-engine:8002
+  // Integrity Service endpoint (proxied through /integrity/ or /verify-integrity)
+  static const String integrityServiceUrl = '';  // Nginx proxies to integrity:8008
+  
+  // API Paths (relative - nginx will proxy these)
+  static const String riskScoringEndpoint = '/risk/score';
+  static const String integrityVerifyEndpoint = '/verify-integrity';
+  static const String kycEndpoint = '/api/profiles';
+  static const String transactionEndpoint = '/api/evaluate';
+  
+  // WebSocket - Disabled for now (no WS backend service)
+  static const String wsUrl = 'ws://localhost:8007';
   
   // Risk Thresholds (matching your smart contract logic)
   static const double lowRiskThreshold = 0.4;

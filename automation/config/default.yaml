@@ -1,0 +1,15 @@
+﻿# AMTTP Automation Config
+inference:
+  host: 0.0.0.0
+  port: 8000
+  models_dir: ml/Automation/ml_pipeline/models/trained
+
+memgraph:
+  host: localhost
+  port: 7687
+
+thresholds:
+  approve: 0.25
+  monitor: 0.40
+  review: 0.70
+  escrow: 0.85
