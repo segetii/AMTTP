@@ -1,0 +1,26 @@
+{
+  "model_threshold": 0.5,
+  "approve_threshold": 0.2,
+  "monitor_threshold": 0.35,
+  "review_threshold": 0.5,
+  "escrow_threshold": 0.65,
+  "pattern_boost": {
+    "SMURFING": 0.25,
+    "LAYERING": 0.15,
+    "FAN_OUT": 0.15,
+    "FAN_IN": 0.1,
+    "PEELING": 0.2,
+    "STRUCTURING": 0.25
+  },
+  "graph_boost": {
+    "direct_sanctioned": 0.4,
+    "direct_mixer": 0.3,
+    "2hop_sanctioned": 0.2,
+    "3hop_sanctioned": 0.1,
+    "high_centrality": 0.05
+  },
+  "multi_signal_multiplier": {
+    "2_signals": 1.2,
+    "3_signals": 1.5
+  }
+}

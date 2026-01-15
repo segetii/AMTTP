@@ -1,13 +1,77 @@
-# Ignore node_modules folders at any level
-**/node_modules
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker Ignore - Exclude unnecessary files from build context
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# Ignore build outputs
-**/dist
-**/.next
-
-# Ignore local data and logs
-data/
-*.log
-
-# Ignore git history
+# Git
 .git
+.gitignore
+
+# Node modules (will be installed during build)
+**/node_modules
+**/.npm
+
+# Build outputs for NON-frontend
+**/dist
+**/out
+
+# Keep Flutter build
+# Keep Next.js .next
+
+# Flutter dev files only
+**/.dart_tool
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.venv
+**/venv
+**/.idea
+**/.vscode
+**/*.swp
+**/*.swo
+
+# Test files
+**/test
+**/tests
+**/*.test.*
+**/*.spec.*
+**/coverage
+**/.coverage
+
+# Data directories (mount as volumes)
+data/
+processed/
+reports/
+cache/
+artifacts/
+forge-cache/
+forge-out/
+crytic-export/
+
+# Logs
+**/*.log
+**/logs
+
+# Hardhat/Foundry (blockchain dev)
+hardhat/
+lib/
+
+# Audit tools
+audit/
+
+# Notebooks
+notebooks/
+
+# Large directories to exclude
+contracts/
+packages/
+spec/
+src/
+deployments/
+docs/
+.github/
+
+# Keep lock files
+!**/package-lock.json
+!**/pubspec.lock

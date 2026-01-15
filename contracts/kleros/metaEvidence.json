@@ -1,0 +1,91 @@
+{
+  "fileURI": "",
+  "fileHash": "",
+  "fileTypeExtension": "json",
+  "category": "Escrow",
+  "title": "AMTTP Transaction Dispute",
+  "description": "Dispute resolution for AMTTP (Anti-Money Transfer Transaction Protocol) escrow transactions. This protocol enables secure P2P cryptocurrency transfers with built-in KYC/AML compliance and fraud detection.",
+  "question": "Should the escrowed funds be released to the intended recipient?",
+  "rulingOptions": {
+    "type": "single-select",
+    "precision": 1,
+    "titles": [
+      "Release Funds to Recipient",
+      "Refund to Sender"
+    ],
+    "descriptions": [
+      "The jurors find that the transaction is legitimate and the funds should be released to the recipient as intended.",
+      "The jurors find evidence of fraud, policy violation, or other issues. The escrowed funds should be returned to the sender."
+    ]
+  },
+  "evidenceDisplayInterfaceURI": "/ipfs/QmPzV8NdNVGbZQ4xmDBLbxpfE1TmAEU2FkPbFvbmvYZjNP/index.html",
+  "dynamicScriptURI": "",
+  "aliases": {
+    "sender": "Sender (Initiator)",
+    "receiver": "Recipient",
+    "escrowAmount": "Escrowed Amount (wei)",
+    "transactionHash": "Transaction Hash",
+    "riskScore": "ML Risk Score (0-1000)",
+    "kycStatus": "KYC Verification Status",
+    "flagReason": "Reason for Flag"
+  },
+  "specification": {
+    "version": "1.0.0",
+    "protocol": "AMTTP",
+    "arbitrationCost": "0.03 ETH",
+    "challengePeriod": "3 days",
+    "reviewPeriod": "7 days"
+  },
+  "evidenceFormat": {
+    "required": [
+      {
+        "name": "Transaction Details",
+        "description": "On-chain transaction data including sender, receiver, amount, and timestamp"
+      },
+      {
+        "name": "Risk Assessment",
+        "description": "ML model risk score and contributing factors"
+      }
+    ],
+    "optional": [
+      {
+        "name": "KYC Documentation",
+        "description": "Identity verification status and any relevant compliance data (redacted as needed)"
+      },
+      {
+        "name": "Communication Records",
+        "description": "Any off-chain communication between parties"
+      },
+      {
+        "name": "Supporting Documents",
+        "description": "Invoices, contracts, or other documentation supporting the transaction"
+      }
+    ]
+  },
+  "disputeGuidelines": [
+    "1. LEGITIMATE TRANSACTION INDICATORS:",
+    "   - Both parties have verified KYC status",
+    "   - Risk score below 500",
+    "   - Transaction matches stated purpose",
+    "   - No pattern of suspicious activity",
+    "",
+    "2. FRAUD INDICATORS:",
+    "   - Unverified or failed KYC",
+    "   - Risk score above 800",
+    "   - Sender claims funds were sent in error",
+    "   - Pattern of rapid transactions to new wallets",
+    "   - Known scam addresses involved",
+    "",
+    "3. EVIDENCE WEIGHT:",
+    "   - On-chain data takes precedence",
+    "   - ML risk scores are advisory, not deterministic",
+    "   - KYC status is a strong indicator",
+    "   - Consider both parties' evidence equally",
+    "",
+    "4. DEFAULT RULING:",
+    "   - If insufficient evidence from both parties, favor release to recipient",
+    "   - The challenger (sender or third party) bears burden of proof"
+  ],
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-02"
+}

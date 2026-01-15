@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP Full Stack - Docker Compose (Unified)
+# Single container deployment with all services
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Usage:
+#   docker-compose -f docker-compose.unified.yml up --build
+#
+# Access:
+#   - Main App (Flutter): http://localhost
+#   - Dashboard (Next.js): http://localhost:3004 or http://localhost/dashboard
+#   - API: http://localhost/api/
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # AMTTP Unified App - All-in-One Container
+  # Contains: Flutter + Next.js + Backend Services
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  amttp-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amttp-unified
+    ports:
+      - "80:80"           # Main entry (Flutter Web)
+      - "3003:3003"       # Flutter direct
+      - "3004:3004"       # Next.js Dashboard
+      - "8002:8002"       # Risk Engine API
+      - "8004:8004"       # Sanctions API
+      - "8005:8005"       # Monitoring API
+      - "8006:8006"       # Geo-Risk API
+      - "8007:8007"       # Orchestrator API
+    environment:
+      NODE_ENV: production
+      # Database connections (if using external DBs)
+      MONGODB_URL: ${MONGODB_URL:-mongodb://localhost:27017}
+      REDIS_URL: ${REDIS_URL:-redis://localhost:6379}
+    volumes:
+      - amttp-logs:/var/log
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  amttp-logs:
+
+networks:
+  default:
+    name: amttp-network

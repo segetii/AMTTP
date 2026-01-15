@@ -1,6 +1,9 @@
 // src/index.ts
 export { AMTTPClient } from './client.js';
-export { AMTTP_ABI } from './abi.js';
+export { MLService, createMLService } from './ml.js';
+export { CrossChainService, createCrossChainService, LZ_CHAIN_IDS } from './crosschain.js';
+export { PolicyAction, RiskLevel } from './types.js';
+export { AMTTP_ABI, CROSSCHAIN_ABI } from './abi.js';
 // Utility functions
 export const utils = {
     /**
@@ -22,6 +25,18 @@ export const utils = {
         }
     },
     /**
+     * Get action color for UI
+     */
+    getActionColor: (action) => {
+        switch (action) {
+            case 'APPROVE': return '#22c55e'; // green
+            case 'REVIEW': return '#f59e0b'; // amber
+            case 'ESCROW': return '#f97316'; // orange
+            case 'BLOCK': return '#ef4444'; // red
+            default: return '#6b7280'; // gray
+        }
+    },
+    /**
      * Check if address is valid Ethereum address
      */
     isValidAddress: (address) => {
@@ -32,6 +47,18 @@ export const utils = {
      */
     formatAmount: (wei, decimals = 18) => {
         return (Number(wei) / Math.pow(10, decimals)).toFixed(4);
+    },
+    /**
+     * Convert risk score (0-1) to contract format (0-1000)
+     */
+    toContractScore: (score) => {
+        return Math.round(Math.max(0, Math.min(1, score)) * 1000);
+    },
+    /**
+     * Convert contract score (0-1000) to normalized (0-1)
+     */
+    fromContractScore: (score) => {
+        return Math.max(0, Math.min(1000, score)) / 1000;
     }
 };
 //# sourceMappingURL=index.js.map

@@ -1,0 +1,139 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ISessionKeyManager",
+  "sourceName": "contracts/interfaces/IBiconomy.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "sessionKey",
+              "type": "address"
+            },
+            {
+              "internalType": "uint48",
+              "name": "validAfter",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint48",
+              "name": "validUntil",
+              "type": "uint48"
+            },
+            {
+              "internalType": "address[]",
+              "name": "allowedTargets",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "allowedFunctions",
+              "type": "bytes4[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "spendingLimit",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ISessionKeyManager.SessionData",
+          "name": "sessionData",
+          "type": "tuple"
+        }
+      ],
+      "name": "createSession",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sessionKey",
+          "type": "address"
+        }
+      ],
+      "name": "getSessionData",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "sessionKey",
+              "type": "address"
+            },
+            {
+              "internalType": "uint48",
+              "name": "validAfter",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint48",
+              "name": "validUntil",
+              "type": "uint48"
+            },
+            {
+              "internalType": "address[]",
+              "name": "allowedTargets",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "allowedFunctions",
+              "type": "bytes4[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "spendingLimit",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ISessionKeyManager.SessionData",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sessionKey",
+          "type": "address"
+        }
+      ],
+      "name": "isSessionValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sessionKey",
+          "type": "address"
+        }
+      ],
+      "name": "revokeSession",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

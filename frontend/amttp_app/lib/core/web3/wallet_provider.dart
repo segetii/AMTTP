@@ -84,28 +84,37 @@ class WalletNotifier extends StateNotifier<WalletState> {
   }
 
   Future<void> connectWallet() async {
+    print('=== WalletNotifier.connectWallet() called ===');
+    print('MetaMask available: ${_web3Service.isMetaMaskAvailable}');
+    
     if (!_web3Service.isMetaMaskAvailable) {
+      print('MetaMask not available - setting error state');
       state = state.copyWith(
         status: WalletConnectionStatus.error,
         error:
-            'MetaMask not detected. Please install MetaMask browser extension.',
+            'MetaMask not detected. Please install MetaMask browser extension and refresh the page.',
       );
       return;
     }
 
     try {
+      print('Setting connecting state...');
       state = state.copyWith(
         status: WalletConnectionStatus.connecting,
         error: null,
       );
 
+      print('Calling _web3Service.connectWallet()...');
       final address = await _web3Service.connectWallet();
+      print('Got address: $address');
+      
       if (address != null) {
         await _updateWalletInfo(address);
       } else {
         throw Exception('Failed to get wallet address');
       }
     } catch (e) {
+      print('Error in connectWallet: $e');
       state = state.copyWith(
         status: WalletConnectionStatus.error,
         error: e.toString(),
@@ -115,13 +124,12 @@ class WalletNotifier extends StateNotifier<WalletState> {
 
   Future<void> _updateWalletInfo(String address) async {
     try {
-      final amttpBalance = await _web3Service.getAmttpBalance(address);
       final ethBalance = await _web3Service.getEthBalance(address);
 
       state = state.copyWith(
         status: WalletConnectionStatus.connected,
         address: address,
-        balance: amttpBalance,
+        balance: ethBalance,  // Use ETH balance as primary
         ethBalance: ethBalance,
         error: null,
       );
@@ -153,12 +161,17 @@ class WalletNotifier extends StateNotifier<WalletState> {
     }
 
     try {
-      // For now, this is a placeholder for actual transaction sending
-      // In a real implementation, this would interact with MetaMask to send the transaction
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Return a mock transaction hash
-      return '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+      // Send actual transaction via MetaMask
+      final txHash = await _web3Service.sendTransaction(
+        to: to,
+        amountInEth: amount,
+        data: data,
+      );
+      
+      // Refresh balance after transaction
+      await refreshBalance();
+      
+      return txHash;
     } catch (e) {
       state = state.copyWith(
         status: WalletConnectionStatus.error,

@@ -29,8 +29,74 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>amttp_app</title>
+  <title>AMTTP - Secure Transfers</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // MetaMask helper functions for Flutter interop
+    window.ethereum_helper = {
+      isMetaMaskAvailable: function() {
+        return typeof window.ethereum !== 'undefined';
+      },
+      
+      requestAccounts: async function() {
+        if (!this.isMetaMaskAvailable()) {
+          throw new Error('MetaMask not installed');
+        }
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          console.log('MetaMask accounts:', accounts);
+          return accounts;
+        } catch (error) {
+          console.error('MetaMask connect error:', error);
+          throw error;
+        }
+      },
+      
+      getAccounts: async function() {
+        if (!this.isMetaMaskAvailable()) return [];
+        try {
+          return await window.ethereum.request({ method: 'eth_accounts' });
+        } catch (e) {
+          return [];
+        }
+      },
+      
+      sendTransaction: async function(from, to, value) {
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{ from, to, value }]
+        });
+        return txHash;
+      },
+      
+      switchChain: async function(chainId) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId }]
+          });
+          return true;
+        } catch (error) {
+          if (error.code === 4902) {
+            // Chain not added - need to add it
+            return false;
+          }
+          throw error;
+        }
+      },
+      
+      addChain: async function(chainParams) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [chainParams]
+        });
+        return true;
+      }
+    };
+    
+    console.log('MetaMask helper loaded, available:', window.ethereum_helper.isMetaMaskAvailable());
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

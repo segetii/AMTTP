@@ -66,13 +66,21 @@ services:
     image: memgraph/memgraph:latest
     container_name: memgraph
     command: >-
-      --telemetry=false
       --log-level=INFO
       --query-execution-timeout-sec=30
       --memory-limit=2048
     ports: ['7687:7687']
-    volumes:
-      - ./data/memgraph:/var/lib/memgraph
+    restart: unless-stopped
+
+  memgraph-lab:
+    image: memgraph/lab:latest
+    container_name: memgraph-lab
+    ports: ['3000:3000']
+    depends_on:
+      - memgraph
+    environment:
+      - QUICK_CONNECT_MG_HOST=memgraph
+      - QUICK_CONNECT_MG_PORT=7687
     restart: unless-stopped
 
   redis:
@@ -93,7 +101,7 @@ services:
       - ./backend/oracle-service/.env
     dns:
       - 8.8.8.8
-    ports: ['3000:3000']
+    ports: ['3001:3000']
     depends_on:
       - hardhat
       - mongo
@@ -104,20 +112,115 @@ services:
 
   risk-engine:
     build:
-      context: ./cloud-training/cloud-training
+      context: ./ml/Automation/risk_engine
       dockerfile: Dockerfile
     container_name: risk-engine
     environment:
       - PYTHONPATH=/app
-    env_file:
-      - ./cloud-training/cloud-training/.env
-    ports: ['8001:8000']
+    ports: ['8002:8000']
     volumes:
-      - ./cloud-training/cloud-training:/app
-      - ./cloud-training/models:/app/models
+      - ./ml/Automation/risk_engine:/app
+      - ./ml/Automation/ml_pipeline/models/trained:/app/models
+      - ./processed:/app/processed
     depends_on:
       - mongo
     restart: unless-stopped
+
+  # AMTTP Compliance Orchestrator
+  orchestrator:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile
+    container_name: compliance-orchestrator
+    environment:
+      # Storage backends
+      MONGODB_URL: mongodb://admin:changeme@mongo:27017
+      MONGODB_DB: amttp
+      REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: localtest
+      MINIO_SECRET_KEY: localtest123
+      MINIO_SECURE: "false"
+      MINIO_BUCKET: amttp-documents
+      IPFS_API_URL: http://helia:5001
+      # Compliance services
+      ML_RISK_URL: http://risk-engine:8000
+      GRAPH_URL: http://memgraph-lab:3000
+      SANCTIONS_URL: http://localhost:8004
+      MONITORING_URL: http://localhost:8005
+      GEO_RISK_URL: http://localhost:8006
+      POLICY_URL: http://localhost:8003
+      FCA_URL: http://localhost:8002
+      # Security
+      AUTH_ENABLED: "false"
+      USE_STORAGE_LAYER: "true"
+    ports: ['8007:8007']
+    volumes:
+      - ./backend/compliance-service:/app
+    depends_on:
+      - mongo
+      - redis
+      - minio
+      - helia
+      - risk-engine
+    restart: unless-stopped
+
+  # AMTTP UI Integrity Service (Bybit-style attack prevention)
+  integrity:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.integrity
+    container_name: integrity-service
+    environment:
+      INTEGRITY_ADMIN_KEY: "${INTEGRITY_ADMIN_KEY:-dev-key}"
+    ports: ['8008:8008']
+    volumes:
+      - ./backend/compliance-service:/app
+      - ./backend/compliance-service/data/integrity:/app/data/integrity
+    restart: unless-stopped
+
+  # ============================================
+  # OPTIONAL: Production Streaming Pipeline
+  # Uncomment below for real-time data streaming
+  # ============================================
+
+  # Redpanda - Kafka-compatible streaming (faster, simpler)
+  # redpanda:
+  #   image: redpandadata/redpanda:latest
+  #   container_name: redpanda
+  #   command:
+  #     - redpanda
+  #     - start
+  #     - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+  #     - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+  #     - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+  #     - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
+  #     - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+  #     - --rpc-addr redpanda:33145
+  #     - --advertise-rpc-addr redpanda:33145
+  #     - --smp 1
+  #     - --memory 1G
+  #     - --overprovisioned
+  #   ports:
+  #     - '19092:19092'  # Kafka
+  #     - '18082:18082'  # HTTP Proxy
+  #     - '18081:18081'  # Schema Registry
+  #   restart: unless-stopped
+
+  # ClickHouse - OLAP analytics database
+  # clickhouse:
+  #   image: clickhouse/clickhouse-server:latest
+  #   container_name: clickhouse
+  #   ports:
+  #     - '8123:8123'  # HTTP
+  #     - '9009:9000'  # Native
+  #   volumes:
+  #     - ./data/clickhouse:/var/lib/clickhouse
+  #   ulimits:
+  #     nofile:
+  #       soft: 262144
+  #       hard: 262144
+  #   restart: unless-stopped
 
 networks:
   default:

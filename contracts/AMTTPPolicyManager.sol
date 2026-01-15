@@ -4,12 +4,13 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./interfaces/IAMTTP.sol";
 
 /**
- * @title AMTTPPolicyInterface - Minimal interface for policy validation
+ * @title IAMTTPPolicyLocal - Minimal interface for policy validation
  * @dev Lightweight interface to integrate with AMTTP without bloating the main contract
  */
-interface IAMTTPPolicy {
+interface IAMTTPPolicyLocal {
     function validateTransaction(
         address user,
         address counterparty,
@@ -22,10 +23,15 @@ interface IAMTTPPolicy {
  * @title AMTTPPolicyManager - Lightweight policy integration
  * @dev Manages policy validation without adding bulk to main contract
  */
-contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract AMTTPPolicyManager is 
+    Initializable, 
+    OwnableUpgradeable, 
+    UUPSUpgradeable,
+    IAMTTPPolicy 
+{
     
     // Policy engine address
-    IAMTTPPolicy public policyEngine;
+    IAMTTPPolicyLocal public policyEngine;
     
     // Simple user policies
     mapping(address => uint256) public userMaxAmounts;
@@ -58,7 +64,7 @@ contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeabl
      * @dev Set policy engine
      */
     function setPolicyEngine(address _policyEngine) external onlyOwner {
-        policyEngine = IAMTTPPolicy(_policyEngine);
+        policyEngine = IAMTTPPolicyLocal(_policyEngine);
         policyEngineEnabled = _policyEngine != address(0);
         emit PolicyEngineUpdated(_policyEngine);
     }
@@ -70,7 +76,7 @@ contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeabl
         address user,
         uint256 maxAmount,
         uint256 riskThreshold
-    ) external {
+    ) external override {
         require(msg.sender == user || msg.sender == owner(), "Unauthorized");
         require(riskThreshold <= 1000, "Invalid threshold");
         
@@ -96,7 +102,7 @@ contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeabl
         address counterparty,
         uint256 amount,
         uint256 riskScore
-    ) external view returns (bool allowed, uint8 recommendedRiskLevel, string memory reason) {
+    ) external view override returns (bool allowed, uint8 recommendedRiskLevel, string memory reason) {
         
         // Check user limits
         uint256 userMaxAmount = userMaxAmounts[user];
@@ -132,7 +138,7 @@ contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeabl
         address counterparty,
         uint256 amount,
         uint256 riskScore
-    ) external view returns (bool) {
+    ) external view override returns (bool) {
         (bool allowed,,) = this.validateTransaction(user, counterparty, amount, riskScore);
         return allowed;
     }
@@ -140,7 +146,7 @@ contract AMTTPPolicyManager is Initializable, OwnableUpgradeable, UUPSUpgradeabl
     /**
      * @dev Get user policy
      */
-    function getUserPolicy(address user) external view returns (
+    function getUserPolicy(address user) external view override returns (
         uint256 maxAmount,
         uint256 riskThreshold,
         bool trusted

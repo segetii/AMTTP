@@ -1,5 +1,18 @@
 // src/index.ts
 export { AMTTPClient } from './client.js';
+export { MLService, createMLService } from './ml.js';
+export { CrossChainService, createCrossChainService, LZ_CHAIN_IDS } from './crosschain.js';
+export type { ChainName, CrossChainRiskScore, CrossChainMessageResult, CrossChainConfig } from './crosschain.js';
+// zkNAF Zero-Knowledge Privacy Layer
+export { ZkNAFService, ProofType } from './zknaf.js';
+export type { ZkNAFConfig, Groth16Proof, ProofResult, SanctionsProofInput, RiskRangeProofInput, KYCProofInput } from './zknaf.js';
+// L2 Risk Router (Polygon/Arbitrum)
+export { RiskRouterClient, createRiskRouterClient, RiskAction, L2_ROUTER_ADDRESSES, CHAIN_NAMES, getActionColor, getActionIcon, predictAction, formatStatistics } from './risk-router.js';
+export type { RiskRouterConfig, RiskResult, BatchRequest, RouterStatistics, RiskThresholds } from './risk-router.js';
+export {
+  PolicyAction,
+  RiskLevel
+} from './types.js';
 export type {
   AMTTPConfig,
   TransactionRequest,
@@ -8,9 +21,9 @@ export type {
   KYCStatus,
   SwapParams,
   PolicySettings,
-  AMTTPResult
+  AMTTPResult,
 } from './types.js';
-export { AMTTP_ABI } from './abi.js';
+export { AMTTP_ABI, CROSSCHAIN_ABI } from './abi.js';
 
 // Utility functions
 export const utils = {
@@ -35,6 +48,19 @@ export const utils = {
   },
 
   /**
+   * Get action color for UI
+   */
+  getActionColor: (action: string): string => {
+    switch (action) {
+      case 'APPROVE': return '#22c55e'; // green
+      case 'REVIEW': return '#f59e0b';  // amber
+      case 'ESCROW': return '#f97316';  // orange
+      case 'BLOCK': return '#ef4444';   // red
+      default: return '#6b7280';        // gray
+    }
+  },
+
+  /**
    * Check if address is valid Ethereum address
    */
   isValidAddress: (address: string): boolean => {
@@ -46,5 +72,19 @@ export const utils = {
    */
   formatAmount: (wei: bigint, decimals: number = 18): string => {
     return (Number(wei) / Math.pow(10, decimals)).toFixed(4);
+  },
+
+  /**
+   * Convert risk score (0-1) to contract format (0-1000)
+   */
+  toContractScore: (score: number): number => {
+    return Math.round(Math.max(0, Math.min(1, score)) * 1000);
+  },
+
+  /**
+   * Convert contract score (0-1000) to normalized (0-1)
+   */
+  fromContractScore: (score: number): number => {
+    return Math.max(0, Math.min(1000, score)) / 1000;
   }
 };

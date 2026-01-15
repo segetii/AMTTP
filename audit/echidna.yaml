@@ -1,0 +1,27 @@
+testMode: property
+testLimit: 50000
+seqLen: 100
+shrinkLimit: 5000
+contractAddr: "0x00a329c0648769a73afac7f9381e08fb43dbea72"
+deployer: "0x30000000000000000000000000000000000003"
+sender: ["0x10000000000000000000000000000000000001", "0x20000000000000000000000000000000000002", "0x40000000000000000000000000000000000004"]
+psender: "0x10000000000000000000000000000000000001"
+coverage: true
+corpusDir: "audit/echidna-corpus"
+format: "text"
+quiet: false
+timeout: 300
+workers: 4
+balanceAddr: 0xffffffff
+balanceContract: 100000000000000000000
+
+# Property testing configuration
+prefix: "echidna_"
+checkAsserts: true
+multi-abi: true
+
+# Crytic compile options  
+cryticArgs: ["--compile-force-framework", "foundry"]
+
+# Test contract to use
+testMode: property

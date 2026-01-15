@@ -1,39 +1,112 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // 🎨 Finalized AMTTP Color Palette (Trust, Security, Compliance, Exclusivity)
+  // 🎨 Modern AMTTP Color Palette - Sleek & Premium
   
-  // Metallic Purple (Brand Signature) - Primary brand color for headers, key flows, important modules
-  static const Color primaryPurple = Color(0xFF6C3BB4);
+  // Primary Gradient Colors
+  static const Color primaryPurple = Color(0xFF7C3AED);      // Vibrant violet
+  static const Color primaryPurpleDark = Color(0xFF5B21B6);  // Deep violet
+  static const Color primaryPurpleLight = Color(0xFFA78BFA); // Light violet
   
-  // Lilac (Support) - Secondary shade for highlights, background accents
-  static const Color supportLilac = Color(0xFFC8A2C8);
+  // Accent Colors
+  static const Color accentCyan = Color(0xFF06B6D4);         // Cyan accent
+  static const Color accentPink = Color(0xFFEC4899);         // Pink accent
+  static const Color supportLilac = Color(0xFFDDD6FE);       // Soft lilac
   
-  // Ash (Neutral Foundation)
-  static const Color lightAsh = Color(0xFFF5F6FA);    // backgrounds, containers
-  static const Color mediumAsh = Color(0xFFE5E5E5);   // cards, dividers
-  static const Color darkAsh = Color(0xFF5C5C5C);     // text, icons, high-contrast areas
+  // Premium Gold
+  static const Color premiumGold = Color(0xFFFBBF24);
+  static const Color premiumGoldLight = Color(0xFFFDE68A);
   
-  // Gold (Premium/Enterprise) - For enterprise-only features, VIP modules, compliance/security emphasis
-  static const Color premiumGold = Color(0xFFD4AF37);
+  // Neutral Colors - Modern Gray Scale
+  static const Color darkBg = Color(0xFF0F172A);             // Dark navy
+  static const Color darkCard = Color(0xFF1E293B);           // Card dark
+  static const Color lightAsh = Color(0xFFF8FAFC);           // Light bg
+  static const Color mediumAsh = Color(0xFFE2E8F0);          // Borders
+  static const Color darkAsh = Color(0xFF334155);            // Text dark
   
-  // White (Clean UI) - Core base for clarity and readability
+  // Clean White
   static const Color cleanWhite = Color(0xFFFFFFFF);
   
-  // Status Colors (kept for functional use)
+  // Status Colors - Vibrant
   static const Color successGreen = Color(0xFF10B981);
   static const Color warningOrange = Color(0xFFF59E0B);
   static const Color dangerRed = Color(0xFFEF4444);
+  static const Color infoBlue = Color(0xFF3B82F6);
+  static const Color errorRed = dangerRed;  // Alias for dangerRed
   
-  // Legacy aliases for backward compatibility
+  // Glassmorphism Colors
+  static const Color glassWhite = Color(0x40FFFFFF);
+  static const Color glassDark = Color(0x30000000);
+  
+  // Legacy aliases
   static const Color primaryBlue = primaryPurple;
   static const Color secondaryBlue = supportLilac;
   static const Color accentGreen = successGreen;
   static const Color backgroundGrey = lightAsh;
   static const Color surfaceWhite = cleanWhite;
   static const Color textDark = darkAsh;
-  static const Color textMedium = Color(0xFF6B7280);
-  static const Color textLight = Color(0xFF9CA3AF);
+  static const Color textMedium = Color(0xFF64748B);
+  static const Color textLight = Color(0xFF94A3B8);
+  
+  // Additional UI colors for secure widgets
+  static const Color mutedText = Color(0xFF94A3B8);  // Same as textLight
+  static const Color neonGreen = successGreen;
+  static const Color neonBlue = accentCyan;
+  static const Color warningYellow = warningOrange;
+  static const Color cardBg = darkCard;
+
+  // Modern Gradients
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primaryPurple, accentCyan],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient premiumGradient = LinearGradient(
+    colors: [primaryPurple, accentPink],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient darkGradient = LinearGradient(
+    colors: [darkBg, Color(0xFF1E1B4B)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+  
+  static const LinearGradient goldGradient = LinearGradient(
+    colors: [premiumGold, Color(0xFFF97316)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  // Background gradient for secure widgets
+  static const LinearGradient backgroundGradient = darkGradient;
+
+  // Modern Box Shadows
+  static List<BoxShadow> softShadow = [
+    BoxShadow(
+      color: primaryPurple.withOpacity(0.15),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
+    ),
+  ];
+  
+  static List<BoxShadow> cardShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.05),
+      blurRadius: 10,
+      offset: const Offset(0, 4),
+    ),
+  ];
+  
+  static List<BoxShadow> glowShadow = [
+    BoxShadow(
+      color: primaryPurple.withOpacity(0.4),
+      blurRadius: 30,
+      spreadRadius: 2,
+    ),
+  ];
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,

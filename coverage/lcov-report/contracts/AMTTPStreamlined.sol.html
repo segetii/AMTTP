@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\AMTTPStreamlined.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> AMTTPStreamlined.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">61.54% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>40/65</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">32.26% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>20/62</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">65% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>13/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">65.88% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>56/85</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+&nbsp;
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+&nbsp;
+/**
+ * @title AMTTPPolicyManager Interface
+ */
+interface IAMTTPPolicyManager {
+    function validateTransaction(
+        address user,
+        address counterparty,
+        uint256 amount,
+        uint256 riskScore
+    ) external view returns (bool allowed, uint8 recommendedRiskLevel, string memory reason);
+}
+&nbsp;
+/**
+ * @title AMTTP - Anti-Money Transfer Transfer Protocol
+ * @dev Main contract with integrated fraud protection and policy validation
+ */
+contract AMTTP is 
+    Initializable, 
+    ERC20Upgradeable, 
+    OwnableUpgradeable, 
+    UUPSUpgradeable, 
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable 
+{
+    
+    // Core Components
+    mapping(address =&gt; bool) public authorizedOracles;
+    mapping(bytes32 =&gt; Transaction) public transactions;
+    mapping(address =&gt; UserProfile) public userProfiles;
+    mapping(address =&gt; bool) public kycVerified;
+    
+    // Policy integration
+    IAMTTPPolicyManager public policyManager;
+    bool public policyValidationEnabled;
+    
+    // Structs
+    struct Transaction {
+        address from;
+        address to;
+        uint256 amount;
+        uint256 timestamp;
+        uint256 riskScore;
+        uint8 status; // 0: pending, 1: approved, 2: rejected, 3: escrowed
+        bytes32 dataHash;
+    }
+    
+    struct UserProfile {
+        uint256 totalTransactions;
+        uint256 totalVolume;
+        uint256 lastActivity;
+        uint8 reputationScore;
+        bool isActive;
+    }
+    
+    // Events
+    event TransactionInitiated(bytes32 indexed txId, address indexed from, address indexed to, uint256 amount);
+    event TransactionApproved(bytes32 indexed txId, uint256 riskScore);
+    event TransactionRejected(bytes32 indexed txId, uint256 riskScore, string reason);
+    event TransactionEscrowed(bytes32 indexed txId, uint256 riskScore);
+    event RiskScoreUpdated(bytes32 indexed txId, uint256 oldScore, uint256 newScore);
+    event UserProfileUpdated(address indexed user, uint8 reputationScore);
+    event KYCStatusUpdated(address indexed user, bool verified);
+    event OracleUpdated(address indexed oracle, bool authorized);
+    event PolicyManagerUpdated(address indexed newManager);
+    
+    // Modifiers
+    modifier onlyOracle() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(authorizedOracles[msg.sender], "Not authorized oracle");
+        _;
+    }
+    
+    modifier validTransaction(bytes32 txId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(transactions[txId].from != address(0), "Transaction not found");
+        _;
+    }
+    
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
+    function initialize(
+        string memory name,
+        string memory symbol,
+        uint256 initialSupply
+    ) public <span class="missing-if-branch" title="else path not taken" >E</span>initializer {
+        __ERC20_init(name, symbol);
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        __Pausable_init();
+        __ReentrancyGuard_init();
+        
+        _mint(msg.sender, initialSupply);
+        authorizedOracles[msg.sender] = true;
+        policyValidationEnabled = false;
+    }
+    
+    /**
+     * @dev Set policy manager
+     */
+    function setPolicyManager(address _policyManager) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        policyManager = IAMTTPPolicyManager(_policyManager);
+        policyValidationEnabled = _policyManager != address(0);
+        emit PolicyManagerUpdated(_policyManager);
+    }
+    
+    /**
+     * @dev Authorize/deauthorize oracle
+     */
+    function setOracle(address oracle, bool authorized) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        authorizedOracles[oracle] = authorized;
+        emit OracleUpdated(oracle, authorized);
+    }
+    
+    /**
+     * @dev Update KYC status
+     */
+<span class="fstat-no" title="function not covered" >    function updateKYCStatus(address user, bool verified) external onlyOracle {</span>
+        kycVerified[user] = verified;
+<span class="cstat-no" title="statement not covered" >        emit KYCStatusUpdated(user, verified);</span>
+    }
+    
+    /**
+     * @dev Initiate secure transfer
+     */
+    function secureTransfer(
+        address to,
+        uint256 amount,
+        bytes32 dataHash
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant <span class="missing-if-branch" title="else path not taken" >E</span>whenNotPaused returns (bytes32 txId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(to != address(0), "Invalid recipient");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(amount &gt; 0, "Invalid amount");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(balanceOf(msg.sender) &gt;= amount, "Insufficient balance");
+        
+        txId = keccak256(abi.encodePacked(msg.sender, to, amount, block.timestamp, block.number));
+        
+        transactions[txId] = Transaction({
+            from: msg.sender,
+            to: to,
+            amount: amount,
+            timestamp: block.timestamp,
+            riskScore: 0,
+            status: 0,
+            dataHash: dataHash
+        });
+        
+        emit TransactionInitiated(txId, msg.sender, to, amount);
+        
+        // Auto-approve if policy validation disabled or not risky
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!policyValidationEnabled) {
+<span class="cstat-no" title="statement not covered" >            _approveTransaction(txId, 0)</span>;
+        }
+        
+        return txId;
+    }
+    
+    /**
+     * @dev Submit risk score and validate transaction
+     */
+    function submitRiskScore(
+        bytes32 txId,
+        uint256 riskScore
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOracle <span class="missing-if-branch" title="else path not taken" >E</span>validTransaction(txId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(transactions[txId].status == 0, "Transaction already processed");
+        
+        Transaction storage txn = transactions[txId];
+        uint256 oldScore = txn.riskScore;
+        txn.riskScore = riskScore;
+        
+        emit RiskScoreUpdated(txId, oldScore, riskScore);
+        
+        // Validate with policy manager if enabled
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (policyValidationEnabled &amp;&amp; address(policyManager) != address(0)) {
+            (bool allowed, uint8 riskLevel, string memory reason) = policyManager.validateTransaction(
+                txn.from,
+                txn.to,
+                txn.amount,
+                riskScore
+            );
+            
+            if (!allowed) {
+                _rejectTransaction(txId, reason);
+            } else <span class="missing-if-branch" title="if path not taken" >I</span>if (riskLevel &gt;= 3) {
+<span class="cstat-no" title="statement not covered" >                _escrowTransaction(txId)</span>;
+            } else {
+                _approveTransaction(txId, riskScore);
+            }
+        } else {
+            // Fallback validation
+<span class="cstat-no" title="statement not covered" >            if (riskScore &gt;= 800) {</span>
+<span class="cstat-no" title="statement not covered" >                _rejectTransaction(txId, "High risk")</span>;
+            } else <span class="cstat-no" title="statement not covered" >if (riskScore &gt;= 600) {</span>
+<span class="cstat-no" title="statement not covered" >                _escrowTransaction(txId)</span>;
+            } else {
+<span class="cstat-no" title="statement not covered" >                _approveTransaction(txId, riskScore)</span>;
+            }
+        }
+    }
+    
+    /**
+     * @dev Approve transaction
+     */
+    function _approveTransaction(bytes32 txId, uint256 riskScore) internal {
+        Transaction storage txn = transactions[txId];
+        txn.status = 1;
+        
+        // Execute transfer
+        _transfer(txn.from, txn.to, txn.amount);
+        
+        // Update user profiles
+        _updateUserProfile(txn.from, txn.amount, true);
+        _updateUserProfile(txn.to, txn.amount, false);
+        
+        emit TransactionApproved(txId, riskScore);
+    }
+    
+    /**
+     * @dev Reject transaction
+     */
+    function _rejectTransaction(bytes32 txId, string memory reason) internal {
+        transactions[txId].status = 2;
+        emit TransactionRejected(txId, transactions[txId].riskScore, reason);
+    }
+    
+    /**
+     * @dev Escrow transaction for manual review
+     */
+<span class="fstat-no" title="function not covered" >    function _escrowTransaction(bytes32 txId) internal {</span>
+<span class="cstat-no" title="statement not covered" >        Transaction storage txn = transactions[txId];</span>
+        txn.status = 3;
+        
+        // Lock funds (simplified - in production would use proper escrow)
+<span class="cstat-no" title="statement not covered" >        _transfer(txn.from, address(this), txn.amount)</span>;
+        
+<span class="cstat-no" title="statement not covered" >        emit TransactionEscrowed(txId, txn.riskScore);</span>
+    }
+    
+    /**
+     * @dev Release escrowed transaction
+     */
+<span class="fstat-no" title="function not covered" >    function releaseEscrow(bytes32 txId, bool approve) external onlyOracle validTransaction(txId) {</span>
+<span class="cstat-no" title="statement not covered" >        require(transactions[txId].status == 3, "Not escrowed")</span>;
+        
+<span class="cstat-no" title="statement not covered" >        Transaction storage txn = transactions[txId];</span>
+        
+<span class="cstat-no" title="statement not covered" >        if (approve) {</span>
+<span class="cstat-no" title="statement not covered" >            _transfer(address(this), txn.to, txn.amount)</span>;
+            txn.status = 1;
+<span class="cstat-no" title="statement not covered" >            _updateUserProfile(txn.from, txn.amount, true)</span>;
+<span class="cstat-no" title="statement not covered" >            _updateUserProfile(txn.to, txn.amount, false)</span>;
+<span class="cstat-no" title="statement not covered" >            emit TransactionApproved(txId, txn.riskScore);</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >            _transfer(address(this), txn.from, txn.amount)</span>;
+            txn.status = 2;
+<span class="cstat-no" title="statement not covered" >            emit TransactionRejected(txId, txn.riskScore, "Manual rejection");</span>
+        }
+    }
+    
+    /**
+     * @dev Update user profile
+     */
+    function _updateUserProfile(address user, uint256 amount, bool isSender) internal {
+        UserProfile storage profile = userProfiles[user];
+        profile.totalTransactions++;
+        profile.totalVolume += amount;
+        profile.lastActivity = block.timestamp;
+        profile.isActive = true;
+        
+        // Simple reputation scoring
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (profile.totalTransactions &lt;= 10) {
+            profile.reputationScore = 50;
+        } else <span class="cstat-no" title="statement not covered" >if (profile.totalTransactions &lt;= 100) {</span>
+            profile.reputationScore = 70;
+        } else {
+            profile.reputationScore = 90;
+        }
+        
+        emit UserProfileUpdated(user, profile.reputationScore);
+    }
+    
+    /**
+     * @dev Get transaction details
+     */
+    function getTransaction(bytes32 txId) external view returns (Transaction memory) {
+        return transactions[txId];
+    }
+    
+    /**
+     * @dev Get user profile
+     */
+<span class="fstat-no" title="function not covered" >    function getUserProfile(address user) external view returns (UserProfile memory) {</span>
+<span class="cstat-no" title="statement not covered" >        return userProfiles[user];</span>
+    }
+    
+    /**
+     * @dev Check if user can transfer amount
+     */
+    function canTransfer(address user, address to, uint256 amount) external view returns (bool) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!policyValidationEnabled || address(policyManager) == address(0)) {
+<span class="cstat-no" title="statement not covered" >            return balanceOf(user) &gt;= amount;</span>
+        }
+        
+        // Use current risk score estimation or 0 for check
+        (bool allowed,,) = policyManager.validateTransaction(user, to, amount, 0);
+        return allowed &amp;&amp; balanceOf(user) &gt;= amount;
+    }
+    
+    // Administrative functions
+<span class="fstat-no" title="function not covered" >    function pause() external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        _pause()</span>;
+    }
+    
+<span class="fstat-no" title="function not covered" >    function unpause() external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        _unpause()</span>;
+    }
+    
+<span class="fstat-no" title="function not covered" >    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}</span>
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Jan 04 2026 18:05:09 GMT+0000 (Greenwich Mean Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

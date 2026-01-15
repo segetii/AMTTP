@@ -23,7 +23,7 @@ c:\amttp/
 │
 ├── ⛓️ Smart Contracts (/contracts/)
 ├── 🔙 Backend Services (/backend/)
-├── 🤖 Machine Learning (/cloud-training/)
+├── 🤖 Machine Learning (/ml/Automation/)
 ├── 📦 Client SDK (/packages/)
 ├── 🧪 Testing Suite (/test/)
 ├── 🚀 Deployment Scripts (/scripts/)
@@ -173,146 +173,41 @@ backend/
 
 ---
 
-## 🤖 Machine Learning Directory (`/cloud-training/`)
+## 🤖 Machine Learning Directory (`/ml/Automation/`)
 
 ```
-cloud-training/
-├── 📓 Training Notebooks
-│   ├── AMTTP_DQN_Colab_Training.ipynb    # 🧠 Main DQN training notebook
-│   │   ├── Data preprocessing pipeline
-│   │   ├── Feature engineering (15 features)
-│   │   ├── DQN model architecture definition
-│   │   ├── Training loop with experience replay
-│   │   ├── Performance evaluation (F1=0.669)
-│   │   └── Model export and optimization
-│   │
-│   └── notebooks/                        # 📁 Additional research notebooks
-│       ├── data_exploration.ipynb        # Dataset analysis
-│       ├── feature_analysis.ipynb        # Feature importance studies
-│       └── model_comparison.ipynb        # Algorithm comparison
-│
-├── 🏗️ Training Infrastructure
-│   ├── dqn_training_environment.py       # 🏋️ Training environment setup
-│   │   ├── Reinforcement learning environment
-│   │   ├── Reward function definition
-│   │   ├── State space configuration
-│   │   └── Action space definition
-│   │
-│   ├── rl_implementation.py             # 🎯 Core RL algorithms
-│   │   ├── DQN agent implementation
-│   │   ├── Experience replay buffer
-│   │   ├── Target network updates
-│   │   └── Epsilon-greedy exploration
-│   │
-│   └── sota_risk_engine.py              # 🏆 State-of-the-art engine
-│       ├── Advanced feature engineering
-│       ├── Ensemble model integration
-│       ├── Real-time inference optimization
-│       └── Production deployment utilities
-│
-├── 🎯 Trained Models (/models/)
-│   ├── dqn_fraud_detection.h5           # 🧠 Main DQN model (F1=0.669)
-│   ├── scaler.pkl                       # 📊 Feature normalization scaler
-│   ├── feature_columns.json             # 📋 Feature configuration
-│   ├── model_metadata.json              # 📄 Model versioning info
-│   └── backup_models/                   # 🔄 Previous model versions
-│       ├── dqn_v1.h5                    # Earlier training iterations
-│       └── baseline_model.h5            # Baseline comparison model
-│
-├── 📊 Training Data (/data/)
-│   ├── prepared_fraud_features.npy      # 🔢 Training features (28,457)
-│   ├── prepared_fraud_labels.npy        # 🎯 Training labels
-│   ├── validation_set.npy               # ✅ Validation data (20%)
-│   ├── test_set.npy                     # 🧪 Test data (20%)
-│   ├── raw_data/                        # 📄 Original datasets
-│   │   ├── credit_card_fraud.csv        # Source fraud data
-│   │   └── synthetic_transactions.csv   # Generated samples
-│   └── processed_data/                  # 🔄 Intermediate processing
-│       ├── feature_engineered.npy       # Post-engineering features
-│       └── normalized_data.npy          # Normalized datasets
-│
-├── ⚙️ Configuration (/config/)
-│   ├── remote_training_config.json      # 🏭 Training hyperparameters
-│   │   ├── Learning rate schedules
-│   │   ├── Batch size configurations
-│   │   ├── Network architecture params
-│   │   └── Training iteration settings
-│   │
-│   ├── model_architecture.json          # 🏗️ DQN architecture
-│   │   ├── Layer definitions
-│   │   ├── Activation functions
-│   │   ├── Regularization parameters
-│   │   └── Output configurations
-│   │
-│   └── production_config.json           # 🚀 Production settings
-│       ├── Inference optimization
-│       ├── Batch processing configs
-│       ├── Memory management
-│       └── Performance thresholds
-│
-├── 🚀 Deployment Scripts (/deployment/)
-│   ├── deploy_dqn.py                    # 🌐 Model deployment automation
-│   │   ├── Model validation and testing
-│   │   ├── Production environment setup
-│   │   ├── API endpoint configuration
-│   │   └── Health check implementation
-│   │
-│   ├── integration_service.py           # 🔗 Backend integration
-│   │   ├── API endpoint creation
-│   │   ├── Request/response handling
-│   │   ├── Error handling and logging
-│   │   └── Performance monitoring
-│   │
-│   └── production_integration.py        # 🏭 Production integration
-│       ├── Load balancing configuration
-│       ├── Scaling policies
-│       ├── Monitoring setup
-│       └── Backup procedures
-│
-├── 📊 Monitoring & Logging (/monitoring/)
-│   ├── training_logs/                   # 📈 Training progress logs
-│   │   ├── loss_curves.json             # Training/validation loss
-│   │   ├── accuracy_metrics.json        # Performance metrics
-│   │   └── hyperparameter_tuning.json   # Parameter optimization
-│   │
-│   ├── performance_metrics.json         # 📊 Model performance tracking
-│   │   ├── F1 scores over time
-│   │   ├── Precision/recall curves
-│   │   ├── ROC curves and AUC
-│   │   └── Confusion matrices
-│   │
-│   └── validation_results.json          # ✅ Validation outcomes
-│       ├── Cross-validation results
-│       ├── A/B testing comparisons
-│       ├── Production performance
-│       └── Drift detection metrics
-│
-├── 🔄 Data Processing Scripts
-│   ├── prepare_colab_upload.py          # 📤 Colab data preparation
-│   ├── real_data_integration.py         # 🔗 Real data integration
-│   ├── check_results.py                 # ✅ Result validation
-│   └── data_pipeline.py                 # 🔄 Data processing automation
-│
-├── 🛠️ Utility Scripts
-│   ├── quick_setup.py                   # ⚡ Quick environment setup
-│   ├── setup_remote_environment.py      # 🌐 Remote training setup
-│   ├── resume_dqn_training.py           # 🔄 Training resumption
-│   └── test_dqn_environment.py          # 🧪 Environment testing
-│
-├── 📋 Documentation & Guides
-│   ├── DQN_README.md                    # 🧠 DQN-specific documentation
-│   ├── SOTA_DEPLOYMENT_GUIDE.md         # 🏆 Production deployment guide
-│   ├── TECHNICAL_ARCHITECTURE.py        # 🏗️ Architecture documentation
-│   ├── colab_quick_start.md             # ⚡ Google Colab quick start
-│   └── colab_upload_instructions.md     # 📤 Colab data upload guide
-│
-└── 🔧 Build & Setup Files
-    ├── requirements_dqn.txt              # 📋 Python dependencies
-    ├── quick_setup_dqn.ps1              # 🪟 Windows setup script
-    ├── setup_complete_environment.ps1    # 🔧 Complete environment setup
-    ├── start_dqn.bat                     # 🚀 Windows batch startup
-    └── start_dqn.ps1                     # 🪟 PowerShell startup script
+ml/Automation/
+├── src/
+│   └── memgraph_enrich.py                 # Memgraph feature enrichment client (Bolt/HTTP)
+├── pipeline/
+│   ├── ofac/
+│   │   └── fetch_ofac_addresses.py       # Fetch/normalize OFAC crypto addresses → JSON
+│   ├── data_fetch/
+│   │   └── fetch_eth_7d.py               # Pull ~7 days of ETH tx via RPC → CSV/Parquet
+│   ├── graph/
+│   │   ├── ingest_memgraph.py            # Ingest tx graph into Memgraph (nodes/edges)
+│   │   └── tag_sanctions.py              # Tag sanctioned addresses in the graph
+│   ├── features/
+│   │   └── build_features_eth.py         # Build tx features + Memgraph enrichment
+│   ├── score_and_pseudo_label.py         # Score unlabeled set → pseudo labels + retrain
+│   └── label_ml_pipeline.py              # Labeling/training pipeline skeleton (extensible)
+├── colab/
+│   └── AMTTP_Baseline_Training_Colab.ipynb # Colab notebook to train/export baseline model
+├── risk_engine/
+│   ├── integration_service.py            # FastAPI service (/health, /score, /reload-model)
+│   ├── train_baseline.py                 # Baseline sklearn trainer (joblib + meta)
+│   ├── requirements.txt                  # Python dependencies for service
+│   └── Dockerfile                        # Container for serving
+├── models/
+│   └── cloud/                            # Persisted models & metadata (mounted into service)
+├── infra/
+│   └── cloudflared_*                     # Optional Memgraph proxy setup
+└── archive/                               # Legacy scripts archived
 ```
+
+Notes:
+- The legacy `/cloud-training/` directory has been removed to avoid duplication and confusion.
+- Docker Compose builds the risk engine from `/ml/Automation/risk_engine` and mounts `/ml/Automation/models` into the container at `/app/models`.
 
 ---
 
@@ -760,15 +655,15 @@ AMTTPPolicyEngine.sol
 ```
 Oracle Service
 ├── Integrates with: Smart contracts (risk score submission)
-├── Uses: DQN model (cloud-training/models/)
+├── Uses: baseline model (ml/Automation/models/)
 ├── Connects to: MongoDB (data/) and MinIO (data/)
 └── Serves: Client SDK and frontend applications
 
-DQN Model
-├── Trained on: prepared_fraud_features.npy (28,457 samples)
-├── Deployed via: deploy_dqn.py
-├── Integrated in: risk.service.ts
-└── Provides: Real-time fraud detection (F1=0.669)
+Risk Model (baseline)
+├── Trained via: ml/Automation/risk_engine/train_baseline.py (synthetic or provided CSV/Parquet with 'label')
+├── Served by: ml/Automation/risk_engine/integration_service.py (FastAPI)
+├── Artifacts: ml/Automation/models/cloud (joblib + meta JSON)
+└── Integrated in: backend/oracle-service (calls risk engine for scores)
 ```
 
 ### Client SDK Dependencies

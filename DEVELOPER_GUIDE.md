@@ -49,9 +49,9 @@ backend/oracle-service/src/db/models.ts         # Database schemas
 
 ### Machine Learning
 ```
-cloud-training/AMTTP_DQN_Colab_Training.ipynb   # Main training notebook
-cloud-training/models/dqn_fraud_detection.h5    # Trained model (F1=0.669)
-cloud-training/data/prepared_fraud_features.npy # Training data (28,457 samples)
+ml/Automation/risk_engine/integration_service.py  # FastAPI risk engine (/health, /score)
+ml/Automation/risk_engine/train_baseline.py       # Baseline sklearn trainer (joblib + meta)
+ml/Automation/models/cloud/                       # Persisted models (baseline_model.joblib, *_meta.json)
 ```
 
 ### Client SDK

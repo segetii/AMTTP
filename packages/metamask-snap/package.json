@@ -1,0 +1,28 @@
+{
+  "name": "@amttp/metamask-snap",
+  "version": "1.0.0",
+  "description": "AMTTP Transaction Risk Assessment Snap for MetaMask",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/segetii/fintech.git"
+  },
+  "license": "MIT",
+  "main": "./dist/bundle.js",
+  "files": ["dist/", "snap.manifest.json", "images/"],
+  "scripts": {
+    "build": "mm-snap build",
+    "serve": "mm-snap serve",
+    "start": "mm-snap watch"
+  },
+  "dependencies": {
+    "@metamask/snaps-sdk": "^6.0.0"
+  },
+  "devDependencies": {
+    "@metamask/snaps-cli": "^6.2.1",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
