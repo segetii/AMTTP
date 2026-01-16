@@ -3,3 +3,31 @@ data/
 .env
 .venv/
 *.log
+
+# Large data files - store in cloud storage/DVC instead
+processed/
+*.parquet
+*.csv
+*.npy
+*.npz
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.cbm
+*.json.gz
+
+# ML model artifacts (large)
+ml/Automation/ml_pipeline/models/trained/
+crytic-export/
+reports/audit/*/slither-all.json
+
+# Build artifacts
+artifacts/build-info/
+forge-out/build-info/
+
+# Cache
+cache/
+forge-cache/
+__pycache__/
+*.pyc
