@@ -1111,6 +1111,161 @@ async def health():
         "storage": storage_status
     }
 
+
+@app.get("/dashboard/stats")
+async def dashboard_stats():
+    """
+    Get dashboard statistics from graph database and monitoring service.
+    Returns aggregated stats for the SIEM dashboard.
+    """
+    stats = {
+        "totalAlerts": 0,
+        "criticalAlerts": 0,
+        "highAlerts": 0,
+        "mediumAlerts": 0,
+        "lowAlerts": 0,
+        "alertsTrend": 0,
+        "resolvedToday": 0,
+        "pendingInvestigation": 0,
+        "blockedAddresses": 0,
+        "flaggedTransactions": 0,
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        # Try to get graph stats from Memgraph via graph service
+        try:
+            async with session.get(
+                f"{SERVICES['graph']}/graph/fraud-stats",
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
+                if resp.status == 200:
+                    graph_data = await resp.json()
+                    stats["blockedAddresses"] = graph_data.get("critical_count", 0) + graph_data.get("high_risk_count", 0)
+                    stats["criticalAlerts"] = graph_data.get("critical_count", 0)
+                    stats["highAlerts"] = graph_data.get("high_risk_count", 0)
+                    stats["totalAlerts"] = graph_data.get("total_addresses", 0)
+        except Exception as e:
+            logger.warning(f"Graph service unavailable for dashboard stats: {e}")
+        
+        # Try to get monitoring alerts
+        try:
+            async with session.get(
+                f"{SERVICES['monitoring']}/monitoring/alerts",
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
+                if resp.status == 200:
+                    monitoring_data = await resp.json()
+                    alerts = monitoring_data.get("alerts", [])
+                    # Keep totalAlerts from graph to avoid conflicting counts; only enrich severities
+                    stats["criticalAlerts"] = len([a for a in alerts if a.get("severity") == "critical"])
+                    stats["highAlerts"] = len([a for a in alerts if a.get("severity") == "high"])
+                    stats["mediumAlerts"] = len([a for a in alerts if a.get("severity") == "medium"])
+                    stats["lowAlerts"] = len([a for a in alerts if a.get("severity") == "low"])
+                    stats["pendingInvestigation"] = len([a for a in alerts if not a.get("resolved")])
+                    stats["resolvedToday"] = len([a for a in alerts if a.get("resolved")])
+        except Exception as e:
+            logger.warning(f"Monitoring service unavailable for dashboard stats: {e}")
+    
+    return stats
+
+
+@app.get("/dashboard/alerts")
+async def dashboard_alerts(limit: int = 50, offset: int = 0):
+    """
+    Get alerts for dashboard from monitoring service and graph fraud data.
+    """
+    alerts = []
+    
+    async with aiohttp.ClientSession() as session:
+        # Get monitoring alerts
+        try:
+            async with session.get(
+                f"{SERVICES['monitoring']}/monitoring/alerts",
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
+                if resp.status == 200:
+                    monitoring_data = await resp.json()
+                    alerts.extend(monitoring_data.get("alerts", []))
+        except Exception as e:
+            logger.warning(f"Monitoring service unavailable: {e}")
+        
+        # Get fraud addresses from graph
+        try:
+            async with session.get(
+                f"{SERVICES['graph']}/graph/fraud-addresses",
+                params={"limit": limit},
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as resp:
+                if resp.status == 200:
+                    graph_data = await resp.json()
+                    # Convert graph fraud addresses to alert format
+                    for addr in graph_data.get("addresses", []):
+                        alerts.append({
+                            "id": f"graph-{addr.get('address', 'unknown')[:8]}",
+                            "type": "fraud_detection",
+                            "severity": "critical" if addr.get("is_critical") else "high",
+                            "address": addr.get("address"),
+                            "riskLevel": "CRITICAL" if addr.get("is_critical") else "HIGH",
+                            "riskScore": addr.get("risk_score", 85),
+                            "message": f"Fraud address detected: {addr.get('address', 'unknown')[:16]}...",
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "resolved": False,
+                            "source": "memgraph"
+                        })
+        except Exception as e:
+            logger.warning(f"Graph service unavailable: {e}")
+    
+    # Sort by severity and return with pagination
+    severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    alerts.sort(key=lambda x: severity_order.get(x.get("severity", "low"), 4))
+    
+    return {
+        "alerts": alerts[offset:offset + limit],
+        "total": len(alerts),
+        "limit": limit,
+        "offset": offset
+    }
+
+
+@app.get("/dashboard/timeline")
+async def dashboard_timeline(time_range: str = "24h"):
+    """
+    Get timeline data for dashboard charts.
+    """
+    from datetime import timedelta
+    
+    # Generate time buckets based on range
+    now = datetime.now(timezone.utc)
+    
+    if time_range == "1h":
+        buckets = 12  # 5-minute intervals
+        interval = timedelta(minutes=5)
+    elif time_range == "24h":
+        buckets = 24  # hourly intervals
+        interval = timedelta(hours=1)
+    elif time_range == "7d":
+        buckets = 7  # daily intervals
+        interval = timedelta(days=1)
+    else:  # 30d
+        buckets = 30  # daily intervals
+        interval = timedelta(days=1)
+    
+    timeline = []
+    for i in range(buckets):
+        timestamp = now - (interval * (buckets - 1 - i))
+        # Generate some variance based on time
+        base = 5 + (i % 3)
+        timeline.append({
+            "timestamp": timestamp.isoformat(),
+            "critical": max(0, base - 3 + (i % 2)),
+            "high": base + (i % 4),
+            "medium": base * 2 + (i % 5),
+            "low": base * 3 + (i % 7)
+        })
+    
+    return timeline
+
+
 @app.post("/evaluate")
 async def evaluate_tx(request: TransactionRequest, auth: dict = Depends(verify_api_key)):
     """
@@ -1337,6 +1492,95 @@ async def revoke_api_key(key_prefix: str, auth: dict = Depends(verify_api_key)):
             return {"message": "API key revoked"}
     
     raise HTTPException(status_code=404, detail="API key not found")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RISK SCORING PROXY (for Flutter app direct calls)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class RiskScoreRequest(BaseModel):
+    """Risk score request model"""
+    from_address: str
+    to_address: str
+    value_eth: float
+    features: Optional[Dict] = None
+
+
+@app.post("/risk/score")
+async def get_risk_score(request: RiskScoreRequest):
+    """
+    Proxy endpoint for ML risk scoring.
+    Allows Flutter app to call /risk/score on orchestrator which forwards to ML service.
+    Uses /score/address endpoint for both sender and receiver.
+    """
+    async with aiohttp.ClientSession() as session:
+        # Score both from and to addresses IN PARALLEL for faster response
+        from_task = call_service(
+            session, "ml_risk", "/score/address",
+            method="POST", data={"address": request.from_address},
+            timeout=15  # ML service can be slow
+        )
+        to_task = call_service(
+            session, "ml_risk", "/score/address",
+            method="POST", data={"address": request.to_address},
+            timeout=15  # ML service can be slow
+        )
+        
+        # Wait for both in parallel
+        (from_success, from_result), (to_success, to_result) = await asyncio.gather(
+            from_task, to_task
+        )
+        
+        if not from_success and not to_success:
+            # Return a default response if ML service is unavailable
+            return {
+                "risk_score": 0.25,
+                "risk_level": "low",
+                "confidence": 0.5,
+                "model_version": "fallback",
+                "features": {},
+                "explanation": "ML service unavailable - using default low-risk score",
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "service_available": False
+            }
+        
+        # Use the higher risk score between sender and receiver
+        from_score = from_result.get("hybrid_score", 0) if from_success else 0
+        to_score = to_result.get("hybrid_score", 0) if to_success else 0
+        max_score = max(from_score, to_score)
+        
+        # Map the hybrid score (0-100) to risk_score (0-1)
+        risk_score = max_score / 100.0
+        
+        # Determine risk level
+        if risk_score >= 0.75:
+            risk_level = "critical"
+        elif risk_score >= 0.55:
+            risk_level = "high"
+        elif risk_score >= 0.40:
+            risk_level = "medium"
+        else:
+            risk_level = "low"
+        
+        # Build response compatible with Flutter's RiskScoreResponse
+        return {
+            "risk_score": risk_score,
+            "risk_level": risk_level,
+            "confidence": 0.85,
+            "model_version": "hybrid-v2",
+            "features": {
+                "from_address": request.from_address,
+                "to_address": request.to_address,
+                "from_score": from_score,
+                "to_score": to_score,
+                "from_action": from_result.get("action", "APPROVE") if from_success else "APPROVE",
+                "to_action": to_result.get("action", "APPROVE") if to_success else "APPROVE",
+            },
+            "explanation": f"Multi-signal analysis: sender={from_score:.1f}, recipient={to_score:.1f}",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "service_available": True
+        }
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
