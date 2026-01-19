@@ -26,17 +26,17 @@ logger = logging.getLogger("storage")
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# MongoDB
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+# MongoDB (Docker default: admin:changeme)
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://admin:changeme@localhost:27017")
 MONGODB_DB = os.getenv("MONGODB_DB", "amttp")
 
 # Redis
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
-# MinIO
+# MinIO (Docker default: localtest:localtest123)
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "localtest")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "localtest123")
 MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
 MINIO_BUCKET = os.getenv("MINIO_BUCKET", "amttp-documents")
 
@@ -97,7 +97,11 @@ class MongoDBClient:
             return False
         
         try:
-            self.client = AsyncIOMotorClient(MONGODB_URL)
+            self.client = AsyncIOMotorClient(
+                MONGODB_URL,
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=5000
+            )
             self.db = self.client[MONGODB_DB]
             # Test connection
             await self.client.admin.command('ping')
@@ -777,22 +781,44 @@ class MinIOClient:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class IPFSClient:
-    """IPFS client for immutable audit trail"""
+    """IPFS client for immutable audit trail - uses HTTP API directly for compatibility"""
     
     def __init__(self):
         self.client = None
+        self.api_url = IPFS_API_URL.rstrip('/')
+        self._use_http = False  # Flag to use HTTP API directly
     
     def connect(self) -> bool:
         if not HAS_IPFS:
-            logger.error("ipfshttpclient not installed")
+            # Try HTTP API directly
+            self._use_http = True
+            try:
+                import requests
+                resp = requests.post(f"{self.api_url}/api/v0/id", timeout=5)
+                if resp.status_code == 200:
+                    logger.info("Connected to IPFS via HTTP API: %s", self.api_url)
+                    return True
+            except Exception as e:
+                logger.error("IPFS HTTP connection failed: %s", e)
             return False
         
         try:
+            # Try standard client first
             self.client = ipfshttpclient.connect(IPFS_API_URL)
             logger.info("Connected to IPFS: %s", IPFS_API_URL)
             return True
         except Exception as e:
-            logger.error("IPFS connection failed: %s", e)
+            # Version mismatch - fall back to HTTP API
+            logger.warning("ipfshttpclient failed (%s), using HTTP API", e)
+            self._use_http = True
+            try:
+                import requests
+                resp = requests.post(f"{self.api_url}/api/v0/id", timeout=5)
+                if resp.status_code == 200:
+                    logger.info("Connected to IPFS via HTTP API fallback: %s", self.api_url)
+                    return True
+            except Exception as e2:
+                logger.error("IPFS HTTP fallback failed: %s", e2)
             return False
     
     def close(self):
