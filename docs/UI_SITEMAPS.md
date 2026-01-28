@@ -1,666 +1,1329 @@
-# AMTTP UI Sitemaps by User Profile
+# AMTTP UI Sitemaps by User Profile# AMTTP UI Sitemaps by User Profile
 
-This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Protocol) application.
 
----
+
+This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Trust Protocol) application.This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Protocol) application.
+
+
+
+**Last Updated:** January 2026  ---
+
+**Version:** 2.0
 
 ## 📊 Application Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              AMTTP PLATFORM                                      │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│   ┌───────────────┐    ┌───────────────┐    ┌───────────────┐                   │
-│   │   END USER    │    │    ADMIN      │    │  COMPLIANCE   │                   │
-│   │   (Wallet)    │    │  (Dashboard)  │    │   (Officer)   │                   │
-│   └───────┬───────┘    └───────┬───────┘    └───────┬───────┘                   │
-│           │                    │                    │                            │
-│           ▼                    ▼                    ▼                            │
-│   ┌───────────────────────────────────────────────────────────────┐             │
-│   │                    SHARED INFRASTRUCTURE                       │             │
-│   │  • Web3 Wallet Connection  • AI Risk Assessment               │             │
-│   │  • Blockchain Integration  • Real-time Monitoring             │             │
-│   └───────────────────────────────────────────────────────────────┘             │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
 ---
 
-## 👤 Profile 1: END USER (Standard User)
+```
 
-The standard user profile for conducting secure transfers and managing their wallet.
+## 📊 Application Architecture Overview┌─────────────────────────────────────────────────────────────────────────────────┐
+
+│                              AMTTP PLATFORM                                      │
+
+```├─────────────────────────────────────────────────────────────────────────────────┤
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐│                                                                                  │
+
+│                                    AMTTP PLATFORM                                                ││   ┌───────────────┐    ┌───────────────┐    ┌───────────────┐                   │
+
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤│   │   END USER    │    │    ADMIN      │    │  COMPLIANCE   │                   │
+
+│                                                                                                  ││   │   (Wallet)    │    │  (Dashboard)  │    │   (Officer)   │                   │
+
+│   ┌────────────────┐     ┌────────────────┐     ┌────────────────┐     ┌────────────────┐       ││   └───────┬───────┘    └───────┬───────┘    └───────┬───────┘                   │
+
+│   │   END USER     │     │     ADMIN      │     │  COMPLIANCE    │     │   APPROVER     │       ││           │                    │                    │                            │
+
+│   │   (Wallet)     │     │  (Dashboard)   │     │   (Officer)    │     │   (Arbiter)    │       ││           ▼                    ▼                    ▼                            │
+
+│   └───────┬────────┘     └───────┬────────┘     └───────┬────────┘     └───────┬────────┘       ││   ┌───────────────────────────────────────────────────────────────┐             │
+
+│           │                      │                      │                      │                ││   │                    SHARED INFRASTRUCTURE                       │             │
+
+│           ▼                      ▼                      ▼                      ▼                ││   │  • Web3 Wallet Connection  • AI Risk Assessment               │             │
+
+│   ┌─────────────────────────────────────────────────────────────────────────────────────┐       ││   │  • Blockchain Integration  • Real-time Monitoring             │             │
+
+│   │                           SHARED INFRASTRUCTURE                                      │       ││   └───────────────────────────────────────────────────────────────┘             │
+
+│   │                                                                                      │       ││                                                                                  │
+
+│   │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐               │       │└─────────────────────────────────────────────────────────────────────────────────┘
+
+│   │  │   Web3      │  │   ML Risk   │  │  Compliance │  │   Smart     │               │       │```
+
+│   │  │   Wallet    │  │   Engine    │  │   Services  │  │  Contracts  │               │       │
+
+│   │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘               │       │---
+
+│   │                                                                                      │       │
+
+│   │  • MetaMask/WalletConnect       • Stacked Ensemble (ROC-AUC ~0.94)                 │       │## 👤 Profile 1: END USER (Standard User)
+
+│   │  • Session Keys (ERC-4337)      • GraphSAGE + LGBM + XGBoost                       │       │
+
+│   │  • Gnosis Safe Module           • Real-time Risk Scoring                           │       │The standard user profile for conducting secure transfers and managing their wallet.
+
+│   │  • zkNAF Privacy Proofs         • 7 AML Pattern Detection                          │       │
+
+│   │                                                                                      │       │```
+
+│   └─────────────────────────────────────────────────────────────────────────────────────┘       │┌─────────────────────────────────────────────────────────────────────────────────┐
+
+│                                                                                                  ││                           END USER SITEMAP                                       │
+
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────────────────────────────────────────────┘
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           END USER SITEMAP                                       │
-└─────────────────────────────────────────────────────────────────────────────────┘
 
                               ┌─────────────────┐
-                              │   HOME PAGE     │
+
+---                              │   HOME PAGE     │
+
                               │   (Welcome)     │
-                              │   Route: /      │
+
+## 🔐 Authentication Flow                              │   Route: /      │
+
                               └────────┬────────┘
-                                       │
-            ┌──────────────────────────┼──────────────────────────┐
-            │                          │                          │
-            ▼                          ▼                          ▼
+
+```                                       │
+
+┌─────────────────────────────────────────────────────────────────────────────────┐            ┌──────────────────────────┼──────────────────────────┐
+
+│                           AUTHENTICATION ROUTES                                  │            │                          │                          │
+
+└─────────────────────────────────────────────────────────────────────────────────┘            ▼                          ▼                          ▼
+
    ┌────────────────┐        ┌────────────────┐        ┌────────────────┐
-   │  NOT CONNECTED │        │   CONNECTED    │        │  QUICK LINKS   │
-   │                │        │                │        │                │
-   │ • Welcome View │        │ • Main Content │        │ • Transfer     │
-   │ • Feature Cards│        │ • Bottom Nav   │        │ • History      │
-   │ • Connect CTA  │        │ • Tab Views    │        │ • Wallet       │
-   │ • Trust Badges │        │                │        │ • Admin        │
-   └────────────────┘        └───────┬────────┘        └────────────────┘
-                                     │
-       ┌─────────────────────────────┼─────────────────────────────┐
-       │                             │                             │
-       ▼                             ▼                             ▼
-┌──────────────┐           ┌──────────────┐           ┌──────────────┐
-│     SEND     │           │   HISTORY    │           │  ANALYTICS   │
-│   (Tab 0)    │           │   (Tab 1)    │           │   (Tab 2)    │
-├──────────────┤           ├──────────────┤           ├──────────────┤
-│              │           │              │           │              │
-│ SecureTransfer           │ • TX List    │           │ • Risk Vis   │
-│ Widget:      │           │ • Risk Scores│           │ • DQN Metrics│
-│              │           │ • Filters    │           │ • Charts     │
-│ • Recipient  │           │ • TX Details │           │ • Score Hist │
-│ • Amount     │           │              │           │              │
-│ • Risk Check │           └──────────────┘           └──────────────┘
-│ • MEV Protect│                  │
-│ • Confirm    │                  ▼
-│              │           ┌──────────────┐
-└──────────────┘           │  TX DETAIL   │
-       │                   │   (Modal)    │
+
+                              ┌─────────────────┐   │  NOT CONNECTED │        │   CONNECTED    │        │  QUICK LINKS   │
+
+                              │    SIGN IN      │   │                │        │                │        │                │
+
+                              │  Route: /sign-in│   │ • Welcome View │        │ • Main Content │        │ • Transfer     │
+
+                              └────────┬────────┘   │ • Feature Cards│        │ • Bottom Nav   │        │ • History      │
+
+                                       │   │ • Connect CTA  │        │ • Tab Views    │        │ • Wallet       │
+
+            ┌──────────────────────────┼──────────────────────────┐   │ • Trust Badges │        │                │        │ • Admin        │
+
+            │                          │                          │   └────────────────┘        └───────┬────────┘        └────────────────┘
+
+            ▼                          ▼                          ▼                                     │
+
+   ┌────────────────┐        ┌────────────────┐        ┌────────────────┐       ┌─────────────────────────────┼─────────────────────────────┐
+
+   │    REGISTER    │        │ SELECT PROFILE │        │  WALLET AUTH   │       │                             │                             │
+
+   │ Route: /register│       │Route: /select- │        │                │       ▼                             ▼                             ▼
+
+   │                │        │      profile   │        │ • MetaMask     │┌──────────────┐           ┌──────────────┐           ┌──────────────┐
+
+   │ • Email/Pass   │        │                │        │ • WalletConnect││     SEND     │           │   HISTORY    │           │  ANALYTICS   │
+
+   │ • Wallet Link  │        │ • End User     │        │ • Coinbase     ││   (Tab 0)    │           │   (Tab 1)    │           │   (Tab 2)    │
+
+   │ • KYC Upload   │        │ • Admin        │        │                │├──────────────┤           ├──────────────┤           ├──────────────┤
+
+   └────────────────┘        │ • Compliance   │        └────────────────┘│              │           │              │           │              │
+
+                             └────────┬────────┘│ SecureTransfer           │ • TX List    │           │ • Risk Vis   │
+
+                                      ││ Widget:      │           │ • Risk Scores│           │ • DQN Metrics│
+
+            ┌─────────────────────────┼─────────────────────────┐│              │           │ • Filters    │           │ • Charts     │
+
+            │                         │                         ││ • Recipient  │           │ • TX Details │           │ • Score Hist │
+
+            ▼                         ▼                         ▼│ • Amount     │           │              │           │              │
+
+     ┌────────────┐           ┌────────────┐           ┌────────────┐│ • Risk Check │           └──────────────┘           └──────────────┘
+
+     │    HOME    │           │   ADMIN    │           │ COMPLIANCE ││ • MEV Protect│                  │
+
+     │  Route: /  │           │Route: /admin│          │Route: /    ││ • Confirm    │                  ▼
+
+     │  (End User)│           │            │           │ compliance ││              │           ┌──────────────┐
+
+     └────────────┘           └────────────┘           └────────────┘└──────────────┘           │  TX DETAIL   │
+
+```       │                   │   (Modal)    │
+
        ▼                   ├──────────────┤
-┌──────────────┐           │ • TX ID      │
+
+---┌──────────────┐           │ • TX ID      │
+
 │ TX RESULT    │           │ • Addresses  │
-│   (Modal)    │           │ • Amount     │
+
+## 👤 Profile 1: END USER (Standard User)│   (Modal)    │           │ • Amount     │
+
 ├──────────────┤           │ • Risk Score │
-│ • Success/   │           │ • Status     │
+
+The standard user profile for conducting secure transfers and managing their wallet.│ • Success/   │           │ • Status     │
+
 │   Failure    │           │ • Timestamp  │
-│ • TX Hash    │           └──────────────┘
-│ • Details    │
-└──────────────┘
+
+```│ • TX Hash    │           └──────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐│ • Details    │
+
+│                           END USER SITEMAP                                       │└──────────────┘
+
+└─────────────────────────────────────────────────────────────────────────────────┘
 
        │
-       ▼
-┌──────────────┐
-│  SECURITY    │
-│   (Tab 3)    │
-├──────────────┤
-│              │
-│ • Wallet Info│
-│ • Security   │
-│   Settings   │
-│ • Risk Prefs │
-│              │
-└──────────────┘
-```
 
-### End User Navigation Flow
+                              ┌─────────────────┐       ▼
 
-```
-HOME (/)
-├── 📱 Bottom Navigation Bar (when connected)
-│   ├── Send (Tab 0)      → SecureTransferWidget
-│   ├── History (Tab 1)   → Transaction History List
-│   ├── Analytics (Tab 2) → Risk Visualizer + DQN Metrics  
-│   └── Security (Tab 3)  → Security & Wallet Settings
-│
-├── 🔗 Quick Links (sidebar)
-│   ├── /transfer → Dedicated Transfer Page
-│   ├── /history  → Full History Page
-│   ├── /wallet   → Wallet Management Page
-│   └── /admin    → Admin Dashboard (if authorized)
-│
-└── ⚙️ Header Actions
-    └── /settings → Settings Page
-```
+                              │   HOME PAGE     │┌──────────────┐
 
----
+                              │   Route: /      ││  SECURITY    │
 
-## 👨‍💼 Profile 2: ADMIN USER
+                              └────────┬────────┘│   (Tab 3)    │
 
-The administrator profile with full system oversight and management capabilities.
+                                       │├──────────────┤
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           ADMIN SITEMAP                                          │
-└─────────────────────────────────────────────────────────────────────────────────┘
+            ┌──────────────────────────┼──────────────────────────┐│              │
 
-                              ┌─────────────────┐
-                              │   ADMIN PAGE    │
-                              │   Route: /admin │
-                              └────────┬────────┘
-                                       │
-     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
-     │                 │               │               │                 │
-     ▼                 ▼               ▼               ▼                 ▼
-┌─────────┐      ┌─────────┐     ┌─────────┐    ┌─────────┐      ┌─────────┐
+            │                          │                          ││ • Wallet Info│
+
+            ▼                          ▼                          ▼│ • Security   │
+
+   ┌────────────────┐        ┌────────────────┐        ┌────────────────┐│   Settings   │
+
+   │  NOT CONNECTED │        │   CONNECTED    │        │  SIDEBAR NAV   ││ • Risk Prefs │
+
+   │                │        │                │        │                ││              │
+
+   │ • Welcome View │        │ • Main Content │        │ • Transfer     │└──────────────┘
+
+   │ • Feature Cards│        │ • Bottom Nav   │        │ • History      │```
+
+   │ • Connect CTA  │        │ • 4 Tab Views  │        │ • NFT Swap     │
+
+   │ • Trust Badges │        │                │        │ • Cross-Chain  │### End User Navigation Flow
+
+   │ • Features     │        │                │        │ • Disputes     │
+
+   │   Carousel     │        │                │        │ • Safe         │```
+
+   └────────────────┘        └───────┬────────┘        │ • Session Keys │HOME (/)
+
+                                     │                 │ • zkNAF        │├── 📱 Bottom Navigation Bar (when connected)
+
+                                     │                 │ • Settings     ││   ├── Send (Tab 0)      → SecureTransferWidget
+
+       ┌─────────────────────────────┼─────────────────┘│   ├── History (Tab 1)   → Transaction History List
+
+       │                             │                             │   ├── Analytics (Tab 2) → Risk Visualizer + DQN Metrics  
+
+       ▼                             ▼                             │   └── Security (Tab 3)  → Security & Wallet Settings
+
+┌──────────────┐           ┌──────────────┐           ┌──────────────┐│
+
+│     SEND     │           │   HISTORY    │           │  ANALYTICS   │├── 🔗 Quick Links (sidebar)
+
+│   (Tab 0)    │           │   (Tab 1)    │           │   (Tab 2)    ││   ├── /transfer → Dedicated Transfer Page
+
+├──────────────┤           ├──────────────┤           ├──────────────┤│   ├── /history  → Full History Page
+
+│              │           │              │           │              ││   ├── /wallet   → Wallet Management Page
+
+│SecureTransfer│           │ • TX List    │           │ • Risk       ││   └── /admin    → Admin Dashboard (if authorized)
+
+│Widget:       │           │ • Risk Scores│           │   Visualizer ││
+
+│              │           │ • Filters    │           │ • ML Metrics │└── ⚙️ Header Actions
+
+│ • Recipient  │           │ • TX Details │           │   (ROC-AUC,  │    └── /settings → Settings Page
+
+│ • Amount     │           │ • Status     │           │    PR-AUC,   │```
+
+│ • Analyze    │           │   Badges     │           │    F1)       │
+
+│   Risk ⭐    │           │              │           │ • Charts     │---
+
+│ • Policy     │           └──────────────┘           │ • History    │
+
+│   Check      │                  │                   │              │## 👨‍💼 Profile 2: ADMIN USER
+
+│ • Labels     │                  ▼                   └──────────────┘
+
+│ • Confirm TX │           ┌──────────────┐                  │The administrator profile with full system oversight and management capabilities.
+
+│              │           │  TX DETAIL   │                  │
+
+└──────────────┘           │   (Modal)    │           ┌──────────────┐```
+
+       │                   ├──────────────┤           │  SECURITY    │┌─────────────────────────────────────────────────────────────────────────────────┐
+
+       ▼                   │ • TX ID      │           │   (Tab 3)    ││                           ADMIN SITEMAP                                          │
+
+┌──────────────┐           │ • Addresses  │           ├──────────────┤└─────────────────────────────────────────────────────────────────────────────────┘
+
+│ TX RESULT    │           │ • Amount     │           │              │
+
+│   (Modal)    │           │ • Risk Score │           │ • Wallet     │                              ┌─────────────────┐
+
+├──────────────┤           │ • Status     │           │   Info       │                              │   ADMIN PAGE    │
+
+│ • Success/   │           │ • Labels     │           │ • Risk Prefs │                              │   Route: /admin │
+
+│   Failure    │           │ • Timestamp  │           │ • 2FA Setup  │                              └────────┬────────┘
+
+│ • TX Hash    │           └──────────────┘           │              │                                       │
+
+│ • Explorer   │                                      └──────────────┘     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
+
+│   Link       │     │                 │               │               │                 │
+
+└──────────────┘     ▼                 ▼               ▼               ▼                 ▼
+
+```┌─────────┐      ┌─────────┐     ┌─────────┐    ┌─────────┐      ┌─────────┐
+
 │OVERVIEW │      │   DQN   │     │  TRANS  │    │POLICIES │      │ WEBHOOKS│
-│ (Tab 0) │      │ANALYTICS│     │ (Tab 2) │    │ (Tab 3) │      │(Tab 3.2)│
+
+### End User Additional Pages│ (Tab 0) │      │ANALYTICS│     │ (Tab 2) │    │ (Tab 3) │      │(Tab 3.2)│
+
 │         │      │ (Tab 1) │     │         │    │         │      │         │
-└────┬────┘      └────┬────┘     └────┬────┘    └────┬────┘      └─────────┘
-     │                │               │               │
-     ▼                ▼               ▼               ▼
-┌─────────────────────────────────────────────────────────────────────────┐
+
+```└────┬────┘      └────┬────┘     └────┬────┘    └────┬────┘      └─────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐     │                │               │               │
+
+│                       END USER - ADDITIONAL FEATURES                             │     ▼                ▼               ▼               ▼
+
+└─────────────────────────────────────────────────────────────────────────────────┘┌─────────────────────────────────────────────────────────────────────────┐
+
 │                           OVERVIEW TAB                                   │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │System Status │  │  DQN Model   │  │ Transactions │  │Fraud Blocked │ │
-│  │  (Health)    │  │   Status     │  │    Today     │  │    Count     │ │
-│  │ • Uptime %   │  │ • Version    │  │ • Count      │  │ • Fraud Rate │ │
-│  │ • Operational│  │ • Active     │  │ • Change %   │  │ • Blocked #  │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘ │
-│                                                                          │
-│  ┌──────────────┐  ┌──────────────┐                                     │
-│  │ Pending EDD  │  │   Alerts     │                                     │
-│  │   Cases      │  │ Unresolved   │                                     │
-│  │ • Count      │  │ • Count      │                                     │
-│  └──────────────┘  └──────────────┘                                     │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │              REAL-TIME TRANSACTION FEED                            │ │
-│  │  • Live TX Stream  • Risk Indicators  • Status Updates             │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │              RISK DISTRIBUTION CHART (Pie)                         │ │
-│  │  • Low Risk %  • Medium Risk %  • High Risk %  • Blocked %         │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+
+┌────────────────┐      ┌────────────────┐      ┌────────────────┐├─────────────────────────────────────────────────────────────────────────┤
+
+│   NFT SWAP     │      │  CROSS-CHAIN   │      │    DISPUTES    ││                                                                          │
+
+│Route: /nft-swap│      │Route: /cross-  │      │Route: /disputes││  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+
+├────────────────┤      │      chain     │      ├────────────────┤│  │System Status │  │  DQN Model   │  │ Transactions │  │Fraud Blocked │ │
+
+│                │      ├────────────────┤      │                ││  │  (Health)    │  │   Status     │  │    Today     │  │    Count     │ │
+
+│ AMTTPNFT.sol   │      │AMTTPCrossChain │      │AMTTPDispute    ││  │ • Uptime %   │  │ • Version    │  │ • Count      │  │ • Fraud Rate │ │
+
+│                │      │     .sol       │      │ Resolver.sol   ││  │ • Operational│  │ • Active     │  │ • Change %   │  │ • Blocked #  │ │
+
+│ • Create Swap  │      │                │      │                ││  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘ │
+
+│ • List My NFTs │      │ • Bridge ETH   │      │ • Open Cases   ││                                                                          │
+
+│ • Active Swaps │      │ • Chain Select │      │ • My Disputes  ││  ┌──────────────┐  ┌──────────────┐                                     │
+
+│ • Claim NFT    │      │ • Fee Preview  │      │ • Submit Claim ││  │ Pending EDD  │  │   Alerts     │                                     │
+
+│ • Escrow View  │      │ • History      │      │ • Evidence     ││  │   Cases      │  │ Unresolved   │                                     │
+
+│                │      │                │      │                ││  │ • Count      │  │ • Count      │                                     │
+
+└────────────────┘      └────────────────┘      └───────┬────────┘│  └──────────────┘  └──────────────┘                                     │
+
+                                                        ││                                                                          │
+
+                                                        ▼│  ┌────────────────────────────────────────────────────────────────────┐ │
+
+                                                ┌────────────────┐│  │              REAL-TIME TRANSACTION FEED                            │ │
+
+                                                │DISPUTE DETAIL  ││  │  • Live TX Stream  • Risk Indicators  • Status Updates             │ │
+
+                                                │Route: /dispute ││  └────────────────────────────────────────────────────────────────────┘ │
+
+                                                │       /:id     ││                                                                          │
+
+                                                ├────────────────┤│  ┌────────────────────────────────────────────────────────────────────┐ │
+
+                                                │ • Case Info    ││  │              RISK DISTRIBUTION CHART (Pie)                         │ │
+
+                                                │ • Evidence     ││  │  • Low Risk %  • Medium Risk %  • High Risk %  • Blocked %         │ │
+
+                                                │ • Timeline     ││  └────────────────────────────────────────────────────────────────────┘ │
+
+                                                │ • Submit Appeal││                                                                          │
+
+                                                │ • Kleros Vote  │└─────────────────────────────────────────────────────────────────────────┘
+
+                                                └────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        DQN ANALYTICS TAB                                 │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                    MODEL PERFORMANCE METRICS                       │  │
-│  │   ┌──────────┐    ┌──────────┐    ┌──────────┐                    │  │
-│  │   │ F1 Score │    │Precision │    │  Recall  │                    │  │
-│  │   │  0.669   │    │  0.723   │    │  0.625   │                    │  │
-│  │   │  66.9%   │    │  72.3%   │    │  62.5%   │                    │  │
-│  │   └──────────┘    └──────────┘    └──────────┘                    │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                 FEATURE IMPORTANCE (Bar Chart)                     │  │
-│  │   Amount ████████████████████ 0.85                                │  │
+
+┌────────────────┐      ┌────────────────┐      ┌────────────────┐│                        DQN ANALYTICS TAB                                 │
+
+│     SAFE       │      │  SESSION KEYS  │      │     zkNAF      │├─────────────────────────────────────────────────────────────────────────┤
+
+│  Route: /safe  │      │Route: /session-│      │ Route: /zknaf  ││                                                                          │
+
+├────────────────┤      │      keys      │      ├────────────────┤│  ┌───────────────────────────────────────────────────────────────────┐  │
+
+│                │      ├────────────────┤      │                ││  │                    MODEL PERFORMANCE METRICS                       │  │
+
+│AMTTPSafeModule │      │AMTTPBiconomy   │      │AMTTPCoreZkNAF  ││  │   ┌──────────┐    ┌──────────┐    ┌──────────┐                    │  │
+
+│     .sol       │      │   Module.sol   │      │     .sol       ││  │   │ F1 Score │    │Precision │    │  Recall  │                    │  │
+
+│                │      │                │      │                ││  │   │  0.669   │    │  0.723   │    │  0.625   │                    │  │
+
+│ • Create Safe  │      │ • Create Key   │      │ • Generate     ││  │   │  66.9%   │    │  72.3%   │    │  62.5%   │                    │  │
+
+│ • Add Owners   │      │ • Key Limits   │      │   Proof        ││  │   └──────────┘    └──────────┘    └──────────┘                    │  │
+
+│ • Set Policy   │      │ • Expiration   │      │ • Verify KYC   ││  └───────────────────────────────────────────────────────────────────┘  │
+
+│ • Queue TX     │      │ • Active Keys  │      │ • Privacy Mode ││                                                                          │
+
+│ • Execute TX   │      │ • Revoke Key   │      │ • Attestations ││  ┌───────────────────────────────────────────────────────────────────┐  │
+
+│                │      │                │      │                ││  │                 FEATURE IMPORTANCE (Bar Chart)                     │  │
+
+└────────────────┘      └────────────────┘      └────────────────┘│  │   Amount ████████████████████ 0.85                                │  │
+
 │  │   Frequency ██████████████ 0.72                                   │  │
-│  │   Geographic █████████████ 0.68                                   │  │
-│  │   Time ██████████ 0.54                                            │  │
-│  │   Account Age █████████ 0.49                                      │  │
-│  │   Velocity ████████ 0.43                                          │  │
-│  │   Cross-border ███████ 0.38                                       │  │
-│  │   Deviation ██████ 0.31                                           │  │
-│  │   Reputation █████ 0.27                                           │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                 TRAINING DATASET ANALYSIS                          │  │
-│  │   • Total Transactions: 28,457                                    │  │
-│  │   • Fraud Cases: 1,842 (6.5%)                                     │  │
-│  │   • Training Time: 2.3 hours                                      │  │
-│  │   • Model Size: 15.2 MB                                           │  │
+
+┌────────────────┐      ┌────────────────┐│  │   Geographic █████████████ 0.68                                   │  │
+
+│    WALLET      │      │   SETTINGS     ││  │   Time ██████████ 0.54                                            │  │
+
+│Route: /wallet  │      │Route: /settings││  │   Account Age █████████ 0.49                                      │  │
+
+├────────────────┤      ├────────────────┤│  │   Velocity ████████ 0.43                                          │  │
+
+│                │      │                ││  │   Cross-border ███████ 0.38                                       │  │
+
+│Interactive     │      │ • Theme        ││  │   Deviation ██████ 0.31                                           │  │
+
+│Wallet Widget   │      │ • Notifications││  │   Reputation █████ 0.27                                           │  │
+
+│                │      │ • Language     ││  └───────────────────────────────────────────────────────────────────┘  │
+
+│ • Balance      │      │ • Risk Prefs   ││                                                                          │
+
+│ • Addresses    │      │ • API Keys     ││  ┌───────────────────────────────────────────────────────────────────┐  │
+
+│ • Token List   │      │ • Export Data  ││  │                 TRAINING DATASET ANALYSIS                          │  │
+
+│ • TX History   │      │                ││  │   • Total Transactions: 28,457                                    │  │
+
+│                │      │                ││  │   • Fraud Cases: 1,842 (6.5%)                                     │  │
+
+└────────────────┘      └────────────────┘│  │   • Training Time: 2.3 hours                                      │  │
+
+```│  │   • Model Size: 15.2 MB                                           │  │
+
 │  │   • Inference Time: <100ms                                        │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │              LIVE PERFORMANCE MONITORING (Line Chart)              │  │
-│  │              Accuracy over last 24 hours                           │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        TRANSACTIONS TAB                                  │
-├─────────────────────────────────────────────────────────────────────────┤
+### End User Navigation Flow│  └───────────────────────────────────────────────────────────────────┘  │
+
 │                                                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │  Filter: [All] [High Risk] [Blocked]    Showing X transactions  │    │
+
+```│  ┌───────────────────────────────────────────────────────────────────┐  │
+
+HOME (/)│  │              LIVE PERFORMANCE MONITORING (Line Chart)              │  │
+
+├── 📱 Bottom Navigation Bar (when connected)│  │              Accuracy over last 24 hours                           │  │
+
+│   ├── Send (Tab 0)      → SecureTransferWidget with ML Risk Analysis│  └───────────────────────────────────────────────────────────────────┘  │
+
+│   ├── History (Tab 1)   → Transaction History with Risk Scores│                                                                          │
+
+│   ├── Analytics (Tab 2) → Risk Visualizer + Model Metrics  └─────────────────────────────────────────────────────────────────────────┘
+
+│   └── Security (Tab 3)  → Wallet & Security Settings
+
+│┌─────────────────────────────────────────────────────────────────────────┐
+
+├── 📂 Sidebar Navigation│                        TRANSACTIONS TAB                                  │
+
+│   ├── /transfer     → Dedicated Transfer Page├─────────────────────────────────────────────────────────────────────────┤
+
+│   ├── /history      → Full History Page│                                                                          │
+
+│   ├── /wallet       → Wallet Management Page│  ┌─────────────────────────────────────────────────────────────────┐    │
+
+│   ├── /nft-swap     → NFT Atomic Swaps (AMTTPNFT.sol)│  │  Filter: [All] [High Risk] [Blocked]    Showing X transactions  │    │
+
+│   ├── /cross-chain  → Cross-Chain Bridge (LayerZero)│  └─────────────────────────────────────────────────────────────────┘    │
+
+│   ├── /disputes     → Dispute Center (Kleros)│                                                                          │
+
+│   ├── /safe         → Gnosis Safe Management│  ┌─────────────────────────────────────────────────────────────────┐    │
+
+│   ├── /session-keys → ERC-4337 Session Keys│  │                    TRANSACTION LIST                              │    │
+
+│   ├── /zknaf        → Zero-Knowledge Proofs│  │  ┌───────────────────────────────────────────────────────────┐  │    │
+
+│   └── /settings     → Application Settings│  │  │ 🟢 0.15 ETH  From: 0x742d...  To: 0x8ba1...  APPROVED     │  │    │
+
+││  │  │ 🟡 0.25 ETH  From: 0x8ba1...  To: 0x742d...  ESCROW       │  │    │
+
+└── ⚙️ Header Actions│  │  │ 🔴 1.50 ETH  From: 0x742d...  To: 0xAb58...  BLOCKED      │  │    │
+
+    └── /settings → Settings Page│  │  │ 🟢 0.50 ETH  From: 0xC02a...  To: 0x742d...  APPROVED     │  │    │
+
+```│  │  └───────────────────────────────────────────────────────────┘  │    │
+
 │  └─────────────────────────────────────────────────────────────────┘    │
-│                                                                          │
+
+---│                                                                          │
+
 │  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │                    TRANSACTION LIST                              │    │
-│  │  ┌───────────────────────────────────────────────────────────┐  │    │
-│  │  │ 🟢 0.15 ETH  From: 0x742d...  To: 0x8ba1...  APPROVED     │  │    │
-│  │  │ 🟡 0.25 ETH  From: 0x8ba1...  To: 0x742d...  ESCROW       │  │    │
-│  │  │ 🔴 1.50 ETH  From: 0x742d...  To: 0xAb58...  BLOCKED      │  │    │
-│  │  │ 🟢 0.50 ETH  From: 0xC02a...  To: 0x742d...  APPROVED     │  │    │
-│  │  └───────────────────────────────────────────────────────────┘  │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │              TRANSACTION DETAIL MODAL (on tap)                   │    │
+
+## 👨‍💼 Profile 2: ADMIN USER│  │              TRANSACTION DETAIL MODAL (on tap)                   │    │
+
 │  │  • Transaction ID    • Amount       • Risk Score                 │    │
-│  │  • From Address      • To Address   • Status                     │    │
+
+The administrator profile with full system oversight and management capabilities.│  │  • From Address      • To Address   • Status                     │    │
+
 │  │  • Timestamp         • Actions: [APPROVE] [REJECT]               │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+
+```│  └─────────────────────────────────────────────────────────────────┘    │
+
+┌─────────────────────────────────────────────────────────────────────────────────┐│                                                                          │
+
+│                           ADMIN SITEMAP                                          │└─────────────────────────────────────────────────────────────────────────┘
+
+└─────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        POLICIES TAB                                      │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                     ACTIVE POLICIES                                │  │
-│  │  ✓ AML Screening      | Anti-money laundering rules    | AML     │  │
-│  │  ✓ Sanctions Check    | OFAC/SDN list verification     | OFAC    │  │
-│  │  ✓ Velocity Limits    | Transaction frequency caps     | LIMITS  │  │
-│  │  ✓ Geographic Rules   | Country-based restrictions     | GEO     │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                    RISK THRESHOLDS                                 │  │
-│  │  Low Risk Threshold:    ▓▓▓▓▓░░░░░░░░░░░░░░░  25%                │  │
-│  │  Medium Risk Threshold: ▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░  50%                │  │
-│  │  High Risk Threshold:   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░  75%                │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                   TRANSACTION LIMITS                               │  │
-│  │  Daily Limit:        $50,000                                      │  │
-│  │  Transaction Limit:  $10,000                                      │  │
-│  │  EDD Threshold:      $15,000                                      │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                   REGISTERED WEBHOOKS                              │  │
-│  │  • High Risk Alert    → https://api.example.com/alerts           │  │
-│  │  • Blocked TX         → https://api.example.com/blocked          │  │
-│  │  • Dispute Created    → https://api.example.com/disputes         │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
 
-### Admin Navigation Flow
+                              ┌─────────────────┐│                        POLICIES TAB                                      │
 
-```
-ADMIN (/admin)
-├── 📊 Tab Navigation
-│   ├── Overview (Tab 0)
-│   │   ├── System Health Cards
-│   │   ├── Compliance Status (EDD, Alerts)
-│   │   ├── Real-time TX Feed
-│   │   └── Risk Distribution Chart
-│   │
-│   ├── DQN Analytics (Tab 1)
-│   │   ├── Performance Metrics (F1, Precision, Recall)
-│   │   ├── Feature Importance Chart
-│   │   ├── Training Dataset Stats
-│   │   └── Live Performance Graph
-│   │
-│   ├── Transactions (Tab 2)
-│   │   ├── Filter Controls
-│   │   ├── Transaction List
-│   │   └── Detail Modal → Approve/Reject Actions
-│   │
-│   └── Policies (Tab 3)
-│       ├── Active Policies List
-│       ├── Risk Threshold Sliders
-│       ├── Transaction Limits
-│       └── Webhook Configuration
-│
-└── 🔙 Back to Home (/)
-```
+                              │   ADMIN PAGE    │├─────────────────────────────────────────────────────────────────────────┤
 
----
+                              │   Route: /admin ││                                                                          │
 
-## 🔍 Profile 3: COMPLIANCE OFFICER
+                              └────────┬────────┘│  ┌───────────────────────────────────────────────────────────────────┐  │
 
-The compliance officer profile focuses on regulatory oversight, EDD reviews, and audit trails.
+                                       ││  │                     ACTIVE POLICIES                                │  │
+
+     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐│  │  ✓ AML Screening      | Anti-money laundering rules    | AML     │  │
+
+     │                 │               │               │                 ││  │  ✓ Sanctions Check    | OFAC/SDN list verification     | OFAC    │  │
+
+     ▼                 ▼               ▼               ▼                 ▼│  │  ✓ Velocity Limits    | Transaction frequency caps     | LIMITS  │  │
+
+┌─────────┐      ┌─────────┐     ┌─────────┐    ┌─────────┐      ┌─────────┐│  │  ✓ Geographic Rules   | Country-based restrictions     | GEO     │  │
+
+│OVERVIEW │      │   ML    │     │  TRANS  │    │POLICIES │      │DETECTION││  └───────────────────────────────────────────────────────────────────┘  │
+
+│ (Tab 0) │      │ANALYTICS│     │ (Tab 2) │    │ (Tab 3) │      │ STUDIO  ││                                                                          │
+
+│         │      │ (Tab 1) │     │         │    │         │      │ (Link)  ││  ┌───────────────────────────────────────────────────────────────────┐  │
+
+└────┬────┘      └────┬────┘     └────┬────┘    └────┬────┘      └────┬────┘│  │                    RISK THRESHOLDS                                 │  │
+
+     │                │               │               │                ││  │  Low Risk Threshold:    ▓▓▓▓▓░░░░░░░░░░░░░░░  25%                │  │
+
+     ▼                ▼               ▼               ▼                ▼│  │  Medium Risk Threshold: ▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░  50%                │  │
+
+┌─────────────────────────────────────────────────────────────────────────────┐│  │  High Risk Threshold:   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░  75%                │  │
+
+│                           OVERVIEW TAB                                       ││  └───────────────────────────────────────────────────────────────────┘  │
+
+│                                                                              ││                                                                          │
+
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐             ││  ┌───────────────────────────────────────────────────────────────────┐  │
+
+│  │  System Health  │  │   ML Model      │  │  Risk Dist.     │             ││  │                   TRANSACTION LIMITS                               │  │
+
+│  │  • Uptime       │  │  • Version      │  │  • CRITICAL     │             ││  │  Daily Limit:        $50,000                                      │  │
+
+│  │  • Services     │  │  • ROC-AUC 0.94 │  │  • HIGH         │             ││  │  Transaction Limit:  $10,000                                      │  │
+
+│  │  • Alerts       │  │  • PR-AUC 0.87  │  │  • MEDIUM       │             ││  │  EDD Threshold:      $15,000                                      │  │
+
+│  │                 │  │  • F1 0.87      │  │  • LOW          │             ││  └───────────────────────────────────────────────────────────────────┘  │
+
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘             ││                                                                          │
+
+│                                                                              ││  ┌───────────────────────────────────────────────────────────────────┐  │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││  │                   REGISTERED WEBHOOKS                              │  │
+
+│  │                    REAL-TIME TRANSACTION FEED                           │││  │  • High Risk Alert    → https://api.example.com/alerts           │  │
+
+│  │  • Live TX stream with risk scores                                      │││  │  • Blocked TX         → https://api.example.com/blocked          │  │
+
+│  │  • Flagged transactions highlighted                                     │││  │  • Dispute Created    → https://api.example.com/disputes         │  │
+
+│  │  • Click to expand details                                              │││  └───────────────────────────────────────────────────────────────────┘  │
+
+│  └─────────────────────────────────────────────────────────────────────────┘││                                                                          │
+
+└─────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────────────────────────────────────┘
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                       COMPLIANCE OFFICER SITEMAP                                 │
-└─────────────────────────────────────────────────────────────────────────────────┘
 
-                              ┌─────────────────┐
-                              │  ADMIN PAGE     │
-                              │  (Compliance    │
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│                           ML ANALYTICS TAB                                   │### Admin Navigation Flow
+
+│                                                                              │
+
+│  ┌──────────────────────────────────────────────────────────┐              │```
+
+│  │                  MODEL PERFORMANCE                        │              │ADMIN (/admin)
+
+│  │                                                           │              │├── 📊 Tab Navigation
+
+│  │  Stacked Ensemble: GraphSAGE + LGBM + XGBoost            │              ││   ├── Overview (Tab 0)
+
+│  │  + Linear Meta-Learner                                    │              ││   │   ├── System Health Cards
+
+│  │                                                           │              ││   │   ├── Compliance Status (EDD, Alerts)
+
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │              ││   │   ├── Real-time TX Feed
+
+│  │  │  ROC-AUC    │  │   PR-AUC    │  │     F1      │      │              ││   │   └── Risk Distribution Chart
+
+│  │  │    0.94     │  │    0.87     │  │    0.87     │      │              ││   │
+
+│  │  └─────────────┘  └─────────────┘  └─────────────┘      │              ││   ├── DQN Analytics (Tab 1)
+
+│  └──────────────────────────────────────────────────────────┘              ││   │   ├── Performance Metrics (F1, Precision, Recall)
+
+│                                                                              ││   │   ├── Feature Importance Chart
+
+│  ┌──────────────────────────────────────────────────────────┐              ││   │   ├── Training Dataset Stats
+
+│  │                  PATTERN DETECTION                        │              ││   │   └── Live Performance Graph
+
+│  │                                                           │              ││   │
+
+│  │  7 AML Patterns Detected:                                │              ││   ├── Transactions (Tab 2)
+
+│  │  • SMURFING    • LAYERING   • FAN-OUT   • FAN-IN        │              ││   │   ├── Filter Controls
+
+│  │  • PEELING     • STRUCTURING • VELOCITY                  │              ││   │   ├── Transaction List
+
+│  │                                                           │              ││   │   └── Detail Modal → Approve/Reject Actions
+
+│  └──────────────────────────────────────────────────────────┘              ││   │
+
+│                                                                              ││   └── Policies (Tab 3)
+
+│  ┌──────────────────────────────────────────────────────────┐              ││       ├── Active Policies List
+
+│  │                  RISK SCORE HISTOGRAM                     │              ││       ├── Risk Threshold Sliders
+
+│  │                                                           │              ││       ├── Transaction Limits
+
+│  │  [Chart: Distribution of risk scores across addresses]   │              ││       └── Webhook Configuration
+
+│  └──────────────────────────────────────────────────────────┘              ││
+
+└─────────────────────────────────────────────────────────────────────────────┘└── 🔙 Back to Home (/)
+
+```
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│                        TRANSACTIONS TAB                                      │---
+
+│                                                                              │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐│## 🔍 Profile 3: COMPLIANCE OFFICER
+
+│  │ Filters: [Status ▼] [Risk Level ▼] [Date Range] [Search Address]       ││
+
+│  └─────────────────────────────────────────────────────────────────────────┘│The compliance officer profile focuses on regulatory oversight, EDD reviews, and audit trails.
+
+│                                                                              │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐│```
+
+│  │ TX Hash    │ From        │ To          │ Amount  │ Risk │ Status       ││┌─────────────────────────────────────────────────────────────────────────────────┐
+
+│  │───────────────────────────────────────────────────────────────────────││││                       COMPLIANCE OFFICER SITEMAP                                 │
+
+│  │ 0xa1b2... │ 0x1234...   │ 0xabcd...   │ 1.5 ETH │ 0.85 │ ⚠️ REVIEW   ││└─────────────────────────────────────────────────────────────────────────────────┘
+
+│  │ 0xc3d4... │ 0x5678...   │ 0xef01...   │ 0.1 ETH │ 0.12 │ ✅ APPROVED  ││
+
+│  │ 0xe5f6... │ 0x9abc...   │ 0x2345...   │ 50 ETH  │ 0.92 │ 🛑 BLOCKED   ││                              ┌─────────────────┐
+
+│  └─────────────────────────────────────────────────────────────────────────┘│                              │  ADMIN PAGE     │
+
+└─────────────────────────────────────────────────────────────────────────────┘                              │  (Compliance    │
+
                               │   Focus)        │
-                              └────────┬────────┘
-                                       │
-     ┌─────────────────┬───────────────┴───────────────┬─────────────────┐
-     │                 │                               │                 │
-     ▼                 ▼                               ▼                 ▼
-┌─────────────┐  ┌─────────────┐              ┌─────────────┐  ┌─────────────┐
-│  OVERVIEW   │  │TRANSACTIONS │              │   POLICIES  │  │   REPORTS   │
-│ (Compliance)│  │  (Review)   │              │(Management) │  │  (Audit)    │
-└──────┬──────┘  └──────┬──────┘              └──────┬──────┘  └──────┬──────┘
-       │                │                            │                │
-       ▼                ▼                            ▼                ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                          COMPLIANCE DASHBOARD                                    │
+
+┌─────────────────────────────────────────────────────────────────────────────┐                              └────────┬────────┘
+
+│                          POLICIES TAB                                        │                                       │
+
+│                                                                              │     ┌─────────────────┬───────────────┴───────────────┬─────────────────┐
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐│     │                 │                               │                 │
+
+│  │ Risk Thresholds        │ Transaction Limits     │ Webhooks              ││     ▼                 ▼                               ▼                 ▼
+
+│  │────────────────────────│────────────────────────│───────────────────────││┌─────────────┐  ┌─────────────┐              ┌─────────────┐  ┌─────────────┐
+
+│  │ CRITICAL: ≥ 0.85       │ Max Single: 100 ETH    │ ✅ Slack #alerts      │││  OVERVIEW   │  │TRANSACTIONS │              │   POLICIES  │  │   REPORTS   │
+
+│  │ HIGH:     ≥ 0.70       │ Daily:      500 ETH    │ ✅ Email ops@         │││ (Compliance)│  │  (Review)   │              │(Management) │  │  (Audit)    │
+
+│  │ MEDIUM:   ≥ 0.50       │ Auto-approve: < 0.30   │ ❌ PagerDuty          ││└──────┬──────┘  └──────┬──────┘              └──────┬──────┘  └──────┬──────┘
+
+│  │ LOW:      ≥ 0.25       │                        │                       ││       │                │                            │                │
+
+│  └─────────────────────────────────────────────────────────────────────────┘│       ▼                ▼                            ▼                ▼
+
+└─────────────────────────────────────────────────────────────────────────────┘┌─────────────────────────────────────────────────────────────────────────────────┐
+
+```│                          COMPLIANCE DASHBOARD                                    │
+
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
+
+### Admin Additional Pages│                                                                                  │
+
 │  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        EDD CASE MANAGEMENT                                  │ │
-│  ├────────────────────────────────────────────────────────────────────────────┤ │
-│  │                                                                             │ │
-│  │  📋 PENDING EDD CASES                                                       │ │
+
+```│  │                        EDD CASE MANAGEMENT                                  │ │
+
+┌─────────────────────────────────────────────────────────────────────────────┐│  ├────────────────────────────────────────────────────────────────────────────┤ │
+
+│                       ADMIN - ADDITIONAL FEATURES                            ││  │                                                                             │ │
+
+└─────────────────────────────────────────────────────────────────────────────┘│  │  📋 PENDING EDD CASES                                                       │ │
+
 │  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ Case #001  | 0x742d...  | $25,000  | High Risk | Awaiting Review   │   │ │
-│  │  │ Case #002  | 0x8ba1...  | $18,500  | Medium    | Documents Pending │   │ │
-│  │  │ Case #003  | 0xAb58...  | $50,000  | Critical  | Urgent Review     │   │ │
-│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
-│  │                                                                             │ │
-│  │  [Review Case] [Request Docs] [Approve] [Escalate] [Reject]                │ │
-│  │                                                                             │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        SANCTIONS SCREENING                                  │ │
-│  ├────────────────────────────────────────────────────────────────────────────┤ │
-│  │                                                                             │ │
-│  │  🚫 BLOCKED ADDRESSES (Sanctions List Matches)                             │ │
-│  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ 0xdead... | OFAC SDN List    | Blocked Since: 2026-01-01          │   │ │
-│  │  │ 0xbeef... | OFAC SDN List    | Blocked Since: 2025-12-15          │   │ │
+
+┌────────────────────────┐              ┌────────────────────────┐│  │  │ Case #001  | 0x742d...  | $25,000  | High Risk | Awaiting Review   │   │ │
+
+│   DETECTION STUDIO     │              │   APPROVER PORTAL      ││  │  │ Case #002  | 0x8ba1...  | $18,500  | Medium    | Documents Pending │   │ │
+
+│ Route: /detection-     │              │ Route: /approver       ││  │  │ Case #003  | 0xAb58...  | $50,000  | Critical  | Urgent Review     │   │ │
+
+│        studio          │              ├────────────────────────┤│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
+├────────────────────────┤              │                        ││  │                                                                             │ │
+
+│                        │              │ AMTTPCore.sol          ││  │  [Review Case] [Request Docs] [Approve] [Escalate] [Reject]                │ │
+
+│ Embeds Next.js         │              │ • approveSwap()        ││  │                                                                             │ │
+
+│ Dashboard (port 3006)  │              │ • rejectSwap()         ││  └────────────────────────────────────────────────────────────────────────────┘ │
+
+│                        │              │                        ││                                                                                  │
+
+│ • SIEM Dashboard       │              │ Features:              ││  ┌────────────────────────────────────────────────────────────────────────────┐ │
+
+│ • FATF Compliance      │              │ • Pending Queue        ││  │                        SANCTIONS SCREENING                                  │ │
+
+│ • Real-time Alerts     │              │ • Risk Details         ││  ├────────────────────────────────────────────────────────────────────────────┤ │
+
+│ • Pattern Visualization│              │ • Approve/Reject       ││  │                                                                             │ │
+
+│ • Custom Queries       │              │ • Add Comments         ││  │  🚫 BLOCKED ADDRESSES (Sanctions List Matches)                             │ │
+
+│                        │              │ • Bulk Actions         ││  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
+
+└────────────────────────┘              └────────────────────────┘│  │  │ 0xdead... | OFAC SDN List    | Blocked Since: 2026-01-01          │   │ │
+
+```│  │  │ 0xbeef... | OFAC SDN List    | Blocked Since: 2025-12-15          │   │ │
+
 │  │  │ 0xcafe... | EU Sanctions     | Blocked Since: 2025-11-20          │   │ │
-│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
+### Admin Navigation Flow│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
 │  │                                                                             │ │
-│  │  [Add Address] [Remove] [Update Lists] [Export Report]                     │ │
-│  │                                                                             │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
+
+```│  │  [Add Address] [Remove] [Update Lists] [Export Report]                     │ │
+
+ADMIN (/admin)│  │                                                                             │ │
+
+├── 📊 TabBar Navigation│  └────────────────────────────────────────────────────────────────────────────┘ │
+
+│   ├── Overview (Tab 0)     → System Health + Real-time Feed│                                                                                  │
+
+│   ├── ML Analytics (Tab 1) → Model Performance + Patterns│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+
+│   ├── Transactions (Tab 2) → Full TX List with Filters│  │                        SUSPICIOUS ACTIVITY REPORTS                          │ │
+
+│   └── Policies (Tab 3)     → Risk Thresholds + Webhooks│  ├────────────────────────────────────────────────────────────────────────────┤ │
+
+││  │                                                                             │ │
+
+├── 📂 Sidebar Navigation│  │  📊 SAR QUEUE                                                              │ │
+
+│   ├── /admin            → Admin Dashboard│  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
+
+│   ├── /detection-studio → Next.js SIEM (iframe)│  │  │ SAR-2026-001 | Structuring Detected  | Priority: High   | Draft    │   │ │
+
+│   ├── /approver         → Swap Approval Portal│  │  │ SAR-2026-002 | Unusual Pattern       | Priority: Medium | Review   │   │ │
+
+│   ├── /compliance       → Compliance Tools│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
+│   └── /fatf-rules       → FATF Compliance Page│  │                                                                             │ │
+
+││  │  [Create SAR] [Submit to FCA] [Archive]                                    │ │
+
+└── 🔗 External Links│  │                                                                             │ │
+
+    └── Next.js Dashboard → http://localhost:3006│  └────────────────────────────────────────────────────────────────────────────┘ │
+
+```│                                                                                  │
+
 │  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        SUSPICIOUS ACTIVITY REPORTS                          │ │
+
+---│  │                        AUDIT TRAIL                                          │ │
+
 │  ├────────────────────────────────────────────────────────────────────────────┤ │
-│  │                                                                             │ │
-│  │  📊 SAR QUEUE                                                              │ │
-│  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ SAR-2026-001 | Structuring Detected  | Priority: High   | Draft    │   │ │
-│  │  │ SAR-2026-002 | Unusual Pattern       | Priority: Medium | Review   │   │ │
-│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
-│  │                                                                             │ │
-│  │  [Create SAR] [Submit to FCA] [Archive]                                    │ │
-│  │                                                                             │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        AUDIT TRAIL                                          │ │
-│  ├────────────────────────────────────────────────────────────────────────────┤ │
-│  │                                                                             │ │
+
+## 👮 Profile 3: COMPLIANCE OFFICER│  │                                                                             │ │
+
 │  │  📝 RECENT COMPLIANCE ACTIONS                                              │ │
-│  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
+
+The compliance officer profile for regulatory monitoring and enforcement.│  │  ┌─────────────────────────────────────────────────────────────────────┐   │ │
+
 │  │  │ 2026-01-04 21:30 | EDD Approved    | Case #001 | Officer: J.Smith │   │ │
-│  │  │ 2026-01-04 20:15 | SAR Submitted   | SAR-001   | Officer: M.Jones │   │ │
-│  │  │ 2026-01-04 19:45 | Address Blocked | 0xdead... | System: Auto     │   │ │
-│  │  │ 2026-01-04 18:30 | Policy Updated  | AML v2.1  | Officer: J.Smith │   │ │
-│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
+```│  │  │ 2026-01-04 20:15 | SAR Submitted   | SAR-001   | Officer: M.Jones │   │ │
+
+┌─────────────────────────────────────────────────────────────────────────────┐│  │  │ 2026-01-04 19:45 | Address Blocked | 0xdead... | System: Auto     │   │ │
+
+│                        COMPLIANCE OFFICER SITEMAP                            ││  │  │ 2026-01-04 18:30 | Policy Updated  | AML v2.1  | Officer: J.Smith │   │ │
+
+└─────────────────────────────────────────────────────────────────────────────┘│  │  └─────────────────────────────────────────────────────────────────────┘   │ │
+
 │  │                                                                             │ │
-│  │  [Export Audit Log] [Filter by Date] [Filter by Officer]                   │ │
-│  │                                                                             │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
 
-### Compliance Officer Navigation Flow
+                              ┌─────────────────┐│  │  [Export Audit Log] [Filter by Date] [Filter by Officer]                   │ │
 
-```
-ADMIN (/admin) - Compliance Focus
-├── 📊 Overview Tab (Compliance Metrics)
-│   ├── Pending EDD Cases Counter
-│   ├── Unresolved Alerts Counter
-│   ├── Fraud Blocked Statistics
-│   └── Compliance Status Dashboard
-│
-├── 📋 Transactions Tab (High-Risk Review)
-│   ├── Filter: High Risk / Blocked
-│   ├── EDD Case Queue
-│   ├── Transaction Review Modal
-│   │   ├── Full Transaction Details
-│   │   ├── Risk Assessment Breakdown
-│   │   ├── Customer Information
-│   │   └── Actions: Approve / Reject / Escalate
-│   └── Bulk Actions
-│
-├── 📜 Policies Tab (Regulatory Management)
-│   ├── Active Policy Management
-│   ├── Risk Threshold Configuration
-│   ├── Transaction Limit Settings
-│   ├── EDD Threshold Configuration
-│   └── Webhook Notifications Setup
-│
-└── 📈 Reports (via API/Export)
-    ├── SAR Generation
-    ├── Audit Trail Export
-    ├── Compliance Reports
-    └── Regulatory Filing
-```
+                              │  COMPLIANCE     ││  │                                                                             │ │
 
----
+                              │    TOOLS        ││  └────────────────────────────────────────────────────────────────────────────┘ │
 
-## 🔧 Shared Pages (All Profiles)
+                              │Route: /compliance││                                                                                  │
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           SHARED PAGES                                           │
-└─────────────────────────────────────────────────────────────────────────────────┘
+                              └────────┬────────┘└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    WALLET       │     │    SETTINGS     │     │    HISTORY      │
-│  Route: /wallet │     │ Route: /settings│     │ Route: /history │
-├─────────────────┤     ├─────────────────┤     ├─────────────────┤
-│                 │     │                 │     │                 │
-│ • Balance Card  │     │ GENERAL         │     │ • TX List       │
-│   - ETH Balance │     │ • Language      │     │ • Risk Scores   │
-│   - USD Value   │     │ • Theme         │     │ • Status Filter │
-│   - Connected   │     │ • Notifications │     │ • Date Filter   │
-│                 │     │                 │     │                 │
-│ • Address       │     │ SECURITY        │     │ • TX Detail     │
-│   - Copy        │     │ • Biometrics    │     │   Modal         │
-│   - QR Code     │     │ • Auto-lock     │     │                 │
-│                 │     │ • TX Limit      │     │                 │
-│ • Tokens        │     │                 │     │                 │
-│   - ETH         │     │ NETWORK         │     │                 │
-│   - ERC-20s     │     │ • RPC Endpoint  │     │                 │
-│                 │     │ • Gas Price     │     │                 │
-│ • Quick Actions │     │                 │     │                 │
-│   - Send        │     │ COMPLIANCE      │     │                 │
-│   - Receive     │     │ • Risk Warnings │     │                 │
-│   - Swap        │     │ • Confirmation  │     │                 │
-│                 │     │ • Slippage      │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                       │```
 
-┌─────────────────┐
-│    TRANSFER     │
-│Route: /transfer │
-├─────────────────┤
-│                 │
-│SecureTransfer   │
-│Widget:          │
-│                 │
-│ • Recipient     │
-│   Address       │
-│                 │
-│ • Amount        │
-│   (ETH/USD)     │
-│                 │
-│ • Risk Preview  │
-│   - Score       │
-│   - Warning     │
-│                 │
-│ • MEV Protection│
-│   Toggle        │
-│                 │
-│ • Review &      │
-│   Confirm       │
-│                 │
-│ • Status        │
-│   Updates       │
-│                 │
-└─────────────────┘
-```
-
----
-
-## 📱 Route Summary
-
-| Route | Page | Access | Description |
-|-------|------|--------|-------------|
-| `/` | HomePage | All | Landing page, wallet connection, main dashboard |
-| `/wallet` | WalletPage | All | Wallet management, balances, addresses |
-| `/transfer` | TransferPage | All | Dedicated transfer page with SecureTransferWidget |
-| `/history` | HistoryPage | All | Transaction history with filters |
-| `/admin` | AdminPage | Admin/Compliance | Full admin dashboard with 4 tabs |
-| `/settings` | SettingsPage | All | User preferences and configuration |
-
----
-
-## 🎨 UI Component Library
-
-```
-SHARED WIDGETS
-├── SecureTransferWidget    - Complete transfer flow with risk assessment
-├── RiskVisualizerWidget    - Risk score visualization and breakdown
-├── RiskLevelIndicator      - Color-coded risk badge
-├── InteractiveWalletWidget - Wallet connection and management
-├── FeaturesCarousel        - Feature showcase on landing page
-└── TransactionCard         - Individual transaction display
-```
-
----
-
-## 🆕 NEW PAGES REQUIRED FOR COMPLETE COVERAGE
-
-The following pages are required to cover all smart contract functionality:
-
----
-
-## 🔄 Profile: NFT TRADER
-
-Complete NFT swap functionality for NFT ↔ ETH and NFT ↔ NFT swaps.
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           NFT SWAP SITEMAP                                       │
-│                           Route: /nft-swap                                       │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-                              ┌─────────────────┐
-                              │  NFT SWAP PAGE  │
-                              │ Route: /nft-swap│
-                              └────────┬────────┘
-                                       │
      ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
-     │                 │               │               │                 │
+
+     │                 │               │               │                 │### Compliance Officer Navigation Flow
+
      ▼                 ▼               ▼               ▼                 ▼
+
+┌─────────┐      ┌─────────┐     ┌─────────┐    ┌─────────┐      ┌─────────┐```
+
+│ FREEZE/ │      │ TRUSTED │     │   PEP/  │    │   EDD   │      │  FATF   │ADMIN (/admin) - Compliance Focus
+
+│UNFREEZE │      │  USERS  │     │SANCTIONS│    │  QUEUE  │      │  RULES  │├── 📊 Overview Tab (Compliance Metrics)
+
+│ (Tab 0) │      │ (Tab 1) │     │ (Tab 2) │    │ (Tab 3) │      │ (Link)  ││   ├── Pending EDD Cases Counter
+
+└────┬────┘      └────┬────┘     └────┬────┘    └────┬────┘      └────┬────┘│   ├── Unresolved Alerts Counter
+
+     │                │               │               │                ││   ├── Fraud Blocked Statistics
+
+     ▼                ▼               ▼               ▼                ▼│   └── Compliance Status Dashboard
+
+┌─────────────────────────────────────────────────────────────────────────────┐│
+
+│                        FREEZE/UNFREEZE TAB                                   │├── 📋 Transactions Tab (High-Risk Review)
+
+│                                                                              ││   ├── Filter: High Risk / Blocked
+
+│  AMTTPPolicyEngine.sol: freezeAccount() / unfreezeAccount()                 ││   ├── EDD Case Queue
+
+│                                                                              ││   ├── Transaction Review Modal
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││   │   ├── Full Transaction Details
+
+│  │ Address Input: [0x________________________________] [🔍 Check]          │││   │   ├── Risk Assessment Breakdown
+
+│  └─────────────────────────────────────────────────────────────────────────┘││   │   ├── Customer Information
+
+│                                                                              ││   │   └── Actions: Approve / Reject / Escalate
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││   └── Bulk Actions
+
+│  │ FROZEN ACCOUNTS                                               [Export] │││
+
+│  │───────────────────────────────────────────────────────────────────────│││├── 📜 Policies Tab (Regulatory Management)
+
+│  │ Address      │ Frozen At    │ Reason         │ By        │ Actions   │││   ├── Active Policy Management
+
+│  │ 0xabcd...   │ Jan 1, 2026  │ OFAC match     │ Automated │ [Unfreeze]│││   ├── Risk Threshold Configuration
+
+│  │ 0x1234...   │ Dec 15, 2025 │ High risk      │ Manual    │ [Unfreeze]│││   ├── Transaction Limit Settings
+
+│  └─────────────────────────────────────────────────────────────────────────┘││   ├── EDD Threshold Configuration
+
+└─────────────────────────────────────────────────────────────────────────────┘│   └── Webhook Notifications Setup
+
+│
+
+┌─────────────────────────────────────────────────────────────────────────────┐└── 📈 Reports (via API/Export)
+
+│                        TRUSTED USERS TAB                                     │    ├── SAR Generation
+
+│                                                                              │    ├── Audit Trail Export
+
+│  AMTTPPolicyEngine.sol: addTrustedUser() / addTrustedCounterparty()         │    ├── Compliance Reports
+
+│                                                                              │    └── Regulatory Filing
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐│```
+
+│  │ Add Trusted:                                                            ││
+
+│  │ [Address] [User ▼] [Reason________________] [+ Add]                    ││---
+
+│  └─────────────────────────────────────────────────────────────────────────┘│
+
+│                                                                              │## 🔧 Shared Pages (All Profiles)
+
+│  ┌─────────────┐ ┌─────────────┐                                           │
+
+│  │ TRUSTED     │ │ TRUSTED     │                                           │```
+
+│  │ USERS       │ │COUNTERPARTY │                                           │┌─────────────────────────────────────────────────────────────────────────────────┐
+
+│  │             │ │             │                                           ││                           SHARED PAGES                                           │
+
+│  │ 12 entries  │ │ 8 entries   │                                           │└─────────────────────────────────────────────────────────────────────────────────┘
+
+│  └─────────────┘ └─────────────┘                                           │
+
+└─────────────────────────────────────────────────────────────────────────────┘┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+
+│    WALLET       │     │    SETTINGS     │     │    HISTORY      │
+
+┌─────────────────────────────────────────────────────────────────────────────┐│  Route: /wallet │     │ Route: /settings│     │ Route: /history │
+
+│                        PEP/SANCTIONS TAB                                     │├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+
+│                                                                              ││                 │     │                 │     │                 │
+
+│  Integrated Sanctions Lists: OFAC, EU, UN, HMT                              ││ • Balance Card  │     │ GENERAL         │     │ • TX List       │
+
+│                                                                              ││   - ETH Balance │     │ • Language      │     │ • Risk Scores   │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││   - USD Value   │     │ • Theme         │     │ • Status Filter │
+
+│  │ Screen Address: [0x________________________________] [🔍 Screen]       │││   - Connected   │     │ • Notifications │     │ • Date Filter   │
+
+│  └─────────────────────────────────────────────────────────────────────────┘││                 │     │                 │     │                 │
+
+│                                                                              ││ • Address       │     │ SECURITY        │     │ • TX Detail     │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││   - Copy        │     │ • Biometrics    │     │   Modal         │
+
+│  │ SCREENING RESULTS                                                       │││   - QR Code     │     │ • Auto-lock     │     │                 │
+
+│  │                                                                          │││                 │     │ • TX Limit      │     │                 │
+
+│  │  ✅ OFAC: Clear                                                         │││ • Tokens        │     │                 │     │                 │
+
+│  │  ✅ EU Sanctions: Clear                                                 │││   - ETH         │     │ NETWORK         │     │                 │
+
+│  │  ✅ UN Sanctions: Clear                                                 │││   - ERC-20s     │     │ • RPC Endpoint  │     │                 │
+
+│  │  ⚠️ HMT: Potential match - Review required                             │││                 │     │ • Gas Price     │     │                 │
+
+│  │                                                                          │││ • Quick Actions │     │                 │     │                 │
+
+│  │  PEP Status: Not a PEP                                                  │││   - Send        │     │ COMPLIANCE      │     │                 │
+
+│  └─────────────────────────────────────────────────────────────────────────┘││   - Receive     │     │ • Risk Warnings │     │                 │
+
+└─────────────────────────────────────────────────────────────────────────────┘│   - Swap        │     │ • Confirmation  │     │                 │
+
+│                 │     │ • Slippage      │     │                 │
+
+┌─────────────────────────────────────────────────────────────────────────────┐└─────────────────┘     └─────────────────┘     └─────────────────┘
+
+│                        EDD QUEUE TAB                                         │
+
+│                                                                              │┌─────────────────┐
+
+│  Enhanced Due Diligence - High-risk cases requiring manual review           ││    TRANSFER     │
+
+│                                                                              ││Route: /transfer │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐│├─────────────────┤
+
+│  │ PENDING REVIEW (5)                                                      │││                 │
+
+│  │───────────────────────────────────────────────────────────────────────││││SecureTransfer   │
+
+│  │ Case ID  │ Address     │ Risk Score │ Trigger        │ Assigned  │Act │││Widget:          │
+
+│  │ EDD-001  │ 0x9abc...   │ 0.88       │ High volume    │ @sarah    │[▶] │││                 │
+
+│  │ EDD-002  │ 0xdef0...   │ 0.91       │ Mixer contact  │ Unassigned│[▶] │││ • Recipient     │
+
+│  │ EDD-003  │ 0x1234...   │ 0.85       │ FATF grey list │ @john     │[▶] │││   Address       │
+
+│  └─────────────────────────────────────────────────────────────────────────┘││                 │
+
+│                                                                              ││ • Amount        │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐││   (ETH/USD)     │
+
+│  │ CASE DETAIL (when expanded)                                             │││                 │
+
+│  │                                                                          │││ • Risk Preview  │
+
+│  │  • Full transaction history                                             │││   - Score       │
+
+│  │  • Risk factor breakdown                                                │││   - Warning     │
+
+│  │  • Connected addresses graph                                            │││                 │
+
+│  │  • Document upload                                                      │││ • MEV Protection│
+
+│  │  • Decision: [Approve] [Escalate] [Reject]                             │││   Toggle        │
+
+│  └─────────────────────────────────────────────────────────────────────────┘││                 │
+
+└─────────────────────────────────────────────────────────────────────────────┘│ • Review &      │
+
+```│   Confirm       │
+
+│                 │
+
+### FATF Rules Page│ • Status        │
+
+│   Updates       │
+
+```│                 │
+
+┌─────────────────────────────────────────────────────────────────────────────┐└─────────────────┘
+
+│                           FATF RULES PAGE                                    │```
+
+│                         Route: /fatf-rules                                   │
+
+└─────────────────────────────────────────────────────────────────────────────┘---
+
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐## 📱 Route Summary
+
+│                                                                              │
+
+│  FATF Travel Rule Compliance                                                │| Route | Page | Access | Description |
+
+│                                                                              │|-------|------|--------|-------------|
+
+│  ┌──────────────────────────────────────────────────────────────────────┐  │| `/` | HomePage | All | Landing page, wallet connection, main dashboard |
+
+│  │                   COMPLIANCE STATUS                                   │  │| `/wallet` | WalletPage | All | Wallet management, balances, addresses |
+
+│  │                                                                       │  │| `/transfer` | TransferPage | All | Dedicated transfer page with SecureTransferWidget |
+
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                  │  │| `/history` | HistoryPage | All | Transaction history with filters |
+
+│  │  │  Travel     │  │  Threshold  │  │  Reporting  │                  │  │| `/admin` | AdminPage | Admin/Compliance | Full admin dashboard with 4 tabs |
+
+│  │  │  Rule       │  │  Monitoring │  │  Status     │                  │  │| `/settings` | SettingsPage | All | User preferences and configuration |
+
+│  │  │  ✅ Active  │  │  €1,000     │  │  Current    │                  │  │
+
+│  │  └─────────────┘  └─────────────┘  └─────────────┘                  │  │---
+
+│  └──────────────────────────────────────────────────────────────────────┘  │
+
+│                                                                              │## 🎨 UI Component Library
+
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+
+│  │                   COUNTRY RISK MATRIX                                 │  │```
+
+│  │                                                                       │  │SHARED WIDGETS
+
+│  │  FATF Grey List (19 countries):                                      │  │├── SecureTransferWidget    - Complete transfer flow with risk assessment
+
+│  │  [Map visualization with risk coloring]                              │  │├── RiskVisualizerWidget    - Risk score visualization and breakdown
+
+│  │                                                                       │  │├── RiskLevelIndicator      - Color-coded risk badge
+
+│  │  FATF Black List (3 countries):                                      │  │├── InteractiveWalletWidget - Wallet connection and management
+
+│  │  • DPRK (North Korea)                                                │  │├── FeaturesCarousel        - Feature showcase on landing page
+
+│  │  • Iran                                                               │  │└── TransactionCard         - Individual transaction display
+
+│  │  • Myanmar                                                            │  │```
+
+│  └──────────────────────────────────────────────────────────────────────┘  │
+
+│                                                                              │---
+
+│  [Open Detection Studio →]  Links to Next.js Dashboard (port 3006)          │
+
+│                                                                              │## 🆕 NEW PAGES REQUIRED FOR COMPLETE COVERAGE
+
+└─────────────────────────────────────────────────────────────────────────────┘
+
+```The following pages are required to cover all smart contract functionality:
+
+
+
+### Compliance Navigation Flow---
+
+
+
+```## 🔄 Profile: NFT TRADER
+
+COMPLIANCE (/compliance)
+
+├── 📊 TabBar NavigationComplete NFT swap functionality for NFT ↔ ETH and NFT ↔ NFT swaps.
+
+│   ├── Freeze/Unfreeze (Tab 0) → Account freezing controls
+
+│   ├── Trusted Users (Tab 1)   → Whitelist management```
+
+│   ├── PEP/Sanctions (Tab 2)   → Screening tools┌─────────────────────────────────────────────────────────────────────────────────┐
+
+│   └── EDD Queue (Tab 3)       → High-risk case review│                           NFT SWAP SITEMAP                                       │
+
+││                           Route: /nft-swap                                       │
+
+├── 📂 Sidebar Navigation└─────────────────────────────────────────────────────────────────────────────────┘
+
+│   ├── /compliance    → Compliance Tools Dashboard
+
+│   ├── /fatf-rules    → FATF Travel Rule Compliance                              ┌─────────────────┐
+
+│   ├── /disputes      → Dispute Resolution Center                              │  NFT SWAP PAGE  │
+
+│   └── /detection-studio → SIEM Dashboard (Next.js)                              │ Route: /nft-swap│
+
+│                              └────────┬────────┘
+
+└── 🔗 Query Parameters                                       │
+
+    └── /compliance?tab=freeze  → Direct to specific tab     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
+
+    └── /compliance?tab=pep     → Direct to PEP/Sanctions     │                 │               │               │                 │
+
+```     ▼                 ▼               ▼               ▼                 ▼
+
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│  NFT → ETH  │  │  NFT → NFT  │  │   ACTIVE    │  │  COMPLETED  │  │   REFUNDS   │
+
+---│  NFT → ETH  │  │  NFT → NFT  │  │   ACTIVE    │  │  COMPLETED  │  │   REFUNDS   │
+
 │   SWAP      │  │    SWAP     │  │   SWAPS     │  │    SWAPS    │  │             │
-│   (Tab 0)   │  │   (Tab 1)   │  │   (Tab 2)   │  │   (Tab 3)   │  │   (Tab 4)   │
+
+## 🌐 Complete Route Map│   (Tab 0)   │  │   (Tab 1)   │  │   (Tab 2)   │  │   (Tab 3)   │  │   (Tab 4)   │
+
 └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────────────┘  └─────────────┘
-       │                │               │
-       ▼                ▼               ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                          NFT → ETH SWAP TAB                                      │
+
+```       │                │               │
+
+┌─────────────────────────────────────────────────────────────────────────────┐       ▼                ▼               ▼
+
+│                        COMPLETE ROUTE STRUCTURE                              │┌─────────────────────────────────────────────────────────────────────────────────┐
+
+└─────────────────────────────────────────────────────────────────────────────┘│                          NFT → ETH SWAP TAB                                      │
+
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        SELECT YOUR NFT                                      │ │
-│  ├────────────────────────────────────────────────────────────────────────────┤ │
+
+PUBLIC ROUTES (No Auth)│                                                                                  │
+
+├── /sign-in         → Sign In Page│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+
+├── /register        → Registration Page│  │                        SELECT YOUR NFT                                      │ │
+
+└── /select-profile  → Profile Selector (Demo)│  ├────────────────────────────────────────────────────────────────────────────┤ │
+
 │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                   │ │
-│  │  │  [NFT 1] │  │  [NFT 2] │  │  [NFT 3] │  │  [NFT 4] │  ...              │ │
-│  │  │  BAYC    │  │  Azuki   │  │  Doodles │  │  Moonbird│                   │ │
-│  │  │  #1234   │  │  #5678   │  │  #9012   │  │  #3456   │                   │ │
-│  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘                   │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                        SWAP CONFIGURATION                                   │ │
-│  ├────────────────────────────────────────────────────────────────────────────┤ │
-│  │  Selected NFT: BAYC #1234                                                  │ │
-│  │  ┌──────────────────────────────────┐                                      │ │
-│  │  │ ETH Amount Requested:  [____] ETH │                                     │ │
-│  │  │ Recipient Address:     [________] │                                     │ │
-│  │  │ Hash Lock (optional):  [________] │                                     │ │
-│  │  │ Time Lock:             [24 hours] │                                     │ │
-│  │  └──────────────────────────────────┘                                      │ │
-│  │                                                                             │ │
-│  │  Risk Assessment: 🟢 Low Risk (Score: 0.23)                                │ │
-│  │                                                                             │ │
-│  │                    [Initiate NFT → ETH Swap]                               │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                          ACTIVE SWAPS TAB                                        │
+AUTHENTICATED ROUTES (Shell with ProfileNavigationShell)│  │  │  [NFT 1] │  │  [NFT 2] │  │  [NFT 3] │  │  [NFT 4] │  ...              │ │
+
+││  │  │  BAYC    │  │  Azuki   │  │  Doodles │  │  Moonbird│                   │ │
+
+├── END USER ROUTES│  │  │  #1234   │  │  #5678   │  │  #9012   │  │  #3456   │                   │ │
+
+│   ├── /                → Home Page (4 tabs)│  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘                   │ │
+
+│   ├── /wallet          → Wallet Management│  └────────────────────────────────────────────────────────────────────────────┘ │
+
+│   ├── /transfer        → Dedicated Transfer│                                                                                  │
+
+│   ├── /history         → Transaction History│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+
+│   ├── /settings        → App Settings│  │                        SWAP CONFIGURATION                                   │ │
+
+│   ├── /nft-swap        → NFT Atomic Swaps│  ├────────────────────────────────────────────────────────────────────────────┤ │
+
+│   ├── /cross-chain     → Cross-Chain Bridge│  │  Selected NFT: BAYC #1234                                                  │ │
+
+│   ├── /disputes        → Dispute Center│  │  ┌──────────────────────────────────┐                                      │ │
+
+│   ├── /dispute/:id     → Dispute Detail│  │  │ ETH Amount Requested:  [____] ETH │                                     │ │
+
+│   ├── /safe            → Gnosis Safe Management│  │  │ Recipient Address:     [________] │                                     │ │
+
+│   ├── /session-keys    → ERC-4337 Session Keys│  │  │ Hash Lock (optional):  [________] │                                     │ │
+
+│   └── /zknaf           → zkNAF Privacy Proofs│  │  │ Time Lock:             [24 hours] │                                     │ │
+
+││  │  └──────────────────────────────────┘                                      │ │
+
+├── ADMIN ROUTES│  │                                                                             │ │
+
+│   ├── /admin           → Admin Dashboard (4 tabs)│  │  Risk Assessment: 🟢 Low Risk (Score: 0.23)                                │ │
+
+│   ├── /detection-studio→ Next.js SIEM (iframe)│  │                                                                             │ │
+
+│   └── /approver        → Swap Approver Portal│  │                    [Initiate NFT → ETH Swap]                               │ │
+
+││  └────────────────────────────────────────────────────────────────────────────┘ │
+
+└── COMPLIANCE ROUTES│                                                                                  │
+
+    ├── /compliance      → Compliance Tools (4 tabs)└─────────────────────────────────────────────────────────────────────────────────┘
+
+    ├── /compliance?tab=X→ Direct tab navigation
+
+    └── /fatf-rules      → FATF Compliance Page┌─────────────────────────────────────────────────────────────────────────────────┐
+
+```│                          ACTIVE SWAPS TAB                                        │
+
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                    PENDING SWAPS (Waiting for Counterparty)             │    │
-│  ├─────────────────────────────────────────────────────────────────────────┤    │
-│  │ Swap #abc123  │ BAYC #1234 → 10 ETH │ Waiting for ETH │ ⏰ 23:45:00     │    │
-│  │ Swap #def456  │ Azuki #567 → NFT    │ Waiting for NFT │ ⏰ 12:30:00     │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                  │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                    READY TO COMPLETE                                    │    │
-│  ├─────────────────────────────────────────────────────────────────────────┤    │
-│  │ Swap #ghi789  │ BAYC #1234 → 10 ETH │ ETH Deposited   │ [COMPLETE SWAP] │    │
-│  │               │ Enter Preimage: [_____________________]                 │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                  │
-│  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │                    AWAITING APPROVAL (High Risk)                        │    │
-│  ├─────────────────────────────────────────────────────────────────────────┤    │
-│  │ Swap #jkl012  │ Rare NFT → 50 ETH   │ Pending Approval │ 🟡 High Risk   │    │
-│  └─────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
 
-**Smart Contract Functions Covered:**
-- `initiateNFTtoETHSwap()` - Start NFT ↔ ETH swap
-- `depositETHForNFT()` - Deposit ETH to complete swap
-- `completeNFTSwap()` - Complete swap with preimage
-- `initiateNFTtoNFTSwap()` - Start NFT ↔ NFT swap
-- `depositNFTForSwap()` - Deposit second NFT
+---│                                                                                  │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+
+## 🔌 Backend Service Integration│  │                    PENDING SWAPS (Waiting for Counterparty)             │    │
+
+│  ├─────────────────────────────────────────────────────────────────────────┤    │
+
+```│  │ Swap #abc123  │ BAYC #1234 → 10 ETH │ Waiting for ETH │ ⏰ 23:45:00     │    │
+
+┌─────────────────────────────────────────────────────────────────────────────┐│  │ Swap #def456  │ Azuki #567 → NFT    │ Waiting for NFT │ ⏰ 12:30:00     │    │
+
+│                        SERVICE PORT MAPPING                                  ││  └─────────────────────────────────────────────────────────────────────────┘    │
+
+└─────────────────────────────────────────────────────────────────────────────┘│                                                                                  │
+
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+
+FRONTEND SERVICES│  │                    READY TO COMPLETE                                    │    │
+
+├── Port 3006  → Next.js Dashboard (Detection Studio / FATF)│  ├─────────────────────────────────────────────────────────────────────────┤    │
+
+└── Port 3010  → Flutter Web App (Main UI)│  │ Swap #ghi789  │ BAYC #1234 → 10 ETH │ ETH Deposited   │ [COMPLETE SWAP] │    │
+
+│  │               │ Enter Preimage: [_____________________]                 │    │
+
+ML & COMPLIANCE SERVICES│  └─────────────────────────────────────────────────────────────────────────┘    │
+
+├── Port 8000  → ML Risk Scoring API (hybrid_api.py)│                                                                                  │
+
+├── Port 8001  → Graph Analysis API (run_graph_server.py)│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+
+├── Port 8002  → Policy Service (policy_api.py)│  │                    AWAITING APPROVAL (High Risk)                        │    │
+
+├── Port 8003  → Monitoring Rules (monitoring_rules.py)│  ├─────────────────────────────────────────────────────────────────────────┤    │
+
+├── Port 8004  → Sanctions Screening (sanctions_service.py)│  │ Swap #jkl012  │ Rare NFT → 50 ETH   │ Pending Approval │ 🟡 High Risk   │    │
+
+├── Port 8005  → Geographic Risk (geographic_risk.py)│  └─────────────────────────────────────────────────────────────────────────┘    │
+
+├── Port 8006  → Labeling Service (labeling_service.py)│                                                                                  │
+
+├── Port 8007  → Orchestrator (Main Gateway)└─────────────────────────────────────────────────────────────────────────────────┘
+
+└── Port 8008  → Integrity Service (UI Security)```
+
+
+
+INFRASTRUCTURE**Smart Contract Functions Covered:**
+
+├── Port 27017 → MongoDB (Data Storage)- `initiateNFTtoETHSwap()` - Start NFT ↔ ETH swap
+
+├── Port 6379  → Redis (Caching)- `depositETHForNFT()` - Deposit ETH to complete swap
+
+├── Port 7687  → Memgraph (Graph Database)- `completeNFTSwap()` - Complete swap with preimage
+
+└── Port 9000  → MinIO (Object Storage)- `initiateNFTtoNFTSwap()` - Start NFT ↔ NFT swap
+
+```- `depositNFTForSwap()` - Deposit second NFT
+
 - `completeNFTtoNFTSwap()` - Complete NFT-to-NFT swap
-- `refundNFTSwap()` - Refund expired swap
+
+---- `refundNFTSwap()` - Refund expired swap
+
 - `approveSwap()` - (Approver) Approve high-risk swap
 
+## 📱 Smart Contract Coverage
+
 ---
 
-## ⚖️ Profile: DISPUTE PARTICIPANT
+| Contract | UI Coverage | Route |
 
-Complete dispute resolution with Kleros arbitration integration.
+|----------|-------------|-------|## ⚖️ Profile: DISPUTE PARTICIPANT
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                         DISPUTE CENTER SITEMAP                                   │
-│                         Route: /disputes                                         │
-└─────────────────────────────────────────────────────────────────────────────────┘
+| `AMTTPCore.sol` | SecureTransferWidget, History | `/`, `/history` |
 
-                              ┌─────────────────┐
+| `AMTTPPolicyEngine.sol` | Compliance Tools | `/compliance` |Complete dispute resolution with Kleros arbitration integration.
+
+| `AMTTPDisputeResolver.sol` | Dispute Center | `/disputes`, `/dispute/:id` |
+
+| `AMTTPNFT.sol` | NFT Swap Page | `/nft-swap` |```
+
+| `AMTTPCrossChain.sol` | Cross-Chain Page | `/cross-chain` |┌─────────────────────────────────────────────────────────────────────────────────┐
+
+| `AMTTPSafeModule.sol` | Safe Management | `/safe` |│                         DISPUTE CENTER SITEMAP                                   │
+
+| `AMTTPBiconomyModule.sol` | Session Keys | `/session-keys` |│                         Route: /disputes                                         │
+
+| `AMTTPCoreZkNAF.sol` | zkNAF Page | `/zknaf` |└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+
+---                              ┌─────────────────┐
+
                               │ DISPUTE CENTER  │
-                              │Route: /disputes │
+
+## 🎨 Design System                              │Route: /disputes │
+
                               └────────┬────────┘
-                                       │
-     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
-     │                 │               │               │                 │
-     ▼                 ▼               ▼               ▼                 ▼
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│   CREATE    │  │   ACTIVE    │  │   SUBMIT    │  │   RESOLVED  │  │   APPEALS   │
-│  DISPUTE    │  │  DISPUTES   │  │  EVIDENCE   │  │   HISTORY   │  │             │
-│   (Tab 0)   │  │   (Tab 1)   │  │   (Tab 2)   │  │   (Tab 3)   │  │   (Tab 4)   │
-└──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────────────┘  └─────────────┘
+
+| Component | Color | Usage |                                       │
+
+|-----------|-------|-------|     ┌─────────────────┬───────────────┼───────────────┬─────────────────┐
+
+| Primary Purple | `#6366F1` | CTAs, Active States |     │                 │               │               │                 │
+
+| Primary Blue | `#3B82F6` | Links, Info |     ▼                 ▼               ▼               ▼                 ▼
+
+| Success Green | `#10B981` | Approved, Success |┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+
+| Warning Orange | `#F59E0B` | Review, Caution |│   CREATE    │  │   ACTIVE    │  │   SUBMIT    │  │   RESOLVED  │  │   APPEALS   │
+
+| Danger Red | `#EF4444` | Blocked, Error |│  DISPUTE    │  │  DISPUTES   │  │  EVIDENCE   │  │   HISTORY   │  │             │
+
+| Dark Background | `#0F172A` | Main BG |│   (Tab 0)   │  │   (Tab 1)   │  │   (Tab 2)   │  │   (Tab 3)   │  │   (Tab 4)   │
+
+| Dark Card | `#1E293B` | Card Surfaces |└──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────────────┘  └─────────────┘
+
        │                │               │
-       ▼                ▼               ▼
+
+---       ▼                ▼               ▼
+
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                       CREATE DISPUTE TAB                                         │
-├─────────────────────────────────────────────────────────────────────────────────┤
+
+*Generated: January 2026*  │                       CREATE DISPUTE TAB                                         │
+
+*AMTTP v2.0 - Flutter Web + Next.js Dashboard*├─────────────────────────────────────────────────────────────────────────────────┤
+
 │                                                                                  │
 │  ┌────────────────────────────────────────────────────────────────────────────┐ │
 │  │                    STEP 1: SELECT TRANSACTION                              │ │

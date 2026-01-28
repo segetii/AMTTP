@@ -9,6 +9,24 @@ export type { ZkNAFConfig, Groth16Proof, ProofResult, SanctionsProofInput, RiskR
 // L2 Risk Router (Polygon/Arbitrum)
 export { RiskRouterClient, createRiskRouterClient, RiskAction, L2_ROUTER_ADDRESSES, CHAIN_NAMES, getActionColor, getActionIcon, predictAction, formatStatistics } from './risk-router.js';
 export type { RiskRouterConfig, RiskResult, BatchRequest, RouterStatistics, RiskThresholds } from './risk-router.js';
+// Explainability - Human-readable risk explanations
+export { 
+  ExplainabilityService, 
+  createExplainabilityService, 
+  formatExplanationForDisplay,
+  TYPOLOGIES 
+} from './explainability.js';
+export type { 
+  ImpactLevel, 
+  TypologyType, 
+  ExplanationFactor, 
+  TypologyMatch, 
+  GraphExplanation,
+  RiskExplanation, 
+  ExplainRequest, 
+  TransactionExplainRequest,
+  TypologyInfo 
+} from './explainability.js';
 export {
   PolicyAction,
   RiskLevel

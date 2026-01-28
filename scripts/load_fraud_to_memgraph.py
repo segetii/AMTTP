@@ -178,7 +178,7 @@ print(f"   ✓ Loaded {loaded_addrs:,} address nodes")
 print("\n[5/6] Loading transaction edges...")
 
 # Sample transactions for faster loading (or load all)
-MAX_TX = 100000  # Limit for demo - remove for full load
+MAX_TX = 20000  # Load 20,000 transactions for realistic visualization
 tx_sample = tx_df.head(MAX_TX) if len(tx_df) > MAX_TX else tx_df
 
 total_tx = len(tx_sample)

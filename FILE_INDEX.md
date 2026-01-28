@@ -540,60 +540,70 @@ data/
 
 ```
 frontend/
-├── 🌐 Main Application (/frontend/)
+├── 🌐 Next.js Dashboard (/frontend/)
 │   ├── 📁 Source Code (/src/)
+│   │   ├── 📱 App Directory (/app/)
+│   │   │   ├── login/                   # � Authentication page (3 methods)
+│   │   │   │   └── page.tsx             #    Wallet, Email, Demo login
+│   │   │   ├── register/                # 📝 User registration
+│   │   │   │   └── page.tsx             #    Wallet or Email signup
+│   │   │   ├── focus/                   # 🎯 End-user Focus Mode
+│   │   │   │   └── page.tsx             #    Personal wallet dashboard
+│   │   │   ├── war-room/                # � Institutional War Room
+│   │   │   │   ├── page.tsx             #    Main dashboard
+│   │   │   │   ├── alerts/              #    Live alerts
+│   │   │   │   ├── transactions/        #    Transaction monitoring
+│   │   │   │   ├── detection/           #    Detection studio
+│   │   │   │   ├── policies/            #    Policy management
+│   │   │   │   ├── disputes/            #    Dispute resolution
+│   │   │   │   ├── multisig/            #    Multisig actions
+│   │   │   │   ├── compliance/          #    Compliance reports (Sprint 11)
+│   │   │   │   ├── audit/               #    Audit trail
+│   │   │   │   └── admin/               # 👨‍💼 Admin section
+│   │   │   │       └── roles/           #    Role management (R4+)
+│   │   │   │           └── page.tsx     #    User & role management UI
+│   │   │   └── api/                     # 🔌 API Routes
+│   │   │       └── auth/                #    Authentication endpoints
+│   │   │           ├── register/route.ts
+│   │   │           ├── login/route.ts
+│   │   │           ├── logout/route.ts
+│   │   │           └── me/route.ts
+│   │   │
 │   │   ├── 📱 Components (/components/)
-│   │   │   ├── Dashboard/               # 📊 Main dashboard components
-│   │   │   ├── Transactions/            # 💸 Transaction management UI
-│   │   │   ├── Risk/                    # 🎯 Risk assessment display
-│   │   │   ├── Policies/                # 🎛️ Policy management interface
-│   │   │   └── Common/                  # 🔧 Shared UI components
+│   │   │   ├── shells/                  # 🐚 Mode shells
+│   │   │   │   ├── FocusShell.tsx       #    End-user shell
+│   │   │   │   └── WarRoomShell.tsx     #    Institutional shell
+│   │   │   ├── compliance/              # 📋 Compliance components (Sprint 11)
+│   │   │   │   ├── SnapshotExplorer.tsx
+│   │   │   │   ├── EvidenceChain.tsx
+│   │   │   │   ├── ReportGenerator.tsx
+│   │   │   │   └── ChainReplayTool.tsx
+│   │   │   ├── trust/                   # 🤝 Trust indicators
+│   │   │   ├── governance/              # 🏛️ Governance components
+│   │   │   └── ...
 │   │   │
-│   │   ├── 📄 Pages (/pages/)
-│   │   │   ├── Home.tsx                 # 🏠 Landing page
-│   │   │   ├── Dashboard.tsx            # 📊 Main user dashboard
-│   │   │   ├── Transactions.tsx         # 💸 Transaction history
-│   │   │   ├── Risk.tsx                 # 🎯 Risk management
-│   │   │   └── Settings.tsx             # ⚙️ User settings
+│   │   ├── 🔧 Library (/lib/)
+│   │   │   ├── auth-context.tsx         # 🔐 Auth state provider
+│   │   │   ├── auth-service.ts          # 🔑 Auth operations & wallet
+│   │   │   ├── role-management-service.ts # 👥 Role management
+│   │   │   ├── ui-snapshot-chain.ts     # 📸 UI integrity snapshots
+│   │   │   ├── compliance-report-service.ts # 📊 Compliance reports
+│   │   │   └── ...
 │   │   │
-│   │   ├── 🔧 Services (/services/)
-│   │   │   ├── api.ts                   # 🌐 API integration
-│   │   │   ├── blockchain.ts            # ⛓️ Blockchain interactions
-│   │   │   ├── risk.ts                  # 🎯 Risk assessment
-│   │   │   └── auth.ts                  # 🔐 Authentication
-│   │   │
-│   │   ├── 🎨 Styles (/styles/)
-│   │   │   ├── global.css               # 🌐 Global styles
-│   │   │   ├── components.css           # 📱 Component styles
-│   │   │   └── themes.css               # 🎨 Theme configurations
-│   │   │
-│   │   └── 🔧 Utils (/utils/)
-│   │       ├── formatters.ts            # 🎨 Data formatting
-│   │       ├── validation.ts            # ✅ Input validation
-│   │       └── constants.ts             # 📋 Application constants
-│   │
-│   ├── 🏗️ Build Output (/dist/)
-│   │   ├── Static assets
-│   │   ├── Compiled JavaScript
-│   │   ├── CSS bundles
-│   │   └── HTML templates
-│   │
-│   ├── 🧪 Tests (/tests/)
-│   │   ├── Component tests
-│   │   ├── Integration tests
-│   │   ├── E2E tests
-│   │   └── Performance tests
+│   │   └── 📝 Types (/types/)
+│   │       ├── rbac.ts                  # 👑 Role definitions & capabilities
+│   │       ├── auth.ts                  # 🔐 Auth type definitions
+│   │       ├── role-management.ts       # 👥 Role management types
+│   │       ├── compliance-report.ts     # 📋 Compliance report types
+│   │       └── ...
 │   │
 │   └── 📋 Configuration
 │       ├── package.json                 # Frontend dependencies
 │       ├── tsconfig.json                # TypeScript configuration
-│       ├── webpack.config.js            # Build configuration
-│       └── .env.example                 # Environment template
-│
-└── 📚 Documentation
-    ├── SETUP.md                         # Frontend setup guide
-    ├── COMPONENTS.md                    # Component documentation
-    └── DEPLOYMENT.md                    # Frontend deployment guide
+│       ├── next.config.mjs              # Next.js configuration
+│       ├── tailwind.config.ts           # Tailwind CSS config
+│       └── .env.local                   # Environment variables
+
 ```
 
 ---

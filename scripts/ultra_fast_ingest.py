@@ -17,10 +17,11 @@ print("="*60)
 print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Configuration
-PARQUET_PATH = r"C:\Users\Administrator\Downloads\eth_merged_dataset.parquet"
+PARQUET_PATH = r"C:\amttp\processed\eth_transactions_full_labeled.parquet"
 MEMGRAPH_HOST = "localhost"
 MEMGRAPH_PORT = 7687
 BATCH_SIZE = 2000
+MAX_TRANSACTIONS = 5000  # Limit to 5k transactions (~30% sample for faster loading)
 
 # Known addresses for labeling
 SANCTIONED_ADDRESSES = {
@@ -60,7 +61,26 @@ print("      Done!")
 # Load data
 print(f"\n[3/4] Loading transactions...")
 df = pd.read_parquet(PARQUET_PATH)
-print(f"      Loaded {len(df):,} transactions")
+print(f"      Loaded {len(df):,} transactions from parquet")
+
+# Limit to MAX_TRANSACTIONS for visualization
+if len(df) > MAX_TRANSACTIONS:
+    # Sample a mix: prioritize transactions with sanctioned addresses + random sample
+    sanctioned_mask = df['from_address'].str.lower().isin(SANCTIONED_LOWER) | df['to_address'].str.lower().isin(SANCTIONED_LOWER)
+    sanctioned_txs = df[sanctioned_mask]
+    normal_txs = df[~sanctioned_mask]
+    
+    # Take all sanctioned + random sample of normal to reach MAX_TRANSACTIONS
+    n_sanctioned = len(sanctioned_txs)
+    n_normal_needed = MAX_TRANSACTIONS - n_sanctioned
+    
+    if n_normal_needed > 0 and len(normal_txs) > n_normal_needed:
+        normal_sample = normal_txs.sample(n=n_normal_needed, random_state=42)
+        df = pd.concat([sanctioned_txs, normal_sample])
+    else:
+        df = df.sample(n=MAX_TRANSACTIONS, random_state=42)
+    
+    print(f"      Sampled {len(df):,} transactions (including {n_sanctioned} sanctioned)")
 
 # Step 1: Create all unique addresses first
 print("\n[4/4] Ingesting data...")

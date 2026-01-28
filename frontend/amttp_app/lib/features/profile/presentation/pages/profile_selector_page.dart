@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/auth/user_profile_provider.dart';
+import '../../../../core/rbac/rbac.dart';
 import '../../../../core/theme/app_theme.dart';
 
 /// Profile Selector Page - Demo page to switch between user profiles
@@ -100,6 +101,7 @@ class ProfileSelectorPage extends ConsumerWidget {
                   ],
                   onTap: () {
                     ref.read(userProfileProvider.notifier).switchProfile(UserProfile.endUser);
+                    ref.read(rbacProvider.notifier).switchRole(Role.r1EndUser);
                     context.go('/');
                   },
                 ),
@@ -123,6 +125,7 @@ class ProfileSelectorPage extends ConsumerWidget {
                   ],
                   onTap: () {
                     ref.read(userProfileProvider.notifier).switchProfile(UserProfile.admin);
+                    ref.read(rbacProvider.notifier).switchRole(Role.r5PlatformAdmin);
                     context.go('/admin');
                   },
                 ),
@@ -146,6 +149,7 @@ class ProfileSelectorPage extends ConsumerWidget {
                   ],
                   onTap: () {
                     ref.read(userProfileProvider.notifier).switchProfile(UserProfile.complianceOfficer);
+                    ref.read(rbacProvider.notifier).switchRole(Role.r4InstitutionCompliance);
                     context.go('/compliance');
                   },
                 ),

@@ -16,17 +16,29 @@ export function RiskDistributionChart({ stats }: RiskDistributionChartProps) {
     );
   }
 
-  const data = [
-    { name: 'Critical', value: stats.criticalAlerts, color: '#ef4444' },
-    { name: 'High', value: stats.highAlerts, color: '#f97316' },
-    { name: 'Medium', value: stats.mediumAlerts, color: '#eab308' },
-    { name: 'Low', value: stats.lowAlerts, color: '#22c55e' },
-  ].filter(d => d.value > 0);
+  const rawData = [
+    { name: 'Critical', value: stats.criticalAlerts ?? 0, color: '#ef4444' },
+    { name: 'High', value: stats.highAlerts ?? 0, color: '#f97316' },
+    { name: 'Medium', value: stats.mediumAlerts ?? 0, color: '#eab308' },
+    { name: 'Low', value: stats.lowAlerts ?? 0, color: '#22c55e' },
+  ];
 
-  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const data = rawData.filter(d => (d.value ?? 0) > 0);
+  const severityTotal = rawData.reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const total = stats.totalAlerts ?? severityTotal;
+
+  if (severityTotal === 0) {
+    return (
+      <div className="h-[250px] flex items-center justify-center text-gray-500 bg-gray-900/40 rounded-lg">
+        <span>No risk distribution data available yet.</span>
+      </div>
+    );
+  }
+
+  const containerStyle = { minWidth: 240, minHeight: 250 } as const;
 
   return (
-    <div className="h-[250px]">
+    <div className="h-[250px] relative" style={containerStyle}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -65,13 +77,13 @@ export function RiskDistributionChart({ stats }: RiskDistributionChartProps) {
           />
         </PieChart>
       </ResponsiveContainer>
-      
-      {/* Center text */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ marginTop: '-40px' }}>
-        <div className="text-center">
-          <div className="text-3xl font-bold text-white">{total}</div>
-          <div className="text-xs text-gray-400">Total Alerts</div>
-        </div>
+
+      {/* Quick legend summary for clarity */}
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-300">
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full inline-block" style={{ background: '#ef4444' }} /> Critical: {rawData[0].value}</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full inline-block" style={{ background: '#f97316' }} /> High: {rawData[1].value}</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full inline-block" style={{ background: '#eab308' }} /> Medium: {rawData[2].value}</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full inline-block" style={{ background: '#22c55e' }} /> Low: {rawData[3].value}</div>
       </div>
     </div>
   );

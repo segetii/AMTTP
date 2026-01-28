@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/auth/auth_service.dart';
-import '../../../../core/auth/user_profile_provider.dart';
+import '../../../../core/rbac/roles.dart';
 import '../../../../core/theme/app_theme.dart';
 
 /// Sign In Page - Login with email/password or demo accounts
@@ -38,20 +38,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
     if (success && mounted) {
       final user = ref.read(authProvider).user;
-      // Navigate based on profile
-      switch (user?.profile) {
-        case null:
+      // Navigate based on role (Focus Mode vs War Room)
+      if (user != null) {
+        final mode = getModeForRole(user.role);
+        if (mode == AppMode.focusMode) {
+          // R1/R2 -> Focus Mode (home)
           context.go('/');
-          break;
-        case UserProfile.endUser:
-          context.go('/');
-          break;
-        case UserProfile.admin:
-          context.go('/admin');
-          break;
-        case UserProfile.complianceOfficer:
-          context.go('/compliance');
-          break;
+        } else {
+          // R3+ -> War Room
+          context.go('/war-room');
+        }
+      } else {
+        context.go('/');
       }
     }
   }
@@ -335,12 +333,22 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   Widget _buildDemoAccountTile(Map<String, String> cred) {
-    final profileColors = {
-      'End User': AppTheme.primaryBlue,
-      'Administrator': AppTheme.primaryPurple,
-      'Compliance': AppTheme.warningOrange,
-    };
-    final color = profileColors[cred['profile']] ?? AppTheme.primaryBlue;
+    // Parse color from hex string or use default
+    final colorValue = int.tryParse(cred['color'] ?? '0xFF3B82F6');
+    final color = Color(colorValue ?? 0xFF3B82F6);
+    
+    // Icons for each role
+    IconData getIcon() {
+      switch (cred['role']) {
+        case 'R1': return Icons.person;
+        case 'R2': return Icons.person_pin;
+        case 'R3': return Icons.analytics;
+        case 'R4': return Icons.verified_user;
+        case 'R5': return Icons.admin_panel_settings;
+        case 'R6': return Icons.security;
+        default: return Icons.person;
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -358,48 +366,71 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             ),
             child: Row(
               children: [
+                // Role badge
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    cred['profile'] == 'End User'
-                        ? Icons.person
-                        : cred['profile'] == 'Administrator'
-                            ? Icons.admin_panel_settings
-                            : Icons.verified_user,
-                    color: color,
-                    size: 20,
+                  child: Center(
+                    child: Text(
+                      cred['role'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
+                // Icon
+                Icon(getIcon(), color: color, size: 20),
+                const SizedBox(width: 8),
+                // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        cred['profile']!,
-                        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14),
+                      Row(
+                        children: [
+                          Text(
+                            cred['profile']!,
+                            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              cred['mode'] ?? '',
+                              style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
-                        cred['email']!,
-                        style: const TextStyle(color: AppTheme.mutedText, fontSize: 12),
+                        cred['description'] ?? '',
+                        style: const TextStyle(color: AppTheme.mutedText, fontSize: 11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
+                // Login button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Quick Login',
-                    style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
+                  child: const Icon(Icons.arrow_forward, color: Colors.white, size: 16),
                 ),
               ],
             ),

@@ -95,10 +95,86 @@ tx_hash = client.set_policy(policy)
 
 ## Model Performance
 
-- **Test AP**: 0.685 (XGBoost)
-- **Test AUC**: 0.983
-- **Test F1**: 0.661
-- **Training Data**: 2.6M transactions, 113:1 imbalance ratio
+The AMTTP ML pipeline uses a **Stacked Ensemble** architecture with knowledge distillation:
+
+| Model | Component | Role |
+|-------|-----------|------|
+| GraphSAGE | Graph Neural Network | Structural fraud patterns via neighbor aggregation |
+| LightGBM | Gradient Boosting | Fast feature interactions with leaf-wise growth |
+| XGBoost | Gradient Boosting | Non-linear patterns with strong regularization |
+| Linear Meta-Learner | Ensemble | Optimal weighting: `y = w₁·GraphSAGE + w₂·LGBM + w₃·XGB + b` |
+
+### Validated Metrics (Time-Based Test Split, Days 27-30)
+
+| Metric | Score | Notes |
+|--------|-------|-------|
+| **ROC-AUC** | ~0.94 | Overall discriminative ability |
+| **PR-AUC** | ~0.87 | Primary metric for imbalanced fraud detection |
+| **F1 @ 0.5** | ~0.87 | Balanced precision/recall at default threshold |
+
+## Explainability
+
+The SDK includes a powerful explainability module for human-readable risk explanations:
+
+```python
+from amttp import ExplainabilityService, format_explanation
+
+# Create explainability service
+explainer = ExplainabilityService("http://localhost:8009")
+
+# Get explanation for a risk score
+explanation = explainer.explain(
+    risk_score=0.73,
+    features={
+        "amount_eth": 50,
+        "tx_count_24h": 15,
+        "hops_to_sanctioned": 2
+    }
+)
+
+print(explanation.summary)
+# "High-risk transaction due to large amount and proximity to flagged addresses"
+
+print(explanation.top_reasons)
+# ["Large transaction (50 ETH)", "2 hops from sanctioned address", "15 txs in 24h"]
+
+print(explanation.action)
+# "ESCROW"
+
+# Explain a specific transaction
+tx_explanation = explainer.explain_transaction(
+    transaction_hash="0xabc123...",
+    risk_score=0.85,
+    sender="0x1234...",
+    receiver="0xabcd...",
+    amount=100,
+    features={"tx_count_24h": 25}
+)
+
+# Format for display
+print(format_explanation(explanation))
+```
+
+### Detected Typologies
+
+| Typology | Description |
+|----------|-------------|
+| `structuring` | Breaking large transactions into smaller ones |
+| `layering` | Complex chains to obscure fund origins |
+| `smurfing` | Using multiple accounts to move funds |
+| `fan_out` / `fan_in` | Distribution or consolidation patterns |
+| `mixer_interaction` | Funds through mixing services |
+| `sanctions_proximity` | Near sanctioned entities |
+| `dormant_activation` | Inactive account suddenly active |
+
+### Training Pipeline
+
+1. **Stage 1**: Base XGBoost trained on Kaggle ETH Fraud Dataset
+2. **Stage 2**: Fresh ETH data enriched with XGB scores, AML rules, graph properties
+3. **Stage 3**: VAE latent features + GraphSAGE embeddings extracted
+4. **Stage 4**: Stacked ensemble (GraphSAGE + LGBM + XGB v2) with linear meta-learner
+
+The final model has all knowledge "baked in": fraud patterns, 6 AML rules, graph topology, and optimal ensemble weighting.
 
 ## Environment Variables
 

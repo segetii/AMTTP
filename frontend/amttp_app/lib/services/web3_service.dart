@@ -185,10 +185,14 @@ class Web3Service {
     final from = await getCurrentAccount();
     if (from == null) throw Exception('No account connected');
 
-    // Convert ETH to Wei (hex)
+    // Convert ETH to Wei using BigInt to avoid overflow
     // 1 ETH = 10^18 Wei
-    final wei = (amountInEth * 1000000000000000000).toInt();
+    // Use string manipulation to preserve precision
+    final weiString = (amountInEth * 1e18).toStringAsFixed(0);
+    final wei = BigInt.parse(weiString);
     final valueHex = '0x${wei.toRadixString(16)}';
+    
+    debugPrint('sendTransaction: $amountInEth ETH -> $valueHex Wei');
 
     final transactionParameters = <String, dynamic>{
       'to': to,

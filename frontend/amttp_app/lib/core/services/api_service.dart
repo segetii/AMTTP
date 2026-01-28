@@ -1,17 +1,36 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart' show Color;
 
 import '../constants/app_constants.dart';
 
 // Optional runtime override for API base (use --dart-define=API_BASE_URL=https://your.ngrok.app)
 const String _apiBaseUrlOverride = String.fromEnvironment('API_BASE_URL');
 
+// Direct service URLs for development when served without nginx proxy
+const String _orchestratorUrl = 'http://localhost:8007';
+const String _integrityServiceUrl = 'http://localhost:8008';
+const String _riskEngineUrl = 'http://localhost:8000';
+const String _explainabilityServiceUrl = 'http://localhost:8009';
+
 class ApiService {
   late final Dio _dio;
+  late final Dio _integrityDio;  // Separate Dio instance for integrity service
+  late final Dio _explainabilityDio;  // Separate Dio instance for explainability service
 
   ApiService() {
     _dio = Dio(BaseOptions(
       baseUrl: _resolveBaseUrl(),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    // Integrity service needs its own Dio instance with direct URL
+    _integrityDio = Dio(BaseOptions(
+      baseUrl: _resolveIntegrityUrl(),
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -25,26 +44,90 @@ class ApiService {
       responseBody: true,
       logPrint: (object) => print(object),
     ));
+
+    _integrityDio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      logPrint: (object) => print('[INTEGRITY] $object'),
+    ));
+
+    // Explainability service needs its own Dio instance with direct URL
+    _explainabilityDio = Dio(BaseOptions(
+      baseUrl: _resolveExplainabilityUrl(),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    _explainabilityDio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      logPrint: (object) => print('[EXPLAINABILITY] $object'),
+    ));
+  }
+
+  /// Resolve explainability service URL
+  /// When served via npx serve (port 3010), use direct URL to port 8009
+  String _resolveExplainabilityUrl() {
+    if (_apiBaseUrlOverride.isNotEmpty) {
+      return _apiBaseUrlOverride;
+    }
+
+    if (kIsWeb) {
+      final uri = Uri.base;
+      // Running on port 3010 (npx serve) or 3003 (flutter dev) - use direct URL
+      if (uri.port == 3010 || uri.port == 3003) {
+        return _explainabilityServiceUrl;
+      }
+    }
+
+    return _explainabilityServiceUrl;
+  }
+
+  /// Resolve integrity service URL
+  /// When served via npx serve (port 3010), use direct URL to port 8008
+  String _resolveIntegrityUrl() {
+    if (_apiBaseUrlOverride.isNotEmpty) {
+      return _apiBaseUrlOverride;
+    }
+
+    if (kIsWeb) {
+      final uri = Uri.base;
+      // Running on port 3010 (npx serve) or 3003 (flutter dev) - use direct URL
+      if (uri.port == 3010 || uri.port == 3003) {
+        return _integrityServiceUrl;
+      }
+    }
+
+    // Use relative URL if nginx is proxying
+    return AppConstants.integrityServiceUrl.isEmpty 
+        ? _integrityServiceUrl 
+        : AppConstants.integrityServiceUrl;
   }
 
   /// Decide the correct API base URL depending on runtime context.
   /// Priority:
   /// 1) API_BASE_URL dart-define (e.g., ngrok/public tunnel)
-  /// 2) Web dev on :3003 -> same host without dev port (nginx on :80)
+  /// 2) Web dev on :3003 or :3010 -> use direct orchestrator URL
   /// 3) AppConstants.baseApiUrl (default: relative via nginx)
   String _resolveBaseUrl() {
     if (_apiBaseUrlOverride.isNotEmpty) {
+      print('[API] Using override URL: $_apiBaseUrlOverride');
       return _apiBaseUrlOverride;
     }
 
     final uri = Uri.base;
+    print('[API] Current URI: $uri (host=${uri.host}, port=${uri.port})');
 
-    // When running `flutter run -d chrome --web-port=3003`, Uri.base carries that port.
-    // Using the same host without the dev port lets nginx serve /api, /risk, /integrity, etc.
-    if (kIsWeb && uri.host.isNotEmpty && uri.port == 3003) {
-      return '${uri.scheme}://${uri.host}';
+    // When running on port 3010 (npx serve) or 3003 (flutter dev), use direct URLs
+    if (kIsWeb && uri.host.isNotEmpty && (uri.port == 3010 || uri.port == 3003)) {
+      print('[API] Resolved to orchestrator: $_orchestratorUrl');
+      return _orchestratorUrl;
     }
 
+    print('[API] Using default baseUrl: ${AppConstants.baseApiUrl}');
     // Use configured base if provided; empty string keeps relative URLs.
     return AppConstants.baseApiUrl;
   }
@@ -58,11 +141,56 @@ class ApiService {
   Future<Map<String, dynamic>> verifyIntegrity(
       Map<String, dynamic> integrityReport) async {
     try {
-      final response = await _dio.post(
-        AppConstants.integrityVerifyEndpoint,
-        data: integrityReport,
+      // Use dedicated integrity Dio instance with direct URL
+      final response = await _integrityDio.post(
+        '/verify-integrity',
+        data: {
+          'version': '1.0.0',
+          'pageIntegrity': {
+            'pageHash': integrityReport['stateHash'] ?? 'flutter-app',
+            'scriptsHash': integrityReport['handlerHash'] ?? 'flutter-app',
+            'stylesHash': 'flutter-native',
+            'formsHash': integrityReport['stateHash'] ?? 'flutter-app',
+            'buttonsHash': integrityReport['handlerHash'] ?? 'flutter-app',
+            'combinedHash': integrityReport['stateHash'] ?? 'flutter-app',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'warnings': [],
+          },
+          'componentIntegrity': [
+            {
+              'componentId': integrityReport['componentId'] ?? 'SecureTransfer',
+              'sourceHash': integrityReport['handlerHash'] ?? 'flutter-native',
+              'domHash': integrityReport['stateHash'] ?? 'flutter-native',
+              'eventHandlersHash': integrityReport['handlerHash'] ?? 'flutter-native',
+              'combinedHash': integrityReport['stateHash'] ?? 'flutter-native',
+              'verified': true,
+              'timestamp': DateTime.now().millisecondsSinceEpoch,
+            }
+          ],
+          'mutationAlerts': (integrityReport['violations'] as List?)
+              ?.map((v) => {
+                    'type': v['violation_type'] ?? 'unknown',
+                    'severity': v['severity'] ?? 'low',
+                    'element': integrityReport['componentId'] ?? 'unknown',
+                    'details': v['details'] ?? '',
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
+                  })
+              .toList() ?? [],
+          'isCompromised': (integrityReport['violations'] as List?)?.isNotEmpty ?? false,
+          'riskLevel': (integrityReport['violations'] as List?)?.isNotEmpty == true
+              ? 'suspicious'
+              : 'safe',
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        },
       );
-      return response.data;
+      
+      final data = response.data;
+      return {
+        'verified': data['valid'] == true,
+        'serverHash': data['serverHash'] ?? '',
+        'reason': data['message'] ?? 'Verified',
+        'riskLevel': data['riskLevel'] ?? 'safe',
+      };
     } on DioException catch (e) {
       // For demo purposes: If integrity service is unavailable, allow transaction
       // In production, this should block the transaction
@@ -87,7 +215,7 @@ class ApiService {
   }) async {
     try {
       final response = await _dio.post(
-        '/api/evaluate-with-integrity',
+        '/evaluate-with-integrity',
         data: {
           'address': address,
           'amount': amount,
@@ -124,6 +252,8 @@ class ApiService {
     required Map<String, dynamic> features,
   }) async {
     try {
+      print('[API] getDQNRiskScore: Calling ${_dio.options.baseUrl}${AppConstants.riskScoringEndpoint}');
+      print('[API] Data: from=$fromAddress, to=$toAddress, amount=$amount');
       // Use relative URL - nginx proxies /risk/ to risk-engine service
       final response = await _dio.post(
         AppConstants.riskScoringEndpoint,
@@ -134,9 +264,11 @@ class ApiService {
           // Risk Engine doesn't use 'features' parameter in current implementation
         },
       );
-
+      print('[API] getDQNRiskScore: Success - ${response.data}');
       return RiskScoreResponse.fromJson(response.data);
     } on DioException catch (e) {
+      print('[API] getDQNRiskScore: DioException - ${e.type}: ${e.message}');
+      print('[API] Response: ${e.response?.data}');
       throw ApiException.fromDioError(e);
     }
   }
@@ -161,6 +293,243 @@ class ApiService {
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
+  }
+
+  // ============================================================
+  // EXPLAINABILITY SERVICE
+  // ============================================================
+
+  /// Get explainability for a risk decision
+  /// Calls the explainability service on port 8009
+  Future<ExplainabilityResponse> getExplanation({
+    required String transactionHash,
+    required double riskScore,
+    required Map<String, dynamic> features,
+    Map<String, dynamic>? graphContext,
+    Map<String, dynamic>? ruleResults,
+  }) async {
+    try {
+      print('[EXPLAINABILITY] Calling $_explainabilityServiceUrl/explain');
+      final response = await _explainabilityDio.post(
+        '/explain',
+        data: {
+          'transaction_hash': transactionHash,
+          'risk_score': riskScore,
+          'features': features,
+          if (graphContext != null) 'graph_context': graphContext,
+          if (ruleResults != null) 'rule_results': ruleResults,
+        },
+      );
+      print('[EXPLAINABILITY] Success: ${response.data}');
+      return ExplainabilityResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      print('[EXPLAINABILITY] Error: ${e.message}');
+      // Return local explanation on failure
+      return _generateLocalExplanation(
+        transactionHash: transactionHash,
+        riskScore: riskScore,
+        features: features,
+        graphContext: graphContext,
+      );
+    }
+  }
+
+  /// Generate a local explanation when the explainability service is unavailable
+  ExplainabilityResponse _generateLocalExplanation({
+    required String transactionHash,
+    required double riskScore,
+    required Map<String, dynamic> features,
+    Map<String, dynamic>? graphContext,
+  }) {
+    final patterns = <ExplainabilityPattern>[];
+    final factors = <ExplainabilityFactor>[];
+    final typologies = <String>[];
+    
+    final amountEth = (features['amount_eth'] ?? features['value_eth'] ?? 0.0) as num;
+    final txCount24h = (features['tx_count_24h'] ?? 0) as num;
+    final velocity24h = (features['velocity_24h'] ?? 0.0) as num;
+    final dormancyDays = (features['dormancy_days'] ?? 0) as num;
+    
+    // Graph context analysis
+    final hopsToSanctioned = graphContext?['hops_to_sanctioned'] as num? ?? 99;
+    final mixerInteraction = graphContext?['mixer_interaction'] as bool? ?? false;
+    final inDegree = graphContext?['in_degree'] as num? ?? 0;
+    final outDegree = graphContext?['out_degree'] as num? ?? 0;
+    final pagerank = graphContext?['pagerank'] as num? ?? 0.0;
+    final clusteringCoefficient = graphContext?['clustering_coefficient'] as num? ?? 0.0;
+
+    // Amount analysis
+    if (amountEth > 10) {
+      patterns.add(ExplainabilityPattern(
+        name: 'large_transfer',
+        description: 'Transaction amount (${amountEth.toStringAsFixed(2)} ETH) exceeds typical threshold',
+        severity: amountEth > 50 ? 'high' : 'medium',
+        confidence: 0.85,
+      ));
+      factors.add(ExplainabilityFactor(
+        name: 'Transaction Amount',
+        value: amountEth.toDouble(),
+        impact: amountEth > 50 ? 0.35 : 0.2,
+        description: 'Large value transfer detected',
+      ));
+      if (amountEth > 50) typologies.add('High Value Transfer');
+    }
+
+    // Velocity analysis
+    if (txCount24h > 5 || velocity24h > 5) {
+      patterns.add(ExplainabilityPattern(
+        name: 'high_velocity',
+        description: 'High transaction velocity: $txCount24h transactions in 24h',
+        severity: txCount24h > 20 ? 'high' : 'medium',
+        confidence: 0.78,
+      ));
+      factors.add(ExplainabilityFactor(
+        name: 'Transaction Velocity',
+        value: txCount24h.toDouble(),
+        impact: 0.25,
+        description: 'Unusual transaction frequency pattern',
+      ));
+      typologies.add('Rapid Movement');
+    }
+
+    // Dormancy analysis
+    if (dormancyDays > 180) {
+      patterns.add(ExplainabilityPattern(
+        name: 'dormant_activation',
+        description: 'Address reactivated after ${dormancyDays.toInt()} days of inactivity',
+        severity: 'high',
+        confidence: 0.82,
+      ));
+      factors.add(ExplainabilityFactor(
+        name: 'Account Dormancy',
+        value: dormancyDays.toDouble(),
+        impact: 0.3,
+        description: 'Long-dormant address suddenly active',
+      ));
+      typologies.add('Dormant Account Activation');
+    }
+
+    // Sanctions proximity (graph analysis)
+    if (hopsToSanctioned <= 3) {
+      patterns.add(ExplainabilityPattern(
+        name: 'sanctions_proximity',
+        description: 'Address is $hopsToSanctioned hops from sanctioned entity',
+        severity: hopsToSanctioned == 1 ? 'critical' : 'high',
+        confidence: 0.95,
+      ));
+      factors.add(ExplainabilityFactor(
+        name: 'Sanctions Proximity',
+        value: hopsToSanctioned.toDouble(),
+        impact: hopsToSanctioned == 1 ? 0.5 : 0.35,
+        description: 'Close connection to sanctioned address in transaction graph',
+      ));
+      typologies.add('Sanctions Evasion Risk');
+    }
+
+    // Mixer interaction
+    if (mixerInteraction) {
+      patterns.add(ExplainabilityPattern(
+        name: 'mixer_interaction',
+        description: 'Address has interacted with known mixing services',
+        severity: 'high',
+        confidence: 0.88,
+      ));
+      factors.add(ExplainabilityFactor(
+        name: 'Mixer Usage',
+        value: 1.0,
+        impact: 0.4,
+        description: 'Funds have passed through mixing/tumbling service',
+      ));
+      typologies.add('Obfuscation Attempt');
+    }
+
+    // Fan-out/fan-in patterns
+    if (outDegree > 10) {
+      patterns.add(ExplainabilityPattern(
+        name: 'fan_out_pattern',
+        description: 'Address distributes funds to $outDegree recipients (fan-out)',
+        severity: outDegree > 50 ? 'high' : 'medium',
+        confidence: 0.75,
+      ));
+      typologies.add('Fund Distribution');
+    }
+    
+    if (inDegree > 10) {
+      patterns.add(ExplainabilityPattern(
+        name: 'fan_in_pattern',
+        description: 'Address receives from $inDegree sources (fan-in)',
+        severity: inDegree > 50 ? 'high' : 'medium',
+        confidence: 0.75,
+      ));
+      typologies.add('Fund Aggregation');
+    }
+
+    // Clustering analysis
+    if (clusteringCoefficient > 0.7) {
+      patterns.add(ExplainabilityPattern(
+        name: 'tight_cluster',
+        description: 'Address part of tightly connected cluster (coefficient: ${clusteringCoefficient.toStringAsFixed(2)})',
+        severity: 'medium',
+        confidence: 0.7,
+      ));
+      typologies.add('Coordinated Network');
+    }
+
+    // Default pattern if no specific ones detected
+    if (patterns.isEmpty) {
+      if (riskScore > 0.7) {
+        patterns.add(ExplainabilityPattern(
+          name: 'elevated_risk',
+          description: 'Combined behavioral signals indicate elevated risk',
+          severity: 'high',
+          confidence: 0.7,
+        ));
+      } else if (riskScore > 0.4) {
+        patterns.add(ExplainabilityPattern(
+          name: 'moderate_risk',
+          description: 'Some risk indicators present, monitoring recommended',
+          severity: 'medium',
+          confidence: 0.65,
+        ));
+      } else {
+        patterns.add(ExplainabilityPattern(
+          name: 'normal_activity',
+          description: 'Transaction patterns appear within normal parameters',
+          severity: 'low',
+          confidence: 0.8,
+        ));
+      }
+    }
+
+    // Generate narrative
+    String narrative;
+    if (riskScore > 0.7) {
+      narrative = 'HIGH RISK: This transaction exhibits ${patterns.length} concerning patterns including ${patterns.map((p) => p.name.replaceAll('_', ' ')).join(', ')}. '
+          'The ML model detected behavioral anomalies with ${(riskScore * 100).toStringAsFixed(0)}% risk confidence. '
+          'Recommend manual review before approval.';
+    } else if (riskScore > 0.4) {
+      narrative = 'MEDIUM RISK: Transaction shows some elevated risk indicators. '
+          'Detected patterns: ${patterns.map((p) => p.name.replaceAll('_', ' ')).join(', ')}. '
+          'Enhanced monitoring recommended.';
+    } else {
+      narrative = 'LOW RISK: Transaction appears routine with no significant risk indicators. '
+          'Standard processing recommended.';
+    }
+
+    return ExplainabilityResponse(
+      transactionHash: transactionHash,
+      riskScore: riskScore,
+      riskLevel: riskScore > 0.7 ? 'high' : (riskScore > 0.4 ? 'medium' : 'low'),
+      narrative: narrative,
+      patterns: patterns,
+      factors: factors,
+      typologies: typologies.isEmpty ? ['Standard Transaction'] : typologies,
+      confidence: patterns.isNotEmpty 
+          ? patterns.map((p) => p.confidence).reduce((a, b) => a + b) / patterns.length
+          : 0.7,
+      modelVersion: 'local-fallback-v2',
+      generatedAt: DateTime.now(),
+    );
   }
 
   // KYC Verification
@@ -747,12 +1116,140 @@ class RiskScoreResponse {
   });
 
   factory RiskScoreResponse.fromJson(Map<String, dynamic> json) {
+    DateTime parsedTimestamp;
+    try {
+      final ts = json['timestamp'];
+      if (ts == null) {
+        parsedTimestamp = DateTime.now();
+      } else if (ts is String) {
+        parsedTimestamp = DateTime.parse(ts);
+      } else if (ts is int) {
+        parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(ts);
+      } else {
+        parsedTimestamp = DateTime.now();
+      }
+    } catch (_) {
+      parsedTimestamp = DateTime.now();
+    }
+    
     return RiskScoreResponse(
       riskScore: json['risk_score']?.toDouble() ?? 0.0,
       riskLevel: json['risk_level'] ?? 'unknown',
       features: json['features'] ?? {},
       modelVersion: json['model_version'] ?? '',
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: parsedTimestamp,
+    );
+  }
+}
+
+// ============================================================
+// EXPLAINABILITY MODELS
+// ============================================================
+
+class ExplainabilityResponse {
+  final String transactionHash;
+  final double riskScore;
+  final String riskLevel;
+  final String narrative;
+  final List<ExplainabilityPattern> patterns;
+  final List<ExplainabilityFactor> factors;
+  final List<String> typologies;
+  final double confidence;
+  final String modelVersion;
+  final DateTime generatedAt;
+
+  ExplainabilityResponse({
+    required this.transactionHash,
+    required this.riskScore,
+    required this.riskLevel,
+    required this.narrative,
+    required this.patterns,
+    required this.factors,
+    required this.typologies,
+    required this.confidence,
+    required this.modelVersion,
+    required this.generatedAt,
+  });
+
+  factory ExplainabilityResponse.fromJson(Map<String, dynamic> json) {
+    return ExplainabilityResponse(
+      transactionHash: json['transaction_hash'] ?? '',
+      riskScore: (json['risk_score'] ?? 0.0).toDouble(),
+      riskLevel: json['risk_level'] ?? 'unknown',
+      narrative: json['narrative'] ?? '',
+      patterns: (json['patterns'] as List<dynamic>?)
+          ?.map((p) => ExplainabilityPattern.fromJson(p))
+          .toList() ?? [],
+      factors: (json['factors'] as List<dynamic>?)
+          ?.map((f) => ExplainabilityFactor.fromJson(f))
+          .toList() ?? [],
+      typologies: List<String>.from(json['typologies'] ?? []),
+      confidence: (json['confidence'] ?? 0.7).toDouble(),
+      modelVersion: json['model_version'] ?? '',
+      generatedAt: json['generated_at'] != null 
+          ? DateTime.parse(json['generated_at']) 
+          : DateTime.now(),
+    );
+  }
+}
+
+class ExplainabilityPattern {
+  final String name;
+  final String description;
+  final String severity; // 'low', 'medium', 'high', 'critical'
+  final double confidence;
+
+  ExplainabilityPattern({
+    required this.name,
+    required this.description,
+    required this.severity,
+    required this.confidence,
+  });
+
+  factory ExplainabilityPattern.fromJson(Map<String, dynamic> json) {
+    return ExplainabilityPattern(
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      severity: json['severity'] ?? 'medium',
+      confidence: (json['confidence'] ?? 0.5).toDouble(),
+    );
+  }
+
+  Color get severityColor {
+    switch (severity) {
+      case 'critical':
+        return const Color(0xFFDC2626); // Red 600
+      case 'high':
+        return const Color(0xFFF59E0B); // Amber 500
+      case 'medium':
+        return const Color(0xFFFBBF24); // Yellow 400
+      case 'low':
+        return const Color(0xFF10B981); // Emerald 500
+      default:
+        return const Color(0xFF6B7280); // Gray 500
+    }
+  }
+}
+
+class ExplainabilityFactor {
+  final String name;
+  final double value;
+  final double impact; // 0-1, how much this contributes to risk
+  final String description;
+
+  ExplainabilityFactor({
+    required this.name,
+    required this.value,
+    required this.impact,
+    required this.description,
+  });
+
+  factory ExplainabilityFactor.fromJson(Map<String, dynamic> json) {
+    return ExplainabilityFactor(
+      name: json['name'] ?? '',
+      value: (json['value'] ?? 0.0).toDouble(),
+      impact: (json['impact'] ?? 0.0).toDouble(),
+      description: json['description'] ?? '',
     );
   }
 }

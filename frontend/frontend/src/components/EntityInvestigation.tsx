@@ -26,6 +26,7 @@ export function EntityInvestigation() {
     graph_score: number;
     patterns: string;
     signal_count: number;
+    reasons: string[];
   } | null>(null);
 
   useEffect(() => {
@@ -172,19 +173,19 @@ export function EntityInvestigation() {
           <StatCard
             icon={<Activity className="w-5 h-5" />}
             label="Total Transactions"
-            value={entity.totalTransactions}
+            value={entity.totalTransactions ?? 0}
             color="blue"
           />
           <StatCard
             icon={<DollarSign className="w-5 h-5" />}
             label="Total Value (ETH)"
-            value={entity.totalValueEth.toFixed(2)}
+            value={(entity.totalValueEth ?? 0).toFixed(2)}
             color="green"
           />
           <StatCard
             icon={<Network className="w-5 h-5" />}
             label="Graph Connections"
-            value={entity.graphConnections}
+            value={entity.graphConnections ?? 0}
             color="purple"
           />
           <StatCard
@@ -196,13 +197,13 @@ export function EntityInvestigation() {
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
             label="ML Score"
-            value={(liveScore?.ml_score ?? entity.mlScore).toFixed(2)}
+            value={((liveScore?.ml_score ?? entity.mlScore) ?? 0).toFixed(2)}
             color="cyan"
           />
           <StatCard
             icon={<Link2 className="w-5 h-5" />}
             label="Graph Score"
-            value={(liveScore?.graph_score ?? entity.graphScore).toFixed(1)}
+            value={((liveScore?.graph_score ?? entity.graphScore) ?? 0).toFixed(1)}
             color="orange"
           />
         </div>
@@ -217,8 +218,42 @@ export function EntityInvestigation() {
             {(liveScore?.patterns?.split(', ') || entity.patterns || []).filter(Boolean).map((pattern) => (
               <PatternBadge key={pattern} pattern={pattern} />
             ))}
-            {!liveScore?.patterns && entity.patterns.length === 0 && (
+            {!liveScore?.patterns && (!entity.patterns || entity.patterns.length === 0) && (
               <span className="text-gray-500">No patterns detected</span>
+            )}
+          </div>
+        </div>
+
+        {/* Risk Reasons - Investigation Insights */}
+        <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Flag className="w-5 h-5 text-yellow-400" />
+            Investigation Insights
+          </h2>
+          <div className="space-y-3">
+            {liveScore?.reasons && liveScore.reasons.length > 0 ? (
+              liveScore.reasons.map((reason, idx) => (
+                <div 
+                  key={idx} 
+                  className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700"
+                >
+                  <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-yellow-400 text-xs font-bold">{idx + 1}</span>
+                  </div>
+                  <p className="text-gray-300 text-sm">{reason}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-500 text-sm">
+                {scoring ? (
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                    Analyzing address for risk indicators...
+                  </span>
+                ) : (
+                  <span>No specific risk reasons identified. This address appears to have normal activity patterns.</span>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -249,7 +284,7 @@ export function EntityInvestigation() {
             <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
               <h3 className="text-lg font-semibold mb-4">Recent Alerts</h3>
               <div className="space-y-3">
-                {entity.alerts.slice(0, 5).map((alert) => (
+                {(entity.alerts || []).slice(0, 5).map((alert) => (
                   <div
                     key={alert.id}
                     className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg"
@@ -264,7 +299,7 @@ export function EntityInvestigation() {
                         {alert.riskLevel}
                       </span>
                       <span className="text-sm text-gray-300">
-                        {alert.patterns.join(', ')}
+                        {(alert.patterns || []).join(', ')}
                       </span>
                     </div>
                     <span className="text-xs text-gray-500">
@@ -282,25 +317,33 @@ export function EntityInvestigation() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">First Seen</span>
                   <span className="font-mono text-sm">
-                    {new Date(entity.firstSeen).toLocaleDateString()}
+                    {entity.firstSeen ? new Date(entity.firstSeen).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Last Seen</span>
                   <span className="font-mono text-sm">
-                    {new Date(entity.lastSeen).toLocaleDateString()}
+                    {entity.lastSeen ? new Date(entity.lastSeen).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Active Days</span>
                   <span className="font-mono text-sm">
-                    {Math.ceil((new Date(entity.lastSeen).getTime() - new Date(entity.firstSeen).getTime()) / (1000 * 60 * 60 * 24))}
+                    {(() => {
+                      const firstSeen = entity.firstSeen ? new Date(entity.firstSeen).getTime() : 0;
+                      const lastSeen = entity.lastSeen ? new Date(entity.lastSeen).getTime() : 0;
+                      if (!firstSeen || !lastSeen || isNaN(firstSeen) || isNaN(lastSeen)) {
+                        return 'N/A';
+                      }
+                      const days = Math.ceil((lastSeen - firstSeen) / (1000 * 60 * 60 * 24));
+                      return isNaN(days) ? 'N/A' : days;
+                    })()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Avg TX Value</span>
                   <span className="font-mono text-sm">
-                    {(entity.totalValueEth / entity.totalTransactions).toFixed(4)} ETH
+                    {((entity.totalValueEth || 0) / (entity.totalTransactions || 1)).toFixed(4)} ETH
                   </span>
                 </div>
               </div>
@@ -309,11 +352,11 @@ export function EntityInvestigation() {
         )}
 
         {activeTab === 'transactions' && (
-          <TransactionsTab transactions={entity.transactions} />
+          <TransactionsTab transactions={entity.transactions || []} />
         )}
 
         {activeTab === 'connections' && (
-          <ConnectionsTab connections={entity.connectedAddresses} onNavigate={(addr) => router.push(`/investigate/${addr}`)} />
+          <ConnectionsTab connections={entity.connectedAddresses || []} onNavigate={(addr) => router.push(`/investigate/${addr}`)} />
         )}
 
         {activeTab === 'timeline' && (
@@ -487,8 +530,8 @@ function ConnectionsTab({ connections, onNavigate }: {
 
 function TimelineTab({ entity }: { entity: EntityProfile }) {
   const events = [
-    ...entity.alerts.map(a => ({ type: 'alert' as const, data: a, timestamp: a.timestamp })),
-    ...entity.transactions.slice(0, 10).map(t => ({ type: 'tx' as const, data: t, timestamp: t.timestamp }))
+    ...(entity.alerts || []).map(a => ({ type: 'alert' as const, data: a, timestamp: a.timestamp })),
+    ...(entity.transactions || []).slice(0, 10).map(t => ({ type: 'tx' as const, data: t, timestamp: t.timestamp }))
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (

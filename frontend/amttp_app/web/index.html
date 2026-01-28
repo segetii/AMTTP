@@ -96,6 +96,23 @@
     };
     
     console.log('MetaMask helper loaded, available:', window.ethereum_helper.isMetaMaskAvailable());
+    
+    // Force clear service worker cache on load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Service worker unregistered');
+        }
+      });
+      // Also clear caches
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+          console.log('Cache deleted:', name);
+        }
+      });
+    }
   </script>
 </head>
 <body>

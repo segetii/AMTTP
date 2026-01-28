@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+// Web-specific imports for file selection
+import 'dart:html' as html if (dart.library.io) 'dart:io';
+import 'dart:async';
 
 /// Dispute Center Page - Covers AMTTPDisputeResolver.sol functionality
 /// Functions covered:
@@ -752,6 +756,8 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
   final _contentController = TextEditingController();
   final _descriptionController = TextEditingController();
   bool _isLoading = false;
+  String? _selectedFileName;
+  List<int>? _selectedFileBytes;
 
   final _activeDisputes = ['001', '002'];
 
@@ -761,6 +767,49 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
     _descriptionController.dispose();
     super.dispose();
   }
+  
+  Future<void> _pickFile() async {
+    if (kIsWeb) {
+      // Web file picker using HTML input element
+      final uploadInput = html.FileUploadInputElement()..accept = '*/*';
+      uploadInput.click();
+      
+      await uploadInput.onChange.first;
+      
+      if (uploadInput.files!.isNotEmpty) {
+        final file = uploadInput.files!.first;
+        final reader = html.FileReader();
+        
+        reader.readAsArrayBuffer(file);
+        await reader.onLoad.first;
+        
+        setState(() {
+          _selectedFileName = file.name;
+          _selectedFileBytes = (reader.result as List<int>);
+          _contentController.text = file.name;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File selected: ${file.name}'),
+              backgroundColor: AppTheme.primaryBlue,
+            ),
+          );
+        }
+      }
+    } else {
+      // For non-web platforms, show info dialog
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File picker available on web platform'),
+            backgroundColor: AppTheme.warningOrange,
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _submitEvidence() async {
     if (!_formKey.currentState!.validate()) return;
@@ -768,7 +817,7 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
     setState(() => _isLoading = true);
     
     try {
-      // Call submitEvidence
+      // In production, this would upload to IPFS or backend storage
       await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
@@ -780,6 +829,10 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
         );
         _contentController.clear();
         _descriptionController.clear();
+        setState(() {
+          _selectedFileName = null;
+          _selectedFileBytes = null;
+        });
       }
     } finally {
       setState(() => _isLoading = false);
@@ -862,27 +915,80 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Content
-                  TextFormField(
-                    controller: _contentController,
-                    maxLines: _evidenceType == 'text' ? 4 : 1,
-                    decoration: InputDecoration(
-                      labelText: _evidenceType == 'text'
-                          ? 'Evidence Content'
-                          : _evidenceType == 'file'
-                              ? 'File Path/URL'
-                              : 'IPFS URI',
-                      labelStyle: const TextStyle(color: AppTheme.mutedText),
-                      filled: true,
-                      fillColor: AppTheme.darkBg,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                  // Content - Show file picker button for file type
+                  if (_evidenceType == 'file') ...[
+                    InkWell(
+                      onTap: _pickFile,
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppTheme.darkBg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _selectedFileName != null 
+                                ? AppTheme.accentGreen 
+                                : AppTheme.mutedText.withValues(alpha: 0.3),
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              _selectedFileName != null 
+                                  ? Icons.check_circle 
+                                  : Icons.cloud_upload,
+                              size: 48,
+                              color: _selectedFileName != null 
+                                  ? AppTheme.accentGreen 
+                                  : AppTheme.mutedText,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _selectedFileName ?? 'Click to select a file',
+                              style: TextStyle(
+                                color: _selectedFileName != null 
+                                    ? AppTheme.cleanWhite 
+                                    : AppTheme.mutedText,
+                                fontWeight: _selectedFileName != null 
+                                    ? FontWeight.bold 
+                                    : FontWeight.normal,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (_selectedFileName != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Click to change file',
+                                style: TextStyle(
+                                  color: AppTheme.mutedText,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
-                    style: const TextStyle(color: AppTheme.cleanWhite),
-                    validator: (v) => v?.isEmpty == true ? 'Required' : null,
-                  ),
+                  ] else ...[
+                    TextFormField(
+                      controller: _contentController,
+                      maxLines: _evidenceType == 'text' ? 4 : 1,
+                      decoration: InputDecoration(
+                        labelText: _evidenceType == 'text'
+                            ? 'Evidence Content'
+                            : 'IPFS URI',
+                        labelStyle: const TextStyle(color: AppTheme.mutedText),
+                        filled: true,
+                        fillColor: AppTheme.darkBg,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: const TextStyle(color: AppTheme.cleanWhite),
+                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   
                   // Description

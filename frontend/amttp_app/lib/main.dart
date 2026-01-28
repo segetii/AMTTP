@@ -28,7 +28,7 @@ class AMTTPApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
+  final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsProvider);
     
     // Determine theme mode from settings

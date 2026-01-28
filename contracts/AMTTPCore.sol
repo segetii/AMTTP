@@ -76,6 +76,8 @@ contract AMTTPCore is
     error NoETHSent();
     error ZeroAmount();
     error ETHTransferFailed();
+    error OracleNotSet();
+    error InvalidApprovalThreshold();
 
     // ══════════════════════════════════════════════════════════════════
     //                           CONSTANTS
@@ -173,6 +175,8 @@ contract AMTTPCore is
     event ApproverAdded(address indexed approver);
     event ApproverRemoved(address indexed approver);
     event ZkNAFModuleUpdated(address indexed zkNAFModule, bool enabled);
+    event OracleUpdated(address indexed newOracle);
+    event ApprovalThresholdUpdated(uint256 newThreshold);
     
     // ══════════════════════════════════════════════════════════════════
     //                           MODIFIERS
@@ -235,6 +239,7 @@ contract AMTTPCore is
     
     function setOracle(address _oracle) external onlyOwner {
         oracle = _oracle;
+        emit OracleUpdated(_oracle);
     }
     
     function setGlobalRiskThreshold(uint256 _threshold) external onlyOwner {
@@ -256,11 +261,31 @@ contract AMTTPCore is
     function removeApprover(address _approver) external onlyOwner {
         require(isApprover[_approver], "Not approver");
         isApprover[_approver] = false;
+        
+        // Remove from array to keep it compact
+        uint256 length = approvers.length;
+        for (uint256 i = 0; i < length; ) {
+            if (approvers[i] == _approver) {
+                approvers[i] = approvers[length - 1];
+                approvers.pop();
+                break;
+            }
+            unchecked { ++i; }
+        }
+        
+        // Adjust threshold if it now exceeds approvers count
+        if (approvalThreshold > approvers.length && approvers.length > 0) {
+            approvalThreshold = approvers.length;
+            emit ApprovalThresholdUpdated(approvalThreshold);
+        }
+        
         emit ApproverRemoved(_approver);
     }
     
     function setApprovalThreshold(uint256 _threshold) external onlyOwner {
+        if (_threshold == 0 || _threshold > approvers.length) revert InvalidApprovalThreshold();
         approvalThreshold = _threshold;
+        emit ApprovalThresholdUpdated(_threshold);
     }
     
     /**
@@ -573,9 +598,18 @@ contract AMTTPCore is
         bytes32 kycHash,
         bytes calldata signature
     ) internal view returns (bool) {
-        if (oracle == address(0)) return true; // Skip if oracle not set
+        if (oracle == address(0)) revert OracleNotSet();
         
-        bytes32 messageHash = keccak256(abi.encodePacked(buyer, seller, amount, riskScore, kycHash));
+        // Include chainId and contract address for replay protection
+        bytes32 messageHash = keccak256(abi.encodePacked(
+            address(this),
+            block.chainid,
+            buyer,
+            seller,
+            amount,
+            riskScore,
+            kycHash
+        ));
         bytes32 ethSignedHash = messageHash.toEthSignedMessageHash();
         address signer = ethSignedHash.recover(signature);
         

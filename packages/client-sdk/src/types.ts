@@ -59,11 +59,12 @@ export interface RiskScore {
   modelVersion: string;
   featuresHash?: string;
   f1Score?: number;
-  // Model metrics from training
+  // Model metrics from validation (time-based test split, days 27-30)
   modelMetrics?: {
-    testAP: number;
-    testAUC: number;
-    testF1: number;
+    rocAUC: number;      // ~0.94 - Overall discriminative ability
+    prAUC: number;       // ~0.87 - Primary metric for imbalanced fraud detection
+    f1: number;          // ~0.87 - Balanced precision/recall at default threshold
+    architecture: string; // Stacked Ensemble (GraphSAGE + LGBM + XGBoost + Linear Meta-Learner)
   };
 }
 

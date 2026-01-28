@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_service.dart';
-import 'user_profile_provider.dart';
+import '../rbac/roles.dart';
+import '../rbac/rbac_provider.dart';
 
 /// Authentication state
 enum AuthStatus {
@@ -64,12 +65,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoading: false,
         );
         
-        // Sync with user profile provider
-        _ref.read(userProfileProvider.notifier).setProfile(
-          profile: user.profile,
-          walletAddress: user.walletAddress ?? '',
-          displayName: user.displayName,
-        );
+        // Sync with RBAC provider
+        _ref.read(rbacProvider.notifier).setRole(user.role);
       } else {
         state = state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -99,17 +96,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       if (result.success && result.user != null) {
+        final user = result.user!;
+
         state = state.copyWith(
           status: AuthStatus.authenticated,
-          user: result.user,
+          user: user,
           isLoading: false,
         );
 
-        // Sync with user profile provider
-        _ref.read(userProfileProvider.notifier).setProfile(
-          profile: result.user!.profile,
-          walletAddress: result.user!.walletAddress ?? '',
-          displayName: result.user!.displayName,
+        // Sync full RBAC context (role + identifiers)
+        _ref.read(rbacProvider.notifier).login(
+          role: user.role,
+          userId: user.id,
+          walletAddress: user.walletAddress ?? '',
+          displayName: user.displayName,
         );
 
         return true;
@@ -136,7 +136,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
     required String displayName,
-    required UserProfile profile,
+    required Role role,
     String? walletAddress,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -146,22 +146,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email,
         password: password,
         displayName: displayName,
-        profile: profile,
+        role: role,
         walletAddress: walletAddress,
       );
 
       if (result.success && result.user != null) {
+        final user = result.user!;
+
         state = state.copyWith(
           status: AuthStatus.authenticated,
-          user: result.user,
+          user: user,
           isLoading: false,
         );
 
-        // Sync with user profile provider
-        _ref.read(userProfileProvider.notifier).setProfile(
-          profile: result.user!.profile,
-          walletAddress: result.user!.walletAddress ?? '',
-          displayName: result.user!.displayName,
+        // Sync full RBAC context (role + identifiers)
+        _ref.read(rbacProvider.notifier).login(
+          role: user.role,
+          userId: user.id,
+          walletAddress: user.walletAddress ?? '',
+          displayName: user.displayName,
         );
 
         return true;
@@ -190,8 +193,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authService.logout();
       state = const AuthState(status: AuthStatus.unauthenticated);
       
-      // Reset profile provider
-      _ref.read(userProfileProvider.notifier).disconnect();
+      // Reset RBAC provider
+      _ref.read(rbacProvider.notifier).logout();
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),
@@ -203,7 +206,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Update user profile
   Future<bool> updateProfile({
     String? displayName,
-    UserProfile? profile,
+    Role? role,
     String? walletAddress,
   }) async {
     if (state.user == null) return false;
@@ -214,7 +217,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final result = await _authService.updateProfile(
         userId: state.user!.id,
         displayName: displayName,
-        profile: profile,
+        role: role,
         walletAddress: walletAddress,
       );
 
@@ -224,12 +227,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoading: false,
         );
 
-        // Sync with user profile provider
-        _ref.read(userProfileProvider.notifier).setProfile(
-          profile: result.user!.profile,
-          walletAddress: result.user!.walletAddress ?? '',
-          displayName: result.user!.displayName,
-        );
+        // Sync with RBAC provider
+        _ref.read(rbacProvider.notifier).setRole(result.user!.role);
 
         return true;
       }

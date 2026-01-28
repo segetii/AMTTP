@@ -1,5 +1,7 @@
 # AMTTP Development Roadmap
 
+## Last Updated: January 22, 2026
+
 ## Current Status ✅ PRODUCTION READY
 - **KYC Backend Service**: Oracle service with Sumsub integration, MongoDB storage, REST APIs
 - **Smart Contract**: Upgradeable AMTTP contracts deployed on Sepolia testnet
@@ -10,6 +12,51 @@
 - **MetaMask Snap**: Transaction insights with risk scoring
 - **Testing**: Vitest + Jest setup with automated tests
 - **CI/CD**: GitHub Actions workflow for testing and building
+- **Authentication**: Multi-method auth (Wallet, Email, Demo) with 6-tier RBAC
+- **Role Management**: Full institutional user management system
+
+---
+
+## ✅ UI/UX Sprints - COMPLETED
+
+### Sprint 1-10: Core UI Implementation ✅ COMPLETE
+- [x] RBAC system with 6 roles (R1-R6)
+- [x] Auth context and mode switching
+- [x] UI snapshot chain for integrity
+- [x] Mode shells (Focus/War Room)
+- [x] Trust components (TrustScoreBadge, ConfidenceIndicator)
+- [x] Risk visualization components
+- [x] ML baseline dashboard
+- [x] Multisig governance UI
+- [x] Escrow & Dispute components
+- [x] Policy engine UI
+- [x] Cross-chain status display
+- [x] Audit trail viewer
+- [x] Real-time alert components
+
+### Sprint 11: Compliance Reporting & Export ✅ COMPLETE (Jan 22, 2026)
+- [x] Snapshot Explorer - Browse/filter/verify UI snapshots
+- [x] Evidence Chain - Evidence linking with list/timeline views
+- [x] Report Generator - Create/export reports (PDF/JSON/CSV/HTML)
+- [x] Chain Replay Tool - Step-by-step UI replay with visual diffs
+- [x] Compliance Dashboard - 4-tab interface at `/war-room/compliance`
+
+### Authentication System ✅ COMPLETE (Jan 22, 2026)
+- [x] Multi-method authentication (Wallet, Email, Demo)
+- [x] Registration page with password validation
+- [x] API routes for auth (`/api/auth/*`)
+- [x] Session management with localStorage
+- [x] Wallet detection (MetaMask, Coinbase, etc.)
+
+### Role Management System ✅ COMPLETE (Jan 22, 2026)
+- [x] Role management types and service
+- [x] Admin UI at `/war-room/admin/roles`
+- [x] User creation/editing/suspension
+- [x] Role assignment with permission hierarchy
+- [x] Audit logging for all role changes
+- [x] Institution management
+
+---
 
 ## ✅ Phase 1: Foundation Layer - COMPLETE
 

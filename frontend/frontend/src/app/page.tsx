@@ -1,5 +1,5 @@
-﻿import { SIEMDashboard } from "@/components/SIEMDashboard";
+﻿import { SIEMDashboardImproved } from "@/components/SIEMDashboardImproved";
 
 export default function Home() {
-  return <SIEMDashboard />;
+  return <SIEMDashboardImproved />;
 }

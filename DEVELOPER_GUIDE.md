@@ -229,6 +229,74 @@ mongostat --host localhost:27017
 
 ## 🛡️ Security Best Practices
 
+### Authentication & Authorization
+
+The platform uses a multi-tier RBAC (Role-Based Access Control) system:
+
+```typescript
+// Role Hierarchy
+enum Role {
+  R1_END_USER = 'R1_END_USER',           // Basic user - Focus Mode
+  R2_END_USER_PEP = 'R2_END_USER_PEP',   // Enhanced monitoring - Focus Mode
+  R3_INSTITUTION_OPS = 'R3_INSTITUTION_OPS',       // Ops team - War Room (View)
+  R4_INSTITUTION_COMPLIANCE = 'R4_INSTITUTION_COMPLIANCE', // Compliance - War Room (Full)
+  R5_PLATFORM_ADMIN = 'R5_PLATFORM_ADMIN',         // Platform admin
+  R6_SUPER_ADMIN = 'R6_SUPER_ADMIN',               // Super admin
+}
+
+// Using auth context in components
+import { useAuth } from '@/lib/auth-context';
+
+function MyComponent() {
+  const { role, capabilities, canEnforce, isInstitutional } = useAuth();
+  
+  if (capabilities?.canTriggerEnforcement) {
+    // Show enforcement options
+  }
+}
+```
+
+### Authentication Methods
+
+```typescript
+// 1. Wallet-based login
+import { connectWallet, isWalletConnected } from '@/lib/auth-service';
+
+const result = await connectWallet();
+if (result) {
+  await login(result.address);
+}
+
+// 2. Email/password login
+const response = await fetch('/api/auth/login', {
+  method: 'POST',
+  body: JSON.stringify({ email, password, authMethod: 'email' })
+});
+
+// 3. API endpoints
+POST /api/auth/register  - User registration
+POST /api/auth/login     - User authentication
+POST /api/auth/logout    - Session invalidation
+GET  /api/auth/me        - Current session info
+```
+
+### Role Management (Admin)
+
+```typescript
+import { useRoleManagement } from '@/lib/role-management-service';
+import { canAssignRole, getAssignableRoles } from '@/types/role-management';
+
+const { assignRole, createUser, suspendUser } = useRoleManagement(currentUserRole);
+
+// Check if current user can assign a role
+if (canAssignRole(Role.R6_SUPER_ADMIN, Role.R4_INSTITUTION_COMPLIANCE)) {
+  await assignRole(userId, Role.R4_INSTITUTION_COMPLIANCE, institutionId, 'Promoted');
+}
+
+// Get roles the current user can assign
+const assignable = getAssignableRoles(currentUserRole);
+```
+
 ### Smart Contract Security
 ```solidity
 // Always use reentrancy protection

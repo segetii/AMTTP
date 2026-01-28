@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/auth/auth_provider.dart';
-import '../../../../core/auth/user_profile_provider.dart';
+import '../../../../core/rbac/roles.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Register Page - Create new user account with profile selection
+/// Register Page - Create new user account with role selection
+/// Only End User roles (R1, R2) can self-register - institutional roles require admin invite
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
@@ -23,7 +24,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  UserProfile _selectedProfile = UserProfile.endUser;
+  Role _selectedRole = Role.r1EndUser;  // Default to R1 End User
   bool _acceptTerms = false;
 
   @override
@@ -53,25 +54,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
       displayName: _displayNameController.text.trim(),
-      profile: _selectedProfile,
+      role: _selectedRole,
       walletAddress: _walletAddressController.text.trim().isNotEmpty 
           ? _walletAddressController.text.trim() 
           : null,
     );
 
     if (success && mounted) {
-      // Navigate based on profile
-      switch (_selectedProfile) {
-        case UserProfile.endUser:
-          context.go('/');
-          break;
-        case UserProfile.admin:
-          context.go('/admin');
-          break;
-        case UserProfile.complianceOfficer:
-          context.go('/compliance');
-          break;
-      }
+      // Navigate to home - router will handle role-based redirects
+      context.go('/');
     }
   }
 
@@ -142,20 +133,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Profile Selection
+                            // Role Selection - Only End User roles for self-registration
                             const Text(
-                              'Select Profile Type',
+                              'Select Account Type',
                               style: TextStyle(color: AppTheme.cleanWhite, fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 12),
                             Row(
                               children: [
-                                Expanded(child: _buildProfileOption(UserProfile.endUser)),
+                                Expanded(child: _buildRoleOption(Role.r1EndUser)),
                                 const SizedBox(width: 8),
-                                Expanded(child: _buildProfileOption(UserProfile.admin)),
-                                const SizedBox(width: 8),
-                                Expanded(child: _buildProfileOption(UserProfile.complianceOfficer)),
+                                Expanded(child: _buildRoleOption(Role.r2EndUserPep)),
                               ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Institutional roles (R3-R6) require admin invitation',
+                              style: TextStyle(color: AppTheme.mutedText, fontSize: 11),
                             ),
                             const SizedBox(height: 24),
 
@@ -398,14 +392,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildProfileOption(UserProfile profile) {
-    final isSelected = _selectedProfile == profile;
-    final color = _getProfileColor(profile);
-    final icon = _getProfileIcon(profile);
-    final label = _getProfileLabel(profile);
+  Widget _buildRoleOption(Role role) {
+    final isSelected = _selectedRole == role;
+    final color = _getRoleColor(role);
+    final icon = _getRoleIcon(role);
+    final label = _getRoleLabel(role);
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedProfile = profile),
+      onTap: () => setState(() => _selectedRole = role),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -428,6 +422,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 color: isSelected ? color : AppTheme.mutedText,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                role.code.substring(0, 2),  // "R1" or "R2"
+                style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -454,36 +460,36 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Color _getProfileColor(UserProfile profile) {
-    switch (profile) {
-      case UserProfile.endUser:
+  Color _getRoleColor(Role role) {
+    switch (role) {
+      case Role.r1EndUser:
         return AppTheme.primaryBlue;
-      case UserProfile.admin:
-        return AppTheme.primaryPurple;
-      case UserProfile.complianceOfficer:
+      case Role.r2EndUserPep:
         return AppTheme.warningOrange;
+      default:
+        return AppTheme.primaryPurple;
     }
   }
 
-  IconData _getProfileIcon(UserProfile profile) {
-    switch (profile) {
-      case UserProfile.endUser:
+  IconData _getRoleIcon(Role role) {
+    switch (role) {
+      case Role.r1EndUser:
         return Icons.person_rounded;
-      case UserProfile.admin:
-        return Icons.admin_panel_settings_rounded;
-      case UserProfile.complianceOfficer:
+      case Role.r2EndUserPep:
         return Icons.verified_user_rounded;
+      default:
+        return Icons.business_rounded;
     }
   }
 
-  String _getProfileLabel(UserProfile profile) {
-    switch (profile) {
-      case UserProfile.endUser:
-        return 'User';
-      case UserProfile.admin:
-        return 'Admin';
-      case UserProfile.complianceOfficer:
-        return 'Compliance';
+  String _getRoleLabel(Role role) {
+    switch (role) {
+      case Role.r1EndUser:
+        return 'Personal';
+      case Role.r2EndUserPep:
+        return 'PEP/HNW';
+      default:
+        return role.displayName;
     }
   }
 }

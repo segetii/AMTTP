@@ -19,10 +19,12 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   
   bool _isLoading = false;
   bool _isCheckingRecipient = false;
+  bool _isLoadingExplanation = false;
   RiskScoreResponse? _riskScore;
   PolicyEvaluationResult? _policyResult;
   AddressLabels? _recipientLabels;
   ReputationResponse? _recipientReputation;
+  ExplainabilityResponse? _explanation;
   bool _showRiskAnalysis = false;
   String? _recipientWarning;
   final ApiService _apiService = ApiService();
@@ -144,7 +146,9 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                   : const Icon(Icons.analytics),
                 label: Text(_isLoading ? 'Analyzing...' : 'Analyze Risk'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.secondaryBlue,
+                  backgroundColor: AppTheme.primaryPurple,
+                  foregroundColor: AppTheme.cleanWhite,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 ),
               ),
 
@@ -163,6 +167,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                   label: Text(_getTransferButtonText()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _getTransferButtonColor(),
+                    foregroundColor: AppTheme.cleanWhite,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
@@ -378,6 +383,28 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             ),
           ),
           
+          // Explain Risk Button
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _isLoadingExplanation ? null : _showExplainabilityModal,
+              icon: _isLoadingExplanation 
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.lightbulb_outline),
+              label: Text(_isLoadingExplanation ? 'Loading...' : 'Explain Risk Decision'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primaryBlue,
+                side: const BorderSide(color: AppTheme.primaryBlue),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+          
           // Transaction Outcome
           const SizedBox(height: 8),
           _buildTransactionOutcome(),
@@ -456,7 +483,437 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       _recipientLabels = null;
       _recipientReputation = null;
       _recipientWarning = null;
+      _explanation = null;
     });
+  }
+
+  /// Show the explainability modal with risk patterns and factors
+  Future<void> _showExplainabilityModal() async {
+    if (_riskScore == null) return;
+
+    setState(() => _isLoadingExplanation = true);
+
+    try {
+      final walletState = ref.read(walletProvider);
+      final amount = double.tryParse(_amountController.text) ?? 0.0;
+      final recipientAddress = _recipientController.text.trim();
+
+      // Build comprehensive features for explainability
+      final features = {
+        'amount_eth': amount,
+        'value_eth': amount,
+        'from_address': walletState.address ?? '',
+        'to_address': recipientAddress,
+        'tx_count_24h': 5, // Simulated
+        'velocity_24h': amount * 2, // Simulated based on amount
+        'dormancy_days': 30, // Simulated
+        'is_new_recipient': _recipientReputation == null,
+        'recipient_reputation': _recipientReputation?.score ?? 50,
+      };
+
+      // Build graph context
+      final graphContext = {
+        'hops_to_sanctioned': _recipientLabels?.isSanctioned == true ? 1 : 99,
+        'mixer_interaction': _recipientLabels?.labels.any((l) => 
+            l.toLowerCase().contains('mixer') || 
+            l.toLowerCase().contains('tornado')) ?? false,
+        'in_degree': 5, // Simulated
+        'out_degree': 8, // Simulated
+        'pagerank': 0.001, // Simulated
+        'clustering_coefficient': 0.3, // Simulated
+      };
+
+      // Build rule results based on policy
+      final ruleResults = {
+        'high_value_transfer': amount > 10,
+        'sanctions_match': _recipientLabels?.isSanctioned ?? false,
+        'mixer_detected': graphContext['mixer_interaction'],
+        'low_reputation': (_recipientReputation?.score ?? 100) < 30,
+        'policy_action': _policyResult?.action ?? 'allow',
+      };
+
+      // Generate a pseudo transaction hash for the explanation
+      final txHash = '0x${DateTime.now().millisecondsSinceEpoch.toRadixString(16).padLeft(64, '0')}';
+
+      final explanation = await _apiService.getExplanation(
+        transactionHash: txHash,
+        riskScore: _riskScore!.riskScore,
+        features: features,
+        graphContext: graphContext,
+        ruleResults: ruleResults,
+      );
+
+      setState(() {
+        _explanation = explanation;
+        _isLoadingExplanation = false;
+      });
+
+      if (mounted) {
+        _showExplanationDialog(explanation);
+      }
+    } catch (e) {
+      setState(() => _isLoadingExplanation = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load explanation: $e')),
+        );
+      }
+    }
+  }
+
+  /// Display the explanation in a modal dialog
+  void _showExplanationDialog(ExplainabilityResponse explanation) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppTheme.darkCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Icon(
+                    Icons.lightbulb,
+                    color: _getRiskColor(explanation.riskLevel),
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Risk Explanation',
+                          style: TextStyle(
+                            color: AppTheme.cleanWhite,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Confidence: ${(explanation.confidence * 100).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            color: AppTheme.mutedText,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppTheme.mutedText),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Risk Level Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getRiskColor(explanation.riskLevel).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: _getRiskColor(explanation.riskLevel)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getRiskIcon(explanation.riskLevel),
+                      color: _getRiskColor(explanation.riskLevel),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${explanation.riskLevel.toUpperCase()} RISK - ${(explanation.riskScore * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        color: _getRiskColor(explanation.riskLevel),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Scrollable Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Narrative
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.darkBg,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.mutedText.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          explanation.narrative,
+                          style: const TextStyle(
+                            color: AppTheme.cleanWhite,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Detected Patterns
+                      if (explanation.patterns.isNotEmpty) ...[
+                        const Text(
+                          '🔍 Detected Patterns',
+                          style: TextStyle(
+                            color: AppTheme.cleanWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...explanation.patterns.map((pattern) => _buildPatternCard(pattern)),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Risk Factors
+                      if (explanation.factors.isNotEmpty) ...[
+                        const Text(
+                          '📊 Risk Factors',
+                          style: TextStyle(
+                            color: AppTheme.cleanWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...explanation.factors.map((factor) => _buildFactorCard(factor)),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Typologies
+                      if (explanation.typologies.isNotEmpty) ...[
+                        const Text(
+                          '🏷️ Risk Typologies',
+                          style: TextStyle(
+                            color: AppTheme.cleanWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: explanation.typologies.map((typology) => 
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryPurple.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.5)),
+                              ),
+                              child: Text(
+                                typology,
+                                style: const TextStyle(
+                                  color: AppTheme.primaryPurple,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Model Info
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.darkBg,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: AppTheme.mutedText, size: 14),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Model: ${explanation.modelVersion} • Generated: ${explanation.generatedAt.toString().substring(0, 19)}',
+                              style: const TextStyle(
+                                color: AppTheme.mutedText,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatternCard(ExplainabilityPattern pattern) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: pattern.severityColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: pattern.severityColor.withOpacity(0.5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: pattern.severityColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              pattern.severity.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pattern.name.replaceAll('_', ' ').toUpperCase(),
+                  style: TextStyle(
+                    color: pattern.severityColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  pattern.description,
+                  style: const TextStyle(
+                    color: AppTheme.cleanWhite,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Confidence: ${(pattern.confidence * 100).toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    color: AppTheme.mutedText,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFactorCard(ExplainabilityFactor factor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.darkBg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppTheme.mutedText.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                factor.name,
+                style: const TextStyle(
+                  color: AppTheme.cleanWhite,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+              Text(
+                'Impact: ${(factor.impact * 100).toStringAsFixed(0)}%',
+                style: TextStyle(
+                  color: _getImpactColor(factor.impact),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            value: factor.impact,
+            backgroundColor: AppTheme.mutedText.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(_getImpactColor(factor.impact)),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            factor.description,
+            style: const TextStyle(
+              color: AppTheme.mutedText,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getRiskColor(String riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'high':
+      case 'critical':
+        return AppTheme.dangerRed;
+      case 'medium':
+        return AppTheme.warningYellow;
+      case 'low':
+        return AppTheme.accentGreen;
+      default:
+        return AppTheme.mutedText;
+    }
+  }
+
+  IconData _getRiskIcon(String riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'high':
+      case 'critical':
+        return Icons.error;
+      case 'medium':
+        return Icons.warning;
+      case 'low':
+        return Icons.check_circle;
+      default:
+        return Icons.info;
+    }
+  }
+
+  Color _getImpactColor(double impact) {
+    if (impact >= 0.4) return AppTheme.dangerRed;
+    if (impact >= 0.2) return AppTheme.warningYellow;
+    return AppTheme.accentGreen;
   }
 
   /// Check recipient address for labels and reputation
@@ -467,14 +924,17 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
     setState(() => _isCheckingRecipient = true);
 
     try {
-      // Parallel fetch labels and reputation
-      final results = await Future.wait([
-        _apiService.getAddressLabels(recipientAddress).catchError((_) => null),
-        _apiService.getReputation(recipientAddress).catchError((_) => null),
-      ]);
-
-      final labels = results[0] as AddressLabels?;
-      final reputation = results[1] as ReputationResponse?;
+      // Fetch labels and reputation individually to avoid type issues
+      AddressLabels? labels;
+      ReputationResponse? reputation;
+      
+      try {
+        labels = await _apiService.getAddressLabels(recipientAddress);
+      } catch (_) {}
+      
+      try {
+        reputation = await _apiService.getReputation(recipientAddress);
+      } catch (_) {}
 
       String? warning;
       if (labels != null) {
@@ -507,7 +967,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   }
 
   Future<void> _analyzeRisk() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     setState(() {
       _isLoading = true;
@@ -525,47 +985,54 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       final amount = double.parse(_amountController.text);
       final recipientAddress = _recipientController.text.trim();
 
-      // Parallel API calls for efficiency
-      final results = await Future.wait([
-        // DQN Risk Score
-        _apiService.getDQNRiskScore(
+      print('[ANALYZE] Starting risk analysis for $recipientAddress, amount: $amount');
+
+      // Get risk score first (required)
+      RiskScoreResponse? riskScore;
+      try {
+        riskScore = await _apiService.getDQNRiskScore(
           fromAddress: walletState.address!,
           toAddress: recipientAddress,
           amount: amount,
           features: features,
-        ),
-        // Policy Evaluation
-        _apiService.evaluatePolicy(
+        );
+        print('[ANALYZE] Got risk score: ${riskScore.riskScore}');
+      } catch (e) {
+        print('[ANALYZE] Risk score error: $e');
+        rethrow;
+      }
+
+      // Parallel optional API calls
+      PolicyEvaluationResult? policyResult;
+      AddressLabels? labels;
+      ReputationResponse? reputation;
+      
+      // Fetch optional data with individual try-catch
+      try {
+        policyResult = await _apiService.evaluatePolicy(
           fromAddress: walletState.address!,
           toAddress: recipientAddress,
           amount: amount,
-          riskScore: 0.0, // Will be updated
-        ).catchError((_) => null),
-        // Recipient Labels
-        _apiService.getAddressLabels(recipientAddress).catchError((_) => null),
-        // Recipient Reputation  
-        _apiService.getReputation(recipientAddress).catchError((_) => null),
-      ]);
-
-      final riskScore = results[0] as RiskScoreResponse;
-      final policyResult = results[1] as PolicyEvaluationResult?;
-      final labels = results[2] as AddressLabels?;
-      final reputation = results[3] as ReputationResponse?;
-
-      // Re-evaluate policy with actual risk score
-      PolicyEvaluationResult? finalPolicy;
-      if (policyResult == null) {
-        try {
-          finalPolicy = await _apiService.evaluatePolicy(
-            fromAddress: walletState.address!,
-            toAddress: recipientAddress,
-            amount: amount,
-            riskScore: riskScore.riskScore,
-          );
-        } catch (_) {}
-      } else {
-        finalPolicy = policyResult;
+          riskScore: riskScore.riskScore,
+        );
+      } catch (e) {
+        print('[ANALYZE] Policy error: $e');
       }
+      
+      try {
+        labels = await _apiService.getAddressLabels(recipientAddress);
+      } catch (e) {
+        print('[ANALYZE] Labels error: $e');
+      }
+      
+      try {
+        reputation = await _apiService.getReputation(recipientAddress);
+      } catch (e) {
+        print('[ANALYZE] Reputation error: $e');
+      }
+
+      // Use policy result or leave as null
+      PolicyEvaluationResult? finalPolicy = policyResult;
 
       // Check for warnings
       String? warning;

@@ -4,7 +4,7 @@ TypeScript SDK for integrating with the AMTTP (AI-powered Multi-signature Transa
 
 ## Features
 
-- 🤖 **ML-Powered Risk Scoring**: XGBoost model (Test AP=0.685, AUC=0.983)
+- 🤖 **ML-Powered Risk Scoring**: Stacked Ensemble (ROC-AUC=0.94, PR-AUC=0.87, F1=0.87)
 - 🔒 **Smart Contract Integration**: Policy engine & manager contracts
 - 🆔 **KYC Integration**: Automatic compliance checking
 - 📊 **Real-time Inference**: Sub-100ms transaction scoring
@@ -141,21 +141,88 @@ interface AMTTPConfig {
 - **MEDIUM** (0.4-0.7): Review recommended
 - **HIGH** (0.7+): Requires approval or escrow
 
-## DQN Model Integration
+## ML Model Integration
 
-The SDK integrates with your trained DQN fraud detection model:
+The SDK integrates with the AMTTP Stacked Ensemble fraud detection model:
 
-- **Performance**: F1 Score = 0.669+ (Production Ready)
-- **Training Data**: 28,457 real fraud transactions
-- **Features**: 20-dimensional feature vectors
+- **Architecture**: GraphSAGE + LGBM + XGBoost + Linear Meta-Learner
+- **ROC-AUC**: ~0.94 (Overall discriminative ability)
+- **PR-AUC**: ~0.87 (Primary metric for imbalanced fraud detection)
+- **F1 Score**: ~0.87 (Balanced precision/recall at default threshold)
+- **Training Data**: 28,457 real fraud transactions (time-based split, days 27-30 test)
+- **Features**: 20-dimensional feature vectors with graph embeddings
 - **Real-time**: < 100ms response time
+
+## Explainability
+
+The SDK includes a powerful explainability module that converts raw ML scores into human-readable explanations:
+
+```typescript
+import { ExplainabilityService, formatExplanationForDisplay } from '@amttp/client-sdk';
+
+// Create explainability service
+const explainer = new ExplainabilityService('http://localhost:8009');
+
+// Get explanation for a risk score
+const explanation = await explainer.explain({
+  riskScore: 0.73,
+  features: {
+    amount_eth: 50,
+    tx_count_24h: 15,
+    hops_to_sanctioned: 2
+  }
+});
+
+console.log(explanation.summary);
+// "High-risk transaction due to large amount and proximity to flagged addresses"
+
+console.log(explanation.topReasons);
+// ["Large transaction (50 ETH)", "2 hops from sanctioned address", "15 transactions in 24h"]
+
+console.log(explanation.action);
+// "ESCROW"
+
+// Explain a specific transaction
+const txExplanation = await explainer.explainTransaction({
+  transactionHash: '0xabc123...',
+  riskScore: 0.85,
+  sender: '0x1234...',
+  receiver: '0xabcd...',
+  amount: 100,
+  features: { tx_count_24h: 25 }
+});
+
+// Format for display
+console.log(formatExplanationForDisplay(explanation));
+```
+
+### Explanation Features
+
+- **Factor Analysis**: Detailed breakdown of each risk factor's contribution
+- **Typology Detection**: Identifies specific fraud patterns (structuring, layering, smurfing, etc.)
+- **Graph Explanations**: Network-based risk factors (proximity to bad actors)
+- **Recommendations**: Actionable next steps based on risk level
+- **Degraded Mode**: Falls back to local explanations when service unavailable
+
+### Detected Typologies
+
+| Typology | Description |
+|----------|-------------|
+| `structuring` | Breaking large transactions into smaller ones |
+| `layering` | Complex chains to obscure fund origins |
+| `smurfing` | Using multiple accounts to move funds |
+| `fan_out` | Single source distributing to many |
+| `fan_in` | Many sources consolidating to one |
+| `mixer_interaction` | Funds through mixing services |
+| `sanctions_proximity` | Near sanctioned entities |
+| `dormant_activation` | Inactive account suddenly active |
 
 ## Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Your dApp     │    │   AMTTP Client   │    │  Oracle Service │
-│                 │───▶│      SDK         │───▶│   + DQN Model   │
+│                 │───▶│      SDK         │───▶│ + Stacked Model │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                 │                        │
                                 ▼                        ▼
