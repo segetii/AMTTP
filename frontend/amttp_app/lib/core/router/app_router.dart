@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/transfer/presentation/pages/transfer_page.dart';
+import '../../features/transfer/presentation/pages/premium_transfer_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/admin/presentation/pages/admin_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/detection_studio/presentation/pages/detection_studio_page.dart';
+import '../../features/war_room/presentation/pages/war_room_nextjs_page.dart';
+import '../../features/war_room/presentation/pages/graph_explorer_page.dart';
 // New feature pages for complete contract coverage
 import '../../features/nft_swap/presentation/pages/nft_swap_page.dart';
 import '../../features/disputes/presentation/pages/dispute_center_page.dart';
@@ -18,16 +21,33 @@ import '../../features/session_keys/presentation/pages/session_key_page.dart';
 import '../../features/approver/presentation/pages/approver_portal_page.dart';
 import '../../features/compliance/presentation/pages/compliance_page.dart';
 import '../../features/compliance/presentation/pages/fatf_rules_page.dart';
+import '../../features/trust_check/presentation/pages/trust_check_page.dart';
+import '../../features/trust_check/presentation/pages/premium_trust_check_page.dart';
+import '../../features/wallet_connect/presentation/pages/premium_wallet_connect_page.dart';
 // zkNAF Zero-Knowledge Privacy
 import '../../features/zknaf/presentation/pages/zknaf_page.dart';
+// Audit Chain Replay
+import '../../features/audit/presentation/pages/audit_chain_replay_page.dart';
 // Profile-based navigation
-import '../navigation/profile_navigation_shell.dart';
 import '../../features/profile/presentation/pages/profile_selector_page.dart';
+// War Room Native Pages (Compliance, Admin, Flagged)
+import '../../features/war_room/presentation/pages/compliance_pages.dart';
+import '../../features/war_room/presentation/pages/admin_pages.dart';
+import '../../features/war_room/presentation/pages/flagged_queue_page.dart';
+// Premium Fintech Shell (Metamask/Revolut style) for End Users
+import '../../shared/shells/premium_fintech_shell.dart';
+// Role-Based Shell for War Room (R3+)
+import '../../shared/shells/role_based_shell.dart';
+// ML Models - Super Admin only
+import '../../features/ml_models/presentation/pages/ml_models_page.dart';
 // Authentication pages
 import '../../features/auth/presentation/pages/sign_in_page.dart';
+import '../../features/auth/presentation/pages/premium_sign_in_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/unauthorized_page.dart';
 import '../auth/auth_provider.dart';
-import '../auth/user_profile_provider.dart';
+// RBAC Route Guards
+import '../rbac/rbac.dart';
 
 /// Listenable for GoRouter refresh when auth state changes
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -39,6 +59,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
+  final rbacState = ref.watch(rbacProvider);
   
   return GoRouter(
     initialLocation: '/sign-in',
@@ -58,31 +79,55 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isAuthenticated && isAuthRoute) {
         final user = authState.user;
         if (user != null) {
-          switch (user.profile) {
-            case UserProfile.endUser:
-              return '/';
-            case UserProfile.admin:
-              return '/admin';
-            case UserProfile.complianceOfficer:
-              return '/compliance';
-          }
+          return _defaultRouteForRole(user.role);
         }
         return '/';
+      }
+      
+      // ═══════════════════════════════════════════════════════════════════════
+      // RBAC ROUTE GUARD - Clean role-based access check
+      // Each role only sees routes in their RoleNavigationConfig
+      // ═══════════════════════════════════════════════════════════════════════
+      if (isAuthenticated) {
+        final currentRole = rbacState.role;
+        final path = state.matchedLocation;
+        
+        // Skip route guard for system pages
+        if (path == '/unauthorized' || 
+            path == '/settings' || 
+            path == '/profile' ||
+            path == '/more') {
+          return null;
+        }
+        
+        // Use clean role-based config check
+        if (!canRoleAccessRoute(currentRole, path)) {
+          debugPrint('[RouteGuard] Access denied to $path for role ${currentRole.displayName}');
+          return '/unauthorized?from=${Uri.encodeComponent(path)}';
+        }
       }
       
       return null;
     },
     routes: [
-      // ========== AUTH ROUTES (Public) ==========
+      // ========== AUTH ROUTES (Public) - Premium Fintech Design ==========
       GoRoute(
         path: '/sign-in',
         name: 'sign-in',
-        builder: (context, state) => const SignInPage(),
+        builder: (context, state) => const PremiumSignInPage(),
       ),
       GoRoute(
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/unauthorized',
+        name: 'unauthorized',
+        builder: (context, state) {
+          final attemptedRoute = state.uri.queryParameters['from'];
+          return UnauthorizedPage(attemptedRoute: attemptedRoute);
+        },
       ),
       
       // ========== PROFILE SELECTOR (Demo/Onboarding) ==========
@@ -92,17 +137,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProfileSelectorPage(),
       ),
       
-      // ========== SHELL ROUTE WITH PROFILE NAVIGATION ==========
+      // ========== END USER ROUTES (R1/R2) - Premium Fintech Shell ==========
       ShellRoute(
         builder: (context, state, child) {
-          return ProfileNavigationShell(child: child);
+          return PremiumFintechShell(
+            currentRoute: state.matchedLocation,
+            child: child,
+          );
         },
         routes: [
-          // ========== END USER ROUTES (Profile 1: Sitemap) ==========
+          // Home - Premium Fintech Wallet Interface
           GoRoute(
             path: '/',
             name: 'home',
-            builder: (context, state) => const HomePage(),
+            builder: (context, state) => const FintechHomePage(),
           ),
           GoRoute(
             path: '/wallet',
@@ -112,7 +160,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/transfer',
             name: 'transfer',
-            builder: (context, state) => const TransferPage(),
+            builder: (context, state) => const PremiumTransferPage(),
           ),
           GoRoute(
             path: '/history',
@@ -120,8 +168,35 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HistoryPage(),
           ),
           GoRoute(
+            path: '/trust-check',
+            name: 'trust-check',
+            builder: (context, state) {
+              final address = state.uri.queryParameters['address'];
+              return PremiumTrustCheckPage(initialAddress: address);
+            },
+          ),
+          GoRoute(
+            path: '/wallet-connect',
+            name: 'wallet-connect',
+            builder: (context, state) => const PremiumWalletConnectPage(),
+          ),
+          GoRoute(
             path: '/settings',
             name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          
+          // Profile page
+          GoRoute(
+            path: '/profile',
+            name: 'profile',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          
+          // More menu - redirect to settings
+          GoRoute(
+            path: '/more',
+            name: 'more',
             builder: (context, state) => const SettingsPage(),
           ),
 
@@ -130,6 +205,60 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/detection-studio',
             name: 'detection-studio',
             builder: (context, state) => const DetectionStudioPage(),
+          ),
+
+          // War Room (embedded Next.js) - single entry point
+          GoRoute(
+            path: '/war-room',
+            name: 'war-room',
+            builder: (context, state) => const WarRoomNextJSPage(),
+          ),
+
+          // War Room deep links (embedded Next.js) to expose Next features via Flutter nav
+          GoRoute(
+            path: '/war-room/alerts',
+            name: 'war-room-alerts',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/alerts'),
+          ),
+          GoRoute(
+            path: '/war-room/transactions',
+            name: 'war-room-transactions',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/transactions'),
+          ),
+          GoRoute(
+            path: '/war-room/cross-chain',
+            name: 'war-room-cross-chain',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/cross-chain'),
+          ),
+          GoRoute(
+            path: '/war-room/detection/graph',
+            name: 'war-room-detection-graph',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/detection/graph'),
+          ),
+          GoRoute(
+            path: '/war-room/detection/models',
+            name: 'war-room-detection-models',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/detection/models'),
+          ),
+          GoRoute(
+            path: '/war-room/detection/risk',
+            name: 'war-room-detection-risk',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/detection/risk'),
+          ),
+          GoRoute(
+            path: '/war-room/approvals',
+            name: 'war-room-approvals',
+            builder: (context, state) => const WarRoomNextJSPage(nextPath: '/war-room/approvals'),
+          ),
+
+          // Graph Explorer (embedded Next.js)
+          GoRoute(
+            path: '/graph-explorer',
+            name: 'graph-explorer',
+            builder: (context, state) {
+              final txId = state.uri.queryParameters['tx'];
+              return GraphExplorerPage(initialTxId: txId);
+            },
           ),
           
           // NFT Swap - covers AMTTPNFT.sol functions
@@ -203,7 +332,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/compliance',
             name: 'compliance',
-            builder: (context, state) => const ComplianceToolsPage(),
+            builder: (context, state) {
+              // Extract tab query parameter (freeze, trusted, pep, edd)
+              final tab = state.uri.queryParameters['tab'];
+              return ComplianceToolsPage(initialTab: tab);
+            },
           ),
           
           // FATF Rules - Links to Next.js compliance tools & Detection Studio
@@ -212,8 +345,101 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'fatf-rules',
             builder: (context, state) => const FATFRulesPage(),
           ),
+          
+          // Audit Chain Replay - For auditors (R6)
+          GoRoute(
+            path: '/audit',
+            name: 'audit',
+            builder: (context, state) => const AuditChainReplayTool(),
+          ),
+          
+          // ========== WAR ROOM NATIVE PAGES (R3+) ==========
+          // Policy Engine - Rule configuration (R4+)
+          GoRoute(
+            path: '/policy-engine',
+            name: 'policy-engine',
+            builder: (context, state) => const PolicyEnginePage(),
+          ),
+          
+          // Enforcement Actions - Freeze/unfreeze controls (R4 with multisig)
+          GoRoute(
+            path: '/enforcement',
+            name: 'enforcement',
+            builder: (context, state) => const EnforcementActionsPage(),
+          ),
+          
+          // Multisig Queue - Pending multisig approvals (R4+)
+          GoRoute(
+            path: '/multisig-queue',
+            name: 'multisig-queue',
+            builder: (context, state) => const MultisigQueuePage(),
+          ),
+          
+          // Pending Approvals - Transfer approval queue (R3+)
+          GoRoute(
+            path: '/pending-approvals',
+            name: 'pending-approvals',
+            builder: (context, state) => const PendingApprovalsPage(),
+          ),
+          
+          // Flagged Queue - Review flagged transactions (R3+)
+          GoRoute(
+            path: '/flagged-queue',
+            name: 'flagged-queue',
+            builder: (context, state) => const FlaggedQueuePage(),
+          ),
+          
+          // UI Snapshots - Audit trail screenshots (R4+, R6)
+          GoRoute(
+            path: '/ui-snapshots',
+            name: 'ui-snapshots',
+            builder: (context, state) => const UISnapshotsPage(),
+          ),
+          
+          // Reports - Compliance & platform reporting (R4+)
+          GoRoute(
+            path: '/reports',
+            name: 'reports',
+            builder: (context, state) => const ReportsPage(),
+          ),
+          
+          // User Management - RBAC user administration (R5)
+          GoRoute(
+            path: '/user-management',
+            name: 'user-management',
+            builder: (context, state) => const UserManagementPage(),
+          ),
+          
+          // System Settings - Platform configuration (R5)
+          GoRoute(
+            path: '/system-settings',
+            name: 'system-settings',
+            builder: (context, state) => const SystemSettingsPage(),
+          ),
+          
+          // ML Models - Machine Learning model management (R6 Super Admin)
+          // Configure, pause, retrain ML models for fraud detection
+          GoRoute(
+            path: '/ml-models',
+            name: 'ml-models',
+            builder: (context, state) => const MLModelsPage(),
+          ),
         ],
       ),
     ],
   );
 });
+
+String _defaultRouteForRole(Role role) {
+  final config = getNavigationConfigForRole(role);
+
+  if (config.sections.isNotEmpty && config.sections.first.items.isNotEmpty) {
+    return config.sections.first.items.first.route;
+  }
+
+  if (config.bottomNav.isNotEmpty) {
+    return config.bottomNav.first.route;
+  }
+
+  return '/';
+}

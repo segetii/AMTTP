@@ -44,6 +44,34 @@ export interface AMTTPEvents {
   'compliance:kyc_required': (address: string) => void;
   'compliance:edd_required': (address: string, caseId: string) => void;
   'compliance:blocked': (address: string, reason: string) => void;
+  'compliance:evaluated': (data: any) => void;
+  'profile:updated': (data: any) => void;
+
+  // Explainability events
+  'explainability:explained': (data: any) => void;
+
+  // Sanctions events
+  'sanctions:checked': (data: any) => void;
+  'sanctions:match': (address: string, listName: string) => void;
+
+  // Geographic risk events
+  'geo:risk_assessed': (data: any) => void;
+
+  // Integrity events
+  'integrity:verified': (data: any) => void;
+  'integrity:violation': (data: any) => void;
+
+  // Governance events
+  'governance:action_created': (data: any) => void;
+  'governance:signature_added': (data: any) => void;
+  'governance:quorum_reached': (data: any) => void;
+  'governance:action_executed': (data: any) => void;
+  'governance:action_cancelled': (data: any) => void;
+
+  // Dashboard events
+  'dashboard:alert_read': (data: any) => void;
+  'dashboard:alert_dismissed': (data: any) => void;
+  'dashboard:stats_updated': (data: any) => void;
 
   // Dispute events
   'dispute:created': (data: any) => void;

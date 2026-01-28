@@ -19,12 +19,16 @@ class AppConstants {
   // When deployed, nginx proxies these paths to the correct backend services
   // For local development, use the full URLs
   
-  // Base URL - empty string means use same origin (works with nginx proxy)
-  static const String baseApiUrl = '';  // Nginx proxies /api/ to orchestrator:8007
-  // Risk Engine endpoint (proxied through /risk/)
-  static const String riskEngineUrl = '';  // Nginx proxies /risk/ to risk-engine:8002
-  // Integrity Service endpoint (proxied through /integrity/ or /verify-integrity)
-  static const String integrityServiceUrl = '';  // Nginx proxies to integrity:8008
+  // Base URL - For local dev, point to orchestrator directly
+  // In production with nginx, this would be empty string
+  static const String baseApiUrl = 'http://localhost:8007';  // Orchestrator
+  // Risk Engine endpoint  
+  static const String riskEngineUrl = 'http://localhost:8002';  // Risk engine
+  // Integrity Service endpoint
+  static const String integrityServiceUrl = 'http://localhost:8008';  // Integrity service
+  
+  // Next.js Frontend (for embedded visualizations)
+  static const String nextJsUrl = 'http://localhost:3006';  // Next.js app
   
   // API Paths (relative - nginx will proxy these)
   static const String riskScoringEndpoint = '/risk/score';

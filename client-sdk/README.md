@@ -4,7 +4,7 @@ A comprehensive TypeScript SDK for the AMTTP (Advanced Money Transfer Transactio
 
 ## Features
 
-- 🔐 **Risk Assessment** - DQN-based ML risk scoring with real-time address analysis
+- 🔐 **Risk Assessment** - Stacked Ensemble ML risk scoring with real-time address analysis
 - 📋 **KYC Verification** - Multi-tier KYC with document management
 - 💸 **Transaction Management** - Full transaction lifecycle with policy enforcement
 - ⚖️ **Dispute Resolution** - Kleros-integrated arbitration system
@@ -16,6 +16,13 @@ A comprehensive TypeScript SDK for the AMTTP (Advanced Money Transfer Transactio
 - 👁️ **Ongoing Monitoring** - Continuous compliance monitoring
 - 🏷️ **Address Labels** - Comprehensive address categorization
 - 🛡️ **MEV Protection** - Flashbots integration for transaction privacy
+- ✅ **Unified Compliance** - Complete compliance evaluation with ML integration
+- 🔍 **ML Explainability** - Human-readable explanations for risk decisions
+- 🚫 **Sanctions Screening** - OFAC, EU, UN sanctions list screening
+- 🌍 **Geographic Risk** - Country and IP risk using FATF lists
+- 🔒 **UI Integrity** - WYSIWYS verification for payment confirmations
+- 🗳️ **Governance** - Multi-signature enforcement actions
+- 📊 **Dashboard Analytics** - Real-time monitoring and visualization
 
 ## Installation
 
@@ -53,7 +60,7 @@ console.log(`Risk Score: ${risk.riskScore}, Level: ${risk.riskLevel}`);
 
 ### Risk Service
 
-Assess transaction and address risk using DQN-based ML models.
+Assess transaction and address risk using the Stacked Ensemble ML model (ROC-AUC ~0.94, PR-AUC ~0.87, F1 ~0.87).
 
 ```typescript
 // Single address assessment
@@ -558,6 +565,299 @@ const protectedTx = await client.mev.submitProtected({
 
 console.log(`Protected via: ${protectedTx.protectionType}`);
 console.log(`Estimated savings: ${protectedTx.savings?.savedAmount}`);
+```
+
+### Compliance Service (NEW)
+
+Unified compliance evaluation with ML-powered risk assessment.
+
+```typescript
+// Evaluate a transaction for compliance
+const result = await client.compliance.evaluate({
+  from_address: '0x...',
+  to_address: '0x...',
+  amount: 1.5,
+  currency: 'ETH',
+  chain: 'ethereum'
+});
+
+console.log(`Action: ${result.action}`); // ALLOW, REQUIRE_INFO, BLOCK, etc.
+console.log(`Risk Score: ${result.risk_score}`);
+console.log(`Checks:`, result.checks);
+
+// Get entity profile
+const profile = await client.compliance.getProfile('0x...');
+console.log(`Entity Type: ${profile.entity_type}`);
+console.log(`KYC Level: ${profile.kyc_level}`);
+console.log(`Risk Tolerance: ${profile.risk_tolerance}`);
+
+// Update entity profile
+await client.compliance.updateProfile('0x...', {
+  entity_type: 'INSTITUTIONAL',
+  kyc_level: 'ENHANCED',
+  risk_tolerance: 'STRICT'
+});
+
+// Get dashboard stats
+const stats = await client.compliance.getDashboardStats();
+console.log(`Active Policies: ${stats.totalPolicies}`);
+console.log(`Pending Reviews: ${stats.pendingReviews}`);
+
+// Get decision history
+const decisions = await client.compliance.getDecisions({ limit: 50, status: 'BLOCKED' });
+```
+
+### Explainability Service (NEW)
+
+Get human-readable explanations for ML risk decisions.
+
+```typescript
+// Explain a risk score
+const explanation = await client.explainability.explain({
+  address: '0x...',
+  includeTypologies: true
+});
+
+console.log(`Risk Score: ${explanation.risk_score}`);
+console.log(`Risk Level: ${explanation.risk_level}`);
+console.log(`Summary: ${explanation.summary}`);
+
+// Display risk factors
+explanation.factors.forEach(f => {
+  console.log(`${f.name}: ${f.contribution}% (${f.impact})`);
+  console.log(`  → ${f.explanation}`);
+});
+
+// Show matched typologies
+explanation.typology_matches.forEach(t => {
+  console.log(`🔍 ${t.name} (Confidence: ${t.confidence})`);
+  console.log(`   ${t.description}`);
+});
+
+// Explain a specific transaction
+const txExplanation = await client.explainability.explainTransaction({
+  tx_hash: '0x...',
+  include_graph: true
+});
+
+// Get available typologies
+const typologies = await client.explainability.getTypologies();
+```
+
+### Sanctions Service (NEW)
+
+OFAC, EU, and UN sanctions screening.
+
+```typescript
+// Check a single address
+const result = await client.sanctions.check({
+  address: '0x...',
+  lists: ['OFAC', 'EU', 'UN'],
+  includeRelated: true
+});
+
+if (result.isMatch) {
+  console.log(`⛔ SANCTIONS MATCH!`);
+  result.matches.forEach(m => {
+    console.log(`  List: ${m.list_name}`);
+    console.log(`  Entity: ${m.entity.name}`);
+    console.log(`  Match Type: ${m.match_type}`);
+    console.log(`  Confidence: ${m.confidence}%`);
+  });
+}
+
+// Batch check multiple addresses
+const batchResult = await client.sanctions.batchCheck({
+  addresses: ['0x...', '0x...', '0x...'],
+  lists: ['OFAC', 'EU']
+});
+
+// Get sanctions statistics
+const stats = await client.sanctions.getStats();
+console.log(`Total entities: ${stats.totalEntities}`);
+console.log(`Last updated: ${stats.lastUpdate}`);
+
+// Get available lists
+const lists = await client.sanctions.getLists();
+```
+
+### Geographic Risk Service (NEW)
+
+Country and IP-based risk assessment using FATF lists.
+
+```typescript
+// Check country risk
+const countryRisk = await client.geographic.getCountryRisk({ country_code: 'IR' });
+console.log(`Risk Level: ${countryRisk.risk_level}`);
+console.log(`FATF Black List: ${countryRisk.is_fatf_black_list}`);
+console.log(`Policy: ${countryRisk.transaction_policy}`);
+
+// Check IP risk
+const ipRisk = await client.geographic.getIpRisk({ ip_address: '1.2.3.4' });
+console.log(`Country: ${ipRisk.country_name}`);
+console.log(`Is VPN: ${ipRisk.is_vpn}`);
+console.log(`Is Tor: ${ipRisk.is_tor}`);
+console.log(`Risk Score: ${ipRisk.risk_score}`);
+
+// Check transaction geographic risk
+const txGeoRisk = await client.geographic.getTransactionRisk({
+  sender_country: 'US',
+  receiver_country: 'RU',
+  sender_ip: '1.2.3.4'
+});
+
+// Get FATF lists
+const blackList = await client.geographic.getFatfBlackList();
+const greyList = await client.geographic.getFatfGreyList();
+const euHighRisk = await client.geographic.getEuHighRiskList();
+const taxHavens = await client.geographic.getTaxHavens();
+```
+
+### Integrity Service (NEW)
+
+WYSIWYS (What You See Is What You Sign) UI integrity verification.
+
+```typescript
+// Register a UI snapshot hash
+const registration = await client.integrity.registerHash({
+  action_type: 'TRANSFER',
+  snapshot_hash: 'sha256:abc123...',
+  ui_version: '1.0.0',
+  component_id: 'PaymentConfirmation'
+});
+
+console.log(`Snapshot ID: ${registration.snapshot_id}`);
+console.log(`Expires: ${registration.expires_at}`);
+
+// Verify integrity before signing
+const verification = await client.integrity.verifyIntegrity({
+  snapshot_hash: 'sha256:abc123...',
+  expected_snapshot_id: registration.snapshot_id
+});
+
+if (!verification.is_valid) {
+  console.log(`⚠️ UI Tampering detected!`);
+  console.log(`Discrepancies: ${verification.discrepancies.join(', ')}`);
+}
+
+// Submit verified payment
+const payment = await client.integrity.submitPayment({
+  from_address: '0x...',
+  to_address: '0x...',
+  amount: '1.5',
+  currency: 'ETH',
+  snapshot_hash: 'sha256:abc123...',
+  user_signature: '0x...'
+});
+
+// Get integrity violations
+const violations = await client.integrity.getViolations({ severity: 'HIGH', limit: 10 });
+```
+
+### Governance Service (NEW)
+
+Multi-signature governance for enforcement actions.
+
+```typescript
+// Create a governance action
+const action = await client.governance.createAction({
+  type: 'WALLET_PAUSE',
+  scope: 'SINGLE_WALLET',
+  targetAddress: '0x...',
+  durationHours: 24,
+  riskContext: {
+    summary: 'High risk ML score and fan-out pattern detected',
+    fanOut: 15,
+    velocityDeviation: 3.2,
+    mlConfidence: 0.94
+  },
+  uiSnapshotHash: 'sha256:...',
+  policyVersion: '2.1.0'
+});
+
+console.log(`Action ID: ${action.id}`);
+console.log(`Status: ${action.status}`);
+console.log(`Required Signatures: ${action.requiredSignatures}`);
+
+// Get pending actions for user
+const pending = await client.governance.getPendingActions('user123');
+
+// Sign an action
+const signResult = await client.governance.signAction({
+  actionId: action.id,
+  signature: '0x...',
+  acknowledgedSnapshotHash: 'sha256:...',
+  mfaToken: '123456'
+});
+
+if (signResult.quorumReached) {
+  console.log(`✓ Quorum reached! Ready for execution.`);
+  
+  // Execute the action
+  const execResult = await client.governance.executeAction(action.id);
+  console.log(`Transaction: ${execResult.transactionHash}`);
+}
+
+// Get What-You-Approve summary
+const summary = await client.governance.getWYASummary(action.id);
+
+// Calculate quorum progress
+const progress = GovernanceService.calculateQuorumProgress(action);
+console.log(`${progress.current}/${progress.required} (${progress.percentage}%)`);
+```
+
+### Dashboard Service (NEW)
+
+Real-time analytics and monitoring dashboard data.
+
+```typescript
+// Get dashboard statistics
+const stats = await client.dashboard.getStats({ timeRange: '24h' });
+console.log(`Total Transactions: ${stats.totalTransactions}`);
+console.log(`Flagged: ${stats.flaggedTransactions}`);
+console.log(`Compliance Score: ${stats.complianceScore}`);
+
+// Get active alerts
+const alerts = await client.dashboard.getAlerts({
+  severity: 'high',
+  unreadOnly: true,
+  limit: 20
+});
+
+alerts.forEach(alert => {
+  const formatted = DashboardService.formatAlert(alert);
+  console.log(`${formatted.icon} ${formatted.title} [${formatted.color}]`);
+  console.log(`   ${formatted.description}`);
+});
+
+// Mark alert as read
+await client.dashboard.markAlertRead(alertId);
+
+// Get risk distribution
+const distribution = await client.dashboard.getRiskDistribution();
+console.log(`Low: ${distribution.low}, Medium: ${distribution.medium}`);
+console.log(`High: ${distribution.high}, Critical: ${distribution.critical}`);
+
+// Get Sankey flow data for visualization
+const sankey = await client.dashboard.getSankeyFlow({ limit: 100 });
+// Use with ECharts or other Sankey visualization library
+
+// Get top risk entities
+const topRisk = await client.dashboard.getTopRiskEntities(10);
+
+// Get geographic risk map
+const geoMap = await client.dashboard.getGeographicRiskMap();
+
+// Subscribe to real-time updates
+const unsubscribe = client.dashboard.subscribeToUpdates((update) => {
+  console.log(`Update: ${update.type}`, update.data);
+});
+
+// Later: cleanup
+unsubscribe();
+
+// Export dashboard data
+const blob = await client.dashboard.exportData('csv', { timeRange: '7d' });
 ```
 
 ## Events

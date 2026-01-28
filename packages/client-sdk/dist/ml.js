@@ -129,9 +129,10 @@ export class MLService {
             recommendations: this.generateRecommendations(riskLevel, action),
             modelVersion: data.model_version,
             modelMetrics: {
-                testAP: 0.685,
-                testAUC: 0.983,
-                testF1: 0.661,
+                rocAUC: 0.94,
+                prAUC: 0.87,
+                f1: 0.87,
+                architecture: 'Stacked Ensemble (GraphSAGE + LGBM + XGBoost + Linear Meta-Learner)',
             },
         };
     }

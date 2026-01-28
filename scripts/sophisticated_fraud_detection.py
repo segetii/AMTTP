@@ -19,7 +19,7 @@ from collections import defaultdict
 
 # Configuration
 PARQUET_PATH = r"C:\Users\Administrator\Downloads\eth_merged_dataset.parquet"
-OUTPUT_DIR = r"c:\amttp\processed"
+OUTPUT_DIR = r"c:\amttp\processed"i 
 
 print("="*70)
 print("SOPHISTICATED FRAUD PATTERN DETECTION")

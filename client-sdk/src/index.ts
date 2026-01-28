@@ -2,7 +2,7 @@
  * AMTTP Client SDK
  * 
  * A comprehensive SDK for interacting with the AMTTP (Advanced Money Transfer Transaction Protocol)
- * backend services. Provides regulatory-compliant transaction processing with DQN-based risk scoring.
+ * backend services. Provides regulatory-compliant transaction processing with Stacked Ensemble ML risk scoring.
  * 
  * @packageDocumentation
  */
@@ -164,6 +164,105 @@ export {
   type MEVProtectionLevel
 } from './mev/protection';
 
+// New service exports
+export { 
+  ComplianceService,
+  type EntityProfile,
+  type EvaluateRequest,
+  type EvaluateResponse,
+  type ComplianceAction,
+  type ComplianceCheck,
+  type EntityType,
+  type RiskTolerance,
+  type DashboardAlert,
+  type TimelineDataPoint,
+  type DecisionRecord,
+  type DecisionListOptions
+} from './services/compliance';
+
+export { 
+  ExplainabilityService,
+  type ExplainRequest,
+  type RiskExplanation,
+  type ExplanationFactor,
+  type TypologyMatch,
+  type TransactionExplainRequest,
+  type TransactionExplanation,
+  type Typology,
+  type ImpactLevel,
+  type RecommendedAction
+} from './services/explainability';
+
+export { 
+  SanctionsService,
+  type SanctionsCheckRequest,
+  type SanctionsCheckResponse,
+  type SanctionsMatch,
+  type BatchCheckRequest,
+  type BatchCheckResult,
+  type BatchCheckResponse,
+  type SanctionsStats,
+  type SanctionsList,
+  type SanctionedEntity,
+  type MatchType
+} from './services/sanctions';
+
+export { 
+  GeographicRiskService,
+  type CountryRiskRequest,
+  type CountryRiskResponse,
+  type IPRiskRequest,
+  type IPRiskResponse,
+  type TransactionGeoRiskRequest,
+  type TransactionGeoRiskResponse,
+  type FATFListCountry,
+  type CountryInfo,
+  type TransactionPolicy
+} from './services/geographic';
+
+export { 
+  IntegrityService,
+  type SnapshotData,
+  type RegisterHashRequest,
+  type RegisterHashResponse,
+  type VerifyIntegrityRequest,
+  type VerifyIntegrityResponse,
+  type PaymentSubmission,
+  type PaymentSubmissionResponse,
+  type IntegrityViolation,
+  type ViolationListOptions
+} from './services/integrity';
+
+export { 
+  GovernanceService,
+  type GovernanceAction,
+  type ActionType,
+  type ActionStatus,
+  type ActionScope,
+  type RiskContext,
+  type Signature,
+  type CreateActionRequest,
+  type SignActionRequest,
+  type SigningResult,
+  type ExecutionResult,
+  type WYASummary,
+  type ActionListOptions
+} from './services/governance';
+
+export { 
+  DashboardService,
+  type DashboardStats,
+  type Alert,
+  type RiskDistribution,
+  type ActivityMetric,
+  type SankeyNode,
+  type SankeyLink,
+  type SankeyData,
+  type TopRiskEntity,
+  type GeographicRiskMap,
+  type DashboardFilters,
+  type TimeRange
+} from './services/dashboard';
+
 export { AMTTPError, AMTTPErrorCode } from './errors';
 export { EventEmitter, type AMTTPEvents } from './events';
-

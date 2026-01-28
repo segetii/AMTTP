@@ -194,11 +194,13 @@ async def model_info():
             "threshold": predictor.threshold,
             "mode": "CPU",
             "calibrator_loaded": predictor.calibrator is not None,
+            "architecture": "Stacked Ensemble (GraphSAGE + LGBM + XGBoost + Linear Meta-Learner)",
             "metrics": {
-                "test_ap": 0.685,
-                "test_auc": 0.983,
-                "test_f1": 0.661,
+                "roc_auc": 0.94,
+                "pr_auc": 0.87,
+                "f1_at_0.5": 0.87,
             },
+            "validation": "Time-based test split (days 27-30)",
         }
     except Exception as e:
         return {"error": str(e)}

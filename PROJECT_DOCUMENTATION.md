@@ -1,7 +1,7 @@
 # AMTTP (Anti-Money Transfer Transfer Protocol) - Complete Project Documentation
 
-**Version:** 2.0.0 - Modular Architecture  
-**Date:** September 22, 2025  
+**Version:** 2.1.0 - With Authentication & Role Management  
+**Date:** January 22, 2026  
 **Status:** Production Ready
 
 ## 🎯 Project Overview
@@ -12,6 +12,9 @@ AMTTP is a comprehensive blockchain-based fraud detection and prevention protoco
 - **Complete Backend Infrastructure** with Oracle services and API integration
 - **TypeScript SDK** for seamless dApp integration
 - **Real-time Risk Assessment** using 28,457 transaction dataset
+- **Multi-Method Authentication** (Wallet, Email, OAuth)
+- **6-Tier RBAC System** for institutional role management
+- **Compliance Reporting** with UI snapshot chain and evidence export
 
 ---
 

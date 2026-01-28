@@ -11,7 +11,10 @@ import '../../../../core/theme/app_theme.dart';
 /// - PEP/Sanctions screening
 /// - EDD (Enhanced Due Diligence)
 class ComplianceToolsPage extends ConsumerStatefulWidget {
-  const ComplianceToolsPage({super.key});
+  /// Initial tab to display (from query param)
+  final String? initialTab;
+  
+  const ComplianceToolsPage({super.key, this.initialTab});
 
   @override
   ConsumerState<ComplianceToolsPage> createState() => _ComplianceToolsPageState();
@@ -21,10 +24,43 @@ class _ComplianceToolsPageState extends ConsumerState<ComplianceToolsPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
+  // Tab name to index mapping
+  static const _tabMap = {
+    'freeze': 0,
+    'trusted': 1,
+    'pep': 2,
+    'edd': 3,
+    // numeric fallbacks from query params (?tab=0)
+    '0': 0,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+  };
+
+  int _resolveInitialIndex(String? tabParam) {
+    if (tabParam == null) return 0;
+    // numeric query support
+    final numeric = int.tryParse(tabParam);
+    if (numeric != null && numeric >= 0 && numeric <= 3) return numeric;
+    // named mapping
+    return _tabMap[tabParam] ?? 0;
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    final initialIndex = _resolveInitialIndex(widget.initialTab);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: initialIndex);
+  }
+
+  @override
+  void didUpdateWidget(ComplianceToolsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update tab when initialTab changes (navigation within compliance)
+    if (widget.initialTab != oldWidget.initialTab) {
+      final newIndex = _resolveInitialIndex(widget.initialTab);
+      _tabController.animateTo(newIndex);
+    }
   }
 
   @override

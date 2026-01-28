@@ -16,6 +16,15 @@ export { EDDService } from './edd';
 export { MonitoringService } from './monitoring';
 export { LabelService } from './label';
 
+// New services
+export { ComplianceService } from './compliance';
+export { ExplainabilityService } from './explainability';
+export { SanctionsService } from './sanctions';
+export { GeographicRiskService } from './geographic';
+export { IntegrityService } from './integrity';
+export { GovernanceService } from './governance';
+export { DashboardService } from './dashboard';
+
 // Re-export types from each service
 export type {
   RiskAssessmentRequest,
@@ -127,3 +136,105 @@ export type {
   LabelCategory,
   LabelSeverity,
 } from './label';
+
+// Compliance service types
+export type {
+  EntityProfile,
+  EvaluateRequest,
+  EvaluateResponse,
+  ComplianceAction,
+  ComplianceCheck,
+  EntityType,
+  KYCLevel as ComplianceKYCLevel,
+  RiskTolerance,
+  DashboardStats as ComplianceDashboardStats,
+  DashboardAlert,
+  TimelineDataPoint,
+  DecisionRecord,
+  DecisionListOptions,
+} from './compliance';
+
+// Explainability service types
+export type {
+  ExplainRequest,
+  RiskExplanation,
+  ExplanationFactor,
+  TypologyMatch,
+  TransactionExplainRequest,
+  TransactionExplanation,
+  Typology,
+  ImpactLevel,
+  RecommendedAction,
+} from './explainability';
+
+// Sanctions service types
+export type {
+  SanctionsCheckRequest,
+  SanctionsCheckResponse,
+  SanctionsMatch,
+  BatchCheckRequest,
+  BatchCheckResult,
+  BatchCheckResponse,
+  SanctionsStats,
+  SanctionsList,
+  SanctionedEntity,
+  MatchType,
+} from './sanctions';
+
+// Geographic risk service types
+export type {
+  CountryRiskRequest,
+  CountryRiskResponse,
+  IPRiskRequest,
+  IPRiskResponse,
+  TransactionGeoRiskRequest,
+  TransactionGeoRiskResponse,
+  FATFListCountry,
+  CountryInfo,
+  RiskLevel as GeoRiskLevel,
+  TransactionPolicy,
+} from './geographic';
+
+// Integrity service types
+export type {
+  SnapshotData,
+  RegisterHashRequest,
+  RegisterHashResponse,
+  VerifyIntegrityRequest,
+  VerifyIntegrityResponse,
+  PaymentSubmission,
+  PaymentSubmissionResponse,
+  IntegrityViolation,
+  ViolationListOptions,
+} from './integrity';
+
+// Governance service types
+export type {
+  GovernanceAction,
+  ActionType,
+  ActionStatus,
+  ActionScope,
+  RiskContext,
+  Signature,
+  CreateActionRequest,
+  SignActionRequest,
+  SigningResult,
+  ExecutionResult,
+  WYASummary,
+  ActionListOptions,
+} from './governance';
+
+// Dashboard service types
+export type {
+  DashboardStats,
+  Alert,
+  RiskDistribution,
+  ActivityMetric,
+  SankeyNode,
+  SankeyLink,
+  SankeyData,
+  TopRiskEntity,
+  GeographicRiskMap,
+  DashboardFilters,
+  TimeRange,
+} from './dashboard';

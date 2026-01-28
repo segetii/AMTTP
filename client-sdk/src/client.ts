@@ -19,6 +19,15 @@ import { MonitoringService } from './services/monitoring';
 import { LabelService } from './services/label';
 import { MEVProtection, type MEVConfig } from './mev/protection';
 
+// New services
+import { ComplianceService } from './services/compliance';
+import { ExplainabilityService } from './services/explainability';
+import { SanctionsService } from './services/sanctions';
+import { GeographicRiskService } from './services/geographic';
+import { IntegrityService } from './services/integrity';
+import { GovernanceService } from './services/governance';
+import { DashboardService } from './services/dashboard';
+
 export interface AMTTPClientConfig {
   /** Base URL for the AMTTP API */
   baseUrl: string;
@@ -60,6 +69,15 @@ export class AMTTPClient {
   public readonly monitoring: MonitoringService;
   public readonly labels: LabelService;
   public readonly mev: MEVProtection;
+  
+  // New services
+  public readonly compliance: ComplianceService;
+  public readonly explainability: ExplainabilityService;
+  public readonly sanctions: SanctionsService;
+  public readonly geographic: GeographicRiskService;
+  public readonly integrity: IntegrityService;
+  public readonly governance: GovernanceService;
+  public readonly dashboard: DashboardService;
 
   constructor(config: AMTTPClientConfig) {
     this.config = {
@@ -101,6 +119,15 @@ export class AMTTPClient {
     this.monitoring = new MonitoringService(this.http, this.events);
     this.labels = new LabelService(this.http, this.events);
     this.mev = new MEVProtection(this.http, this.events);
+    
+    // Initialize new services
+    this.compliance = new ComplianceService(this.http, this.events);
+    this.explainability = new ExplainabilityService(this.http, this.events);
+    this.sanctions = new SanctionsService(this.http, this.events);
+    this.geographic = new GeographicRiskService(this.http, this.events);
+    this.integrity = new IntegrityService(this.http, this.events);
+    this.governance = new GovernanceService(this.http, this.events);
+    this.dashboard = new DashboardService(this.http, this.events);
     
     // Apply MEV config if provided
     if (this.config.mevConfig) {

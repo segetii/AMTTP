@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Next.js Dev Server",
+			"type": "shell",
+			"command": "npm run dev -- -p 3006",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "c:\\amttp\\frontend\\frontend"
+			}
+		},
+		{
+			"label": "Start Flutter Web Server",
+			"type": "shell",
+			"command": "npx serve -s -l 3010",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "c:\\amttp\\frontend\\amttp_app\\build\\web"
+			}
+		}
+	]
+}

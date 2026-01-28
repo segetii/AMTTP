@@ -243,27 +243,27 @@ const _complianceNavItems = [
     isSection: true,
   ),
   
-  // Account Management
+  // Account Management - uses query params to select tab
   NavigationItem(
     title: 'Account Controls',
     route: '',
     icon: 'manage_accounts',
     isSection: true,
     children: [
-      NavigationItem(title: 'Freeze/Unfreeze', route: '/compliance', icon: 'ac_unit'),
-      NavigationItem(title: 'Trusted Users', route: '/compliance', icon: 'verified_user'),
+      NavigationItem(title: 'Freeze/Unfreeze', route: '/compliance?tab=freeze', icon: 'ac_unit'),
+      NavigationItem(title: 'Trusted Users', route: '/compliance?tab=trusted', icon: 'verified_user'),
     ],
   ),
   
-  // Screening & Verification
+  // Screening & Verification - uses query params to select tab
   NavigationItem(
     title: 'Screening',
     route: '',
     icon: 'search',
     isSection: true,
     children: [
-      NavigationItem(title: 'PEP/Sanctions', route: '/compliance', icon: 'policy'),
-      NavigationItem(title: 'EDD Queue', route: '/compliance', icon: 'fact_check'),
+      NavigationItem(title: 'PEP/Sanctions', route: '/compliance?tab=pep', icon: 'policy'),
+      NavigationItem(title: 'EDD Queue', route: '/compliance?tab=edd', icon: 'fact_check'),
     ],
   ),
   
@@ -304,7 +304,7 @@ const _complianceNavItems = [
     icon: 'public',
   ),
 
-  // Detection Studio (Next.js)
+  // Detection Studio (Next.js SIEM Dashboard)
   NavigationItem(
     title: 'Detection Studio',
     route: '/detection-studio',

@@ -328,6 +328,84 @@ async def add_transaction(request: AddTransactionRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/graph/fraud-stats")
+async def fraud_stats():
+    """Get fraud statistics from the graph database for dashboard."""
+    try:
+        service = get_graph_service()
+        
+        # Simpler separate queries to avoid timeout
+        total_query = "MATCH (n:Address) RETURN count(n)"
+        fraud_query = "MATCH (n:Fraud) RETURN count(n)"
+        critical_query = "MATCH (n:Address) WHERE n.risk_level = 'CRITICAL' RETURN count(n)"
+        high_query = "MATCH (n:Address) WHERE n.risk_level = 'HIGH' RETURN count(n)"
+        
+        total = service.execute(total_query)
+        fraud = service.execute(fraud_query)
+        critical = service.execute(critical_query)
+        high = service.execute(high_query)
+        
+        return {
+            "total_addresses": total[0][0] if total and len(total) > 0 else 0,
+            "critical_count": critical[0][0] if critical and len(critical) > 0 else 0,
+            "high_risk_count": high[0][0] if high and len(high) > 0 else 0,
+            "fraud_count": fraud[0][0] if fraud and len(fraud) > 0 else 0,
+            "sanctioned_count": 0,
+            "mixer_count": 0,
+        }
+    except Exception as e:
+        logger.error(f"Fraud stats error: {e}")
+        return {
+            "error": str(e),
+            "total_addresses": 0,
+            "critical_count": 0,
+            "high_risk_count": 0,
+        }
+
+
+@app.get("/graph/fraud-addresses")
+async def fraud_addresses(limit: int = Query(50, ge=1, le=500)):
+    """Get list of fraud/high-risk addresses from the graph database."""
+    try:
+        service = get_graph_service()
+        
+        # Simple query - just get Fraud nodes with id property
+        query = f"""
+        MATCH (n:Fraud)
+        RETURN n.id, n.risk_level, n.hybrid_score
+        LIMIT {limit}
+        """
+        
+        result = service.execute(query)
+        
+        addresses = []
+        for row in result or []:
+            address = row[0] if len(row) > 0 else "unknown"
+            risk_level = row[1] if len(row) > 1 else "HIGH"
+            score = row[2] if len(row) > 2 else 85
+            
+            addresses.append({
+                "address": address,
+                "is_critical": risk_level == "CRITICAL",
+                "is_high_risk": risk_level == "HIGH",
+                "risk_score": float(score) if score else 85,
+                "risk_level": risk_level or "HIGH",
+            })
+        
+        return {
+            "addresses": addresses,
+            "total": len(addresses),
+            "limit": limit,
+        }
+    except Exception as e:
+        logger.error(f"Fraud addresses error: {e}")
+        return {
+            "error": str(e),
+            "addresses": [],
+            "total": 0,
+        }
+
+
 @app.post("/graph/tag-address")
 async def tag_address(request: TagAddressRequest):
     """Tag an address (sanctioned, mixer, exchange, etc.)."""

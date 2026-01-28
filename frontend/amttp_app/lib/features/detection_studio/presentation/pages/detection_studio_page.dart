@@ -4,56 +4,82 @@ import 'dart:ui_web' as ui;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/rbac/rbac_provider.dart';
+import '../../../../shared/shells/role_based_shell.dart';
 
-/// Detection Studio Page - Embeds the Next.js dashboard inside Flutter
+/// Detection Studio Page - Embeds the Next.js SIEM dashboard inside Flutter
 /// This allows Admin and Compliance users to access the full Next.js UI
 /// within the Flutter app for advanced risk analysis and detection features.
-class DetectionStudioPage extends StatefulWidget {
-  const DetectionStudioPage({super.key});
+/// 
+/// Role Integration:
+/// - Passes Flutter RBAC role to Next.js via query params
+/// - Next.js uses embed mode to hide redundant chrome
+/// - Syncs session between Flutter and Next.js
+///
+/// FULL SCREEN MODE:
+/// - Shell will hide Flutter chrome when this page is displayed
+/// - Only back button overlay will be visible
+/// - Content fills the entire screen
+class DetectionStudioPage extends ConsumerStatefulWidget {
+  final String? initialView; // 'velocity', 'network', 'flow', 'distribution'
+  
+  const DetectionStudioPage({super.key, this.initialView});
 
   @override
-  State<DetectionStudioPage> createState() => _DetectionStudioPageState();
+  ConsumerState<DetectionStudioPage> createState() => _DetectionStudioPageState();
 }
 
-class _DetectionStudioPageState extends State<DetectionStudioPage> {
+class _DetectionStudioPageState extends ConsumerState<DetectionStudioPage> {
   // Resolved URL pointing to Next.js SIEM dashboard
-  static String _nextJsUrl = '';
-  static const _viewType = 'detection-studio-iframe';
-  static bool _registered = false;
+  late String _nextJsUrl;
+  late String _viewType;
+  bool _registered = false;
 
-  // Optional override (use --dart-define=DETECTION_STUDIO_URL=https://your.host/siem/)
+  // Optional override (use --dart-define=DETECTION_STUDIO_URL=https://your.host/)
   static const String _overrideUrl = String.fromEnvironment('DETECTION_STUDIO_URL');
 
   @override
   void initState() {
     super.initState();
+    // Generate unique view type to allow re-registration with different URLs
+    _viewType = 'detection-studio-iframe-${DateTime.now().millisecondsSinceEpoch}';
     _initUrl();
-    _registerIframe();
   }
 
   void _initUrl() {
-    // Compute URL once per app lifetime (static)
-    if (_nextJsUrl.isNotEmpty) return;
-
+    final rbacState = ref.read(rbacProvider);
+    final role = rbacState.role.code;
+    final view = widget.initialView ?? 'overview';
+    
+    String baseUrl;
     if (_overrideUrl.isNotEmpty) {
-      _nextJsUrl = _overrideUrl;
-      return;
-    }
-
-    // Detect host/port to decide where nginx lives
-    final location = html.window.location;
-    final host = location.host; // may include port
-    final protocol = location.protocol; // includes trailing ':'
-
-    if (host.contains(':3003')) {
-      // Flutter dev on :3003 -> nginx on same host default port
-      _nextJsUrl = '${protocol}//${location.hostname}/siem/';
+      baseUrl = _overrideUrl;
     } else {
-      // Production: same origin (Flutter served via nginx)
-      _nextJsUrl = '/siem/';
+      // Detect host/port to decide where Next.js lives
+      final location = html.window.location;
+      final host = location.hostname ?? 'localhost';
+      final protocol = location.protocol;
+
+      // AMTTP Standard Port Configuration:
+      // Next.js Frontend: 3006
+      // Flutter Web: 3010
+      // Backend Services: 8000-8009
+      const nextJsPort = '3006';
+      
+      if (location.port == nextJsPort) {
+        baseUrl = '$protocol//$host:${location.port}';
+      } else {
+        baseUrl = '$protocol//$host:$nextJsPort';
+      }
     }
+    
+    // Build URL with embed mode, role, and view parameters
+    _nextJsUrl = '$baseUrl/war-room/detection-studio?embed=true&role=$role&view=$view';
+    
+    _registerIframe();
   }
 
   void _registerIframe() {
@@ -74,15 +100,11 @@ class _DetectionStudioPageState extends State<DetectionStudioPage> {
 
   @override
   Widget build(BuildContext context) {
+    
     if (!kIsWeb) {
       // Fallback for non-web platforms
       return Scaffold(
         backgroundColor: AppTheme.darkBg,
-        appBar: AppBar(
-          title: const Text('Detection Studio'),
-          backgroundColor: AppTheme.darkCard,
-          foregroundColor: AppTheme.cleanWhite,
-        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -107,33 +129,6 @@ class _DetectionStudioPageState extends State<DetectionStudioPage> {
         ),
       );
     }
-
-    return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(Icons.visibility, color: AppTheme.primaryBlue),
-            const SizedBox(width: 8),
-            const Text('Detection Studio'),
-          ],
-        ),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.open_in_new),
-            onPressed: () => html.window.open(_nextJsUrl, '_blank'),
-            tooltip: 'Open in new tab',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => setState(() {}),
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      body: const HtmlElementView(viewType: _viewType),
-    );
+    return HtmlElementView(viewType: _viewType);
   }
 }
