@@ -15,6 +15,9 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
   late Animation<double> _fadeAnimation;
 
   int _currentIndex = 0;
+  DateTime _lastInteraction = DateTime.now();
+  // Set to true to disable auto-scroll (e.g., for reduced motion preference)
+  final bool _reducedMotion = false;
 
   final List<FeatureItem> _features = [
     const FeatureItem(
@@ -58,11 +61,14 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
   }
 
   void _startAutoAdvance() {
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      final idleFor = DateTime.now().difference(_lastInteraction);
+      // Only auto-advance if user has been idle long enough and motion is allowed
+      if (!_reducedMotion && idleFor >= const Duration(seconds: 5)) {
         _nextPage();
-        _startAutoAdvance();
       }
+      _startAutoAdvance();
     });
   }
 
@@ -114,6 +120,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
               onPageChanged: (index) {
                 setState(() {
                   _currentIndex = index;
+                  _lastInteraction = DateTime.now();
                 });
               },
               itemCount: _features.length,
@@ -150,6 +157,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
               _features.length,
               (index) => GestureDetector(
                 onTap: () {
+                  _lastInteraction = DateTime.now();
                   _pageController.animateToPage(
                     index,
                     duration: const Duration(milliseconds: 300),

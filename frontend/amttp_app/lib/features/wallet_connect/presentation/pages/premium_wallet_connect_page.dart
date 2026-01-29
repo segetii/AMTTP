@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
+import '../../../../core/web3/wallet_provider.dart';
 
 /// Premium Wallet Connect Page - Web3 Wallet Connection
 class PremiumWalletConnectPage extends ConsumerStatefulWidget {
-  const PremiumWalletConnectPage({super.key});
+  final bool isDemo;
+  const PremiumWalletConnectPage({super.key, this.isDemo = false});
 
   @override
   ConsumerState<PremiumWalletConnectPage> createState() => _PremiumWalletConnectPageState();
@@ -13,7 +16,6 @@ class PremiumWalletConnectPage extends ConsumerStatefulWidget {
 class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectPage>
     with SingleTickerProviderStateMixin {
   final _watchAddressController = TextEditingController();
-  bool _isConnecting = false;
   String? _connectingWallet;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -67,19 +69,52 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
   }
 
   Future<void> _connectWallet(String walletName) async {
+    // For now, all wallet options trigger the same MetaMask-based
+    // connection flow via the shared walletProvider.
     setState(() {
-      _isConnecting = true;
       _connectingWallet = walletName;
     });
 
     _showConnectionModal(walletName);
-    
-    // Simulate connection
-    await Future.delayed(const Duration(seconds: 3));
-    
-    if (mounted) {
-      Navigator.pop(context); // Close modal
+
+    // Demo mode: simulate a quick success without touching the real provider
+    if (widget.isDemo) {
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      Navigator.of(context).maybePop();
       _showSuccessModal(walletName);
+      setState(() {
+        _connectingWallet = null;
+      });
+      return;
+    }
+
+    final notifier = ref.read(walletProvider.notifier);
+
+    try {
+      await notifier.connectWallet();
+      if (!mounted) return;
+
+      // Close the bottom sheet first
+      Navigator.of(context).maybePop();
+
+      final state = ref.read(walletProvider);
+      if (state.isConnected) {
+        _showSuccessModal(walletName);
+      } else if (state.hasError && state.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _connectingWallet = null;
+        });
+      }
     }
   }
 
@@ -87,7 +122,8 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isDismissible: false,
+      isDismissible: true,
+      enableDrag: true,
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
@@ -151,17 +187,20 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             const SizedBox(height: 24),
             
             // Cancel button
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isConnecting = false;
-                  _connectingWallet = null;
-                });
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+            Semantics(
+              label: 'Cancel wallet connection',
+              button: true,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _connectingWallet = null;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                ),
               ),
             ),
           ],
@@ -309,7 +348,10 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             GestureDetector(
               onTap: () {
                 Navigator.pop(context);
-                context.go('/');
+                // After a successful connection, send the user to the
+                // main wallet page so they immediately see balances
+                // and address instead of just landing back on home.
+                context.go('/wallet');
               },
               child: Container(
                 height: 54,
@@ -331,7 +373,6 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
     );
     
     setState(() {
-      _isConnecting = false;
       _connectingWallet = null;
     });
   }
@@ -339,71 +380,64 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width > 680 ? 624.0 : MediaQuery.of(context).size.width - 40,
-            ),
-            child: Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.transparent,
+      body: PremiumCenteredPage(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hero
+                    _buildHero(),
+                    const SizedBox(height: 32),
+
+                    // Wallet options
+                    const Text(
+                      'Connect Wallet',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ..._wallets.map((wallet) => _buildWalletOption(wallet)),
+
+                    const SizedBox(height: 24),
+
+                    // Divider
+                    Row(
                       children: [
-                        // Hero
-                        _buildHero(),
-                        const SizedBox(height: 32),
-                        
-                        // Wallet options
-                        const Text(
-                          'Connect Wallet',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        ..._wallets.map((wallet) => _buildWalletOption(wallet)),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Divider
-                        Row(
-                          children: [
-                            Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'OR',
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
-                              ),
-                            ),
-                            Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Watch address
-                        _buildWatchAddress(),
-                        
-                        const SizedBox(height: 32),
-                        
-                        // Security section
-                        _buildSecuritySection(),
+                        Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
                       ],
                     ),
-                  ),
+
+                    const SizedBox(height: 24),
+
+                    // Watch address
+                    _buildWatchAddress(),
+
+                    const SizedBox(height: 32),
+
+                    // Security section
+                    _buildSecuritySection(),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -493,6 +527,21 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             ),
             textAlign: TextAlign.center,
           ),
+          if (widget.isDemo) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange.withOpacity(0.5)),
+              ),
+              child: const Text(
+                'Demo environment — no real funds',
+                style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -560,6 +609,13 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (widget.isDemo) ...[
+                        const SizedBox(width: 8),
+                        const Tooltip(
+                          message: 'Demo mode uses simulated connections only',
+                          child: Icon(Icons.info_outline_rounded, size: 14, color: Colors.orange),
+                        ),
+                      ],
                       if (wallet['popular'] == true) ...[
                         const SizedBox(width: 8),
                         Container(

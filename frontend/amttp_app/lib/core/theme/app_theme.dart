@@ -117,6 +117,18 @@ class AppTheme {
   static const Color riskHigh = red500;
   static const Color riskMedium = amber500;
   static const Color riskLow = green500;
+
+  // === Cross-Stack Tokens (matches frontend/design-tokens.json) ===
+  static const Color tokenPrimary = Color(0xFF6366F1);
+  static const Color tokenPrimarySoft = Color(0xFF8B5CF6);
+  static const Color tokenBackground = Color(0xFF0A0A0F);
+  static const Color tokenSurface = Color(0xFF12121A);
+  static const Color tokenBorderSubtle = Color(0xFF1E1E2E);
+  static const Color tokenText = Color(0xFFFFFFFF);
+  static const Color tokenMutedText = Color(0xFF9CA3AF);
+  static const Color tokenSuccess = Color(0xFF22C55E);
+  static const Color tokenWarning = Color(0xFFF59E0B);
+  static const Color tokenDanger = Color(0xFFEF4444);
   
   static const Color integrityLock = cyan500;
   
@@ -363,23 +375,23 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
-      primary: indigo600,                // Primary brand
-      secondary: cyan500,                // Accent cyan
+      primary: tokenPrimary,             // Token primary
+      secondary: tokenPrimarySoft,       // Softer primary
       tertiary: premiumGold,             // Gold premium features
-      error: red500,                     // Tailwind red-500
-      surface: slate800,                 // slate-800 cards
-      onPrimary: cleanWhite,
-      onSecondary: slate900,
-      onSurface: slate100,               // slate-100 text
+      error: tokenDanger,                // Danger token
+      surface: tokenSurface,             // Token surface
+      onPrimary: tokenText,
+      onSecondary: tokenText,
+      onSurface: tokenText,              // Text on surfaces
     ),
     
     // === Scaffold Background (Next.js: bg-slate-900) ===
-    scaffoldBackgroundColor: slate900,
+    scaffoldBackgroundColor: tokenBackground,
     
     // === App Bar Theme (Dark Ops) ===
     appBarTheme: const AppBarTheme(
-      backgroundColor: slate900,
-      foregroundColor: slate100,
+      backgroundColor: tokenBackground,
+      foregroundColor: tokenText,
       elevation: 0,
       scrolledUnderElevation: 1,
       centerTitle: false,
@@ -387,19 +399,19 @@ class AppTheme {
     
     // === Card Theme (Next.js: bg-slate-800 border-slate-700) ===
     cardTheme: CardThemeData(
-      color: slate800,
+      color: tokenSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: slate700),
+        side: const BorderSide(color: tokenBorderSubtle),
       ),
     ),
     
     // === Elevated Button Theme ===
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: indigo600,
-        foregroundColor: cleanWhite,
+        backgroundColor: tokenPrimary,
+        foregroundColor: tokenText,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(
@@ -418,68 +430,57 @@ class AppTheme {
       ),
       headlineMedium: TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       headlineSmall: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       titleLarge: TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       titleMedium: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       titleSmall: TextStyle(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: slate300,                  // text-slate-300
+        color: slate300,                  // text-slate-300 (muted)
         fontFamily: 'Inter',
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
-        fontWeight: FontWeight.normal,
-        color: slate300,                  // text-slate-300
+        color: slate300,                  // text-slate-300 (muted)
         fontFamily: 'Inter',
       ),
       bodySmall: TextStyle(
         fontSize: 12,
-        fontWeight: FontWeight.normal,
-        color: slate400,                  // text-slate-400
+        color: slate400,                  // text-slate-400 (muted)
         fontFamily: 'Inter',
       ),
       labelLarge: TextStyle(
         fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: slate100,
+        color: slate100,                  // text-slate-100
         fontFamily: 'Inter',
       ),
       labelMedium: TextStyle(
         fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: slate400,
+        color: slate400,                  // text-slate-400 (muted)
         fontFamily: 'Inter',
       ),
       labelSmall: TextStyle(
         fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: slate400,
+        color: slate400,                  // text-slate-400 (muted)
         letterSpacing: 0.5,
         fontFamily: 'Inter',
       ),

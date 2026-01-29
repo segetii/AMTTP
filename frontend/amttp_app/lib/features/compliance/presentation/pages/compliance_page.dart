@@ -208,9 +208,11 @@ class _FreezeManagementTabState extends ConsumerState<_FreezeManagementTab> {
             title: 'Frozen Accounts',
             icon: Icons.block,
             color: AppTheme.dangerRed,
-            child: Column(
-              children: _frozenAccounts.map((account) => _FrozenAccountTile(account: account)).toList(),
-            ),
+            child: _frozenAccounts.isEmpty
+                ? _buildEmptyFrozenState()
+                : Column(
+                    children: _frozenAccounts.map((account) => _FrozenAccountTile(account: account)).toList(),
+                  ),
           ),
         ],
       ),
@@ -244,6 +246,31 @@ class _FreezeManagementTabState extends ConsumerState<_FreezeManagementTab> {
       filled: true,
       fillColor: AppTheme.darkBg,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+    );
+  }
+
+  Widget _buildEmptyFrozenState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle_outline, size: 48, color: AppTheme.accentGreen.withOpacity(0.6)),
+            const SizedBox(height: 16),
+            const Text(
+              'No Frozen Accounts',
+              style: TextStyle(color: AppTheme.cleanWhite, fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'All accounts are currently active and unfrozen.',
+              style: TextStyle(color: AppTheme.mutedText, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -463,40 +490,68 @@ class _TrustedUsersTabState extends ConsumerState<_TrustedUsersTab> {
                   Text('Trusted Addresses', style: TextStyle(color: AppTheme.cleanWhite, fontSize: 18, fontWeight: FontWeight.bold)),
                 ]),
                 const SizedBox(height: 16),
-                ..._trustedList.map((item) {
-                  final isUser = item['type'] == 'user';
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.darkBg,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(isUser ? Icons.person : Icons.handshake, color: AppTheme.accentGreen),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item['address'] as String, style: const TextStyle(color: AppTheme.cleanWhite, fontFamily: 'monospace')),
-                              Text('${isUser ? 'User' : 'Counterparty'} • Added: ${item['addedAt']}', style: const TextStyle(color: AppTheme.mutedText, fontSize: 12)),
-                            ],
+                if (_trustedList.isEmpty)
+                  _buildEmptyTrustedState()
+                else
+                  ..._trustedList.map((item) {
+                    final isUser = item['type'] == 'user';
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.darkBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(isUser ? Icons.person : Icons.handshake, color: AppTheme.accentGreen),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item['address'] as String, style: const TextStyle(color: AppTheme.cleanWhite, fontFamily: 'monospace')),
+                                Text('${isUser ? 'User' : 'Counterparty'} • Added: ${item['addedAt']}', style: const TextStyle(color: AppTheme.mutedText, fontSize: 12)),
+                              ],
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.delete, color: AppTheme.dangerRed),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.delete, color: AppTheme.dangerRed),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyTrustedState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.person_add_outlined, size: 48, color: AppTheme.mutedText.withOpacity(0.6)),
+            const SizedBox(height: 16),
+            const Text(
+              'No Trusted Addresses Yet',
+              style: TextStyle(color: AppTheme.cleanWhite, fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add trusted users or counterparties above to\nbypass compliance checks for known entities.',
+              style: TextStyle(color: AppTheme.mutedText, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -646,11 +701,15 @@ class _PEPSanctionsTabState extends ConsumerState<_PEPSanctionsTab> {
 class _EDDQueueTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eddQueue = [
+    final eddQueue = <Map<String, dynamic>>[
       {'address': '0x1111...2222', 'reason': 'High-value transaction', 'priority': 'high', 'submitted': '2 hours ago'},
       {'address': '0x3333...4444', 'reason': 'New counterparty', 'priority': 'medium', 'submitted': '1 day ago'},
       {'address': '0x5555...6666', 'reason': 'PEP potential match', 'priority': 'high', 'submitted': '3 days ago'},
     ];
+
+    if (eddQueue.isEmpty) {
+      return _buildEmptyEDDState();
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -758,6 +817,31 @@ class _EDDQueueTab extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyEDDState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.fact_check_outlined, size: 64, color: AppTheme.accentGreen.withOpacity(0.6)),
+            const SizedBox(height: 24),
+            const Text(
+              'EDD Queue Empty',
+              style: TextStyle(color: AppTheme.cleanWhite, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'No cases currently require enhanced due diligence.\nHigh-risk transactions will appear here for review.',
+              style: TextStyle(color: AppTheme.mutedText, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

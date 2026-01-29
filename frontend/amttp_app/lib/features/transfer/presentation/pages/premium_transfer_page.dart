@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
+import '../../../trust_check/data/trust_check_repository.dart';
 
 /// Premium Transfer Page - Metamask/Revolut Style
 class PremiumTransferPage extends ConsumerStatefulWidget {
@@ -18,7 +20,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   String _selectedToken = 'ETH';
   double _gasSpeed = 0.5; // 0 = slow, 0.5 = normal, 1 = fast
   bool _showTrustCheck = false;
+  bool _isCheckingTrust = false;
+  bool _hasTrustResult = false;
+  String _trustBucket = '';
   int _trustScore = 0;
+  List<String> _trustReasons = [];
+  String? _trustError;
+  final _trustRepo = TrustCheckRepository();
 
   final List<Map<String, dynamic>> _tokens = [
     {'symbol': 'ETH', 'name': 'Ethereum', 'balance': '3.245', 'usd': '10,234.56', 'icon': '◆', 'color': Color(0xFF627EEA)},
@@ -39,11 +47,31 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     super.dispose();
   }
 
-  void _checkTrust() {
-    if (_recipientController.text.isNotEmpty) {
+  Future<void> _checkTrust() async {
+    final value = _recipientController.text.trim();
+    if (value.isEmpty) return;
+
+    setState(() {
+      _showTrustCheck = true;
+      _isCheckingTrust = true;
+      _hasTrustResult = false;
+      _trustError = null;
+    });
+
+    try {
+      final result = await _trustRepo.checkAddress(value);
       setState(() {
-        _showTrustCheck = true;
-        _trustScore = 94; // Mock score
+        _isCheckingTrust = false;
+        _hasTrustResult = true;
+        _trustScore = result.score;
+        _trustBucket = result.bucket;
+        _trustReasons = result.reasons;
+      });
+    } catch (e) {
+      setState(() {
+        _isCheckingTrust = false;
+        _hasTrustResult = false;
+        _trustError = 'Unable to check trust right now. Please retry.';
       });
     }
   }
@@ -51,88 +79,58 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
-      body: Stack(
-        children: [
-          // Background gradient orbs
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF6366F1).withOpacity(0.15),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width > 680 ? 624.0 : MediaQuery.of(context).size.width - 40,
-                ),
+      backgroundColor: Colors.transparent,
+      body: PremiumCenteredPage(
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(context),
+
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
-                    _buildHeader(context),
-                    
-                    // Scrollable content
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Token selector
-                            _buildTokenSelector(),
-                            const SizedBox(height: 24),
-                            
-                            // Recipient input
-                            _buildRecipientInput(),
-                            const SizedBox(height: 16),
-                            
-                            // Recent recipients
-                            _buildRecentRecipients(),
-                            const SizedBox(height: 24),
-                            
-                            // Amount input
-                            _buildAmountInput(),
-                            const SizedBox(height: 24),
-                            
-                            // Trust check result
-                            if (_showTrustCheck) ...[
-                              _buildTrustCheckResult(),
-                              const SizedBox(height: 24),
-                            ],
-                            
-                            // Gas settings
-                            _buildGasSettings(),
-                            const SizedBox(height: 24),
-                            
-                            // Summary
-                            _buildSummary(),
-                            const SizedBox(height: 32),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Bottom button
-                    _buildSendButton(),
+                    // Token selector
+                    _buildTokenSelector(),
+                    const SizedBox(height: 24),
+
+                    // Recipient input
+                    _buildRecipientInput(),
+                    const SizedBox(height: 16),
+
+                    // Recent recipients
+                    _buildRecentRecipients(),
+                    const SizedBox(height: 24),
+
+                    // Amount input
+                    _buildAmountInput(),
+                    const SizedBox(height: 24),
+
+                    // Trust check result
+                    if (_showTrustCheck) ...[
+                      _buildTrustState(),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Gas settings
+                    _buildGasSettings(),
+                    const SizedBox(height: 24),
+
+                    // Summary
+                    _buildSummary(),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Bottom button
+            _buildSendButton(),
+          ],
+        ),
       ),
     );
   }
@@ -358,9 +356,6 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               Expanded(
                 child: TextField(
                   controller: _recipientController,
-                  onChanged: (v) {
-                    if (v.length > 10) _checkTrust();
-                  },
                   style: const TextStyle(color: Colors.white, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Enter address or ENS name',
@@ -375,7 +370,6 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   final data = await Clipboard.getData('text/plain');
                   if (data?.text != null) {
                     _recipientController.text = data!.text!;
-                    _checkTrust();
                   }
                 },
                 child: Container(
@@ -405,6 +399,25 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF64748B), size: 20),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: _checkTrust,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(Icons.shield_rounded, size: 16, color: Colors.white.withOpacity(0.7)),
+              const SizedBox(width: 6),
+              Text(
+                'Check trust',
+                style: TextStyle(
+                  color: const Color(0xFF6366F1),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -634,84 +647,254 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     setState(() {});
   }
 
-  Widget _buildTrustCheckResult() {
-    final isGood = _trustScore >= 70;
-    
+  Widget _buildTrustState() {
+    if (_isCheckingTrust) {
+      return _buildTrustLoading();
+    }
+    if (_trustError != null) {
+      return _buildTrustError();
+    }
+    if (_hasTrustResult) {
+      return _buildTrustCheckResult();
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildTrustLoading() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isGood 
-            ? const Color(0xFF22C55E).withOpacity(0.1)
-            : const Color(0xFFEF4444).withOpacity(0.1),
+        color: const Color(0xFF12121A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isGood 
-              ? const Color(0xFF22C55E).withOpacity(0.3)
-              : const Color(0xFFEF4444).withOpacity(0.3),
-        ),
+        border: Border.all(color: const Color(0xFF1E1E2E)),
+      ),
+      child: Row(
+        children: const [
+          SizedBox(
+            width: 26,
+            height: 26,
+            child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation(Color(0xFF6366F1))),
+          ),
+          SizedBox(width: 12),
+          Text('Running trust checks...', style: TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustError() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A2E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: isGood 
-                  ? const Color(0xFF22C55E).withOpacity(0.15)
-                  : const Color(0xFFEF4444).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isGood ? Icons.verified_rounded : Icons.warning_rounded,
-              color: isGood ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 14),
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+          const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isGood ? 'Recipient verified' : 'Caution advised',
-                  style: TextStyle(
-                    color: isGood ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Trust Score: $_trustScore/100 • No sanctions flags',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            child: Text(
+              _trustError ?? 'Trust check failed',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
-          GestureDetector(
-            onTap: () => context.push('/trust-check?address=${_recipientController.text}'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+          TextButton(
+            onPressed: _checkTrust,
+            child: const Text('Retry', style: TextStyle(color: Color(0xFFF59E0B))),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildTrustCheckResult() {
+    final bucket = _trustBucket.toUpperCase();
+    Color bucketColor;
+    IconData bucketIcon;
+    String label;
+    if (bucket == 'TRUSTED') {
+      bucketColor = const Color(0xFF22C55E);
+      bucketIcon = Icons.verified_rounded;
+      label = 'Trusted';
+    } else if (bucket == 'CAUTION') {
+      bucketColor = const Color(0xFFF59E0B);
+      bucketIcon = Icons.warning_rounded;
+      label = 'Caution';
+    } else {
+      bucketColor = const Color(0xFFEF4444);
+      bucketIcon = Icons.dangerous_rounded;
+      label = 'High Risk';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bucketColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: bucketColor.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: bucketColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(bucketIcon, color: bucketColor, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$label recipient',
+                      style: TextStyle(
+                        color: bucketColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Trust Score: $_trustScore/100 • Bucket: $bucket',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.push('/trust-check?address=${_recipientController.text}'),
+                child: const Text('Details', style: TextStyle(color: Color(0xFF818CF8))),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_trustReasons.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _trustReasons.map((reason) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    Icon(Icons.fiber_manual_record, size: 8, color: bucketColor),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(reason, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12))),
+                  ],
+                ),
+              )).toList(),
+            ),
+          const SizedBox(height: 12),
+          _buildTrustActions(bucketColor),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustActions(Color bucketColor) {
+    final risky = _trustBucket.toUpperCase() == 'HIGH RISK';
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: bucketColor.withOpacity(0.15),
+                  foregroundColor: bucketColor,
+                  side: BorderSide(color: bucketColor.withOpacity(0.4)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Escrow/Manual review requested')),
+                  );
+                },
+                icon: const Icon(Icons.shield_moon_rounded),
+                label: const Text('Escrow / Manual review'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF22C55E),
+                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Address added to whitelist (mock)')),
+                  );
+                },
+                icon: const Icon(Icons.check_circle_outline_rounded),
+                label: const Text('Whitelist'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton.icon(
+            onPressed: () async {
+              final proceed = await _confirmSendAnyway();
+              if (proceed) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(risky ? 'Proceeding despite risk' : 'Proceeding to send'),
+                    backgroundColor: risky ? const Color(0xFFEF4444) : const Color(0xFF6366F1),
+                  ),
+                );
+              }
+            },
+            icon: Icon(Icons.send_rounded, color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8)),
+            label: Text(
+              risky ? 'Send anyway (confirm)' : 'Proceed to send',
+              style: TextStyle(color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8), fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<bool> _confirmSendAnyway() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFF12121A),
+            title: const Text('Proceed with risk?', style: TextStyle(color: Colors.white)),
+            content: const Text(
+              'This recipient has risk signals. Are you sure you want to continue?',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Proceed anyway', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   Widget _buildGasSettings() {
