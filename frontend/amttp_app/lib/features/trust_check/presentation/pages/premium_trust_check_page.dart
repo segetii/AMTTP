@@ -1,8 +1,8 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../data/trust_check_repository.dart';
 
 /// Premium Trust Check Page - Address Verification
 class PremiumTrustCheckPage extends ConsumerStatefulWidget {
@@ -20,10 +20,13 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
   bool _isChecking = false;
   bool _hasResult = false;
   int _trustScore = 0;
+  String _bucket = '';
+  String? _errorMessage;
   late AnimationController _animController;
   late Animation<double> _scoreAnimation;
 
   final List<Map<String, dynamic>> _riskChecks = [];
+  final _repo = TrustCheckRepository();
 
   @override
   void initState() {
@@ -55,59 +58,63 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     setState(() {
       _isChecking = true;
       _hasResult = false;
+      _errorMessage = null;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    TrustCheckResult result;
+    try {
+      result = await _repo.checkAddress(_addressController.text);
+    } catch (e) {
+      setState(() {
+        _isChecking = false;
+        _hasResult = false;
+        _errorMessage = 'Trust check failed. Please retry.';
+      });
+      return;
+    }
 
-    // Mock results
-    final score = 70 + math.Random().nextInt(25); // 70-94
+    Color bucketColor;
+    IconData bucketIcon;
+    final bucket = result.bucket.toLowerCase();
+    if (bucket == 'trusted') {
+      bucketColor = const Color(0xFF22C55E);
+      bucketIcon = Icons.check_circle_rounded;
+    } else if (bucket == 'caution') {
+      bucketColor = const Color(0xFFF59E0B);
+      bucketIcon = Icons.warning_rounded;
+    } else {
+      bucketColor = const Color(0xFFEF4444);
+      bucketIcon = Icons.dangerous_rounded;
+    }
     
     setState(() {
       _isChecking = false;
       _hasResult = true;
-      _trustScore = score;
+      _trustScore = result.score;
+      _bucket = result.bucket;
       _riskChecks.clear();
-      _riskChecks.addAll([
-        {
+      if (result.reasons.isNotEmpty) {
+        for (var i = 0; i < result.reasons.length; i++) {
+          _riskChecks.add({
+            'title': 'Signal ${i + 1}',
+            'status': result.bucket.toUpperCase(),
+            'description': result.reasons[i],
+            'icon': bucketIcon,
+            'color': bucketColor,
+          });
+        }
+      } else {
+        _riskChecks.add({
           'title': 'Sanctions Check',
           'status': 'CLEAR',
           'description': 'Not on OFAC, EU, or UN sanctions lists',
           'icon': Icons.check_circle_rounded,
           'color': const Color(0xFF22C55E),
-        },
-        {
-          'title': 'Transaction History',
-          'status': 'NORMAL',
-          'description': '547 transactions over 2.3 years',
-          'icon': Icons.check_circle_rounded,
-          'color': const Color(0xFF22C55E),
-        },
-        {
-          'title': 'Source of Funds',
-          'status': 'VERIFIED',
-          'description': 'Primarily DEX swaps and CEX withdrawals',
-          'icon': Icons.check_circle_rounded,
-          'color': const Color(0xFF22C55E),
-        },
-        {
-          'title': 'Mixer Exposure',
-          'status': 'LOW (2%)',
-          'description': 'Minor indirect exposure to Tornado Cash',
-          'icon': Icons.warning_rounded,
-          'color': const Color(0xFFF59E0B),
-        },
-        {
-          'title': 'Counterparty Risk',
-          'status': 'LOW',
-          'description': 'Interacts with known legitimate protocols',
-          'icon': Icons.check_circle_rounded,
-          'color': const Color(0xFF22C55E),
-        },
-      ]);
+        });
+      }
     });
 
-    _scoreAnimation = Tween<double>(begin: 0, end: score.toDouble()).animate(
+    _scoreAnimation = Tween<double>(begin: 0, end: result.score.toDouble()).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
     );
     _animController.forward(from: 0);
@@ -127,6 +134,8 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               children: [
                 // Header
                 _buildHeader(context),
+                const SizedBox(height: 4),
+                _buildStepper(),
                 
                 // Content
                 Expanded(
@@ -144,6 +153,10 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                         
                         // Loading state
                         if (_isChecking) _buildLoading(),
+
+                        // Error state
+                        if (_errorMessage != null && !_isChecking)
+                          _buildError(),
                         
                         // Results
                         if (_hasResult && !_isChecking) ...[
@@ -163,6 +176,68 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStepper() {
+    int currentStep;
+    if (_isChecking) {
+      currentStep = 2;
+    } else if (_hasResult) {
+      currentStep = 3;
+    } else {
+      currentStep = 1;
+    }
+
+    Widget dot(int step, String label) {
+      final isActive = currentStep == step;
+      final isCompleted = currentStep > step;
+      Color color;
+      if (isCompleted) {
+        color = const Color(0xFF22C55E);
+      } else if (isActive) {
+        color = const Color(0xFF6366F1);
+      } else {
+        color = const Color(0xFF1E293B);
+      }
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            child: Center(
+              child: isCompleted
+                  ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                  : Text(step.toString(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.white.withOpacity(0.6),
+              fontSize: 11,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          dot(1, 'Enter'),
+          Container(width: 28, height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withOpacity(0.15)),
+          dot(2, 'Analyze'),
+          Container(width: 28, height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withOpacity(0.15)),
+          dot(3, 'Result'),
+        ],
       ),
     );
   }
@@ -363,21 +438,63 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     );
   }
 
+  Widget _buildError() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A2E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _errorMessage ?? 'Trust check failed',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          TextButton(
+            onPressed: _checkAddress,
+            child: const Text('Retry', style: TextStyle(color: Color(0xFFF59E0B))),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildScoreCard() {
     final isGood = _trustScore >= 70;
     final isMedium = _trustScore >= 40 && _trustScore < 70;
-    
+
     Color scoreColor;
     String scoreLabel;
-    if (isGood) {
-      scoreColor = const Color(0xFF22C55E);
-      scoreLabel = 'TRUSTED';
-    } else if (isMedium) {
-      scoreColor = const Color(0xFFF59E0B);
-      scoreLabel = 'CAUTION';
-    } else {
-      scoreColor = const Color(0xFFEF4444);
-      scoreLabel = 'HIGH RISK';
+    switch (_bucket.toLowerCase()) {
+      case 'trusted':
+        scoreColor = const Color(0xFF22C55E);
+        scoreLabel = 'TRUSTED';
+        break;
+      case 'caution':
+        scoreColor = const Color(0xFFF59E0B);
+        scoreLabel = 'CAUTION';
+        break;
+      case 'restricted':
+        scoreColor = const Color(0xFFEF4444);
+        scoreLabel = 'RESTRICTED';
+        break;
+      default:
+        if (isGood) {
+          scoreColor = const Color(0xFF22C55E);
+          scoreLabel = 'TRUSTED';
+        } else if (isMedium) {
+          scoreColor = const Color(0xFFF59E0B);
+          scoreLabel = 'CAUTION';
+        } else {
+          scoreColor = const Color(0xFFEF4444);
+          scoreLabel = 'HIGH RISK';
+        }
     }
 
     return Container(
@@ -609,10 +726,10 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              GestureDetector(
-                onTap: () => context.push('/graph-explorer?tx=${_addressController.text}'),
+              TextButton(
+                onPressed: () => _showGraphModal(),
                 child: const Text(
-                  'View Full →',
+                  'View details',
                   style: TextStyle(
                     color: Color(0xFF6366F1),
                     fontSize: 13,
@@ -714,76 +831,143 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
   }
 
   Widget _buildActions() {
-    return Row(
+    final risky = _bucket.toUpperCase() == 'HIGH RISK';
+    return Column(
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${_addressController.text.length > 12 ? "${_addressController.text.substring(0, 6)}...${_addressController.text.substring(_addressController.text.length - 4)}" : _addressController.text} added to whitelist!'),
-                  backgroundColor: const Color(0xFF22C55E),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E1E2E),
+                  foregroundColor: const Color(0xFF22C55E),
+                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-              );
-            },
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF12121A),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFF22C55E).withOpacity(0.3)),
-              ),
-              child: const Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Add to Whitelist',
-                      style: TextStyle(
-                        color: Color(0xFF22C55E),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Escrow/Manual review opened (mock)')),
+                  );
+                },
+                icon: const Icon(Icons.shield_moon_rounded),
+                label: const Text('Escrow / Manual review'),
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => context.push('/transfer'),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.send_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'Send',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF22C55E),
+                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Address added to whitelist (mock)')),
+                  );
+                },
+                icon: const Icon(Icons.check_circle_outline_rounded),
+                label: const Text('Whitelist'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton.icon(
+            onPressed: () async {
+              final proceed = await _confirmSend();
+              if (proceed) context.push('/transfer');
+            },
+            icon: Icon(Icons.send_rounded, color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8)),
+            label: Text(
+              risky ? 'Send anyway (confirm)' : 'Send',
+              style: TextStyle(
+                color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8),
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Future<bool> _confirmSend() async {
+    final risky = _bucket.toUpperCase() == 'HIGH RISK';
+    if (!risky) return true;
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFF12121A),
+            title: const Text('Proceed despite risk?', style: TextStyle(color: Colors.white)),
+            content: const Text(
+              'This address is marked high risk. Confirm you want to continue.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Proceed anyway', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  void _showGraphModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Color(0xFF12121A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Explainability Graph',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close, color: Colors.white54),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0A0F),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF1E1E2E)),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Graph detail placeholder',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
   

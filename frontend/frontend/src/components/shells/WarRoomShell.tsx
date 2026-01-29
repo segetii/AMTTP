@@ -324,7 +324,11 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
   const { session, logout, roleLabel, roleColor, capabilities, isAuthenticated } = useAuth();
   const { shortHash, isVerified } = useUISnapshot();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(NAV_GROUPS.map(g => g.label));
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(
+    NAV_GROUPS.filter((g) => g.label !== 'System').map((g) => g.label)
+  );
+  const isLoading = !session && isAuthenticated;
+  const lastUpdatedLabel = new Date().toLocaleTimeString();
   
   // CHECK FOR EMBED MODE - When embedded in Flutter, hide all navigation chrome
   const isEmbedMode = searchParams.get('embed') === 'true';
@@ -365,20 +369,20 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
   };
   
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex">
+    <div className="min-h-screen bg-background text-text flex">
       {/* ─────────────────────────────────────────────────────────────────────── */}
       {/* Sidebar */}
       {/* ─────────────────────────────────────────────────────────────────────── */}
       <aside 
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-64 bg-slate-800 border-r border-slate-700
+          w-64 bg-surface border-r border-borderSubtle
           transform transition-transform lg:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-borderSubtle">
           <Link href={buildHref('/war-room')} className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
               <ShieldIcon />
@@ -401,41 +405,46 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
           {NAV_GROUPS.map((group) => {
             const visibleItems = group.items.filter(canSeeNavItem);
             if (visibleItems.length === 0) return null;
-            
-            const isExpanded = expandedGroups.includes(group.label);
-            
+
+            const groupActive = visibleItems.some((item) => pathname?.startsWith(item.href));
+            const isExpanded = expandedGroups.includes(group.label) || groupActive;
+
             return (
-              <div key={group.label}>
+              <div key={group.label} className={`rounded-lg border ${groupActive ? 'bg-surface/90 border-primary/40 ring-1 ring-primary/30' : 'bg-surface/60 border-borderSubtle'}`}>
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="w-full flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 hover:text-slate-200"
+                  className={`w-full flex items-center justify-between text-xs font-semibold uppercase tracking-wider px-3 py-2 rounded-t-lg transition-colors ${groupActive ? 'text-text' : 'text-mutedText'} ${groupActive ? 'bg-surface' : 'hover:text-text hover:bg-surface/80'}`}
                 >
-                  {group.label}
+                  <span className="flex items-center gap-2">
+                    <span className={`${groupActive ? 'text-text font-bold' : 'text-mutedText'}`}>{group.label}</span>
+                  </span>
                   <ChevronIcon isOpen={isExpanded} />
                 </button>
-                
+
                 {isExpanded && (
-                  <div className="mt-1 space-y-1">
+                  <div className="mt-1 space-y-1 px-1 pb-2">
                     {visibleItems.map((item) => {
                       const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-                      
+
                       return (
                         <Link
                           key={item.href}
                           href={buildHref(item.href)}
                           className={`
-                            flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors
-                            ${isActive 
-                              ? 'bg-slate-700 text-white' 
-                              : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                            flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors
+                            ${isActive
+                              ? 'bg-surface text-text border border-borderSubtle shadow-sm'
+                              : 'text-mutedText hover:bg-surface/70 hover:text-text'
                             }
                           `}
                           onClick={() => setSidebarOpen(false)}
                         >
-                          {item.icon}
-                          <span className="flex-1">{item.label}</span>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-mutedText ${isActive ? 'text-text' : ''}`}>{item.icon}</span>
+                            <span className={`font-medium ${isActive ? 'text-text' : ''}`}>{item.label}</span>
+                          </div>
                           {item.badge && (
-                            <span className="px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded">
+                            <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-warning/20 text-warning border border-warning/40">
                               {item.badge}
                             </span>
                           )}
@@ -483,7 +492,7 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
       {/* ─────────────────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 bg-slate-800/50 border-b border-slate-700 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40 backdrop-blur-sm">
+        <header className="h-16 bg-surface/70 border-b border-borderSubtle flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40 backdrop-blur-sm">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -519,12 +528,15 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
         </header>
         
         {/* Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
-          {children}
+        <main className="flex-1 p-4 lg:p-6 overflow-auto bg-background">
+          {isLoading ? <SkeletonDashboard /> : children}
+          {!isLoading && (
+            <div className="mt-4 text-xs text-mutedText">Last updated at {lastUpdatedLabel}</div>
+          )}
         </main>
         
         {/* Footer Status Bar */}
-        <footer className="h-8 bg-slate-800/50 border-t border-slate-700 flex items-center justify-between px-4 text-xs text-slate-500">
+        <footer className="h-8 bg-surface/70 border-t border-borderSubtle flex items-center justify-between px-4 text-xs text-mutedText">
           <div className="flex items-center gap-4">
             <span>AMTTP v2.3</span>
             <span>•</span>
@@ -541,16 +553,36 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
           </div>
         </footer>
       </div>
-      
+
       {/* ─────────────────────────────────────────────────────────────────────── */}
       {/* Mobile Sidebar Overlay */}
       {/* ─────────────────────────────────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+function SkeletonDashboard() {
+  return (
+    <div className="space-y-4" data-testid="warroom-skeleton">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-28 rounded-xl bg-surface/70 border border-borderSubtle animate-pulse" />
+        ))}
+      </div>
+      <div className="rounded-xl bg-surface/70 border border-borderSubtle p-4 animate-pulse">
+        <div className="h-4 w-24 bg-borderSubtle rounded mb-3" />
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-3 bg-borderSubtle rounded w-full" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/web3/wallet_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 class WalletPage extends ConsumerWidget {
   const WalletPage({super.key});
@@ -14,31 +15,38 @@ class WalletPage extends ConsumerWidget {
     final walletNotifier = ref.read(walletProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('My Wallet'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          if (walletState.isConnected)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () => walletNotifier.refreshBalance(),
-              tooltip: 'Refresh Balance',
-            ),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.transparent,
+      body: PremiumCenteredPage(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header row (replaces AppBar for premium shell)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const Text(
+                  'My Wallet',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (walletState.isConnected)
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white70),
+                    onPressed: () => walletNotifier.refreshBalance(),
+                    tooltip: 'Refresh Balance',
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // Balance Card
                 _buildBalanceCard(walletState),
                 const SizedBox(height: 24),
@@ -47,29 +55,31 @@ class WalletPage extends ConsumerWidget {
                 _buildAddressSection(context, walletState),
                 const SizedBox(height: 24),
 
-                // Token Balances
-                if (walletState.isConnected) ...[
-                  _buildTokenBalances(walletState),
-                  const SizedBox(height: 24),
-                ],
+                    // Token Balances
+                    if (walletState.isConnected) ...[
+                      _buildTokenBalances(walletState),
+                      const SizedBox(height: 24),
+                    ],
 
-                // Quick Actions
-                if (walletState.isConnected) _buildQuickActions(context),
+                    // Quick Actions
+                    if (walletState.isConnected) _buildQuickActions(context),
 
-                // Connection Button (if not connected)
-                if (!walletState.isConnected) ...[
-                  const SizedBox(height: 24),
-                  _buildConnectButton(context, ref),
-                ],
+                    // Connection Button (if not connected)
+                    if (!walletState.isConnected) ...[
+                      const SizedBox(height: 24),
+                      _buildConnectButton(context, ref),
+                    ],
 
-                // Error Message
-                if (walletState.hasError) ...[
-                  const SizedBox(height: 16),
-                  _buildErrorMessage(walletState.error ?? 'Unknown error'),
-                ],
-              ],
+                    // Error Message
+                    if (walletState.hasError) ...[
+                      const SizedBox(height: 16),
+                      _buildErrorMessage(walletState.error ?? 'Unknown error'),
+                    ],
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -49,6 +49,55 @@ import '../auth/auth_provider.dart';
 // RBAC Route Guards
 import '../rbac/rbac.dart';
 
+// Simple enum to represent the main premium shell sections for bottom nav
+enum PremiumSection {
+  home,
+  wallet,
+  send,
+  activity,
+  profile,
+}
+
+// Fintech section mapping for centralized routing decisions
+enum FintechSection { home, wallet, send, activity, profile }
+
+PremiumSection sectionForRoute(String route) {
+  return _sectionFromPath(route.split('?').first.split('#').first);
+}
+
+FintechSection fintechSectionForRoute(String route) {
+  return _sectionFromPath(route.split('?').first.split('#').first) == PremiumSection.home
+      ? FintechSection.home
+      : FintechSection.values[_sectionFromPath(route.split('?').first.split('#').first).index];
+}
+
+PremiumSection _sectionFromPath(String path) {
+  if (path == '/' || path == '/home') return PremiumSection.home;
+
+  if (path == '/wallet' || path.startsWith('/wallet/')) {
+    return PremiumSection.wallet;
+  }
+
+  // Any transfer-related or trust-check flows are treated as "Send" section
+  if (path == '/transfer' ||
+      path.startsWith('/transfer/') ||
+      path == '/trust-check' ||
+      path.startsWith('/trust-check/')) {
+    return PremiumSection.send;
+  }
+
+  if (path == '/history' || path.startsWith('/history/')) {
+    return PremiumSection.activity;
+  }
+
+  if (path == '/profile' || path.startsWith('/profile/') || path == '/settings') {
+    return PremiumSection.profile;
+  }
+
+  // Default to home for unknown paths inside the premium shell
+  return PremiumSection.home;
+}
+
 /// Listenable for GoRouter refresh when auth state changes
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(this._ref) {

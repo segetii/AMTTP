@@ -14,6 +14,14 @@ AMTTP uses a **dual frontend architecture** with distinct purposes:
 
 Both connect to a **unified backend microservices architecture** across ports 8000-8007.
 
+### 🧭 UX Decisions & Rationale (Jan 29, 2026)
+
+- **Trust-first flows:** Transfer and dedicated trust-check screens now share a deterministic trust repository, expose explicit “Check trust” calls, and gate risky sends behind confirmations while prioritizing safe actions (escrow/manual review, whitelist).
+- **Explainability split:** Graph/explainability content moved into a modal detail view to keep primary results concise while preserving deep-dive access.
+- **Navigation consistency:** Bottom nav highlights now derive from centralized `FintechSection` mappings so nested routes (transfer review/trust, wallet subroutes) stay in sync; War Room sidebar auto-expands/highlights the active group.
+- **Demo clarity:** Wallet Connect surfaces a demo banner and tooltips to signal simulated connections; cancel/dismiss is always available.
+- **Load/skeleton hygiene:** Trust/transfer flows show explicit idle → loading → result/error states; War Room adds a lightweight skeleton and “Last updated” stamp for dashboard loads.
+
 ---
 
 ## 🌐 Frontend Applications

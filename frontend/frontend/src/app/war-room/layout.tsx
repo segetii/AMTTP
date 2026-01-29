@@ -19,13 +19,7 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const isEmbedMode = searchParams.get('embed') === 'true';
   const { mode, isAuthenticated, isLoading } = useAuth();
-  
-  // Skip ALL auth checks for embed mode (used by Flutter app iframes)
-  // Return children immediately without any auth logic
-  if (isEmbedMode) {
-    return <>{children}</>;
-  }
-  
+
   useEffect(() => {
     // Skip if embed mode (safety check)
     if (isEmbedMode) return;
@@ -42,6 +36,12 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
       return;
     }
   }, [isLoading, isAuthenticated, mode, router, isEmbedMode]);
+
+  // Skip ALL auth checks for embed mode (used by Flutter app iframes)
+  // Return children immediately without any auth logic
+  if (isEmbedMode) {
+    return <>{children}</>;
+  }
   
   // Show loading while checking auth
   if (isLoading) {

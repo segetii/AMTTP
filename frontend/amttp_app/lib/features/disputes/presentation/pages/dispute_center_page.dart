@@ -513,8 +513,8 @@ class _CreateDisputeTabState extends ConsumerState<_CreateDisputeTab> {
 class _ActiveDisputesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Mock active disputes
-    final disputes = [
+    // Mock active disputes (toggle to empty list to see empty state)
+    final disputes = <_DisputeData>[
       _DisputeData(
         id: '001',
         txId: '0xabc123...def456',
@@ -534,10 +534,47 @@ class _ActiveDisputesTab extends ConsumerWidget {
       ),
     ];
 
+    if (disputes.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: disputes.length,
       itemBuilder: (context, index) => _DisputeCard(dispute: disputes[index]),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.gavel_rounded,
+            size: 72,
+            color: AppTheme.mutedText.withOpacity(0.5),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'No Active Disputes',
+            style: TextStyle(
+              color: AppTheme.cleanWhite,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'All clear! You have no disputes in progress.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppTheme.mutedText.withOpacity(0.7),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1080,6 +1117,10 @@ class _DisputeHistoryTab extends ConsumerWidget {
       {'id': '099', 'status': 'Resolved - Lost', 'date': 'Dec 1, 2025', 'amount': '1.0 ETH'},
     ];
 
+    if (history.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: history.length,
@@ -1139,6 +1180,39 @@ class _DisputeHistoryTab extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.history_rounded,
+            size: 72,
+            color: AppTheme.mutedText.withOpacity(0.5),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'No Dispute History',
+            style: TextStyle(
+              color: AppTheme.cleanWhite,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your resolved disputes will appear here.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppTheme.mutedText.withOpacity(0.7),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

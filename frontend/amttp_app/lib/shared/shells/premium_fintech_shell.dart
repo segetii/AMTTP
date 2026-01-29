@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/rbac/rbac.dart';
 import '../../core/rbac/role_navigation_config.dart';
 import '../../core/rbac/roles.dart';
+import '../../core/router/app_router.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PREMIUM FINTECH SHELL
@@ -57,16 +58,24 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
 
   void _updateNavIndex() {
     final route = widget.currentRoute ?? '/';
-    if (route == '/' || route == '/home') {
-      _currentNavIndex = 0;
-    } else if (route.contains('/wallet')) {
-      _currentNavIndex = 1;
-    } else if (route.contains('/transfer') || route.contains('/send')) {
-      _currentNavIndex = 2;
-    } else if (route.contains('/history')) {
-      _currentNavIndex = 3;
-    } else if (route.contains('/profile') || route.contains('/more')) {
-      _currentNavIndex = 4;
+    final section = fintechSectionForRoute(route);
+
+    switch (section) {
+      case FintechSection.home:
+        _currentNavIndex = 0;
+        break;
+      case FintechSection.wallet:
+        _currentNavIndex = 1;
+        break;
+      case FintechSection.send:
+        _currentNavIndex = 2;
+        break;
+      case FintechSection.activity:
+        _currentNavIndex = 3;
+        break;
+      case FintechSection.profile:
+        _currentNavIndex = 4;
+        break;
     }
   }
 
@@ -136,8 +145,10 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
     
     return GestureDetector(
       onTap: () {
-        setState(() => _currentNavIndex = index);
-        context.go(route);
+        if (!isSelected) {
+          setState(() => _currentNavIndex = index);
+          context.go(route);
+        }
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -195,6 +206,7 @@ class FintechHomePage extends ConsumerStatefulWidget {
 class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   late PageController _carouselController;
   int _currentCarouselIndex = 0;
+  DateTime _lastUserInteraction = DateTime.now();
   
   @override
   void initState() {
@@ -212,6 +224,16 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   void _startAutoScroll() {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
+        final reduceMotion = MediaQuery.maybeOf(context)?.accessibleNavigation ?? false;
+        if (reduceMotion) return;
+
+        // Only auto-advance if user has been idle for at least 5 seconds
+        final idleDuration = DateTime.now().difference(_lastUserInteraction);
+        if (idleDuration < const Duration(seconds: 5)) {
+          _startAutoScroll();
+          return;
+        }
+
         final rbacState = ref.read(rbacProvider);
         final isPeP = rbacState.role == Role.r2EndUserPep;
         final products = isPeP ? _getPepProducts() : _getStandardProducts();
@@ -549,21 +571,39 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           
           const Spacer(),
           
-          // Scan button
-          _buildIconButton(
-            icon: Icons.qr_code_scanner_rounded,
-            onTap: () => _showScannerModal(context),
+          // Primary CTA shortcuts
+          ElevatedButton.icon(
+            onPressed: () => context.go('/trust'),
+            icon: const Icon(Icons.verified_user, size: 18),
+            label: const Text('Trust check'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+          ),
+          const SizedBox(width: 10),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/transfer'),
+            icon: const Icon(Icons.send_rounded, size: 18),
+            label: const Text('Send'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Color(0xFF6366F1)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
           ),
           const SizedBox(width: 12),
-          
-          // Notifications
+
+          // Consolidated secondary actions
           _buildIconButton(
-            icon: Icons.notifications_none_rounded,
-            badge: true,
-            onTap: () => _showNotificationsModal(context),
+            icon: Icons.more_horiz,
+            onTap: () => _showMoreActions(context),
           ),
           const SizedBox(width: 12),
-          
+
           // Profile
           GestureDetector(
             onTap: () => context.go('/profile'),
@@ -601,6 +641,69 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showMoreActions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF12121A),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E2E),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ],
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                title: const Text('Notifications', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Compliance and security alerts', style: TextStyle(color: Color(0xFF9CA3AF))),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showNotificationsModal(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
+                title: const Text('Scan QR', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Move scanner into flows when needed', style: TextStyle(color: Color(0xFF9CA3AF))),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showScannerModal(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined, color: Colors.white),
+                title: const Text('Preferences', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Network, limits, accessibility', style: TextStyle(color: Color(0xFF9CA3AF))),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.go('/settings');
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1509,16 +1612,26 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 ),
               ),
               Row(
-                children: List.generate(products.length, (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: i == _currentCarouselIndex ? 20 : 8,
-                  height: 8,
-                  margin: const EdgeInsets.only(left: 4),
-                  decoration: BoxDecoration(
-                    color: i == _currentCarouselIndex 
-                        ? (isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1))
-                        : const Color(0xFF374151),
-                    borderRadius: BorderRadius.circular(4),
+                children: List.generate(products.length, (i) => GestureDetector(
+                  onTap: () {
+                    _lastUserInteraction = DateTime.now();
+                    _carouselController.animateToPage(
+                      i,
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: i == _currentCarouselIndex ? 20 : 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(left: 4),
+                    decoration: BoxDecoration(
+                      color: i == _currentCarouselIndex 
+                          ? (isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1))
+                          : const Color(0xFF374151),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 )),
               ),
@@ -1527,24 +1640,31 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         ),
         SizedBox(
           height: 180,
-          child: PageView.builder(
-            controller: _carouselController,
-            onPageChanged: (index) {
-              setState(() => _currentCarouselIndex = index);
+          child: Listener(
+            onPointerDown: (_) {
+              // Treat any pointer interaction as user activity to pause auto-scroll
+              _lastUserInteraction = DateTime.now();
             },
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return _buildProductCard(
-                context,
-                icon: product['icon'] as IconData,
-                title: product['title'] as String,
-                description: product['description'] as String,
-                gradient: product['gradient'] as List<Color>,
-                route: product['route'] as String,
-                cta: product['cta'] as String,
-              );
-            },
+            child: PageView.builder(
+              controller: _carouselController,
+              onPageChanged: (index) {
+                _lastUserInteraction = DateTime.now();
+                setState(() => _currentCarouselIndex = index);
+              },
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return _buildProductCard(
+                  context,
+                  icon: product['icon'] as IconData,
+                  title: product['title'] as String,
+                  description: product['description'] as String,
+                  gradient: product['gradient'] as List<Color>,
+                  route: product['route'] as String,
+                  cta: product['cta'] as String,
+                );
+              },
+            ),
           ),
         ),
       ],

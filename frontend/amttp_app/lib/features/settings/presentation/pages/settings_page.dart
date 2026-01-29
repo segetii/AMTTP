@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/settings_provider.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -9,128 +10,137 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.restore),
-            onPressed: () => _showResetDialog(context, ref),
-            tooltip: 'Reset to defaults',
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildSettingsSection('General', [
-                _buildSelectSettingsItem(
-                  context: context,
-                  icon: Icons.language_rounded,
-                  title: 'Language',
-                  value: settings.language,
-                  options: languageOptions,
-                  onSelected: (value) => ref.read(settingsProvider.notifier).setLanguage(value),
+      backgroundColor: Colors.transparent,
+      body: PremiumCenteredPage(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header row (replaces AppBar for premium shell)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Settings',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                _buildSelectSettingsItem(
-                  context: context,
-                  icon: Icons.palette_rounded,
-                  title: 'Theme',
-                  value: settings.theme,
-                  options: themeOptions,
-                  onSelected: (value) => ref.read(settingsProvider.notifier).setTheme(value),
+                IconButton(
+                  icon: const Icon(Icons.restore, color: Colors.white70),
+                  onPressed: () => _showResetDialog(context, ref),
+                  tooltip: 'Reset to defaults',
                 ),
-                _buildSwitchSettingsItem(
-                  icon: Icons.notifications_rounded,
-                  title: 'Notifications',
-                  value: settings.notificationsEnabled,
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setNotificationsEnabled(value),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSettingsSection('Security', [
-                _buildSwitchSettingsItem(
-                  icon: Icons.fingerprint_rounded,
-                  title: 'Biometrics',
-                  value: settings.biometricsEnabled,
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setBiometricsEnabled(value),
-                ),
-                _buildSelectSettingsItem(
-                  context: context,
-                  icon: Icons.lock_rounded,
-                  title: 'Auto-lock',
-                  value: '${settings.autoLockMinutes} min',
-                  options: autoLockOptions.map((m) => '$m min').toList(),
-                  onSelected: (value) {
-                    final minutes = int.parse(value.replaceAll(' min', ''));
-                    ref.read(settingsProvider.notifier).setAutoLockMinutes(minutes);
-                  },
-                ),
-                _buildNumberSettingsItem(
-                  context: context,
-                  ref: ref,
-                  icon: Icons.shield_rounded,
-                  title: 'Transaction Limit',
-                  value: '\$${settings.transactionLimit.toStringAsFixed(0)}',
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setTransactionLimit(value),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSettingsSection('Network', [
-                _buildSelectSettingsItem(
-                  context: context,
-                  icon: Icons.lan_rounded,
-                  title: 'RPC Endpoint',
-                  value: settings.rpcEndpoint,
-                  options: rpcEndpointOptions,
-                  onSelected: (value) => ref.read(settingsProvider.notifier).setRpcEndpoint(value),
-                ),
-                _buildSelectSettingsItem(
-                  context: context,
-                  icon: Icons.speed_rounded,
-                  title: 'Gas Price',
-                  value: settings.gasPrice,
-                  options: gasPriceOptions,
-                  onSelected: (value) => ref.read(settingsProvider.notifier).setGasPrice(value),
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSettingsSection('Compliance', [
-                _buildSwitchSettingsItem(
-                  icon: Icons.warning_rounded,
-                  title: 'Show Risk Warnings',
-                  value: settings.showRiskWarnings,
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setShowRiskWarnings(value),
-                ),
-                _buildSwitchSettingsItem(
-                  icon: Icons.check_circle_rounded,
-                  title: 'Require Confirmation',
-                  value: settings.requireConfirmation,
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setRequireConfirmation(value),
-                ),
-                _buildSliderSettingsItem(
-                  context: context,
-                  icon: Icons.tune_rounded,
-                  title: 'Default Slippage',
-                  value: settings.defaultSlippage,
-                  min: 0.1,
-                  max: 5.0,
-                  suffix: '%',
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setDefaultSlippage(value),
-                ),
-              ]),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildSettingsSection('General', [
+                    _buildSelectSettingsItem(
+                      context: context,
+                      icon: Icons.language_rounded,
+                      title: 'Language',
+                      value: settings.language,
+                      options: languageOptions,
+                      onSelected: (value) => ref.read(settingsProvider.notifier).setLanguage(value),
+                    ),
+                    _buildSelectSettingsItem(
+                      context: context,
+                      icon: Icons.palette_rounded,
+                      title: 'Theme',
+                      value: settings.theme,
+                      options: themeOptions,
+                      onSelected: (value) => ref.read(settingsProvider.notifier).setTheme(value),
+                    ),
+                    _buildSwitchSettingsItem(
+                      icon: Icons.notifications_rounded,
+                      title: 'Notifications',
+                      value: settings.notificationsEnabled,
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setNotificationsEnabled(value),
+                    ),
+                  ]),
+                  const SizedBox(height: 24),
+                  _buildSettingsSection('Security', [
+                    _buildSwitchSettingsItem(
+                      icon: Icons.fingerprint_rounded,
+                      title: 'Biometrics',
+                      value: settings.biometricsEnabled,
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setBiometricsEnabled(value),
+                    ),
+                    _buildSelectSettingsItem(
+                      context: context,
+                      icon: Icons.lock_rounded,
+                      title: 'Auto-lock',
+                      value: '${settings.autoLockMinutes} min',
+                      options: autoLockOptions.map((m) => '$m min').toList(),
+                      onSelected: (value) {
+                        final minutes = int.parse(value.replaceAll(' min', ''));
+                        ref.read(settingsProvider.notifier).setAutoLockMinutes(minutes);
+                      },
+                    ),
+                    _buildNumberSettingsItem(
+                      context: context,
+                      ref: ref,
+                      icon: Icons.shield_rounded,
+                      title: 'Transaction Limit',
+                      value: '\$${settings.transactionLimit.toStringAsFixed(0)}',
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setTransactionLimit(value),
+                    ),
+                  ]),
+                  const SizedBox(height: 24),
+                  _buildSettingsSection('Network', [
+                    _buildSelectSettingsItem(
+                      context: context,
+                      icon: Icons.lan_rounded,
+                      title: 'RPC Endpoint',
+                      value: settings.rpcEndpoint,
+                      options: rpcEndpointOptions,
+                      onSelected: (value) => ref.read(settingsProvider.notifier).setRpcEndpoint(value),
+                    ),
+                    _buildSelectSettingsItem(
+                      context: context,
+                      icon: Icons.speed_rounded,
+                      title: 'Gas Price',
+                      value: settings.gasPrice,
+                      options: gasPriceOptions,
+                      onSelected: (value) => ref.read(settingsProvider.notifier).setGasPrice(value),
+                    ),
+                  ]),
+                  const SizedBox(height: 24),
+                  _buildSettingsSection('Compliance', [
+                    _buildSwitchSettingsItem(
+                      icon: Icons.warning_rounded,
+                      title: 'Show Risk Warnings',
+                      value: settings.showRiskWarnings,
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setShowRiskWarnings(value),
+                    ),
+                    _buildSwitchSettingsItem(
+                      icon: Icons.check_circle_rounded,
+                      title: 'Require Confirmation',
+                      value: settings.requireConfirmation,
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setRequireConfirmation(value),
+                    ),
+                    _buildSliderSettingsItem(
+                      context: context,
+                      icon: Icons.tune_rounded,
+                      title: 'Default Slippage',
+                      value: settings.defaultSlippage,
+                      min: 0.1,
+                      max: 5.0,
+                      suffix: '%',
+                      onChanged: (value) => ref.read(settingsProvider.notifier).setDefaultSlippage(value),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
