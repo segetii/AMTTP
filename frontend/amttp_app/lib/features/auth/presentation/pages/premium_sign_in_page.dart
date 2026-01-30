@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../../../core/rbac/roles.dart';
 
 /// Premium Fintech Sign In Page - Metamask/Revolut Style
+/// 
+/// Simplified routing:
+/// - End Users (R1, R2) → Flutter Wallet App (/)
+/// - Institutional (R3+) → Next.js War Room (external)
 class PremiumSignInPage extends ConsumerStatefulWidget {
   const PremiumSignInPage({super.key});
 
@@ -24,6 +29,9 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
+
+  // Next.js War Room URL
+  static const String _warRoomUrl = 'http://localhost:3006/war-room';
 
   @override
   void initState() {
@@ -65,15 +73,34 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     if (success && mounted) {
       final user = ref.read(authProvider).user;
       if (user != null) {
-        final mode = getModeForRole(user.role);
-        if (mode == AppMode.focusMode) {
-          context.go('/');
-        } else {
-          context.go('/war-room');
-        }
+        _routeToAppropriateDestination(user.role);
       } else {
         context.go('/');
       }
+    }
+  }
+
+  /// Route user based on role:
+  /// - End Users (R1, R2) → Flutter Wallet (/)
+  /// - Institutional (R3+) → Next.js War Room (external link)
+  void _routeToAppropriateDestination(Role role) {
+    if (role.level <= 2) {
+      // End Users stay in Flutter
+      context.go('/');
+    } else {
+      // Institutional users go to Next.js War Room
+      _launchWarRoom();
+    }
+  }
+
+  Future<void> _launchWarRoom() async {
+    final uri = Uri.parse(_warRoomUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+    // Also navigate to home in case they come back
+    if (mounted) {
+      context.go('/');
     }
   }
 
