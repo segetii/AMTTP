@@ -143,7 +143,7 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
                 _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet', '/wallet'),
                 _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
                 _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
-                _buildNavItem(4, Icons.person_rounded, 'Profile', '/profile'),
+                _buildMoreNavItem(),
               ],
             ),
           ),
@@ -198,6 +198,93 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// More menu with Advanced features, Settings, etc.
+  Widget _buildMoreNavItem() {
+    final isSelected = _currentNavIndex == 4;
+    
+    return PopupMenuButton<String>(
+      offset: const Offset(0, -200),
+      color: const Color(0xFF1A1A2E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      onSelected: (route) {
+        setState(() => _currentNavIndex = 4);
+        context.go(route);
+      },
+      itemBuilder: (context) => [
+        _buildPopupItem(Icons.rocket_launch_rounded, 'Advanced', '/advanced', 'NFT, Cross-Chain, Safe'),
+        _buildPopupItem(Icons.verified_user_rounded, 'Trust Check', '/trust-check', 'Verify addresses'),
+        _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes', 'Raise & track disputes'),
+        const PopupMenuDivider(),
+        _buildPopupItem(Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),
+        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/connect', 'Web3 connection'),
+      ],
+      child: SizedBox(
+        width: 64,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? const Color(0xFF6366F1).withOpacity(0.2) 
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.more_horiz_rounded,
+                color: isSelected 
+                    ? const Color(0xFF818CF8) 
+                    : const Color(0xFF64748B),
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'More',
+              style: TextStyle(
+                color: isSelected 
+                    ? const Color(0xFF818CF8) 
+                    : const Color(0xFF64748B),
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupItem(IconData icon, String title, String route, String subtitle) {
+    return PopupMenuItem<String>(
+      value: route,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6366F1).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: const Color(0xFF818CF8), size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
