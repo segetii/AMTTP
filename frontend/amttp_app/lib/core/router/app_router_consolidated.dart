@@ -1,10 +1,13 @@
 /// Consolidated App Router
 /// 
 /// SIMPLIFIED STRUCTURE:
-/// - 10 core pages (down from 35+)
-/// - Single implementation per feature (no Premium vs Standard duplicates)
-/// - Advanced features consolidated into single tabbed page
-/// - Backward-compatible redirects for old routes
+/// - 10 core pages for end users
+/// - No RBAC route guards (handled by Next.js for institutional users)
+/// - Sign-in routes users to appropriate app based on role
+/// 
+/// Routing Logic:
+/// - End Users (R1, R2) → Stay in Flutter Wallet App
+/// - Institutional (R3+) → Redirected to Next.js War Room
 /// 
 /// See CONSOLIDATION_PLAN.md for details.
 
@@ -31,21 +34,11 @@ import '../../features/auth/presentation/pages/premium_sign_in_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/unauthorized_page.dart';
 
-// Admin pages (kept for institutional users)
-import '../../features/admin/presentation/pages/admin_page.dart';
-import '../../features/compliance/presentation/pages/compliance_page.dart';
-import '../../features/approver/presentation/pages/approver_portal_page.dart';
-import '../../features/audit/presentation/pages/audit_chain_replay_page.dart';
-import '../../features/war_room/presentation/pages/flagged_queue_page.dart';
-import '../../features/war_room/presentation/pages/compliance_pages.dart';
-import '../../features/war_room/presentation/pages/admin_pages.dart';
-
 // Shell
 import '../../shared/shells/premium_fintech_shell.dart';
 
-// Auth & RBAC
+// Auth
 import '../auth/auth_provider.dart';
-import '../rbac/rbac.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // NAVIGATION SECTIONS
@@ -85,12 +78,11 @@ class GoRouterRefreshStream extends ChangeNotifier {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CONSOLIDATED ROUTER PROVIDER
+// SIMPLIFIED ROUTER PROVIDER (No RBAC)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  final rbacState = ref.watch(rbacProvider);
   
   return GoRouter(
     initialLocation: '/sign-in',
@@ -98,25 +90,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
       final path = state.matchedLocation;
-      final isAuthRoute = path == '/sign-in' || path == '/register' || path == '/select-profile';
+      final isAuthRoute = path == '/sign-in' || path == '/register';
       
       // Redirect unauthenticated users to sign-in
       if (!isAuthenticated && !isAuthRoute && path != '/unauthorized') {
         return '/sign-in';
       }
       
-      // Redirect authenticated users away from auth pages
+      // Redirect authenticated users away from auth pages to home
+      // (Role-based routing is handled in sign-in page)
       if (isAuthenticated && isAuthRoute) {
-        final user = authState.user;
-        return user != null ? _defaultRouteForRole(user.role) : '/';
-      }
-      
-      // RBAC route guard for institutional routes
-      if (isAuthenticated && _isInstitutionalRoute(path)) {
-        final currentRole = rbacState.role;
-        if (!canRoleAccessRoute(currentRole, path)) {
-          return '/unauthorized?from=${Uri.encodeComponent(path)}';
-        }
+        return '/';
       }
       
       return null;
@@ -145,7 +129,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       
       // ════════════════════════════════════════════════════════════════════════
-      // MAIN APP (Premium Fintech Shell) - 10 Core Pages
+      // MAIN APP (Premium Fintech Shell) - End User Wallet
       // ════════════════════════════════════════════════════════════════════════
       ShellRoute(
         builder: (context, state, child) {
@@ -269,105 +253,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/safe', redirect: (_, __) => '/advanced?tab=safe'),
           GoRoute(path: '/session-keys', redirect: (_, __) => '/advanced?tab=sessions'),
           GoRoute(path: '/zknaf', redirect: (_, __) => '/advanced?tab=privacy'),
-          
-          // ════════════════════════════════════════════════════════════════════════
-          // INSTITUTIONAL ROUTES (R3+) - Kept for Admin/Compliance users
-          // ════════════════════════════════════════════════════════════════════════
-          GoRoute(
-            path: '/admin',
-            name: 'admin',
-            builder: (context, state) => const AdminPage(),
-          ),
-          GoRoute(
-            path: '/compliance',
-            name: 'compliance',
-            builder: (context, state) {
-              final tab = state.uri.queryParameters['tab'];
-              return ComplianceToolsPage(initialTab: tab);
-            },
-          ),
-          GoRoute(
-            path: '/approver',
-            name: 'approver',
-            builder: (context, state) => const ApproverPortalPage(),
-          ),
-          GoRoute(
-            path: '/audit',
-            name: 'audit',
-            builder: (context, state) => const AuditChainReplayTool(),
-          ),
-          GoRoute(
-            path: '/flagged-queue',
-            name: 'flagged-queue',
-            builder: (context, state) => const FlaggedQueuePage(),
-          ),
-          GoRoute(
-            path: '/policy-engine',
-            name: 'policy-engine',
-            builder: (context, state) => const PolicyEnginePage(),
-          ),
-          GoRoute(
-            path: '/enforcement',
-            name: 'enforcement',
-            builder: (context, state) => const EnforcementActionsPage(),
-          ),
-          GoRoute(
-            path: '/pending-approvals',
-            name: 'pending-approvals',
-            builder: (context, state) => const PendingApprovalsPage(),
-          ),
-          GoRoute(
-            path: '/multisig-queue',
-            name: 'multisig-queue',
-            builder: (context, state) => const MultisigQueuePage(),
-          ),
-          GoRoute(
-            path: '/ui-snapshots',
-            name: 'ui-snapshots',
-            builder: (context, state) => const UISnapshotsPage(),
-          ),
-          GoRoute(
-            path: '/reports',
-            name: 'reports',
-            builder: (context, state) => const ReportsPage(),
-          ),
-          GoRoute(
-            path: '/user-management',
-            name: 'user-management',
-            builder: (context, state) => const UserManagementPage(),
-          ),
-          GoRoute(
-            path: '/system-settings',
-            name: 'system-settings',
-            builder: (context, state) => const SystemSettingsPage(),
-          ),
         ],
       ),
     ],
   );
 });
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HELPER FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/// Check if route is for institutional users (R3+)
-bool _isInstitutionalRoute(String path) {
-  const institutionalPaths = [
-    '/admin', '/compliance', '/approver', '/audit', '/flagged-queue',
-    '/policy-engine', '/enforcement', '/pending-approvals', '/multisig-queue',
-    '/ui-snapshots', '/reports', '/user-management', '/system-settings',
-  ];
-  return institutionalPaths.any((p) => path.startsWith(p));
-}
-
-/// Get default route for user role
-String _defaultRouteForRole(Role role) {
-  // End users go to home
-  if (role.level <= 2) return '/';
-  
-  // Institutional users go to admin or compliance based on role
-  if (role.level >= 4) return '/admin';
-  
-  return '/flagged-queue';
-}
