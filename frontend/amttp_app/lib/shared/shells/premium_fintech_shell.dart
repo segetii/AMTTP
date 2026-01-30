@@ -18,6 +18,7 @@ import '../../core/rbac/rbac.dart';
 import '../../core/rbac/role_navigation_config.dart';
 import '../../core/rbac/roles.dart';
 import '../../core/router/app_router.dart';
+import '../widgets/platform_app_switcher.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PREMIUM FINTECH SHELL
@@ -90,8 +91,19 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
       backgroundColor: const Color(0xFF0A0A0F),
       body: Stack(
         children: [
-          // Main scrollable content
-          widget.child,
+          // Main scrollable content with top padding for header
+          Padding(
+            padding: const EdgeInsets.only(top: 56),
+            child: widget.child,
+          ),
+          
+          // Fixed platform header at top
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: CompactPlatformHeader(currentApp: 'wallet'),
+          ),
           
           // Fixed bottom nav
           Positioned(

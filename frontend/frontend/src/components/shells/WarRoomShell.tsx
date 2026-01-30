@@ -21,6 +21,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useUISnapshot } from '@/lib/ui-snapshot-chain';
 import { Role } from '@/types/rbac';
+import { PlatformAppSwitcher } from '@/components/shared/PlatformAppSwitcher';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -384,12 +385,11 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-borderSubtle">
           <Link href={buildHref('/war-room')} className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-500 rounded-lg flex items-center justify-center text-white">
               <ShieldIcon />
             </div>
             <div>
               <span className="font-bold text-white">AMTTP</span>
-              <span className="text-xs ml-1 text-red-400 font-semibold">WAR ROOM</span>
             </div>
           </Link>
           <button 
@@ -501,8 +501,11 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
               <MenuIcon />
             </button>
             
+            {/* App Switcher */}
+            <PlatformAppSwitcher currentApp="war-room" />
+            
             {/* System Status */}
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
               <span className="text-sm text-slate-400">System Operational</span>
             </div>
