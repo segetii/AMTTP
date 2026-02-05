@@ -1,6 +1,6 @@
 # AMTTP Authentication & Authorization Guide
 
-## Last Updated: January 22, 2026
+## Last Updated: February 1, 2026
 
 This document describes the authentication system, role-based access control (RBAC), and user management features in AMTTP.
 
@@ -18,6 +18,17 @@ This document describes the authentication system, role-based access control (RB
 
 ---
 
+## 🏠 Entry Points
+
+| Application | URL | Entry Point |
+|-------------|-----|-------------|
+| Flutter Consumer | http://localhost:8889 | Home (wallet connect) |
+| Next.js War Room | http://localhost:3006 | Login page |
+
+> **Note:** The War Room now opens directly to the login page. The SIEM dashboard has been removed.
+
+---
+
 ## 🔐 Authentication Methods
 
 ### 1. Wallet-Based Authentication (Web3)
@@ -25,7 +36,7 @@ This document describes the authentication system, role-based access control (RB
 The recommended authentication method for DeFi users.
 
 **Supported Wallets:**
-- MetaMask
+- MetaMask (primary)
 - Coinbase Wallet
 - WalletConnect
 - Other injected Web3 providers

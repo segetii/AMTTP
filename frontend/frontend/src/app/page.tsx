@@ -1,5 +1,5 @@
-﻿import { SIEMDashboardImproved } from "@/components/SIEMDashboardImproved";
+﻿import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <SIEMDashboardImproved />;
+  redirect('/login');
 }

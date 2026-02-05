@@ -163,12 +163,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             institutionId = data.institutionId;
             institutionName = data.institutionName;
           } else {
-            role = Role.R1_END_USER;
+            // Default to R3 for Next.js (institutional users only)
+            role = Role.R3_INSTITUTION_OPS;
             displayName = `${address.slice(0, 6)}...${address.slice(-4)}`;
           }
         } catch {
-          // Backend not available, default to end user
-          role = Role.R1_END_USER;
+          // Backend not available, default to R3 for Next.js (institutional users only)
+          role = Role.R3_INSTITUTION_OPS;
           displayName = `${address.slice(0, 6)}...${address.slice(-4)}`;
         }
       }
@@ -200,8 +201,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (e) {
       console.error('Login failed:', e);
       
-      // Fallback: create local session as end user
-      const role = Role.R1_END_USER;
+      // Fallback: create local session as R3 (institutional user) for Next.js
+      const role = Role.R3_INSTITUTION_OPS;
       const session: UserSession = {
         userId: `user_${address.slice(2, 10)}`,
         address,

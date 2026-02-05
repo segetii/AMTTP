@@ -347,14 +347,20 @@ export default function DisputesPage() {
                 View Details
               </Link>
               {dispute.status === 'evidence' && (
-                <button className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-sm">
+                <Link 
+                  href={`/disputes/${dispute.id}`}
+                  className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-sm"
+                >
                   Submit Evidence
-                </button>
+                </Link>
               )}
               {dispute.status === 'voting' && (
-                <button className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-sm">
+                <Link 
+                  href={`/disputes/${dispute.id}`}
+                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-sm"
+                >
                   Cast Vote
-                </button>
+                </Link>
               )}
             </div>
           </div>

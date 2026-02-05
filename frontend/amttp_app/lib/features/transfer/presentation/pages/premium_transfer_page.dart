@@ -5,8 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/layout/premium_centered_page.dart';
 import '../../../trust_check/data/trust_check_repository.dart';
+import '../../../../services/swap_service.dart';
+import '../../../../core/web3/wallet_provider.dart';
 
 /// Premium Transfer Page - Metamask/Revolut Style
+/// Now connected to backend atomic swap logic via SwapService
 class PremiumTransferPage extends ConsumerStatefulWidget {
   const PremiumTransferPage({super.key});
 
@@ -27,6 +30,11 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   List<String> _trustReasons = [];
   String? _trustError;
   final _trustRepo = TrustCheckRepository();
+  final _swapService = SwapService.instance;
+  
+  // Swap state
+  bool _isProcessingSwap = false;
+  SwapRiskResult? _riskResult;
 
   final List<Map<String, dynamic>> _tokens = [
     {'symbol': 'ETH', 'name': 'Ethereum', 'balance': '3.245', 'usd': '10,234.56', 'icon': '◆', 'color': Color(0xFF627EEA)},
@@ -1116,112 +1124,248 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   }
 
   void _confirmSend() {
+    final walletState = ref.read(walletProvider);
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF374151),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                'Confirm Transaction',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: const BoxDecoration(
+            color: Color(0xFF12121A),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(top: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF374151),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0A0A0F),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${_amountController.text} $_selectedToken',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '≈ \$${_calculateUsdValue()}',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildConfirmRow('To', _recipientController.text),
-                    _buildConfirmRow('Network', 'Ethereum Mainnet'),
-                    _buildConfirmRow('Fee', '~\$2.45'),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Transaction submitted!'),
-                            backgroundColor: Color(0xFF22C55E),
-                          ),
-                        );
-                        context.go('/');
-                      },
-                      child: Container(
-                        height: 56,
-                        margin: const EdgeInsets.only(bottom: 20),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  _isProcessingSwap ? 'Processing...' : 'Confirm Transaction',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                          ),
+                          color: const Color(0xFF0A0A0F),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Confirm & Send',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        child: Column(
+                          children: [
+                            Text(
+                              '${_amountController.text} $_selectedToken',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '≈ \$${_calculateUsdValue()}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildConfirmRow('To', _recipientController.text),
+                      _buildConfirmRow('Network', 'Sepolia Testnet'),
+                      _buildConfirmRow('Fee', '~\$0.50'),
+                      
+                      // Risk Assessment Section
+                      if (_riskResult != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _riskResult!.isHighRisk 
+                                ? const Color(0xFFDC2626).withOpacity(0.1)
+                                : _riskResult!.isMediumRisk
+                                    ? const Color(0xFFF59E0B).withOpacity(0.1)
+                                    : const Color(0xFF22C55E).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _riskResult!.isHighRisk 
+                                  ? const Color(0xFFDC2626).withOpacity(0.3)
+                                  : _riskResult!.isMediumRisk
+                                      ? const Color(0xFFF59E0B).withOpacity(0.3)
+                                      : const Color(0xFF22C55E).withOpacity(0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _riskResult!.isHighRisk 
+                                    ? Icons.warning_rounded
+                                    : _riskResult!.isMediumRisk
+                                        ? Icons.info_rounded
+                                        : Icons.check_circle_rounded,
+                                color: _riskResult!.isHighRisk 
+                                    ? const Color(0xFFDC2626)
+                                    : _riskResult!.isMediumRisk
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFF22C55E),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Risk Score: ${(_riskResult!.riskScore * 100).toStringAsFixed(0)}%',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (_riskResult!.reasons.isNotEmpty)
+                                      Text(
+                                        _riskResult!.reasons.first,
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      
+                      const Spacer(),
+                      
+                      // Confirm Button
+                      GestureDetector(
+                        onTap: _isProcessingSwap ? null : () async {
+                          if (!walletState.isConnected) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please connect your wallet first'),
+                                backgroundColor: Color(0xFFDC2626),
+                              ),
+                            );
+                            return;
+                          }
+                          
+                          setModalState(() {
+                            _isProcessingSwap = true;
+                          });
+                          setState(() {
+                            _isProcessingSwap = true;
+                          });
+                          
+                          try {
+                            final amount = double.parse(_amountController.text);
+                            final toAddress = _recipientController.text.trim();
+                            
+                            // Execute the transfer via swap service
+                            final result = await _swapService.executeTransfer(
+                              toAddress: toAddress,
+                              amountEth: amount,
+                            );
+                            
+                            Navigator.pop(context);
+                            
+                            if (result.success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Transaction submitted! Hash: ${result.transactionHash?.substring(0, 10)}...'),
+                                  backgroundColor: const Color(0xFF22C55E),
+                                  duration: const Duration(seconds: 5),
+                                ),
+                              );
+                              context.go('/history');
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(result.message),
+                                  backgroundColor: result.status == SwapStatus.pendingApproval
+                                      ? const Color(0xFFF59E0B)
+                                      : const Color(0xFFDC2626),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Transaction failed: $e'),
+                                backgroundColor: const Color(0xFFDC2626),
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isProcessingSwap = false;
+                              });
+                            }
+                          }
+                        },
+                        child: Container(
+                          height: 56,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            gradient: _isProcessingSwap 
+                                ? null
+                                : const LinearGradient(
+                                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                                  ),
+                            color: _isProcessingSwap ? const Color(0xFF374151) : null,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: _isProcessingSwap
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Confirm & Send',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

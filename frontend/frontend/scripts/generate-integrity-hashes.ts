@@ -12,11 +12,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
-import { fileURLToPath } from "url";
-
-// Recreate __dirname for ESM/ts-node
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// In Docker builds we run this script via ts-node in CommonJS mode.
+// Avoid import.meta so it works consistently across Node/ts-node configurations.
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION

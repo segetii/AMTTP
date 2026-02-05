@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../../../shared/widgets/risk_level_indicator.dart';
+import '../../../../services/swap_service.dart';
+import '../../../../services/web3_service.dart';
 
 /// NFT Swap Page - Covers AMTTPNFT.sol functionality
 /// Functions covered:
@@ -93,6 +95,11 @@ class _NFTToETHSwapTabState extends ConsumerState<_NFTToETHSwapTab> {
   String _selectedTimelock = '24 hours';
   bool _isLoading = false;
   double? _riskScore;
+  SwapRiskResult? _riskResult;
+  String? _statusMessage;
+
+  final SwapService _swapService = SwapService.instance;
+  final Web3Service _web3Service = Web3Service.instance;
 
   @override
   void dispose() {
@@ -112,10 +119,35 @@ class _NFTToETHSwapTabState extends ConsumerState<_NFTToETHSwapTab> {
     setState(() => _isLoading = true);
     
     try {
-      // Simulate risk check - in production, call actual API
-      await Future.delayed(const Duration(seconds: 1));
+      // Get current connected wallet
+      final fromAddress = await _web3Service.getCurrentAccount();
+      if (fromAddress == null) {
+        setState(() {
+          _statusMessage = 'Please connect your wallet first';
+        });
+        return;
+      }
+      
+      final amount = double.tryParse(_ethAmountController.text) ?? 0.0;
+      
+      // Call real risk evaluation
+      final result = await _swapService.evaluateTransactionRisk(
+        fromAddress: fromAddress,
+        toAddress: _recipientController.text,
+        amountEth: amount,
+        tokenAddress: _nftAddressController.text.isNotEmpty 
+            ? _nftAddressController.text 
+            : null,
+      );
+      
       setState(() {
-        _riskScore = 0.23; // Mock score
+        _riskResult = result;
+        _riskScore = result.riskScore;
+        _statusMessage = null;
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Risk check failed: $e';
       });
     } finally {
       setState(() => _isLoading = false);
@@ -128,16 +160,83 @@ class _NFTToETHSwapTabState extends ConsumerState<_NFTToETHSwapTab> {
     setState(() => _isLoading = true);
     
     try {
-      // Call initiateNFTtoETHSwap
-      await Future.delayed(const Duration(seconds: 2));
+      // Check wallet connection
+      final fromAddress = await _web3Service.getCurrentAccount();
+      if (fromAddress == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please connect your wallet first'),
+              backgroundColor: AppTheme.dangerRed,
+            ),
+          );
+        }
+        return;
+      }
+      
+      final amount = double.tryParse(_ethAmountController.text) ?? 0.0;
+      
+      // First evaluate risk if not done
+      if (_riskResult == null) {
+        _riskResult = await _swapService.evaluateTransactionRisk(
+          fromAddress: fromAddress,
+          toAddress: _recipientController.text,
+          amountEth: amount,
+        );
+        setState(() {
+          _riskScore = _riskResult!.riskScore;
+        });
+      }
+      
+      // Parse timelock to minutes
+      int timelockMinutes = 24 * 60; // default 24 hours
+      switch (_selectedTimelock) {
+        case '1 hour': timelockMinutes = 60; break;
+        case '6 hours': timelockMinutes = 6 * 60; break;
+        case '12 hours': timelockMinutes = 12 * 60; break;
+        case '24 hours': timelockMinutes = 24 * 60; break;
+        case '48 hours': timelockMinutes = 48 * 60; break;
+        case '7 days': timelockMinutes = 7 * 24 * 60; break;
+      }
+      
+      // Initiate the swap via MetaMask
+      final result = await _swapService.initiateSwap(
+        toAddress: _recipientController.text,
+        amountEth: amount,
+        riskResult: _riskResult!,
+        hashlock: _hashLockController.text.isNotEmpty ? _hashLockController.text : null,
+        timelockMinutes: timelockMinutes,
+      );
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('NFT → ETH Swap initiated successfully!'),
-            backgroundColor: AppTheme.accentGreen,
-          ),
-        );
+        if (result.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Swap initiated! TX: ${result.transactionHash?.substring(0, 20)}...'),
+              backgroundColor: AppTheme.accentGreen,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+          // Clear form on success
+          _nftAddressController.clear();
+          _tokenIdController.clear();
+          _ethAmountController.clear();
+          _recipientController.clear();
+          _hashLockController.clear();
+          setState(() {
+            _riskScore = null;
+            _riskResult = null;
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message),
+              backgroundColor: result.status == SwapStatus.blocked 
+                  ? AppTheme.dangerRed 
+                  : Colors.orange,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

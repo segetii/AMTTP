@@ -1,7 +1,7 @@
 # AMTTP System Architecture
 
-**Version:** 2.0  
-**Date:** January 2026  
+**Version:** 2.1  
+**Date:** February 2026  
 **Author:** DevOps Engineering  
 
 ---
@@ -31,6 +31,13 @@ AMTTP (Anti-Money Laundering Transaction Trust Protocol) is a comprehensive comp
 - **Geographic risk assessment** (FATF Black/Grey lists)
 - **Smart contract enforcement** on Ethereum
 
+### Recent Updates (February 2026)
+
+- **Flutter Consumer App**: Fully standardized with design tokens and real MetaMask wallet integration
+- **War Room**: Landing page as entry point (SIEM dashboard removed)
+- **Authentication**: Multi-method auth (wallet, email, demo mode)
+- **RBAC**: Unified 6-tier role system across all applications
+
 ---
 
 ## System Diagram
@@ -42,13 +49,13 @@ AMTTP (Anti-Money Laundering Transaction Trust Protocol) is a comprehensive comp
 │  ┌─────────────────────────────────────────────────────────────────────────────────────┐│
 │  │                              PRESENTATION LAYER                                      ││
 │  │  ┌──────────────────────┐    ┌──────────────────────┐    ┌────────────────────────┐ ││
-│  │  │    Flutter Web App   │    │   Next.js Dashboard  │    │    External Clients    │ ││
-│  │  │    (Port 80 - /)     │    │   (Port 80 - /siem)  │    │    (SDK / REST API)    │ ││
+│  │  │  Flutter Consumer    │    │   Next.js War Room   │    │    External Clients    │ ││
+│  │  │    (Port 8889)       │    │     (Port 3006)      │    │    (SDK / REST API)    │ ││
 │  │  │                      │    │                      │    │                        │ ││
-│  │  │  • Wallet Connect    │    │  • Risk Dashboard    │    │  • TypeScript SDK      │ ││
+│  │  │  • MetaMask Wallet   │    │  • Login/Auth        │    │  • TypeScript SDK      │ ││
 │  │  │  • Transfer UI       │    │  • Compliance View   │    │  • REST/JSON API       │ ││
-│  │  │  • Detection Studio  │◄──►│  • SIEM Monitoring   │    │  • WebSocket Events    │ ││
-│  │  │    (iframe embed)    │    │  • Entity Investigation│   │                        │ ││
+│  │  │  • Balance Display   │◄──►│  • Detection Studio  │    │  • WebSocket Events    │ ││
+│  │  │  • Transaction List  │    │  • Policy Engine     │    │                        │ ││
 │  │  └──────────┬───────────┘    └──────────┬───────────┘    └───────────┬────────────┘ ││
 │  └─────────────┼────────────────────────────┼───────────────────────────┼──────────────┘│
 │                │                            │                           │               │
@@ -58,7 +65,7 @@ AMTTP (Anti-Money Laundering Transaction Trust Protocol) is a comprehensive comp
 │  │                                   (Port 80)                                          ││
 │  │                                                                                      ││
 │  │   /              → Flutter Web (static)      /sanctions/   → Sanctions Service      ││
-│  │   /siem/         → Next.js Dashboard         /monitoring/  → Monitoring Service     ││
+│  │   /war-room/     → Next.js War Room          /monitoring/  → Monitoring Service     ││
 │  │   /api/          → Orchestrator              /geo/         → Geographic Risk        ││
 │  │   /risk/         → Risk Engine               /integrity/   → Integrity Service      ││
 │  │   /_next/        → Next.js Assets                                                   ││

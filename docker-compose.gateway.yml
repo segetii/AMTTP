@@ -1,0 +1,56 @@
+version: "3.8"
+
+# =============================================================================
+# AMTTP Gateway - Unified Entry Point for All Services
+# =============================================================================
+# This creates a single nginx gateway that routes:
+#   /           -> Flutter Consumer App (localhost:8889)
+#   /warroom/*  -> Next.js War Room (localhost:3006)
+#   /api/*      -> Orchestrator API (localhost:8007)
+#   /sanctions/ -> Sanctions Service (localhost:8004)
+#   /geo/       -> Geographic Risk Service (localhost:8006)
+#
+# Then ngrok exposes this single gateway to the internet.
+# =============================================================================
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NGINX GATEWAY - Single entry point
+  # ═══════════════════════════════════════════════════════════════════════════
+  gateway:
+    image: nginx:alpine
+    container_name: amttp-gateway
+    ports:
+      - "8888:80"
+    volumes:
+      - ./docker/nginx-gateway.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NGROK - Public tunnel
+  # ═══════════════════════════════════════════════════════════════════════════
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: amttp-ngrok
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-37AJQMwbXua6dQ4TS3XDO92nxAp_7AayYRarHEBXLvVw38erC}
+    command:
+      - "http"
+      - "gateway:80"
+      - "--log=stdout"
+    ports:
+      - "4040:4040"
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
+networks:
+  default:
+    name: amttp-gateway-network

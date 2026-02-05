@@ -1,12 +1,13 @@
-# AMTTP UI Sitemaps by User Profile# AMTTP UI Sitemaps by User Profile
+# AMTTP UI Sitemaps by User Profile
 
+This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Trust Protocol) application.
 
+**Last Updated:** February 2026  
+**Version:** 2.1
 
-This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Trust Protocol) application.This document provides visual sitemaps for each user profile in the AMTTP (Advanced Money Transfer Protocol) application.
+> **Note:** SIEM Dashboard has been removed. The War Room now opens to the login page.
 
-
-
-**Last Updated:** January 2026  ---
+---
 
 **Version:** 2.0
 
