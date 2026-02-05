@@ -721,8 +721,20 @@ export async function fetchEntityProfile(address: string): Promise<EntityProfile
     return response.json();
   } catch (error) {
     console.error('Failed to fetch entity profile:', error);
-    // Return mock entity as fallback
-    return generateMockEntity(address);
+    // Return empty profile for address not found
+    return {
+      address,
+      entity_type: 'UNKNOWN',
+      kyc_level: 'NONE',
+      risk_tolerance: 'LOW',
+      jurisdiction: 'UNKNOWN',
+      daily_limit_eth: 0,
+      monthly_limit_eth: 0,
+      single_tx_limit_eth: 0,
+      total_transactions: 0,
+      daily_volume_eth: 0,
+      flags: ['Entity not found - register in orchestrator'],
+    };
   }
 }
 
@@ -941,40 +953,6 @@ function generateMockAlerts(count: number): Alert[] {
   }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
-function generateMockEntity(address: string): EntityProfile {
-  return {
-    address,
-    firstSeen: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    lastSeen: new Date().toISOString(),
-    totalTransactions: Math.floor(Math.random() * 500) + 50,
-    totalValueEth: Math.random() * 1000,
-    riskScore: Math.random() * 100,
-    riskLevel: 'HIGH',
-    patterns: ['LAYERING', 'FAN_OUT'],
-    graphConnections: Math.floor(Math.random() * 50) + 5,
-    mlScore: Math.random(),
-    graphScore: Math.random() * 50,
-    alerts: generateMockAlerts(5),
-    transactions: Array.from({ length: 10 }, (_, i) => ({
-      hash: `0x${Math.random().toString(16).slice(2, 66)}`,
-      timestamp: new Date(Date.now() - i * 3600000).toISOString(),
-      from: i % 2 === 0 ? address : `0x${Math.random().toString(16).slice(2, 42)}`,
-      to: i % 2 === 1 ? address : `0x${Math.random().toString(16).slice(2, 42)}`,
-      valueEth: Math.random() * 10,
-      gasUsed: Math.floor(Math.random() * 100000) + 21000,
-      riskScore: Math.random() * 100,
-      flagged: Math.random() > 0.7
-    })),
-    connectedAddresses: Array.from({ length: 8 }, () => ({
-      address: `0x${Math.random().toString(16).slice(2, 42)}`,
-      relationship: ['SENT_TO', 'RECEIVED_FROM', 'BOTH'][Math.floor(Math.random() * 3)] as 'SENT_TO' | 'RECEIVED_FROM' | 'BOTH',
-      transactionCount: Math.floor(Math.random() * 20) + 1,
-      totalValue: Math.random() * 50,
-      riskLevel: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)]
-    }))
-  };
-}
-
 function generateMockTimeline(timeRange: string): TimelineDataPoint[] {
   const points = timeRange === '1h' ? 12 : timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
   const interval = timeRange === '1h' ? 5 * 60 * 1000 : 
@@ -983,10 +961,14 @@ function generateMockTimeline(timeRange: string): TimelineDataPoint[] {
   
   return Array.from({ length: points }, (_, i) => ({
     timestamp: new Date(Date.now() - (points - i) * interval).toISOString(),
-    critical: Math.floor(Math.random() * 3),
-    high: Math.floor(Math.random() * 8),
-    medium: Math.floor(Math.random() * 15),
-    low: Math.floor(Math.random() * 10)
+    value: Math.floor(Math.random() * 20),
+    label: `Point ${i}`,
+    metadata: {
+      critical: Math.floor(Math.random() * 3),
+      high: Math.floor(Math.random() * 8),
+      medium: Math.floor(Math.random() * 15),
+      low: Math.floor(Math.random() * 10)
+    }
   }));
 }
 

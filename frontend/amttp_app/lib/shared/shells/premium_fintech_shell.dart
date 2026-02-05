@@ -18,6 +18,7 @@ import '../../core/rbac/rbac.dart';
 import '../../core/rbac/role_navigation_config.dart';
 import '../../core/rbac/roles.dart';
 import '../../core/router/app_router.dart';
+import '../../core/web3/wallet_provider.dart';
 import '../widgets/platform_app_switcher.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -89,30 +90,51 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
-      body: Stack(
+      body: Column(
         children: [
-          // Main scrollable content with top padding for header
-          Padding(
-            padding: const EdgeInsets.only(top: 56),
+          // Fixed platform header at top
+          const CompactPlatformHeader(currentApp: 'wallet'),
+          
+          // Top navigation bar (moved from bottom)
+          _buildTopNav(),
+          
+          // Main scrollable content
+          Expanded(
             child: widget.child,
           ),
-          
-          // Fixed platform header at top
-          const Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: CompactPlatformHeader(currentApp: 'wallet'),
-          ),
-          
-          // Fixed bottom nav
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildBottomNav(),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTopNav() {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A0A0F).withOpacity(0.85),
+            border: const Border(
+              bottom: BorderSide(
+                color: Color(0xFF1E1E2D),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.home_rounded, 'Home', '/'),
+                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet', '/wallet'),
+                _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
+                _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
+                _buildMoreNavItem(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -220,7 +242,7 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
         _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes', 'Raise & track disputes'),
         const PopupMenuDivider(),
         _buildPopupItem(Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),
-        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/connect', 'Web3 connection'),
+        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/wallet-connect', 'Web3 connection'),
       ],
       child: SizedBox(
         width: 64,
@@ -1176,6 +1198,21 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   }
 
   Widget _buildWalletCard(BuildContext context, bool isPeP) {
+    // Get real wallet data from provider
+    final walletState = ref.watch(walletProvider);
+    final isConnected = walletState.isConnected;
+    final address = walletState.address ?? '';
+    final ethBalance = walletState.ethBalance ?? 0.0;
+    
+    // Format address for display
+    final formattedAddress = address.length > 10 
+        ? '${address.substring(0, 6)}...${address.substring(address.length - 4)}'
+        : address;
+    
+    // Format balance (ETH value, not USD for now)
+    final balanceWhole = ethBalance.floor();
+    final balanceDecimal = ((ethBalance - balanceWhole) * 100).round().toString().padLeft(2, '0');
+    
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Container(
@@ -1205,50 +1242,92 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card header
+            // Card header - show connection status based on real wallet state
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF22C55E).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle, color: Color(0xFF22C55E), size: 14),
-                      SizedBox(width: 4),
-                      Text(
-                        'Connected',
-                        style: TextStyle(
-                          color: Color(0xFF22C55E),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                if (isConnected)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF22C55E).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, color: Color(0xFF22C55E), size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'Connected',
+                          style: TextStyle(
+                            color: Color(0xFF22C55E),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                      ],
+                    ),
+                  )
+                else
+                  GestureDetector(
+                    onTap: () => ref.read(walletProvider.notifier).connectWallet(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ],
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.account_balance_wallet, color: Color(0xFF6366F1), size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'Connect Wallet',
+                            style: TextStyle(
+                              color: Color(0xFF6366F1),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
                 const Spacer(),
-                GestureDetector(
+                if (isConnected)
+                  GestureDetector(
                   onTap: () {
-                    Clipboard.setData(const ClipboardData(text: '0x7F3a1234567890abcdef9b2C'));
+                    Clipboard.setData(ClipboardData(text: address));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Address copied!'), backgroundColor: Color(0xFF22C55E)),
                     );
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.copy_rounded,
-                      color: Color(0xFF64748B),
-                      size: 18,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formattedAddress,
+                        style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.copy_rounded,
+                          color: Color(0xFF64748B),
+                          size: 18,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (isPeP) ...[
@@ -1284,9 +1363,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             const SizedBox(height: 32),
             
             // Balance label
-            const Text(
-              'Total Balance',
-              style: TextStyle(
+            Text(
+              isConnected ? 'ETH Balance' : 'Connect to View Balance',
+              style: const TextStyle(
                 color: Color(0xFF94A3B8),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -1294,117 +1373,89 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             ),
             const SizedBox(height: 8),
             
-            // Balance amount
-            const Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '\$12,847',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 44,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -2,
-                    height: 1,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 6, left: 4),
-                  child: Text(
-                    '.63',
-                    style: TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 28,
+            // Balance amount - show real ETH balance
+            if (isConnected)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    ethBalance.toStringAsFixed(4),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 44,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: -2,
+                      height: 1,
                     ),
                   ),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 6, left: 8),
+                    child: Text(
+                      'ETH',
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              GestureDetector(
+                onTap: () => ref.read(walletProvider.notifier).connectWallet(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.account_balance_wallet, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Connect MetaMask',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
             
             const SizedBox(height: 16),
             
-            // Change indicator
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF22C55E).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.trending_up_rounded, color: Color(0xFF22C55E), size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    '+\$284.52 (2.3%)',
-                    style: TextStyle(
-                      color: Color(0xFF22C55E),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'today',
-                    style: TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Wallet address
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
+            // Network indicator (only show when connected)
+            if (isConnected)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6366F1).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, color: Color(0xFF22C55E), size: 8),
+                    SizedBox(width: 6),
+                    Text(
+                      'Sepolia Testnet',
+                      style: TextStyle(
+                        color: Color(0xFF818CF8),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
-                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 16),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Main Wallet',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '0x1234...5678',
-                          style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: Color(0xFF64748B)),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -1453,6 +1504,12 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   }
   
   void _showReceiveModal(BuildContext context) {
+    final walletState = ref.read(walletProvider);
+    final address = walletState.address ?? '';
+    final formattedAddress = address.length > 10 
+        ? '${address.substring(0, 6)}...${address.substring(address.length - 4)}'
+        : address;
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1487,7 +1544,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               ),
               child: Column(
                 children: [
-                  // QR Code placeholder
+                  // QR Code placeholder - shows address
                   Container(
                     width: 180,
                     height: 180,
@@ -1495,9 +1552,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                       color: Colors.white,
                       border: Border.all(color: const Color(0xFF1E1E2E)),
                     ),
-                    child: const Center(
-                      child: Icon(Icons.qr_code_rounded, size: 160, color: Color(0xFF0A0A0F)),
-                    ),
+                    child: address.isNotEmpty
+                        ? const Center(
+                            child: Icon(Icons.qr_code_rounded, size: 160, color: Color(0xFF0A0A0F)),
+                          )
+                        : const Center(
+                            child: Text('Connect wallet first', style: TextStyle(color: Colors.grey)),
+                          ),
                   ),
                 ],
               ),
@@ -1511,28 +1572,29 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               ),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      '0x7F3a...9b2C',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'monospace'),
+                      address.isNotEmpty ? formattedAddress : 'No wallet connected',
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'monospace'),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(const ClipboardData(text: '0x7F3a1234567890abcdef9b2C'));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Address copied!'), backgroundColor: Color(0xFF22C55E)),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6366F1),
-                        borderRadius: BorderRadius.circular(8),
+                  if (address.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: address));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Address copied!'), backgroundColor: Color(0xFF22C55E)),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text('Copy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                       ),
-                      child: const Text('Copy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -2002,6 +2064,11 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   }
 
   Widget _buildAssetsSection(BuildContext context) {
+    // Get real wallet data
+    final walletState = ref.watch(walletProvider);
+    final isConnected = walletState.isConnected;
+    final ethBalance = walletState.ethBalance ?? 0.0;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -2018,65 +2085,97 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 ),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Color(0xFF818CF8),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+              if (isConnected)
+                GestureDetector(
+                  onTap: () => ref.read(walletProvider.notifier).refreshBalance(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A2E),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_rounded, color: Color(0xFF818CF8), size: 16),
-                  ],
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.refresh_rounded, color: Color(0xFF818CF8), size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          'Refresh',
+                          style: TextStyle(
+                            color: Color(0xFF818CF8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
           
-          // Asset items
-          _buildAssetItem(
-            symbol: 'ETH',
-            name: 'Ethereum',
-            balance: '2.4521',
-            value: '\$8,234.12',
-            change: '+2.4%',
-            isPositive: true,
-            color: const Color(0xFF627EEA),
-            icon: 'Ξ',
-          ),
-          const SizedBox(height: 12),
-          _buildAssetItem(
-            symbol: 'USDC',
-            name: 'USD Coin',
-            balance: '3,245.00',
-            value: '\$3,245.00',
-            change: '0.0%',
-            isPositive: true,
-            color: const Color(0xFF2775CA),
-            icon: '\$',
-          ),
-          const SizedBox(height: 12),
-          _buildAssetItem(
-            symbol: 'AMTTP',
-            name: 'AMTTP Token',
-            balance: '1,500.00',
-            value: '\$1,368.51',
-            change: '+5.2%',
-            isPositive: true,
-            color: const Color(0xFF8B5CF6),
-            icon: 'A',
-          ),
+          // Asset items - show real balance if connected
+          if (isConnected) ...[
+            _buildAssetItem(
+              symbol: 'ETH',
+              name: 'Ethereum (Sepolia)',
+              balance: ethBalance.toStringAsFixed(6),
+              value: 'Testnet',
+              change: '',
+              isPositive: true,
+              color: const Color(0xFF627EEA),
+              icon: 'Ξ',
+            ),
+          ] else ...[
+            // Show placeholder when not connected
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A2E),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF2D2D44)),
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.account_balance_wallet_outlined,
+                    color: Color(0xFF64748B),
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Connect your wallet to view assets',
+                    style: TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => ref.read(walletProvider.notifier).connectWallet(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        'Connect Wallet',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

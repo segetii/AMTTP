@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AppLayout from '@/components/AppLayout';
 
 interface SanctionsCheckResult {
   query: { address?: string; name?: string };
@@ -135,6 +136,7 @@ export default function SanctionsPage() {
   };
 
   return (
+    <AppLayout>
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
@@ -349,5 +351,6 @@ export default function SanctionsPage() {
         </div>
       )}
     </div>
+    </AppLayout>
   );
 }

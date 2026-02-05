@@ -21,14 +21,14 @@ class AppConstants {
   
   // Base URL - For local dev, point to orchestrator directly
   // In production with nginx, this would be empty string
-  static const String baseApiUrl = 'http://localhost:8007';  // Orchestrator
+  static const String baseApiUrl = '';  // via gateway (/api/*)
   // Risk Engine endpoint  
   static const String riskEngineUrl = 'http://localhost:8002';  // Risk engine
   // Integrity Service endpoint
-  static const String integrityServiceUrl = 'http://localhost:8008';  // Integrity service
+  static const String integrityServiceUrl = '';  // via gateway (/integrity/*)
   
   // Next.js Frontend (for embedded visualizations)
-  static const String nextJsUrl = 'http://localhost:3006';  // Next.js app
+  static const String nextJsUrl = '/warroom';  // via gateway
   
   // API Paths (relative - nginx will proxy these)
   static const String riskScoringEndpoint = '/risk/score';

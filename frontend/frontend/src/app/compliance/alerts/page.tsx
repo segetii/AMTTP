@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getExplanation, type RiskExplanation, type ExplanationFactor, type TypologyMatch } from '@/lib/api';
+import AppLayout from '@/components/AppLayout';
 
 interface MonitoringAlert {
   id: string;
@@ -125,41 +126,10 @@ export default function AlertsPage() {
       if (!response.ok) throw new Error(`Failed to fetch alerts: ${response.status}`);
       const data = await response.json();
       setAlerts(Array.isArray(data) ? data : data.alerts || []);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch alerts');
-      // Show mock data for demo
-      setAlerts([
-        {
-          id: 'alert-001',
-          rule_type: 'large_transaction',
-          severity: 'high',
-          status: 'pending',
-          address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0Ab3D',
-          description: 'Transaction of 150 ETH exceeds threshold of 100 ETH',
-          amount: 150,
-          threshold: 100,
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-        },
-        {
-          id: 'alert-002',
-          rule_type: 'rapid_movement',
-          severity: 'critical',
-          status: 'pending',
-          address: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
-          description: 'Rapid fund movement: 5 transactions in 10 minutes',
-          created_at: new Date(Date.now() - 7200000).toISOString(),
-        },
-        {
-          id: 'alert-003',
-          rule_type: 'high_risk_country',
-          severity: 'medium',
-          status: 'reviewed',
-          address: '0x1234567890123456789012345678901234567890',
-          description: 'Transaction involving high-risk jurisdiction',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          reviewed_by: 'compliance@example.com',
-        },
-      ]);
+      setError(err instanceof Error ? err.message : 'Failed to fetch alerts. Ensure Orchestrator is running on port 8007.');
+      setAlerts([]);
     } finally {
       setIsLoading(false);
     }
@@ -174,15 +144,8 @@ export default function AlertsPage() {
       }
     } catch (err) {
       console.error('Failed to fetch stats:', err);
-      // Mock stats
-      setStats({
-        total_alerts: 156,
-        pending: 23,
-        reviewed: 120,
-        escalated: 13,
-        by_severity: { critical: 5, high: 18, medium: 45, low: 88 },
-        by_rule_type: { large_transaction: 30, rapid_movement: 25, structuring: 15 },
-      });
+      // Stats will remain null - show empty state
+      setStats(null);
     }
   };
 
@@ -306,6 +269,7 @@ export default function AlertsPage() {
   const uniqueRuleTypes = [...new Set(alerts.map(a => a.rule_type))];
 
   return (
+    <AppLayout>
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
@@ -734,5 +698,6 @@ export default function AlertsPage() {
         </div>
       )}
     </div>
+    </AppLayout>
   );
 }

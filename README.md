@@ -1,8 +1,14 @@
 # AMTTP - Anti-Money Laundering Transaction Transfer Protocol
 
-## Last Updated: January 22, 2026
+## Last Updated: February 1, 2026
 
 A comprehensive DeFi compliance platform with ML-powered fraud detection, regulatory compliance (FATF, FCA), real-time transaction monitoring, and enterprise role management.
+
+> **Recent Updates (Feb 2026):**
+> - Flutter app fully standardized with design tokens, components, and services layer
+> - Real MetaMask wallet integration (Sepolia testnet)
+> - War Room landing page as entry point (SIEM removed)
+> - Unified RBAC system across Flutter and Next.js
 
 ---
 
@@ -189,26 +195,46 @@ c:\amttp\
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Flutter App | http://localhost:3010 | Main DeFi transfer interface |
-| Next.js Dashboard | http://localhost:3006 | Compliance & SIEM dashboard |
+| Flutter Consumer App | http://localhost:8889 | End-user wallet & transfer interface |
+| Next.js War Room | http://localhost:3006 | Institutional compliance dashboard |
 | Orchestrator API | http://localhost:8007 | Main API gateway |
 | ML Risk API | http://localhost:8000 | Fraud detection service |
+
+> **Note:** The War Room now opens directly to the login page. SIEM dashboard has been removed.
 
 ---
 
 ## 📖 Documentation
 
+### Quick Reference
+
 | Document | Description |
 |----------|-------------|
-| [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md) | How to start all services |
+| [QUICK_START_GUIDE.md](documentation/QUICK_START_GUIDE.md) | How to start all services |
+| [PORT_USAGE.md](documentation/PORT_USAGE.md) | Complete port reference |
+| [FINAL_STATUS.md](documentation/FINAL_STATUS.md) | Current implementation status |
+| [UI_ARCHITECTURE_MAP.md](documentation/UI_ARCHITECTURE_MAP.md) | UI/UX structure |
+
+### Architecture & Design
+
+| Document | Description |
+|----------|-------------|
+| [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md) | Full system architecture |
 | [AUTH_GUIDE.md](docs/AUTH_GUIDE.md) | Authentication & role management |
-| [CHANGELOG.md](CHANGELOG.md) | Version history & release notes |
-| [PORT_USAGE.md](PORT_USAGE.md) | Complete port reference |
-| [ARCHITECTURE_DIAGRAM.md](ARCHITECTURE_DIAGRAM.md) | System architecture |
-| [ML_ARCHITECTURE_DIAGRAM.md](ML_ARCHITECTURE_DIAGRAM.md) | ML pipeline details |
-| [FCA_COMPLIANCE.md](FCA_COMPLIANCE.md) | FCA regulatory compliance |
-| [FATF_COMPLIANCE.md](docs/FATF_COMPLIANCE.md) | FATF Travel Rule implementation |
-| [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | Developer quick reference |
+| [ML_ARCHITECTURE.md](docs/ML_ARCHITECTURE.md) | ML pipeline details |
+
+### Compliance & Regulatory
+
+| Document | Description |
+|----------|-------------|
+| [FCA_COMPLIANCE.md](documentation/FCA_COMPLIANCE.md) | FCA regulatory compliance |
+| [FATF_COMPLIANCE.md](documentation/FATF_COMPLIANCE.md) | FATF Travel Rule implementation |
+
+### Flutter App
+
+| Document | Description |
+|----------|-------------|
+| [STANDARDIZATION_GUIDE.md](frontend/amttp_app/STANDARDIZATION_GUIDE.md) | Flutter design system & patterns |
 
 ---
 

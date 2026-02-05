@@ -127,9 +127,10 @@ class ApiService {
       return _orchestratorUrl;
     }
 
-    print('[API] Using default baseUrl: ${AppConstants.baseApiUrl}');
-    // Use configured base if provided; empty string keeps relative URLs.
-    return AppConstants.baseApiUrl;
+    // Default to relative URLs in production so nginx/gateway can proxy.
+    // This makes the app work behind ngrok without hardcoding localhost.
+    print('[API] Using default baseUrl (relative via gateway)');
+    return '';
   }
 
   // ============================================================

@@ -2,9 +2,18 @@
 
 ## Ethereum Fraud Detection Pipeline - Full Technical Reference
 
-**Version:** 1.0  
-**Last Updated:** January 2, 2026  
+**Version:** 1.1  
+**Last Updated:** February 1, 2026  
 **Author:** AMTTP Development Team
+
+---
+
+## Recent Updates (February 2026)
+
+- Flutter consumer app standardized with design tokens and real MetaMask integration
+- War Room opens to login page (SIEM dashboard removed)
+- Multi-method authentication (wallet, email, demo mode)
+- Unified RBAC system across all applications
 
 ---
 

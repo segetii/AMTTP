@@ -10,6 +10,7 @@ import '../../features/admin/presentation/pages/admin_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/detection_studio/presentation/pages/detection_studio_page.dart';
 import '../../features/war_room/presentation/pages/war_room_nextjs_page.dart';
+import '../../features/war_room/presentation/pages/war_room_landing_page.dart';
 import '../../features/war_room/presentation/pages/graph_explorer_page.dart';
 // New feature pages for complete contract coverage
 import '../../features/nft_swap/presentation/pages/nft_swap_page.dart';
@@ -118,6 +119,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = state.matchedLocation == '/sign-in' || 
                           state.matchedLocation == '/register' ||
                           state.matchedLocation == '/select-profile';
+      
+      // ═══════════════════════════════════════════════════════════════════════
+      // DEBUG PREVIEW MODE - Skip auth for these routes to evaluate pages
+      // TODO: Remove this block before production
+      // ═══════════════════════════════════════════════════════════════════════
+      const debugPreviewRoutes = [
+        '/war-room-landing',
+        '/flagged-queue',
+        '/policy-engine',
+        '/enforcement',
+        '/multisig-queue',
+        '/pending-approvals',
+        '/ui-snapshots',
+        '/reports',
+        '/user-management',
+        '/system-settings',
+      ];
+      if (debugPreviewRoutes.contains(state.matchedLocation)) {
+        return null; // Allow access without auth for preview
+      }
       
       // If not authenticated and not on auth route, redirect to sign-in
       if (!isAuthenticated && !isAuthRoute) {
@@ -261,6 +282,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/war-room',
             name: 'war-room',
             builder: (context, state) => const WarRoomNextJSPage(),
+          ),
+
+          // War Room landing (Flutter native) for direct viewing/testing
+          GoRoute(
+            path: '/war-room-landing',
+            name: 'war-room-landing',
+            builder: (context, state) => const WarRoomLandingPage(),
           ),
 
           // War Room deep links (embedded Next.js) to expose Next features via Flutter nav

@@ -272,7 +272,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { 
         label: 'Policy Engine', 
-        href: '/war-room/policies', 
+        href: '/policies', 
         icon: <PolicyIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },

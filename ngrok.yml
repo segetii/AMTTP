@@ -1,9 +1,13 @@
 version: "2"
-authtoken: # Your ngrok authtoken will be here
+authtoken: 37AJQMwbXua6dQ4TS3XDO92nxAp_7AayYRarHEBXLvVw38erC
+web_addr: 127.0.0.1:4040
 tunnels:
   flutter-app:
-    addr: 3003
+    addr: 8889
     proto: http
-  nextjs-dashboard:
-    addr: 3004
+  nextjs-warroom:
+    addr: 3006
+    proto: http
+  orchestrator:
+    addr: 8007
     proto: http

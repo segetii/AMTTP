@@ -20,23 +20,10 @@ type LoginTab = 'wallet' | 'email' | 'demo';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DEMO ROLE OPTIONS (for demo mode)
+// NOTE: End Users (R1/R2) are handled by the Flutter app, not Next.js
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const ROLE_OPTIONS = [
-  {
-    role: Role.R1_END_USER,
-    title: 'End User',
-    description: 'Personal wallet user with Focus Mode',
-    mode: 'Focus Mode',
-    color: 'from-green-500 to-emerald-600',
-  },
-  {
-    role: Role.R2_END_USER_PEP,
-    title: 'Enhanced End User',
-    description: 'PEP-flagged user with additional monitoring',
-    mode: 'Focus Mode',
-    color: 'from-amber-500 to-orange-600',
-  },
   {
     role: Role.R3_INSTITUTION_OPS,
     title: 'Institution Ops',
@@ -129,7 +116,8 @@ function LoginContent() {
       // In production, this would call an API
       const mockAddress = `0x${email.split('@')[0].padEnd(40, '0')}`;
       await login(mockAddress);
-      router.push('/focus');
+      // Always redirect to war-room (institutional users only in Next.js)
+      router.push('/war-room');
     } catch (error) {
       setEmailError('An error occurred during login');
       console.error('Email login error:', error);
@@ -145,9 +133,8 @@ function LoginContent() {
     setIsConnecting(true);
     try {
       // Use the pre-seeded mock user addresses based on role
-      const roleAddresses: Record<Role, string> = {
-        [Role.R1_END_USER]: '0x742d35cc6634c0532925a3b844bc9e7595f1c7d8',
-        [Role.R2_END_USER_PEP]: '0x2222222222222222222222222222222222222222',
+      // NOTE: Only institutional roles (R3-R6) - end users use Flutter app
+      const roleAddresses: Record<string, string> = {
         [Role.R3_INSTITUTION_OPS]: '0x3333333333333333333333333333333333333333',
         [Role.R4_INSTITUTION_COMPLIANCE]: '0x4444444444444444444444444444444444444444',
         [Role.R5_PLATFORM_ADMIN]: '0x5555555555555555555555555555555555555555',
@@ -155,15 +142,14 @@ function LoginContent() {
       };
       
       const demoAddress = roleAddresses[selectedRole];
+      if (!demoAddress) {
+        console.error('Invalid role for Next.js - end users should use Flutter app');
+        return;
+      }
       await login(demoAddress);
       
-      // Redirect based on mode
-      const mode = getRoleMode(selectedRole);
-      if (mode === AppMode.FOCUS) {
-        router.push('/focus');
-      } else {
-        router.push('/war-room');
-      }
+      // All Next.js logins go to War Room (end users use Flutter)
+      router.push('/war-room');
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

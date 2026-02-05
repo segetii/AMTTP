@@ -1,0 +1,341 @@
+# =============================================================================
+# AMTTP Full Stack - All Services with ngrok Exposure
+# =============================================================================
+# Usage: docker-compose -f docker-compose.full.yml up -d
+# 
+# This bundles:
+#   - Flutter Consumer App (port 8889)
+#   - Next.js War Room (port 3006)
+#   - Compliance Services (Orchestrator, Sanctions, Geographic Risk)
+#   - Infrastructure (Mongo, Redis, Memgraph, etc.)
+#   - ngrok tunnels for public exposure
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # FRONTEND SERVICES
+  # ===========================================================================
+
+  gateway:
+    image: nginx:alpine
+    container_name: amttp-gateway
+    ports:
+      - "8888:80"
+    volumes:
+      - ./docker/nginx-gateway.docker.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flutter-app
+      - nextjs-warroom
+      - orchestrator
+      - sanctions
+      - geo-risk
+      - policy-service
+      - ui-integrity
+      - fca-compliance
+      - monitoring
+      - explainability
+      - ml-risk-engine
+      - graph-api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+  
+  flutter-app:
+    build:
+      context: ./frontend/amttp_app
+      dockerfile: Dockerfile
+    container_name: amttp-flutter
+    ports:
+      - "8889:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nextjs-warroom:
+    build:
+      context: ./frontend/frontend
+      dockerfile: Dockerfile
+    container_name: amttp-warroom
+    ports:
+      - "3006:3000"
+    environment:
+      - NODE_ENV=production
+      # Leave empty so client-side fallback uses localhost:8888 from port 3006
+      - NEXT_PUBLIC_API_ORIGIN=
+      # Backend service URLs (Docker internal networking)
+      - ORCHESTRATOR_URL=http://orchestrator:8007
+      - SANCTIONS_URL=http://sanctions:8004
+      - MONITORING_URL=http://monitoring:8005
+      - GEO_RISK_URL=http://geo-risk:8006
+      - EXPLAINABILITY_URL=http://explainability:8009
+      # Public URLs for client-side
+      - NEXT_PUBLIC_ORCHESTRATOR_URL=http://orchestrator:8007
+      - NEXT_PUBLIC_SANCTIONS_URL=http://sanctions:8004
+      - NEXT_PUBLIC_GEO_RISK_URL=http://geo-risk:8006
+    depends_on:
+      - orchestrator
+      - sanctions
+      - geo-risk
+    restart: unless-stopped
+
+  # ===========================================================================
+  # COMPLIANCE SERVICES
+  # ===========================================================================
+
+  orchestrator:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile
+    container_name: amttp-orchestrator
+    environment:
+      USE_STORAGE_LAYER: "false"
+      MONGODB_URL: mongodb://admin:changeme@mongo:27017
+      MONGODB_DB: amttp
+      REDIS_URL: redis://redis:6379
+      SANCTIONS_URL: http://sanctions:8004
+      GEO_RISK_URL: http://geo-risk:8006
+      ML_RISK_URL: http://risk-engine:8000
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8007/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  sanctions:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.sanctions
+    container_name: amttp-sanctions
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  geo-risk:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.geo
+    container_name: amttp-geo-risk
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  policy-service:
+    build:
+      context: ./backend/policy-service
+      dockerfile: Dockerfile
+    container_name: amttp-policy
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/policy-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ui-integrity:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.integrity
+    container_name: amttp-integrity
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8008/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  fca-compliance:
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile.fca
+    container_name: amttp-fca
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/compliance/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  monitoring:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.monitoring
+    container_name: amttp-monitoring
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  explainability:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.explainability
+    container_name: amttp-explainability
+    ports:
+      - "8009:8009"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8009/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================================================
+  # ML SERVICES
+  # ===========================================================================
+
+  ml-risk-engine:
+    build:
+      context: ./ml/Automation/risk_engine
+      dockerfile: Dockerfile
+    container_name: amttp-ml-risk
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ml/Automation/risk_engine/models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  graph-api:
+    build:
+      context: ./ml/Automation/ml_pipeline
+      dockerfile: Dockerfile.graph
+    container_name: amttp-graph
+    ports:
+      - "8001:8001"
+    environment:
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_PORT=7687
+    depends_on:
+      - memgraph
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================================================
+  # INFRASTRUCTURE
+  # ===========================================================================
+
+  mongo:
+    image: mongo:6
+    container_name: amttp-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: changeme
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: amttp-redis
+    command: redis-server --save "" --appendonly no --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  memgraph:
+    image: memgraph/memgraph:latest
+    container_name: amttp-memgraph
+    command: >-
+      --log-level=INFO
+      --query-execution-timeout-sec=30
+      --memory-limit=2048
+    ports:
+      - "7687:7687"
+    restart: unless-stopped
+
+  # ===========================================================================
+  # CLOUDFLARE TUNNEL (FREE) - Public URL via trycloudflare.com
+  # ===========================================================================
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: amttp-cloudflared
+    command: tunnel --no-autoupdate --url http://gateway:80 --http-host-header=localhost
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ===========================================================================
+  # NGROK - Public Tunnel Exposure (disabled; Cloudflare Tunnel is preferred)
+  # ===========================================================================
+
+  # ngrok:
+  #   image: ngrok/ngrok:latest
+  #   container_name: amttp-ngrok
+  #   restart: unless-stopped
+  #   environment:
+  #     NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-""}
+  #   command:
+  #     - "start"
+  #     - "--all"
+  #     - "--config"
+  #     - "/etc/ngrok.yml"
+  #   volumes:
+  #     - ./docker/ngrok.yml:/etc/ngrok.yml:ro
+  #   ports:
+  #     - "4040:4040"
+  #   depends_on:
+  #     - gateway
+
+volumes:
+  mongo-data:
+
+networks:
+  default:
+    name: amttp-network

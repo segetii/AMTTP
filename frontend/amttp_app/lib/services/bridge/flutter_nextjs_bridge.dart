@@ -23,7 +23,9 @@ class FlutterNextJSBridge {
   WebViewController? _webViewController;
   
   // Configuration
-  static const String nextJsBaseUrl = 'http://localhost:3006';
+  static const String _nextJsBaseUrlOverride = String.fromEnvironment('NEXTJS_BASE_URL');
+  static String get nextJsBaseUrl =>
+      _nextJsBaseUrlOverride.isNotEmpty ? _nextJsBaseUrlOverride : '/warroom';
   static const String flutterChannelName = 'FlutterBridge';
   
   // Callbacks for handling messages from Next.js

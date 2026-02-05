@@ -9,7 +9,7 @@
     "build:prod": "npm run generate-hashes && npm run register-hashes && next build",
     "start": "next start",
     "lint": "eslint",
-    "generate-hashes": "ts-node scripts/generate-integrity-hashes.ts",
+    "generate-hashes": "ts-node --compiler-options=\"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/generate-integrity-hashes.ts",
     "register-hashes": "bash public/register-hashes.sh"
   },
   "dependencies": {
