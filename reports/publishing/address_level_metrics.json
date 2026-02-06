@@ -1,0 +1,61 @@
+{
+  "dataset": {
+    "path": "processed\\eth_addresses_labeled.csv",
+    "columns_used": [
+      "fraud",
+      "hybrid_score",
+      "xgb_normalized",
+      "soph_normalized",
+      "risk_level"
+    ]
+  },
+  "computed_at": "2026-02-06T16:53:55.664723+00:00",
+  "score_metrics": {
+    "hybrid_score": {
+      "n": 625168,
+      "positives": 372,
+      "positive_rate": 0.0005950400532336908,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0
+    },
+    "xgb_normalized": {
+      "n": 625168,
+      "positives": 372,
+      "positive_rate": 0.0005950400532336908,
+      "roc_auc": 0.9969038905051297,
+      "pr_auc": 0.087932860240583
+    },
+    "soph_normalized": {
+      "n": 625168,
+      "positives": 372,
+      "positive_rate": 0.0005950400532336908,
+      "roc_auc": 0.9999788404053362,
+      "pr_auc": 0.9766649517995328
+    }
+  },
+  "threshold_metrics": {
+    "risk_level_is_critical_or_high": {
+      "positive_predicate": "risk_level in {CRITICAL,HIGH}",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "risk_level_is_medium_or_higher": {
+      "positive_predicate": "risk_level in {CRITICAL,HIGH,MEDIUM}",
+      "precision": 0.20021528525296017,
+      "recall": 1.0,
+      "f1": 0.33363228699551567
+    }
+  },
+  "label_provenance_checks": {
+    "agreement_fraud_equals_risk_level_predicate": {
+      "predicate": "risk_level in {CRITICAL,HIGH}",
+      "agreement": 1.0
+    }
+  },
+  "notes": [
+    "IMPORTANT: In this dataset, the fraud label exactly matches the predicate risk_level in {CRITICAL,HIGH}. Metrics here reflect proxy-label consistency, not independent generalization performance.",
+    "All metrics are computed from processed/eth_addresses_labeled.csv present in the repo.",
+    "ROC-AUC and PR-AUC use continuous scores; threshold metrics use a discrete predicate."
+  ]
+}

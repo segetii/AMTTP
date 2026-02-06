@@ -98,10 +98,10 @@ See [FLUTTER_NEXTJS_BRIDGE.md](docs/FLUTTER_NEXTJS_BRIDGE.md) for implementation
 ## 🔑 Key Features
 
 ### ML-Powered Fraud Detection
-- **Stacked Ensemble**: GraphSAGE + LightGBM + XGBoost with Linear Meta-Learner
-- **Validated Performance**: ROC-AUC ~0.94, PR-AUC ~0.87, F1 ~0.87 (time-based test split)
-- **Multi-Signal Analysis**: Combines ML predictions, graph topology, 6 AML rules
-- **Real-time Scoring**: Sub-second risk assessment via parallel async calls
+- **Hybrid Risk Scoring**: Combines ML model outputs, graph-derived signals, and rule/pattern checks
+- **Reproducible Evaluation Artifacts**: See `reports/publishing/address_level_metrics.md` (includes a proxy-label circularity caveat) and `reports/publishing/etherscan_validation_metrics.md` (small external sanity check)
+- **Multi-Signal Analysis**: Combines ML predictions, graph topology signals, and AML pattern rules
+- **Async Scoring**: Parallel service calls (latency depends on deployment)
 
 ### Explainability & ML Transparency
 - **Drill-down Explainability**: Click any alert or decision in the dashboard to view a full ML explanation, including:

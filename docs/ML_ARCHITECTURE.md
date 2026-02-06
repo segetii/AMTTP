@@ -550,13 +550,15 @@ final_prob = meta.predict_proba(meta_X_test)[:, 1]
 
 ## Model Performance
 
+This repository contains reproducible evaluation artifacts under `reports/publishing/`.
+Any performance/latency numbers shown elsewhere in documentation should be treated as historical/illustrative unless tied to a reproducible report.
+
 | Metric | Value | Notes |
 |--------|-------|-------|
-| AUC-ROC | 0.94 | Stacked ensemble |
-| F1 Score | 0.87 | Balanced precision/recall |
-| Precision | 0.89 | Low false positives |
-| Recall | 0.85 | Catches most fraud |
-| Inference Time | <50ms | P99 latency |
+| AUC-ROC | See report | Reported in `reports/publishing/*` |
+| PR-AUC | See report | Reported in `reports/publishing/*` |
+| F1 | See report | Predicate metrics and confusion matrices are recorded where applicable |
+| Inference Time | Deployment-dependent | Varies with model selection, hardware, and service topology |
 
 ---
 

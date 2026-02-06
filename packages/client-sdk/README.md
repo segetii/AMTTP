@@ -4,10 +4,10 @@ TypeScript SDK for integrating with the AMTTP (AI-powered Multi-signature Transa
 
 ## Features
 
-- 🤖 **ML-Powered Risk Scoring**: Stacked Ensemble (ROC-AUC=0.94, PR-AUC=0.87, F1=0.87)
+- 🤖 **ML-Powered Risk Scoring**: Integrates with the AMTTP scoring API (hybrid ML + rules)
 - 🔒 **Smart Contract Integration**: Policy engine & manager contracts
 - 🆔 **KYC Integration**: Automatic compliance checking
-- 📊 **Real-time Inference**: Sub-100ms transaction scoring
+- 📊 **Real-time Inference**: Low-latency scoring (deployment-dependent)
 - 🛡️ **Policy Engine**: User-defined transaction limits and risk thresholds
 - ⚡ **Multi-chain Ready**: Designed for Ethereum, Polygon, Arbitrum
 
@@ -143,15 +143,12 @@ interface AMTTPConfig {
 
 ## ML Model Integration
 
-The SDK integrates with the AMTTP Stacked Ensemble fraud detection model:
+The SDK integrates with the AMTTP scoring service.
 
-- **Architecture**: GraphSAGE + LGBM + XGBoost + Linear Meta-Learner
-- **ROC-AUC**: ~0.94 (Overall discriminative ability)
-- **PR-AUC**: ~0.87 (Primary metric for imbalanced fraud detection)
-- **F1 Score**: ~0.87 (Balanced precision/recall at default threshold)
-- **Training Data**: 28,457 real fraud transactions (time-based split, days 27-30 test)
-- **Features**: 20-dimensional feature vectors with graph embeddings
-- **Real-time**: < 100ms response time
+For reproducible evaluation artifacts in this repo, see:
+
+- `../../reports/publishing/address_level_metrics.md` (includes a proxy-label circularity caveat)
+- `../../reports/publishing/etherscan_validation_metrics.md` (small external sanity check)
 
 ## Explainability
 

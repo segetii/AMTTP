@@ -93,24 +93,14 @@ tx_hash = client.set_policy(policy)
 | MEDIUM | 0.40 - 0.70 | REVIEW |
 | HIGH | 0.70 - 1.00 | ESCROW/BLOCK |
 
-## Model Performance
+## Model & Evaluation Evidence
 
-The AMTTP ML pipeline uses a **Stacked Ensemble** architecture with knowledge distillation:
+The AMTTP risk engine can combine multiple signals (GBM models, graph-based models, and rule/pattern heuristics) behind the API.
 
-| Model | Component | Role |
-|-------|-----------|------|
-| GraphSAGE | Graph Neural Network | Structural fraud patterns via neighbor aggregation |
-| LightGBM | Gradient Boosting | Fast feature interactions with leaf-wise growth |
-| XGBoost | Gradient Boosting | Non-linear patterns with strong regularization |
-| Linear Meta-Learner | Ensemble | Optimal weighting: `y = w₁·GraphSAGE + w₂·LGBM + w₃·XGB + b` |
+For reproducible evaluation artifacts in this repository, see:
 
-### Validated Metrics (Time-Based Test Split, Days 27-30)
-
-| Metric | Score | Notes |
-|--------|-------|-------|
-| **ROC-AUC** | ~0.94 | Overall discriminative ability |
-| **PR-AUC** | ~0.87 | Primary metric for imbalanced fraud detection |
-| **F1 @ 0.5** | ~0.87 | Balanced precision/recall at default threshold |
+- `../../reports/publishing/address_level_metrics.md` — large-sample address-level report; includes an explicit note about proxy-label circularity in `processed/eth_addresses_labeled.csv`.
+- `../../reports/publishing/etherscan_validation_metrics.md` — small external sanity-check set (dataset size and class balance are recorded in the report).
 
 ## Explainability
 

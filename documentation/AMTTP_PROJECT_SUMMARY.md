@@ -206,11 +206,12 @@ The CPU inference API includes a `/model/info` endpoint that reports an architec
 - “Stacked Ensemble (GraphSAGE + LGBM + XGBoost + Linear Meta‑Learner)”
 
 and a metrics object (reported values):
-- `roc_auc`: 0.94
-- `pr_auc`: 0.87
-- `f1_at_0.5`: 0.87
 
-If you want these to be “source-of-truth” benchmarks, the repo’s training scripts/notebooks should be the canonical place to reproduce them.
+For reproducible evaluation artifacts in this repository (including explicit caveats about label provenance and dataset size), see:
+- `reports/publishing/address_level_metrics.md`
+- `reports/publishing/etherscan_validation_metrics.md`
+
+If you want API-reported metrics to be “source-of-truth” benchmarks, the repo’s training/evaluation scripts should be the canonical place to reproduce them and to record an auditable run artifact.
 
 ---
 
