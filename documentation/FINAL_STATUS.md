@@ -72,7 +72,7 @@ All core features are implemented and functional.
 - ✅ GraphSAGE embeddings
 - ✅ 6 AML detection rules
 - ✅ Explainability service
-- ✅ ROC-AUC ~0.94, PR-AUC ~0.87, F1 ~0.87
+- ✅ Reproducible evaluation artifacts under `reports/publishing/` (see `address_level_metrics.md` for proxy-label caveat and `etherscan_validation_metrics.md` for the small external sanity check)
 
 ### Smart Contracts
 

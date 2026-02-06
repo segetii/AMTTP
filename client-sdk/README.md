@@ -60,7 +60,11 @@ console.log(`Risk Score: ${risk.riskScore}, Level: ${risk.riskLevel}`);
 
 ### Risk Service
 
-Assess transaction and address risk using the Stacked Ensemble ML model (ROC-AUC ~0.94, PR-AUC ~0.87, F1 ~0.87).
+Assess transaction and address risk using AMTTP's hybrid scoring API (ML + graph-derived signals + rule/pattern checks).
+
+For reproducible evaluation artifacts in this repo, see:
+- `../reports/publishing/address_level_metrics.md` (includes a proxy-label circularity caveat)
+- `../reports/publishing/etherscan_validation_metrics.md` (small external sanity check)
 
 ```typescript
 // Single address assessment
@@ -769,7 +773,7 @@ const action = await client.governance.createAction({
     summary: 'High risk ML score and fan-out pattern detected',
     fanOut: 15,
     velocityDeviation: 3.2,
-    mlConfidence: 0.94
+    mlConfidence: 0.91
   },
   uiSnapshotHash: 'sha256:...',
   policyVersion: '2.1.0'
