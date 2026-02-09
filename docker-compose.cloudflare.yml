@@ -1,0 +1,243 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP Production Docker Compose - Cloudflare Tunnel Deployment
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Deploy the entire AMTTP platform with Cloudflare Tunnel for secure exposure
+#
+# Quick Start:
+#   1. Set CLOUDFLARE_TUNNEL_TOKEN environment variable
+#   2. docker-compose -f docker-compose.cloudflare.yml up -d
+#
+# Environment Variables Required:
+#   - CLOUDFLARE_TUNNEL_TOKEN: Your Cloudflare tunnel token (from dashboard)
+#   - MONGODB_URI: MongoDB connection string (optional, uses mongo service)
+#   - REDIS_URL: Redis connection string (optional, uses redis service)
+#
+# Exposed via Cloudflare:
+#   - https://amttp.yourdomain.com - Flutter Web App
+#   - https://amttp.yourdomain.com/api - REST API
+#   - https://amttp.yourdomain.com/dashboard - Next.js Dashboard
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Cloudflare Tunnel - Secure ingress without exposing ports
+  # ─────────────────────────────────────────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: amttp-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://amttp-platform:80
+    depends_on:
+      amttp-platform:
+        condition: service_healthy
+    networks:
+      - amttp-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # AMTTP Platform - Main application container
+  # ─────────────────────────────────────────────────────────────────────────────
+  amttp-platform:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.production
+    image: amttp-platform:latest
+    container_name: amttp-platform
+    restart: unless-stopped
+    environment:
+      # Database connections
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongo:27017/amttp}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      # Ethereum/Blockchain
+      - ETH_RPC_URL=${ETH_RPC_URL:-https://sepolia.infura.io/v3/your-key}
+      - CHAIN_ID=${CHAIN_ID:-11155111}
+      # Contract addresses (from deployment)
+      - AMTTP_CORE_ADDRESS=${AMTTP_CORE_ADDRESS}
+      - AMTTP_NFT_ADDRESS=${AMTTP_NFT_ADDRESS}
+      - AMTTP_ZKNAF_ADDRESS=${AMTTP_ZKNAF_ADDRESS}
+      # Service ports
+      - NEXTJS_PORT=3000
+      - ORCHESTRATOR_PORT=8007
+      - RISK_ENGINE_PORT=8002
+      - SANCTIONS_PORT=8004
+      - MONITORING_PORT=8005
+      - GEO_RISK_PORT=8006
+      - INTEGRITY_PORT=8008
+      # ML/zkNAF
+      - ML_MODELS_PATH=/app/models
+      - ZKNAF_CIRCUITS_PATH=/app/zknaf/circuits
+      # Security
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+    volumes:
+      - amttp-data:/app/data
+      - amttp-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - amttp-network
+    # Ports are NOT exposed externally - Cloudflare tunnel connects internally
+    expose:
+      - "80"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # MongoDB - Document database
+  # ─────────────────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: amttp-mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-amttp_secure_pwd}
+      - MONGO_INITDB_DATABASE=amttp
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amttp-network
+    # Not exposed externally
+    expose:
+      - "27017"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Redis - Caching and rate limiting
+  # ─────────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: amttp-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amttp-network
+    expose:
+      - "6379"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Memgraph - Graph database for transaction analysis
+  # ─────────────────────────────────────────────────────────────────────────────
+  memgraph:
+    image: memgraph/memgraph-mage:latest
+    container_name: amttp-memgraph
+    restart: unless-stopped
+    environment:
+      - MEMGRAPH_USER=admin
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD:-amttp_graph_pwd}
+    volumes:
+      - memgraph-data:/var/lib/memgraph
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'RETURN 1;' | mgconsole || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - amttp-network
+    expose:
+      - "7687"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # MinIO - S3-compatible storage for ML artifacts
+  # ─────────────────────────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: amttp-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-amttp_admin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-amttp_minio_pwd}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - amttp-network
+    expose:
+      - "9000"
+      - "9001"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Hardhat Node - Local Ethereum node for testing (optional)
+  # ─────────────────────────────────────────────────────────────────────────────
+  hardhat:
+    image: node:20-alpine
+    container_name: amttp-hardhat
+    restart: unless-stopped
+    working_dir: /app
+    command: npx hardhat node --hostname 0.0.0.0
+    volumes:
+      - ./hardhat.config.js:/app/hardhat.config.js
+      - ./package.json:/app/package.json
+      - hardhat-artifacts:/app/artifacts
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8545"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - amttp-network
+    expose:
+      - "8545"
+    profiles:
+      - dev  # Only starts with --profile dev
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════════════════════════════
+networks:
+  amttp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════════════════════════════
+volumes:
+  amttp-data:
+    name: amttp-data
+  amttp-logs:
+    name: amttp-logs
+  mongo-data:
+    name: amttp-mongo-data
+  mongo-config:
+    name: amttp-mongo-config
+  redis-data:
+    name: amttp-redis-data
+  memgraph-data:
+    name: amttp-memgraph-data
+  minio-data:
+    name: amttp-minio-data
+  hardhat-artifacts:
+    name: amttp-hardhat-artifacts

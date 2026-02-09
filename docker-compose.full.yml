@@ -75,6 +75,8 @@ services:
       - MONITORING_URL=http://monitoring:8005
       - GEO_RISK_URL=http://geo-risk:8006
       - EXPLAINABILITY_URL=http://explainability:8009
+      - ZKNAF_URL=http://zknaf:8010
+      - DOCKER_CONTAINER=true
       # Public URLs for client-side
       - NEXT_PUBLIC_ORCHESTRATOR_URL=http://orchestrator:8007
       - NEXT_PUBLIC_SANCTIONS_URL=http://sanctions:8004

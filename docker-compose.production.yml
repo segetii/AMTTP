@@ -1,0 +1,358 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP Production Stack - Docker Compose with Cloudflare Tunnel
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Prerequisites:
+#   1. Get Cloudflare Tunnel token: https://dash.cloudflare.com/
+#      - Go to Zero Trust > Access > Tunnels > Create tunnel
+#      - Copy the tunnel token
+#   2. Set token: export CLOUDFLARE_TUNNEL_TOKEN=<your-token>
+#
+# Usage:
+#   docker-compose -f docker-compose.production.yml up -d
+#
+# Services exposed via Cloudflare:
+#   - Main App (Flutter):   https://amttp.yourdomain.com
+#   - Dashboard (Next.js):  https://dashboard.amttp.yourdomain.com
+#   - API:                  https://api.amttp.yourdomain.com
+#   - zkNAF:               https://zknaf.amttp.yourdomain.com
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+x-common-env: &common-env
+  NODE_ENV: production
+  TZ: UTC
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CLOUDFLARE TUNNEL - Secure External Access
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: amttp-cloudflared
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - nginx-gateway
+    networks:
+      - amttp-internal
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NGINX GATEWAY - Central Reverse Proxy
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  nginx-gateway:
+    image: nginx:alpine
+    container_name: amttp-gateway
+    volumes:
+      - ./docker/nginx-production.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/amttp_app/build/web:/var/www/flutter:ro
+      - ./frontend/frontend/.next/static:/var/www/nextjs/static:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - nextjs-dashboard
+      - orchestrator
+      - risk-engine
+      - zknaf
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FRONTEND SERVICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  nextjs-dashboard:
+    build:
+      context: ./frontend/frontend
+      dockerfile: Dockerfile.production
+    container_name: amttp-dashboard
+    environment:
+      <<: *common-env
+      PORT: 3005
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: /api
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3005/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BACKEND SERVICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  oracle-service:
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile
+    container_name: amttp-oracle
+    environment:
+      <<: *common-env
+      PORT: 3001
+      MONGODB_URL: mongodb://admin:${MONGO_PASSWORD:-changeme}@mongo:27017
+      REDIS_URL: redis://redis:6379
+      MEMGRAPH_URL: bolt://memgraph:7687
+    depends_on:
+      - mongo
+      - redis
+      - memgraph
+    networks:
+      - amttp-internal
+    restart: unless-stopped
+
+  orchestrator:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile
+    container_name: amttp-orchestrator
+    environment:
+      <<: *common-env
+      # Storage backends
+      MONGODB_URL: mongodb://admin:${MONGO_PASSWORD:-changeme}@mongo:27017
+      MONGODB_DB: amttp
+      REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-localtest}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-localtest123}
+      MINIO_SECURE: "false"
+      MINIO_BUCKET: amttp-documents
+      IPFS_API_URL: http://helia:5001
+      # Internal service URLs
+      ML_RISK_URL: http://risk-engine:8000
+      ZKNAF_URL: http://zknaf:8010
+      GRAPH_URL: http://memgraph:7687
+    depends_on:
+      - mongo
+      - redis
+      - minio
+      - risk-engine
+    networks:
+      - amttp-internal
+    restart: unless-stopped
+
+  risk-engine:
+    build:
+      context: ./ml/Automation/risk_engine
+      dockerfile: Dockerfile
+    container_name: amttp-risk-engine
+    environment:
+      <<: *common-env
+      PYTHONPATH: /app
+      MODEL_PATH: /app/models
+    volumes:
+      - ./ml/Automation/ml_pipeline/models/trained:/app/models:ro
+      - ./processed:/app/processed:ro
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  zknaf:
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile.zknaf
+    container_name: amttp-zknaf
+    environment:
+      <<: *common-env
+      ZKNAF_PORT: 8010
+      CIRCUITS_PATH: /app/circuits
+      PROVING_KEY_PATH: /app/keys
+    volumes:
+      - ./backend/oracle-service/src/zknaf/circuits:/app/circuits:ro
+      - zknaf-keys:/app/keys
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DATA LAYER
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  mongo:
+    image: mongo:7
+    container_name: amttp-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-changeme}
+    volumes:
+      - mongo-data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: amttp-redis
+    command: >
+      redis-server 
+      --appendonly yes 
+      --maxmemory 512mb 
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis-data:/data
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  memgraph:
+    image: memgraph/memgraph:latest
+    container_name: amttp-memgraph
+    command: >-
+      --log-level=INFO
+      --query-execution-timeout-sec=30
+      --memory-limit=2048
+    volumes:
+      - memgraph-data:/var/lib/memgraph
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'RETURN 1;' | mgconsole || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: amttp-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-localtest}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-localtest123}
+    volumes:
+      - minio-data:/data
+    networks:
+      - amttp-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  helia:
+    image: ipfs/kubo:latest
+    container_name: amttp-ipfs
+    volumes:
+      - ipfs-data:/data/ipfs
+    networks:
+      - amttp-internal
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BLOCKCHAIN NODE (Local Development/Staging)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  hardhat:
+    build:
+      context: .
+      dockerfile: ./hardhat/Dockerfile
+    container_name: amttp-hardhat
+    volumes:
+      - ./contracts:/app/contracts:ro
+      - ./scripts:/app/scripts:ro
+      - ./deployments:/app/deployments
+    networks:
+      - amttp-internal
+    profiles:
+      - dev
+      - staging
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MONITORING & OBSERVABILITY
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: amttp-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - amttp-internal
+    profiles:
+      - monitoring
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: amttp-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: https://monitoring.amttp.yourdomain.com
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - amttp-internal
+    profiles:
+      - monitoring
+    restart: unless-stopped
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NETWORKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+networks:
+  amttp-internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VOLUMES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+volumes:
+  mongo-data:
+  redis-data:
+  memgraph-data:
+  minio-data:
+  ipfs-data:
+  zknaf-keys:
+  nginx-logs:
+  prometheus-data:
+  grafana-data:

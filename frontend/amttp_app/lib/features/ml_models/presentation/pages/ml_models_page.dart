@@ -55,12 +55,20 @@ class _MLModelsPageState extends ConsumerState<MLModelsPage> {
       final location = html.window.location;
       final host = location.hostname ?? 'localhost';
       final protocol = location.protocol;
-      const nextJsPort = '3006';
+      final port = location.port;
       
-      if (location.port == nextJsPort) {
-        baseUrl = '$protocol//$host:${location.port}';
+      if (host == 'localhost' || host == '127.0.0.1') {
+        const nextJsPort = '3006';
+        if (location.port == nextJsPort) {
+          baseUrl = '$protocol//$host:${location.port}';
+        } else {
+          baseUrl = '$protocol//$host:$nextJsPort';
+        }
       } else {
-        baseUrl = '$protocol//$host:$nextJsPort';
+        baseUrl = '$protocol//$host';
+        if (port.isNotEmpty && port != '80' && port != '443') {
+          baseUrl = '$protocol//$host:$port';
+        }
       }
     }
     

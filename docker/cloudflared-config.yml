@@ -1,0 +1,58 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cloudflare Tunnel Configuration for AMTTP Platform
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This file configures how Cloudflare Tunnel routes traffic to your services.
+# 
+# Setup Instructions:
+# 1. Log into Cloudflare Dashboard → Zero Trust → Access → Tunnels
+# 2. Create a new tunnel named "amttp-production"
+# 3. Copy the tunnel token and set as CLOUDFLARE_TUNNEL_TOKEN env var
+# 4. Configure the public hostnames in the Cloudflare dashboard to match below
+#
+# The tunnel token approach (recommended) handles auth automatically.
+# This config file is for reference - actual routing is configured in dashboard.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Tunnel identification (set in dashboard)
+tunnel: amttp-production
+credentials-file: /etc/cloudflared/credentials.json
+
+# Ingress rules - defines how requests are routed
+# Configure these in Cloudflare Dashboard → Zero Trust → Access → Tunnels → Configure
+ingress:
+  # Main application (Flutter + API + Dashboard)
+  # Route: https://amttp.yourdomain.com → localhost:80
+  - hostname: amttp.yourdomain.com
+    service: http://amttp-platform:80
+    originRequest:
+      connectTimeout: 30s
+      noTLSVerify: false
+      httpHostHeader: amttp.yourdomain.com
+
+  # API direct access (optional, for external integrations)
+  # Route: https://api.amttp.yourdomain.com → localhost:80/api
+  - hostname: api.amttp.yourdomain.com
+    service: http://amttp-platform:80
+    path: /api
+    originRequest:
+      connectTimeout: 30s
+
+  # Dashboard direct access (optional)
+  # Route: https://dashboard.amttp.yourdomain.com → localhost:80/dashboard
+  - hostname: dashboard.amttp.yourdomain.com
+    service: http://amttp-platform:80
+    path: /dashboard
+    originRequest:
+      connectTimeout: 30s
+
+  # Catch-all rule (required)
+  - service: http_status:404
+
+# Logging configuration
+loglevel: info
+transport-loglevel: warn
+
+# Metrics
+metrics: 0.0.0.0:2000

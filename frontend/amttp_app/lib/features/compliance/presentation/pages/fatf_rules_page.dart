@@ -39,6 +39,14 @@ class _FATFRulesPageState extends ConsumerState<FATFRulesPage> {
     final host = loc.hostname ?? 'localhost';
     final proto = loc.protocol.isEmpty ? 'http:' : loc.protocol;
     
+    // In production (non-localhost), use same origin via nginx proxy
+    if (host != 'localhost' && host != '127.0.0.1') {
+      final port = loc.port;
+      if (port.isNotEmpty && port != '80' && port != '443') {
+        return '$proto//$host:$port/compliance/fatf-rules';
+      }
+      return '$proto//$host/compliance/fatf-rules';
+    }
     return '$proto//$host:3006/compliance/fatf-rules';
   }
 

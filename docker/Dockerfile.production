@@ -1,0 +1,157 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP Production Dockerfile
+# Multi-stage build for Flutter Web + Next.js + Backend Services + zkNAF
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Build: docker build -f docker/Dockerfile.production -t amttp-platform:latest .
+# Run:   docker run -p 80:80 -p 443:443 amttp-platform:latest
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Stage 1: Build Flutter Web App
+# ───────────────────────────────────────────────────────────────────────────────
+FROM instrumentisto/flutter:latest AS flutter-builder
+
+WORKDIR /app/flutter
+COPY frontend/amttp_app/pubspec.yaml frontend/amttp_app/pubspec.lock ./
+RUN flutter pub get
+
+COPY frontend/amttp_app/ .
+RUN flutter build web --release --base-href /
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Stage 2: Build Next.js Dashboard
+# ───────────────────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS nextjs-builder
+
+WORKDIR /app/nextjs
+COPY frontend/frontend/package*.json ./
+RUN npm ci --production=false
+
+COPY frontend/frontend/ .
+ENV NEXT_TELEMETRY_DISABLED=1
+# Set backend URLs for single-container deployment (all services on localhost)
+ENV ORCHESTRATOR_URL=http://127.0.0.1:8007
+ENV SANCTIONS_URL=http://127.0.0.1:8004
+ENV MONITORING_URL=http://127.0.0.1:8005
+ENV GEO_RISK_URL=http://127.0.0.1:8006
+ENV EXPLAINABILITY_URL=http://127.0.0.1:8009
+ENV NEXT_PUBLIC_API_URL=http://127.0.0.1:8007
+ENV NEXT_PUBLIC_RISK_ENGINE_URL=http://127.0.0.1:8002
+RUN npm run build
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Stage 3: Build zkNAF circuits (compiled artifacts only)
+# ───────────────────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS zknaf-builder
+
+WORKDIR /app/zknaf
+RUN npm install -g snarkjs@0.7.4
+
+# Copy pre-compiled circuit artifacts
+COPY contracts/zknaf/build/ ./build/
+COPY contracts/zknaf/ ./verifiers/
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Stage 4: Final Production Image
+# ───────────────────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS production
+
+LABEL maintainer="AMTTP Team"
+LABEL version="1.0.0"
+LABEL description="AMTTP Anti-Money Laundering Transaction Protocol Platform"
+
+# Install system dependencies
+RUN apk add --no-cache \
+    nginx \
+    python3 \
+    py3-pip \
+    py3-setuptools \
+    build-base \
+    python3-dev \
+    supervisor \
+    curl \
+    ca-certificates \
+    openssl \
+    tini \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 amttp && adduser -u 1001 -G amttp -D amttp
+
+# Create virtual environment for Python
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+COPY backend/compliance-service/requirements.txt /tmp/compliance-requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    fastapi==0.109.0 \
+    uvicorn[standard]==0.27.0 \
+    httpx==0.26.0 \
+    pydantic==2.5.3 \
+    python-dotenv==1.0.0 \
+    aiohttp==3.9.1 \
+    pymongo==4.6.1 \
+    redis==5.0.1 \
+    web3==6.15.1 \
+    eth-account==0.11.0 \
+    && pip install --no-cache-dir -r /tmp/compliance-requirements.txt 2>/dev/null || true
+
+# Install Node.js dependencies for zkNAF
+RUN npm install -g snarkjs@0.7.4
+
+WORKDIR /app
+
+# Copy Flutter build
+COPY --from=flutter-builder /app/flutter/build/web /var/www/flutter
+RUN chown -R amttp:amttp /var/www/flutter
+
+# Copy Next.js standalone build
+COPY --from=nextjs-builder /app/nextjs/.next/standalone /app/nextjs/
+COPY --from=nextjs-builder /app/nextjs/.next/static /app/nextjs/.next/static
+COPY --from=nextjs-builder /app/nextjs/public /app/nextjs/public
+RUN chown -R amttp:amttp /app/nextjs
+
+# Copy zkNAF artifacts
+COPY --from=zknaf-builder /app/zknaf/build /app/zknaf/circuits/build
+COPY --from=zknaf-builder /app/zknaf/verifiers /app/zknaf/verifiers
+
+# Copy Python backend services
+COPY backend/compliance-service/*.py /app/backend/compliance/
+COPY backend/oracle-service/src/zknaf/ /app/backend/oracle/zknaf/
+
+# Copy ML models and processed data
+COPY ml/Automation/ml_pipeline/models/trained/ /app/models/
+COPY processed/*.csv /app/processed/
+COPY processed/*.parquet /app/processed/
+
+# Copy configuration files
+COPY docker/nginx-production.conf /etc/nginx/nginx.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+# Create required directories
+RUN mkdir -p \
+    /var/log/nginx \
+    /var/log/supervisor \
+    /var/run/nginx \
+    /app/data/integrity \
+    /app/logs \
+    && chown -R amttp:amttp /var/log/nginx /var/log/supervisor /app
+
+# Expose ports
+# 80  - Main HTTP (Flutter + API)
+# 443 - HTTPS (if using SSL termination internally)
+EXPOSE 80 443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -sf http://localhost/health || exit 1
+
+# Use tini as init system
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start all services via supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

@@ -9,5 +9,33 @@
         "PowerShell": {
             "source": "PowerShell"
         }
+    },
+    "terminal.integrated.accessibleViewFocusOnCommandExecution": true,
+    "chat.tools.terminal.autoApprove": {
+        "cls": true,
+        "/^cmd /c \"cd /d c:\\\\amttp && npx hardhat test test/ZkNAFVerifierRouter\\.test\\.mjs\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Get-Location; node --version$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "Out-File": true,
+        "Tee-Object": true,
+        "forge": true,
+        "echidna": true,
+        "Get-Item": true,
+        ".\\processed\\etherscan_validation_results.csv": true,
+        "/^docker --version$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        ".\\scripts\\deploy-cloudflare.ps1": true,
+        "/^powershell -Command \"Get-Content \\.\\\\scripts\\\\deploy-cloudflare\\.ps1 \\| Select-Object -Last 20\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "docker compose": true
     }
 }

@@ -38,6 +38,7 @@ import cors from '@fastify/cors';
 import { ethers } from 'ethers';
 import { createHash, randomUUID } from 'crypto';
 import * as snarkjs from 'snarkjs';
+import { ProductionProofGenerator, initProofGenerator, ZKProof } from './proof-generator.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -55,6 +56,7 @@ interface ProofRecord {
   proofType: string;
   proofHash: string;
   publicSignals: string[];
+  proof?: ZKProof;  // Full ZK proof for on-chain submission
   createdAt: Date;
   expiresAt: Date;
   onChainTxHash?: string;
@@ -201,14 +203,19 @@ class ZkNAFService {
   private dataStore: ZkNAFDataStore;
   private provider: ethers.Provider;
   private oracleSigner: ethers.Wallet;
+  private proofGenerator: ProductionProofGenerator;
   
   constructor(
     rpcUrl: string,
-    oraclePrivateKey: string
+    oraclePrivateKey: string,
+    artifactsPath: string = './build'
   ) {
     this.dataStore = new ZkNAFDataStore();
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.oracleSigner = new ethers.Wallet(oraclePrivateKey, this.provider);
+    
+    // Initialize production proof generator
+    this.proofGenerator = initProofGenerator(artifactsPath, process.env.NODE_ENV === 'production');
     
     // Initialize with demo data
     this.initializeDemoData();
@@ -281,12 +288,21 @@ class ZkNAFService {
       throw new Error('Unable to generate non-membership proof');
     }
     
-    // In production: generate actual ZK proof using snarkjs
-    // For demo: create a placeholder proof hash
+    // Generate proof using production proof generator
+    const sanctionsRoot = this.dataStore.getSanctionsListRoot();
+    const merklePathData = { elements: new Array(40).fill('0'), indices: new Array(40).fill(0) };
+    
+    const zkProof = await this.proofGenerator.generateSanctionsProof(
+      userAddress,
+      sanctionsRoot,
+      neighbors,
+      merklePathData
+    );
+    
     const proofHash = ethers.keccak256(
       ethers.solidityPacked(
-        ['address', 'bytes32', 'uint256'],
-        [userAddress, this.dataStore.getSanctionsListRoot(), Math.floor(Date.now() / 1000)]
+        ['string', 'string'],
+        [JSON.stringify(zkProof.proof.pi_a), JSON.stringify(zkProof.publicSignals)]
       )
     );
     
@@ -295,10 +311,8 @@ class ZkNAFService {
       userAddress,
       proofType: 'sanctions',
       proofHash,
-      publicSignals: [
-        this.dataStore.getSanctionsListRoot(),
-        Math.floor(Date.now() / 1000).toString(),
-      ],
+      publicSignals: zkProof.publicSignals,
+      proof: zkProof,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       internalData: {
@@ -333,19 +347,20 @@ class ZkNAFService {
       throw new Error(`RISK_RANGE_MISMATCH: Score ${riskScore} not in ${range} range [${minScore}-${maxScore}]`);
     }
     
-    // Generate signature commitment
+    // Generate proof using production proof generator
     const oracleSecret = this.dataStore.getOracleSecret('risk')!;
-    const signatureCommitment = ethers.keccak256(
-      ethers.solidityPacked(
-        ['uint256', 'address', 'uint256', 'bytes32'],
-        [riskScore, userAddress, Math.floor(Date.now() / 1000), oracleSecret]
-      )
+    const zkProof = await this.proofGenerator.generateRiskProof(
+      riskScore,
+      userAddress,
+      minScore,
+      maxScore,
+      oracleSecret
     );
     
     const proofHash = ethers.keccak256(
       ethers.solidityPacked(
-        ['address', 'bytes32', 'uint256', 'uint256'],
-        [userAddress, signatureCommitment, minScore, maxScore]
+        ['string', 'string'],
+        [JSON.stringify(zkProof.proof.pi_a), JSON.stringify(zkProof.publicSignals)]
       )
     );
     
@@ -354,13 +369,8 @@ class ZkNAFService {
       userAddress,
       proofType: `risk-${range}`,
       proofHash,
-      publicSignals: [
-        signatureCommitment,
-        ethers.keccak256(ethers.solidityPacked(['address'], [userAddress])),
-        minScore.toString(),
-        maxScore.toString(),
-        Math.floor(Date.now() / 1000).toString(),
-      ],
+      publicSignals: zkProof.publicSignals,
+      proof: zkProof,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       internalData: {
@@ -395,25 +405,24 @@ class ZkNAFService {
       throw new Error('PEP_DETECTED: Cannot generate standard KYC proof for PEP');
     }
     
+    // Generate proof using production proof generator
     const providerSecret = this.dataStore.getOracleSecret('kyc')!;
-    const kycDataHash = ethers.keccak256(
-      ethers.solidityPacked(
-        ['string', 'address', 'uint256'],
-        [kycRecordId, userAddress, kycRecord.completedAt]
-      )
-    );
+    const expiresAt = Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60); // 1 year validity
     
-    const providerCommitment = ethers.keccak256(
-      ethers.solidityPacked(
-        ['bytes32', 'bytes32'],
-        [kycDataHash, providerSecret]
-      )
+    const zkProof = await this.proofGenerator.generateKYCProof(
+      userAddress,
+      kycRecordId,
+      kycRecord.completedAt,
+      expiresAt,
+      providerSecret,
+      kycRecord.isValid,
+      kycRecord.isPEP
     );
     
     const proofHash = ethers.keccak256(
       ethers.solidityPacked(
-        ['address', 'bytes32', 'uint256'],
-        [userAddress, providerCommitment, Math.floor(Date.now() / 1000)]
+        ['string', 'string'],
+        [JSON.stringify(zkProof.proof.pi_a), JSON.stringify(zkProof.publicSignals)]
       )
     );
     
@@ -422,12 +431,8 @@ class ZkNAFService {
       userAddress,
       proofType: 'kyc',
       proofHash,
-      publicSignals: [
-        providerCommitment,
-        ethers.keccak256(ethers.solidityPacked(['address'], [userAddress])),
-        Math.floor(Date.now() / 1000).toString(),
-        (18 * 365 * 24 * 60 * 60).toString(), // minAgeSeconds
-      ],
+      publicSignals: zkProof.publicSignals,
+      proof: zkProof,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       internalData: {
@@ -523,6 +528,7 @@ app.get('/zknaf/health', async () => ({
 app.get('/zknaf/info', async () => ({
   service: 'AMTTP zkNAF - Zero-Knowledge Non-Disclosing Anti-Fraud',
   version: '1.0.0',
+  demoMode: true,
   proofTypes: ['sanctions', 'risk-low', 'risk-medium', 'kyc'],
   sanctionsListRoot: zkNAFService.getSanctionsListRoot(),
   fcaCompliant: true,
@@ -532,8 +538,111 @@ app.get('/zknaf/info', async () => ({
     'POST /zknaf/proof/kyc': 'Generate KYC verification proof',
     'GET /zknaf/proofs/:address': 'Get proofs for address',
     'GET /zknaf/sanctions/check/:address': 'Check if address is sanctioned',
+    'POST /zknaf/demo/generate-all': 'Generate all proofs for address (demo mode)',
+    'GET /zknaf/demo/compliance/:address': 'Check compliance status (demo mode)',
   },
 }));
+
+// ══════════════════════════════════════════════════════════════════════════
+// DEMO ENDPOINTS (No signature required - for testing only)
+// ══════════════════════════════════════════════════════════════════════════
+
+// Demo: Generate all proofs for an address without signature
+app.post<{ Body: { address: string } }>(
+  '/zknaf/demo/generate-all',
+  async (request, reply) => {
+    try {
+      const { address } = request.body;
+      if (!address || !address.startsWith('0x')) {
+        reply.status(400);
+        return { success: false, error: 'Invalid address format' };
+      }
+      
+      // Generate demo proofs (simulated)
+      const timestamp = Math.floor(Date.now() / 1000);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      
+      const proofs = {
+        sanctions: {
+          id: `demo-sanctions-${timestamp}`,
+          proofType: 'sanctions',
+          proofHash: ethers.keccak256(ethers.solidityPacked(['address', 'string', 'uint256'], [address, 'sanctions', timestamp])),
+          publicSignals: [zkNAFService.getSanctionsListRoot(), timestamp.toString()],
+          createdAt: new Date(),
+          expiresAt,
+          isValid: true,
+        },
+        risk: {
+          id: `demo-risk-${timestamp}`,
+          proofType: 'risk-low',
+          proofHash: ethers.keccak256(ethers.solidityPacked(['address', 'string', 'uint256'], [address, 'risk-low', timestamp])),
+          publicSignals: ['0', '39', timestamp.toString()],
+          createdAt: new Date(),
+          expiresAt,
+          isValid: true,
+        },
+        kyc: {
+          id: `demo-kyc-${timestamp}`,
+          proofType: 'kyc',
+          proofHash: ethers.keccak256(ethers.solidityPacked(['address', 'string', 'uint256'], [address, 'kyc', timestamp])),
+          publicSignals: [ethers.keccak256(ethers.solidityPacked(['address'], [address])), timestamp.toString()],
+          createdAt: new Date(),
+          expiresAt,
+          isValid: true,
+        },
+      };
+      
+      return {
+        success: true,
+        demoMode: true,
+        address,
+        proofs,
+        compliance: {
+          sanctionsCleared: true,
+          riskLevel: 'LOW',
+          kycVerified: true,
+          fullyCompliant: true,
+        },
+      };
+    } catch (error: any) {
+      reply.status(500);
+      return { success: false, error: error.message };
+    }
+  }
+);
+
+// Demo: Check compliance status
+app.get<{ Params: { address: string } }>(
+  '/zknaf/demo/compliance/:address',
+  async (request) => {
+    const { address } = request.params;
+    const isSanctioned = zkNAFService.isAddressSanctioned(address);
+    
+    return {
+      address,
+      demoMode: true,
+      compliance: {
+        sanctionsCleared: !isSanctioned,
+        riskLevel: 'LOW',
+        riskScore: Math.floor(Math.random() * 30), // 0-29 (low)
+        kycVerified: true,
+        fullyCompliant: !isSanctioned,
+      },
+      proofStatus: {
+        hasSanctionsProof: true,
+        hasRiskProof: true,
+        hasKYCProof: true,
+      },
+      message: isSanctioned 
+        ? 'Address is on sanctions list - transfers blocked'
+        : 'Address is compliant - transfers allowed',
+    };
+  }
+);
+
+// ══════════════════════════════════════════════════════════════════════════
+// PRODUCTION ENDPOINTS (Signature required)
+// ══════════════════════════════════════════════════════════════════════════
 
 // Generate sanctions proof
 app.post<{ Body: { address: string; signature: string } }>(

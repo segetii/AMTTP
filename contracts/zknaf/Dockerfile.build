@@ -1,0 +1,50 @@
+# Dockerfile for compiling zkNAF Circom circuits
+# This creates the production-ready ZK proof artifacts
+
+FROM node:20-bullseye
+
+# Install Rust and Circom dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    nlohmann-json3-dev \
+    libgmp-dev \
+    nasm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Circom from git (not on crates.io)
+RUN git clone https://github.com/iden3/circom.git /tmp/circom && \
+    cd /tmp/circom && \
+    git checkout v2.1.6 && \
+    cargo build --release && \
+    mv target/release/circom /usr/local/bin/ && \
+    rm -rf /tmp/circom
+
+# Install snarkjs globally
+RUN npm install -g snarkjs@0.7.4
+
+# Set working directory
+WORKDIR /circuits
+
+# Copy package files first (better caching)
+COPY package*.json ./
+RUN npm install
+
+# Copy circuit files
+COPY circuits/ ./circuits/
+COPY scripts/ ./scripts/
+
+# Create build directory
+RUN mkdir -p build
+
+# Copy pre-downloaded powers of tau file (15 powers = 2^15 = 32768 constraints)
+# This is the Hermez trusted setup ceremony file
+COPY ptau/pot15_final.ptau ptau/pot15_final.ptau
+
+# Run the full production build (compile + trusted setup + export)
+CMD ["node", "scripts/build-production.js"]

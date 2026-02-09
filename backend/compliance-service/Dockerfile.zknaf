@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir fastapi uvicorn pydantic
+
+COPY zknaf_demo.py .
+
+ENV ZKNAF_PORT=8008
+
+EXPOSE 8008
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8008/zknaf/health')" || exit 1
+
+CMD ["python", "zknaf_demo.py"]

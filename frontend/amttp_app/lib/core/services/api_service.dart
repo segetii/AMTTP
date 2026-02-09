@@ -69,7 +69,8 @@ class ApiService {
   }
 
   /// Resolve explainability service URL
-  /// When served via npx serve (port 3010), use direct URL to port 8009
+  /// When served via npx serve (port 3010) or 3003 (flutter dev), use direct URL
+  /// In production (behind nginx), use relative URL
   String _resolveExplainabilityUrl() {
     if (_apiBaseUrlOverride.isNotEmpty) {
       return _apiBaseUrlOverride;
@@ -81,13 +82,16 @@ class ApiService {
       if (uri.port == 3010 || uri.port == 3003) {
         return _explainabilityServiceUrl;
       }
+      // In production, use relative URL via nginx proxy
+      return '';
     }
 
     return _explainabilityServiceUrl;
   }
 
   /// Resolve integrity service URL
-  /// When served via npx serve (port 3010), use direct URL to port 8008
+  /// When served via npx serve (port 3010) or 3003 (flutter dev), use direct URL
+  /// In production (behind nginx), use relative URL
   String _resolveIntegrityUrl() {
     if (_apiBaseUrlOverride.isNotEmpty) {
       return _apiBaseUrlOverride;
@@ -99,6 +103,8 @@ class ApiService {
       if (uri.port == 3010 || uri.port == 3003) {
         return _integrityServiceUrl;
       }
+      // In production, use relative URL via nginx proxy
+      return '';
     }
 
     // Use relative URL if nginx is proxying
