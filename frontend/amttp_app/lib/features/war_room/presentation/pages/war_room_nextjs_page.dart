@@ -49,9 +49,20 @@ class _WarRoomNextJSPageState extends ConsumerState<WarRoomNextJSPage> {
     final location = html.window.location;
     final host = location.hostname ?? 'localhost';
     final protocol = location.protocol;
-    const nextJsPort = '3006';
+    final port = location.port;
     
-    final baseUrl = '$protocol//$host:$nextJsPort';
+    // In production (no port or port 80/443), use relative URL via nginx proxy
+    // In dev (port 3010/3003), use Next.js on port 3006
+    String baseUrl;
+    if (host == 'localhost' || host == '127.0.0.1') {
+      const nextJsPort = '3006';
+      baseUrl = '$protocol//$host:$nextJsPort';
+    } else {
+      baseUrl = '$protocol//$host';
+      if (port.isNotEmpty && port != '80' && port != '443') {
+        baseUrl = '$protocol//$host:$port';
+      }
+    }
     final path = (widget.nextPath?.startsWith('/') ?? false)
         ? widget.nextPath!
         : '/war-room';

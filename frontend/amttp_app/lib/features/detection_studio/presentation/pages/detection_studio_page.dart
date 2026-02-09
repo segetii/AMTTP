@@ -62,17 +62,22 @@ class _DetectionStudioPageState extends ConsumerState<DetectionStudioPage> {
       final location = html.window.location;
       final host = location.hostname ?? 'localhost';
       final protocol = location.protocol;
+      final port = location.port;
 
-      // AMTTP Standard Port Configuration:
-      // Next.js Frontend: 3006
-      // Flutter Web: 3010
-      // Backend Services: 8000-8009
-      const nextJsPort = '3006';
-      
-      if (location.port == nextJsPort) {
-        baseUrl = '$protocol//$host:${location.port}';
+      // In production (non-localhost), Next.js is served via nginx on same origin
+      // In dev (localhost), use port 3006
+      if (host == 'localhost' || host == '127.0.0.1') {
+        const nextJsPort = '3006';
+        if (location.port == nextJsPort) {
+          baseUrl = '$protocol//$host:${location.port}';
+        } else {
+          baseUrl = '$protocol//$host:$nextJsPort';
+        }
       } else {
-        baseUrl = '$protocol//$host:$nextJsPort';
+        baseUrl = '$protocol//$host';
+        if (port.isNotEmpty && port != '80' && port != '443') {
+          baseUrl = '$protocol//$host:$port';
+        }
       }
     }
     

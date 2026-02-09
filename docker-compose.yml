@@ -110,6 +110,22 @@ services:
       - risk-engine
     restart: unless-stopped
 
+  # zkNAF Zero-Knowledge Proof Service (Demo Mode)
+  zknaf:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.zknaf
+    container_name: amttp-zknaf
+    environment:
+      - ZKNAF_PORT=8010
+    ports: ['8010:8010']
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/zknaf/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
   risk-engine:
     build:
       context: ./ml/Automation/risk_engine

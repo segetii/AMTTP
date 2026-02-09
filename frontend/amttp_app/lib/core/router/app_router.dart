@@ -99,22 +99,28 @@ PremiumSection _sectionFromPath(String path) {
   return PremiumSection.home;
 }
 
-/// Listenable for GoRouter refresh when auth state changes
+/// Listenable for GoRouter refresh when auth or RBAC state changes
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(this._ref) {
     _ref.listen(authProvider, (_, __) => notifyListeners());
+    _ref.listen(rbacProvider, (_, __) => notifyListeners());
   }
   final Ref _ref;
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final rbacState = ref.watch(rbacProvider);
+  // IMPORTANT: Do NOT ref.watch(authProvider) or ref.watch(rbacProvider) here.
+  // That would recreate the GoRouter (resetting to initialLocation) on every
+  // state change. Instead, read current state inside the redirect callback
+  // and rely on GoRouterRefreshStream to trigger re-evaluation.
+  ref.keepAlive();
   
   return GoRouter(
     initialLocation: '/sign-in',
     refreshListenable: GoRouterRefreshStream(ref),
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
+      final rbacState = ref.read(rbacProvider);
       final isAuthenticated = authState.isAuthenticated;
       final isAuthRoute = state.matchedLocation == '/sign-in' || 
                           state.matchedLocation == '/register' ||
@@ -508,11 +514,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 String _defaultRouteForRole(Role role) {
-  final config = getNavigationConfigForRole(role);
-
-  if (config.sections.isNotEmpty && config.sections.first.items.isNotEmpty) {
-    return config.sections.first.items.first.route;
+  // R3+ users are redirected to Next.js War Room via full browser navigation
+  // (handled in premium_sign_in_page.dart), so just return Flutter home here
+  if (role.level >= 3) {
+    return '/';
   }
+
+  final config = getNavigationConfigForRole(role);
 
   if (config.bottomNav.isNotEmpty) {
     return config.bottomNav.first.route;

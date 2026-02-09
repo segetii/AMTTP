@@ -206,11 +206,16 @@ class AuthService {
     await _prefs?.setString(_usersKey, usersJson);
   }
 
-  /// Load current user session
-  /// NOTE: Disabled auto-restore - users must sign in each session
+  /// Load current user session from persistent storage
   Future<void> _loadCurrentUser() async {
-    // Clear any saved session - require fresh login
-    await _prefs?.remove(_currentUserKey);
+    final userId = _prefs?.getString(_currentUserKey);
+    if (userId != null && _users.isNotEmpty) {
+      final match = _users.where((u) => u.id == userId).toList();
+      if (match.isNotEmpty) {
+        _currentUser = match.first;
+        return;
+      }
+    }
     _currentUser = null;
   }
 

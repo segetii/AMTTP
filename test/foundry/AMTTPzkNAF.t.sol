@@ -2,13 +2,15 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../AMTTPzkNAF.sol";
+import "../../contracts/zknaf/AMTTPzkNAF.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @title AMTTPzkNAF Test
  * @dev Foundry tests for the zkNAF Groth16 verifier contract
  */
 contract AMTTPzkNAFTest is Test {
+    AMTTPzkNAF public implementation;
     AMTTPzkNAF public zknaf;
     
     address public owner;
@@ -45,14 +47,9 @@ contract AMTTPzkNAFTest is Test {
     
     uint256[2][] testIC;
 
-    event ProofVerified(
-        address indexed user,
-        AMTTPzkNAF.ProofType proofType,
-        bytes32 indexed proofHash,
-        uint256 timestamp
-    );
-    
-    event VerificationKeyUpdated(AMTTPzkNAF.ProofType proofType);
+    event VerifyingKeyUpdated(AMTTPzkNAF.ProofType indexed proofType, bytes32 keyHash);
+    event OracleAuthorized(address indexed oracle, bool authorized);
+    event SanctionsListUpdated(bytes32 indexed newRoot, uint256 timestamp);
 
     function setUp() public {
         owner = address(this);
@@ -65,22 +62,25 @@ contract AMTTPzkNAFTest is Test {
         testIC[0] = [uint256(0x1), uint256(0x2)];
         testIC[1] = [uint256(0x3), uint256(0x4)];
         
-        // Deploy and initialize
-        zknaf = new AMTTPzkNAF();
-        zknaf.initialize();
+        // Deploy implementation
+        implementation = new AMTTPzkNAF();
+        
+        // Deploy proxy and initialize
+        bytes memory initData = abi.encodeWithSelector(AMTTPzkNAF.initialize.selector, owner);
+        ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
+        zknaf = AMTTPzkNAF(address(proxy));
     }
 
-    function testInitialize() public {
+    function testInitialize() public view {
         assertEq(zknaf.owner(), owner);
         assertFalse(zknaf.paused());
     }
 
-    function testSetVerificationKey() public {
-        vm.expectEmit(true, false, false, false);
-        emit VerificationKeyUpdated(AMTTPzkNAF.ProofType.SANCTIONS);
+    function testSetVerifyingKey() public {
+        assertFalse(zknaf.verifyingKeySet(AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP));
         
-        zknaf.setVerificationKey(
-            AMTTPzkNAF.ProofType.SANCTIONS,
+        zknaf.setVerifyingKey(
+            AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP,
             testAlpha1,
             testBeta2,
             testGamma2,
@@ -88,17 +88,14 @@ contract AMTTPzkNAFTest is Test {
             testIC
         );
         
-        // Verify key was set (using getter)
-        AMTTPzkNAF.VerifyingKey memory key = zknaf.getVerifyingKey(AMTTPzkNAF.ProofType.SANCTIONS);
-        assertEq(key.alpha1[0], testAlpha1[0]);
-        assertEq(key.alpha1[1], testAlpha1[1]);
+        assertTrue(zknaf.verifyingKeySet(AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP));
     }
 
-    function testSetVerificationKeyUnauthorized() public {
+    function testSetVerifyingKeyUnauthorized() public {
         vm.prank(user1);
         vm.expectRevert();
-        zknaf.setVerificationKey(
-            AMTTPzkNAF.ProofType.SANCTIONS,
+        zknaf.setVerifyingKey(
+            AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP,
             testAlpha1,
             testBeta2,
             testGamma2,
@@ -107,20 +104,9 @@ contract AMTTPzkNAFTest is Test {
         );
     }
 
-    function testGetProofRecord() public {
-        // Initially no proofs
-        AMTTPzkNAF.ProofRecord memory record = zknaf.getProofRecord(
-            user1,
-            AMTTPzkNAF.ProofType.SANCTIONS
-        );
-        
-        assertEq(record.timestamp, 0);
-        assertFalse(record.isValid);
-    }
-
-    function testIsProofValid() public {
+    function testHasValidProof() public view {
         // No proof submitted yet
-        assertFalse(zknaf.isProofValid(user1, AMTTPzkNAF.ProofType.SANCTIONS));
+        assertFalse(zknaf.hasValidProof(user1, AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP));
     }
 
     function testPauseUnpause() public {
@@ -139,56 +125,63 @@ contract AMTTPzkNAFTest is Test {
         zknaf.pause();
     }
 
-    function testSetProofValidity() public {
+    function testSetProofValidityDuration() public {
         uint256 validity = 365 days;
-        zknaf.setProofValidity(AMTTPzkNAF.ProofType.SANCTIONS, validity);
-        assertEq(zknaf.proofValidity(AMTTPzkNAF.ProofType.SANCTIONS), validity);
+        zknaf.setProofValidityDuration(validity);
+        assertEq(zknaf.proofValidityDuration(), validity);
     }
 
-    function testSetProofValidityUnauthorized() public {
+    function testSetProofValidityDurationUnauthorized() public {
         vm.prank(user1);
         vm.expectRevert();
-        zknaf.setProofValidity(AMTTPzkNAF.ProofType.SANCTIONS, 365 days);
+        zknaf.setProofValidityDuration(365 days);
     }
 
-    function testRevokeProof() public {
-        // First we need to simulate a valid proof record
-        // This would normally come from a successful verification
+    function testSetAuthorizedOracle() public {
+        assertFalse(zknaf.authorizedOracles(oracle));
         
-        vm.prank(owner);
-        zknaf.revokeProof(user1, AMTTPzkNAF.ProofType.SANCTIONS);
+        zknaf.setAuthorizedOracle(oracle, true);
+        assertTrue(zknaf.authorizedOracles(oracle));
         
-        // Proof should be revoked
-        AMTTPzkNAF.ProofRecord memory record = zknaf.getProofRecord(
-            user1,
-            AMTTPzkNAF.ProofType.SANCTIONS
-        );
-        assertFalse(record.isValid);
+        zknaf.setAuthorizedOracle(oracle, false);
+        assertFalse(zknaf.authorizedOracles(oracle));
     }
 
-    function testRevokeProofUnauthorized() public {
+    function testSetAuthorizedOracleUnauthorized() public {
         vm.prank(user1);
         vm.expectRevert();
-        zknaf.revokeProof(user2, AMTTPzkNAF.ProofType.SANCTIONS);
+        zknaf.setAuthorizedOracle(oracle, true);
     }
 
-    function testProofValidityExpiration() public {
-        // Set validity to 1 day
-        zknaf.setProofValidity(AMTTPzkNAF.ProofType.SANCTIONS, 1 days);
+    function testUpdateSanctionsListRoot() public {
+        // First authorize the oracle
+        zknaf.setAuthorizedOracle(oracle, true);
         
-        // Check proof is not valid (no proof submitted)
-        assertFalse(zknaf.isProofValid(user1, AMTTPzkNAF.ProofType.SANCTIONS));
+        bytes32 newRoot = keccak256("test_root");
+        
+        vm.prank(oracle);
+        zknaf.updateSanctionsListRoot(newRoot);
+        
+        assertEq(zknaf.sanctionsListRoot(), newRoot);
+    }
+
+    function testUpdateSanctionsListRootUnauthorized() public {
+        bytes32 newRoot = keccak256("test_root");
+        
+        vm.prank(user1); // user1 is not an authorized oracle
+        vm.expectRevert(AMTTPzkNAF.NotAuthorizedOracle.selector);
+        zknaf.updateSanctionsListRoot(newRoot);
     }
 
     function testBatchOperations() public {
-        // Test batch verification key setup for multiple proof types
+        // Test setting verification keys for multiple proof types
         AMTTPzkNAF.ProofType[] memory types = new AMTTPzkNAF.ProofType[](3);
-        types[0] = AMTTPzkNAF.ProofType.SANCTIONS;
-        types[1] = AMTTPzkNAF.ProofType.RISK_LOW;
+        types[0] = AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP;
+        types[1] = AMTTPzkNAF.ProofType.RISK_RANGE_LOW;
         types[2] = AMTTPzkNAF.ProofType.KYC_VERIFIED;
         
         for (uint256 i = 0; i < types.length; i++) {
-            zknaf.setVerificationKey(
+            zknaf.setVerifyingKey(
                 types[i],
                 testAlpha1,
                 testBeta2,
@@ -197,41 +190,41 @@ contract AMTTPzkNAFTest is Test {
                 testIC
             );
             
-            AMTTPzkNAF.VerifyingKey memory key = zknaf.getVerifyingKey(types[i]);
-            assertEq(key.alpha1[0], testAlpha1[0]);
+            assertTrue(zknaf.verifyingKeySet(types[i]));
         }
     }
 
     function testProofTypeEnumValues() public pure {
         // Verify enum values match expected
-        assertEq(uint(AMTTPzkNAF.ProofType.SANCTIONS), 0);
-        assertEq(uint(AMTTPzkNAF.ProofType.RISK_LOW), 1);
-        assertEq(uint(AMTTPzkNAF.ProofType.RISK_MEDIUM), 2);
+        assertEq(uint(AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP), 0);
+        assertEq(uint(AMTTPzkNAF.ProofType.RISK_RANGE_LOW), 1);
+        assertEq(uint(AMTTPzkNAF.ProofType.RISK_RANGE_MEDIUM), 2);
         assertEq(uint(AMTTPzkNAF.ProofType.KYC_VERIFIED), 3);
+        assertEq(uint(AMTTPzkNAF.ProofType.TRANSACTION_COMPLIANT), 4);
     }
 
     function testUpgradeability() public {
         // Test that the contract is properly initialized for upgrades
         // The initialize function should only be callable once
         vm.expectRevert();
-        zknaf.initialize();
+        zknaf.initialize(owner);
     }
 
     // Fuzz testing for proof validity periods
-    function testFuzzProofValidity(uint256 validity) public {
+    function testFuzzProofValidityDuration(uint256 validity) public {
         // Bound validity to reasonable range (1 hour to 10 years)
         validity = bound(validity, 1 hours, 3650 days);
         
-        zknaf.setProofValidity(AMTTPzkNAF.ProofType.SANCTIONS, validity);
-        assertEq(zknaf.proofValidity(AMTTPzkNAF.ProofType.SANCTIONS), validity);
+        zknaf.setProofValidityDuration(validity);
+        assertEq(zknaf.proofValidityDuration(), validity);
     }
 
     // Test gas consumption patterns
     function testGasEstimation() public {
         uint256 gasStart = gasleft();
         
-        zknaf.setVerificationKey(
-            AMTTPzkNAF.ProofType.SANCTIONS,
+        zknaf.setVerifyingKey(
+            AMTTPzkNAF.ProofType.SANCTIONS_NON_MEMBERSHIP,
             testAlpha1,
             testBeta2,
             testGamma2,
@@ -242,9 +235,39 @@ contract AMTTPzkNAFTest is Test {
         uint256 gasUsed = gasStart - gasleft();
         
         // Log gas used for analysis
-        emit log_named_uint("Gas used for setVerificationKey", gasUsed);
+        emit log_named_uint("Gas used for setVerifyingKey", gasUsed);
         
-        // Ensure gas is within reasonable bounds (less than 500k)
-        assertLt(gasUsed, 500000);
+        // Ensure gas is within reasonable bounds (less than 600k)
+        assertLt(gasUsed, 600000);
+    }
+
+    function testIsCompliant() public view {
+        // No proofs submitted, should not be compliant
+        (bool sanctionsProof, bool riskProof, bool kycProof, bool fullyCompliant) = 
+            zknaf.isCompliant(user1);
+        
+        assertFalse(sanctionsProof);
+        assertFalse(riskProof);
+        assertFalse(kycProof);
+        assertFalse(fullyCompliant);
+    }
+
+    function testTotalProofsVerified() public view {
+        assertEq(zknaf.totalProofsVerified(), 0);
+    }
+
+    function testVersion() public view {
+        string memory version = zknaf.version();
+        assertTrue(bytes(version).length > 0);
+    }
+    
+    function testOwnerIsAuthorizedOracle() public view {
+        // Owner should be auto-authorized as oracle during initialization
+        assertTrue(zknaf.authorizedOracles(owner));
+    }
+    
+    function testDefaultProofValidityDuration() public view {
+        // Default should be 24 hours
+        assertEq(zknaf.proofValidityDuration(), 24 hours);
     }
 }

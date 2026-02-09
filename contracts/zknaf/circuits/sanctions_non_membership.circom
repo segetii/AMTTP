@@ -18,10 +18,10 @@
 
 pragma circom 2.1.6;
 
-include "node_modules/circomlib/circuits/poseidon.circom";
-include "node_modules/circomlib/circuits/comparators.circom";
-include "node_modules/circomlib/circuits/mux1.circom";
-include "node_modules/circomlib/circuits/bitify.circom";
+include "circomlib/circuits/poseidon.circom";
+include "circomlib/circuits/comparators.circom";
+include "circomlib/circuits/mux1.circom";
+include "circomlib/circuits/bitify.circom";
 
 /*
  * MerkleTreeChecker - Verifies a Merkle proof

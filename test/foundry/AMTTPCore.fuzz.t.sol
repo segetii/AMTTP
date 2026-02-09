@@ -76,7 +76,17 @@ contract AMTTPCoreFuzzTest is Test {
         uint256 _riskScore,
         bytes32 _kycHash
     ) internal view returns (bytes memory) {
-        bytes32 messageHash = keccak256(abi.encodePacked(_buyer, _seller, _amount, _riskScore, _kycHash));
+        // Must match contract's _verifyOracleSignature format:
+        // includes address(this), block.chainid for replay protection
+        bytes32 messageHash = keccak256(abi.encodePacked(
+            address(amttp),
+            block.chainid,
+            _buyer,
+            _seller,
+            _amount,
+            _riskScore,
+            _kycHash
+        ));
         bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(oraclePrivateKey, ethSignedHash);
         return abi.encodePacked(r, s, v);

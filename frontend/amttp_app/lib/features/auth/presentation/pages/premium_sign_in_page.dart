@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
+import 'dart:html' as html;
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../../../core/rbac/roles.dart';
@@ -29,9 +29,6 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
-
-  // Next.js War Room URL
-  static const String _warRoomUrl = 'http://localhost:3006/war-room';
 
   @override
   void initState() {
@@ -82,25 +79,15 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
 
   /// Route user based on role:
   /// - End Users (R1, R2) → Flutter Wallet (/)
-  /// - Institutional (R3+) → Next.js War Room (external link)
+  /// - Institutional (R3+) → Next.js War Room (full page, standalone)
   void _routeToAppropriateDestination(Role role) {
     if (role.level <= 2) {
       // End Users stay in Flutter
       context.go('/');
     } else {
-      // Institutional users go to Next.js War Room
-      _launchWarRoom();
-    }
-  }
-
-  Future<void> _launchWarRoom() async {
-    final uri = Uri.parse(_warRoomUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-    // Also navigate to home in case they come back
-    if (mounted) {
-      context.go('/');
+      // Institutional users: full browser redirect to Next.js War Room
+      // This bypasses Flutter's router so the page loads standalone
+      html.window.location.href = '/war-room';
     }
   }
 

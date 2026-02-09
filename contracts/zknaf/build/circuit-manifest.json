@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "buildDate": "2026-02-05T21:38:59.527Z",
+  "circuits": [
+    {
+      "name": "sanctions_non_membership",
+      "artifacts": {
+        "r1cs": "sanctions/sanctions_non_membership.r1cs",
+        "wasm": "sanctions/sanctions_non_membership_js/sanctions_non_membership.wasm",
+        "zkey": "sanctions/sanctions_non_membership_final.zkey",
+        "vkey": "sanctions/sanctions_non_membership_verification_key.json",
+        "verifier": "sanctions/sanctions_non_membership_verifier.sol"
+      }
+    },
+    {
+      "name": "risk_range_proof",
+      "artifacts": {
+        "r1cs": "risk/risk_range_proof.r1cs",
+        "wasm": "risk/risk_range_proof_js/risk_range_proof.wasm",
+        "zkey": "risk/risk_range_proof_final.zkey",
+        "vkey": "risk/risk_range_proof_verification_key.json",
+        "verifier": "risk/risk_range_proof_verifier.sol"
+      }
+    },
+    {
+      "name": "kyc_credential",
+      "artifacts": {
+        "r1cs": "kyc/kyc_credential.r1cs",
+        "wasm": "kyc/kyc_credential_js/kyc_credential.wasm",
+        "zkey": "kyc/kyc_credential_final.zkey",
+        "vkey": "kyc/kyc_credential_verification_key.json",
+        "verifier": "kyc/kyc_credential_verifier.sol"
+      }
+    }
+  ]
+}
