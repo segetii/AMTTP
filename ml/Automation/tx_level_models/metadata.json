@@ -1,0 +1,132 @@
+{
+  "version": "20260209_202553",
+  "training_date": "2026-02-09T20:25:53.107844",
+  "dataset": "c:\\amttp\\processed\\eth_transactions_full_labeled.parquet",
+  "n_train": 1338595,
+  "n_test": 334649,
+  "fraud_rate": 0.2515162164035849,
+  "features": {
+    "tx_raw": [
+      "value_eth",
+      "gas_price_gwei",
+      "gas_used",
+      "gas_limit",
+      "nonce",
+      "transaction_type"
+    ],
+    "derived": [
+      "gas_efficiency",
+      "value_log",
+      "gas_price_log",
+      "is_round_amount",
+      "value_gas_ratio",
+      "is_zero_value",
+      "is_high_nonce"
+    ],
+    "sender": [
+      "sender_total_transactions",
+      "sender_total_sent",
+      "sender_total_received",
+      "sender_balance",
+      "sender_avg_sent",
+      "sender_unique_receivers",
+      "sender_in_out_ratio",
+      "sender_active_duration_mins"
+    ],
+    "all": [
+      "value_eth",
+      "gas_price_gwei",
+      "gas_used",
+      "gas_limit",
+      "nonce",
+      "transaction_type",
+      "gas_efficiency",
+      "value_log",
+      "gas_price_log",
+      "is_round_amount",
+      "value_gas_ratio",
+      "is_zero_value",
+      "is_high_nonce",
+      "sender_total_transactions",
+      "sender_total_sent",
+      "sender_total_received",
+      "sender_balance",
+      "sender_avg_sent",
+      "sender_unique_receivers",
+      "sender_in_out_ratio",
+      "sender_active_duration_mins"
+    ],
+    "total_count": 21
+  },
+  "meta_learner": {
+    "type": "sklearn.LogisticRegression",
+    "coef": [
+      7.742284456450318,
+      2.2219675541554564
+    ],
+    "intercept": -6.251781196881035,
+    "features": [
+      "xgb_prob",
+      "lgb_prob"
+    ]
+  },
+  "xgb": {
+    "n_estimators": 499,
+    "train_time_s": 162.1
+  },
+  "lgb": {
+    "n_estimators": 500,
+    "train_time_s": 123.4
+  },
+  "optimal_threshold": 0.5950457741549706,
+  "performance": {
+    "Teacher Stack (\u26a0 circular)": {
+      "roc_auc": 0.7301,
+      "pr_auc": 0.6903,
+      "f1": 0.7,
+      "precision": 1.0,
+      "recall": 0.5385,
+      "threshold": 0.4858
+    },
+    "Student v2 XGB (addr)": {
+      "roc_auc": 0.6436,
+      "pr_auc": 0.3618,
+      "f1": 0.4834,
+      "precision": 0.4136,
+      "recall": 0.5814,
+      "threshold": 0.9993
+    },
+    "TX-Level XGB": {
+      "roc_auc": 0.9878,
+      "pr_auc": 0.9713,
+      "f1": 0.9011,
+      "precision": 0.921,
+      "recall": 0.882,
+      "threshold": 0.6562
+    },
+    "TX-Level LGB": {
+      "roc_auc": 0.9876,
+      "pr_auc": 0.9707,
+      "f1": 0.8986,
+      "precision": 0.9253,
+      "recall": 0.8733,
+      "threshold": 0.6705
+    },
+    "TX-Level Ensemble": {
+      "roc_auc": 0.9879,
+      "pr_auc": 0.9715,
+      "f1": 0.9012,
+      "precision": 0.9272,
+      "recall": 0.8765,
+      "threshold": 0.595
+    },
+    "Student v2 Ensemble (addr)": {
+      "roc_auc": 0.6322,
+      "pr_auc": 0.3491,
+      "f1": 0.4728,
+      "precision": 0.3959,
+      "recall": 0.5867,
+      "threshold": 0.8536
+    }
+  }
+}

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMTTP Protocol — Three-Layer System Architecture</title>
+<style>
+  /* ── IEEE Page & Reset ─────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:   #1a237e;
+    --secondary: #283593;
+    --accent:    #0d47a1;
+    --text:      #212121;
+    --text-inv:  #ffffff;
+    --border:    #37474f;
+    --arrow:     #455a64;
+
+    /* layer colours */
+    --layer1-bg:   #e3f2fd;  --layer1-bdr: #1565c0;  --layer1-head: #1565c0;
+    --layer2-bg:   #e8f5e9;  --layer2-bdr: #2e7d32;  --layer2-head: #2e7d32;
+    --layer2r-bg:  #fce4ec;  --layer2r-bdr:#c62828;  --layer2r-head:#b71c1c;
+    --layer3-bg:   #fff3e0;  --layer3-bdr: #e65100;  --layer3-head: #e65100;
+    --chain-bg:    #f3e5f5;  --chain-bdr:  #6a1b9a;  --chain-head:  #6a1b9a;
+    --data-bg:     #eceff1;  --data-bdr:   #37474f;  --data-head:   #37474f;
+    --decision-bg: #fff8e1;  --decision-bdr:#f9a825; --decision-head:#f57f17;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+    color: var(--text);
+    background: #f5f5f5;
+    padding: 0;
+  }
+
+  /* ── Page container (US Letter, printable) ─────────────────── */
+  .page {
+    width: 215.9mm;          /* 8.5 in */
+    min-height: 279.4mm;     /* 11 in  */
+    margin: 20px auto;
+    background: #fff;
+    padding: 18mm 16mm 14mm;
+    box-shadow: 0 2px 12px rgba(0,0,0,.12);
+    position: relative;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; padding: 14mm 16mm 12mm; width: 100%; }
+    .no-print { display: none !important; }
+  }
+
+  /* ── Header ──────────────────────────────────────────────── */
+  .doc-header {
+    text-align: center;
+    border-bottom: 2.5px solid var(--primary);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .doc-header h1 {
+    font-family: 'Source Serif 4', 'Times New Roman', serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  .doc-header .subtitle {
+    font-size: 0.82rem;
+    color: #555;
+    font-style: italic;
+  }
+  .doc-header .meta {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  /* ── Layer wrapper ───────────────────────────────────────── */
+  .layer {
+    border: 2px solid;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .layer-head {
+    color: var(--text-inv);
+    padding: 5px 12px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .layer-head .tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(255,255,255,.22);
+    padding: 1px 7px;
+    border-radius: 3px;
+  }
+  .layer-body { padding: 10px 12px; }
+
+  /* Layer 1 */
+  .layer--1 { border-color: var(--layer1-bdr); }
+  .layer--1 .layer-head { background: var(--layer1-head); }
+  .layer--1 .layer-body { background: var(--layer1-bg); }
+
+  /* Layer 2 */
+  .layer--2 { border-color: var(--layer2-bdr); }
+  .layer--2 .layer-head { background: var(--layer2-head); }
+  .layer--2 .layer-body { background: var(--layer2-bg); }
+
+  /* Layer 3 */
+  .layer--3 { border-color: var(--layer3-bdr); }
+  .layer--3 .layer-head { background: var(--layer3-head); }
+  .layer--3 .layer-body { background: var(--layer3-bg); }
+
+  /* ── Component boxes ─────────────────────────────────────── */
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row + .row { margin-top: 8px; }
+
+  .box {
+    flex: 1 1 0;
+    min-width: 140px;
+    border: 1.5px solid;
+    border-radius: 5px;
+    background: #fff;
+    overflow: hidden;
+    font-size: 0.72rem;
+  }
+  .box-head {
+    padding: 4px 8px;
+    font-weight: 700;
+    font-size: 0.73rem;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .box-sub {
+    text-align: center;
+    font-size: 0.62rem;
+    font-style: italic;
+    color: #666;
+    padding: 1px 6px 3px;
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .box-body {
+    padding: 5px 8px;
+    line-height: 1.4;
+  }
+  .box-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .box-body li::before {
+    content: "•";
+    color: #999;
+    font-weight: bold;
+    margin-right: 4px;
+  }
+  .box-body li {
+    font-size: 0.67rem;
+    color: #444;
+  }
+
+  /* colour variants */
+  .box--blue   { border-color: #1565c0; }
+  .box--blue  .box-head { background: #1976d2; }
+  .box--green  { border-color: #2e7d32; }
+  .box--green .box-head { background: #388e3c; }
+  .box--orange { border-color: #e65100; }
+  .box--orange .box-head { background: #ef6c00; }
+  .box--red    { border-color: #c62828; }
+  .box--red   .box-head { background: #d32f2f; }
+  .box--purple { border-color: #6a1b9a; }
+  .box--purple .box-head { background: #7b1fa2; }
+  .box--grey   { border-color: #455a64; }
+  .box--grey  .box-head { background: #546e7a; }
+  .box--teal   { border-color: #00695c; }
+  .box--teal  .box-head { background: #00897b; }
+  .box--amber  { border-color: #f57f17; }
+  .box--amber .box-head { background: #f9a825; color: #333; }
+
+  /* ── Sublayer (nested group) ─────────────────────────────── */
+  .sublayer {
+    border: 1.5px dashed;
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+  .sublayer-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    padding-left: 2px;
+  }
+
+  .sublayer--identity { border-color: #2e7d32; background: rgba(232,245,233,.45); }
+  .sublayer--identity .sublayer-title { color: #1b5e20; }
+
+  .sublayer--txseq    { border-color: #2e7d32; background: rgba(232,245,233,.45); }
+  .sublayer--txseq .sublayer-title { color: #1b5e20; }
+
+  .sublayer--risk     { border-color: #c62828; background: rgba(252,228,236,.45); }
+  .sublayer--risk .sublayer-title { color: #b71c1c; }
+
+  .sublayer--chain    { border-color: #6a1b9a; background: rgba(243,229,245,.5); }
+  .sublayer--chain .sublayer-title { color: #4a148c; }
+
+  .sublayer--data     { border-color: #455a64; background: rgba(236,239,241,.5); }
+  .sublayer--data .sublayer-title { color: #263238; }
+
+  /* ── Arrow connectors ────────────────────────────────────── */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.62rem;
+    color: var(--arrow);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .arrow-down .shaft {
+    width: 2px;
+    height: 14px;
+    background: var(--arrow);
+  }
+  .arrow-down .head {
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--arrow);
+  }
+  .arrow-down .label {
+    font-size: 0.58rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 1px;
+    text-align: center;
+    max-width: 110px;
+  }
+
+  .arrow-fan {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 2px 0 4px;
+  }
+
+  /* ── Decision matrix special box ─────────────────────────── */
+  .decision-box {
+    border: 2px solid var(--decision-bdr);
+    border-radius: 5px;
+    background: var(--decision-bg);
+    padding: 7px 12px;
+    margin-top: 8px;
+  }
+  .decision-box h4 {
+    font-size: 0.75rem;
+    color: var(--decision-head);
+    margin-bottom: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 16px;
+    font-size: 0.66rem;
+    font-family: 'Source Code Pro', monospace;
+  }
+  .decision-grid .rule { display: flex; gap: 6px; }
+  .decision-grid .cond { color: #555; }
+  .decision-grid .act  { font-weight: 700; }
+  .decision-grid .act--allow  { color: #2e7d32; }
+  .decision-grid .act--review { color: #e65100; }
+  .decision-grid .act--escrow { color: #c62828; }
+  .decision-grid .act--block  { color: #b71c1c; }
+
+  /* ── Footer ──────────────────────────────────────────────── */
+  .doc-footer {
+    margin-top: 12px;
+    padding-top: 6px;
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    color: #999;
+  }
+
+  /* ── Legend ──────────────────────────────────────────────── */
+  .legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+    padding: 5px 0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.6rem;
+    color: #555;
+  }
+  .legend-swatch {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,.2);
+  }
+
+  /* ── Print-specific tweaks ───────────────────────────────── */
+  @media print {
+    .page { page-break-inside: avoid; }
+    .layer { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <div class="doc-header">
+    <h1>AMTTP Protocol — Three-Layer System Architecture</h1>
+    <div class="subtitle">Anti-Money Laundering Transaction Trust Protocol</div>
+    <div class="meta">IEEE Technical White Paper — Version 3.0 — February 2026</div>
+  </div>
+
+  <!-- ═══════════ LAYER I — INTEGRATION & ACCESS ═══════════ -->
+  <div class="layer layer--1">
+    <div class="layer-head">
+      <span>Layer I — Integration &amp; Access</span>
+      <span class="tag">External-facing</span>
+    </div>
+    <div class="layer-body">
+      <div class="row">
+        <!-- SDK -->
+        <div class="box box--blue">
+          <div class="box-head">AMTTP Open-Source SDK</div>
+          <div class="box-sub">TypeScript / Python Client Library</div>
+          <div class="box-body">
+            <ul>
+              <li>Transaction Construction</li>
+              <li>Wallet Signature (EIP-712)</li>
+              <li>WebSocket Event Streaming</li>
+              <li>Batch Scoring Interface</li>
+            </ul>
+          </div>
+        </div>
+        <!-- API Interface -->
+        <div class="box box--blue">
+          <div class="box-head">RESTful API Interface</div>
+          <div class="box-sub">JSON / HTTP + WebSocket</div>
+          <div class="box-body">
+            <ul>
+              <li>POST /evaluate</li>
+              <li>POST /score/address</li>
+              <li>GET /profiles/{addr}</li>
+              <li>SSE /webhook/stream</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Web App -->
+        <div class="box box--blue">
+          <div class="box-head">Web Application Layer</div>
+          <div class="box-sub">Flutter Consumer App + Next.js War Room</div>
+          <div class="box-body">
+            <ul>
+              <li>MetaMask Wallet Integration</li>
+              <li>Compliance Dashboard (R1–R6)</li>
+              <li>Detection Studio &amp; Graph Explorer</li>
+              <li>zkNAF Proof Verification UI</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrow-row">
+    <div class="arrow-down">
+      <div class="shaft"></div><div class="head"></div>
+      <div class="label">HTTP/WS — Authenticated Request</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LAYER II — PROTOCOL LOGIC (The Singular Stack) ═══════════ -->
+  <div class="layer layer--2">
+    <div class="layer-head">
+      <span>Layer II — Protocol Logic &amp; Computation (The Singular Stack)</span>
+      <span class="tag">Core Engine</span>
+    </div>
+    <div class="layer-body">
+
+      <!-- Orchestrator -->
+      <div class="row" style="margin-bottom:8px;">
+        <div class="box box--green" style="flex:1;">
+          <div class="box-head">Compliance Orchestrator — Central Decision Coordinator</div>
+          <div class="box-body" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.66rem;">• Fan-out to downstream services</span>
+            <span style="font-size:.66rem;">• Aggregate multi-signal decisions</span>
+            <span style="font-size:.66rem;">• Profile &amp; entity management</span>
+            <span style="font-size:.66rem;">• API key issuance &amp; RBAC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fan-out arrows -->
+      <div class="arrow-fan">
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.1 Identity</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.2 Tx Sequencing</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.3 ML Risk</div></div>
+      </div>
+
+      <!-- Three parallel modules -->
+      <div class="row" style="align-items:stretch;">
+
+        <!-- §2.1 Identity Management -->
+        <div class="sublayer sublayer--identity" style="flex:1;">
+          <div class="sublayer-title">§2.1 Identity Management Module</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Sanctions Screening</div>
+              <div class="box-body">
+                <ul>
+                  <li>OFAC · HMT · EU · UN</li>
+                  <li>7,800+ entities, 22 crypto addr</li>
+                  <li>Fuzzy name matching</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">KYC / PEP / EDD</div>
+              <div class="box-body">
+                <ul>
+                  <li>PEP database screening</li>
+                  <li>Dual-control label submission</li>
+                  <li>Travel Rule (FATF Rec. 16)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">zkNAF Proofs</div>
+              <div class="box-body">
+                <ul>
+                  <li>KYC Credential Circuit</li>
+                  <li>Risk Range Proof</li>
+                  <li>Sanctions Non-Membership</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- §2.2 Transaction Sequencing -->
+        <div class="sublayer sublayer--txseq" style="flex:1;">
+          <div class="sublayer-title">§2.2 Transaction Sequencing Module</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AML Monitoring Engine</div>
+              <div class="box-body">
+                <ul>
+                  <li>Large Tx Detection</li>
+                  <li>Rapid Succession</li>
+                  <li>Structuring (Smurfing)</li>
+                  <li>Mixer Interaction</li>
+                  <li>Dormant Account</li>
+                  <li>FATF Jurisdiction Block</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Policy Engine</div>
+              <div class="box-body">
+                <ul>
+                  <li>Policy CRUD lifecycle</li>
+                  <li>Whitelist / Blacklist</li>
+                  <li>Threshold management</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Geographic Risk</div>
+              <div class="box-body">
+                <ul>
+                  <li>FATF Black / Grey Lists</li>
+                  <li>EU High-Risk (14 countries)</li>
+                  <li>Tax Haven &amp; IP Risk</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- §2.3 Risk Engine -->
+        <div class="sublayer sublayer--risk" style="flex:1;">
+          <div class="sublayer-title">§2.3 Graph-Powered Risk Engine (ML/DL)</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Feature Extraction</div>
+              <div class="box-body">
+                <ul>
+                  <li>VAE Latent Features</li>
+                  <li>GraphSAGE Embeddings</li>
+                  <li>Memgraph Clustering</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Stacked Ensemble Classifier</div>
+              <div class="box-body">
+                <ul>
+                  <li>Base: XGBoost v1 (ETH Fraud)</li>
+                  <li>L1: GraphSAGE · LightGBM · XGBoost v2</li>
+                  <li>Meta: α₁·f₁ + α₂·f₂ + α₃·f₃</li>
+                  <li>Output: P(fraud) ∈ [0, 1]</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Explainability (XAI)</div>
+              <div class="box-body">
+                <ul>
+                  <li>SHAP feature attribution</li>
+                  <li>Typology classification</li>
+                  <li>FCA / AMLD6 audit trail</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Converge arrows -->
+      <div class="arrow-fan">
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">sanctions_hit, kyc_status</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">rule_alerts, geo_risk</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">risk_score, explanations</div></div>
+      </div>
+
+      <!-- Decision Matrix -->
+      <div class="decision-box">
+        <h4>Compliance Decision Matrix — Deterministic Action Resolution</h4>
+        <div class="decision-grid">
+          <div class="rule">
+            <span class="cond">P &lt; 0.4 ∧ ¬sanctioned ∧ geo=LOW</span>
+            <span class="act act--allow">→ ALLOW</span>
+          </div>
+          <div class="rule">
+            <span class="cond">0.4 ≤ P &lt; 0.7 ∧ ¬sanctioned</span>
+            <span class="act act--review">→ REVIEW</span>
+          </div>
+          <div class="rule">
+            <span class="cond">P ≥ 0.7 ∧ ¬sanctioned</span>
+            <span class="act act--escrow">→ ESCROW</span>
+          </div>
+          <div class="rule">
+            <span class="cond">sanctioned ∨ FATF_blacklist</span>
+            <span class="act act--block">→ BLOCK</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrow-row">
+    <div class="arrow-down">
+      <div class="shaft"></div><div class="head"></div>
+      <div class="label">action ∈ {ALLOW, REVIEW, ESCROW, BLOCK}</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LAYER III — PRODUCTION & DEPLOYMENT ═══════════ -->
+  <div class="layer layer--3">
+    <div class="layer-head">
+      <span>Layer III — Production &amp; Deployment</span>
+      <span class="tag">Infrastructure</span>
+    </div>
+    <div class="layer-body">
+
+      <!-- API Gateway -->
+      <div class="row" style="margin-bottom:8px;">
+        <div class="box box--orange" style="flex:1;">
+          <div class="box-head">API Gateway — NGINX Reverse Proxy</div>
+          <div class="box-body" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.66rem;">• TLS termination</span>
+            <span style="font-size:.66rem;">• Rate limiting (100 req/s)</span>
+            <span style="font-size:.66rem;">• Path-based routing (/api, /risk, /geo …)</span>
+            <span style="font-size:.66rem;">• Cloudflare Tunnel (production)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- On-Chain Verification -->
+      <div class="sublayer sublayer--chain">
+        <div class="sublayer-title">§3.1 On-Chain Verification — Ethereum Smart Contracts</div>
+        <div class="row">
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AMTTPCore</div>
+            <div class="box-body"><ul><li>Risk Oracle</li><li>Escrow Logic</li><li>Tx Validation</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AMTTPNFT</div>
+            <div class="box-body"><ul><li>KYC Badges</li><li>Compliance ID</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">DisputeResolver</div>
+            <div class="box-body"><ul><li>Kleros Arbitration</li><li>MetaEvidence</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">CrossChain</div>
+            <div class="box-body"><ul><li>LayerZero Bridge</li><li>Score Relay</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">zkNAF Circuits</div>
+            <div class="box-body"><ul><li>KYC Credential</li><li>Risk Range Proof</li><li>Sanctions Non-Mem.</li></ul></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Persistence -->
+      <div class="sublayer sublayer--data" style="margin-top:8px; margin-bottom:0;">
+        <div class="sublayer-title">§3.2 Data Persistence Layer</div>
+        <div class="row">
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">MongoDB</div>
+            <div class="box-sub">Document Store</div>
+            <div class="box-body"><ul><li>Profiles &amp; Alerts</li><li>Tx History</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Redis</div>
+            <div class="box-sub">Cache Layer</div>
+            <div class="box-body"><ul><li>Sessions</li><li>Rate Limits</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Memgraph</div>
+            <div class="box-sub">Graph Database</div>
+            <div class="box-body"><ul><li>Entity Relations</li><li>Risk Paths</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Helia (IPFS)</div>
+            <div class="box-sub">Immutable Store</div>
+            <div class="box-body"><ul><li>Audit Logs</li><li>Evidence</li></ul></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloud -->
+      <div class="row" style="margin-top:8px;">
+        <div class="box box--teal" style="flex:1;">
+          <div class="box-head">Cloud Infrastructure — Container Orchestration</div>
+          <div class="box-body" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.66rem;">• Docker Compose (unified / full-stack / production)</span>
+            <span style="font-size:.66rem;">• Supervisord process management</span>
+            <span style="font-size:.66rem;">• Prometheus + Grafana observability</span>
+            <span style="font-size:.66rem;">• HashiCorp Vault (secrets)</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ LEGEND ═══════════ -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer1-bg); border-color:var(--layer1-bdr);"></div> Integration</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer2-bg); border-color:var(--layer2-bdr);"></div> Protocol Logic</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer2r-bg); border-color:var(--layer2r-bdr);"></div> Risk Engine</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--decision-bg); border-color:var(--decision-bdr);"></div> Decision Matrix</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer3-bg); border-color:var(--layer3-bdr);"></div> Production</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--chain-bg); border-color:var(--chain-bdr);"></div> On-Chain</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--data-bg); border-color:var(--data-bdr);"></div> Data Layer</div>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <div class="doc-footer">
+    <span>AMTTP Protocol v3.0 — Anti-Money Laundering Transaction Trust Protocol</span>
+    <span>IEEE Technical White Paper — © 2026</span>
+  </div>
+
+</div>
+
+<!-- ═══════════ PRINT BUTTON ═══════════ -->
+<div style="text-align:center; padding:12px 0 30px;" class="no-print">
+  <button onclick="window.print()" style="
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 10px 28px;
+    background: #1a237e; color: #fff;
+    border: none; border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  ">Print / Save as PDF</button>
+  <button onclick="captureAsPNG()" style="
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 10px 28px;
+    background: #2e7d32; color: #fff;
+    border: none; border-radius: 5px;
+    cursor: pointer;
+  ">Download as PNG (300 DPI)</button>
+  <p style="margin-top:8px; font-size:12px; color:#888;">
+    Tip: Use <strong>Print → Save as PDF</strong> for vector quality. PNG button captures at 3× resolution for high-DPI.
+  </p>
+</div>
+
+<script>
+  // High-res PNG capture using html2canvas (loaded from CDN on demand)
+  async function captureAsPNG() {
+    const btn = event.target;
+    btn.textContent = 'Rendering…';
+    btn.disabled = true;
+
+    // Load html2canvas if not present
+    if (typeof html2canvas === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    const page = document.querySelector('.page');
+    const canvas = await html2canvas(page, {
+      scale: 3,               // 3× for ~300 DPI
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+
+    const link = document.createElement('a');
+    link.download = 'AMTTP_Protocol_Architecture.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    btn.textContent = 'Download as PNG (300 DPI)';
+    btn.disabled = false;
+  }
+</script>
+
+</body>
+</html>

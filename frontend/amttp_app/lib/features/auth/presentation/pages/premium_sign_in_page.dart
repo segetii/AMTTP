@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:ui';
-import 'dart:html' as html;
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../../../core/rbac/roles.dart';
@@ -85,9 +84,9 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
       // End Users stay in Flutter
       context.go('/');
     } else {
-      // Institutional users: full browser redirect to Next.js War Room
-      // This bypasses Flutter's router so the page loads standalone
-      html.window.location.href = '/war-room';
+      // Institutional users: navigate to trampoline page that does a
+      // full browser redirect to standalone Next.js War Room
+      context.go('/war-room-redirect');
     }
   }
 

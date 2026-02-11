@@ -1,0 +1,149 @@
+{
+  "evaluation_date": "2026-02-09T18:20:25.431182",
+  "dataset": {
+    "path": "C:\\amttp\\processed\\eth_addresses_labeled.parquet",
+    "n_samples": 625168,
+    "n_fraud": 372,
+    "fraud_rate": 0.0005950400532336908
+  },
+  "teacher": {
+    "model": "integration_service.py (risk_engine)",
+    "description": "XGBoost + custom rules + Memgraph graph",
+    "predictions_source": "C:\\amttp\\processed\\inference_results\\all_predictions.parquet",
+    "metrics": {
+      "roc_auc": 0.9719791400128055,
+      "pr_auc": 0.02458764613472214,
+      "log_loss": 0.0041316396424833,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "mcc": 0.0,
+      "balanced_accuracy": 0.5,
+      "true_positives": 0.0,
+      "true_negatives": 624796.0,
+      "false_positives": 0.0,
+      "false_negatives": 372.0,
+      "fpr": 0.0,
+      "fnr": 1.0,
+      "tpr": 0.0,
+      "optimal_f1_threshold": 0.0026511941105127335,
+      "optimal_f1": 0.0632275132181562
+    },
+    "confusion_matrix": [
+      [
+        624796,
+        0
+      ],
+      [
+        372,
+        0
+      ]
+    ]
+  },
+  "student_meta": {
+    "model": "amttp_models_20251231_174617/meta_ensemble.joblib",
+    "description": "LogisticRegression meta-learner over [VAE\u2192GNN\u2192XGB+LGB] (simplified: graph features zeroed)",
+    "threshold": 0.7270426131902658,
+    "metrics": {
+      "roc_auc": 0.9999997977834588,
+      "pr_auc": 0.9996778335855537,
+      "log_loss": 0.005663269079785128,
+      "f1": 0.9863760217983651,
+      "precision": 1.0,
+      "recall": 0.9731182795698925,
+      "mcc": 0.9864596823200754,
+      "balanced_accuracy": 0.9865591397849462,
+      "true_positives": 362.0,
+      "true_negatives": 624796.0,
+      "false_positives": 0.0,
+      "false_negatives": 10.0,
+      "fpr": 0.0,
+      "fnr": 0.026881720430107527,
+      "tpr": 0.9731182795698925,
+      "optimal_f1_threshold": 0.14340723203354352,
+      "optimal_f1": 0.9932885905540269
+    },
+    "confusion_matrix": [
+      [
+        624796,
+        0
+      ],
+      [
+        10,
+        362
+      ]
+    ]
+  },
+  "student_xgb": {
+    "model": "amttp_models_20251231_174617/xgboost_fraud.ubj",
+    "description": "XGBoost component of student ensemble",
+    "metrics": {
+      "roc_auc": 0.9897559552685309,
+      "pr_auc": 0.9693495741576424,
+      "log_loss": 0.06200298191568666,
+      "f1": 0.9766803840877915,
+      "precision": 0.9971988795518207,
+      "recall": 0.956989247311828,
+      "mcc": 0.9768738418183175,
+      "balanced_accuracy": 0.9784938233947087,
+      "true_positives": 356.0,
+      "true_negatives": 624795.0,
+      "false_positives": 1.0,
+      "false_negatives": 16.0,
+      "fpr": 1.600522410514792e-06,
+      "fnr": 0.043010752688172046,
+      "tpr": 0.956989247311828,
+      "optimal_f1_threshold": 0.4558747708797455,
+      "optimal_f1": 0.9780821917308403
+    },
+    "confusion_matrix": [
+      [
+        624795,
+        1
+      ],
+      [
+        16,
+        356
+      ]
+    ]
+  },
+  "student_lgb": {
+    "model": "amttp_models_20251231_174617/lightgbm_fraud.txt",
+    "description": "LightGBM component of student ensemble",
+    "metrics": {
+      "roc_auc": 0.9999996859189894,
+      "pr_auc": 0.9995075670756317,
+      "log_loss": 0.04815654597129185,
+      "f1": 0.990578734858681,
+      "precision": 0.9919137466307277,
+      "recall": 0.989247311827957,
+      "mcc": 0.9905740312919628,
+      "balanced_accuracy": 0.9946212551303627,
+      "true_positives": 368.0,
+      "true_negatives": 624793.0,
+      "false_positives": 3.0,
+      "false_negatives": 4.0,
+      "fpr": 4.801567231544376e-06,
+      "fnr": 0.010752688172043012,
+      "tpr": 0.989247311827957,
+      "optimal_f1_threshold": 0.6885938841507501,
+      "optimal_f1": 0.9918699186491903
+    },
+    "confusion_matrix": [
+      [
+        624793,
+        3
+      ],
+      [
+        4,
+        368
+      ]
+    ]
+  },
+  "notes": [
+    "Student runs in simplified mode: VAE/GNN graph features are zeroed out",
+    "Only XGBoost and LightGBM probabilities flow through the meta-learner",
+    "Full pipeline (with graph infrastructure) would yield higher student performance",
+    "Teacher labels ARE the ground truth \u2014 perfect recall expected for teacher"
+  ]
+}

@@ -3,6 +3,10 @@ AMTTP ML Pipeline - CPU-Only Inference Service
 
 Optimized for systems without GPU. Uses XGBoost and LightGBM
 which run efficiently on CPU for inference.
+
+Threshold strategy: percentile-based (rank within reference distribution)
+rather than absolute probability cutoffs, because raw model probabilities
+are poorly calibrated across different data distributions.
 """
 import os
 import json
@@ -24,15 +28,24 @@ class CPUPredictor:
     
     Uses XGBoost/LightGBM which are fast on CPU for inference.
     Handles feature name alignment automatically.
+    
+    Threshold strategy:
+      - Binary classification uses a calibrated threshold loaded from
+        training metadata (``thresholds.json``), falling back to
+        percentile-based search on a reference score distribution.
+      - Risk-level actions (BLOCK / ESCROW / REVIEW / MONITOR / APPROVE)
+        are assigned by percentile rank within the reference distribution
+        so they remain valid even when raw probability scales shift.
     """
     
-    # OPTIMIZED thresholds - balanced for detection vs false positives
-    # Based on F1 score optimization (Dec 2024)
-    THRESHOLDS = {
-        "xgb": 0.55,      # Optimal F1 score
-        "lgbm": 0.55,     # Optimal F1 score
-        "stacking": 0.60, # Slightly higher for ensemble
-        "catboost": 0.55, # Optimal F1 score
+    # Percentile-based risk tiers (top-N% of reference distribution)
+    # These are used ONLY when a reference distribution is available.
+    RISK_PERCENTILES = {
+        "BLOCK":   99.0,   # top 1%
+        "ESCROW":  95.0,   # top 5%
+        "REVIEW":  85.0,   # top 15%
+        "MONITOR": 70.0,   # top 30%
+        # everything below → APPROVE
     }
     
     def __init__(
@@ -49,13 +62,17 @@ class CPUPredictor:
         """
         self.models_dir = Path(models_dir)
         self.primary_model = primary_model
-        self.threshold = self.THRESHOLDS.get(primary_model, 0.5)
         
         self.model = None
         self.calibrator = None
         self.feature_names: List[str] = []
+        self.threshold: float = 0.5            # default; overridden below
+        self.reference_scores: Optional[np.ndarray] = None
+        self.risk_cutoffs: Dict[str, float] = {}
         
         self._load_feature_schema()
+        self._load_thresholds()
+        self._load_reference_distribution()
         self._load_model()
     
     def _load_feature_schema(self):
@@ -68,6 +85,56 @@ class CPUPredictor:
                 logger.info(f"Loaded feature schema: {len(self.feature_names)} features")
         else:
             logger.warning(f"Feature schema not found at {schema_path}")
+    
+    def _load_thresholds(self):
+        """Load calibrated binary-classification threshold from training metadata.
+        
+        Looks for ``thresholds.json`` next to the model files.  Format::
+        
+            {"xgb": 0.0004, "lgbm": 0.0005, ...}
+        
+        These values are the *optimal F1 thresholds* computed during training
+        and may be very small if the model's raw probabilities are compressed.
+        """
+        th_path = self.models_dir.parent / "thresholds.json"
+        if th_path.exists():
+            with open(th_path, "r") as f:
+                th_data = json.load(f)
+            if self.primary_model in th_data:
+                self.threshold = float(th_data[self.primary_model])
+                logger.info(f"Loaded calibrated threshold for {self.primary_model}: {self.threshold}")
+                return
+        # Fallback: use a percentile-based threshold if reference distribution exists
+        logger.info("No thresholds.json found; will use percentile-based threshold")
+    
+    def _load_reference_distribution(self):
+        """Load a saved reference score distribution from training.
+        
+        The file ``reference_scores_<model>.npy`` stores the sorted raw
+        probabilities from the validation set, enabling percentile-rank
+        conversion at inference time.
+        """
+        ref_path = self.models_dir.parent / f"reference_scores_{self.primary_model}.npy"
+        if not ref_path.exists():
+            ref_path = self.models_dir.parent / "reference_scores.npy"
+        
+        if ref_path.exists():
+            self.reference_scores = np.sort(np.load(ref_path).ravel())
+            # Pre-compute absolute cutoffs from percentile tiers
+            for level, pctile in self.RISK_PERCENTILES.items():
+                self.risk_cutoffs[level] = float(np.percentile(self.reference_scores, pctile))
+            logger.info(
+                f"Loaded reference distribution ({len(self.reference_scores)} scores). "
+                f"Risk cutoffs: { {k: f'{v:.6f}' for k, v in self.risk_cutoffs.items()} }"
+            )
+            # If no calibrated threshold was loaded, derive one from the reference
+            # distribution at the 85th percentile (top-15% flagged as fraud).
+            th_path = self.models_dir.parent / "thresholds.json"
+            if not th_path.exists():
+                self.threshold = float(np.percentile(self.reference_scores, 85))
+                logger.info(f"Derived threshold from reference distribution (p85): {self.threshold}")
+        else:
+            logger.warning("No reference score distribution found — risk tiers will use fallback heuristic")
     
     def _load_model(self):
         """Load the primary model."""
@@ -187,28 +254,68 @@ class CPUPredictor:
         return proba
     
     def predict(self, X: Union[np.ndarray, pd.DataFrame, Dict]) -> np.ndarray:
-        """Get binary predictions."""
+        """Get binary predictions using the calibrated threshold."""
         return (self.predict_proba(X) >= self.threshold).astype(int)
     
+    def _score_to_percentile(self, scores: np.ndarray) -> np.ndarray:
+        """Convert raw scores to percentile ranks within the reference distribution.
+        
+        Returns values in [0, 100].  If no reference distribution is loaded,
+        falls back to rank within the current batch (less stable for small
+        batches but still distribution-agnostic).
+        """
+        if self.reference_scores is not None and len(self.reference_scores) > 0:
+            # np.searchsorted gives the insertion point in the sorted reference
+            ranks = np.searchsorted(self.reference_scores, scores, side="right")
+            return 100.0 * ranks / len(self.reference_scores)
+        else:
+            # Fallback: rank within the batch itself
+            if len(scores) <= 1:
+                return np.array([50.0] * len(scores))
+            order = scores.argsort().argsort()  # rank
+            return 100.0 * order / (len(scores) - 1)
+    
     def predict_with_action(self, X: Union[np.ndarray, pd.DataFrame, Dict]) -> List[Dict[str, Any]]:
-        """Get predictions with recommended actions."""
+        """Get predictions with recommended actions based on percentile rank.
+        
+        Risk tiers are assigned by where a score falls in the reference
+        distribution (or in-batch rank as fallback), NOT by absolute
+        probability cutoffs.  This ensures consistent behaviour even when
+        the model's probability scale changes across datasets.
+        """
         proba = self.predict_proba(X)
+        pctiles = self._score_to_percentile(proba)
         
         results = []
-        for score in proba:
-            if score >= 0.99:
-                action = "BLOCK"
-            elif score >= 0.90:
-                action = "ESCROW"
-            elif score >= self.threshold:
-                action = "REVIEW"
-            elif score >= 0.5:
-                action = "MONITOR"
+        for score, pct in zip(proba, pctiles):
+            if self.risk_cutoffs:
+                # Use pre-computed absolute cutoffs from reference distribution
+                if score >= self.risk_cutoffs.get("BLOCK", float("inf")):
+                    action = "BLOCK"
+                elif score >= self.risk_cutoffs.get("ESCROW", float("inf")):
+                    action = "ESCROW"
+                elif score >= self.risk_cutoffs.get("REVIEW", float("inf")):
+                    action = "REVIEW"
+                elif score >= self.risk_cutoffs.get("MONITOR", float("inf")):
+                    action = "MONITOR"
+                else:
+                    action = "APPROVE"
             else:
-                action = "APPROVE"
+                # Fallback: use percentile rank directly
+                if pct >= self.RISK_PERCENTILES["BLOCK"]:
+                    action = "BLOCK"
+                elif pct >= self.RISK_PERCENTILES["ESCROW"]:
+                    action = "ESCROW"
+                elif pct >= self.RISK_PERCENTILES["REVIEW"]:
+                    action = "REVIEW"
+                elif pct >= self.RISK_PERCENTILES["MONITOR"]:
+                    action = "MONITOR"
+                else:
+                    action = "APPROVE"
             
             results.append({
                 "risk_score": float(score),
+                "percentile": float(pct),
                 "prediction": int(score >= self.threshold),
                 "action": action,
             })

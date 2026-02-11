@@ -1,0 +1,68 @@
+{
+  "version": "20251231_174617",
+  "training_date": "2025-12-31T17:46:17.458421",
+  "dataset": {
+    "path": "/content/eth_transactions_full_labeled.parquet",
+    "n_samples": 1673244,
+    "n_features": 5,
+    "fraud_rate": 0.2515162229537964,
+    "n_nodes": 1673244,
+    "n_edges": 1673244
+  },
+  "preprocessing": {
+    "log_transform_features": 3,
+    "skewness_threshold": 1.0,
+    "scalers": [
+      "RobustScaler"
+    ],
+    "graph_scaler": "StandardScaler"
+  },
+  "models": {
+    "vae": {
+      "type": "BetaVAE",
+      "latent_dim": 64,
+      "beta": 4.0
+    },
+    "vgae": {
+      "type": "VGAE",
+      "out_channels": 32
+    },
+    "gat": {
+      "type": "GATv2",
+      "hidden": 64,
+      "heads": 4
+    },
+    "graphsage": {
+      "type": "GraphSAGE_Large",
+      "hidden": 128,
+      "num_layers": 3
+    },
+    "xgboost": {
+      "best_params": {},
+      "n_estimators": 1999
+    },
+    "lightgbm": {
+      "best_params": {},
+      "n_estimators": 2000
+    },
+    "meta": {
+      "type": "LogisticRegression",
+      "C": 1.0
+    }
+  },
+  "thresholds": {
+    "CRITICAL": 0.9,
+    "HIGH": 0.75,
+    "MEDIUM": 0.5,
+    "LOW": 0.3
+  },
+  "optimal_threshold": 0.7270426131902658,
+  "performance": {
+    "meta_roc_auc": 0.9229380930516362,
+    "meta_pr_auc": 0.8608691000145307,
+    "xgb_roc_auc": 0.9170271704999535,
+    "lgb_roc_auc": 0.9226353159194435,
+    "gat_roc_auc": 0.6505523530969552,
+    "sage_roc_auc": 0.8579004260247962
+  }
+}
