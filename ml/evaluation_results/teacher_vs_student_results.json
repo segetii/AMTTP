@@ -1,0 +1,136 @@
+{
+  "timestamp": "2026-02-09T16:15:02.539491",
+  "dataset": {
+    "file": "eth_addresses_labeled.parquet",
+    "n_samples": 625168,
+    "n_features": 17,
+    "feature_names": [
+      "total_sent",
+      "total_received",
+      "balance",
+      "avg_sent",
+      "avg_received",
+      "avg_value",
+      "max_sent",
+      "max_received",
+      "min_sent",
+      "min_received",
+      "std_sent",
+      "std_received",
+      "total_gas_sent",
+      "avg_gas_used",
+      "avg_gas_price",
+      "in_out_ratio",
+      "active_duration_mins"
+    ],
+    "n_fraud": 372,
+    "fraud_rate": 0.0005950400532336908
+  },
+  "teacher": {
+    "model_dir": "c:\\amttp\\ml\\Automation\\amttp_models_20251231_174617",
+    "architecture": "BetaVAE + VGAE + GATv2 + GraphSAGE + XGBoost + LightGBM + LogisticRegressionCV meta",
+    "optimal_threshold": 0.0039767911657691,
+    "metrics": {
+      "model": "Teacher (optimal threshold)",
+      "roc_auc": 0.9885529432505695,
+      "pr_auc": 0.03724551037177928,
+      "f1": 0.09079951787866614,
+      "precision": 0.049066435084672164,
+      "recall": 0.6075268817204301,
+      "true_positives": 226,
+      "false_positives": 4380,
+      "false_negatives": 146,
+      "true_negatives": 620416,
+      "predicted_positive": 4606,
+      "actual_positive": 372
+    }
+  },
+  "student": {
+    "architecture": "XGBoost + LightGBM + LogisticRegressionCV meta-learner",
+    "n_folds": 5,
+    "optimal_threshold": 0.9980542523518234,
+    "metrics": {
+      "model": "Student (LR Meta, CV)",
+      "roc_auc": 0.9840317879755953,
+      "pr_auc": 0.5249399157182805,
+      "f1": 0.5984072810011376,
+      "precision": 0.5187376725838264,
+      "recall": 0.706989247311828,
+      "true_positives": 263,
+      "false_positives": 244,
+      "false_negatives": 109,
+      "true_negatives": 624552,
+      "predicted_positive": 507,
+      "actual_positive": 372
+    },
+    "base_model_metrics": {
+      "xgboost": {
+        "model": "Student-XGBoost (base)",
+        "roc_auc": 0.9957291006020924,
+        "pr_auc": 0.633321591408781,
+        "f1": 0.6354009077155824,
+        "precision": 0.726643598615917,
+        "recall": 0.5645161290322581,
+        "true_positives": 210,
+        "false_positives": 79,
+        "false_negatives": 162,
+        "true_negatives": 624717,
+        "predicted_positive": 289,
+        "actual_positive": 372
+      },
+      "lightgbm": {
+        "model": "Student-LightGBM (base)",
+        "roc_auc": 0.9467116690543707,
+        "pr_auc": 0.017042419272525873,
+        "f1": 0.0354312824912936,
+        "precision": 0.018054626819608045,
+        "recall": 0.9435483870967742,
+        "true_positives": 351,
+        "false_positives": 19090,
+        "false_negatives": 21,
+        "true_negatives": 605706,
+        "predicted_positive": 19441,
+        "actual_positive": 372
+      }
+    },
+    "fold_metrics": [
+      {
+        "fold": 1,
+        "roc_auc": 0.9989866487005571,
+        "pr_auc": 0.7046983593915181,
+        "time_s": 164.06611943244934
+      },
+      {
+        "fold": 2,
+        "roc_auc": 0.9993524275962515,
+        "pr_auc": 0.6316872018719889,
+        "time_s": 145.71559119224548
+      },
+      {
+        "fold": 3,
+        "roc_auc": 0.9982178687942979,
+        "pr_auc": 0.6720797790888837,
+        "time_s": 175.8250560760498
+      },
+      {
+        "fold": 4,
+        "roc_auc": 0.9985735861903244,
+        "pr_auc": 0.68756197636634,
+        "time_s": 147.12538409233093
+      },
+      {
+        "fold": 5,
+        "roc_auc": 0.9872772323376121,
+        "pr_auc": 0.5971178733196372,
+        "time_s": 52.12410855293274
+      }
+    ]
+  },
+  "comparison": {
+    "score_correlation": 0.21833875253843993,
+    "prediction_agreement": 0.9927491490287411,
+    "roc_auc_delta": -0.004521155274974209,
+    "pr_auc_delta": 0.4876944053465012
+  },
+  "total_time_s": 699.648274898529
+}

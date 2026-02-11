@@ -1,0 +1,155 @@
+{
+  "evaluation_date": "2026-02-09T19:22:33.159423",
+  "dataset": {
+    "path": "C:\\amttp\\processed\\eth_addresses_labeled.parquet",
+    "n_samples": 625168,
+    "n_fraud": 372,
+    "fraud_rate": 0.0005950400532336908,
+    "label_source": "hybrid_score thresholds (CRITICAL/HIGH risk_level)"
+  },
+  "models": {
+    "Teacher XGB": {
+      "threshold": 0.519873480384297,
+      "roc_auc": 0.9969038905051297,
+      "pr_auc": 0.087932860240583,
+      "log_loss": 0.6934034437269744,
+      "f1": 0.17554168196841718,
+      "precision": 0.10165886856656742,
+      "recall": 0.6424731182795699,
+      "mcc": 0.2546232056266301,
+      "balanced_accuracy": 0.8195464074742813,
+      "tp": 239.0,
+      "fp": 2112.0,
+      "fn": 133.0,
+      "tn": 622684.0,
+      "fpr": 0.0033803033310072406,
+      "fnr": 0.3575268817204301,
+      "optimal_f1_threshold": 0.519873480384297,
+      "optimal_f1": 0.17554168194482703
+    },
+    "Teacher Stack\u26a0": {
+      "threshold": 0.4858,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "log_loss": 0.011190233130348887,
+      "f1": 0.9986541049798116,
+      "precision": 1.0,
+      "recall": 0.9973118279569892,
+      "mcc": 0.9986542102948412,
+      "balanced_accuracy": 0.9986559139784946,
+      "tp": 371.0,
+      "fp": 0.0,
+      "fn": 1.0,
+      "tn": 624796.0,
+      "fpr": 0.0,
+      "fnr": 0.002688172043010753,
+      "optimal_f1_threshold": 0.48577254121065183,
+      "optimal_f1": 0.99999999995
+    },
+    "Student XGB": {
+      "threshold": 0.5,
+      "roc_auc": 0.9897559552685309,
+      "pr_auc": 0.9693495741576424,
+      "log_loss": 0.06200298138899345,
+      "f1": 0.9766803840877915,
+      "precision": 0.9971988795518207,
+      "recall": 0.956989247311828,
+      "mcc": 0.9768738418183175,
+      "balanced_accuracy": 0.9784938233947087,
+      "tp": 356.0,
+      "fp": 1.0,
+      "fn": 16.0,
+      "tn": 624795.0,
+      "fpr": 1.600522410514792e-06,
+      "fnr": 0.043010752688172046,
+      "optimal_f1_threshold": 0.4558747708797455,
+      "optimal_f1": 0.9780821917308403
+    },
+    "Student LGB": {
+      "threshold": 0.5,
+      "roc_auc": 0.9999996859189894,
+      "pr_auc": 0.9995075670756317,
+      "log_loss": 0.04815654597129185,
+      "f1": 0.990578734858681,
+      "precision": 0.9919137466307277,
+      "recall": 0.989247311827957,
+      "mcc": 0.9905740312919628,
+      "balanced_accuracy": 0.9946212551303627,
+      "tp": 368.0,
+      "fp": 3.0,
+      "fn": 4.0,
+      "tn": 624793.0,
+      "fpr": 4.801567231544376e-06,
+      "fnr": 0.010752688172043012,
+      "optimal_f1_threshold": 0.6885938841507501,
+      "optimal_f1": 0.9918699186491903
+    },
+    "Student Ens": {
+      "threshold": 0.7270426131902658,
+      "roc_auc": 0.9999997977834588,
+      "pr_auc": 0.9996778335855537,
+      "log_loss": 0.005663269079785128,
+      "f1": 0.9863760217983651,
+      "precision": 1.0,
+      "recall": 0.9731182795698925,
+      "mcc": 0.9864596823200754,
+      "balanced_accuracy": 0.9865591397849462,
+      "tp": 362.0,
+      "fp": 0.0,
+      "fn": 10.0,
+      "tn": 624796.0,
+      "fpr": 0.0,
+      "fnr": 0.026881720430107527,
+      "optimal_f1_threshold": 0.14340723203354352,
+      "optimal_f1": 0.9932885905540269
+    }
+  },
+  "recalibration": {
+    "teacher_xgb_raw_roc_auc": 0.9969038905051297,
+    "teacher_xgb_raw_pr_auc": 0.087932860240583,
+    "teacher_xgb_f1_threshold_raw": 0.0026511941105127,
+    "teacher_xgb_f1_optimal_raw": 0.17554168194482703,
+    "teacher_xgb_youden_threshold": 0.0004831259720958,
+    "teacher_xgb_youden_j": 0.9934538633409945,
+    "teacher_xgb_calibrated_roc_auc": 0.9969038905051297,
+    "teacher_xgb_calibrated_pr_auc": 0.087932860240583,
+    "teacher_xgb_calibrated_f1_threshold": 0.519873480384297,
+    "teacher_xgb_calibrated_f1_optimal": 0.17554168194482703,
+    "sigmoid_params": {
+      "k": 30,
+      "center": "p75"
+    }
+  },
+  "meta_learner_weights": {
+    "coef": [
+      [
+        0.7021293540377205,
+        3.399373412044826,
+        0.4667988736205826,
+        -2.589833766437772,
+        0.849195356329139,
+        -1.685824234002968,
+        8.982036918692234
+      ]
+    ],
+    "intercept": [
+      -5.5340591160288435
+    ],
+    "feature_names": [
+      "recon_err",
+      "edge_score",
+      "gat_score",
+      "uncertainty",
+      "sage_score",
+      "xgb_prob",
+      "lgb_prob"
+    ]
+  },
+  "notes": [
+    "Teacher Full Stack achieves F1=1.0 because fraud labels ARE derived from hybrid_score thresholds (CIRCULAR)",
+    "The meaningful comparison is Teacher XGB (standalone) vs Student models",
+    "Student runs in SIMPLIFIED mode: graph/VAE features zeroed, only XGB+LGB flow through meta-learner",
+    "Teacher XGB v1 trained on 171 Kaggle features; Student XGB v2 trained on 71 features (5 tabular + 64 VAE + 2 graph)",
+    "Teacher XGB has high ROC-AUC (ranking) but poor F1 (classification) due to compressed score range"
+  ]
+}

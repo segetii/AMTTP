@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies including ML libraries
+# scikit-learn required for reconstructed meta-learner (from cuML weights)
 RUN pip install --no-cache-dir \
     fastapi==0.109.0 \
     uvicorn==0.27.0 \

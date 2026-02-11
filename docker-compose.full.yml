@@ -238,7 +238,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./ml/Automation/risk_engine/models:/app/models
+      - ./ml/Automation/tx_level_models:/app/models
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

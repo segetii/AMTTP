@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/pages/war_room_redirect_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/transfer/presentation/pages/transfer_page.dart';
@@ -151,10 +152,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/sign-in';
       }
       
+      // Allow the war-room-redirect trampoline page without further checks
+      if (state.matchedLocation == '/war-room-redirect') {
+        return null;
+      }
+      
       // If authenticated and on auth route, redirect to home
       if (isAuthenticated && isAuthRoute) {
         final user = authState.user;
         if (user != null) {
+          // R3+ users → trampoline page that does a full browser redirect
+          if (user.role.level >= 3) {
+            return '/war-room-redirect';
+          }
           return _defaultRouteForRole(user.role);
         }
         return '/';
@@ -191,6 +201,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/sign-in',
         name: 'sign-in',
         builder: (context, state) => const PremiumSignInPage(),
+      ),
+      // Trampoline: shows spinner then does full browser redirect to Next.js War Room
+      GoRoute(
+        path: '/war-room-redirect',
+        name: 'war-room-redirect',
+        builder: (context, state) => const WarRoomRedirectPage(),
       ),
       GoRoute(
         path: '/register',
@@ -514,11 +530,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 String _defaultRouteForRole(Role role) {
-  // R3+ users are redirected to Next.js War Room via full browser navigation
-  // (handled in premium_sign_in_page.dart), so just return Flutter home here
-  if (role.level >= 3) {
-    return '/';
-  }
+  // R3+ users are redirected to Next.js War Room via html.window.location.href
+  // in the GoRouter redirect above. This function is only called for R1/R2.
 
   final config = getNavigationConfigForRole(role);
 

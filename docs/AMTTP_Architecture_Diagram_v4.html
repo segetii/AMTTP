@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMTTP Protocol — Complete System Architecture v4.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700;8..60,800&family=Source+Sans+3:wght@400;600;700;800;900&family=Source+Code+Pro:wght@400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:   #0d1b3e;
+    --secondary: #1a2d5a;
+    --accent:    #0d47a1;
+    --text:      #1a1a1a;
+    --text-inv:  #ffffff;
+    --border:    #263238;
+    --arrow:     #37474f;
+
+    --layer1-bg:   #e3f2fd;  --layer1-bdr: #0d47a1;  --layer1-head: #0d47a1;
+    --layer2-bg:   #e8f5e9;  --layer2-bdr: #1b5e20;  --layer2-head: #1b5e20;
+    --layer2r-bg:  #fce4ec;  --layer2r-bdr:#b71c1c;  --layer2r-head:#b71c1c;
+    --layer3-bg:   #fff3e0;  --layer3-bdr: #bf360c;  --layer3-head: #bf360c;
+    --chain-bg:    #f3e5f5;  --chain-bdr:  #4a148c;  --chain-head:  #4a148c;
+    --data-bg:     #eceff1;  --data-bdr:   #263238;  --data-head:   #263238;
+    --decision-bg: #fff8e1;  --decision-bdr:#e65100; --decision-head:#e65100;
+    --ml-bg:       #fce4ec;  --ml-bdr:     #880e4f;  --ml-head:     #880e4f;
+    --train-bg:    #e8eaf6;  --train-bdr:  #283593;  --train-head:  #283593;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+    color: var(--text);
+    background: #e0e0e0;
+    padding: 0;
+    font-weight: 600;
+  }
+
+  .page {
+    width: 260mm;
+    min-height: 370mm;
+    margin: 20px auto;
+    background: #fff;
+    padding: 18mm 14mm 14mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    position: relative;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; padding: 12mm 12mm 10mm; width: 100%; }
+    .no-print { display: none !important; }
+  }
+
+  /* ── Header ──────────────────────────────────────────────── */
+  .doc-header {
+    text-align: center;
+    border-bottom: 3.5px solid var(--primary);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .doc-header h1 {
+    font-family: 'Source Serif 4', 'Times New Roman', serif;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.3px;
+    margin-bottom: 3px;
+  }
+  .doc-header .subtitle {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 700;
+    font-style: italic;
+  }
+  .doc-header .meta {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* ── Layer wrapper ───────────────────────────────────────── */
+  .layer {
+    border: 3px solid;
+    border-radius: 7px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .layer-head {
+    color: var(--text-inv);
+    padding: 6px 14px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .layer-head .tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(255,255,255,.25);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .layer-body { padding: 10px 12px; }
+
+  .layer--1 { border-color: var(--layer1-bdr); }
+  .layer--1 .layer-head { background: var(--layer1-head); }
+  .layer--1 .layer-body { background: var(--layer1-bg); }
+
+  .layer--2 { border-color: var(--layer2-bdr); }
+  .layer--2 .layer-head { background: var(--layer2-head); }
+  .layer--2 .layer-body { background: var(--layer2-bg); }
+
+  .layer--3 { border-color: var(--layer3-bdr); }
+  .layer--3 .layer-head { background: var(--layer3-head); }
+  .layer--3 .layer-body { background: var(--layer3-bg); }
+
+  .layer--ml { border-color: var(--ml-bdr); }
+  .layer--ml .layer-head { background: var(--ml-head); }
+  .layer--ml .layer-body { background: var(--ml-bg); }
+
+  .layer--train { border-color: var(--train-bdr); }
+  .layer--train .layer-head { background: var(--train-head); }
+  .layer--train .layer-body { background: var(--train-bg); }
+
+  /* ── Component boxes ─────────────────────────────────────── */
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row + .row { margin-top: 8px; }
+
+  .box {
+    flex: 1 1 0;
+    min-width: 130px;
+    border: 2.5px solid;
+    border-radius: 6px;
+    background: #fff;
+    overflow: hidden;
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+  .box-head {
+    padding: 5px 8px;
+    font-weight: 800;
+    font-size: 0.76rem;
+    color: #fff;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .box-sub {
+    text-align: center;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: #555;
+    padding: 2px 6px 3px;
+    background: #f5f5f5;
+    border-bottom: 1.5px solid #ddd;
+  }
+  .box-body {
+    padding: 5px 8px;
+    line-height: 1.45;
+  }
+  .box-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .box-body li::before {
+    content: "▸";
+    color: #777;
+    font-weight: 900;
+    margin-right: 4px;
+  }
+  .box-body li {
+    font-size: 0.68rem;
+    color: #333;
+    font-weight: 600;
+  }
+  .box-body .metric {
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 700;
+    color: #b71c1c;
+  }
+  .box-body .metric--green {
+    color: #1b5e20;
+  }
+
+  .box--blue   { border-color: #0d47a1; }
+  .box--blue  .box-head { background: #1565c0; }
+  .box--green  { border-color: #1b5e20; }
+  .box--green .box-head { background: #2e7d32; }
+  .box--orange { border-color: #bf360c; }
+  .box--orange .box-head { background: #e65100; }
+  .box--red    { border-color: #b71c1c; }
+  .box--red   .box-head { background: #c62828; }
+  .box--purple { border-color: #4a148c; }
+  .box--purple .box-head { background: #6a1b9a; }
+  .box--grey   { border-color: #263238; }
+  .box--grey  .box-head { background: #37474f; }
+  .box--teal   { border-color: #004d40; }
+  .box--teal  .box-head { background: #00695c; }
+  .box--amber  { border-color: #e65100; }
+  .box--amber .box-head { background: #ef6c00; color: #fff; }
+  .box--indigo { border-color: #1a237e; }
+  .box--indigo .box-head { background: #283593; }
+  .box--pink   { border-color: #880e4f; }
+  .box--pink  .box-head { background: #ad1457; }
+  .box--dgreen { border-color: #004d40; }
+  .box--dgreen .box-head { background: #00695c; }
+
+  /* ── Sublayer ─────────────────────────────────────────────── */
+  .sublayer {
+    border: 2.5px dashed;
+    border-radius: 6px;
+    padding: 7px 9px;
+    margin-bottom: 8px;
+  }
+  .sublayer-title {
+    font-size: 0.74rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    padding-left: 2px;
+  }
+
+  .sublayer--identity { border-color: #1b5e20; background: rgba(232,245,233,.5); }
+  .sublayer--identity .sublayer-title { color: #1b5e20; }
+  .sublayer--txseq    { border-color: #1b5e20; background: rgba(232,245,233,.5); }
+  .sublayer--txseq .sublayer-title { color: #1b5e20; }
+  .sublayer--risk     { border-color: #b71c1c; background: rgba(252,228,236,.5); }
+  .sublayer--risk .sublayer-title { color: #880e4f; }
+  .sublayer--chain    { border-color: #4a148c; background: rgba(243,229,245,.5); }
+  .sublayer--chain .sublayer-title { color: #4a148c; }
+  .sublayer--data     { border-color: #263238; background: rgba(236,239,241,.55); }
+  .sublayer--data .sublayer-title { color: #263238; }
+  .sublayer--train    { border-color: #283593; background: rgba(232,234,246,.5); }
+  .sublayer--train .sublayer-title { color: #1a237e; }
+  .sublayer--prod     { border-color: #880e4f; background: rgba(252,228,236,.45); }
+  .sublayer--prod .sublayer-title { color: #880e4f; }
+
+  /* ── Arrow connectors ────────────────────────────────────── */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.64rem;
+    color: var(--arrow);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .arrow-down .shaft {
+    width: 3px;
+    height: 14px;
+    background: var(--arrow);
+  }
+  .arrow-down .head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--arrow);
+  }
+  .arrow-down .label {
+    font-size: 0.6rem;
+    color: #444;
+    font-weight: 700;
+    font-style: italic;
+    margin-top: 1px;
+    text-align: center;
+    max-width: 140px;
+  }
+  .arrow-fan {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    padding: 2px 0 4px;
+  }
+
+  /* ── Side-by-side train vs prod ──────────────────────────── */
+  .ml-split {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .ml-split > * { flex: 1; }
+
+  /* ── Decision matrix ─────────────────────────────────────── */
+  .decision-box {
+    border: 3px solid var(--decision-bdr);
+    border-radius: 6px;
+    background: var(--decision-bg);
+    padding: 8px 12px;
+    margin-top: 8px;
+  }
+  .decision-box h4 {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--decision-head);
+    margin-bottom: 5px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 18px;
+    font-size: 0.68rem;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 600;
+  }
+  .decision-grid .rule { display: flex; gap: 6px; }
+  .decision-grid .cond { color: #444; font-weight: 600; }
+  .decision-grid .act  { font-weight: 800; }
+  .decision-grid .act--allow  { color: #1b5e20; }
+  .decision-grid .act--review { color: #e65100; }
+  .decision-grid .act--escrow { color: #c62828; }
+  .decision-grid .act--block  { color: #880e4f; }
+
+  /* ── Footer & legend ─────────────────────────────────────── */
+  .doc-footer {
+    margin-top: 14px;
+    padding-top: 7px;
+    border-top: 2px solid #999;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: #777;
+    font-weight: 700;
+  }
+  .legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 6px 0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    color: #444;
+    font-weight: 700;
+  }
+  .legend-swatch {
+    width: 13px; height: 13px;
+    border-radius: 2px;
+    border: 2px solid rgba(0,0,0,.3);
+  }
+
+  /* ── Pipeline flow (horizontal) ──────────────────────────── */
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 6px 0;
+  }
+  .pf-step {
+    background: #fff;
+    border: 2.5px solid;
+    border-radius: 6px;
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 0.66rem;
+    font-weight: 700;
+    min-width: 100px;
+  }
+  .pf-arrow {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--arrow);
+    padding: 0 3px;
+  }
+
+  @media print {
+    .page { page-break-inside: avoid; }
+    .layer { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <div class="doc-header">
+    <h1>AMTTP Protocol — Complete System Architecture</h1>
+    <div class="subtitle">Anti-Money Laundering Transaction Trust Protocol</div>
+    <div class="meta">Version 4.0 — February 2026</div>
+  </div>
+
+  <!-- ═══════════ LAYER I — INTEGRATION & ACCESS ═══════════ -->
+  <div class="layer layer--1">
+    <div class="layer-head">
+      <span>Layer I — Integration &amp; Access</span>
+      <span class="tag">External-Facing</span>
+    </div>
+    <div class="layer-body">
+      <div class="row">
+        <div class="box box--blue">
+          <div class="box-head">AMTTP Open-Source SDK</div>
+          <div class="box-sub">TypeScript / Python Client Library</div>
+          <div class="box-body">
+            <ul>
+              <li>Transaction Construction &amp; Signing</li>
+              <li>Wallet Signature (EIP-712)</li>
+              <li>WebSocket Event Streaming</li>
+              <li>Batch Scoring Interface</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box box--blue">
+          <div class="box-head">RESTful API Interface</div>
+          <div class="box-sub">FastAPI — Port 8000</div>
+          <div class="box-body">
+            <ul>
+              <li><b>POST /score</b> — Single Tx Scoring</li>
+              <li><b>POST /batch</b> — Batch Scoring</li>
+              <li><b>GET /model/info</b> — Model Metadata</li>
+              <li><b>GET /alerts</b> — SIEM Dashboard</li>
+              <li><b>GET /health</b> — Readiness Probe</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box box--blue">
+          <div class="box-head">Web Application Layer</div>
+          <div class="box-sub">Flutter Consumer App + Next.js War Room</div>
+          <div class="box-body">
+            <ul>
+              <li>MetaMask Wallet Integration</li>
+              <li>Compliance Dashboard (R1–R6)</li>
+              <li>Real-Time Alert Feed &amp; Timeline</li>
+              <li>Risk Score Visualisation</li>
+              <li>zkNAF Proof Verification UI</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrow-row">
+    <div class="arrow-down">
+      <div class="shaft"></div><div class="head"></div>
+      <div class="label">TransactionRequest (JSON)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LAYER II — PROTOCOL LOGIC ═══════════ -->
+  <div class="layer layer--2">
+    <div class="layer-head">
+      <span>Layer II — Protocol Logic &amp; Compliance Computation</span>
+      <span class="tag">Core Engine</span>
+    </div>
+    <div class="layer-body">
+
+      <!-- Orchestrator -->
+      <div class="row" style="margin-bottom:8px;">
+        <div class="box box--green" style="flex:1;">
+          <div class="box-head">Compliance Orchestrator — Central Decision Coordinator</div>
+          <div class="box-body" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.68rem; font-weight:700;">▸ Fan-out to downstream services</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Aggregate multi-signal decisions</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Profile &amp; entity management</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ API key issuance &amp; RBAC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fan-out arrows -->
+      <div class="arrow-fan">
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.1 Identity</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.2 Tx Sequencing</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">§2.3 ML Risk</div></div>
+      </div>
+
+      <!-- Three parallel modules -->
+      <div class="row" style="align-items:stretch;">
+
+        <!-- §2.1 Identity -->
+        <div class="sublayer sublayer--identity" style="flex:1;">
+          <div class="sublayer-title">§2.1 Identity Management Module</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Sanctions Screening</div>
+              <div class="box-body">
+                <ul>
+                  <li>OFAC · HMT · EU · UN Lists</li>
+                  <li>7,800+ entities, 22 crypto addr</li>
+                  <li>Fuzzy name matching</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">KYC / PEP / EDD</div>
+              <div class="box-body">
+                <ul>
+                  <li>PEP database screening</li>
+                  <li>Travel Rule (FATF Rec. 16)</li>
+                  <li>Dual-control label submission</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">zkNAF Proofs</div>
+              <div class="box-body">
+                <ul>
+                  <li>KYC Credential Circuit</li>
+                  <li>Risk Range Proof</li>
+                  <li>Sanctions Non-Membership</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- §2.2 Transaction Sequencing -->
+        <div class="sublayer sublayer--txseq" style="flex:1;">
+          <div class="sublayer-title">§2.2 Transaction Sequencing Module</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">AML Pattern Detection</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>SMURFING</b> — Many small tx</li>
+                  <li><b>FAN_OUT</b> — 1→N distribution</li>
+                  <li><b>FAN_IN</b> — N→1 collection</li>
+                  <li><b>LAYERING</b> — Multi-hop chains</li>
+                  <li><b>VELOCITY</b> — Abnormal frequency</li>
+                  <li><b>PEELING</b> — Gradual extraction</li>
+                  <li><b>STRUCTURING</b> — Threshold avoidance</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--green" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Geographic &amp; Policy Engine</div>
+              <div class="box-body">
+                <ul>
+                  <li>FATF Black / Grey Lists</li>
+                  <li>EU High-Risk (14 countries)</li>
+                  <li>Whitelist / Blacklist CRUD</li>
+                  <li>Threshold management</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- §2.3 ML Risk Engine -->
+        <div class="sublayer sublayer--risk" style="flex:1;">
+          <div class="sublayer-title">§2.3 ML Risk Engine — Production (CPU)</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Feature Extraction (21 Features)</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>TX Raw (6):</b> value, gas, nonce, type</li>
+                  <li><b>Derived (7):</b> gas_efficiency, value_log,
+                      is_round_amount, value_gas_ratio …</li>
+                  <li><b>Sender Agg (8):</b> total_tx, total_sent,
+                      balance, unique_receivers, in_out_ratio …</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">TX-Level Ensemble (Production)</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>XGBoost</b> — 499 trees, hist method</li>
+                  <li><b>LightGBM</b> — 500 trees, GBDT</li>
+                  <li><b>Meta-Learner</b> — sklearn LogReg</li>
+                  <li>σ(<span class="metric metric--green">7.74</span>·xgb + <span class="metric metric--green">2.22</span>·lgb − <span class="metric metric--green">6.25</span>)</li>
+                  <li>Threshold: <span class="metric metric--green">0.595</span></li>
+                  <li><b>Zero training/serving skew</b></li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--red" style="min-width:0;">
+              <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Performance (Validated)</div>
+              <div class="box-body">
+                <ul>
+                  <li>ROC-AUC: <span class="metric metric--green">0.9879</span></li>
+                  <li>PR-AUC: <span class="metric metric--green">0.9715</span></li>
+                  <li>F1-Score: <span class="metric metric--green">0.9012</span></li>
+                  <li>Precision: <span class="metric metric--green">0.927</span> | Recall: <span class="metric metric--green">0.877</span></li>
+                  <li>Latency: <span class="metric metric--green">&lt; 5ms</span> per tx</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Converge arrows -->
+      <div class="arrow-fan">
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">sanctions_hit, kyc_status</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">rule_alerts, geo_risk</div></div>
+        <div class="arrow-down"><div class="shaft"></div><div class="head"></div><div class="label">fraud_prob, confidence</div></div>
+      </div>
+
+      <!-- Decision Matrix -->
+      <div class="decision-box">
+        <h4>Compliance Decision Matrix — Deterministic Action Resolution</h4>
+        <div class="decision-grid">
+          <div class="rule">
+            <span class="cond">risk &lt; 200 ∧ ¬sanctioned ∧ geo ∉ {PROHIBITED}</span>
+            <span class="act act--allow">→ APPROVE (minimal)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">200 ≤ risk &lt; 400 ∧ ¬sanctioned</span>
+            <span class="act act--allow">→ APPROVE (low)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">400 ≤ risk &lt; 600 ∧ ¬sanctioned</span>
+            <span class="act act--review">→ REVIEW (medium)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">600 ≤ risk &lt; 800</span>
+            <span class="act act--escrow">→ ESCROW (high)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">risk ≥ 800 ∨ ≥4 red flags</span>
+            <span class="act act--block">→ BLOCK (critical)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">sanctioned ∨ FATF_blacklist</span>
+            <span class="act act--block">→ BLOCK (absolute)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">geo ∈ {VERY_HIGH, HIGH}</span>
+            <span class="act act--escrow">→ ESCROW (geo override)</span>
+          </div>
+          <div class="rule">
+            <span class="cond">risk ≥ 80 ∨ action = BLOCK</span>
+            <span class="act act--block">→ SAR filing triggered</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrow-row">
+    <div class="arrow-down">
+      <div class="shaft"></div><div class="head"></div>
+      <div class="label">RiskResponse → action ∈ {APPROVE, REVIEW, ESCROW, BLOCK, REQUIRE_INFO}</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LAYER III — ML TRAINING PIPELINE (Offline) ═══════════ -->
+  <div class="layer layer--train">
+    <div class="layer-head">
+      <span>Layer III — ML Training Pipeline (Offline — Colab A100 GPU)</span>
+      <span class="tag">Weak Supervision + Knowledge Distillation</span>
+    </div>
+    <div class="layer-body">
+
+      <!-- Stage 1 -->
+      <div class="sublayer sublayer--train">
+        <div class="sublayer-title">Stage 1 — Hope_machine: Teacher Model Training (BitcoinHeist + Ethereum Kaggle)</div>
+        <div class="row">
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Training Data</div>
+            <div class="box-body">
+              <ul>
+                <li><b>merged_clean_imputed_v2.parquet</b></li>
+                <li><span class="metric metric--green">2,640,911</span> rows × <span class="metric metric--green">177</span> cols</li>
+                <li>BitcoinHeist + Ethereum Kaggle</li>
+                <li>Fraud rate: <span class="metric">0.87%</span> (113:1)</li>
+                <li><b>Independent real labels</b></li>
+              </ul>
+            </div>
+          </div>
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">VAE Feature Extraction</div>
+            <div class="box-body">
+              <ul>
+                <li><b>VAEWithAttention</b> (A100 GPU)</li>
+                <li>Latent vector z → compressed features</li>
+                <li>Reconstruction error → anomaly signal</li>
+                <li>Appended to original 177 features</li>
+              </ul>
+            </div>
+          </div>
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Teacher XGBoost</div>
+            <div class="box-body">
+              <ul>
+                <li>Input: original features + VAE latents</li>
+                <li>Bayesian hyperparameter optimisation</li>
+                <li>Output: <b>xgb.json</b> (Teacher model)</li>
+                <li>Used to label fresh ETH data (Stage 2)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 1 → Stage 2 arrow -->
+      <div class="arrow-row">
+        <div class="arrow-down">
+          <div class="shaft"></div><div class="head"></div>
+          <div class="label">Teacher XGB → Label fresh Ethereum data (Weak Supervision)</div>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="sublayer sublayer--train">
+        <div class="sublayer-title">Stage 2 — Weak Supervision Labeling (3 Noisy Label Sources → Consensus)</div>
+        <div class="row">
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Label Source 1: Teacher XGB</div>
+            <div class="box-sub">Learned Fraud Model</div>
+            <div class="box-body">
+              <ul>
+                <li>Predict on <span class="metric metric--green">1.67M</span> fresh BigQuery tx</li>
+                <li>171 engineered features</li>
+                <li>Weight: <b>0.4</b> in hybrid_score</li>
+              </ul>
+            </div>
+          </div>
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Label Source 2: Graph Rules</div>
+            <div class="box-sub">FATF AML Typologies</div>
+            <div class="box-body">
+              <ul>
+                <li>7 behavioural patterns (SMURFING,
+                    FAN_OUT, FAN_IN, LAYERING,
+                    STRUCTURING, VELOCITY, PEELING)</li>
+                <li>Weight: <b>0.3</b> in hybrid_score</li>
+              </ul>
+            </div>
+          </div>
+          <div class="box box--indigo" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Label Source 3: Memgraph</div>
+            <div class="box-sub">Structural Graph Analysis</div>
+            <div class="box-body">
+              <ul>
+                <li>Degree / centrality / community</li>
+                <li>Cross-validation: <b>0.7</b>×graph + <b>0.3</b>×ML</li>
+                <li>Output: <b>eth_addresses_labeled.parquet</b></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 2 → Stage 3 arrow -->
+      <div class="arrow-row">
+        <div class="arrow-down">
+          <div class="shaft"></div><div class="head"></div>
+          <div class="label">Weakly-supervised labels → Train VAE/GNN pipeline + Production models</div>
+        </div>
+      </div>
+
+      <!-- Stage 3 — Two paths -->
+      <div class="ml-split">
+        <!-- Colab pipeline -->
+        <div class="sublayer sublayer--train" style="margin-bottom:0;">
+          <div class="sublayer-title">Stage 3a — VAE/GNN Pipeline (Colab GPU)</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--indigo" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Deep Learning Models</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>β-VAE</b> — Latent features + recon_err</li>
+                  <li><b>VGAE</b> — Edge reconstruction (GCNConv)</li>
+                  <li><b>GATv2</b> — Attention-based fraud (3 heads)</li>
+                  <li><b>GraphSAGE</b> — Neighbourhood aggregation</li>
+                  <li>→ ~32% of ensemble feature importance</li>
+                  <li><b>XGB v2 + LGB v2 + Meta-ensemble</b></li>
+                  <li>ROC-AUC: <span class="metric metric--green">0.9229</span></li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--amber" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">⚠ GPU-Only — Not Deployed</div>
+              <div class="box-body">
+                <ul>
+                  <li>Requires CUDA + PyTorch Geometric</li>
+                  <li>Knowledge encoded in labels &amp; features</li>
+                  <li>SHAP: graphsage_score 12%, recon_err 8%</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Production models -->
+        <div class="sublayer sublayer--prod" style="margin-bottom:0;">
+          <div class="sublayer-title">Stage 3b — Production Models (CPU — Deployed)</div>
+          <div class="row" style="flex-direction:column; gap:5px;">
+            <div class="box box--pink" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">TX-Level Ensemble (train_tx_level_models.py)</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>21 features</b> — all available at inference</li>
+                  <li><b>XGBoost</b> → xgboost_tx.ubj (CPU hist)</li>
+                  <li><b>LightGBM</b> → lightgbm_tx.txt (CPU GBDT)</li>
+                  <li><b>sklearn LogReg</b> → meta_learner.joblib</li>
+                  <li>Trained on <span class="metric metric--green">1.34M</span> tx</li>
+                  <li><b>Zero CUDA dependency</b></li>
+                  <li>ROC-AUC: <span class="metric metric--green">0.9879</span></li>
+                </ul>
+              </div>
+            </div>
+            <div class="box box--dgreen" style="min-width:0;">
+              <div class="box-head" style="font-size:.66rem; padding:3px 6px;">✅ Deployed to Production</div>
+              <div class="box-body">
+                <ul>
+                  <li><b>integration_service.py</b> (FastAPI)</li>
+                  <li><b>Docker:</b> docker-compose.full.yml</li>
+                  <li>CPU-only, &lt; 5ms latency</li>
+                  <li>5/5 integration tests pass</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrow-row">
+    <div class="arrow-down">
+      <div class="shaft"></div><div class="head"></div>
+      <div class="label">Model artifacts mounted via Docker volume</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ LAYER IV — INFRASTRUCTURE ═══════════ -->
+  <div class="layer layer--3">
+    <div class="layer-head">
+      <span>Layer IV — Infrastructure &amp; On-Chain</span>
+      <span class="tag">Production Deployment</span>
+    </div>
+    <div class="layer-body">
+
+      <div class="row" style="margin-bottom:8px;">
+        <div class="box box--orange" style="flex:1;">
+          <div class="box-head">API Gateway — NGINX Reverse Proxy</div>
+          <div class="box-body" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.68rem; font-weight:700;">▸ TLS termination</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Rate limiting (100 req/s)</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Path-based routing</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Cloudflare Tunnel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- On-Chain -->
+      <div class="sublayer sublayer--chain">
+        <div class="sublayer-title">§4.1 On-Chain Verification — Ethereum Smart Contracts (Solidity, 19 contracts)</div>
+        <div class="row">
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AMTTPCore</div>
+            <div class="box-body"><ul><li>Risk Oracle</li><li>Escrow Logic</li><li>Tx Validation</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AMTTPNFT</div>
+            <div class="box-body"><ul><li>KYC Badges (ERC-721)</li><li>Compliance ID</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">DisputeResolver</div>
+            <div class="box-body"><ul><li>Kleros Arbitration</li><li>MetaEvidence</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">CrossChain</div>
+            <div class="box-body"><ul><li>LayerZero Bridge</li><li>Score Relay</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">PolicyEngine</div>
+            <div class="box-body"><ul><li>Rule Management</li><li>Threshold CRUD</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">RiskRouter</div>
+            <div class="box-body"><ul><li>Score Routing</li><li>Multi-chain Relay</li></ul></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:5px;">
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">zkNAF Circuits</div>
+            <div class="box-body"><ul><li>KYC Credential</li><li>Risk Range Proof</li><li>Sanctions Non-Mem.</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">SafeModule</div>
+            <div class="box-body"><ul><li>Gnosis Safe Integration</li><li>Multi-sig Compliance</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">BiconomyModule</div>
+            <div class="box-body"><ul><li>Gasless Transactions</li><li>ERC-4337 Paymaster</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">AMTTPRouter</div>
+            <div class="box-body"><ul><li>Tx Routing Logic</li><li>Fallback Handling</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">CoreSecure</div>
+            <div class="box-body"><ul><li>Hardened Core</li><li>Reentrancy Guards</li></ul></div>
+          </div>
+          <div class="box box--purple" style="min-width:0;">
+            <div class="box-head" style="font-size:.66rem; padding:3px 6px;">Streamlined</div>
+            <div class="box-body"><ul><li>Gas-optimised Core</li><li>Minimal Proxy</li></ul></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Layer -->
+      <div class="sublayer sublayer--data" style="margin-top:8px;">
+        <div class="sublayer-title">§4.2 Data Persistence Layer</div>
+        <div class="row">
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">MongoDB</div>
+            <div class="box-sub">Document Store</div>
+            <div class="box-body"><ul><li>Profiles &amp; Alerts</li><li>Tx History &amp; Audit Trail</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Redis</div>
+            <div class="box-sub">Cache Layer</div>
+            <div class="box-body"><ul><li>Sessions &amp; Rate Limits</li><li>Sender Feature Cache</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Memgraph</div>
+            <div class="box-sub">Graph Database</div>
+            <div class="box-body"><ul><li>Entity Relations</li><li>Risk Propagation Paths</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">Helia (IPFS)</div>
+            <div class="box-sub">Immutable Store</div>
+            <div class="box-body"><ul><li>Audit Logs</li><li>Evidence &amp; Proofs</li></ul></div>
+          </div>
+          <div class="box box--grey" style="min-width:0;">
+            <div class="box-head" style="font-size:.68rem; padding:3px 6px;">BigQuery</div>
+            <div class="box-sub">Data Source</div>
+            <div class="box-body"><ul><li>30-day Ethereum tx</li><li>1.67M tx training data</li></ul></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container Orchestration -->
+      <div class="row" style="margin-top:8px;">
+        <div class="box box--teal" style="flex:1;">
+          <div class="box-head">Container Orchestration — Docker Compose</div>
+          <div class="box-body" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; padding:5px 12px;">
+            <span style="font-size:.68rem; font-weight:700;">▸ docker-compose.full.yml (17 services)</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Volume: ml/Automation/tx_level_models → /app/models</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Supervisord process management</span>
+            <span style="font-size:.68rem; font-weight:700;">▸ Prometheus + Grafana observability</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ LEGEND ═══════════ -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer1-bg); border-color:var(--layer1-bdr);"></div> Integration &amp; Access</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer2-bg); border-color:var(--layer2-bdr);"></div> Protocol Logic</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer2r-bg); border-color:var(--layer2r-bdr);"></div> Risk Engine (Prod)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--train-bg); border-color:var(--train-bdr);"></div> Training Pipeline (GPU)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--decision-bg); border-color:var(--decision-bdr);"></div> Decision Matrix</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--layer3-bg); border-color:var(--layer3-bdr);"></div> Infrastructure</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--chain-bg); border-color:var(--chain-bdr);"></div> On-Chain</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--data-bg); border-color:var(--data-bdr);"></div> Data Layer</div>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <!-- Figure caption -->
+  <div style="text-align:center; margin-top:12px; padding:6px 0; border-top:1.5px solid #bbb;">
+    <span style="font-family:'Source Serif 4',serif; font-size:0.78rem; font-weight:700; color:#333;">Figure 1.</span>
+    <span style="font-family:'Source Serif 4',serif; font-size:0.78rem; font-weight:400; color:#333; font-style:italic;"> Complete four-layer architecture of the AMTTP protocol showing the integration interface (Layer I), compliance computation engine with ML risk scoring (Layer II), offline multi-stage training pipeline with weak supervision (Layer III), and production infrastructure including 12 on-chain smart contracts and 17 containerised microservices (Layer IV).</span>
+  </div>
+
+  <div class="doc-footer">
+    <span>AMTTP Protocol v4.0 — Anti-Money Laundering Transaction Trust Protocol</span>
+    <span>© 2026 — TechRxiv Preprint</span>
+  </div>
+
+</div>
+
+<!-- ═══════════ PRINT / PNG BUTTONS ═══════════ -->
+<div style="text-align:center; padding:14px 0 30px;" class="no-print">
+  <button onclick="window.print()" style="
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px; font-weight: 800;
+    padding: 12px 32px;
+    background: #0d1b3e; color: #fff;
+    border: none; border-radius: 6px;
+    cursor: pointer;
+    margin-right: 12px;
+  ">Print / Save as PDF</button>
+  <button onclick="captureAsPNG()" style="
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px; font-weight: 800;
+    padding: 12px 32px;
+    background: #1b5e20; color: #fff;
+    border: none; border-radius: 6px;
+    cursor: pointer;
+  ">Download as PNG (300 DPI)</button>
+  <p style="margin-top:10px; font-size:13px; color:#666; font-weight:700;">
+    Tip: Use <strong>Print → Save as PDF</strong> for vector quality. PNG button captures at 3× resolution.
+  </p>
+</div>
+
+<script>
+  async function captureAsPNG() {
+    const btn = event.target;
+    btn.textContent = 'Rendering…';
+    btn.disabled = true;
+
+    if (typeof html2canvas === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    const page = document.querySelector('.page');
+    const canvas = await html2canvas(page, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+
+    const link = document.createElement('a');
+    link.download = 'AMTTP_Architecture_v4.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    btn.textContent = 'Download as PNG (300 DPI)';
+    btn.disabled = false;
+  }
+</script>
+
+</body>
+</html>
