@@ -47,13 +47,13 @@ class WalletPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                // Balance Card
-                _buildBalanceCard(walletState),
-                const SizedBox(height: 24),
+                    // Balance Card
+                    _buildBalanceCard(walletState),
+                    const SizedBox(height: 24),
 
-                // Wallet Address Section
-                _buildAddressSection(context, walletState),
-                const SizedBox(height: 24),
+                    // Wallet Address Section
+                    _buildAddressSection(context, walletState),
+                    const SizedBox(height: 24),
 
                     // Token Balances
                     if (walletState.isConnected) ...[
@@ -87,7 +87,7 @@ class WalletPage extends ConsumerWidget {
 
   Widget _buildBalanceCard(WalletState walletState) {
     final ethBalance = walletState.ethBalance ?? 0.0;
-    final usdValue = ethBalance * 2300; // Approximate ETH/USD
+    final usdValue = ethBalance * AppTheme.ethUsdPrice; // Approximate ETH/USD
 
     return Container(
       width: double.infinity,
@@ -257,8 +257,8 @@ class WalletPage extends ConsumerWidget {
           'Ethereum',
           'ETH',
           walletState.ethBalance ?? 0.0,
-          Icons.currency_bitcoin,
-          AppTheme.primaryBlue,
+          Icons.diamond_rounded,
+          AppTheme.brandETH,
         ),
       ],
     );
@@ -503,7 +503,7 @@ class WalletPage extends ConsumerWidget {
                   style: const TextStyle(
                     color: AppTheme.cleanWhite,
                     fontSize: 12,
-                    fontFamily: 'monospace',
+                    fontFamily: 'JetBrains Mono',
                   ),
                   textAlign: TextAlign.center,
                 ),

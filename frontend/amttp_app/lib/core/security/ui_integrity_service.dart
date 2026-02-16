@@ -9,6 +9,7 @@
 /// 3. Runtime state validation
 /// 4. Server-side verification
 /// 5. Visual confirmation
+library;
 
 import 'dart:convert';
 import 'package:crypto/crypto.dart';

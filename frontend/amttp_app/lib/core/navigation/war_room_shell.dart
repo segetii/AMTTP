@@ -9,6 +9,7 @@
 /// - Compliance Studio: Policy Engine, Enforcement Actions (R4+)
 /// - Multisig Governance (R4+)
 /// - UI Integrity always visible
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

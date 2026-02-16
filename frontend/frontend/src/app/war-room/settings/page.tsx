@@ -62,12 +62,12 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">System Settings</h1>
-          <p className="text-slate-400 mt-1">Configure system-wide settings and preferences</p>
+          <h1 className="text-2xl font-bold text-text">System Settings</h1>
+          <p className="text-mutedText mt-1">Configure system-wide settings and preferences</p>
         </div>
         <button 
           onClick={handleSave}
@@ -97,8 +97,8 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-blue-600 text-text'
+                    : 'text-mutedText hover:bg-surface hover:text-text'
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
@@ -109,26 +109,26 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-slate-800 rounded-lg border border-slate-700 p-6">
+        <div className="flex-1 bg-surface rounded-lg border border-borderSubtle p-6">
           {/* General Settings */}
           {activeTab === 'general' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">General Settings</h2>
+              <h2 className="text-lg font-semibold text-text">General Settings</h2>
               
               <div>
-                <label className="block text-slate-400 text-sm mb-2">System Name</label>
+                <label className="block text-mutedText text-sm mb-2">System Name</label>
                 <input
                   type="text"
                   value={systemName}
                   onChange={(e) => setSystemName(e.target.value)}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-background border border-borderSubtle rounded-lg text-text focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Maintenance Mode</p>
-                  <p className="text-slate-500 text-sm">Temporarily disable user access for maintenance</p>
+                  <p className="text-text font-medium">Maintenance Mode</p>
+                  <p className="text-mutedText text-sm">Temporarily disable user access for maintenance</p>
                 </div>
                 <button
                   onClick={() => setMaintenanceMode(!maintenanceMode)}
@@ -142,10 +142,10 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Debug Mode</p>
-                  <p className="text-slate-500 text-sm">Enable verbose logging and debug information</p>
+                  <p className="text-text font-medium">Debug Mode</p>
+                  <p className="text-mutedText text-sm">Enable verbose logging and debug information</p>
                 </div>
                 <button
                   onClick={() => setDebugMode(!debugMode)}
@@ -164,12 +164,12 @@ export default function SettingsPage() {
           {/* Security Settings */}
           {activeTab === 'security' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">Security Settings</h2>
+              <h2 className="text-lg font-semibold text-text">Security Settings</h2>
               
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Require MFA</p>
-                  <p className="text-slate-500 text-sm">Require multi-factor authentication for all users</p>
+                  <p className="text-text font-medium">Require MFA</p>
+                  <p className="text-mutedText text-sm">Require multi-factor authentication for all users</p>
                 </div>
                 <button
                   onClick={() => setMfaRequired(!mfaRequired)}
@@ -184,22 +184,22 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-2">Session Timeout (minutes)</label>
+                <label className="block text-mutedText text-sm mb-2">Session Timeout (minutes)</label>
                 <input
                   type="number"
                   value={sessionTimeout}
                   onChange={(e) => setSessionTimeout(Number(e.target.value))}
-                  className="w-32 px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-32 px-4 py-2 bg-background border border-borderSubtle rounded-lg text-text focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-2">IP Whitelist (comma-separated)</label>
+                <label className="block text-mutedText text-sm mb-2">IP Whitelist (comma-separated)</label>
                 <textarea
                   value={ipWhitelist}
                   onChange={(e) => setIpWhitelist(e.target.value)}
                   placeholder="e.g., 192.168.1.1, 10.0.0.0/24"
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 h-24"
+                  className="w-full px-4 py-2 bg-background border border-borderSubtle rounded-lg text-text focus:outline-none focus:border-blue-500 h-24"
                 />
               </div>
             </div>
@@ -208,12 +208,12 @@ export default function SettingsPage() {
           {/* Notification Settings */}
           {activeTab === 'notifications' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">Notification Settings</h2>
+              <h2 className="text-lg font-semibold text-text">Notification Settings</h2>
               
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Email Alerts</p>
-                  <p className="text-slate-500 text-sm">Send critical alerts via email</p>
+                  <p className="text-text font-medium">Email Alerts</p>
+                  <p className="text-mutedText text-sm">Send critical alerts via email</p>
                 </div>
                 <button
                   onClick={() => setEmailAlerts(!emailAlerts)}
@@ -227,10 +227,10 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Slack Alerts</p>
-                  <p className="text-slate-500 text-sm">Send alerts to Slack channel</p>
+                  <p className="text-text font-medium">Slack Alerts</p>
+                  <p className="text-mutedText text-sm">Send alerts to Slack channel</p>
                 </div>
                 <button
                   onClick={() => setSlackAlerts(!slackAlerts)}
@@ -245,7 +245,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-2">Alert Threshold (Risk Score)</label>
+                <label className="block text-mutedText text-sm mb-2">Alert Threshold (Risk Score)</label>
                 <div className="flex items-center gap-4">
                   <input
                     type="range"
@@ -256,7 +256,7 @@ export default function SettingsPage() {
                     onChange={(e) => setAlertThreshold(Number(e.target.value))}
                     className="flex-1"
                   />
-                  <span className="text-white w-12">{alertThreshold.toFixed(1)}</span>
+                  <span className="text-text w-12">{alertThreshold.toFixed(1)}</span>
                 </div>
               </div>
             </div>
@@ -265,12 +265,12 @@ export default function SettingsPage() {
           {/* API Settings */}
           {activeTab === 'api' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">API Settings</h2>
+              <h2 className="text-lg font-semibold text-text">API Settings</h2>
               
-              <div className="flex items-center justify-between py-3 border-b border-slate-700">
+              <div className="flex items-center justify-between py-3 border-b border-borderSubtle">
                 <div>
-                  <p className="text-white font-medium">Rate Limiting</p>
-                  <p className="text-slate-500 text-sm">Enable API rate limiting</p>
+                  <p className="text-text font-medium">Rate Limiting</p>
+                  <p className="text-mutedText text-sm">Enable API rate limiting</p>
                 </div>
                 <button
                   onClick={() => setRateLimitEnabled(!rateLimitEnabled)}
@@ -285,21 +285,21 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-2">Rate Limit (requests/minute)</label>
+                <label className="block text-mutedText text-sm mb-2">Rate Limit (requests/minute)</label>
                 <input
                   type="number"
                   value={rateLimit}
                   onChange={(e) => setRateLimit(Number(e.target.value))}
-                  className="w-32 px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-32 px-4 py-2 bg-background border border-borderSubtle rounded-lg text-text focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 text-sm mb-2">API Version</label>
+                <label className="block text-mutedText text-sm mb-2">API Version</label>
                 <select
                   value={apiVersion}
                   onChange={(e) => setApiVersion(e.target.value)}
-                  className="px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="px-4 py-2 bg-background border border-borderSubtle rounded-lg text-text focus:outline-none focus:border-blue-500"
                 >
                   <option value="v1">v1 (Legacy)</option>
                   <option value="v2">v2 (Current)</option>
@@ -307,8 +307,8 @@ export default function SettingsPage() {
                 </select>
               </div>
 
-              <div className="p-4 bg-slate-900 rounded-lg border border-slate-700">
-                <p className="text-slate-400 text-sm mb-2">API Endpoint</p>
+              <div className="p-4 bg-background rounded-lg border border-borderSubtle">
+                <p className="text-mutedText text-sm mb-2">API Endpoint</p>
                 <code className="text-blue-400">https://api.amttp.io/{apiVersion}/</code>
               </div>
             </div>
@@ -317,7 +317,7 @@ export default function SettingsPage() {
           {/* Integrations */}
           {activeTab === 'integrations' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">Integrations</h2>
+              <h2 className="text-lg font-semibold text-text">Integrations</h2>
               
               <div className="grid gap-4">
                 {[
@@ -328,12 +328,12 @@ export default function SettingsPage() {
                   { name: 'Vault', status: 'connected', icon: '🔐' },
                   { name: 'LayerZero', status: 'configured', icon: '⛓️' },
                 ].map((integration) => (
-                  <div key={integration.name} className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700">
+                  <div key={integration.name} className="flex items-center justify-between p-4 bg-background rounded-lg border border-borderSubtle">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{integration.icon}</span>
                       <div>
-                        <p className="text-white font-medium">{integration.name}</p>
-                        <p className="text-slate-500 text-sm capitalize">{integration.status}</p>
+                        <p className="text-text font-medium">{integration.name}</p>
+                        <p className="text-mutedText text-sm capitalize">{integration.status}</p>
                       </div>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs ${
@@ -352,7 +352,7 @@ export default function SettingsPage() {
           {/* Compliance */}
           {activeTab === 'compliance' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-white">Compliance Settings</h2>
+              <h2 className="text-lg font-semibold text-text">Compliance Settings</h2>
               
               <div className="grid gap-4">
                 {[
@@ -363,12 +363,12 @@ export default function SettingsPage() {
                   { name: 'Sanctions Screening', enabled: true },
                   { name: 'PEP Screening', enabled: false },
                 ].map((item) => (
-                  <div key={item.name} className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700">
-                    <p className="text-white font-medium">{item.name}</p>
+                  <div key={item.name} className="flex items-center justify-between p-4 bg-background rounded-lg border border-borderSubtle">
+                    <p className="text-text font-medium">{item.name}</p>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       item.enabled 
                         ? 'bg-green-900/50 text-green-400 border border-green-700'
-                        : 'bg-slate-700 text-slate-400'
+                        : 'bg-slate-700 text-mutedText'
                     }`}>
                       {item.enabled ? 'Enabled' : 'Disabled'}
                     </span>

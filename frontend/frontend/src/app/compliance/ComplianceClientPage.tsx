@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import WarRoomShell from '@/components/shells/WarRoomShell';
 import { useAuth } from '@/lib/auth-context';
 import { useDashboardStats, useFlaggedQueue, FlaggedTransaction } from '@/lib/data-service';
@@ -1351,12 +1352,12 @@ export default function ComplianceDashboard() {
                 <h2 className="font-bold text-white">Flagged Queue</h2>
                 <span className="px-2.5 py-1 bg-rose-500/20 rounded-full text-xs font-bold text-rose-400">{flaggedQueue.length}</span>
               </div>
-              <a href="/war-room/alerts" className="text-sm text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 group">
+              <Link href="/war-room/alerts" className="text-sm text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 group">
                 View all
                 <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
             </div>
             <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
               {flaggedError ? (
@@ -1390,7 +1391,7 @@ export default function ComplianceDashboard() {
               </div>
             </div>
             <div className="p-4 space-y-2">
-              <a href="/war-room/detection-studio" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
+              <Link href="/war-room/detection-studio" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
                 <div className="p-2 bg-indigo-500/20 rounded-lg group-hover:scale-110 transition-transform">
                   <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1400,9 +1401,9 @@ export default function ComplianceDashboard() {
                 <svg className="w-4 h-4 text-slate-500 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
               
-              <a href="/war-room/compliance" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
+              <Link href="/war-room/compliance" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
                 <div className="p-2 bg-emerald-500/20 rounded-lg group-hover:scale-110 transition-transform">
                   <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -1412,9 +1413,9 @@ export default function ComplianceDashboard() {
                 <svg className="w-4 h-4 text-slate-500 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
               
-              <a href="/war-room/detection-studio?view=network" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
+              <Link href="/war-room/detection-studio?view=network" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-left border border-transparent hover:border-white/10">
                 <div className="p-2 bg-purple-500/20 rounded-lg group-hover:scale-110 transition-transform">
                   <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -1424,10 +1425,10 @@ export default function ComplianceDashboard() {
                 <svg className="w-4 h-4 text-slate-500 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
               
               {capabilities?.canEditPolicies && (
-                <a href="/policies" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl transition-all text-left shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40">
+                <Link href="/policies" className="group w-full flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl transition-all text-left shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40">
                   <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -1437,7 +1438,7 @@ export default function ComplianceDashboard() {
                   <svg className="w-4 h-4 text-white/70 ml-auto group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </Link>
               )}
             </div>
           </div>

@@ -1,10 +1,15 @@
+/// @deprecated — This file is DEAD CODE. All R1/R2 routing now uses
+/// [FintechHomePage] in `shared/shells/premium_fintech_shell.dart`.
+/// Retained for reference only. Safe to delete.
+///
 /// Focus Mode Home Page - Sleek End User Interface
-/// 
+///
 /// Per Ground Truth v2.3:
 /// - Simplified interface for R1/R2 end users
 /// - No complex charts or analytics
 /// - Clean, modern, consumer-grade UX
 /// - Quick access to core features: Send, Trust Check, History
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +41,8 @@ class _FocusHomePageState extends ConsumerState<FocusHomePage>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
   }
 
@@ -123,8 +129,8 @@ class _FocusHomePageState extends ConsumerState<FocusHomePage>
           ),
           const SizedBox(height: 4),
           Text(
-            rbacState.displayName.isNotEmpty 
-                ? rbacState.displayName 
+            rbacState.displayName.isNotEmpty
+                ? rbacState.displayName
                 : 'Welcome back',
             style: TextStyle(
               fontSize: 28,
@@ -175,7 +181,8 @@ class _FocusHomePageState extends ConsumerState<FocusHomePage>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -282,7 +289,8 @@ class _FocusHomePageState extends ConsumerState<FocusHomePage>
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: actions.map((action) => _buildActionButton(action)).toList(),
+            children:
+                actions.map((action) => _buildActionButton(action)).toList(),
           ),
         ],
       ),

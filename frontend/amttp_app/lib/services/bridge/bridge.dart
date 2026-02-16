@@ -27,7 +27,7 @@
 /// bridge.openFullScreen('/war-room');
 /// ```
 
-library bridge;
+library;
 
 export 'flutter_nextjs_bridge.dart';
 export 'embedded_analytics.dart';

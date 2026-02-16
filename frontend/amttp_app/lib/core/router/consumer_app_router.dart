@@ -4,6 +4,7 @@
 /// It ONLY includes pages that end users need - no institutional/War Room pages.
 /// 
 /// For institutional users, they access the Next.js War Room directly.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,11 +15,9 @@ import 'package:go_router/go_router.dart';
 // ═══════════════════════════════════════════════════════════════════════════════
 // Note: FintechHomePage is in premium_fintech_shell.dart, not home_page.dart
 import '../../features/wallet/presentation/pages/wallet_page.dart';
-import '../../features/transfer/presentation/pages/transfer_page.dart';
 import '../../features/transfer/presentation/pages/premium_transfer_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/trust_check/presentation/pages/trust_check_page.dart';
 import '../../features/trust_check/presentation/pages/premium_trust_check_page.dart';
 import '../../features/disputes/presentation/pages/dispute_center_page.dart';
 import '../../features/disputes/presentation/pages/dispute_detail_page.dart';

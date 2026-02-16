@@ -2,11 +2,11 @@
 /// 
 /// Shows a friendly message explaining access restrictions and provides
 /// navigation options to return to accessible areas.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/rbac/rbac.dart';
-import '../../../../core/rbac/route_guard.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class UnauthorizedPage extends ConsumerWidget {

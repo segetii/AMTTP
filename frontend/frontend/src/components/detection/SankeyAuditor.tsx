@@ -61,6 +61,14 @@ const TYPE_COLORS = {
   exchange: '#f59e0b',     // Amber - Exchange
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  source: 'Origin',
+  intermediate: 'Relay',
+  sink: 'Destination',
+  mixer: 'Mixer',
+  exchange: 'Exchange',
+};
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -211,8 +219,8 @@ export default function SankeyAuditor({
   
   // Link color accessor
   const linkColor = (d: FlowLink) => {
-    if (d.isAnomaly) return '#ef4444';
-    return darkMode ? 'rgba(148, 163, 184, 0.3)' : 'rgba(100, 116, 139, 0.3)';
+    if (d.isAnomaly) return 'rgba(239, 68, 68, 0.7)';
+    return darkMode ? 'rgba(148, 163, 184, 0.5)' : 'rgba(100, 116, 139, 0.5)';
   };
   
   // Node label accessor
@@ -270,7 +278,7 @@ export default function SankeyAuditor({
             linkValue={(d: any) => d.value}
             label={nodeLabel}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            subLabel={(d: any) => nodeMap.get(d.id)?.type || ''}
+            subLabel={(d: any) => TYPE_LABELS[nodeMap.get(d.id)?.type || ''] || ''}
             labelBackground={true}
           />
         </VisSingleContainer>
@@ -295,7 +303,7 @@ export default function SankeyAuditor({
           <div className={`p-4 rounded-lg ${darkMode ? 'bg-slate-800/30' : 'bg-gray-100'}`}>
             <div className="text-sm opacity-60">Total Flow</div>
             <div className="text-xl font-semibold text-cyan-400">
-              {flowStats.totalFlow.toFixed(2)} ETH
+              {flowStats.totalFlow.toFixed(2)} {safeLinks[0]?.currency || 'ETH'}
             </div>
           </div>
           <div className={`p-4 rounded-lg ${darkMode ? 'bg-slate-800/30' : 'bg-gray-100'}`}>

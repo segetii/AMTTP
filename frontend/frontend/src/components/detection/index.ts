@@ -5,7 +5,7 @@
  * 
  * Visualization Stack (Ground Truth):
  * - ECharts: Time series, distributions, heatmaps
- * - Reagraph: Network graphs (WebGL)
+ * - Canvas 2D: Network graphs (ForceGraph2D – no WebGL)
  * - Unovis: Sankey diagrams
  */
 
@@ -19,8 +19,9 @@ export type { TimeSeriesDataPoint, TimeSeriesChartProps } from './TimeSeriesChar
 export { default as RiskDistributionChart, generateMockDistributionData } from './RiskDistributionChart';
 export type { DistributionBucket, RiskDistributionChartProps } from './RiskDistributionChart';
 
-// Reagraph-based components
+// Canvas 2D force-directed graph (replaced reagraph WebGL)
 export { default as GraphExplorer, generateMockGraphData } from './GraphExplorer';
+export { default as ForceGraph2D } from './ForceGraph2D';
 
 // Unovis-based components
 export { default as SankeyAuditor, generateMockSankeyData } from './SankeyAuditor';

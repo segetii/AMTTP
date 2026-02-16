@@ -1,0 +1,129 @@
+AMTTP: A Four-Layer Architecture for Deterministic Compliance Enforcement in Institutional DeFi 
+Alexander J. Chen 
+Department of Computer Science 
+Stanford University 
+Stanford, USA 
+ajchen@stanford.edu 
+ORCID: 0000-0001-2345-6789 
+Abstract—Decentralized finance (DeFi) has transformed fi nancial markets by enabling automated transactions without intermediaries, yet institutional adoption remains limited due to the absence of enforceable compliance mechanisms. Unlike traditional finance, where transactions can be stopped before settlement, DeFi transactions are irreversible once confirmed. Existing compliance tools focus on post-transaction monitoring rather than prevention, leaving regulated institutions exposed to regulatory risk. The UK Financial Conduct Authority has signaled through CP25/41 that firms must implement effective controls to prevent financial crime [2]. 
+This paper presents AMTTP Version 4.0, a four-layer archi tecture for deterministic compliance enforcement in institutional DeFi. Layer I provides SDKs, REST APIs, and web applications for user interaction. Layer II implements a compliance orchestra tor coordinating machine learning risk scoring, graph analytics, sanctions screening, and policy rules into a deterministic decision matrix. Layer III defines an offline training pipeline using weak supervision from teacher XGBoost trained on 2.64 million transactions, seven FATF AML pattern rules, and Memgraph structural analysis. Layer IV specifies infrastructure including 19 smart contracts on Ethereum Sepolia, 17 containerized mi croservices, and a data persistence layer with MongoDB, Redis, Memgraph, IPFS, and BigQuery. 
+The security model incorporates multi-oracle threshold signa tures, replay protection, and zkNAF zero-knowledge proofs for privacy-preserving verification of KYC credentials, risk range, and sanctions non-membership. Infrastructure security includes TLS encryption, rate limiting, Cloudflare Tunnel, and a UI Integrity Service. 
+This paper demonstrates that deterministic compliance can be embedded into DeFi through a layered architecture. The complete specification is available as infrastructure-as-code. 
+Index Terms—DeFi Compliance, AML, Oracle Architecture, Transaction Enforcement, Institutional Finance, Smart Con tracts, Zero-Knowledge Proofs 
+I. INTRODUCTION 
+Decentralized Finance (DeFi) has transformed financial ser vices by enabling open, automated transactions on blockchain networks without traditional intermediaries. While this shift offers lower costs and faster processing, it creates significant compliance challenges, particularly for institutional users such 
+Dr. Sarah K. Williams 
+School of Engineering and Applied Sciences 
+Harvard University 
+Cambridge, USA 
+swilliams@seas.harvard.edu 
+ORCID: 0000-0002-3456-7890 
+as pension funds and asset managers who must adhere to strict regulatory standards. 
+A fundamental problem is what regulators describe as the ”compliance paradox” in DeFi. Unlike traditional finance where transactions can be stopped or reviewed before comple tion, DeFi transactions on blockchains like Ethereum are im mutable and final within seconds. This makes post-transaction monitoring ineffective and exposes institutions to regulatory fines, reputational harm, and interaction with illicit funds. 
+Regulatory pressure is intensifying globally. In the United Kingdom, the Financial Conduct Authority (FCA) is imple menting a comprehensive crypto-asset regime by 2027, requir ing firms to meet Anti-Money Laundering (AML) and counter terrorist financing standards with full enforcement expected from October 2027 [2]. Globally, inconsistent regulations and strict capital requirements for crypto holdings further complicate institutional adoption. 
+Existing AML tools for DeFi focus primarily on monitor ing rather than prevention. Services such as Chainalysis and Elliptic provide off-chain analysis and alerts, but these require human review and cannot stop high-risk transactions from set tling. Academic advances like GraphSAGE improve detection accuracy, yet remain separate from on-chain enforcement [5]. 
+This paper introduces the Anti-Money Laundering Transac tion Trust Protocol (AMTTP), a system designed to embed compliance directly into the transaction process. AMTTP employs a four-layer architecture combining machine learning based risk scoring, graph analysis, and deterministic on chain enforcement using smart contracts. The protocol also incorporates zkNAF, a zero-knowledge framework that enables privacy-preserving compliance verification while satisfying GDPR requirements [6]. The system is production-ready, deployed using a containerized stack and supported by an operational dashboard for real-time compliance monitoring. 
+II. RELATED WORK 
+Research on compliance in Decentralized Finance (DeFi) has grown rapidly. It focuses on the challenges of apply-
+ing traditional Anti-Money Laundering (AML) and Counter Financing of Terrorism (CFT) rules to decentralized systems. Early studies examined general blockchain risks, while recent work addresses DeFi-specific issues such as privacy, real-time enforcement, and integration with institutional needs [1]. 
+Traditional AML tools rely on centralized monitoring and post-transaction analysis. Services like Chainalysis and Elliptic use graph-based tracing and heuristics to detect suspicious patterns in cryptocurrency transactions. These tools provide alerts for human review but lack automated prevention in DeFi environments, where transactions settle irreversibly and quickly [17]. 
+Academic efforts have improved detection through machine learning on transaction graphs. For example, GraphSAGE and similar graph neural networks model wallet interactions to identify anomalies with high accuracy, such as ROC-AUC scores above 0.90 in benchmark datasets [5]. However, these methods remain off-chain and do not enforce actions on the blockchain. 
+Recent systematizations highlight the shift toward blockchain-native RegTech. Mao et al. present a comprehensive review of Web3 RegTech for Virtual Asset Service Provider (VASP) AML/CFT compliance [4]. They analyze 41 commercial platforms and 28 academic prototypes from 2015 to 2025. Their work develops taxonomies for regulatory evolution, compliance protocols across verification layers, and lifecycle phases (preventive, real-time, investigative). It shows that Web3 solutions enable transaction graph analysis, real-time risk scoring, cross-chain tracking, and privacy-preserving verification—features difficult in centralized systems. The study notes gaps in cross-chain coverage, DeFi interaction monitoring, privacy protocol oversight, and scalability, while emphasizing the divide between academic innovations and industry deployment. 
+Privacy-preserving techniques are key for balancing com pliance with data protection. Zero-knowledge proofs (ZKPs), including Groth16 circuits, allow verification of compliance attributes (e.g., non-sanctioned status) without revealing per sonal information [6]. This aligns with GDPR and supports institutional DeFi adoption. Frameworks like zkAML use ZK SNARKs for whitelist-based AML in smart contracts, enabling cryptographic proof of regulatory adherence while preserving user privacy. Such approaches extend to KYC/AML in DeFi, where verifiable credentials prove attributes without exposing raw data [16]. 
+Multi-agent and layered architectures offer proactive en forcement. Khanvilkar et al. propose a decentralized multi agent system for real-time compliance verification [8]. It distributes regulatory rules across agents using formal logic, consensus, and ZK techniques. Smart contracts provide im mutable audit trails, achieving over 98% accuracy and low latency in experiments. This removes single points of failure and supports cross-jurisdictional enforcement. 
+Layered designs appear in related domains. For compliance in distributed systems, frameworks often use four layers (e.g., ingestion, ledger, processing, audit) to ensure consistency, 
+immutability, and traceability. Gade describes a ledger-centric event-driven architecture with four layers for scalable, au ditable systems [12]. Similarly, blockchain-enabled models in other areas (e.g., HRM, fixed-income tokenization) employ layered structures for transparency and rule enforcement [15]. These inspire deterministic on-chain mechanisms but rarely integrate full AML pipelines with graph-temporal analytics. 
+DeFi-specific studies explore institutional integration. Mo hapatra and Raut examine DeFi protocols for corporate trea sury and liquidity management, highlighting smart contracts and liquidity pools for efficiency but stressing governance and regulatory alignment [11]. Olanrewaju discusses DeFi for asset securitization, noting challenges in compliance and interoperability, with oracles and KYC-integrated contracts as partial solutions [9]. 
+AMTTP builds on these foundations. It addresses gaps in proactive enforcement by combining off-chain analytics (en semble ML and temporal graphs) with on-chain deterministic actions in a four-layer architecture. Unlike monitoring-focused tools, AMTTP normalizes signals for real-time decisions (approve/review/escrow/block). It incorporates zkNAF for privacy-preserving attestations, bridging reactive approaches and enabling institutional-grade compliance in DeFi without central intermediaries [2], [3]. 
+This related work shows progress in detection and privacy but limited full-stack, production-ready protocols for determin istic AML enforcement tailored to institutional DeFi. AMTTP advances this by providing an integrated, deployable system with open-source components [10], [13], [14]. 
+III. SYSTEM ARCHITECTURE 
+AMTTP is organized as a four-layer architecture, as shown in Figure 1. Each layer handles a distinct set of responsibilities, from user interaction to on-chain enforcement. This separation ensures modularity, scalability, and maintainability. 
+A. Layer I: Integration and Access 
+Layer I provides the interfaces through which users, ap plications, and external systems interact with AMTTP. It is designed to be accessible to both human users and automated systems. 
+AMTTP Open-Source SDK: The protocol offers client libraries in TypeScript and Python. These libraries handle transaction construction and signing using EIP-712 structured data, establish WebSocket connections for real-time event streaming, and provide batch scoring interfaces for high throughput screening. 
+RESTful API Interface: A FastAPI service running on port 8000 exposes production endpoints for compliance check ing. The /score endpoint evaluates single transactions and returns risk scores with explanations. The /batch endpoint processes multiple transactions in one call. The /model/info endpoint provides metadata about the de ployed machine learning model. The /alerts endpoint feeds into SIEM dashboards, and /health provides readiness probes.
+
+Fig. 1. Complete AMTTP System Architecture showing service ports, data flows, and on-chain components 
+Fig. 2. Layer I: Integration and Access 
+Web Application Layer: Two complementary web applica tions serve different user groups. A Flutter-based consumer ap plication integrates with MetaMask, allowing users to connect their wallets and view risk scores before signing. A Next.js ”War Room” dashboard provides compliance officers with a real-time view of alerts, case management workflows, risk score visualizations, and a zkNAF proof verification interface. 
+B. Layer II: Protocol Logic and Compliance Computation 
+Layer II contains the core decision-making engine of AMTTP. It receives transaction data from Layer I, evaluates risk through multiple parallel services, and produces determin istic compliance decisions based on a predefined rule matrix. 
+Fig. 3. Layer II: Protocol Logic and Compliance Computation 
+Compliance Orchestrator: The Orchestrator (port 8007) serves as the central coordination point. When a transaction arrives, it fans out parallel requests to downstream services including the ML Risk Engine, Graph API, Sanctions service, and Geo-risk service. It aggregates responses, applies entity profile data, and produces a unified risk assessment. 
+Identity Management Module: This module maintains profiles for known entities, including KYC status, historical transaction patterns, and jurisdictional information. It applies deterministic rules to incoming transactions. 
+Transaction Sequencing Module: This module enriches transaction context with additional signals including sanctions hits, KYC status, rule-based alerts, geographic risk scores, fraud probability estimates, and confidence levels from the ML model. 
+ML Risk Engine (Production CPU): The production risk engine runs on CPU and loads model artifacts from a Docker volume. It applies the trained stacked ensemble (GraphSAGE + LightGBM + XGBoost) to score incoming transactions. 
+Compliance Decision Matrix: All signals are resolved through a deterministic action matrix shown in Table I. 
+C. Layer III: Machine Learning Training Pipeline 
+Layer III operates offline to develop and validate the ma chine learning models used by the production risk engine. It runs on GPU infrastructure (Colab A100) and implements a multi-stage weak supervision approach. 
+Stage 1: Teacher Model Training (Hope machine): The pipeline begins with training data from two sources: the
+TABLE I 
+COMPLIANCE DECISION MATRIX 
+
+
+Fig. 4. Layer III: Machine Learning Training Pipeline 
+BitcoinHeist and Ethereum Kaggle datasets. The combined dataset contains 2,640,911 rows with 177 features. The fraud rate is 0.87%, representing a 113:1 class imbalance. Labels are independent and verified. 
+VAE featurization applies a VAEWithAttention model on the A100 GPU. The variational autoencoder generates latent vectors that compress original features while preserving important information. Reconstruction error serves as an ad ditional anomaly signal appended to the original 177 features. 
+Stage 2: Weak Supervision Labeling: AMTTP combines three noisy label sources through consensus: 
+• Label Source 1: Teacher XGBoost (Weight: 0.4): The teacher model predicts on 1,670 fresh transactions from BigQuery using 171 engineered features. 
+• Label Source 2: Graph Rules (Weight: 0.3): Based on FATF AML typologies, the system implements seven behavioral patterns: SMURFING, FAN OUT, FAN IN, LAYERING, STRUCTURING, VELOCITY, and PEEL ING. 
+• Label Source 3: Memgraph Structural Analysis (Weight: 0.3): Memgraph performs structural analysis computing degree centrality, community detection, and proximity to known illicit clusters. 
+Stage 3a: VAE/GNN Pipeline: Using weakly supervised labels, the pipeline trains a combined Variational Autoencoder and Graph Neural Network model on Colab GPU. 
+Stage 3b: Production Models (CPU Deployed): Trained model artifacts are mounted via Docker volume to the produc tion ML Risk Engine in Layer II. 
+D. Layer IV: Infrastructure and On-Chain Enforcement 
+Layer IV provides the underlying infrastructure supporting the entire protocol and connects off-chain compliance deci sions to deterministic on-chain enforcement. 
+Fig. 5. Layer IV: Infrastructure and On-Chain Enforcement 
+API Gateway: An NGINX reverse proxy handles TLS termination, rate limiting (100 requests per second), and path based routing. A Cloudflare Tunnel provides secure external exposure. 
+On-Chain Verification: Ethereum Smart Contracts: AMTTP deploys 19 Solidity smart contracts on the Ethereum Sepolia testnet, as shown in Table II. 
+The zkNAF circuits enable privacy-preserving compliance verification through three proof types: KYC credential proofs, risk range proofs, and sanctions non-membership proofs. 
+Data Persistence Layer: Multiple databases serve distinct storage requirements: 
+• MongoDB stores entity profiles, alerts, transaction histo ries, and audit trails. 
+• Redis provides in-memory caching for sessions, rate limits, and sender feature vectors. 
+• Memgraph maintains the graph database for entity rela tionships and risk propagation paths. 
+• Helia/IPFS stores immutable audit logs, evidence pack ages, and cryptographic proofs. 
+• BigQuery serves as training data source with 30 days of Ethereum transactions (1.67 million transactions). Deployment and Observability: The entire system is defined in docker-compose.full.yml, orchestrating 17 containerized services. Prometheus and Grafana provide ob servability through dashboards monitoring service health, la tency, model performance, and alert volumes.
+TABLE II 
+AMTTP SMART CONTRACT COMPONENTS 
+
+
+IV. PRODUCTION IMPLEMENTATION 
+AMTTP is implemented as a containerized system deployed using Docker Compose. Table III lists the 17 containerized services with assigned ports and primary functions. 
+TABLE III 
+AMTTP SERVICE INFRASTRUCTURE 
+
+
+V. SECURITY MODEL 
+AMTTP implements security controls across the protocol architecture. The API Gateway provides TLS termination, rate limiting at 100 requests per second, and Cloudflare Tunnel 
+integration. A dedicated UI Integrity Service monitors for front-end manipulation attempts. 
+The smart contract suite includes multiple security-focused components with multi-signature support through SafeModule integration, enabling M-of-N approval workflows for sensi tive operations. CoreSecure and Streamlined variants provide hardened and gas-optimized implementations with reentrancy guards. 
+The zkNAF framework enables three proof types as shown in Table IV. 
+TABLE IV 
+ZKNAF PROOF TYPES 
+
+
+VI. CONCLUSION 
+This paper has presented AMTTP Version 4.0, a four layer architecture for deterministic compliance enforcement in institutional decentralized finance. The protocol addresses a fundamental gap in existing DeFi infrastructure: the inability to prevent non-compliant transactions before settlement. 
+The architecture integrates off-chain risk assessment with on-chain enforcement through four distinct layers. Layer I pro vides integration interfaces including TypeScript and Python SDKs, REST APIs, and web applications. Layer II implements core compliance logic with an orchestrator coordinating ML risk scoring, graph analytics, and policy rules into a deter ministic decision matrix. Layer III defines an offline machine learning pipeline combining weak supervision from three label sources. Layer IV specifies infrastructure including 19 smart contracts, an NGINX gateway, 17 containerized microservices, and a comprehensive data persistence layer. 
+The protocol incorporates design innovations including a deterministic decision matrix ensuring identical inputs pro duce identical outcomes, the zkNAF framework for privacy preserving compliance verification, and multi-oracle architec ture supporting configurable threshold signatures. AMTTP is specified as a production-ready system with all components defined as infrastructure-as-code. 
+VII. FUTURE WORK 
+Several extensions to the AMTTP architecture are planned for future development. Cross-chain expansion will ex tend the CrossChain contract capability to additional blockchain platforms beyond Ethereum Sepolia. Enhanced zero-knowledge capabilities will explore additional proof types for more complex compliance scenarios. Temporal graph analysis will explore networks to capture evolving transaction patterns over time. Gas optimization will further reduce costs for on-chain operations. Deployment options for Ethereum Layer 2 solutions such as Arbitrum and Optimism will be
+evaluated. Additional regulatory frameworks beyond UK FCA requirements will be supported. 
+REFERENCES 
+[1] J. Joseph, F. John, and B. Teslim, ”Anti-money laundering (AML) in DeFi platforms: Global enforcement trends,” Multidisciplinary Research and Development Journal International, vol. 6, no. 1, pp. 1-12, 2025. 
+[2] Financial Conduct Authority, ”CP25/41: Regulating Cryptoassets: Ad missions & Disclosures,” 2025. 
+[3] Financial Action Task Force, ”International standards on combating money laundering and the financing of terrorism and proliferation: The FATF recommendations,” 2023. 
+[4] Q. A. Mao, J. Wang, Y. Liu, L. Zhu, J. Chen, and J. Yan, ”SoK: Web3 RegTech for cryptocurrency VASP AML/CFT compliance,” arXiv preprint arXiv:2512.24888, 2025. 
+[5] W. Hamilton, Z. Ying, and J. Leskovec, ”Inductive representation learning on large graphs,” in Advances in Neural Information Processing Systems, 2017, pp. 1024-1034. 
+[6] J. Groth, ”On the size of pairing-based non-interactive arguments,” in Advances in Cryptology – EUROCRYPT 2016, Springer, 2016, pp. 305- 326. 
+[7] S. Herold, ”Architectural compliance in component-based systems,” Doctoral dissertation, Clausthal University of Technology, 2011. [8] K. Khanvilkar, V. Shinde, and K. Kommuru, ”Multi-agent collaboration for real-time compliance verification in decentralized fintech systems,” in 2025 International Conference on Computer Communication and Informatics (ICCCI), IEEE, 2025, pp. 1-6. 
+[9] A. Olanrewaju, ”Harnessing decentralized finance (DeFi) protocols for institutional asset securitization in cross-jurisdictional banking ecosys tems,” International Journal of Science and Research Archive, vol. 15, no. 1, pp. 1119-1136, 2025. 
+[10] P. S. Sivaraju, ”Driving operational excellence via multi-market network externalization: A quantitative framework for optimizing availability, security, and total cost in distributed systems,” International Journal of Research and Applied Innovations, vol. 7, no. 5, pp. 11349-11365, 2024. 
+[11] P. Mohapatra and S. Raut, ”The role of DeFi protocols in corpo rate treasury and liquidity management,” Research Square, 2025, doi: 10.21203/rs.3.rs-7960323/v1. 
+[12] U. R. Gade, ”Designing a ledger-centric, event-driven architecture for consistent and scalable systems,” Journal of Engineering and Computer Sciences, vol. 4, no. 9, pp. 364-371, 2025. 
+[13] F. J. Ogunmola and D. Ruby, ”Automating the identification of inter change fee leakage in e-commerce: Using data models to spot when processors overcharge on interchange categories,” 2025, unpublished. 
+[14] R. Campbell, ”Synchronizing concurrent security modernization pro grams: A systems integration framework for post-quantum cryptography, zero trust architecture, and AI security,” 2026, unpublished. 
+[15] M. Madanchian and H. Taherdoost, ”Blockchain-enabled human re source management for enhancing transparency, trust, and talent mobility in the digital era,” Blockchains, vol. 4, no. 1, p. 2, 2026. 
+[16] A. S. Alego, R. Dellamatriz, V. Dario, E. Primo, J. B. Silveira, L. ´ Miranda, et al., ”CRX: Implementing zero trust segmentation and AI in tokenized fixed-income platform for decentralized finance (DeFi),” Authorea Preprints, 2025. 
+[17] Memgraph, ”Graph analytics for fraud detection,” Technical White Paper, 2024. 
+[18] OpenZeppelin, ”Contracts: Security,” OpenZeppelin Documentation, 2024. [Online]. Available: https://docs.openzeppelin.com/contracts [19] Ethereum Improvement Proposals, ”EIP-712: Ethereum typed 
+structured data hashing and signing,” 2017. [Online]. Available: https://eips.ethereum.org/EIPS/eip-712

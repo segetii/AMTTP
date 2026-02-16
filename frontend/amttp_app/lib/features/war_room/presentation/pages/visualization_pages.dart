@@ -4,6 +4,7 @@
 /// - Velocity Heatmap: Activity intensity over time
 /// - Sankey Flow: Value movement visualization
 /// - ML Explainability: SHAP-based feature importance
+library;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';

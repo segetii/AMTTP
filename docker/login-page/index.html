@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMTTP — Sign In</title>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --border: #1f2937;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --success: #10b981;
+      --error: #ef4444;
+      --warn: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container { width: 100%; max-width: 460px; padding: 24px; }
+    .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .logo p { color: var(--muted); font-size: 0.875rem; margin-top: 8px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .card h2 { font-size: 1.25rem; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--accent); }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--error);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+    .demo-section h3 {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-section h3::before {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .demo-section h3::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .demo-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .demo-card:hover {
+      border-color: var(--accent);
+      background: rgba(59,130,246,0.05);
+    }
+    .demo-card .role-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .demo-card .name { font-size: 0.85rem; font-weight: 600; }
+    .demo-card .email { font-size: 0.75rem; color: var(--muted); }
+    .demo-card .apps { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+    .r1 .role-badge { background: rgba(16,185,129,0.15); color: #10b981; }
+    .r2 .role-badge { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .r3 .role-badge { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .r4 .role-badge { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+    .r5 .role-badge { background: rgba(236,72,153,0.15); color: #ec4899; }
+    .r6 .role-badge { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>🛡️ AMTTP</h1>
+      <p>Anti-Money Laundering Trust Transfer Protocol</p>
+    </div>
+
+    <div class="card">
+      <h2>Sign In</h2>
+      <div id="error" class="error-msg"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@amttp.io" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+      </form>
+    </div>
+
+    <div class="demo-section">
+      <h3>Quick Demo Login</h3>
+      <div class="demo-grid" id="demoGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div class="footer">
+      AMTTP v2.3 &middot; Unified Gateway &middot; RBAC Enforced
+    </div>
+  </div>
+
+  <script>
+    const DEMO_USERS = [
+      { email: 'user@amttp.io',       password: 'user123',   name: 'Alex Thompson',     role: 'R1', label: 'End User',       apps: 'Consumer', cls: 'r1' },
+      { email: 'pep@amttp.io',        password: 'pep123',    name: 'Jordan Mitchell',   role: 'R2', label: 'End User PEP',   apps: 'Consumer', cls: 'r2' },
+      { email: 'ops@amttp.io',        password: 'ops123',    name: 'Emma Wilson',       role: 'R3', label: 'Institution Ops', apps: 'Both',     cls: 'r3' },
+      { email: 'compliance@amttp.io', password: 'comply123', name: 'Michael Rodriguez', role: 'R4', label: 'Compliance',     apps: 'Both',     cls: 'r4' },
+      { email: 'admin@amttp.io',      password: 'admin123',  name: 'Sarah Chen',        role: 'R5', label: 'Platform Admin', apps: 'Both',     cls: 'r5' },
+      { email: 'super@amttp.io',      password: 'super123',  name: 'James Park',        role: 'R6', label: 'Super Admin',    apps: 'Both',     cls: 'r6' },
+    ];
+
+    // Populate demo cards
+    const grid = document.getElementById('demoGrid');
+    DEMO_USERS.forEach(u => {
+      const card = document.createElement('div');
+      card.className = `demo-card ${u.cls}`;
+      card.innerHTML = `
+        <span class="role-badge">${u.role} ${u.label}</span>
+        <div class="name">${u.name}</div>
+        <div class="email">${u.email}</div>
+        <div class="apps">→ ${u.apps}</div>
+      `;
+      card.onclick = () => demoLogin(u);
+      grid.appendChild(card);
+    });
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+    function hideError() {
+      document.getElementById('error').classList.remove('visible');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Signing in...';
+
+      try {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showError(data.detail || 'Login failed');
+          return;
+        }
+        // Redirect to original destination (from ?redirect=) or role-based default
+        const dest = redirectTo || data.redirect || '/consumer/';
+        window.location.href = dest;
+      } catch (err) {
+        showError('Network error. Is the auth gateway running?');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    async function demoLogin(user) {
+      hideError();
+      document.getElementById('email').value = user.email;
+      document.getElementById('password').value = user.password;
+      // Small delay for visual feedback
+      await new Promise(r => setTimeout(r, 150));
+      document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    }
+
+    // If redirected here with ?redirect=, store it
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirect');
+  </script>
+</body>
+</html>

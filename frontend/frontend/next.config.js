@@ -10,7 +10,11 @@ const EXPLAINABILITY_URL = process.env.EXPLAINABILITY_URL || 'http://explainabil
 const nextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
-  
+
+  // Base path for unified gateway — all Next.js routes are served under /app
+  // This ensures internal links, static assets, and router all use the /app prefix.
+  basePath: '/app',
+
   // Disable telemetry in production
   experimental: {
     // instrumentationHook: true,

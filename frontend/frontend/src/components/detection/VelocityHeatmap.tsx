@@ -145,18 +145,26 @@ export default function VelocityHeatmap({
     },
     grid: {
       top: 60,
-      bottom: 60,
+      bottom: 100,
       left: 60,
       right: 40,
     },
     xAxis: {
       type: 'category',
       data: HOURS,
+      name: 'Hour of Day',
+      nameLocation: 'center',
+      nameGap: 30,
+      nameTextStyle: {
+        color: darkMode ? '#94a3b8' : '#64748b',
+        fontSize: 11,
+      },
       splitArea: { show: true },
       axisLabel: {
         color: darkMode ? '#94a3b8' : '#64748b',
         fontSize: 10,
         interval: 2,
+        rotate: 45,
       },
       axisLine: {
         lineStyle: { color: darkMode ? '#334155' : '#e2e8f0' },
@@ -165,6 +173,11 @@ export default function VelocityHeatmap({
     yAxis: {
       type: 'category',
       data: DAYS,
+      name: 'Day',
+      nameTextStyle: {
+        color: darkMode ? '#94a3b8' : '#64748b',
+        fontSize: 11,
+      },
       splitArea: { show: true },
       axisLabel: {
         color: darkMode ? '#94a3b8' : '#64748b',
@@ -180,11 +193,11 @@ export default function VelocityHeatmap({
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      bottom: 10,
+      bottom: 55,
       inRange: {
         color: darkMode 
-          ? ['#0ea5e9', '#22c55e', '#eab308', '#ef4444']
-          : ['#bae6fd', '#86efac', '#fde047', '#fca5a5'],
+          ? ['#0c4a6e', '#0369a1', '#0ea5e9', '#f59e0b', '#ef4444']
+          : ['#e0f2fe', '#7dd3fc', '#38bdf8', '#fbbf24', '#f87171'],
       },
       textStyle: {
         color: darkMode ? '#94a3b8' : '#64748b',
@@ -205,11 +218,20 @@ export default function VelocityHeatmap({
           },
         },
         markPoint: showAnomalies ? {
-          symbol: 'circle',
-          symbolSize: 20,
+          symbol: 'pin',
+          symbolSize: 28,
           data: anomalyMarkers,
+          itemStyle: {
+            color: '#ef4444',
+            shadowBlur: 8,
+            shadowColor: 'rgba(239, 68, 68, 0.5)',
+          },
           label: {
-            show: false,
+            show: true,
+            formatter: '!',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 'bold',
           },
         } : undefined,
       },
@@ -220,7 +242,7 @@ export default function VelocityHeatmap({
         xAxisIndex: 0,
         start: 0,
         end: 100,
-        bottom: 35,
+        bottom: 10,
         height: 15,
         borderColor: darkMode ? '#334155' : '#e2e8f0',
         backgroundColor: darkMode ? '#1e293b' : '#f8fafc',

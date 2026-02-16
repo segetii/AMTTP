@@ -1,11 +1,11 @@
 /// Route Permissions Configuration
-/// 
+///
 /// Single source of truth for route-role access mapping.
 /// This file defines which user roles can access each route.
-/// 
+///
 /// Roles (from RBAC system):
 /// - R1: End User (Basic)
-/// - R2: Power User  
+/// - R2: Power User
 /// - R3: Institution Ops
 /// - R4: Institution Compliance
 /// - R5: Platform Admin
@@ -15,6 +15,7 @@
 /// - native: Flutter-native page
 /// - embedded: Next.js page embedded via iframe
 /// - external: Opens in external browser
+library;
 
 import 'package:flutter/material.dart';
 
@@ -30,9 +31,9 @@ enum UserRole {
 
 /// Route implementation type
 enum RouteType {
-  native,    // Flutter-native page
-  embedded,  // Next.js embedded via iframe
-  external,  // Opens in browser
+  native, // Flutter-native page
+  embedded, // Next.js embedded via iframe
+  external, // Opens in browser
 }
 
 /// Route permission definition
@@ -42,9 +43,9 @@ class RoutePermission {
   final IconData icon;
   final List<UserRole> allowedRoles;
   final RouteType type;
-  final String? nextJsPath;  // For embedded routes
+  final String? nextJsPath; // For embedded routes
   final String? description;
-  final bool showInNav;  // Whether to show in navigation menus
+  final bool showInNav; // Whether to show in navigation menus
 
   const RoutePermission({
     required this.path,
@@ -59,13 +60,12 @@ class RoutePermission {
 
   /// Check if a role has access to this route
   bool hasAccess(UserRole role) => allowedRoles.contains(role);
-  
+
   /// Check if role level is sufficient (R6 can access everything R1 can)
   bool hasAccessByLevel(UserRole role) {
     final roleIndex = UserRole.values.indexOf(role);
-    return allowedRoles.any((allowed) => 
-      UserRole.values.indexOf(allowed) <= roleIndex
-    );
+    return allowedRoles
+        .any((allowed) => UserRole.values.indexOf(allowed) <= roleIndex);
   }
 }
 
@@ -263,6 +263,7 @@ class RoutePermissions {
     label: 'War Room',
     icon: Icons.dashboard_rounded,
     allowedRoles: [
+      UserRole.R3_INSTITUTION_OPS,
       UserRole.R4_INSTITUTION_COMPLIANCE,
       UserRole.R5_PLATFORM_ADMIN,
       UserRole.R6_SUPER_ADMIN,
@@ -369,12 +370,28 @@ class RoutePermissions {
 
   /// All routes
   static const List<RoutePermission> allRoutes = [
-    home, wallet, transfer, history, settings,
-    nftSwap, crossChain, disputes, sessionKeys, safe,
-    approver, detectionStudio,
-    compliance, fatfRules, warRoom, sanctions, complianceAlerts,
-    admin, audit, zknaf,
-    mlModels, roleManagement,
+    home,
+    wallet,
+    transfer,
+    history,
+    settings,
+    nftSwap,
+    crossChain,
+    disputes,
+    sessionKeys,
+    safe,
+    approver,
+    detectionStudio,
+    compliance,
+    fatfRules,
+    warRoom,
+    sanctions,
+    complianceAlerts,
+    admin,
+    audit,
+    zknaf,
+    mlModels,
+    roleManagement,
   ];
 
   /// Get routes accessible by a specific role
@@ -411,31 +428,47 @@ class RoutePermissions {
 
   /// End User navigation (Focus Mode)
   static const List<RoutePermission> endUserNav = [
-    home, wallet, transfer, history, settings,
+    home,
+    wallet,
+    transfer,
+    history,
+    settings,
   ];
 
   /// Power User additions
   static const List<RoutePermission> powerUserNav = [
-    nftSwap, crossChain, disputes, sessionKeys, safe,
+    nftSwap,
+    crossChain,
+    disputes,
+    sessionKeys,
+    safe,
   ];
 
-  /// Institution Ops additions  
+  /// Institution Ops additions
   static const List<RoutePermission> institutionOpsNav = [
-    approver, detectionStudio,
+    approver,
+    detectionStudio,
   ];
 
   /// Compliance additions
   static const List<RoutePermission> complianceNav = [
-    compliance, fatfRules, warRoom, sanctions, complianceAlerts,
+    compliance,
+    fatfRules,
+    warRoom,
+    sanctions,
+    complianceAlerts,
   ];
 
   /// Admin additions
   static const List<RoutePermission> adminNav = [
-    admin, audit, zknaf,
+    admin,
+    audit,
+    zknaf,
   ];
 
   /// Super Admin additions
   static const List<RoutePermission> superAdminNav = [
-    mlModels, roleManagement,
+    mlModels,
+    roleManagement,
   ];
 }

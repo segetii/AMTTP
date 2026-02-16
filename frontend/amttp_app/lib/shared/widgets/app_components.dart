@@ -2,6 +2,7 @@
 /// 
 /// These components follow the design system and should be used
 /// throughout the app for consistency.
+library;
 
 import 'package:flutter/material.dart';
 import '../../core/theme/design_tokens.dart';

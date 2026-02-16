@@ -196,7 +196,7 @@ export function SecurePaymentFlow({
 
     // Generate confirmation data
     // First, get compliance evaluation from orchestrator
-    const orchestratorUrl = "http://127.0.0.1:8007";
+    const orchestratorUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8007";
     try {
       const complianceResponse = await fetch(`${orchestratorUrl}/evaluate-with-integrity`, {
         method: "POST",

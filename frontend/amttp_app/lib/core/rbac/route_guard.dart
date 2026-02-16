@@ -1,7 +1,8 @@
 /// Route Guard - Enforces role-based access at the router level
-/// 
+///
 /// Uses RoutePermissions config to determine if a user can access a route.
 /// Integrates with existing RBAC Role enum.
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'roles.dart';
@@ -56,7 +57,9 @@ RouteGuardResult checkRouteAccess(String path, Role? role) {
   // Not logged in
   if (role == null) {
     // Allow public routes
-    if (path == '/sign-in' || path == '/register' || path == '/select-profile') {
+    if (path == '/sign-in' ||
+        path == '/register' ||
+        path == '/select-profile') {
       return RouteGuardResult.allowed;
     }
     return RouteGuardResult.redirectToLogin;
@@ -67,10 +70,11 @@ RouteGuardResult checkRouteAccess(String path, Role? role) {
 
   // Check route permissions
   final routePermission = RoutePermissions.getRoute(path);
-  
-  // Route not in config - allow (it may be a system route)
+
+  // Route not in config - deny by default (secure-by-default)
+  // System/common routes are handled separately in the router redirect
   if (routePermission == null) {
-    return RouteGuardResult.allowed;
+    return RouteGuardResult.redirectToHome;
   }
 
   // Check access
@@ -128,18 +132,19 @@ String? getNextJsPath(String path) {
 /// Get profile-based navigation structure
 class ProfileNavigation {
   final Role role;
-  
+
   ProfileNavigation(this.role);
-  
+
   /// Get main nav items (sidebar)
   List<RoutePermission> get mainNav => getRouteNavItemsForRole(role);
-  
+
   /// Get bottom nav items (mobile)
   List<RoutePermission> get bottomNav {
     final userRole = roleToUserRole(role);
-    
+
     // End users get simplified bottom nav
-    if (userRole == UserRole.R1_END_USER || userRole == UserRole.R2_POWER_USER) {
+    if (userRole == UserRole.R1_END_USER ||
+        userRole == UserRole.R2_POWER_USER) {
       return [
         RoutePermissions.home,
         RoutePermissions.wallet,
@@ -148,7 +153,7 @@ class ProfileNavigation {
         RoutePermissions.settings,
       ];
     }
-    
+
     // Institutional users get different bottom nav
     return [
       RoutePermissions.home,
@@ -157,15 +162,15 @@ class ProfileNavigation {
       RoutePermissions.settings,
     ];
   }
-  
+
   /// Get quick action routes (FAB menu, etc.)
   List<RoutePermission> get quickActions {
     final userRole = roleToUserRole(role);
-    
+
     final actions = <RoutePermission>[
       RoutePermissions.transfer,
     ];
-    
+
     // Add more actions for higher roles
     if (RoutePermissions.nftSwap.hasAccess(userRole)) {
       actions.add(RoutePermissions.nftSwap);
@@ -173,28 +178,28 @@ class ProfileNavigation {
     if (RoutePermissions.crossChain.hasAccess(userRole)) {
       actions.add(RoutePermissions.crossChain);
     }
-    
+
     return actions;
   }
-  
+
   /// Check if War Room access is available
   bool get hasWarRoomAccess {
     final userRole = roleToUserRole(role);
     return RoutePermissions.warRoom.hasAccess(userRole);
   }
-  
+
   /// Check if Compliance tools are available
   bool get hasComplianceAccess {
     final userRole = roleToUserRole(role);
     return RoutePermissions.compliance.hasAccess(userRole);
   }
-  
+
   /// Check if Admin tools are available
   bool get hasAdminAccess {
     final userRole = roleToUserRole(role);
     return RoutePermissions.admin.hasAccess(userRole);
   }
-  
+
   /// Check if Super Admin tools are available
   bool get hasSuperAdminAccess {
     final userRole = roleToUserRole(role);
@@ -207,6 +212,7 @@ class ProfileNavigation {
 /// ═══════════════════════════════════════════════════════════════════════════════
 
 /// Provider for profile navigation
-final profileNavigationProvider = Provider.family<ProfileNavigation, Role>((ref, role) {
+final profileNavigationProvider =
+    Provider.family<ProfileNavigation, Role>((ref, role) {
   return ProfileNavigation(role);
 });

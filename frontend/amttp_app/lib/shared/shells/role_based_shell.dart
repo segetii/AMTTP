@@ -4,12 +4,12 @@
 /// - Single sidebar navigation (no double bars)
 /// - Full screen mode for embedded Next.js pages (top bar hides)
 /// - Back arrow overlay for navigation
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/rbac/rbac.dart';
-import '../../core/rbac/role_navigation_config.dart';
 import '../../core/theme/app_theme.dart';
 // Import the Premium Fintech Shell (Metamask/Revolut style)
 import 'premium_fintech_shell.dart';

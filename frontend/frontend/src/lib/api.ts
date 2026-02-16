@@ -664,19 +664,8 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     if (!response.ok) throw new Error('Failed to fetch stats');
     return response.json();
   } catch (error) {
-    // Return mock data if API unavailable
-    return {
-      totalAlerts: 166,
-      criticalAlerts: 8,
-      highAlerts: 24,
-      mediumAlerts: 89,
-      lowAlerts: 45,
-      alertsTrend: 12.5,
-      resolvedToday: 15,
-      pendingInvestigation: 23,
-      blockedAddresses: 8,
-      flaggedTransactions: 1152
-    };
+    console.error('[Dashboard] API unavailable:', error);
+    throw error;
   }
 }
 
@@ -708,8 +697,8 @@ export async function fetchAlerts(filters?: {
     if (Array.isArray(data?.alerts)) return data.alerts;
     return [];
   } catch (error) {
-    // Return mock alerts
-    return generateMockAlerts(20);
+    console.error('[Alerts] API unavailable:', error);
+    throw error;
   }
 }
 
@@ -720,21 +709,8 @@ export async function fetchEntityProfile(address: string): Promise<EntityProfile
     if (!response.ok) throw new Error('Failed to fetch entity');
     return response.json();
   } catch (error) {
-    console.error('Failed to fetch entity profile:', error);
-    // Return empty profile for address not found
-    return {
-      address,
-      entity_type: 'UNKNOWN',
-      kyc_level: 'NONE',
-      risk_tolerance: 'LOW',
-      jurisdiction: 'UNKNOWN',
-      daily_limit_eth: 0,
-      monthly_limit_eth: 0,
-      single_tx_limit_eth: 0,
-      total_transactions: 0,
-      daily_volume_eth: 0,
-      flags: ['Entity not found - register in orchestrator'],
-    };
+    console.error('[Entity] Failed to fetch entity profile:', error);
+    throw error;
   }
 }
 
@@ -783,26 +759,8 @@ export async function scoreAddress(address: string): Promise<{
       reasons
     };
   } catch (error) {
-    console.error('Failed to score address, using fallback:', error);
-    // Return fallback score based on address characteristics
-    const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const baseScore = (hash % 100) / 100;
-    const riskLevel = baseScore > 0.7 ? 'HIGH' : baseScore > 0.4 ? 'MEDIUM' : 'LOW';
-    
-    // Generate fallback reasons
-    const reasons = generateInvestigationReasons(address, baseScore, riskLevel, null);
-    
-    return {
-      address,
-      hybrid_score: baseScore,
-      risk_level: riskLevel,
-      action: riskLevel === 'HIGH' ? 'REVIEW' : 'ALLOW',
-      ml_score: baseScore * 0.9,
-      graph_score: baseScore * 1.1,
-      patterns: generatePatternString(baseScore),
-      signal_count: Math.floor(hash % 10),
-      reasons
-    };
+    console.error('[Risk] Failed to score address:', error);
+    throw error;
   }
 }
 
@@ -894,7 +852,8 @@ export async function performAction(
     if (!response.ok) throw new Error('Action failed');
     return response.json();
   } catch (error) {
-    return { success: true, message: `Action ${action} performed (mock)` };
+    console.error('[Action] Failed to perform action:', error);
+    throw error;
   }
 }
 
@@ -905,72 +864,12 @@ export async function fetchTimelineData(timeRange: string): Promise<TimelineData
     if (!response.ok) throw new Error('Failed to fetch timeline');
     return response.json();
   } catch (error) {
-    return generateMockTimeline(timeRange);
+    console.error('[Timeline] Failed to fetch timeline:', error);
+    throw error;
   }
 }
 
-// Mock data generators
-function generateMockAlerts(count: number): Alert[] {
-  const riskLevels: Alert['riskLevel'][] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
-  const patterns = ['SMURFING', 'LAYERING', 'FAN_OUT', 'FAN_IN', 'ROUND_TRIP', 'RAPID_MOVEMENT'];
-  const statuses: Alert['status'][] = ['NEW', 'INVESTIGATING', 'RESOLVED', 'FALSE_POSITIVE'];
-  const actions: Alert['action'][] = ['BLOCK', 'ESCROW', 'FLAG', 'MONITOR', 'APPROVE'];
-  
-  // Known high-risk addresses from our analysis
-  const knownAddresses = [
-    '0xeae7380dd4cef6fbd1144f49e4d1e6964258a4f4',
-    '0xa1abfa21f80ecf401b5fab3f4cf88223dc7ed5a6',
-    '0x28c6c06298d514db089934071355e5743bf21d60',
-    '0x21a31ee1afc51d94c2efccaa2092ad1028285549',
-    '0x56eddb7aa87536c09ccc2793473599fd21a8b17f',
-    '0x3cc936b795a188f0e246cbb2d74c5bd190aecf18',
-    '0x9696f59e4d72e237be84ffd425dcad154bf96976',
-    '0xd793281d0d58993d2c99cd238a03f51c54b7001c'
-  ];
-  
-  return Array.from({ length: count }, (_, i) => {
-    const riskLevel = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-    const numPatterns = Math.floor(Math.random() * 3) + 1;
-    const selectedPatterns = patterns.sort(() => 0.5 - Math.random()).slice(0, numPatterns);
-    
-    return {
-      id: `alert-${Date.now()}-${i}`,
-      timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      address: i < knownAddresses.length ? knownAddresses[i] : `0x${Math.random().toString(16).slice(2, 42)}`,
-      riskLevel,
-      riskScore: riskLevel === 'CRITICAL' ? 85 + Math.random() * 15 :
-                 riskLevel === 'HIGH' ? 65 + Math.random() * 20 :
-                 riskLevel === 'MEDIUM' ? 40 + Math.random() * 25 :
-                 Math.random() * 40,
-      signals: selectedPatterns,
-      signalCount: numPatterns,
-      patterns: selectedPatterns,
-      action: actions[riskLevels.indexOf(riskLevel)] || 'MONITOR',
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      valueEth: Math.random() * 100,
-      transactionHash: `0x${Math.random().toString(16).slice(2, 66)}`
-    };
-  }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-}
-
-function generateMockTimeline(timeRange: string): TimelineDataPoint[] {
-  const points = timeRange === '1h' ? 12 : timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : 30;
-  const interval = timeRange === '1h' ? 5 * 60 * 1000 : 
-                   timeRange === '24h' ? 60 * 60 * 1000 :
-                   24 * 60 * 60 * 1000;
-  
-  return Array.from({ length: points }, (_, i) => ({
-    timestamp: new Date(Date.now() - (points - i) * interval).toISOString(),
-    value: Math.floor(Math.random() * 20),
-    label: `Point ${i}`,
-    metadata: {
-      critical: Math.floor(Math.random() * 3),
-      high: Math.floor(Math.random() * 8),
-      medium: Math.floor(Math.random() * 15),
-      low: Math.floor(Math.random() * 10)
-    }
-  }));
-}
+// Mock data generators — REMOVED (all data from real backends now)
 
 // ============================================================================
 // Policy Management API
@@ -980,34 +879,45 @@ import type { Policy, PolicyFormData } from '@/types/policy';
 
 const POLICY_API = process.env.NEXT_PUBLIC_POLICY_API_URL || 'http://127.0.0.1:8003';
 
+// Helper: fetch with timeout to avoid long hangs when backend is off
+async function policyFetch(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // Fetch all policies
 export async function fetchPolicies(): Promise<Policy[]> {
   try {
-    const response = await fetch(`${POLICY_API}/policies`);
+    const response = await policyFetch(`${POLICY_API}/policies`);
     if (!response.ok) throw new Error('Failed to fetch policies');
     return response.json();
   } catch (error) {
-    console.error('API error, using mock data:', error);
-    return generateMockPolicies();
+    console.error('[Policies] Failed to fetch policies:', error);
+    throw error;
   }
 }
 
 // Fetch single policy by ID
 export async function fetchPolicy(id: string): Promise<Policy | null> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${id}`);
+    const response = await policyFetch(`${POLICY_API}/policies/${id}`);
     if (!response.ok) return null;
     return response.json();
-  } catch {
-    const policies = generateMockPolicies();
-    return policies.find(p => p.id === id) || null;
+  } catch (error) {
+    console.error('[Policies] Failed to fetch policy:', error);
+    throw error;
   }
 }
 
 // Create new policy
 export async function createPolicy(data: PolicyFormData): Promise<Policy> {
   try {
-    const response = await fetch(`${POLICY_API}/policies`, {
+    const response = await policyFetch(`${POLICY_API}/policies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1015,30 +925,15 @@ export async function createPolicy(data: PolicyFormData): Promise<Policy> {
     if (!response.ok) throw new Error('Failed to create policy');
     return response.json();
   } catch (error) {
-    console.error('Create policy error:', error);
-    // Return mock created policy
-    return {
-      id: `policy-${Date.now()}`,
-      ...data,
-      isDefault: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: '0x0000000000000000000000000000000000000000',
-      stats: {
-        totalTransactions: 0,
-        approvedCount: 0,
-        reviewedCount: 0,
-        escrowedCount: 0,
-        blockedCount: 0
-      }
-    };
+    console.error('[Policies] Failed to create policy:', error);
+    throw error;
   }
 }
 
 // Update existing policy
 export async function updatePolicy(id: string, data: Partial<PolicyFormData>): Promise<Policy> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${id}`, {
+    const response = await policyFetch(`${POLICY_API}/policies/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1046,7 +941,7 @@ export async function updatePolicy(id: string, data: Partial<PolicyFormData>): P
     if (!response.ok) throw new Error('Failed to update policy');
     return response.json();
   } catch (error) {
-    console.error('Update policy error:', error);
+    console.error('[Policies] Failed to update policy:', error);
     throw error;
   }
 }
@@ -1054,12 +949,12 @@ export async function updatePolicy(id: string, data: Partial<PolicyFormData>): P
 // Delete policy
 export async function deletePolicy(id: string): Promise<void> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${id}`, {
+    const response = await policyFetch(`${POLICY_API}/policies/${id}`, {
       method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete policy');
   } catch (error) {
-    console.error('Delete policy error:', error);
+    console.error('[Policies] Failed to delete policy:', error);
     throw error;
   }
 }
@@ -1072,13 +967,13 @@ export async function togglePolicyStatus(id: string, isActive: boolean): Promise
 // Set policy as default
 export async function setDefaultPolicy(id: string): Promise<Policy> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${id}/set-default`, {
+    const response = await policyFetch(`${POLICY_API}/policies/${id}/set-default`, {
       method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to set default policy');
     return response.json();
   } catch (error) {
-    console.error('Set default policy error:', error);
+    console.error('[Policies] Failed to set default policy:', error);
     throw error;
   }
 }
@@ -1086,7 +981,7 @@ export async function setDefaultPolicy(id: string): Promise<Policy> {
 // Add address to whitelist
 export async function addToWhitelist(policyId: string, address: string): Promise<Policy> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${policyId}/whitelist`, {
+    const response = await policyFetch(`${POLICY_API}/policies/${policyId}/whitelist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address })
@@ -1094,7 +989,7 @@ export async function addToWhitelist(policyId: string, address: string): Promise
     if (!response.ok) throw new Error('Failed to add to whitelist');
     return response.json();
   } catch (error) {
-    console.error('Add to whitelist error:', error);
+    console.error('[Policies] Failed to add to whitelist:', error);
     throw error;
   }
 }
@@ -1102,7 +997,7 @@ export async function addToWhitelist(policyId: string, address: string): Promise
 // Add address to blacklist
 export async function addToBlacklist(policyId: string, address: string): Promise<Policy> {
   try {
-    const response = await fetch(`${POLICY_API}/policies/${policyId}/blacklist`, {
+    const response = await policyFetch(`${POLICY_API}/policies/${policyId}/blacklist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address })
@@ -1110,144 +1005,9 @@ export async function addToBlacklist(policyId: string, address: string): Promise
     if (!response.ok) throw new Error('Failed to add to blacklist');
     return response.json();
   } catch (error) {
-    console.error('Add to blacklist error:', error);
+    console.error('[Policies] Failed to add to blacklist:', error);
     throw error;
   }
 }
 
-// Mock policy data generator
-function generateMockPolicies(): Policy[] {
-  return [
-    {
-      id: 'policy-default',
-      name: 'Default Policy',
-      description: 'Standard compliance policy for all transactions',
-      isActive: true,
-      isDefault: true,
-      createdAt: '2025-01-01T00:00:00Z',
-      updatedAt: '2025-01-05T00:00:00Z',
-      createdBy: '0xBc270F0ce5bbE8Ed8489f11262eF1a1527CaF23F',
-      thresholds: { lowRiskMax: 25, mediumRiskMax: 50, highRiskMax: 75 },
-      limits: {
-        maxTransactionAmount: '1000000000000000000000',
-        dailyLimit: '10000000000000000000000',
-        monthlyLimit: '100000000000000000000000',
-        maxCounterparties: 100
-      },
-      rules: {
-        blockSanctionedAddresses: true,
-        requireKYCAboveThreshold: true,
-        kycThresholdAmount: '10000000000000000000',
-        autoEscrowHighRisk: true,
-        escrowDurationHours: 24,
-        allowedChainIds: [1, 137, 42161],
-        blockedCountries: ['KP', 'IR', 'SY']
-      },
-      actions: {
-        onLowRisk: 'APPROVE',
-        onMediumRisk: 'REVIEW',
-        onHighRisk: 'ESCROW',
-        onCriticalRisk: 'BLOCK',
-        onSanctionedAddress: 'BLOCK',
-        onUnknownAddress: 'REVIEW'
-      },
-      whitelist: [],
-      blacklist: [],
-      stats: {
-        totalTransactions: 15420,
-        approvedCount: 12500,
-        reviewedCount: 2100,
-        escrowedCount: 720,
-        blockedCount: 100,
-        lastTriggered: '2025-01-05T10:30:00Z'
-      }
-    },
-    {
-      id: 'policy-high-value',
-      name: 'High Value Transactions',
-      description: 'Stricter policy for transactions over 100 ETH',
-      isActive: true,
-      isDefault: false,
-      createdAt: '2025-01-02T00:00:00Z',
-      updatedAt: '2025-01-04T00:00:00Z',
-      createdBy: '0xBc270F0ce5bbE8Ed8489f11262eF1a1527CaF23F',
-      thresholds: { lowRiskMax: 15, mediumRiskMax: 35, highRiskMax: 60 },
-      limits: {
-        maxTransactionAmount: '500000000000000000000',
-        dailyLimit: '1000000000000000000000',
-        monthlyLimit: '10000000000000000000000',
-        maxCounterparties: 20
-      },
-      rules: {
-        blockSanctionedAddresses: true,
-        requireKYCAboveThreshold: true,
-        kycThresholdAmount: '1000000000000000000',
-        autoEscrowHighRisk: true,
-        escrowDurationHours: 48,
-        allowedChainIds: [1],
-        blockedCountries: ['KP', 'IR', 'SY', 'CU', 'VE']
-      },
-      actions: {
-        onLowRisk: 'REVIEW',
-        onMediumRisk: 'ESCROW',
-        onHighRisk: 'ESCROW',
-        onCriticalRisk: 'BLOCK',
-        onSanctionedAddress: 'BLOCK',
-        onUnknownAddress: 'BLOCK'
-      },
-      whitelist: ['0x1234567890123456789012345678901234567890'],
-      blacklist: [],
-      stats: {
-        totalTransactions: 342,
-        approvedCount: 0,
-        reviewedCount: 210,
-        escrowedCount: 120,
-        blockedCount: 12,
-        lastTriggered: '2025-01-05T09:15:00Z'
-      }
-    },
-    {
-      id: 'policy-defi',
-      name: 'DeFi Protocol Interactions',
-      description: 'Optimized for DEX and lending protocol interactions',
-      isActive: false,
-      isDefault: false,
-      createdAt: '2025-01-03T00:00:00Z',
-      updatedAt: '2025-01-03T00:00:00Z',
-      createdBy: '0xBc270F0ce5bbE8Ed8489f11262eF1a1527CaF23F',
-      thresholds: { lowRiskMax: 30, mediumRiskMax: 55, highRiskMax: 80 },
-      limits: {
-        maxTransactionAmount: '10000000000000000000000',
-        dailyLimit: '50000000000000000000000',
-        monthlyLimit: '500000000000000000000000',
-        maxCounterparties: 500
-      },
-      rules: {
-        blockSanctionedAddresses: true,
-        requireKYCAboveThreshold: false,
-        kycThresholdAmount: '0',
-        autoEscrowHighRisk: false,
-        escrowDurationHours: 0,
-        allowedChainIds: [1, 137, 42161, 10, 8453],
-        blockedCountries: []
-      },
-      actions: {
-        onLowRisk: 'APPROVE',
-        onMediumRisk: 'APPROVE',
-        onHighRisk: 'REVIEW',
-        onCriticalRisk: 'ESCROW',
-        onSanctionedAddress: 'BLOCK',
-        onUnknownAddress: 'APPROVE'
-      },
-      whitelist: [],
-      blacklist: [],
-      stats: {
-        totalTransactions: 0,
-        approvedCount: 0,
-        reviewedCount: 0,
-        escrowedCount: 0,
-        blockedCount: 0
-      }
-    }
-  ];
-}
+// Mock policy data generator — REMOVED (all data from real backends now)

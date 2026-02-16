@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_service.dart';
+import 'cross_app_auth_bridge.dart';
 import '../rbac/roles.dart';
 import '../rbac/rbac_provider.dart';
 
@@ -25,7 +26,8 @@ class AuthState {
     this.isLoading = false,
   });
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
 
   AuthState copyWith({
     AuthStatus? status,
@@ -53,10 +55,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _init() async {
     state = state.copyWith(status: AuthStatus.loading, isLoading: true);
-    
+
     try {
       await _authService.init();
-      
+
       if (_authService.isLoggedIn && _authService.currentUser != null) {
         final user = _authService.currentUser!;
         state = state.copyWith(
@@ -64,7 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user: user,
           isLoading: false,
         );
-        
+
         // Sync with RBAC provider
         _ref.read(rbacProvider.notifier).setRole(user.role);
       } else {
@@ -106,11 +108,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
         // Sync full RBAC context (role + identifiers)
         _ref.read(rbacProvider.notifier).login(
-          role: user.role,
-          userId: user.id,
-          walletAddress: user.walletAddress ?? '',
-          displayName: user.displayName,
-        );
+              role: user.role,
+              userId: user.id,
+              walletAddress: user.walletAddress ?? '',
+              displayName: user.displayName,
+            );
+
+        // Write cross-app auth bridge cookie (web only)
+        try {
+          CrossAppAuthBridge.writeCookie(
+            CrossAppAuthBridge.createToken(
+              userId: user.id,
+              email: user.email,
+              role: user.role.name,
+              mode: user.role.mode,
+              displayName: user.displayName,
+            ),
+          );
+        } catch (_) {}
 
         return true;
       } else {
@@ -161,11 +176,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
         // Sync full RBAC context (role + identifiers)
         _ref.read(rbacProvider.notifier).login(
-          role: user.role,
-          userId: user.id,
-          walletAddress: user.walletAddress ?? '',
-          displayName: user.displayName,
-        );
+              role: user.role,
+              userId: user.id,
+              walletAddress: user.walletAddress ?? '',
+              displayName: user.displayName,
+            );
 
         return true;
       } else {
@@ -192,9 +207,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _authService.logout();
       state = const AuthState(status: AuthStatus.unauthenticated);
-      
+
       // Reset RBAC provider
       _ref.read(rbacProvider.notifier).logout();
+
+      // Clear cross-app auth bridge cookie (web only)
+      try {
+        CrossAppAuthBridge.clearCookie();
+      } catch (_) {}
     } catch (e) {
       state = state.copyWith(
         errorMessage: e.toString(),

@@ -2,6 +2,7 @@
 /// 
 /// Placeholder pages for War Room features per Ground Truth v2.3
 /// These will be implemented with full functionality in subsequent sprints
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -327,7 +328,6 @@ class _WarRoomPageScaffold extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.child,
-    this.actions,
   });
 
   @override

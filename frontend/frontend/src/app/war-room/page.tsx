@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from 'react';
-import WarRoomShell from '@/components/shells/WarRoomShell';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useDashboardStats, useFlaggedQueue, FlaggedTransaction } from '@/lib/data-service';
 
@@ -34,22 +34,22 @@ function StatCard({ label, value, change, changeType = 'neutral', icon }: StatCa
   const changeColors = {
     positive: 'text-green-400',
     negative: 'text-red-400',
-    neutral: 'text-slate-400',
+    neutral: 'text-mutedText',
   };
   
   return (
-    <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+    <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-400">{label}</p>
-          <p className="text-2xl font-bold text-white mt-1">{value}</p>
+          <p className="text-sm text-mutedText">{label}</p>
+          <p className="text-2xl font-bold text-text mt-1">{value}</p>
           {change && (
             <p className={`text-sm mt-1 ${changeColors[changeType]}`}>
               {change}
             </p>
           )}
         </div>
-        <div className="text-slate-400">
+        <div className="text-mutedText">
           {icon}
         </div>
       </div>
@@ -112,22 +112,22 @@ function FlaggedRow({ item, onClick }: { item: FlaggedTransaction; onClick: () =
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${config.badge}`}>
+            <span className={`px-1.5 py-0.5 text-xs font-bold text-text rounded ${config.badge}`}>
               {item.riskLevel || 'FLAGGED'}
             </span>
-            <span className="text-sm font-medium text-white truncate">
+            <span className="text-sm font-medium text-text truncate">
               {item.reason || 'Flagged for review'}
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1 line-clamp-2">
+          <p className="text-sm text-mutedText mt-1 line-clamp-2">
             Risk Score: {item.riskScore?.toFixed(1) || 'N/A'} • {item.status?.replace('_', ' ') || 'pending'}
           </p>
           {item.address && (
-            <p className="text-xs font-mono text-slate-500 mt-1">{item.address}</p>
+            <p className="text-xs font-mono text-mutedText mt-1">{item.address}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 whitespace-nowrap">{timeAgo}</span>
+          <span className="text-xs text-mutedText whitespace-nowrap">{timeAgo}</span>
           <svg className="w-4 h-4 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -274,7 +274,7 @@ function ExplainabilityModal({
       case 'HIGH': return 'text-amber-500 bg-amber-500';
       case 'MEDIUM': return 'text-yellow-400 bg-yellow-400';
       case 'LOW': return 'text-green-500 bg-green-500';
-      default: return 'text-slate-400 bg-slate-400';
+      default: return 'text-mutedText bg-slate-400';
     }
   };
   
@@ -283,7 +283,7 @@ function ExplainabilityModal({
       case 'critical': return 'border-red-500 bg-red-500/10 text-red-400';
       case 'high': return 'border-amber-500 bg-amber-500/10 text-amber-400';
       case 'medium': return 'border-yellow-400 bg-yellow-400/10 text-yellow-400';
-      default: return 'border-slate-500 bg-slate-500/10 text-slate-400';
+      default: return 'border-slate-500 bg-slate-500/10 text-mutedText';
     }
   };
   
@@ -291,23 +291,23 @@ function ExplainabilityModal({
   
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      <div className="bg-background rounded-2xl border border-borderSubtle w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-800 border-b border-slate-700 flex items-center gap-4">
+        <div className="px-6 py-4 bg-surface border-b border-borderSubtle flex items-center gap-4">
           <div className={`p-2 rounded-lg ${riskColorClass.split(' ')[1]}/20`}>
             <svg className={`w-6 h-6 ${riskColorClass.split(' ')[0]}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-white">Decision Explainability</h2>
-            <p className="text-sm text-slate-400 font-mono">{item.address || item.id}</p>
+            <h2 className="text-lg font-bold text-text">Decision Explainability</h2>
+            <p className="text-sm text-mutedText font-mono">{item.address || item.id}</p>
           </div>
           <div className={`px-3 py-1 rounded-full ${riskColorClass.split(' ')[1]}/20 border ${riskColorClass.split(' ')[1].replace('bg-', 'border-')}/50`}>
             <span className={`text-sm font-bold ${riskColorClass.split(' ')[0]}`}>{explanation.riskLevel} RISK</span>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-            <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5 text-mutedText" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -336,15 +336,15 @@ function ExplainabilityModal({
               </div>
             </div>
             <div>
-              <p className="text-sm text-slate-400">Confidence: {Math.round(explanation.confidence * 100)}%</p>
-              <p className="text-sm text-slate-500 mt-1">Model: GraphSAGE + XGBoost</p>
+              <p className="text-sm text-mutedText">Confidence: {Math.round(explanation.confidence * 100)}%</p>
+              <p className="text-sm text-mutedText mt-1">Model: GraphSAGE + XGBoost</p>
             </div>
           </div>
           
           {/* Narrative */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">Analysis Summary</h3>
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+            <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Analysis Summary</h3>
+            <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
               <p className="text-slate-200 leading-relaxed">{explanation.narrative}</p>
             </div>
           </div>
@@ -352,7 +352,7 @@ function ExplainabilityModal({
           {/* Patterns */}
           {explanation.patterns.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">Detected Patterns</h3>
+              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Detected Patterns</h3>
               <div className="space-y-2">
                 {explanation.patterns.map((p, i) => (
                   <div key={i} className={`border rounded-lg p-3 ${getSeverityColor(p.severity)}`}>
@@ -370,12 +370,12 @@ function ExplainabilityModal({
           {/* Factors */}
           {explanation.factors.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">Contributing Factors (SHAP)</h3>
+              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Contributing Factors (SHAP)</h3>
               <div className="space-y-3">
                 {explanation.factors.map((f, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <span className="w-32 text-sm text-slate-300 truncate">{f.name}</span>
-                    <div className="flex-1 h-5 bg-slate-800 rounded relative">
+                    <div className="flex-1 h-5 bg-surface rounded relative">
                       <div 
                         className={`h-5 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
                         style={{ width: `${Math.min(f.impact * 100 * 3, 100)}%` }}
@@ -393,7 +393,7 @@ function ExplainabilityModal({
           {/* Typologies */}
           {explanation.typologies.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">AML Typologies</h3>
+              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">AML Typologies</h3>
               <div className="flex flex-wrap gap-2">
                 {explanation.typologies.map((t, i) => (
                   <span key={i} className="px-3 py-1 bg-red-500/15 border border-red-500/30 rounded-lg text-sm text-red-400">
@@ -406,16 +406,16 @@ function ExplainabilityModal({
         </div>
         
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-800 border-t border-slate-700 flex justify-end gap-3">
+        <div className="px-6 py-4 bg-surface border-t border-borderSubtle flex justify-end gap-3">
           <button 
             onClick={onClose}
-            className="px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors"
+            className="px-4 py-2 text-mutedText hover:text-slate-200 transition-colors"
           >
             Close
           </button>
           <button 
             onClick={onInvestigate}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-text rounded-lg transition-colors flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -485,17 +485,17 @@ function AlertRow({ alert }: { alert: Alert }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${config.badge}`}>
+            <span className={`px-1.5 py-0.5 text-xs font-bold text-text rounded ${config.badge}`}>
               {alert.type.toUpperCase()}
             </span>
-            <span className="text-sm font-medium text-white truncate">{alert.title}</span>
+            <span className="text-sm font-medium text-text truncate">{alert.title}</span>
           </div>
-          <p className="text-sm text-slate-400 mt-1 line-clamp-2">{alert.description}</p>
+          <p className="text-sm text-mutedText mt-1 line-clamp-2">{alert.description}</p>
           {alert.address && (
-            <p className="text-xs font-mono text-slate-500 mt-1">{alert.address}</p>
+            <p className="text-xs font-mono text-mutedText mt-1">{alert.address}</p>
           )}
         </div>
-        <span className="text-xs text-slate-500 whitespace-nowrap">{alert.timestamp}</span>
+        <span className="text-xs text-mutedText whitespace-nowrap">{alert.timestamp}</span>
       </div>
     </div>
   );
@@ -564,13 +564,13 @@ export default function WarRoomDashboard() {
   };
   
   return (
-    <WarRoomShell>
+    <>
       <div className="space-y-6">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">War Room Dashboard</h1>
-            <p className="text-slate-400 mt-1">Real-time monitoring and alerts</p>
+            <h1 className="text-2xl font-bold text-text">War Room Dashboard</h1>
+            <p className="text-mutedText mt-1">Real-time monitoring and alerts</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
@@ -637,18 +637,18 @@ export default function WarRoomDashboard() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Flagged Queue Panel */}
-          <div className="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700">
-            <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
-              <h2 className="font-semibold text-white">Flagged Queue ({flaggedQueue.length})</h2>
-              <a href="/war-room/alerts" className="text-sm text-indigo-400 hover:text-indigo-300">View all</a>
+          <div className="lg:col-span-2 bg-surface rounded-xl border border-borderSubtle">
+            <div className="px-4 py-3 border-b border-borderSubtle flex items-center justify-between">
+              <h2 className="font-semibold text-text">Flagged Queue ({flaggedQueue.length})</h2>
+              <Link href="/war-room/alerts" className="text-sm text-indigo-400 hover:text-indigo-300">View all</Link>
             </div>
             <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
               {flaggedError ? (
                 <div className="text-center py-8 text-red-400">Failed to load flagged queue. {flaggedError}</div>
               ) : flaggedLoading ? (
-                <div className="text-center py-8 text-slate-400">Loading flagged items...</div>
+                <div className="text-center py-8 text-mutedText">Loading flagged items...</div>
               ) : flaggedQueue.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">No flagged items</div>
+                <div className="text-center py-8 text-mutedText">No flagged items</div>
               ) : (
                 flaggedQueue.slice(0, 10).map((item) => (
                   <FlaggedRow 
@@ -662,46 +662,46 @@ export default function WarRoomDashboard() {
           </div>
           
           {/* Quick Actions Panel */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700">
-            <div className="px-4 py-3 border-b border-slate-700">
-              <h2 className="font-semibold text-white">Quick Actions</h2>
+          <div className="bg-surface rounded-xl border border-borderSubtle">
+            <div className="px-4 py-3 border-b border-borderSubtle">
+              <h2 className="font-semibold text-text">Quick Actions</h2>
             </div>
             <div className="p-4 space-y-3">
-              <a href="/war-room/detection-studio" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <Link href="/war-room/detection-studio" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
                 <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="text-white">Search Address</span>
-              </a>
+                <span className="text-text">Search Address</span>
+              </Link>
               
-              <a href="/war-room/compliance" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <Link href="/war-room/compliance" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
                 <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span className="text-white">View Reports</span>
-              </a>
+                <span className="text-text">View Reports</span>
+              </Link>
               
-              <a href="/war-room/detection-studio?view=network" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
+              <Link href="/war-room/detection-studio?view=network" className="w-full flex items-center gap-3 px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left">
                 <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span className="text-white">Entity Graph</span>
-              </a>
+                <span className="text-text">Entity Graph</span>
+              </Link>
               
               {capabilities?.canEditPolicies && (
-                <a href="/policies" className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors text-left">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <Link href="/policies" className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors text-left">
+                  <svg className="w-5 h-5 text-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
-                  <span className="text-white">Configure Policies</span>
-                </a>
+                  <span className="text-text">Configure Policies</span>
+                </Link>
               )}
             </div>
           </div>
         </div>
         
         {/* System Status Bar */}
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
+        <div className="bg-surface rounded-xl border border-borderSubtle p-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
@@ -721,21 +721,20 @@ export default function WarRoomDashboard() {
                 <span className="text-sm text-slate-300">Monitoring</span>
               </div>
             </div>
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-mutedText">
               Last updated: Just now
             </div>
           </div>
         </div>
       </div>
-      
       {/* Explainability Modal */}
-      {selectedItem && (
+      {selectedItem !== null && selectedItem && (
         <ExplainabilityModal
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onInvestigate={handleInvestigate}
         />
       )}
-    </WarRoomShell>
+    </>
   );
 }

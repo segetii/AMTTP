@@ -492,7 +492,7 @@ export default function RegisterPage() {
                   />
                   <span className="text-sm text-slate-400 group-hover:text-slate-300">
                     I agree to the{' '}
-                    <a href="/terms" className="text-cyan-400 hover:text-cyan-300">Terms of Service</a>
+                    <Link href="/terms" className="text-cyan-400 hover:text-cyan-300">Terms of Service</Link>
                   </span>
                 </label>
                 
@@ -505,7 +505,7 @@ export default function RegisterPage() {
                   />
                   <span className="text-sm text-slate-400 group-hover:text-slate-300">
                     I agree to the{' '}
-                    <a href="/privacy" className="text-cyan-400 hover:text-cyan-300">Privacy Policy</a>
+                    <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300">Privacy Policy</Link>
                   </span>
                 </label>
               </div>

@@ -95,9 +95,12 @@ export default function RiskDistributionChart({
         const p = params[0];
         const bucket = data[p.dataIndex];
         const pct = total > 0 ? ((bucket.count / total) * 100).toFixed(1) : 0;
+        const midpoint = (bucket.rangeStart + bucket.rangeEnd) / 2;
+        const riskLevel = thresholds.find(t => midpoint <= t.value)?.label || thresholds[thresholds.length - 1]?.label || '';
         return `
           <div style="padding: 4px;">
             <div style="font-weight: 600;">${bucket.range}</div>
+            <div style="color: ${getBarColor(bucket.rangeStart, bucket.rangeEnd)}; font-size: 11px; margin-bottom: 4px;">${riskLevel}</div>
             <div>Count: ${bucket.count.toLocaleString()}</div>
             <div>Percentage: ${pct}%</div>
           </div>
@@ -124,7 +127,6 @@ export default function RiskDistributionChart({
       },
       axisLabel: {
         color: darkMode ? '#94a3b8' : '#64748b',
-        rotate: 45,
       },
     },
     yAxis: {
@@ -142,7 +144,8 @@ export default function RiskDistributionChart({
       },
       splitLine: {
         lineStyle: {
-          color: darkMode ? '#1e293b' : '#f1f5f9',
+          color: darkMode ? '#334155' : '#e2e8f0',
+          type: 'dashed',
         },
       },
     },
@@ -157,32 +160,35 @@ export default function RiskDistributionChart({
             borderRadius: [4, 4, 0, 0],
           },
         })),
-        barWidth: '60%',
+        barWidth: '55%',
+        barCategoryGap: '30%',
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
             shadowColor: 'rgba(0, 0, 0, 0.3)',
           },
         },
+        markLine: thresholds.length > 0 ? {
+          silent: true,
+          symbol: 'none',
+          data: thresholds.slice(0, -1).map((t, idx) => ({
+            xAxis: Math.round(t.value * (data.length)) - 0.5,
+            lineStyle: {
+              color: t.color,
+              type: 'dashed',
+              width: 2,
+            },
+            label: {
+              show: true,
+              formatter: t.label,
+              color: t.color,
+              position: 'end',
+              fontSize: 11,
+            },
+          })),
+        } : undefined,
       },
     ],
-    // Threshold lines
-    markLine: thresholds.length > 0 ? {
-      silent: true,
-      symbol: 'none',
-      data: thresholds.slice(0, -1).map(t => ({
-        xAxis: t.value * 10 - 0.5,
-        lineStyle: {
-          color: t.color,
-          type: 'dashed',
-          width: 2,
-        },
-        label: {
-          formatter: t.label,
-          color: t.color,
-        },
-      })),
-    } : undefined,
   }), [data, title, xAxisLabel, showPercentage, thresholds, total, darkMode]);
   
   // Handle click events

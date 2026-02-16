@@ -1,15 +1,16 @@
 /// Consolidated App Router
-/// 
+///
 /// SIMPLIFIED STRUCTURE:
 /// - 10 core pages for end users
 /// - No RBAC route guards (handled by Next.js for institutional users)
 /// - Sign-in routes users to appropriate app based on role
-/// 
+///
 /// Routing Logic:
 /// - End Users (R1, R2) → Stay in Flutter Wallet App
 /// - Institutional (R3+) → Redirected to Next.js War Room
-/// 
+///
 /// See CONSOLIDATION_PLAN.md for details.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +19,7 @@ import 'package:go_router/go_router.dart';
 // ═══════════════════════════════════════════════════════════════════════════════
 // CORE PAGES (Consolidated)
 // ═══════════════════════════════════════════════════════════════════════════════
-import '../../features/home/presentation/pages/home_page.dart';
+// Dead import removed: home_page.dart (only FintechHomePage from premium_fintech_shell.dart is used)
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/transfer/presentation/pages/premium_transfer_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
@@ -48,13 +49,23 @@ enum PremiumSection { home, wallet, send, activity, profile }
 
 PremiumSection sectionForRoute(String route) {
   final path = route.split('?').first.split('#').first;
-  
+
   if (path == '/' || path == '/home') return PremiumSection.home;
-  if (path == '/wallet' || path.startsWith('/wallet')) return PremiumSection.wallet;
-  if (path == '/transfer' || path == '/trust-check' || path.startsWith('/transfer')) return PremiumSection.send;
-  if (path == '/history' || path.startsWith('/history')) return PremiumSection.activity;
-  if (path == '/profile' || path == '/settings' || path == '/more') return PremiumSection.profile;
-  
+  if (path == '/wallet' || path.startsWith('/wallet')) {
+    return PremiumSection.wallet;
+  }
+  if (path == '/transfer' ||
+      path == '/trust-check' ||
+      path.startsWith('/transfer')) {
+    return PremiumSection.send;
+  }
+  if (path == '/history' || path.startsWith('/history')) {
+    return PremiumSection.activity;
+  }
+  if (path == '/profile' || path == '/settings' || path == '/more') {
+    return PremiumSection.profile;
+  }
+
   return PremiumSection.home;
 }
 
@@ -83,7 +94,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  
+
   return GoRouter(
     initialLocation: '/sign-in',
     refreshListenable: GoRouterRefreshStream(ref),
@@ -91,18 +102,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState.isAuthenticated;
       final path = state.matchedLocation;
       final isAuthRoute = path == '/sign-in' || path == '/register';
-      
+
       // Redirect unauthenticated users to sign-in
       if (!isAuthenticated && !isAuthRoute && path != '/unauthorized') {
         return '/sign-in';
       }
-      
+
       // Redirect authenticated users away from auth pages to home
       // (Role-based routing is handled in sign-in page)
       if (isAuthenticated && isAuthRoute) {
         return '/';
       }
-      
+
       return null;
     },
     routes: [
@@ -127,7 +138,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return UnauthorizedPage(attemptedRoute: attemptedRoute);
         },
       ),
-      
+
       // ════════════════════════════════════════════════════════════════════════
       // MAIN APP (Premium Fintech Shell) - End User Wallet
       // ════════════════════════════════════════════════════════════════════════
@@ -147,7 +158,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'home',
             builder: (context, state) => const FintechHomePage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 2. WALLET
           // ──────────────────────────────────────────────────────────────────────
@@ -156,7 +167,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'wallet',
             builder: (context, state) => const WalletPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 3. TRANSFER (includes trust check)
           // ──────────────────────────────────────────────────────────────────────
@@ -165,7 +176,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'transfer',
             builder: (context, state) => const PremiumTransferPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 4. HISTORY
           // ──────────────────────────────────────────────────────────────────────
@@ -174,7 +185,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'history',
             builder: (context, state) => const HistoryPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 5. SETTINGS
           // ──────────────────────────────────────────────────────────────────────
@@ -183,7 +194,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'settings',
             builder: (context, state) => const SettingsPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 6. TRUST CHECK (standalone page)
           // ──────────────────────────────────────────────────────────────────────
@@ -195,7 +206,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               return PremiumTrustCheckPage(initialAddress: address);
             },
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 7. WALLET CONNECT
           // ──────────────────────────────────────────────────────────────────────
@@ -204,7 +215,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'connect',
             builder: (context, state) => const PremiumWalletConnectPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 8. ADVANCED FEATURES (Consolidated: NFT, CrossChain, Safe, Sessions, zkNAF)
           // ──────────────────────────────────────────────────────────────────────
@@ -216,7 +227,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               return AdvancedFeaturesPage(initialTab: tab);
             },
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 9. DISPUTES
           // ──────────────────────────────────────────────────────────────────────
@@ -225,7 +236,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'disputes',
             builder: (context, state) => const DisputeCenterPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // 10. DISPUTE DETAIL
           // ──────────────────────────────────────────────────────────────────────
@@ -237,21 +248,25 @@ final routerProvider = Provider<GoRouter>((ref) {
               return DisputeDetailPage(disputeId: disputeId);
             },
           ),
-          
+
           // ════════════════════════════════════════════════════════════════════════
           // BACKWARD COMPATIBILITY REDIRECTS
           // ════════════════════════════════════════════════════════════════════════
-          
+
           // Navigation aliases
           GoRoute(path: '/wallet-connect', redirect: (_, __) => '/connect'),
           GoRoute(path: '/profile', redirect: (_, __) => '/settings'),
           GoRoute(path: '/more', redirect: (_, __) => '/settings'),
-          
+
           // Advanced features deep links → consolidated page
           GoRoute(path: '/nft-swap', redirect: (_, __) => '/advanced?tab=nft'),
-          GoRoute(path: '/cross-chain', redirect: (_, __) => '/advanced?tab=crosschain'),
+          GoRoute(
+              path: '/cross-chain',
+              redirect: (_, __) => '/advanced?tab=crosschain'),
           GoRoute(path: '/safe', redirect: (_, __) => '/advanced?tab=safe'),
-          GoRoute(path: '/session-keys', redirect: (_, __) => '/advanced?tab=sessions'),
+          GoRoute(
+              path: '/session-keys',
+              redirect: (_, __) => '/advanced?tab=sessions'),
           GoRoute(path: '/zknaf', redirect: (_, __) => '/advanced?tab=privacy'),
         ],
       ),

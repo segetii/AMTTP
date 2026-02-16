@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/providers/admin_providers.dart';
-import '../../../../shared/widgets/risk_visualizer_widget.dart';
 import '../../../../shared/widgets/risk_level_indicator.dart';
 
 class AdminPage extends ConsumerStatefulWidget {

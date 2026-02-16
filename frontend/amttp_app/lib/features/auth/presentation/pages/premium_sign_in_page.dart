@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:ui';
 import '../../../../core/auth/auth_provider.dart';
-import '../../../../core/auth/auth_service.dart';
 import '../../../../core/rbac/roles.dart';
 
 /// Premium Fintech Sign In Page - Metamask/Revolut Style
-/// 
+///
 /// Simplified routing:
 /// - End Users (R1, R2) → Flutter Wallet App (/)
 /// - Institutional (R3+) → Next.js War Room (external)
@@ -46,7 +45,8 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
   }
 
@@ -62,9 +62,9 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     if (!_formKey.currentState!.validate()) return;
 
     final success = await ref.read(authProvider.notifier).signIn(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
     if (success && mounted) {
       final user = ref.read(authProvider).user;
@@ -99,15 +99,14 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final demoCredentials = AuthService.getDemoCredentials();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: AppTheme.tokenBackground,
       body: Stack(
         children: [
           // Animated gradient background
           _buildAnimatedBackground(),
-          
+
           // Main content
           SafeArea(
             child: Center(
@@ -125,13 +124,12 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
                           // Logo and branding
                           _buildLogo(),
                           const SizedBox(height: 48),
-                          
+
                           // Login card
                           _buildLoginCard(authState),
                           const SizedBox(height: 32),
-                          
-                          // Demo accounts
-                          _buildDemoAccounts(demoCredentials),
+
+                          // Demo accounts removed. Only real backend login is available.
                         ],
                       ),
                     ),
@@ -159,8 +157,8 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFF6366F1).withOpacity(0.3),
-                  const Color(0xFF6366F1).withOpacity(0.0),
+                  AppTheme.tokenPrimary.withAlpha(77),
+                  AppTheme.tokenPrimary.withOpacity(0.0),
                 ],
               ),
             ),
@@ -177,8 +175,8 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFF8B5CF6).withOpacity(0.2),
-                  const Color(0xFF8B5CF6).withOpacity(0.0),
+                  AppTheme.tokenPrimarySoft.withAlpha(51),
+                  AppTheme.tokenPrimarySoft.withOpacity(0.0),
                 ],
               ),
             ),
@@ -199,12 +197,12 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+              colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
             ),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6366F1).withOpacity(0.4),
+                color: AppTheme.tokenPrimary.withAlpha(102),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -214,7 +212,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             child: Text(
               'A',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
                 letterSpacing: -2,
@@ -223,24 +221,24 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // App name
         const Text(
           'AMTTP',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.tokenText,
             fontSize: 32,
             fontWeight: FontWeight.bold,
             letterSpacing: 4,
           ),
         ),
         const SizedBox(height: 8),
-        
+
         // Tagline
         Text(
           'Secure • Compliant • Decentralized',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 14,
             fontWeight: FontWeight.w500,
             letterSpacing: 1,
@@ -254,14 +252,14 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF1E1E2E),
+          color: AppTheme.tokenBorderSubtle,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withAlpha(77),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -276,7 +274,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             const Text(
               'Welcome back',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -285,12 +283,12 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             Text(
               'Sign in to access your account',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withAlpha(128),
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Email field
             _buildTextField(
               controller: _emailController,
@@ -301,7 +299,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               validator: (v) => v == null || v.isEmpty ? 'Enter email' : null,
             ),
             const SizedBox(height: 20),
-            
+
             // Password field
             _buildTextField(
               controller: _passwordController,
@@ -311,45 +309,57 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               obscureText: _obscurePassword,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                  color: const Color(0xFF64748B),
+                  _obscurePassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: AppTheme.slate500,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Enter password' : null,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Enter password' : null,
             ),
             const SizedBox(height: 32),
-            
+
             // Sign in button
             _buildSignInButton(authState),
             const SizedBox(height: 20),
-            
+
             // Divider
             Row(
               children: [
-                Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
+                Expanded(
+                    child: Container(
+                        height: 1, color: AppTheme.tokenBorderSubtle)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     'or continue with',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.4),
+                      color: Colors.white.withAlpha(102),
                       fontSize: 12,
                     ),
                   ),
                 ),
-                Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
+                Expanded(
+                    child: Container(
+                        height: 1, color: AppTheme.tokenBorderSubtle)),
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Social buttons
             Row(
               children: [
-                Expanded(child: _buildSocialButton('Connect Wallet', Icons.account_balance_wallet_outlined)),
+                Expanded(
+                    child: _buildSocialButton('Connect Wallet',
+                        Icons.account_balance_wallet_outlined)),
                 const SizedBox(width: 12),
-                Expanded(child: _buildSocialButton('Web3Auth', Icons.security_outlined)),
+                Expanded(
+                    child: _buildSocialButton(
+                        'Web3Auth', Icons.security_outlined)),
               ],
             ),
           ],
@@ -374,7 +384,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -385,31 +395,33 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
           keyboardType: keyboardType,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+          style: const TextStyle(color: AppTheme.tokenText, fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-            prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 20),
+            hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
+            prefixIcon: Icon(icon, color: AppTheme.slate500, size: 20),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: const Color(0xFF0A0A0F),
+            fillColor: AppTheme.tokenBackground,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1E1E2E)),
+              borderSide: const BorderSide(color: AppTheme.tokenBorderSubtle),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1E1E2E)),
+              borderSide: const BorderSide(color: AppTheme.tokenBorderSubtle),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+              borderSide:
+                  const BorderSide(color: AppTheme.tokenPrimary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFEF4444)),
+              borderSide: const BorderSide(color: AppTheme.tokenDanger),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],
@@ -417,48 +429,57 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
   }
 
   Widget _buildSignInButton(AuthState authState) {
-    return GestureDetector(
-      onTap: authState.isLoading ? null : _signIn,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    return SizedBox(
+      height: 56,
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: authState.isLoading ? null : _signIn,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          elevation: 0,
+          backgroundColor: AppTheme.tokenPrimary,
+          foregroundColor: AppTheme.tokenText,
+          disabledBackgroundColor: AppTheme.tokenPrimary.withAlpha(128),
         ),
-        child: Center(
-          child: authState.isLoading
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.5,
-                  ),
-                )
-              : const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Sign In',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            height: 56,
+            child: authState.isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: AppTheme.tokenText,
+                      strokeWidth: 2.5,
                     ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                  ],
-                ),
+                  )
+                : const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Sign In',
+                        style: TextStyle(
+                          color: AppTheme.tokenText,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded,
+                          color: AppTheme.tokenText, size: 20),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -468,20 +489,20 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0A0F),
+        color: AppTheme.tokenBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Center(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: const Color(0xFF64748B), size: 18),
+            Icon(icon, color: AppTheme.slate500, size: 18),
             const SizedBox(width: 8),
             Text(
               text,
               style: const TextStyle(
-                color: Color(0xFF94A3B8),
+                color: AppTheme.slate400,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -504,7 +525,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
       if (role == 'R5') credsMap['admin'] = cred;
       if (role == 'R6') credsMap['super_admin'] = cred;
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -513,20 +534,22 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E).withOpacity(0.15),
+                  color: AppTheme.tokenSuccess.withAlpha(38),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.science_outlined, color: Color(0xFF22C55E), size: 14),
+                    Icon(Icons.science_outlined,
+                        color: AppTheme.tokenSuccess, size: 14),
                     SizedBox(width: 6),
                     Text(
                       'DEMO MODE',
                       style: TextStyle(
-                        color: Color(0xFF22C55E),
+                        color: AppTheme.tokenSuccess,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1,
@@ -539,14 +562,14 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               Text(
                 'Quick access accounts',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withAlpha(102),
                   fontSize: 13,
                 ),
               ),
             ],
           ),
         ),
-        
+
         // Account cards
         Wrap(
           spacing: 12,
@@ -556,60 +579,72 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               title: 'End User',
               subtitle: 'R1 • Focus Mode',
               icon: Icons.person_outline_rounded,
-              color: const Color(0xFF3B82F6),
+              color: AppTheme.blue500,
               onTap: () {
                 final creds = credsMap['end_user'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
             _buildDemoCard(
               title: 'PeP User',
               subtitle: 'R2 • Focus Mode',
               icon: Icons.verified_user_outlined,
-              color: const Color(0xFF8B5CF6),
+              color: AppTheme.tokenPrimarySoft,
               onTap: () {
                 final creds = credsMap['pep_user'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
             _buildDemoCard(
               title: 'Analyst',
               subtitle: 'R3 • War Room',
               icon: Icons.analytics_outlined,
-              color: const Color(0xFFF59E0B),
+              color: AppTheme.tokenWarning,
               onTap: () {
                 final creds = credsMap['analyst'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
             _buildDemoCard(
               title: 'Compliance',
               subtitle: 'R4 • War Room',
               icon: Icons.gavel_outlined,
-              color: const Color(0xFFEF4444),
+              color: AppTheme.tokenDanger,
               onTap: () {
                 final creds = credsMap['compliance'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
             _buildDemoCard(
               title: 'Admin',
               subtitle: 'R5 • War Room',
               icon: Icons.admin_panel_settings_outlined,
-              color: const Color(0xFF10B981),
+              color: AppTheme.emerald500,
               onTap: () {
                 final creds = credsMap['admin'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
             _buildDemoCard(
               title: 'Super Admin',
               subtitle: 'R6 • War Room',
               icon: Icons.security_outlined,
-              color: const Color(0xFFEC4899),
+              color: AppTheme.pink500,
               onTap: () {
                 final creds = credsMap['super_admin'];
-                if (creds != null) _quickLogin(creds['email']!, creds['password']!);
+                if (creds != null) {
+                  _quickLogin(creds['email']!, creds['password']!);
+                }
               },
             ),
           ],
@@ -625,15 +660,15 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        width: 120,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF1E1E2E)),
+          border: Border.all(color: AppTheme.tokenBorderSubtle),
         ),
         child: Column(
           children: [
@@ -641,7 +676,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withAlpha(38),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 22),
@@ -650,7 +685,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             Text(
               title,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -659,7 +694,7 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
             Text(
               subtitle,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withAlpha(102),
                 fontSize: 11,
               ),
               textAlign: TextAlign.center,

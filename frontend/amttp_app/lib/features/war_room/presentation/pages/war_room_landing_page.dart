@@ -6,6 +6,7 @@
 /// - Right Context Panel (Read-only policy snapshot)
 /// 
 /// "Fast triage, No charts yet, Forces click-through for depth"
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -515,7 +516,6 @@ class _ContextCard extends StatelessWidget {
   const _ContextCard({
     required this.title,
     required this.icon,
-    this.iconColor,
     required this.children,
   });
 

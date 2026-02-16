@@ -74,6 +74,7 @@ function DashboardContent() {
   const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(null);
   const [recentDecisions, setRecentDecisions] = useState<RecentDecision[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendOffline, setBackendOffline] = useState(false);
   
   // Explainability state
   const [selectedDecision, setSelectedDecision] = useState<RecentDecision | null>(null);
@@ -98,7 +99,8 @@ function DashboardContent() {
         setRecentDecisions(data.decisions || []);
       }
     } catch (e) {
-      console.error('Failed to load dashboard data:', e);
+      console.warn('[Dashboard] Backend unavailable, showing offline state.');
+      setBackendOffline(true);
     }
     setLoading(false);
   }
@@ -127,8 +129,8 @@ function DashboardContent() {
       const isMixerInteraction = decision.to_address?.toLowerCase().includes('mixer') || 
                                   decision.risk_score >= 85;
       
-      // Extract ML score or use fallback
-      const mlScore = mlCheck?.score ?? (decision.risk_score > 50 ? decision.risk_score / 2 : 30);
+      // Extract ML score (no fallback, backend must provide)
+      const mlScore = mlCheck?.score;
       
       // Build comprehensive features from decision data and checks
       const features: Record<string, unknown> = {
@@ -265,6 +267,13 @@ function DashboardContent() {
     <div>
       <h1 className="text-3xl font-bold mb-2">📊 Dashboard</h1>
       <p className="text-gray-400 mb-6">Welcome to AMTTP Compliance Platform</p>
+
+      {backendOffline && (
+        <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-3 mb-4 flex items-center gap-2 text-red-300 text-sm">
+          <span>⚠️</span>
+          <span>Backend services are offline. No data available. Errors are surfaced directly.</span>
+        </div>
+      )}
 
       {/* Profile Summary */}
       {profile ? (

@@ -9,7 +9,7 @@
  * Supports embed mode (?embed=true) for Flutter integration
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   ArrowPathIcon,
@@ -26,108 +26,30 @@ import {
 } from '@heroicons/react/24/outline';
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MOCK DATA
-// ═══════════════════════════════════════════════════════════════════════════════
-
-interface MLModel {
-  id: string;
-  name: string;
-  type: string;
-  status: 'active' | 'training' | 'paused' | 'error';
-  accuracy: number;
-  precision: number;
-  recall: number;
-  f1Score: number;
-  lastTrained: string;
-  predictions24h: number;
-  avgLatency: number;
-  version: string;
-}
-
-const mockModels: MLModel[] = [
-  {
-    id: 'model_001',
-    name: 'Anomaly Detector v3',
-    type: 'Isolation Forest',
-    status: 'active',
-    accuracy: 0.94,
-    precision: 0.92,
-    recall: 0.89,
-    f1Score: 0.905,
-    lastTrained: '2026-01-20T14:30:00Z',
-    predictions24h: 12450,
-    avgLatency: 23,
-    version: '3.2.1',
-  },
-  {
-    id: 'model_002',
-    name: 'Transaction Classifier',
-    type: 'XGBoost',
-    status: 'active',
-    accuracy: 0.96,
-    precision: 0.94,
-    recall: 0.93,
-    f1Score: 0.935,
-    lastTrained: '2026-01-19T10:15:00Z',
-    predictions24h: 8920,
-    avgLatency: 15,
-    version: '2.1.0',
-  },
-  {
-    id: 'model_003',
-    name: 'Risk Scoring Engine',
-    type: 'Neural Network',
-    status: 'training',
-    accuracy: 0.91,
-    precision: 0.88,
-    recall: 0.85,
-    f1Score: 0.865,
-    lastTrained: '2026-01-18T08:00:00Z',
-    predictions24h: 0,
-    avgLatency: 45,
-    version: '1.5.2',
-  },
-  {
-    id: 'model_004',
-    name: 'Wallet Clustering',
-    type: 'DBSCAN',
-    status: 'active',
-    accuracy: 0.89,
-    precision: 0.87,
-    recall: 0.84,
-    f1Score: 0.855,
-    lastTrained: '2026-01-17T16:45:00Z',
-    predictions24h: 3200,
-    avgLatency: 120,
-    version: '1.2.0',
-  },
-  {
-    id: 'model_005',
-    name: 'Velocity Anomaly',
-    type: 'LSTM',
-    status: 'paused',
-    accuracy: 0.87,
-    precision: 0.83,
-    recall: 0.80,
-    f1Score: 0.815,
-    lastTrained: '2026-01-15T12:00:00Z',
-    predictions24h: 0,
-    avgLatency: 78,
-    version: '1.0.3',
-  },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function MLModelsPage() {
+  const [models, setModels] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:3001/risk/models/status')
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+      .then(data => setModels(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    setLoading(true);
+    fetch('http://127.0.0.1:3001/risk/models/status')
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+      .then(data => setModels(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
   };
 
   const getStatusBadge = (status: string) => {
@@ -174,27 +96,29 @@ export default function MLModelsPage() {
     });
   };
 
-  const activeModels = mockModels.filter(m => m.status === 'active').length;
-  const totalPredictions = mockModels.reduce((sum, m) => sum + m.predictions24h, 0);
-  const avgAccuracy = mockModels.reduce((sum, m) => sum + m.accuracy, 0) / mockModels.length;
+  const activeModels = models.filter(m => m.status === 'active').length;
+  const totalPredictions = models.reduce((sum, m) => sum + m.predictions24h, 0);
+  const avgAccuracy = models.reduce((sum, m) => sum + m.accuracy, 0) / models.length;
 
   // Check for embed mode (Flutter integration)
   const searchParams = useSearchParams();
   const isEmbedded = searchParams.get('embed') === 'true';
 
   return (
-    <div className={`${isEmbedded ? 'p-4' : 'p-6'} space-y-6 min-h-screen bg-slate-950`}>
+    <div className={`${isEmbedded ? 'p-4' : ''} space-y-6`}>
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className={`${isEmbedded ? 'text-xl' : 'text-2xl'} font-bold text-white`}>ML Models</h1>
+            <h1 className={`${isEmbedded ? 'text-xl' : 'text-2xl'} font-bold text-text`}>ML Models</h1>
             <span className="px-2 py-1 bg-purple-900/50 text-purple-400 border border-purple-700 rounded text-xs font-medium flex items-center gap-1">
               <ShieldCheckIcon className="w-3 h-3" />
               SUPER ADMIN
             </span>
           </div>
-          <p className="text-slate-400 mt-1">Configure, pause, and retrain machine learning models</p>
+          <p className="text-mutedText mt-1">Configure, pause, and retrain machine learning models</p>
         </div>
         <div className="flex gap-3">
           <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center gap-2 transition-colors">
@@ -203,10 +127,10 @@ export default function MLModelsPage() {
           </button>
           <button 
             onClick={handleRefresh}
-            disabled={isLoading}
+            disabled={loading}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
           >
-            <ArrowPathIcon className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
@@ -214,53 +138,53 @@ export default function MLModelsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <CpuChipIcon className="w-4 h-4" />
             <span>Total Models</span>
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{mockModels.length}</p>
+          <p className="text-2xl font-bold text-text mt-2">{models.length}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <CheckCircleIcon className="w-4 h-4 text-green-400" />
             <span>Active Models</span>
           </div>
           <p className="text-2xl font-bold text-green-400 mt-2">{activeModels}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ChartBarIcon className="w-4 h-4" />
             <span>Predictions (24h)</span>
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{totalPredictions.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-text mt-2">{totalPredictions.toLocaleString()}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ArrowTrendingUpIcon className="w-4 h-4 text-green-400" />
             <span>Avg Accuracy</span>
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{(avgAccuracy * 100).toFixed(1)}%</p>
+          <p className="text-2xl font-bold text-text mt-2">{(avgAccuracy * 100).toFixed(1)}%</p>
         </div>
       </div>
 
       {/* Models Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {mockModels.map((model) => (
+        {models.map((model) => (
           <div 
             key={model.id}
-            className={`bg-slate-800 rounded-lg border transition-colors cursor-pointer ${
+            className={`bg-surface rounded-lg border transition-colors cursor-pointer ${
               selectedModel === model.id 
                 ? 'border-blue-500' 
-                : 'border-slate-700 hover:border-slate-600'
+                : 'border-borderSubtle hover:border-borderSubtle'
             }`}
             onClick={() => setSelectedModel(selectedModel === model.id ? null : model.id)}
           >
             <div className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-white">{model.name}</h3>
-                  <p className="text-slate-400 text-sm">{model.type} • v{model.version}</p>
+                  <h3 className="text-lg font-semibold text-text">{model.name}</h3>
+                  <p className="text-mutedText text-sm">{model.type} • v{model.version}</p>
                 </div>
                 {getStatusBadge(model.status)}
               </div>
@@ -268,41 +192,41 @@ export default function MLModelsPage() {
               {/* Metrics Grid */}
               <div className="grid grid-cols-4 gap-4 mt-4">
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Accuracy</p>
-                  <p className="text-white font-semibold">{(model.accuracy * 100).toFixed(1)}%</p>
+                  <p className="text-mutedText text-xs uppercase">Accuracy</p>
+                  <p className="text-text font-semibold">{(model.accuracy * 100).toFixed(1)}%</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Precision</p>
-                  <p className="text-white font-semibold">{(model.precision * 100).toFixed(1)}%</p>
+                  <p className="text-mutedText text-xs uppercase">Precision</p>
+                  <p className="text-text font-semibold">{(model.precision * 100).toFixed(1)}%</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Recall</p>
-                  <p className="text-white font-semibold">{(model.recall * 100).toFixed(1)}%</p>
+                  <p className="text-mutedText text-xs uppercase">Recall</p>
+                  <p className="text-text font-semibold">{(model.recall * 100).toFixed(1)}%</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">F1 Score</p>
-                  <p className="text-white font-semibold">{(model.f1Score * 100).toFixed(1)}%</p>
+                  <p className="text-mutedText text-xs uppercase">F1 Score</p>
+                  <p className="text-text font-semibold">{(model.f1Score * 100).toFixed(1)}%</p>
                 </div>
               </div>
 
               {/* Additional Info */}
-              <div className="flex items-center gap-6 mt-4 pt-4 border-t border-slate-700 text-sm">
-                <div className="flex items-center gap-1 text-slate-400">
+              <div className="flex items-center gap-6 mt-4 pt-4 border-t border-borderSubtle text-sm">
+                <div className="flex items-center gap-1 text-mutedText">
                   <ClockIcon className="w-4 h-4" />
                   <span>Trained: {formatDate(model.lastTrained)}</span>
                 </div>
-                <div className="flex items-center gap-1 text-slate-400">
+                <div className="flex items-center gap-1 text-mutedText">
                   <ChartBarIcon className="w-4 h-4" />
                   <span>{model.predictions24h.toLocaleString()} predictions</span>
                 </div>
-                <div className="text-slate-400">
+                <div className="text-mutedText">
                   <span>{model.avgLatency}ms avg</span>
                 </div>
               </div>
 
               {/* Expanded Actions */}
               {selectedModel === model.id && (
-                <div className="flex gap-2 mt-4 pt-4 border-t border-slate-700">
+                <div className="flex gap-2 mt-4 pt-4 border-t border-borderSubtle">
                   {model.status === 'active' && (
                     <button className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-sm flex items-center gap-1">
                       <PauseIcon className="w-4 h-4" />

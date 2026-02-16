@@ -69,31 +69,31 @@ function AlertStats({ alerts }: { alerts: Alert[] }) {
   
   return (
     <div className="grid grid-cols-4 gap-4 mb-6">
-      <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+      <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
         <div className="flex items-center justify-between">
-          <span className="text-slate-400 text-sm">Active Alerts</span>
+          <span className="text-mutedText text-sm">Active Alerts</span>
           <span className="text-2xl">🔔</span>
         </div>
         <div className="mt-2">
-          <span className="text-3xl font-bold text-white">{activeCount}</span>
+          <span className="text-3xl font-bold text-text">{activeCount}</span>
         </div>
       </div>
       
-      <div className="bg-slate-800 rounded-lg p-4 border border-red-900/50">
+      <div className="bg-surface rounded-lg p-4 border border-red-900/50">
         <div className="flex items-center justify-between">
-          <span className="text-slate-400 text-sm">Critical</span>
+          <span className="text-mutedText text-sm">Critical</span>
           <span className="text-2xl">🚨</span>
         </div>
         <div className="mt-2">
-          <span className={`text-3xl font-bold ${criticalCount > 0 ? 'text-red-400' : 'text-white'}`}>
+          <span className={`text-3xl font-bold ${criticalCount > 0 ? 'text-red-400' : 'text-text'}`}>
             {criticalCount}
           </span>
         </div>
       </div>
       
-      <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+      <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
         <div className="flex items-center justify-between">
-          <span className="text-slate-400 text-sm">Acknowledged</span>
+          <span className="text-mutedText text-sm">Acknowledged</span>
           <span className="text-2xl">✋</span>
         </div>
         <div className="mt-2">
@@ -101,9 +101,9 @@ function AlertStats({ alerts }: { alerts: Alert[] }) {
         </div>
       </div>
       
-      <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+      <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
         <div className="flex items-center justify-between">
-          <span className="text-slate-400 text-sm">Resolved Today</span>
+          <span className="text-mutedText text-sm">Resolved Today</span>
           <span className="text-2xl">✅</span>
         </div>
         <div className="mt-2">
@@ -130,14 +130,14 @@ function RulesList({
       {rules.map((rule) => (
         <div
           key={rule.id}
-          className={`bg-slate-800 rounded-lg p-4 border transition-all ${
-            rule.enabled ? 'border-slate-700' : 'border-slate-800 opacity-60'
+          className={`bg-surface rounded-lg p-4 border transition-all ${
+            rule.enabled ? 'border-borderSubtle' : 'border-slate-800 opacity-60'
           }`}
         >
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="font-medium text-white">{rule.name}</h4>
+                <h4 className="font-medium text-text">{rule.name}</h4>
                 <span className={`px-2 py-0.5 rounded text-xs ${
                   rule.priority === AlertPriority.CRITICAL ? 'bg-red-900/50 text-red-300' :
                   rule.priority === AlertPriority.HIGH ? 'bg-orange-900/50 text-orange-300' :
@@ -151,9 +151,9 @@ function RulesList({
                 </span>
               </div>
               {rule.description && (
-                <p className="text-sm text-slate-400 mt-1">{rule.description}</p>
+                <p className="text-sm text-mutedText mt-1">{rule.description}</p>
               )}
-              <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+              <div className="flex items-center gap-4 mt-2 text-xs text-mutedText">
                 <span>{rule.conditions.length} condition(s)</span>
                 <span>Cooldown: {rule.cooldownMinutes}m</span>
               </div>
@@ -175,7 +175,7 @@ function RulesList({
               
               <button
                 onClick={() => onEdit(rule)}
-                className="p-2 text-slate-400 hover:text-white"
+                className="p-2 text-mutedText hover:text-text"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -185,7 +185,7 @@ function RulesList({
               
               <button
                 onClick={() => onDelete(rule.id)}
-                className="p-2 text-slate-400 hover:text-red-400"
+                className="p-2 text-mutedText hover:text-red-400"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -198,7 +198,7 @@ function RulesList({
       ))}
       
       {rules.length === 0 && (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-mutedText">
           <div className="text-4xl mb-2">📋</div>
           <p>No alert rules configured</p>
           <p className="text-sm mt-1">Create a rule to start monitoring</p>
@@ -288,7 +288,7 @@ export default function AlertsPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="space-y-6">
       {/* Toast Notifications */}
       <AlertToastContainer
         toasts={toasts}
@@ -299,8 +299,8 @@ export default function AlertsPage() {
       
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Alert Center</h1>
-        <p className="text-slate-400">Monitor and manage system alerts in real-time</p>
+        <h1 className="text-2xl font-bold text-text">Alert Center</h1>
+        <p className="text-mutedText">Monitor and manage system alerts in real-time</p>
       </div>
       
       {/* Stats */}
@@ -319,7 +319,7 @@ export default function AlertsPage() {
             className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === tab.id
                 ? 'text-cyan-400 border-cyan-400'
-                : 'text-slate-400 border-transparent hover:text-white'
+                : 'text-mutedText border-transparent hover:text-text'
             }`}
           >
             <span className="mr-2">{tab.icon}</span>
@@ -347,7 +347,7 @@ export default function AlertsPage() {
                   setEditingRule(null);
                   setShowRuleEditor(true);
                 }}
-                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm"
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-text rounded-lg text-sm"
               >
                 + Create Rule
               </button>
@@ -389,10 +389,10 @@ export default function AlertsPage() {
       {/* Alert Detail Modal */}
       {selectedAlert && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-slate-900 rounded-xl border border-slate-700 p-6 w-full max-w-lg">
+          <div className="bg-background rounded-xl border border-borderSubtle p-6 w-full max-w-lg">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-white">{selectedAlert.title}</h3>
+                <h3 className="text-lg font-semibold text-text">{selectedAlert.title}</h3>
                 <div className="flex gap-2 mt-1">
                   <span className={`px-2 py-0.5 rounded text-xs ${
                     selectedAlert.priority === AlertPriority.CRITICAL ? 'bg-red-900/50 text-red-300' :
@@ -411,7 +411,7 @@ export default function AlertsPage() {
               </div>
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-mutedText hover:text-text"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -422,20 +422,20 @@ export default function AlertsPage() {
             <p className="text-slate-300 mb-4">{selectedAlert.message}</p>
             
             {selectedAlert.metadata && Object.keys(selectedAlert.metadata).length > 0 && (
-              <div className="bg-slate-800 rounded-lg p-3 mb-4">
-                <h4 className="text-sm font-medium text-slate-400 mb-2">Details</h4>
+              <div className="bg-surface rounded-lg p-3 mb-4">
+                <h4 className="text-sm font-medium text-mutedText mb-2">Details</h4>
                 <div className="space-y-1 text-sm">
                   {Object.entries(selectedAlert.metadata).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
-                      <span className="text-slate-500">{key}:</span>
-                      <span className="text-white font-mono">{String(value)}</span>
+                      <span className="text-mutedText">{key}:</span>
+                      <span className="text-text font-mono">{String(value)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             
-            <div className="text-xs text-slate-500 mb-4">
+            <div className="text-xs text-mutedText mb-4">
               Created: {selectedAlert.createdAt.toLocaleString()}
               {selectedAlert.acknowledgedAt && (
                 <> • Acknowledged: {new Date(selectedAlert.acknowledgedAt).toLocaleString()}</>
@@ -453,7 +453,7 @@ export default function AlertsPage() {
                       handleAcknowledge(selectedAlert.id);
                       setSelectedAlert(null);
                     }}
-                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg"
+                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-text rounded-lg"
                   >
                     Acknowledge
                   </button>
@@ -462,7 +462,7 @@ export default function AlertsPage() {
                       handleResolve(selectedAlert.id);
                       setSelectedAlert(null);
                     }}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg"
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-text rounded-lg"
                   >
                     Resolve
                   </button>
@@ -474,14 +474,14 @@ export default function AlertsPage() {
                     handleResolve(selectedAlert.id);
                     setSelectedAlert(null);
                   }}
-                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg"
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-text rounded-lg"
                 >
                   Resolve
                 </button>
               )}
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-text rounded-lg"
               >
                 Close
               </button>

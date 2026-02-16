@@ -2,15 +2,19 @@
 
 /**
  * Graph Explorer Component
- * Reagraph (WebGL) based network visualization for wallet relationships
+ * Canvas 2D force-directed network visualization for wallet relationships
  * Used in War Room - Detection Studio
+ *
+ * Replaced reagraph (WebGL / Three.js) with a pure Canvas 2D renderer
+ * to eliminate chunk-load timeouts and WeakMap errors.
  */
 
-import React, { useState, useCallback, useMemo, Component, ReactNode, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import type { GraphCanvasRef, InternalGraphNode, Theme } from 'reagraph';
+import React, { useState, useCallback, useMemo, Component, ReactNode, useRef } from 'react';
+import ForceGraph2D from './ForceGraph2D';
+import type { ForceGraph2DRef, ForceNode, ForceEdge } from './ForceGraph2D';
 
-// Error Boundary for WebGL errors
+// ─── Error Boundary ──────────────────────────────────────────────────────────
+
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
@@ -38,7 +42,7 @@ class GraphErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStat
           <div className="text-center p-8">
             <div className="text-red-400 text-lg mb-2">Graph Visualization Error</div>
             <div className="text-slate-400 text-sm">
-              {this.state.error?.message || 'WebGL rendering failed'}
+              {this.state.error?.message || 'Rendering failed'}
             </div>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
@@ -54,134 +58,8 @@ class GraphErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStat
   }
 }
 
-// Dynamic import with SSR disabled for WebGL
-const GraphCanvas = dynamic(
-  () => import('reagraph').then((mod) => mod.GraphCanvas),
-  { ssr: false, loading: () => <GraphLoadingPlaceholder /> }
-);
+// ─── Types (exported for use in pages) ───────────────────────────────────────
 
-function GraphLoadingPlaceholder() {
-  return (
-    <div className="flex items-center justify-center h-full bg-slate-900 rounded-lg">
-      <div className="text-slate-400">Loading graph visualization...</div>
-    </div>
-  );
-}
-
-// Wrapper component for safe graph rendering with ref forwarding
-interface SafeGraphProps {
-  nodes: Array<{ id: string; label: string; fill: string; data?: unknown }>;
-  edges: Array<{ id: string; source: string; target: string; label?: string; data?: unknown }>;
-  onNodeClick?: (node: InternalGraphNode) => void;
-  onReady?: (ref: GraphCanvasRef) => void;
-}
-
-function SafeGraphCanvas({ nodes, edges, onNodeClick, onReady }: SafeGraphProps) {
-  const internalRef = React.useRef<GraphCanvasRef>(null);
-  const [hasError, setHasError] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-
-  // Wait for next tick to ensure stable render
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Notify parent when ref is available
-  useEffect(() => {
-    if (isReady && internalRef.current && onReady) {
-      onReady(internalRef.current);
-    }
-  }, [isReady, onReady]);
-
-  // Reset error state if data changes
-  useEffect(() => {
-    setHasError(false);
-  }, [nodes.length, edges.length]);
-
-  if (hasError) {
-    return (
-      <div className="flex items-center justify-center h-full bg-slate-900 rounded-lg">
-        <div className="text-center p-4">
-          <div className="text-amber-400 mb-2">Graph rendering issue</div>
-          <button 
-            onClick={() => setHasError(false)}
-            className="px-3 py-1 bg-indigo-600 text-white rounded text-sm"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isReady || nodes.length === 0) {
-    return <GraphLoadingPlaceholder />;
-  }
-
-  // Final validation - ensure no null/undefined in critical fields
-  const safeNodes = nodes.filter(n => n.id && n.label && n.fill);
-  const safeEdges = edges.filter(e => e.id && e.source && e.target);
-
-  if (safeNodes.length === 0) {
-    return <GraphLoadingPlaceholder />;
-  }
-
-  try {
-    return (
-      <GraphCanvas
-        ref={internalRef}
-        nodes={safeNodes}
-        edges={safeEdges}
-        theme={GRAPH_THEME as Theme}
-        layoutType="forceDirected2d"
-        // Disable labels to avoid Three.js texture creation issues
-        labelType="none"
-        draggable
-        animated={false}
-        onNodeClick={onNodeClick}
-      />
-    );
-  } catch {
-    setHasError(true);
-    return <GraphLoadingPlaceholder />;
-  }
-}
-
-// Theme configuration for reagraph - partial theme (only custom overrides)
-const GRAPH_THEME: Partial<Theme> = {
-  canvas: { background: '#0f172a' },
-  node: {
-    fill: '#6366f1',
-    activeFill: '#818cf8',
-    opacity: 1,
-    selectedOpacity: 1,
-    inactiveOpacity: 0.3,
-    label: {
-      color: '#f1f5f9',
-      stroke: '#0f172a',
-      activeColor: '#ffffff',
-    },
-  },
-  edge: {
-    fill: '#475569',
-    activeFill: '#6366f1',
-    opacity: 1,
-    selectedOpacity: 1,
-    inactiveOpacity: 0.2,
-    label: {
-      color: '#94a3b8',
-      stroke: '#0f172a',
-      activeColor: '#ffffff',
-    },
-  },
-  ring: { fill: '#22c55e', activeFill: '#4ade80' },
-  arrow: { fill: '#475569', activeFill: '#6366f1' },
-  lasso: { border: '#6366f1', background: 'rgba(99, 102, 241, 0.1)' },
-  cluster: { stroke: '#475569', fill: 'rgba(71, 85, 105, 0.2)', label: { color: '#f1f5f9' } },
-};
-
-// Types - exported for use in pages
 export interface WalletNode {
   id: string;
   label: string;
@@ -215,7 +93,8 @@ interface GraphExplorerProps {
   className?: string;
 }
 
-// Stable mock data - generated once with deterministic values
+// ─── Mock data ───────────────────────────────────────────────────────────────
+
 const MOCK_NODES: WalletNode[] = [
   { id: 'wallet-1', label: '0x1a2b3c4d...', data: { type: 'wallet', riskScore: 25, balance: 150.5, transactionCount: 42 } },
   { id: 'wallet-2', label: '0x2b3c4d5e...', data: { type: 'wallet', riskScore: 15, balance: 320.8, transactionCount: 128 } },
@@ -249,69 +128,43 @@ const MOCK_EDGES: TransactionEdge[] = [
   { id: 'edge-15', source: 'contract-2', target: 'wallet-3', label: '3.0 ETH', data: { amount: 3.0, timestamp: Date.now() - 1296000000 } },
 ];
 
-// Mock data generator - exported for use in pages (returns stable data)
 export function generateMockGraphData(): { nodes: WalletNode[]; edges: TransactionEdge[] } {
   return { nodes: MOCK_NODES, edges: MOCK_EDGES };
 }
 
-// Node color by risk score (primary) with type overlay
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function getNodeColorByRisk(riskScore?: number, type?: string): string {
-  // Flagged nodes always red
   if (type === 'flagged') return '#ef4444';
-  
-  // Risk-based coloring
   const score = riskScore ?? 0;
-  if (score >= 70) return '#ef4444';      // Critical - red
-  if (score >= 50) return '#f97316';      // High - orange
-  if (score >= 30) return '#f59e0b';      // Medium - amber
-  return '#22c55e';                        // Low - green
+  if (score >= 70) return '#ef4444';
+  if (score >= 50) return '#f97316';
+  if (score >= 30) return '#f59e0b';
+  return '#22c55e';
 }
 
-// Node color by type (legacy, kept for fallback)
-function getNodeColor(type?: string): string {
-  switch (type) {
-    case 'flagged': return '#ef4444';
-    case 'exchange': return '#06b6d4';
-    case 'contract': return '#8b5cf6';
-    default: return '#6366f1';
-  }
-}
-
-// Validate graph data to prevent WeakMap errors
 function validateGraphData(
-  nodes: WalletNode[], 
-  edges: TransactionEdge[]
+  nodes: WalletNode[],
+  edges: TransactionEdge[],
 ): { validNodes: WalletNode[]; validEdges: TransactionEdge[] } {
-  // Filter out nodes with invalid/undefined IDs
-  const validNodes = nodes.filter(node => {
-    if (!node || typeof node.id !== 'string' || node.id.trim() === '') {
-      console.warn('[GraphExplorer] Skipping invalid node:', node);
-      return false;
-    }
-    return true;
-  });
-  
-  const validNodeIds = new Set(validNodes.map(n => n.id));
-  
-  // Filter out edges with missing endpoints or invalid IDs
-  const validEdges = edges.filter(edge => {
-    if (!edge || typeof edge.id !== 'string' || edge.id.trim() === '') {
-      console.warn('[GraphExplorer] Skipping edge with invalid id:', edge);
-      return false;
-    }
-    if (!edge.source || !edge.target) {
-      console.warn('[GraphExplorer] Skipping edge with missing source/target:', edge);
-      return false;
-    }
-    if (!validNodeIds.has(edge.source) || !validNodeIds.has(edge.target)) {
-      // Orphaned edge - skip silently (common with filtered datasets)
-      return false;
-    }
-    return true;
-  });
-  
+  const validNodes = nodes.filter(
+    (n) => n && typeof n.id === 'string' && n.id.trim() !== '',
+  );
+  const ids = new Set(validNodes.map((n) => n.id));
+  const validEdges = edges.filter(
+    (e) =>
+      e &&
+      typeof e.id === 'string' &&
+      e.id.trim() !== '' &&
+      e.source &&
+      e.target &&
+      ids.has(e.source) &&
+      ids.has(e.target),
+  );
   return { validNodes, validEdges };
 }
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function GraphExplorer({
   initialAddress,
@@ -322,165 +175,74 @@ export default function GraphExplorer({
   height,
   className = '',
 }: GraphExplorerProps) {
-  const isMountedRef = React.useRef(true);
-  const graphRefCallback = React.useRef<GraphCanvasRef | null>(null);
+  const graphRef = useRef<ForceGraph2DRef>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [searchAddress, setSearchAddress] = useState(initialAddress || '');
-  const [isMounted, setIsMounted] = useState(false);
-  const [isDataReady, setIsDataReady] = useState(false);
 
-  // Track component mount state
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Delay mounting to avoid React 18 strict mode double-render WebGL issues
-  // Increased delay to 300ms for better hydration stability
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isMountedRef.current) {
-        setIsMounted(true);
-      }
-    }, 300);
-    return () => {
-      clearTimeout(timer);
-      setIsMounted(false);
-    };
-  }, []);
-
-  // Use external data or generate mock data, with validation
-  const { nodes, edges } = useMemo(() => {
-    let rawNodes: WalletNode[];
-    let rawEdges: TransactionEdge[];
-    
-    if (externalNodes && externalEdges && externalNodes.length > 0) {
-      rawNodes = externalNodes;
-      rawEdges = externalEdges;
-    } else {
-      const mockData = generateMockGraphData();
-      rawNodes = mockData.nodes;
-      rawEdges = mockData.edges;
-    }
-    
-    // Validate to prevent WeakMap errors
-    const { validNodes, validEdges } = validateGraphData(rawNodes, rawEdges);
-    return { nodes: validNodes, edges: validEdges };
+  // Use external data or fall back to mock
+  const { validNodes: nodes, validEdges: edges } = useMemo(() => {
+    const raw =
+      externalNodes && externalEdges && externalNodes.length > 0
+        ? { nodes: externalNodes, edges: externalEdges }
+        : generateMockGraphData();
+    return validateGraphData(raw.nodes, raw.edges);
   }, [externalNodes, externalEdges]);
 
-  // Transform nodes for reagraph with risk-based coloring
-  // CRITICAL: All properties must be non-null to prevent Three.js WeakMap errors
-  const graphNodes = useMemo(() => {
-    if (!nodes || nodes.length === 0) return [];
-    return nodes
-      .filter(node => node && node.id && typeof node.id === 'string' && node.id.trim() !== '')
-      .map((node) => {
-        const id = String(node.id).trim();
-        const label = String(node.label || id.slice(0, 10) + '...').trim();
-        const fill = getNodeColorByRisk(node.data?.riskScore, node.data?.type) || '#6366f1';
-        
-        // Ensure no undefined/null values that could cause texture issues
-        return {
-          id,
-          label: label || id,
-          fill,
-          // Only include data if it's a valid object
-          ...(node.data && typeof node.data === 'object' ? { data: node.data } : {}),
-        };
-      });
-  }, [nodes]);
-
-  // Transform edges for reagraph
-  // CRITICAL: Edge labels that are undefined cause Three.js texture errors
-  const graphEdges = useMemo(() => {
-    if (!edges || edges.length === 0) return [];
-    const validNodeIds = new Set(graphNodes.map(n => n.id));
-    return edges
-      .filter(edge => edge && edge.id && edge.source && edge.target && 
-              validNodeIds.has(edge.source) && validNodeIds.has(edge.target))
-      .map((edge) => {
-        const id = String(edge.id).trim();
-        const source = String(edge.source).trim();
-        const target = String(edge.target).trim();
-        
-        // Build edge object without undefined properties
-        const edgeObj: { id: string; source: string; target: string; label?: string; data?: unknown } = {
-          id,
-          source,
-          target,
-        };
-        
-        // Only add label if it's a non-empty string
-        if (edge.label && typeof edge.label === 'string' && edge.label.trim() !== '') {
-          edgeObj.label = edge.label.trim();
-        }
-        
-        // Only add data if it's a valid object
-        if (edge.data && typeof edge.data === 'object') {
-          edgeObj.data = edge.data;
-        }
-        
-        return edgeObj;
-      });
-  }, [edges, graphNodes]);
-
-  // Mark data as ready after a brief stabilization period
-  useEffect(() => {
-    if (graphNodes.length > 0) {
-      const timer = setTimeout(() => {
-        if (isMountedRef.current) {
-          setIsDataReady(true);
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      setIsDataReady(false);
-    }
-  }, [graphNodes.length]);
-
-  // Only render graph when both mounted and data is ready
-  const canRenderGraph = isMounted && isDataReady && graphNodes.length > 0;
-
-  // Callback to receive ref from SafeGraphCanvas
-  const handleGraphReady = useCallback((ref: GraphCanvasRef) => {
-    graphRefCallback.current = ref;
-  }, []);
-
-  const handleNodeClick = useCallback((node: InternalGraphNode) => {
-    setSelectedNode(node.id);
-    const walletNode = nodes.find((n) => n.id === node.id) || null;
-    onNodeSelect?.(walletNode);
-    if (walletNode) {
-      externalOnNodeClick?.(walletNode);
-    }
-  }, [nodes, onNodeSelect, externalOnNodeClick]);
-
-  // Graph control handlers
-  const handleCenterGraph = useCallback(() => {
-    graphRefCallback.current?.centerGraph();
-  }, []);
-
-  const handleZoomIn = useCallback(() => {
-    graphRefCallback.current?.zoomIn?.();
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    graphRefCallback.current?.zoomOut?.();
-  }, []);
-
-  const handleFitView = useCallback(() => {
-    graphRefCallback.current?.fitNodesInView?.();
-  }, []);
-
-  const selectedNodeData = useMemo(() => 
-    nodes.find((n) => n.id === selectedNode),
-    [nodes, selectedNode]
+  // Transform WalletNodes → ForceNodes with risk-based coloring
+  const graphNodes: ForceNode[] = useMemo(
+    () =>
+      nodes.map((n) => ({
+        id: n.id,
+        label: n.label || n.id.slice(0, 12) + '…',
+        fill: getNodeColorByRisk(n.data?.riskScore, n.data?.type),
+        data: n.data,
+      })),
+    [nodes],
   );
 
+  // Transform TransactionEdges → ForceEdges
+  const graphEdges: ForceEdge[] = useMemo(() => {
+    const ids = new Set(graphNodes.map((n) => n.id));
+    return edges
+      .filter((e) => ids.has(e.source) && ids.has(e.target))
+      .map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        ...(e.label ? { label: e.label } : {}),
+        ...(e.data ? { data: e.data } : {}),
+      }));
+  }, [edges, graphNodes]);
+
+  // ── Callbacks ────────────────────────────────────────────────────────
+
+  const handleNodeClick = useCallback(
+    (node: ForceNode) => {
+      setSelectedNode(node.id);
+      const walletNode = nodes.find((n) => n.id === node.id) || null;
+      onNodeSelect?.(walletNode);
+      if (walletNode) externalOnNodeClick?.(walletNode);
+    },
+    [nodes, onNodeSelect, externalOnNodeClick],
+  );
+
+  const handleCenterGraph = useCallback(() => graphRef.current?.centerGraph(), []);
+  const handleZoomIn = useCallback(() => graphRef.current?.zoomIn(), []);
+  const handleZoomOut = useCallback(() => graphRef.current?.zoomOut(), []);
+  const handleFitView = useCallback(() => graphRef.current?.fitNodesInView(), []);
+
+  const selectedNodeData = useMemo(
+    () => nodes.find((n) => n.id === selectedNode),
+    [nodes, selectedNode],
+  );
+
+  // ── Render ───────────────────────────────────────────────────────────
+
   return (
-    <div className={`flex flex-col ${className}`} style={height ? { height: `${height}px` } : { height: '100%' }}>
+    <div
+      className={`flex flex-col ${className}`}
+      style={height ? { height: `${height}px` } : { height: '100%' }}
+    >
       {/* Toolbar */}
       <div className="flex items-center gap-4 p-4 bg-slate-800 border-b border-slate-700">
         <input
@@ -510,31 +272,32 @@ export default function GraphExplorer({
             className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition-colors"
             title="Center Graph"
           >
-            ⌖
+            ○
           </button>
           <button
             onClick={handleFitView}
             className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition-colors"
             title="Fit All Nodes"
           >
-            ⊡
+            □
           </button>
         </div>
       </div>
 
       {/* Graph Container */}
       <div className="flex-1 relative">
-        <GraphErrorBoundary key={`boundary-${graphNodes.length}-${graphEdges.length}`}>
-          {canRenderGraph ? (
-            <SafeGraphCanvas
-              key={`graph-${graphNodes.length}-${graphEdges.length}`}
+        <GraphErrorBoundary>
+          {graphNodes.length > 0 ? (
+            <ForceGraph2D
+              ref={graphRef}
               nodes={graphNodes}
               edges={graphEdges}
               onNodeClick={handleNodeClick}
-              onReady={handleGraphReady}
             />
           ) : (
-            <GraphLoadingPlaceholder />
+            <div className="flex items-center justify-center h-full bg-slate-900 rounded-lg">
+              <div className="text-slate-400">No graph data available</div>
+            </div>
           )}
         </GraphErrorBoundary>
 
@@ -566,10 +329,15 @@ export default function GraphExplorer({
               {selectedNodeData.data?.riskScore !== undefined && (
                 <div>
                   <span className="text-slate-400">Risk Score:</span>
-                  <span className={`ml-2 font-medium ${
-                    selectedNodeData.data.riskScore > 70 ? 'text-red-400' :
-                    selectedNodeData.data.riskScore > 40 ? 'text-amber-400' : 'text-green-400'
-                  }`}>
+                  <span
+                    className={`ml-2 font-medium ${
+                      selectedNodeData.data.riskScore > 70
+                        ? 'text-red-400'
+                        : selectedNodeData.data.riskScore > 40
+                          ? 'text-amber-400'
+                          : 'text-green-400'
+                    }`}
+                  >
                     {selectedNodeData.data.riskScore.toFixed(1)}
                   </span>
                 </div>
@@ -595,8 +363,8 @@ export default function GraphExplorer({
         )}
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 p-3 bg-slate-800/95 backdrop-blur border border-slate-600 rounded-lg">
-          <div className="text-xs font-medium text-slate-300 mb-2">Risk Level Legend</div>
+        <div className="absolute bottom-4 left-4 p-3 bg-slate-800/95 backdrop-blur border border-slate-600 rounded-lg max-w-[200px]">
+          <div className="text-xs font-medium text-slate-300 mb-2">Risk Level</div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
@@ -604,7 +372,7 @@ export default function GraphExplorer({
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-              <span className="text-slate-400">Medium (30-50)</span>
+              <span className="text-slate-400">Med (30-50)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-orange-500"></div>
@@ -613,27 +381,6 @@ export default function GraphExplorer({
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <span className="text-slate-400">Critical (70+)</span>
-            </div>
-          </div>
-          <div className="mt-2 pt-2 border-t border-slate-600">
-            <div className="text-xs font-medium text-slate-300 mb-1">Entity Type</div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full border-2 border-slate-400"></div>
-                <span className="text-slate-400">Wallet</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm border-2 border-purple-500"></div>
-                <span className="text-slate-400">Contract</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm border-2 border-cyan-500"></div>
-                <span className="text-slate-400">Exchange</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full border-2 border-red-500 bg-red-500/30"></div>
-                <span className="text-slate-400">Flagged</span>
-              </div>
             </div>
           </div>
         </div>

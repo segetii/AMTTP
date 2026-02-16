@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/providers/api_providers.dart';
 import '../../../../shared/widgets/risk_level_indicator.dart';
 import '../../../../services/swap_service.dart';
 import '../../../../services/web3_service.dart';
@@ -337,7 +335,7 @@ class _NFTToETHSwapTabState extends ConsumerState<_NFTToETHSwapTab> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedTimelock,
+                    initialValue: _selectedTimelock,
                     decoration: _inputDecoration('Time Lock', Icons.timer),
                     dropdownColor: AppTheme.darkCard,
                     style: const TextStyle(color: AppTheme.cleanWhite),

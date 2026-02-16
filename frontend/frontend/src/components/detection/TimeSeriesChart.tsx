@@ -122,7 +122,7 @@ export default function TimeSeriesChart({
     },
     grid: {
       top: 80,
-      bottom: 80,
+      bottom: 90,
       left: 60,
       right: 40,
     },
@@ -135,7 +135,7 @@ export default function TimeSeriesChart({
         color: darkMode ? '#94a3b8' : '#64748b',
         formatter: (value: number) => {
           const date = new Date(value);
-          return `${date.getMonth() + 1}/${date.getDate()}\n${date.getHours()}:00`;
+          return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:00`;
         },
       },
       splitLine: {
@@ -169,7 +169,7 @@ export default function TimeSeriesChart({
         xAxisIndex: 0,
         start: 0,
         end: 100,
-        bottom: 20,
+        bottom: 10,
         height: 30,
         borderColor: darkMode ? '#334155' : '#e2e8f0',
         backgroundColor: darkMode ? '#1e293b' : '#f8fafc',
@@ -204,7 +204,7 @@ export default function TimeSeriesChart({
         borderColor: darkMode ? '#94a3b8' : '#64748b',
       },
       right: 20,
-      top: 5,
+      top: 0,
     },
     brush: onBrushSelect ? {
       toolbox: ['lineX', 'clear'],
@@ -234,13 +234,19 @@ export default function TimeSeriesChart({
         },
         markPoint: showAnomalies ? {
           symbol: 'circle',
-          symbolSize: 10,
+          symbolSize: 14,
           data: seriesData.anomalies,
           itemStyle: {
             color: '#ef4444',
+            shadowBlur: 6,
+            shadowColor: 'rgba(239, 68, 68, 0.4)',
           },
           label: {
-            show: false,
+            show: true,
+            formatter: '!',
+            color: '#fff',
+            fontSize: 10,
+            fontWeight: 'bold',
           },
         } : undefined,
       },
@@ -265,9 +271,9 @@ export default function TimeSeriesChart({
         smooth: true,
         symbol: 'none',
         lineStyle: {
-          color: '#f59e0b',
+          color: '#f97316',
           width: 1,
-          type: 'dotted',
+          type: 'dashed',
         },
       },
       // Lower bound
@@ -278,9 +284,9 @@ export default function TimeSeriesChart({
         smooth: true,
         symbol: 'none',
         lineStyle: {
-          color: '#f59e0b',
+          color: '#a855f7',
           width: 1,
-          type: 'dotted',
+          type: 'dashed',
         },
       },
   ].filter(Boolean) as unknown[],

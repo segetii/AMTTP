@@ -1,0 +1,391 @@
+{
+  "$schema": "AMTTP Unified RBAC Configuration — Single Source of Truth",
+  "$version": "2.4",
+  "$updated": "2026-02-12",
+
+  "roles": {
+    "R1_END_USER": {
+      "level": 1,
+      "label": "End User",
+      "mode": "FOCUS",
+      "color": "#3FB950",
+      "capabilities": {
+        "canInitiateOwnTx": true,
+        "canViewOthersTx": false,
+        "canAccessDetectionStudio": false,
+        "canEditPolicies": false,
+        "canTriggerEnforcement": false,
+        "canSignMultisig": false,
+        "canVerifyUISnapshot": "view",
+        "canEmergencyOverride": false,
+        "canManageUsers": false,
+        "canExportReports": false,
+        "canAccessCompliance": false
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "home",     "label": "Home",    "route": "/",         "icon": "home_rounded" },
+          { "id": "wallet",   "label": "Wallet",  "route": "/wallet",   "icon": "account_balance_wallet_rounded" },
+          { "id": "transfer", "label": "Send",    "route": "/transfer", "icon": "send_rounded" },
+          { "id": "history",  "label": "History", "route": "/history",  "icon": "history_rounded" },
+          { "id": "profile",  "label": "Profile", "route": "/profile",  "icon": "person_rounded" }
+        ],
+        "allowed": [
+          "/", "/wallet", "/transfer", "/history", "/profile",
+          "/trust-check", "/disputes", "/dispute/:id", "/settings", "/more"
+        ]
+      }
+    },
+
+    "R2_END_USER_PEP": {
+      "level": 2,
+      "label": "End User (PEP)",
+      "mode": "FOCUS",
+      "color": "#F5A524",
+      "capabilities": {
+        "canInitiateOwnTx": true,
+        "canViewOthersTx": false,
+        "canAccessDetectionStudio": false,
+        "canEditPolicies": false,
+        "canTriggerEnforcement": false,
+        "canSignMultisig": false,
+        "canVerifyUISnapshot": "view",
+        "canEmergencyOverride": false,
+        "canManageUsers": false,
+        "canExportReports": false,
+        "canAccessCompliance": false
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "home",     "label": "Home",    "route": "/",         "icon": "home_rounded" },
+          { "id": "wallet",   "label": "Wallet",  "route": "/wallet",   "icon": "account_balance_wallet_rounded" },
+          { "id": "transfer", "label": "Send",    "route": "/transfer", "icon": "send_rounded" },
+          { "id": "history",  "label": "History", "route": "/history",  "icon": "history_rounded" },
+          { "id": "more",     "label": "More",    "route": "/more",     "icon": "more_horiz_rounded" }
+        ],
+        "allowed": [
+          "/", "/wallet", "/transfer", "/history", "/profile",
+          "/trust-check", "/disputes", "/dispute/:id", "/settings", "/more",
+          "/nft-swap", "/cross-chain", "/zknaf", "/safe", "/session-keys", "/approver"
+        ]
+      }
+    },
+
+    "R3_INSTITUTION_OPS": {
+      "level": 3,
+      "label": "Institution Ops",
+      "mode": "WAR_ROOM",
+      "color": "#9C27B0",
+      "capabilities": {
+        "canInitiateOwnTx": false,
+        "canViewOthersTx": true,
+        "canAccessDetectionStudio": true,
+        "canEditPolicies": false,
+        "canTriggerEnforcement": false,
+        "canSignMultisig": false,
+        "canVerifyUISnapshot": "view",
+        "canEmergencyOverride": false,
+        "canManageUsers": false,
+        "canExportReports": true,
+        "canAccessCompliance": true
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "dashboard", "label": "Dashboard", "route": "/war-room",         "icon": "dashboard_rounded" },
+          { "id": "detection", "label": "Detection", "route": "/detection-studio",  "icon": "psychology_rounded" },
+          { "id": "graph",     "label": "Graph",     "route": "/graph-explorer",    "icon": "account_tree_rounded" },
+          { "id": "settings",  "label": "Settings",  "route": "/settings",          "icon": "settings_rounded" }
+        ],
+        "sections": [
+          {
+            "title": "MONITORING",
+            "items": [
+              "/war-room", "/war-room/alerts", "/flagged-queue",
+              "/war-room/transactions", "/war-room/cross-chain",
+              "/detection-studio", "/graph-explorer", "/war-room/detection/risk"
+            ]
+          },
+          {
+            "title": "OPERATIONS",
+            "items": [
+              "/compliance", "/disputes", "/pending-approvals",
+              "/audit", "/approver"
+            ]
+          }
+        ],
+        "allowed": [
+          "/", "/wallet", "/history", "/trust-check", "/dispute/:id",
+          "/war-room", "/war-room/alerts", "/war-room/transactions",
+          "/war-room/cross-chain", "/war-room/detection/graph",
+          "/war-room/detection/models", "/war-room/detection/risk",
+          "/war-room/approvals", "/detection-studio", "/graph-explorer",
+          "/compliance", "/disputes", "/pending-approvals", "/audit",
+          "/approver", "/flagged-queue", "/cross-chain", "/nft-swap",
+          "/zknaf", "/safe", "/session-keys",
+          "/settings", "/profile", "/more"
+        ]
+      }
+    },
+
+    "R4_INSTITUTION_COMPLIANCE": {
+      "level": 4,
+      "label": "Compliance Officer",
+      "mode": "WAR_ROOM",
+      "color": "#FF9800",
+      "capabilities": {
+        "canInitiateOwnTx": false,
+        "canViewOthersTx": true,
+        "canAccessDetectionStudio": true,
+        "canEditPolicies": true,
+        "canTriggerEnforcement": true,
+        "canSignMultisig": true,
+        "canVerifyUISnapshot": "full",
+        "canEmergencyOverride": false,
+        "canManageUsers": false,
+        "canExportReports": true,
+        "canAccessCompliance": true
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "dashboard",  "label": "Dashboard",  "route": "/war-room",    "icon": "dashboard_rounded" },
+          { "id": "compliance", "label": "Compliance",  "route": "/compliance",  "icon": "shield_rounded" },
+          { "id": "audit",      "label": "Audit",       "route": "/audit",       "icon": "history_edu_rounded" },
+          { "id": "settings",   "label": "Settings",    "route": "/settings",    "icon": "settings_rounded" }
+        ],
+        "sections": [
+          {
+            "title": "MONITORING",
+            "items": [
+              "/war-room", "/war-room/alerts", "/flagged-queue",
+              "/war-room/transactions", "/war-room/cross-chain",
+              "/detection-studio", "/graph-explorer", "/war-room/detection/risk"
+            ]
+          },
+          {
+            "title": "COMPLIANCE",
+            "items": [
+              "/compliance", "/policy-engine", "/enforcement",
+              "/fatf-rules", "/disputes"
+            ]
+          },
+          {
+            "title": "GOVERNANCE",
+            "items": [
+              "/multisig-queue", "/pending-approvals", "/audit",
+              "/ui-snapshots", "/reports", "/approver"
+            ]
+          }
+        ],
+        "allowed": [
+          "/", "/wallet", "/history", "/trust-check", "/dispute/:id",
+          "/war-room", "/war-room/alerts", "/war-room/transactions",
+          "/war-room/cross-chain", "/war-room/detection/graph",
+          "/war-room/detection/models", "/war-room/detection/risk",
+          "/war-room/approvals", "/detection-studio", "/graph-explorer",
+          "/compliance", "/disputes", "/pending-approvals", "/audit",
+          "/approver", "/flagged-queue", "/cross-chain", "/nft-swap",
+          "/zknaf", "/safe", "/session-keys",
+          "/policy-engine", "/enforcement", "/fatf-rules",
+          "/multisig-queue", "/ui-snapshots", "/reports",
+          "/settings", "/profile", "/more"
+        ]
+      }
+    },
+
+    "R5_PLATFORM_ADMIN": {
+      "level": 5,
+      "label": "Platform Admin",
+      "mode": "WAR_ROOM",
+      "color": "#F44336",
+      "capabilities": {
+        "canInitiateOwnTx": false,
+        "canViewOthersTx": true,
+        "canAccessDetectionStudio": true,
+        "canEditPolicies": true,
+        "canTriggerEnforcement": true,
+        "canSignMultisig": true,
+        "canVerifyUISnapshot": "full",
+        "canEmergencyOverride": false,
+        "canManageUsers": true,
+        "canExportReports": true,
+        "canAccessCompliance": true
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "dashboard", "label": "Dashboard", "route": "/war-room",         "icon": "dashboard_rounded" },
+          { "id": "admin",     "label": "Admin",     "route": "/admin",            "icon": "admin_panel_settings_rounded" },
+          { "id": "users",     "label": "Users",     "route": "/user-management", "icon": "people_rounded" },
+          { "id": "settings",  "label": "Settings",  "route": "/settings",         "icon": "settings_rounded" }
+        ],
+        "sections": [
+          {
+            "title": "MONITORING",
+            "items": [
+              "/war-room", "/war-room/alerts", "/flagged-queue",
+              "/war-room/transactions", "/war-room/cross-chain",
+              "/detection-studio", "/graph-explorer", "/war-room/detection/risk"
+            ]
+          },
+          {
+            "title": "ADMIN",
+            "items": [
+              "/admin", "/user-management", "/system-settings",
+              "/session-keys", "/safe"
+            ]
+          },
+          {
+            "title": "COMPLIANCE",
+            "items": [
+              "/compliance", "/policy-engine", "/enforcement", "/reports"
+            ]
+          },
+          {
+            "title": "GOVERNANCE",
+            "items": ["/multisig-queue", "/audit"]
+          }
+        ],
+        "allowed": [
+          "/", "/wallet", "/history", "/trust-check", "/disputes",
+          "/dispute/:id", "/compliance", "/audit",
+          "/war-room", "/war-room/alerts", "/war-room/transactions",
+          "/war-room/cross-chain", "/war-room/detection/graph",
+          "/war-room/detection/models", "/war-room/detection/risk",
+          "/war-room/approvals", "/detection-studio", "/graph-explorer",
+          "/admin", "/user-management", "/system-settings",
+          "/session-keys", "/safe",
+          "/policy-engine", "/enforcement", "/reports",
+          "/multisig-queue", "/flagged-queue", "/pending-approvals",
+          "/ui-snapshots", "/cross-chain", "/nft-swap", "/zknaf",
+          "/settings", "/profile", "/more", "/ml-models"
+        ]
+      }
+    },
+
+    "R6_SUPER_ADMIN": {
+      "level": 6,
+      "label": "Super Admin",
+      "mode": "WAR_ROOM",
+      "color": "#6366F1",
+      "capabilities": {
+        "canInitiateOwnTx": false,
+        "canViewOthersTx": true,
+        "canAccessDetectionStudio": true,
+        "canEditPolicies": true,
+        "canTriggerEnforcement": true,
+        "canSignMultisig": true,
+        "canVerifyUISnapshot": "full",
+        "canEmergencyOverride": true,
+        "canManageUsers": true,
+        "canExportReports": true,
+        "canAccessCompliance": true
+      },
+      "routes": {
+        "bottomNav": [
+          { "id": "audit",     "label": "Audit",     "route": "/audit",        "icon": "history_edu_rounded" },
+          { "id": "dashboard", "label": "War Room",  "route": "/war-room",     "icon": "dashboard_rounded" },
+          { "id": "snapshots", "label": "Snapshots", "route": "/ui-snapshots", "icon": "photo_camera_rounded" },
+          { "id": "settings",  "label": "Settings",  "route": "/settings",     "icon": "settings_rounded" }
+        ],
+        "sections": [
+          {
+            "title": "AUDIT",
+            "items": [
+              "/audit", "/ui-snapshots", "/reports", "/fatf-rules"
+            ]
+          },
+          {
+            "title": "ML & DETECTION",
+            "items": [
+              "/ml-models", "/detection-studio", "/war-room/detection/risk"
+            ]
+          },
+          {
+            "title": "READ-ONLY VIEWS",
+            "items": [
+              "/war-room", "/war-room/alerts", "/flagged-queue",
+              "/war-room/transactions", "/war-room/cross-chain",
+              "/graph-explorer", "/disputes"
+            ]
+          },
+          {
+            "title": "ADMIN (RO)",
+            "items": ["/admin", "/compliance"]
+          }
+        ],
+        "allowed": [
+          "/", "/wallet", "/history", "/trust-check", "/disputes",
+          "/dispute/:id", "/compliance", "/fatf-rules", "/admin", "/audit",
+          "/war-room", "/war-room/alerts", "/war-room/transactions",
+          "/war-room/cross-chain", "/war-room/detection/graph",
+          "/war-room/detection/models", "/war-room/detection/risk",
+          "/war-room/approvals", "/detection-studio", "/graph-explorer",
+          "/flagged-queue", "/ui-snapshots", "/reports", "/ml-models",
+          "/cross-chain", "/nft-swap", "/zknaf", "/safe", "/session-keys",
+          "/settings", "/profile", "/more"
+        ]
+      }
+    }
+  },
+
+  "criticalActions": {
+    "$doc": "Actions that require TEE attestation or secure enclave confirmation",
+    "actions": [
+      {
+        "id": "freeze_address",
+        "label": "Freeze Address",
+        "minRole": 4,
+        "requiresMultisig": true,
+        "requiresTEE": true,
+        "description": "Freeze a wallet address from all protocol interactions"
+      },
+      {
+        "id": "unfreeze_address",
+        "label": "Unfreeze Address",
+        "minRole": 4,
+        "requiresMultisig": true,
+        "requiresTEE": true,
+        "description": "Unfreeze a previously frozen wallet address"
+      },
+      {
+        "id": "emergency_override",
+        "label": "Emergency Override",
+        "minRole": 6,
+        "requiresMultisig": false,
+        "requiresTEE": true,
+        "description": "Bypass all safety checks in emergency situations"
+      },
+      {
+        "id": "policy_update",
+        "label": "Update Compliance Policy",
+        "minRole": 4,
+        "requiresMultisig": true,
+        "requiresTEE": true,
+        "description": "Modify FATF or custom compliance policy rules"
+      },
+      {
+        "id": "role_escalation",
+        "label": "Escalate User Role",
+        "minRole": 5,
+        "requiresMultisig": true,
+        "requiresTEE": true,
+        "description": "Promote a user to a higher RBAC role"
+      },
+      {
+        "id": "export_pii",
+        "label": "Export PII Data",
+        "minRole": 4,
+        "requiresMultisig": false,
+        "requiresTEE": true,
+        "description": "Export personally identifiable information for SAR filing"
+      },
+      {
+        "id": "ml_model_retrain",
+        "label": "Retrain ML Model",
+        "minRole": 6,
+        "requiresMultisig": false,
+        "requiresTEE": true,
+        "description": "Trigger retraining of fraud detection ML models"
+      }
+    ]
+  }
+}

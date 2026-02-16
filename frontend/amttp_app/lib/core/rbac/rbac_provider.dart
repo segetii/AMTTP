@@ -1,10 +1,11 @@
 /// RBAC Provider - State management for role-based access
-/// 
+///
 /// Provides:
 /// - Current user role state
 /// - App mode (Focus/War Room)
 /// - Permission checks
 /// - Role switching (for testing)
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'roles.dart';
@@ -150,9 +151,8 @@ class RBACNotifier extends StateNotifier<RBACState> {
   void updateSessionToken(String token, {Duration? duration}) {
     state = state.copyWith(
       sessionToken: token,
-      sessionExpiry: duration != null 
-        ? DateTime.now().add(duration)
-        : state.sessionExpiry,
+      sessionExpiry:
+          duration != null ? DateTime.now().add(duration) : state.sessionExpiry,
     );
   }
 
@@ -177,8 +177,8 @@ final currentModeProvider = Provider<AppMode>((ref) {
   return ref.watch(rbacProvider).mode;
 });
 
-/// Provider for checking if authenticated
-final isAuthenticatedProvider = Provider<bool>((ref) {
+/// Provider for checking if RBAC-authenticated (use auth isAuthenticatedProvider for canonical check)
+final isRbacAuthenticatedProvider = Provider<bool>((ref) {
   return ref.watch(rbacProvider).isAuthenticated;
 });
 

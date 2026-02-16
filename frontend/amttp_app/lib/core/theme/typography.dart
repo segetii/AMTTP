@@ -5,6 +5,7 @@
 /// Text('Hello', style: AppTypography.headlineLarge)
 /// Text('Body text', style: AppTypography.bodyMedium)
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'design_tokens.dart';

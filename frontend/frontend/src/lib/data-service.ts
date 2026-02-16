@@ -8,8 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import sankeyFallback from '@/data/sankeyFlowData.json';
-import flaggedFallback from '@/data/flaggedQueueData.json';
+// Fallback JSON imports REMOVED — all data from real backends now
 
 // ============================================================================
 // Types - Matching Component Interfaces
@@ -261,8 +260,10 @@ function transformGraphData(raw: unknown): GraphData {
 // Data Fetching Functions
 // ============================================================================
 
-// Use a dedicated internal API namespace to avoid collisions with backend rewrites
-const API_BASE = '/app-api/data';
+// Use a dedicated internal API namespace to avoid collisions with backend rewrites.
+// Must include basePath ('/app') so browser requests reach the Next.js /app/ location
+// through the gateway nginx.
+const API_BASE = '/app/app-api/data';
 
 async function fetchData<T>(endpoint: string, transform?: (raw: unknown) => T): Promise<T> {
   const response = await fetch(`${API_BASE}/${endpoint}`, {
@@ -291,12 +292,7 @@ async function fetchData<T>(endpoint: string, transform?: (raw: unknown) => T): 
 // ============================================================================
 
 export async function getSankeyData(): Promise<SankeyData> {
-  try {
-    return await fetchData<SankeyData>('sankey');
-  } catch (e) {
-    console.error('Falling back to bundled Sankey data:', e);
-    return sankeyFallback as SankeyData;
-  }
+  return fetchData<SankeyData>('sankey');
 }
 
 export async function getGraphData(): Promise<GraphData> {
@@ -316,12 +312,7 @@ export async function getDistributionData(): Promise<DistributionBucket[]> {
 }
 
 export async function getFlaggedQueue(): Promise<FlaggedTransaction[]> {
-  try {
-    return await fetchData<FlaggedTransaction[]>('flagged', transformFlaggedQueue);
-  } catch (e) {
-    console.error('Falling back to bundled flagged queue data:', e);
-    return transformFlaggedQueue(flaggedFallback as unknown);
-  }
+  return fetchData<FlaggedTransaction[]>('flagged', transformFlaggedQueue);
 }
 
 function transformFlaggedQueue(raw: unknown): FlaggedTransaction[] {

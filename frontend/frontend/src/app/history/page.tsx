@@ -24,6 +24,7 @@ function HistoryContent() {
   const { profile, address } = useProfile();
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendOffline, setBackendOffline] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [selectedDecision, setSelectedDecision] = useState<Decision | null>(null);
 
@@ -40,7 +41,8 @@ function HistoryContent() {
         setDecisions(data.decisions || []);
       }
     } catch (e) {
-      console.error('Failed to load history:', e);
+      console.warn('[History] Backend unavailable, showing offline state.');
+      setBackendOffline(true);
     }
     setLoading(false);
   }
@@ -73,6 +75,13 @@ function HistoryContent() {
     <div>
       <h1 className="text-3xl font-bold mb-2">📜 Transaction History</h1>
       <p className="text-gray-400 mb-6">View compliance decisions and transaction history</p>
+
+      {backendOffline && (
+        <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 mb-4 flex items-center gap-2 text-yellow-300 text-sm">
+          <span>⚠️</span>
+          <span>Backend services are offline. No transaction history available.</span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-2 mb-6">

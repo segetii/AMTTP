@@ -86,6 +86,17 @@ function BatchTransferContent() {
         ));
       } catch (e) {
         console.error('Batch check failed:', e);
+        setTransactions(prev => prev.map((t, idx) => 
+          idx === i ? { 
+            ...t, 
+            status: 'blocked' as BatchTx['status'],
+            decision: {
+              action: 'ERROR',
+              risk_score: 0,
+              reasons: ['Backend unavailable — unable to evaluate transaction']
+            }
+          } : t
+        ));
       }
 
       // Small delay between checks

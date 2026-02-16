@@ -19,6 +19,8 @@ import {
   ROLE_LABELS,
   ROLE_COLORS,
 } from '@/types/rbac';
+import { logoutUser } from '@/lib/auth-service';
+import { clearBridgeSession } from '@/lib/cross-app-auth-bridge';
 
 const ORCHESTRATOR_API = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
 
@@ -201,41 +203,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (e) {
       console.error('Login failed:', e);
       
-      // Fallback: create local session as R3 (institutional user) for Next.js
-      const role = Role.R3_INSTITUTION_OPS;
-      const session: UserSession = {
-        userId: `user_${address.slice(2, 10)}`,
-        address,
-        displayName: `${address.slice(0, 6)}...${address.slice(-4)}`,
-        role,
-        mode: getRoleMode(role),
-        capabilities: getRoleCapabilities(role),
-      };
-      
-      localStorage.setItem('amttp_session', JSON.stringify(session));
-      
+      // SECURITY: Do NOT create fallback sessions - auth must fail safely
       setState({
-        isAuthenticated: true,
+        isAuthenticated: false,
         isLoading: false,
-        session,
-        error: null,
+        session: null,
+        error: 'Authentication service unavailable. Please try again later.',
       });
     }
   }, []);
 
   // Logout
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      // 1. Invalidate server-side session
+      const token = localStorage.getItem('amttp_session_token');
+      if (token) {
+        await fetch(`${ORCHESTRATOR_API}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).catch(() => {}); // Best-effort server call
+      }
+    } catch (_) {}
+
+    // 2. Clear all localStorage auth keys
+    logoutUser();
     localStorage.removeItem('amttp_session');
+
+    // 3. Clear cross-app auth bridge cookie
+    clearBridgeSession();
+
+    // 4. Reset context state
     setState({
       isAuthenticated: false,
       isLoading: false,
       session: null,
       error: null,
     });
+
+    // 5. Redirect to sign-in
+    window.location.href = '/sign-in';
   }, []);
 
-  // Demo role switching (development only)
+  // Demo role switching (development only - disabled in production)
   const switchRole = useCallback((role: Role) => {
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('Role switching is disabled in production');
+      return;
+    }
     if (!state.session) return;
     
     const mode = getRoleMode(role);
@@ -267,8 +282,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [role]);
   
   const isEndUser = role === Role.R1_END_USER || role === Role.R2_END_USER_PEP;
-  const isInstitutional = role === Role.R3_INSTITUTION_OPS || role === Role.R4_INSTITUTION_COMPLIANCE;
-  const canEnforceAction = role === Role.R4_INSTITUTION_COMPLIANCE;
+  const isInstitutional = role !== null && role !== Role.R1_END_USER && role !== Role.R2_END_USER_PEP;
+  const canEnforceAction = role === Role.R4_INSTITUTION_COMPLIANCE || role === Role.R5_PLATFORM_ADMIN || role === Role.R6_SUPER_ADMIN;
   
   const roleLabel = role ? ROLE_LABELS[role] : '';
   const roleColor = role ? ROLE_COLORS[role] : '#6B7280';

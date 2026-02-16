@@ -108,53 +108,17 @@ function LoginContent() {
   // Handle email login
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setEmailError('');
-    setIsEmailLoading(true);
-    
-    try {
-      // For now, simulate email login by generating an address
-      // In production, this would call an API
-      const mockAddress = `0x${email.split('@')[0].padEnd(40, '0')}`;
-      await login(mockAddress);
-      // Always redirect to war-room (institutional users only in Next.js)
-      router.push('/war-room');
-    } catch (error) {
-      setEmailError('An error occurred during login');
-      console.error('Email login error:', error);
-    } finally {
-      setIsEmailLoading(false);
-    }
+    setEmailError('No real backend authentication is available.');
+    setIsEmailLoading(false);
   };
   
   // Handle demo connect - use pre-seeded mock user addresses
   const handleDemoConnect = async () => {
-    if (!selectedRole) return;
-    
     setIsConnecting(true);
-    try {
-      // Use the pre-seeded mock user addresses based on role
-      // NOTE: Only institutional roles (R3-R6) - end users use Flutter app
-      const roleAddresses: Record<string, string> = {
-        [Role.R3_INSTITUTION_OPS]: '0x3333333333333333333333333333333333333333',
-        [Role.R4_INSTITUTION_COMPLIANCE]: '0x4444444444444444444444444444444444444444',
-        [Role.R5_PLATFORM_ADMIN]: '0x5555555555555555555555555555555555555555',
-        [Role.R6_SUPER_ADMIN]: '0x6666666666666666666666666666666666666666',
-      };
-      
-      const demoAddress = roleAddresses[selectedRole];
-      if (!demoAddress) {
-        console.error('Invalid role for Next.js - end users should use Flutter app');
-        return;
-      }
-      await login(demoAddress);
-      
-      // All Next.js logins go to War Room (end users use Flutter)
-      router.push('/war-room');
-    } catch (error) {
-      console.error('Login failed:', error);
-    } finally {
+    setTimeout(() => {
       setIsConnecting(false);
-    }
+      setEmailError('Demo connect is disabled. No backend auth available.');
+    }, 500);
   };
   
   return (

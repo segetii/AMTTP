@@ -49,9 +49,9 @@ function StatsPanel() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {stats.map(stat => (
-        <div key={stat.label} className="p-4 bg-slate-800 border border-slate-700 rounded-lg">
-          <p className="text-xs text-slate-400 mb-1">{stat.label}</p>
-          <p className="text-2xl font-bold text-white mb-1">{stat.value}</p>
+        <div key={stat.label} className="p-4 bg-surface border border-borderSubtle rounded-lg">
+          <p className="text-xs text-mutedText mb-1">{stat.label}</p>
+          <p className="text-2xl font-bold text-text mb-1">{stat.value}</p>
           <p className={`text-xs ${stat.positive ? 'text-green-400' : 'text-yellow-400'}`}>
             {stat.change}
           </p>
@@ -79,7 +79,7 @@ function QuickActions({ onAction }: { onAction: (action: string) => void }) {
         <button
           key={action.id}
           onClick={() => onAction(action.id)}
-          className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2 transition-colors"
+          className="px-4 py-2 bg-surface border border-borderSubtle rounded-lg text-sm text-slate-300 hover:bg-slate-700 hover:text-text flex items-center gap-2 transition-colors"
         >
           <span>{action.icon}</span>
           {action.label}
@@ -128,14 +128,14 @@ export default function ComplianceReportsPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
+        <h1 className="text-2xl font-bold text-text flex items-center gap-3 mb-2">
           <span className="text-3xl">📊</span>
           Compliance Reports
         </h1>
-        <p className="text-slate-400">
+        <p className="text-mutedText">
           Generate reports, explore snapshots, and verify evidence for regulatory compliance
         </p>
       </header>
@@ -147,15 +147,15 @@ export default function ComplianceReportsPage() {
       <QuickActions onAction={handleQuickAction} />
       
       {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 bg-slate-800 rounded-xl mb-6">
+      <div className="flex gap-1 p-1 bg-surface rounded-xl mb-6">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-cyan-600 text-white'
-                : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                ? 'bg-cyan-600 text-text'
+                : 'text-mutedText hover:text-text hover:bg-slate-700'
             }`}
           >
             <span className="mr-2">{tab.icon}</span>
@@ -165,8 +165,8 @@ export default function ComplianceReportsPage() {
       </div>
       
       {/* Tab Description */}
-      <div className="mb-4 p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
-        <p className="text-sm text-slate-400">
+      <div className="mb-4 p-3 bg-surface/50 border border-borderSubtle rounded-lg">
+        <p className="text-sm text-mutedText">
           {tabs.find(t => t.id === activeTab)?.icon}{' '}
           {tabs.find(t => t.id === activeTab)?.description}
         </p>
@@ -199,8 +199,8 @@ export default function ComplianceReportsPage() {
       </div>
       
       {/* Footer Info */}
-      <footer className="mt-6 pt-6 border-t border-slate-700">
-        <div className="flex items-center justify-between text-xs text-slate-500">
+      <footer className="mt-6 pt-6 border-t border-borderSubtle">
+        <div className="flex items-center justify-between text-xs text-mutedText">
           <span>
             Sprint 11: Compliance Reporting & Export System
           </span>

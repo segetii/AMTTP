@@ -6,6 +6,7 @@
 /// 
 /// Naming Convention: category_variant_state
 /// Example: color_primary_default, spacing_md, radius_lg
+library;
 
 import 'package:flutter/material.dart';
 

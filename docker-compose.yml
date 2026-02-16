@@ -142,6 +142,73 @@ services:
       - mongo
     restart: unless-stopped
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMPLIANCE MICRO-SERVICES
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  sanctions:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.sanctions
+    container_name: amttp-sanctions
+    ports: ['8004:8004']
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  geo-risk:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.geo
+    container_name: amttp-geo-risk
+    ports: ['8006:8006']
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  monitoring:
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile.monitoring
+    container_name: amttp-monitoring
+    ports: ['8005:8005']
+    volumes:
+      - ./backend/compliance-service/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  graph-api:
+    build:
+      context: ./ml/Automation/ml_pipeline
+      dockerfile: Dockerfile.graph
+    container_name: amttp-graph
+    ports: ['8001:8001']
+    environment:
+      MEMGRAPH_HOST: memgraph
+      MEMGRAPH_PORT: "7687"
+    depends_on:
+      - memgraph
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # AMTTP Compliance Orchestrator
   orchestrator:
     build:
@@ -159,12 +226,12 @@ services:
       MINIO_SECURE: "false"
       MINIO_BUCKET: amttp-documents
       IPFS_API_URL: http://helia:5001
-      # Compliance services
+      # Compliance services (Docker internal networking)
       ML_RISK_URL: http://risk-engine:8000
-      GRAPH_URL: http://memgraph-lab:3000
-      SANCTIONS_URL: http://localhost:8004
-      MONITORING_URL: http://localhost:8005
-      GEO_RISK_URL: http://localhost:8006
+      GRAPH_URL: http://graph-api:8001
+      SANCTIONS_URL: http://sanctions:8004
+      MONITORING_URL: http://monitoring:8005
+      GEO_RISK_URL: http://geo-risk:8006
       POLICY_URL: http://localhost:8003
       FCA_URL: http://localhost:8002
       # Security
@@ -179,6 +246,10 @@ services:
       - minio
       - helia
       - risk-engine
+      - sanctions
+      - geo-risk
+      - monitoring
+      - graph-api
     restart: unless-stopped
 
   # AMTTP UI Integrity Service (Bybit-style attack prevention)
