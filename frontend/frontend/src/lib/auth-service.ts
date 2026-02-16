@@ -31,6 +31,18 @@ import {
 import { Role, AppMode } from '@/types/rbac';
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// CRYPTO UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'amttp_salt_2026');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // STORAGE KEYS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -406,7 +418,7 @@ export async function registerUser(data: RegistrationData): Promise<Registration
         defaultCurrency: 'USD',
         language: 'en',
       },
-      passwordHash: data.password, // TODO: Hash password properly
+      passwordHash: await hashPassword(data.password),
     };
     
     // Save to "database"
@@ -487,9 +499,10 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
       };
     }
     
-    // Find user
+    // Find user and verify hashed password
     const user = mockUsers.get(credentials.email.toLowerCase()) as (User & { passwordHash?: string }) | undefined;
-    if (!user || user.passwordHash !== credentials.password) {
+    const inputHash = await hashPassword(credentials.password);
+    if (!user || user.passwordHash !== inputHash) {
       return {
         success: false,
         error: LoginError.INVALID_CREDENTIALS,

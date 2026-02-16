@@ -289,7 +289,7 @@ class Transaction {
 
   @override
   String toString() =>
-      'Transaction(id: $id, hash: $shortHash, ${shortFrom} -> ${shortTo}, $amount $tokenSymbol, ${status.name})';
+      'Transaction(id: $id, hash: $shortHash, $shortFrom -> $shortTo, $amount $tokenSymbol, ${status.name})';
 }
 
 /// Transaction request for initiating a new transaction

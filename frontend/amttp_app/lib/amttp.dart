@@ -6,6 +6,7 @@
 /// ```dart
 /// import 'package:amttp_app/amttp.dart';
 /// ```
+library;
 
 // Core exports
 export 'core/core.dart';

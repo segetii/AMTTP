@@ -5,6 +5,7 @@
 /// - Compliance Studio (R4 - Can Enforce with Multisig)
 /// - Governance (Multisig)
 /// - Audit & Reports
+library;
 
 // Main pages
 export 'war_room_landing_page.dart';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 interface PendingApproval {
@@ -19,66 +19,20 @@ interface PendingApproval {
   requiredApprovals: number;
 }
 
-const mockApprovals: PendingApproval[] = [
-  {
-    id: '1',
-    type: 'transfer',
-    title: 'Large Transfer Approval',
-    description: 'Transfer exceeds daily limit threshold',
-    requestedBy: '0xAlice...1234',
-    timestamp: '2026-01-31 14:00:00',
-    priority: 'high',
-    amount: '75,000',
-    token: 'USDC',
-    from: '0xAlice...1234',
-    to: '0xBob...5678',
-    approvals: [
-      { user: 'compliance@exchange.com', timestamp: '2026-01-31 14:05:00' },
-    ],
-    requiredApprovals: 2,
-  },
-  {
-    id: '2',
-    type: 'policy_change',
-    title: 'Velocity Limit Update',
-    description: 'Increase daily limit for premium users to $100,000',
-    requestedBy: 'admin@exchange.com',
-    timestamp: '2026-01-31 12:00:00',
-    priority: 'medium',
-    approvals: [],
-    requiredApprovals: 3,
-  },
-  {
-    id: '3',
-    type: 'enforcement',
-    title: 'Account Freeze Request',
-    description: 'Freeze account 0xSuspect...9012 due to fraud investigation',
-    requestedBy: 'legal@exchange.com',
-    timestamp: '2026-01-31 10:30:00',
-    priority: 'urgent',
-    approvals: [
-      { user: 'compliance@exchange.com', timestamp: '2026-01-31 10:45:00' },
-      { user: 'admin@exchange.com', timestamp: '2026-01-31 11:00:00' },
-    ],
-    requiredApprovals: 3,
-  },
-  {
-    id: '4',
-    type: 'user_action',
-    title: 'New Approver Addition',
-    description: 'Add jane@exchange.com as a compliance approver',
-    requestedBy: 'admin@exchange.com',
-    timestamp: '2026-01-30 16:00:00',
-    priority: 'low',
-    approvals: [
-      { user: 'super@exchange.com', timestamp: '2026-01-30 16:30:00' },
-    ],
-    requiredApprovals: 2,
-  },
-];
+
 
 export default function PendingApprovalsPage() {
-  const [approvals, setApprovals] = useState(mockApprovals);
+  const [approvals, setApprovals] = useState<PendingApproval[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch('http://127.0.0.1:3001/risk/reviews')
+      .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
+      .then(data => setApprovals(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -96,17 +50,17 @@ export default function PendingApprovalsPage() {
       case 'policy_change': return 'bg-blue-500/20 text-blue-400';
       case 'enforcement': return 'bg-red-500/20 text-red-400';
       case 'user_action': return 'bg-purple-500/20 text-purple-400';
-      default: return 'bg-slate-500/20 text-slate-400';
+      default: return 'bg-slate-500/20 text-mutedText';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-500 text-white';
+      case 'urgent': return 'bg-red-500 text-text';
       case 'high': return 'bg-orange-500/20 text-orange-400';
       case 'medium': return 'bg-yellow-500/20 text-yellow-400';
-      case 'low': return 'bg-slate-500/20 text-slate-400';
-      default: return 'bg-slate-500/20 text-slate-400';
+      case 'low': return 'bg-slate-500/20 text-mutedText';
+      default: return 'bg-slate-500/20 text-mutedText';
     }
   };
 
@@ -127,17 +81,17 @@ export default function PendingApprovalsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link href="/war-room" className="text-slate-400 hover:text-white">
+            <Link href="/war-room" className="text-mutedText hover:text-text">
               ← War Room
             </Link>
           </div>
           <h1 className="text-3xl font-bold">Pending Approvals</h1>
-          <p className="text-slate-400 mt-1">Review and approve pending requests</p>
+          <p className="text-mutedText mt-1">Review and approve pending requests</p>
         </div>
         <div className="flex items-center gap-4">
           <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm">
@@ -148,28 +102,28 @@ export default function PendingApprovalsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-green-400">{approvals.filter(a => a.type === 'transfer').length}</div>
-          <div className="text-slate-400 text-sm">Transfers</div>
+          <div className="text-mutedText text-sm">Transfers</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-blue-400">{approvals.filter(a => a.type === 'policy_change').length}</div>
-          <div className="text-slate-400 text-sm">Policy Changes</div>
+          <div className="text-mutedText text-sm">Policy Changes</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-red-400">{approvals.filter(a => a.type === 'enforcement').length}</div>
-          <div className="text-slate-400 text-sm">Enforcement</div>
+          <div className="text-mutedText text-sm">Enforcement</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-purple-400">{approvals.filter(a => a.type === 'user_action').length}</div>
-          <div className="text-slate-400 text-sm">User Actions</div>
+          <div className="text-mutedText text-sm">User Actions</div>
         </div>
       </div>
 
       {/* Approvals List */}
       <div className="space-y-4">
         {approvals.map(approval => (
-          <div key={approval.id} className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+          <div key={approval.id} className="bg-surface rounded-xl p-6 border border-borderSubtle">
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${getTypeColor(approval.type)}`}>
@@ -185,19 +139,19 @@ export default function PendingApprovalsPage() {
                       {approval.priority}
                     </span>
                   </div>
-                  <p className="text-slate-400 text-sm mb-2">{approval.description}</p>
+                  <p className="text-mutedText text-sm mb-2">{approval.description}</p>
                   
                   {approval.type === 'transfer' && approval.amount && (
                     <div className="bg-slate-700/50 rounded-lg p-3 mb-3 inline-block">
                       <span className="text-2xl font-bold">{approval.amount}</span>
-                      <span className="text-slate-400 ml-2">{approval.token}</span>
-                      <div className="text-sm text-slate-400 mt-1">
+                      <span className="text-mutedText ml-2">{approval.token}</span>
+                      <div className="text-sm text-mutedText mt-1">
                         {approval.from} → {approval.to}
                       </div>
                     </div>
                   )}
                   
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-mutedText">
                     Requested by {approval.requestedBy} • {approval.timestamp}
                   </div>
                 </div>
@@ -205,7 +159,7 @@ export default function PendingApprovalsPage() {
               
               <div className="text-right">
                 <div className="mb-3">
-                  <div className="text-sm text-slate-400 mb-1">Approvals</div>
+                  <div className="text-sm text-mutedText mb-1">Approvals</div>
                   <div className="flex items-center gap-1 justify-end">
                     {Array.from({ length: approval.requiredApprovals }).map((_, i) => (
                       <div 
@@ -234,13 +188,13 @@ export default function PendingApprovalsPage() {
             </div>
             
             {approval.approvals.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                <div className="text-sm text-slate-400 mb-2">Approval History</div>
+              <div className="mt-4 pt-4 border-t border-borderSubtle">
+                <div className="text-sm text-mutedText mb-2">Approval History</div>
                 <div className="flex flex-wrap gap-2">
                   {approval.approvals.map((a, i) => (
                     <div key={i} className="bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-1 text-sm">
                       <span className="text-green-400">✓</span> {a.user}
-                      <span className="text-slate-500 ml-2 text-xs">{a.timestamp}</span>
+                      <span className="text-mutedText ml-2 text-xs">{a.timestamp}</span>
                     </div>
                   ))}
                 </div>
@@ -249,6 +203,8 @@ export default function PendingApprovalsPage() {
           </div>
         ))}
       </div>
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
     </div>
   );
 }

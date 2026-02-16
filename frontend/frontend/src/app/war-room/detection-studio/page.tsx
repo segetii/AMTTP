@@ -116,10 +116,10 @@ const VIEW_TABS: ViewTab[] = [
 function ChartPlaceholder({ height = 350 }: { height?: number }) {
   return (
     <div 
-      className="bg-slate-800/50 rounded-lg animate-pulse flex items-center justify-center"
+      className="bg-surface/50 rounded-lg animate-pulse flex items-center justify-center"
       style={{ height }}
     >
-      <div className="text-slate-500">Loading visualization...</div>
+      <div className="text-mutedText">Loading visualization...</div>
     </div>
   );
 }
@@ -135,7 +135,7 @@ function AlertBanner() {
             Unusual velocity detected in cluster 0x7f2e...3d4c • Possible layering pattern • Review required
           </p>
         </div>
-        <button className="ml-auto bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm">
+        <button className="ml-auto bg-amber-600 hover:bg-amber-700 text-text px-4 py-2 rounded-lg text-sm">
           Review Alerts
         </button>
       </div>
@@ -190,7 +190,7 @@ export default function DetectionStudioPage() {
   // ═══════════════════════════════════════════════════════════════════════════════
   if (embedParam) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-4">
+      <div className="p-4">
         {/* Flow View (Sankey) */}
         {activeView === 'flow' && (
           <div className="h-full">
@@ -205,11 +205,11 @@ export default function DetectionStudioPage() {
               <div className="h-[500px] flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-slate-400">Loading value flow data...</p>
+                  <p className="text-mutedText">Loading value flow data...</p>
                 </div>
               </div>
             ) : sankeyData.nodes.length === 0 || sankeyData.links.length === 0 ? (
-              <div className="h-[500px] flex items-center justify-center text-slate-400">
+              <div className="h-[500px] flex items-center justify-center text-mutedText">
                 No value flow data available
               </div>
             ) : (
@@ -253,7 +253,7 @@ export default function DetectionStudioPage() {
                 onNodeClick={(node) => handleNodeSelect(node.id)}
               />
             ) : (
-              <div className="h-[600px] flex items-center justify-center text-slate-400">No graph data</div>
+              <div className="h-[600px] flex items-center justify-center text-mutedText">No graph data</div>
             )}
           </div>
         )}
@@ -272,7 +272,7 @@ export default function DetectionStudioPage() {
                 height={400}
               />
             ) : (
-              <div className="h-[400px] flex items-center justify-center text-slate-400">No distribution data</div>
+              <div className="h-[400px] flex items-center justify-center text-mutedText">No distribution data</div>
             )}
           </div>
         )}
@@ -291,11 +291,11 @@ export default function DetectionStudioPage() {
               <div className="h-[500px] flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-slate-400">Loading Detection Studio...</p>
+                  <p className="text-mutedText">Loading Detection Studio...</p>
                 </div>
               </div>
             ) : sankeyData.nodes.length === 0 || sankeyData.links.length === 0 ? (
-              <div className="h-[500px] flex items-center justify-center text-slate-400">
+              <div className="h-[500px] flex items-center justify-center text-mutedText">
                 <div className="text-center">
                   <p className="text-lg font-medium mb-2">Detection Studio Ready</p>
                   <p className="text-sm">No active transactions to display</p>
@@ -318,12 +318,12 @@ export default function DetectionStudioPage() {
   // FULL PAGE MODE: Complete dashboard with all chrome
   // ═══════════════════════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="p-6">
+    <div className="space-y-6">
+      <div>
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Detection Studio</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-text">Detection Studio</h1>
+          <p className="text-mutedText mt-1">
             Advanced visualization workspace for pattern analysis
           </p>
         </div>
@@ -334,20 +334,20 @@ export default function DetectionStudioPage() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative max-w-lg">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-mutedText" />
             <input
               type="text"
               placeholder="Search address, transaction, or cluster..."
               value={selectedAddress}
               onChange={(e) => setSelectedAddress(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 
-                       text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              className="w-full bg-surface border border-borderSubtle rounded-lg py-2.5 pl-10 pr-4 
+                       text-text placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             />
           </div>
         </div>
         
         {/* View Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-slate-700 pb-4">
+        <div className="flex gap-2 mb-6 border-b border-borderSubtle pb-4">
           {VIEW_TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeView === tab.id;
@@ -358,8 +358,8 @@ export default function DetectionStudioPage() {
                 onClick={() => setActiveView(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-cyan-600 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                    ? 'bg-cyan-600 text-text'
+                    : 'bg-surface text-mutedText hover:bg-slate-700 hover:text-text'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -376,40 +376,40 @@ export default function DetectionStudioPage() {
             <div className="space-y-6">
               {/* Row 1: Time Series + Distribution */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
                   {isLoadingTimeSeries ? (
-                    <div className="h-[300px] flex items-center justify-center">
+                    <div className="h-[360px] flex items-center justify-center">
                       <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
                     </div>
                   ) : timeSeriesData.length > 0 ? (
                     <TimeSeriesChart
                       data={timeSeriesData}
                       title="Transaction Volume (30 Days)"
-                      height={300}
+                      height={360}
                     />
                   ) : (
-                    <div className="h-[300px] flex items-center justify-center text-slate-400">No time series data</div>
+                    <div className="h-[360px] flex items-center justify-center text-mutedText">No time series data</div>
                   )}
                 </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
                   {isLoadingDistribution ? (
-                    <div className="h-[300px] flex items-center justify-center">
+                    <div className="h-[360px] flex items-center justify-center">
                       <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
                     </div>
                   ) : distributionData.length > 0 ? (
                     <RiskDistributionChart
                       data={distributionData}
                       title="Risk Score Distribution"
-                      height={300}
+                      height={360}
                     />
                   ) : (
-                    <div className="h-[300px] flex items-center justify-center text-slate-400">No distribution data</div>
+                    <div className="h-[360px] flex items-center justify-center text-mutedText">No distribution data</div>
                   )}
                 </div>
               </div>
               
               {/* Row 2: Velocity Heatmap */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+              <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
                 {isLoadingHeatmap ? (
                   <div className="h-[350px] flex items-center justify-center">
                     <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
@@ -422,26 +422,26 @@ export default function DetectionStudioPage() {
                     onCellClick={handleHeatmapClick}
                   />
                 ) : (
-                  <div className="h-[350px] flex items-center justify-center text-slate-400">No velocity data</div>
+                  <div className="h-[350px] flex items-center justify-center text-mutedText">No velocity data</div>
                 )}
               </div>
               
               {/* Row 3: Network Graph */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Network Explorer</h3>
+              <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
+                <h3 className="text-lg font-semibold text-text mb-4">Network Explorer</h3>
                 {isLoadingGraph ? (
-                  <div className="h-[400px] flex items-center justify-center">
+                  <div className="h-[500px] flex items-center justify-center">
                     <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
                   </div>
                 ) : validGraphData.nodes.length > 0 ? (
                   <GraphExplorer
                     nodes={validGraphData.nodes}
                     edges={validGraphData.edges}
-                    height={400}
+                    height={500}
                     onNodeClick={(node) => handleNodeSelect(node.id)}
                   />
                 ) : (
-                  <div className="h-[400px] flex items-center justify-center text-slate-400">No graph data</div>
+                  <div className="h-[500px] flex items-center justify-center text-mutedText">No graph data</div>
                 )}
               </div>
             </div>
@@ -450,10 +450,10 @@ export default function DetectionStudioPage() {
           {/* Velocity Mode: Heatmap focus */}
           {activeView === 'velocity' && (
             <div className="space-y-6">
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+              <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-white">Temporal Velocity Analysis</h3>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <h3 className="text-lg font-semibold text-text">Temporal Velocity Analysis</h3>
+                  <p className="text-sm text-mutedText mt-1">
                     Hour × Day matrix showing transaction frequency. Red cells indicate anomalous activity.
                     Bot patterns often show consistent activity in unusual hours.
                   </p>
@@ -469,11 +469,11 @@ export default function DetectionStudioPage() {
                     onCellClick={handleHeatmapClick}
                   />
                 ) : (
-                  <div className="h-[500px] flex items-center justify-center text-slate-400">No velocity data</div>
+                  <div className="h-[500px] flex items-center justify-center text-mutedText">No velocity data</div>
                 )}
               </div>
               
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+              <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
                 {isLoadingTimeSeries ? (
                   <div className="h-[350px] flex items-center justify-center">
                     <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
@@ -485,7 +485,7 @@ export default function DetectionStudioPage() {
                     height={350}
                   />
                 ) : (
-                  <div className="h-[350px] flex items-center justify-center text-slate-400">No time series data</div>
+                  <div className="h-[350px] flex items-center justify-center text-mutedText">No time series data</div>
                 )}
               </div>
             </div>
@@ -493,10 +493,10 @@ export default function DetectionStudioPage() {
           
           {/* Network Mode: Graph focus */}
           {activeView === 'network' && (
-            <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">Network Graph Explorer</h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <h3 className="text-lg font-semibold text-text">Network Graph Explorer</h3>
+                <p className="text-sm text-mutedText mt-1">
                   WebGL-accelerated graph for exploring wallet relationships.
                   Click nodes to expand. Red edges indicate high-risk transfers.
                 </p>
@@ -513,11 +513,11 @@ export default function DetectionStudioPage() {
                   onNodeClick={(node) => handleNodeSelect(node.id)}
                 />
               ) : (
-                <div className="h-[600px] flex items-center justify-center text-slate-400">No graph data</div>
+                <div className="h-[600px] flex items-center justify-center text-mutedText">No graph data</div>
               )}
               {selectedAddress && (
-                <div className="mt-4 p-4 bg-slate-900/50 rounded-lg">
-                  <h4 className="text-sm font-medium text-slate-400">Selected Node</h4>
+                <div className="mt-4 p-4 bg-background/50 rounded-lg">
+                  <h4 className="text-sm font-medium text-mutedText">Selected Node</h4>
                   <code className="text-cyan-400 text-sm">{selectedAddress}</code>
                 </div>
               )}
@@ -527,11 +527,11 @@ export default function DetectionStudioPage() {
           {/* Flow Mode: Sankey focus */}
           {activeView === 'flow' && (
             <div className="space-y-6">
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+              <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Value Flow Auditor</h3>
-                    <p className="text-sm text-slate-400 mt-1">
+                    <h3 className="text-lg font-semibold text-text">Value Flow Auditor</h3>
+                    <p className="text-sm text-mutedText mt-1">
                       Sankey diagram for value conservation analysis.
                       Money never lies - splits, merges, and smurfing patterns are visible here.
                     </p>
@@ -556,11 +556,11 @@ export default function DetectionStudioPage() {
                   <div className="h-[500px] flex items-center justify-center">
                     <div className="text-center">
                       <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                      <p className="text-slate-400">Loading value flow data...</p>
+                      <p className="text-mutedText">Loading value flow data...</p>
                     </div>
                   </div>
                 ) : sankeyData.nodes.length === 0 || sankeyData.links.length === 0 ? (
-                  <div className="h-[500px] flex items-center justify-center text-slate-400">
+                  <div className="h-[500px] flex items-center justify-center text-mutedText">
                     No value flow data available
                   </div>
                 ) : (
@@ -572,28 +572,28 @@ export default function DetectionStudioPage() {
                 )}
               </div>
               
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                <h4 className="text-lg font-semibold text-white mb-4">Flow Statistics</h4>
+              <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
+                <h4 className="text-lg font-semibold text-text mb-4">Flow Statistics</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-900/50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-white">{sankeyData.nodes.length}</div>
-                    <div className="text-sm text-slate-400">Unique Addresses</div>
+                  <div className="bg-background/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-text">{sankeyData.nodes.length}</div>
+                    <div className="text-sm text-mutedText">Unique Addresses</div>
                   </div>
-                  <div className="bg-slate-900/50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-white">{sankeyData.links.length}</div>
-                    <div className="text-sm text-slate-400">Transfer Links</div>
+                  <div className="bg-background/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-text">{sankeyData.links.length}</div>
+                    <div className="text-sm text-mutedText">Transfer Links</div>
                   </div>
-                  <div className="bg-slate-900/50 rounded-lg p-4">
+                  <div className="bg-background/50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-emerald-400">
                       {sankeyData.links.reduce((sum, l) => sum + l.value, 0).toFixed(1)} ETH
                     </div>
-                    <div className="text-sm text-slate-400">Total Volume</div>
+                    <div className="text-sm text-mutedText">Total Volume</div>
                   </div>
-                  <div className="bg-slate-900/50 rounded-lg p-4">
+                  <div className="bg-background/50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-amber-400">
                       {sankeyData.links.filter(l => l.isAnomaly).length}
                     </div>
-                    <div className="text-sm text-slate-400">Anomalous Flows</div>
+                    <div className="text-sm text-mutedText">Anomalous Flows</div>
                   </div>
                 </div>
               </div>
@@ -603,10 +603,10 @@ export default function DetectionStudioPage() {
           {/* Distribution Mode */}
           {activeView === 'distribution' && (
             <div className="space-y-6">
-              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+              <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-white">Risk Score Distribution</h3>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <h3 className="text-lg font-semibold text-text">Risk Score Distribution</h3>
+                  <p className="text-sm text-mutedText mt-1">
                     Statistical view of risk scores across all analyzed addresses.
                     Click bars to drill down into specific risk ranges.
                   </p>
@@ -622,29 +622,29 @@ export default function DetectionStudioPage() {
                     onBarClick={(bucket) => console.log('Clicked bucket:', bucket)}
                   />
                 ) : (
-                  <div className="h-[400px] flex items-center justify-center text-slate-400">No distribution data</div>
+                  <div className="h-[400px] flex items-center justify-center text-mutedText">No distribution data</div>
                 )}
               </div>
               
               {distributionData.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                    <h4 className="text-lg font-semibold text-white mb-4">Distribution Summary</h4>
+                  <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
+                    <h4 className="text-lg font-semibold text-text mb-4">Distribution Summary</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Low Risk (0-30%)</span>
+                        <span className="text-mutedText">Low Risk (0-30%)</span>
                         <span className="text-emerald-400 font-medium">
                           {distributionData.slice(0, 3).reduce((s, d) => s + d.count, 0).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Medium Risk (30-70%)</span>
+                        <span className="text-mutedText">Medium Risk (30-70%)</span>
                         <span className="text-amber-400 font-medium">
                           {distributionData.slice(3, 7).reduce((s, d) => s + d.count, 0).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">High Risk (70-100%)</span>
+                        <span className="text-mutedText">High Risk (70-100%)</span>
                         <span className="text-red-400 font-medium">
                           {distributionData.slice(7).reduce((s, d) => s + d.count, 0).toLocaleString()}
                         </span>
@@ -652,21 +652,21 @@ export default function DetectionStudioPage() {
                     </div>
                   </div>
                   
-                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                    <h4 className="text-lg font-semibold text-white mb-4">Key Metrics</h4>
+                  <div className="bg-surface/50 rounded-xl p-6 border border-borderSubtle">
+                    <h4 className="text-lg font-semibold text-text mb-4">Key Metrics</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Total Addresses Analyzed</span>
-                        <span className="text-white font-medium">
+                        <span className="text-mutedText">Total Addresses Analyzed</span>
+                        <span className="text-text font-medium">
                           {distributionData.reduce((s, d) => s + d.count, 0).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Flagged for Review</span>
+                        <span className="text-mutedText">Flagged for Review</span>
                         <span className="text-amber-400 font-medium">142</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Blocked</span>
+                        <span className="text-mutedText">Blocked</span>
                         <span className="text-red-400 font-medium">23</span>
                       </div>
                     </div>

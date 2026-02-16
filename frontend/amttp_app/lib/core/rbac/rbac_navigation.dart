@@ -3,6 +3,7 @@
 /// Defines navigation structure for each app mode:
 /// - Focus Mode: Simple navigation for end users (R1, R2)
 /// - War Room Mode: Full analytics for institutional users (R3+)
+library;
 
 import 'package:flutter/material.dart';
 import 'roles.dart';

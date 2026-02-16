@@ -1,5 +1,5 @@
 /// API configuration constants
-/// 
+///
 /// Centralized configuration for all API endpoints and timeouts.
 library;
 
@@ -11,7 +11,8 @@ import '../constants/app_constants.dart';
 const String _apiBaseUrlOverride = String.fromEnvironment('API_BASE_URL');
 
 /// Use mock data in development
-const bool _useMocks = bool.fromEnvironment('USE_MOCKS', defaultValue: false);
+const bool _useMocks =
+    bool.fromEnvironment('USE_MOCKS', defaultValue: true); // Demo mode enabled
 
 class ApiConfig {
   ApiConfig._();
@@ -21,10 +22,10 @@ class ApiConfig {
 
   /// Connection timeout
   static const Duration connectTimeout = Duration(seconds: 15);
-  
+
   /// Receive timeout
   static const Duration receiveTimeout = Duration(seconds: 30);
-  
+
   /// Send timeout
   static const Duration sendTimeout = Duration(seconds: 30);
 
@@ -53,21 +54,21 @@ class ApiConfig {
   static const String riskScore = '/risk/score';
   static const String riskBatch = '/risk/score/batch';
   static const String riskHealth = '/risk/health';
-  
+
   static const String integrityVerify = '/integrity/verify';
   static const String integrityAudit = '/integrity/audit';
-  
+
   static const String compliance = '/evaluate';
   static const String complianceWithIntegrity = '/evaluate-with-integrity';
-  
+
   static const String kycVerify = '/kyc/verify';
   static const String kycStatus = '/kyc/status';
-  
+
   static const String disputes = '/disputes';
   static const String disputeEvidence = '/disputes/evidence';
-  
+
   static const String policies = '/policies';
-  
+
   static const String transactions = '/transactions';
   static const String transactionHistory = '/transactions/history';
 

@@ -6,6 +6,7 @@
 /// - Keyboard navigable (↑ ↓ Enter)
 /// - Columns: TxID, Risk Class, Primary Reason, Asset, Amount, Age, CTA
 /// - Click to show decision explainability modal
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +17,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/unified_data_service.dart';
 import '../../../../core/services/action_service.dart';
 import '../../../../core/services/api_service.dart';
-import '../../../../shared/widgets/explainability_widget.dart';
 
 class FlaggedQueuePage extends ConsumerStatefulWidget {
   const FlaggedQueuePage({super.key});
@@ -29,7 +29,7 @@ class _FlaggedQueuePageState extends ConsumerState<FlaggedQueuePage> {
   int _selectedIndex = -1;
   String _filterRisk = 'All';
   String _sortBy = 'age';
-  bool _sortAsc = false;
+  final bool _sortAsc = false;
   bool _isLoading = true;
   bool _useDemoData = false;
   bool _isLoadingExplanation = false;

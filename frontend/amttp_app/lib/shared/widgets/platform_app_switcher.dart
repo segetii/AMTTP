@@ -2,6 +2,7 @@
 /// 
 /// Unified header component with app switcher for AMTTP Platform
 /// Works on web, iOS, and Android
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

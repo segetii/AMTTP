@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/auth/auth_provider.dart';
 import '../../../../shared/layout/premium_centered_page.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -48,7 +50,9 @@ class SettingsPage extends ConsumerWidget {
                       title: 'Language',
                       value: settings.language,
                       options: languageOptions,
-                      onSelected: (value) => ref.read(settingsProvider.notifier).setLanguage(value),
+                      onSelected: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setLanguage(value),
                     ),
                     _buildSelectSettingsItem(
                       context: context,
@@ -56,13 +60,16 @@ class SettingsPage extends ConsumerWidget {
                       title: 'Theme',
                       value: settings.theme,
                       options: themeOptions,
-                      onSelected: (value) => ref.read(settingsProvider.notifier).setTheme(value),
+                      onSelected: (value) =>
+                          ref.read(settingsProvider.notifier).setTheme(value),
                     ),
                     _buildSwitchSettingsItem(
                       icon: Icons.notifications_rounded,
                       title: 'Notifications',
                       value: settings.notificationsEnabled,
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setNotificationsEnabled(value),
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setNotificationsEnabled(value),
                     ),
                   ]),
                   const SizedBox(height: 24),
@@ -71,7 +78,9 @@ class SettingsPage extends ConsumerWidget {
                       icon: Icons.fingerprint_rounded,
                       title: 'Biometrics',
                       value: settings.biometricsEnabled,
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setBiometricsEnabled(value),
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setBiometricsEnabled(value),
                     ),
                     _buildSelectSettingsItem(
                       context: context,
@@ -81,7 +90,9 @@ class SettingsPage extends ConsumerWidget {
                       options: autoLockOptions.map((m) => '$m min').toList(),
                       onSelected: (value) {
                         final minutes = int.parse(value.replaceAll(' min', ''));
-                        ref.read(settingsProvider.notifier).setAutoLockMinutes(minutes);
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setAutoLockMinutes(minutes);
                       },
                     ),
                     _buildNumberSettingsItem(
@@ -89,8 +100,11 @@ class SettingsPage extends ConsumerWidget {
                       ref: ref,
                       icon: Icons.shield_rounded,
                       title: 'Transaction Limit',
-                      value: '\$${settings.transactionLimit.toStringAsFixed(0)}',
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setTransactionLimit(value),
+                      value:
+                          '\$${settings.transactionLimit.toStringAsFixed(0)}',
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setTransactionLimit(value),
                     ),
                   ]),
                   const SizedBox(height: 24),
@@ -101,7 +115,9 @@ class SettingsPage extends ConsumerWidget {
                       title: 'RPC Endpoint',
                       value: settings.rpcEndpoint,
                       options: rpcEndpointOptions,
-                      onSelected: (value) => ref.read(settingsProvider.notifier).setRpcEndpoint(value),
+                      onSelected: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setRpcEndpoint(value),
                     ),
                     _buildSelectSettingsItem(
                       context: context,
@@ -109,7 +125,9 @@ class SettingsPage extends ConsumerWidget {
                       title: 'Gas Price',
                       value: settings.gasPrice,
                       options: gasPriceOptions,
-                      onSelected: (value) => ref.read(settingsProvider.notifier).setGasPrice(value),
+                      onSelected: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setGasPrice(value),
                     ),
                   ]),
                   const SizedBox(height: 24),
@@ -118,13 +136,17 @@ class SettingsPage extends ConsumerWidget {
                       icon: Icons.warning_rounded,
                       title: 'Show Risk Warnings',
                       value: settings.showRiskWarnings,
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setShowRiskWarnings(value),
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setShowRiskWarnings(value),
                     ),
                     _buildSwitchSettingsItem(
                       icon: Icons.check_circle_rounded,
                       title: 'Require Confirmation',
                       value: settings.requireConfirmation,
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setRequireConfirmation(value),
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setRequireConfirmation(value),
                     ),
                     _buildSliderSettingsItem(
                       context: context,
@@ -134,9 +156,31 @@ class SettingsPage extends ConsumerWidget {
                       min: 0.1,
                       max: 5.0,
                       suffix: '%',
-                      onChanged: (value) => ref.read(settingsProvider.notifier).setDefaultSlippage(value),
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setDefaultSlippage(value),
                     ),
                   ]),
+                  const SizedBox(height: 32),
+                  // Sign Out
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showSignOutDialog(context, ref),
+                      icon: const Icon(Icons.logout_rounded),
+                      label: const Text('Sign Out'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.tokenDanger,
+                        side: BorderSide(
+                            color: AppTheme.tokenDanger.withAlpha(100)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -146,12 +190,44 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.tokenCardElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Sign Out',
+            style: TextStyle(color: AppTheme.cleanWhite)),
+        content: const Text(
+          'Are you sure you want to sign out? You will need to sign in again to access your account.',
+          style: TextStyle(color: AppTheme.slate400),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(authProvider.notifier).signOut();
+              if (context.mounted) context.go('/sign-in');
+            },
+            style: TextButton.styleFrom(foregroundColor: AppTheme.tokenDanger),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showResetDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.darkCard,
-        title: const Text('Reset Settings', style: TextStyle(color: AppTheme.cleanWhite)),
+        title: const Text('Reset Settings',
+            style: TextStyle(color: AppTheme.cleanWhite)),
         content: const Text(
           'Are you sure you want to reset all settings to their defaults?',
           style: TextStyle(color: AppTheme.cleanWhite),
@@ -169,7 +245,8 @@ class SettingsPage extends ConsumerWidget {
                 const SnackBar(content: Text('Settings reset to defaults')),
               );
             },
-            child: const Text('Reset', style: TextStyle(color: AppTheme.dangerRed)),
+            child: const Text('Reset',
+                style: TextStyle(color: AppTheme.dangerRed)),
           ),
         ],
       ),
@@ -231,15 +308,17 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
                 ...options.map((option) => ListTile(
-                  title: Text(option, style: const TextStyle(color: AppTheme.cleanWhite)),
-                  trailing: option == value
-                      ? const Icon(Icons.check, color: AppTheme.primaryPurple)
-                      : null,
-                  onTap: () {
-                    onSelected(option);
-                    Navigator.pop(context);
-                  },
-                )),
+                      title: Text(option,
+                          style: const TextStyle(color: AppTheme.cleanWhite)),
+                      trailing: option == value
+                          ? const Icon(Icons.check,
+                              color: AppTheme.primaryPurple)
+                          : null,
+                      onTap: () {
+                        onSelected(option);
+                        Navigator.pop(context);
+                      },
+                    )),
                 const SizedBox(height: 16),
               ],
             ),
@@ -316,7 +395,7 @@ class SettingsPage extends ConsumerWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primaryPurple,
+            activeThumbColor: AppTheme.primaryPurple,
           ),
         ],
       ),
@@ -340,7 +419,8 @@ class SettingsPage extends ConsumerWidget {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: AppTheme.darkCard,
-            title: Text('Set $title', style: const TextStyle(color: AppTheme.cleanWhite)),
+            title: Text('Set $title',
+                style: const TextStyle(color: AppTheme.cleanWhite)),
             content: TextField(
               controller: controller,
               keyboardType: TextInputType.number,
@@ -349,7 +429,8 @@ class SettingsPage extends ConsumerWidget {
                 prefixText: '\$',
                 prefixStyle: const TextStyle(color: AppTheme.cleanWhite),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppTheme.cleanWhite.withOpacity(0.3)),
+                  borderSide:
+                      BorderSide(color: AppTheme.cleanWhite.withOpacity(0.3)),
                 ),
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: AppTheme.primaryPurple),

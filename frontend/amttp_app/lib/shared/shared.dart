@@ -6,6 +6,7 @@
 /// - Shells (app wrappers)
 /// - Common widgets
 /// - Utility widgets
+library;
 
 // Models
 export 'models/models.dart';

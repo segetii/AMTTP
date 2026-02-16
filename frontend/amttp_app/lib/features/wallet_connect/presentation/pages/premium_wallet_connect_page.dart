@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/layout/premium_centered_page.dart';
@@ -24,20 +25,20 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
     {
       'name': 'MetaMask',
       'icon': 'metamask',
-      'color': const Color(0xFFF6851B),
+      'color': AppTheme.brandMetaMask,
       'popular': true,
       'installed': true,
     },
     {
       'name': 'WalletConnect',
       'icon': 'walletconnect',
-      'color': const Color(0xFF3B99FC),
+      'color': AppTheme.brandWalletConnect,
       'popular': true,
     },
     {
       'name': 'Coinbase Wallet',
       'icon': 'coinbase',
-      'color': const Color(0xFF0052FF),
+      'color': AppTheme.brandCoinbase,
       'popular': true,
     },
     {
@@ -127,7 +128,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -137,7 +138,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withAlpha(51),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -153,12 +154,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6851B).withOpacity(0.15),
+                      color: AppTheme.brandMetaMask.withAlpha(38),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFF6851B), width: 2),
+                      border: Border.all(color: AppTheme.brandMetaMask, width: 2),
                     ),
                     child: const Center(
-                      child: Icon(Icons.account_balance_wallet_rounded, color: Color(0xFFF6851B), size: 36),
+                      child: Icon(Icons.account_balance_wallet_rounded, color: AppTheme.brandMetaMask, size: 36),
                     ),
                   ),
                 );
@@ -169,7 +170,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             Text(
               'Connecting to $walletName',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -177,7 +178,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             const SizedBox(height: 12),
             Text(
               'Please approve the connection in your wallet',
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+              style: TextStyle(color: Colors.white.withAlpha(153), fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -199,7 +200,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 },
                 child: Text(
                   'Cancel',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                  style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
                 ),
               ),
             ),
@@ -231,22 +232,22 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                   height: 28,
                   decoration: BoxDecoration(
                     color: step['done'] == true
-                        ? const Color(0xFF22C55E)
+                        ? AppTheme.tokenSuccess
                         : (step['active'] == true
-                            ? const Color(0xFF6366F1)
-                            : const Color(0xFF1E1E2E)),
+                            ? AppTheme.tokenPrimary
+                            : AppTheme.tokenBorderSubtle),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: step['done'] == true
-                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+                        ? const Icon(Icons.check_rounded, color: AppTheme.tokenText, size: 16)
                         : (step['active'] == true
                             ? const SizedBox(
                                 width: 14,
                                 height: 14,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation(AppTheme.tokenText),
                                 ),
                               )
                             : null),
@@ -256,7 +257,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 Text(
                   step['label'] as String,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withAlpha(128),
                     fontSize: 10,
                   ),
                 ),
@@ -268,8 +269,8 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 height: 2,
                 margin: const EdgeInsets.only(bottom: 20, left: 4, right: 4),
                 color: step['done'] == true
-                    ? const Color(0xFF22C55E)
-                    : const Color(0xFF1E1E2E),
+                    ? AppTheme.tokenSuccess
+                    : AppTheme.tokenBorderSubtle,
               ),
           ],
         );
@@ -284,7 +285,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -294,7 +295,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withAlpha(51),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -304,12 +305,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF22C55E).withOpacity(0.15),
+                color: AppTheme.tokenSuccess.withAlpha(38),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF22C55E), width: 2),
+                border: Border.all(color: AppTheme.tokenSuccess, width: 2),
               ),
               child: const Center(
-                child: Icon(Icons.check_rounded, color: Color(0xFF22C55E), size: 40),
+                child: Icon(Icons.check_rounded, color: AppTheme.tokenSuccess, size: 40),
               ),
             ),
             const SizedBox(height: 24),
@@ -317,7 +318,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             const Text(
               'Connected!',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -325,21 +326,21 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             const SizedBox(height: 12),
             Text(
               'Your $walletName is now connected',
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+              style: TextStyle(color: Colors.white.withAlpha(153), fontSize: 14),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E2E),
+                color: AppTheme.tokenBorderSubtle,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Text(
                 '0x7F3a...9b2C',
                 style: TextStyle(
-                  color: Color(0xFF6366F1),
+                  color: AppTheme.tokenPrimary,
                   fontSize: 14,
-                  fontFamily: 'monospace',
+                  fontFamily: 'JetBrains Mono',
                 ),
               ),
             ),
@@ -356,13 +357,13 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               child: Container(
                 height: 54,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+                  gradient: const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft]),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Center(
                   child: Text(
                     'Continue to Wallet',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppTheme.tokenText, fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -399,7 +400,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                     const Text(
                       'Connect Wallet',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.tokenText,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -412,15 +413,15 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                     // Divider
                     Row(
                       children: [
-                        Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
+                        Expanded(child: Container(height: 1, color: AppTheme.tokenBorderSubtle)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'OR',
-                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
+                            style: TextStyle(color: Colors.white.withAlpha(102), fontSize: 12),
                           ),
                         ),
-                        Expanded(child: Container(height: 1, color: const Color(0xFF1E1E2E))),
+                        Expanded(child: Container(height: 1, color: AppTheme.tokenBorderSubtle)),
                       ],
                     ),
 
@@ -454,11 +455,11 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2D2D44)),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
               ),
-              child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.arrow_back_rounded, color: AppTheme.tokenText, size: 20),
             ),
           ),
           const Expanded(
@@ -466,7 +467,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               'Connect Wallet',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -486,12 +487,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF6366F1).withOpacity(0.15),
-            const Color(0xFF8B5CF6).withOpacity(0.1),
+            AppTheme.tokenPrimary.withAlpha(38),
+            AppTheme.tokenPrimarySoft.withAlpha(26),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.2)),
+        border: Border.all(color: AppTheme.tokenPrimary.withAlpha(51)),
       ),
       child: Column(
         children: [
@@ -499,12 +500,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.2),
+              color: AppTheme.tokenPrimary.withAlpha(51),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.account_balance_wallet_rounded,
-              color: Color(0xFF6366F1),
+              color: AppTheme.tokenPrimary,
               size: 32,
             ),
           ),
@@ -512,7 +513,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
           const Text(
             'Link Your Wallet',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.tokenText,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -521,7 +522,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
           Text(
             'Connect your Web3 wallet to access compliant transfers with zkNAF privacy',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(153),
               fontSize: 13,
               height: 1.4,
             ),
@@ -532,9 +533,9 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.15),
+                color: Colors.orange.withAlpha(38),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                border: Border.all(color: Colors.orange.withAlpha(128)),
               ),
               child: const Text(
                 'Demo environment — no real funds',
@@ -559,19 +560,19 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isMetaMask
-              ? const Color(0xFFF6851B).withOpacity(0.08)
-              : const Color(0xFF12121A),
+              ? AppTheme.brandMetaMask.withAlpha(20)
+              : AppTheme.tokenSurface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isMetaMask
-                ? const Color(0xFFF6851B).withOpacity(0.4)
-                : const Color(0xFF1E1E2E),
+                ? AppTheme.brandMetaMask.withAlpha(102)
+                : AppTheme.tokenBorderSubtle,
             width: isMetaMask ? 1.5 : 1,
           ),
           boxShadow: isMetaMask
               ? [
                   BoxShadow(
-                    color: const Color(0xFFF6851B).withOpacity(0.15),
+                    color: AppTheme.brandMetaMask.withAlpha(38),
                     blurRadius: 20,
                     offset: const Offset(0, 4),
                   ),
@@ -585,7 +586,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: (wallet['color'] as Color).withOpacity(0.15),
+                color: (wallet['color'] as Color).withAlpha(38),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -604,7 +605,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                       Text(
                         wallet['name'] as String,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -621,12 +622,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1).withOpacity(0.15),
+                            color: AppTheme.tokenPrimary.withAlpha(38),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             'Popular',
-                            style: TextStyle(color: Color(0xFF6366F1), fontSize: 9, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppTheme.tokenPrimary, fontSize: 9, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -635,12 +636,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF22C55E).withOpacity(0.15),
+                            color: AppTheme.tokenSuccess.withAlpha(38),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             'Installed',
-                            style: TextStyle(color: Color(0xFF22C55E), fontSize: 9, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppTheme.tokenSuccess, fontSize: 9, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -651,7 +652,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                     Text(
                       wallet['description'] as String,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withAlpha(128),
                         fontSize: 12,
                       ),
                     ),
@@ -667,13 +668,13 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Color(0xFF6366F1)),
+                  valueColor: AlwaysStoppedAnimation(AppTheme.tokenPrimary),
                 ),
               )
             else
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withAlpha(77),
                 size: 16,
               ),
           ],
@@ -703,12 +704,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
       children: [
         const Row(
           children: [
-            Icon(Icons.visibility_rounded, color: Color(0xFF64748B), size: 18),
+            Icon(Icons.visibility_rounded, color: AppTheme.slate500, size: 18),
             SizedBox(width: 8),
             Text(
               'Watch Address (Read-only)',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -719,7 +720,7 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
         Text(
           'Monitor any address without connecting a wallet',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 12,
           ),
         ),
@@ -727,19 +728,19 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF1E1E2E)),
+            border: Border.all(color: AppTheme.tokenBorderSubtle),
           ),
           child: Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _watchAddressController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(color: AppTheme.tokenText, fontSize: 14),
                   decoration: InputDecoration(
                     hintText: '0x... or ENS name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -750,13 +751,13 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                    color: AppTheme.tokenBorderSubtle,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Text(
                     'Watch',
                     style: TextStyle(
-                      color: Color(0xFF6366F1),
+                      color: AppTheme.tokenPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -774,9 +775,9 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Column(
         children: [
@@ -786,17 +787,17 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E).withOpacity(0.15),
+                  color: AppTheme.tokenSuccess.withAlpha(38),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.shield_rounded, color: Color(0xFF22C55E), size: 18),
+                child: const Icon(Icons.shield_rounded, color: AppTheme.tokenSuccess, size: 18),
               ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
                   'Your Security, Our Priority',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.tokenText,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -818,12 +819,12 @@ class _PremiumWalletConnectPageState extends ConsumerState<PremiumWalletConnectP
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF64748B), size: 16),
+          Icon(icon, color: AppTheme.slate500, size: 16),
           const SizedBox(width: 10),
           Text(
             text,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(153),
               fontSize: 13,
             ),
           ),

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 interface EnforcementAction {
@@ -17,62 +17,20 @@ interface EnforcementAction {
   requiredApprovals: number;
 }
 
-const mockActions: EnforcementAction[] = [
-  {
-    id: '1',
-    type: 'freeze',
-    targetAddress: '0xSuspicious...1234',
-    targetName: 'Suspected Fraud Account',
-    reason: 'Multiple fraud reports, pending investigation',
-    initiatedBy: 'compliance@exchange.com',
-    timestamp: '2026-01-31 10:00:00',
-    status: 'pending',
-    requiresMultisig: true,
-    approvals: 2,
-    requiredApprovals: 3,
-  },
-  {
-    id: '2',
-    type: 'blacklist',
-    targetAddress: '0xMixer...5678',
-    reason: 'Known mixer service - OFAC sanctioned',
-    initiatedBy: 'admin@exchange.com',
-    timestamp: '2026-01-30 15:30:00',
-    status: 'executed',
-    requiresMultisig: true,
-    approvals: 3,
-    requiredApprovals: 3,
-  },
-  {
-    id: '3',
-    type: 'unfreeze',
-    targetAddress: '0xCleared...9012',
-    targetName: 'John Doe',
-    reason: 'Investigation complete - no wrongdoing found',
-    initiatedBy: 'legal@exchange.com',
-    timestamp: '2026-01-29 11:00:00',
-    status: 'executed',
-    requiresMultisig: true,
-    approvals: 3,
-    requiredApprovals: 3,
-  },
-  {
-    id: '4',
-    type: 'limit',
-    targetAddress: '0xHighRisk...3456',
-    targetName: 'High Risk User',
-    reason: 'Reduce daily limit to $5,000 pending enhanced due diligence',
-    initiatedBy: 'compliance@exchange.com',
-    timestamp: '2026-01-28 09:00:00',
-    status: 'pending',
-    requiresMultisig: false,
-    approvals: 0,
-    requiredApprovals: 1,
-  },
-];
+
 
 export default function EnforcementPage() {
-  const [actions, setActions] = useState(mockActions);
+    const [actions, setActions] = useState<EnforcementAction[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    React.useEffect(() => {
+      fetch('http://127.0.0.1:3001/monitoring/alerts')
+        .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
+        .then(data => setActions(Array.isArray(data) ? data : []))
+        .catch(e => setError(e.message))
+        .finally(() => setLoading(false));
+    }, []);
   const [showNewAction, setShowNewAction] = useState(false);
   const [newActionType, setNewActionType] = useState<'freeze' | 'unfreeze' | 'blacklist' | 'whitelist' | 'limit'>('freeze');
 
@@ -94,7 +52,7 @@ export default function EnforcementPage() {
       case 'blacklist': return 'bg-red-500/20 text-red-400 border-red-500/50';
       case 'whitelist': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
       case 'limit': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/50';
+      default: return 'bg-slate-500/20 text-mutedText border-slate-500/50';
     }
   };
 
@@ -103,8 +61,8 @@ export default function EnforcementPage() {
       case 'executed': return 'bg-green-500/20 text-green-400';
       case 'pending': return 'bg-yellow-500/20 text-yellow-400';
       case 'rejected': return 'bg-red-500/20 text-red-400';
-      case 'expired': return 'bg-slate-500/20 text-slate-400';
-      default: return 'bg-slate-500/20 text-slate-400';
+      case 'expired': return 'bg-slate-500/20 text-mutedText';
+      default: return 'bg-slate-500/20 text-mutedText';
     }
   };
 
@@ -123,17 +81,19 @@ export default function EnforcementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link href="/war-room" className="text-slate-400 hover:text-white">
+            <Link href="/war-room" className="text-mutedText hover:text-text">
               ← War Room
             </Link>
           </div>
           <h1 className="text-3xl font-bold">Enforcement Actions</h1>
-          <p className="text-slate-400 mt-1">Freeze, unfreeze, and manage account restrictions</p>
+          <p className="text-mutedText mt-1">Freeze, unfreeze, and manage account restrictions</p>
         </div>
         <button 
           onClick={() => setShowNewAction(true)}
@@ -158,8 +118,8 @@ export default function EnforcementPage() {
       </div>
 
       {/* Actions List */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="p-4 border-b border-slate-700">
+      <div className="bg-surface rounded-xl border border-borderSubtle overflow-hidden">
+        <div className="p-4 border-b border-borderSubtle">
           <h2 className="font-semibold">Recent Actions</h2>
         </div>
         <div className="divide-y divide-slate-700">
@@ -177,12 +137,12 @@ export default function EnforcementPage() {
                         {action.status}
                       </span>
                     </div>
-                    <div className="font-mono text-sm text-slate-400 mb-1">
+                    <div className="font-mono text-sm text-mutedText mb-1">
                       {action.targetAddress}
-                      {action.targetName && <span className="ml-2 text-slate-500">({action.targetName})</span>}
+                      {action.targetName && <span className="ml-2 text-mutedText">({action.targetName})</span>}
                     </div>
-                    <div className="text-sm text-slate-400">{action.reason}</div>
-                    <div className="text-xs text-slate-500 mt-2">
+                    <div className="text-sm text-mutedText">{action.reason}</div>
+                    <div className="text-xs text-mutedText mt-2">
                       By {action.initiatedBy} • {action.timestamp}
                     </div>
                   </div>
@@ -190,7 +150,7 @@ export default function EnforcementPage() {
                 <div className="text-right">
                   {action.requiresMultisig && (
                     <div className="mb-2">
-                      <div className="text-sm text-slate-400">Approvals</div>
+                      <div className="text-sm text-mutedText">Approvals</div>
                       <div className="text-lg font-semibold">
                         {action.approvals}/{action.requiredApprovals}
                       </div>
@@ -214,28 +174,28 @@ export default function EnforcementPage() {
       {/* New Action Modal */}
       {showNewAction && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowNewAction(false)}>
-          <div className="bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4 border border-slate-700" onClick={e => e.stopPropagation()}>
+          <div className="bg-surface rounded-xl p-6 max-w-lg w-full mx-4 border border-borderSubtle" onClick={e => e.stopPropagation()}>
             <h2 className="text-xl font-bold mb-4 capitalize">New {newActionType} Action</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Target Address</label>
+                <label className="block text-sm text-mutedText mb-1">Target Address</label>
                 <input 
                   type="text" 
                   placeholder="0x..." 
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Reason</label>
+                <label className="block text-sm text-mutedText mb-1">Reason</label>
                 <textarea 
                   rows={3}
                   placeholder="Explain the reason for this action..."
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="multisig" className="rounded" defaultChecked />
-                <label htmlFor="multisig" className="text-sm text-slate-400">Require multisig approval (3 of 5)</label>
+                <label htmlFor="multisig" className="text-sm text-mutedText">Require multisig approval (3 of 5)</label>
               </div>
             </div>
             <div className="flex gap-3 justify-end mt-6">

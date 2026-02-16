@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'web3_service.dart';

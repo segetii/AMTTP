@@ -5,6 +5,7 @@
 /// - Reports: Compliance reporting
 /// - User Management: RBAC user administration (R5+)
 /// - System Settings: Platform configuration (R5+)
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -150,7 +151,7 @@ class _SnapshotCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${DateTime.now().subtract(Duration(hours: index * 3)).toString().substring(0, 16)}',
+                  DateTime.now().subtract(Duration(hours: index * 3)).toString().substring(0, 16),
                   style: TextStyle(
                     fontSize: 11,
                     color: isDark ? AppTheme.slate500 : AppTheme.slate400,
@@ -449,7 +450,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Role>(
-                  value: selectedRole,
+                  initialValue: selectedRole,
                   dropdownColor: isDark ? AppTheme.slate700 : Colors.white,
                   style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
@@ -563,7 +564,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
           backgroundColor: isDark ? AppTheme.slate800 : Colors.white,
           title: Text('Edit Role: ${user['name']}', style: TextStyle(color: isDark ? Colors.white : AppTheme.slate800)),
           content: DropdownButtonFormField<Role>(
-            value: selectedRole,
+            initialValue: selectedRole,
             dropdownColor: isDark ? AppTheme.slate700 : Colors.white,
             style: TextStyle(color: isDark ? Colors.white : Colors.black),
             decoration: InputDecoration(

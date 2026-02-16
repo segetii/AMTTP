@@ -1,24 +1,24 @@
 /// Premium Fintech Shell - Complete Redesign
-/// 
+///
 /// Inspired by Metamask, Revolut, and modern crypto wallets
-/// 
+///
 /// Key Design Elements:
 /// - Card-based wallet interface at top
 /// - Action buttons row (Send, Receive, Swap, Buy)
 /// - Token/Asset list below
 /// - Floating bottom nav with blur
+library;
 
 import 'dart:ui';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/rbac/rbac.dart';
-import '../../core/rbac/role_navigation_config.dart';
-import '../../core/rbac/roles.dart';
 import '../../core/router/app_router.dart';
 import '../../core/web3/wallet_provider.dart';
+import '../../core/auth/auth_provider.dart';
 import '../widgets/platform_app_switcher.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -38,7 +38,8 @@ class PremiumFintechShell extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PremiumFintechShell> createState() => _PremiumFintechShellState();
+  ConsumerState<PremiumFintechShell> createState() =>
+      _PremiumFintechShellState();
 }
 
 class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
@@ -89,15 +90,15 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
     ));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: AppTheme.tokenBackground,
       body: Column(
         children: [
           // Fixed platform header at top
           const CompactPlatformHeader(currentApp: 'wallet'),
-          
+
           // Top navigation bar (moved from bottom)
           _buildTopNav(),
-          
+
           // Main scrollable content
           Expanded(
             child: widget.child,
@@ -113,10 +114,10 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0A0A0F).withOpacity(0.85),
-            border: const Border(
+            color: AppTheme.tokenBackground.withOpacity(0.85),
+            border: Border(
               bottom: BorderSide(
-                color: Color(0xFF1E1E2D),
+                color: AppTheme.tokenBorderSubtle,
                 width: 1,
               ),
             ),
@@ -127,7 +128,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.home_rounded, 'Home', '/'),
-                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet', '/wallet'),
+                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet',
+                    '/wallet'),
                 _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
                 _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
                 _buildMoreNavItem(),
@@ -148,10 +150,10 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             bottom: MediaQuery.of(context).padding.bottom,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A0A0F).withOpacity(0.85),
-            border: const Border(
+            color: AppTheme.tokenBackground.withOpacity(0.85),
+            border: Border(
               top: BorderSide(
-                color: Color(0xFF1E1E2D),
+                color: AppTheme.tokenBorderSubtle,
                 width: 1,
               ),
             ),
@@ -162,7 +164,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.home_rounded, 'Home', '/'),
-                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet', '/wallet'),
+                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet',
+                    '/wallet'),
                 _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
                 _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
                 _buildMoreNavItem(),
@@ -176,7 +179,7 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
 
   Widget _buildNavItem(int index, IconData icon, String label, String route) {
     final isSelected = _currentNavIndex == index;
-    
+
     return GestureDetector(
       onTap: () {
         if (!isSelected) {
@@ -194,16 +197,15 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? const Color(0xFF6366F1).withOpacity(0.2) 
+                color: isSelected
+                    ? AppTheme.tokenPrimary.withAlpha(51)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: isSelected 
-                    ? const Color(0xFF818CF8) 
-                    : const Color(0xFF64748B),
+                color:
+                    isSelected ? AppTheme.tokenPrimaryLight : AppTheme.slate500,
                 size: 24,
               ),
             ),
@@ -211,9 +213,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected 
-                    ? const Color(0xFF818CF8) 
-                    : const Color(0xFF64748B),
+                color:
+                    isSelected ? AppTheme.tokenPrimaryLight : AppTheme.slate500,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -224,25 +225,69 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
     );
   }
 
+  /// Handle sign out with confirmation dialog
+  Future<void> _handleSignOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.tokenCardElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Sign Out',
+            style: TextStyle(color: AppTheme.cleanWhite)),
+        content: const Text(
+          'Are you sure you want to sign out? You will need to sign in again to access your account.',
+          style: TextStyle(color: AppTheme.slate400),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.tokenDanger),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(authProvider.notifier).signOut();
+      if (mounted) context.go('/sign-in');
+    }
+  }
+
   /// More menu with Advanced features, Settings, etc.
   Widget _buildMoreNavItem() {
     final isSelected = _currentNavIndex == 4;
-    
+
     return PopupMenuButton<String>(
       offset: const Offset(0, -200),
-      color: const Color(0xFF1A1A2E),
+      color: AppTheme.tokenCardElevated,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (route) {
+        if (route == '__sign_out__') {
+          _handleSignOut();
+          return;
+        }
         setState(() => _currentNavIndex = 4);
         context.go(route);
       },
       itemBuilder: (context) => [
-        _buildPopupItem(Icons.rocket_launch_rounded, 'Advanced', '/advanced', 'NFT, Cross-Chain, Safe'),
-        _buildPopupItem(Icons.verified_user_rounded, 'Trust Check', '/trust-check', 'Verify addresses'),
-        _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes', 'Raise & track disputes'),
+        _buildPopupItem(Icons.rocket_launch_rounded, 'Advanced', '/advanced',
+            'NFT, Cross-Chain, Safe'),
+        _buildPopupItem(Icons.verified_user_rounded, 'Trust Check',
+            '/trust-check', 'Verify addresses'),
+        _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes',
+            'Raise & track disputes'),
         const PopupMenuDivider(),
-        _buildPopupItem(Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),
-        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/wallet-connect', 'Web3 connection'),
+        _buildPopupItem(
+            Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),
+        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/wallet-connect',
+            'Web3 connection'),
+        const PopupMenuDivider(),
+        _buildPopupItem(Icons.logout_rounded, 'Sign Out', '__sign_out__',
+            'Sign out of your account'),
       ],
       child: SizedBox(
         width: 64,
@@ -253,16 +298,15 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? const Color(0xFF6366F1).withOpacity(0.2) 
+                color: isSelected
+                    ? AppTheme.tokenPrimary.withAlpha(51)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.more_horiz_rounded,
-                color: isSelected 
-                    ? const Color(0xFF818CF8) 
-                    : const Color(0xFF64748B),
+                color:
+                    isSelected ? AppTheme.tokenPrimaryLight : AppTheme.slate500,
                 size: 24,
               ),
             ),
@@ -270,9 +314,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             Text(
               'More',
               style: TextStyle(
-                color: isSelected 
-                    ? const Color(0xFF818CF8) 
-                    : const Color(0xFF64748B),
+                color:
+                    isSelected ? AppTheme.tokenPrimaryLight : AppTheme.slate500,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -283,7 +326,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
     );
   }
 
-  PopupMenuItem<String> _buildPopupItem(IconData icon, String title, String route, String subtitle) {
+  PopupMenuItem<String> _buildPopupItem(
+      IconData icon, String title, String route, String subtitle) {
     return PopupMenuItem<String>(
       value: route,
       child: Row(
@@ -291,18 +335,24 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.15),
+              color: AppTheme.tokenPrimary.withAlpha(38),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: const Color(0xFF818CF8), size: 20),
+            child: Icon(icon, color: AppTheme.tokenPrimaryLight, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                Text(title,
+                    style: const TextStyle(
+                        color: AppTheme.tokenText,
+                        fontWeight: FontWeight.w600)),
+                Text(subtitle,
+                    style: TextStyle(
+                        color: AppTheme.tokenText.withAlpha(138),
+                        fontSize: 11)),
               ],
             ),
           ),
@@ -328,24 +378,25 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   late PageController _carouselController;
   int _currentCarouselIndex = 0;
   DateTime _lastUserInteraction = DateTime.now();
-  
+
   @override
   void initState() {
     super.initState();
     _carouselController = PageController(viewportFraction: 0.85);
     _startAutoScroll();
   }
-  
+
   @override
   void dispose() {
     _carouselController.dispose();
     super.dispose();
   }
-  
+
   void _startAutoScroll() {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        final reduceMotion = MediaQuery.maybeOf(context)?.accessibleNavigation ?? false;
+        final reduceMotion =
+            MediaQuery.maybeOf(context)?.accessibleNavigation ?? false;
         if (reduceMotion) return;
 
         // Only auto-advance if user has been idle for at least 5 seconds
@@ -359,13 +410,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         final isPeP = rbacState.role == Role.r2EndUserPep;
         final products = isPeP ? _getPepProducts() : _getStandardProducts();
         final nextIndex = (_currentCarouselIndex + 1) % products.length;
-        
+
         _carouselController.animateToPage(
           nextIndex,
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOut,
         );
-        
+
         setState(() => _currentCarouselIndex = nextIndex);
         _startAutoScroll();
       }
@@ -377,20 +428,20 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     final rbacState = ref.watch(rbacProvider);
     final isPeP = rbacState.role == Role.r2EndUserPep;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Calculate max width for centralized MetaMask-style layout
     // Max content width is 624px (30% wider than original 480px)
     final maxContentWidth = screenWidth > 680 ? 624.0 : screenWidth - 40;
     final horizontalPadding = (screenWidth - maxContentWidth) / 2;
-    
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF0F0F1A),
-            Color(0xFF0A0A0F),
+            AppTheme.tokenGradientBgTop,
+            AppTheme.tokenBackground,
           ],
         ),
       ),
@@ -409,10 +460,10 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
 
                   // Hero spotlight
                   _buildHero(context, isPeP, rbacState),
-                  
+
                   // Main wallet card
                   _buildWalletCard(context, isPeP),
-                  
+
                   // Quick actions row
                   _buildQuickActions(context),
 
@@ -424,10 +475,10 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
 
                   // Insights / security
                   _buildInsightsRow(context, isPeP),
-                  
+
                   // Assets section
                   _buildAssetsSection(context),
-                  
+
                   // Recent activity
                   _buildRecentActivity(context),
                 ],
@@ -438,7 +489,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
-  
+
   void _showScannerModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -447,8 +498,8 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       builder: (ctx) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+        decoration: BoxDecoration(
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -457,49 +508,59 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Scan QR Code',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: AppTheme.tokenText,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Scan a wallet address or payment request',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+              style:
+                  TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             ),
             const SizedBox(height: 32),
             // Camera placeholder
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A0A0F),
+                  color: AppTheme.tokenBackground,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2D2D44)),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
                 ),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.camera_alt_rounded, color: Colors.white.withOpacity(0.3), size: 64),
+                      Icon(Icons.camera_alt_rounded,
+                          color: Colors.white.withAlpha(77), size: 64),
                       const SizedBox(height: 16),
                       Text(
                         'Camera access required',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                        style: TextStyle(
+                            color: Colors.white.withAlpha(128), fontSize: 14),
                       ),
                       const SizedBox(height: 16),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1),
+                            color: AppTheme.tokenPrimary,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text('Enable Camera', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                          child: const Text('Enable Camera',
+                              style: TextStyle(
+                                  color: AppTheme.tokenText,
+                                  fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ],
@@ -513,7 +574,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
-  
+
   void _showNotificationsModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -522,8 +583,8 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       builder: (ctx) => Container(
         height: MediaQuery.of(context).size.height * 0.6,
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+        decoration: BoxDecoration(
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -534,7 +595,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF374151),
+                  color: AppTheme.gray700,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -542,7 +603,10 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             const SizedBox(height: 20),
             const Text(
               'Notifications',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: AppTheme.tokenText,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -550,7 +614,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 children: [
                   _buildNotificationItem(
                     icon: Icons.arrow_downward_rounded,
-                    iconColor: const Color(0xFF22C55E),
+                    iconColor: AppTheme.tokenSuccess,
                     title: 'Received 0.5 ETH',
                     subtitle: 'From 0x1234...5678',
                     time: '2 min ago',
@@ -558,7 +622,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   ),
                   _buildNotificationItem(
                     icon: Icons.check_circle_rounded,
-                    iconColor: const Color(0xFF22C55E),
+                    iconColor: AppTheme.tokenSuccess,
                     title: 'Transaction confirmed',
                     subtitle: 'Your transfer of 1.2 ETH was successful',
                     time: '1 hour ago',
@@ -566,7 +630,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   ),
                   _buildNotificationItem(
                     icon: Icons.shield_rounded,
-                    iconColor: const Color(0xFF6366F1),
+                    iconColor: AppTheme.tokenPrimary,
                     title: 'Security check passed',
                     subtitle: 'Address 0xABCD verified as trusted',
                     time: 'Yesterday',
@@ -574,7 +638,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   ),
                   _buildNotificationItem(
                     icon: Icons.trending_up_rounded,
-                    iconColor: const Color(0xFFF59E0B),
+                    iconColor: AppTheme.tokenWarning,
                     title: 'ETH up 5.2%',
                     subtitle: 'Your portfolio gained \$234.50',
                     time: '2 days ago',
@@ -588,7 +652,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
-  
+
   Widget _buildNotificationItem({
     required IconData icon,
     required Color iconColor,
@@ -601,9 +665,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isNew ? const Color(0xFF1A1A2E) : Colors.transparent,
+        color: isNew ? AppTheme.tokenCardElevated : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF2D2D44)),
+        border: Border.all(color: AppTheme.tokenBorderStrong),
       ),
       child: Row(
         children: [
@@ -611,7 +675,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.15),
+              color: iconColor.withAlpha(38),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 22),
@@ -623,14 +687,18 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               children: [
                 Row(
                   children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                    Text(title,
+                        style: const TextStyle(
+                            color: AppTheme.tokenText,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600)),
                     if (isNew) ...[
                       const SizedBox(width: 8),
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF6366F1),
+                        decoration: BoxDecoration(
+                          color: AppTheme.tokenPrimary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -638,127 +706,160 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                Text(subtitle,
+                    style: TextStyle(
+                        color: Colors.white.withAlpha(128), fontSize: 12)),
               ],
             ),
           ),
-          Text(time, style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11)),
+          Text(time,
+              style:
+                  TextStyle(color: Colors.white.withAlpha(77), fontSize: 11)),
         ],
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context, RBACState rbacState, bool isPeP) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isNarrow = screenWidth < 520;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
+      child: Column(
         children: [
-          // Network selector (Metamask style)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF2D2D44)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
+          // Row 1: Network + Profile
+          Row(
+            children: [
+              // Network selector (Metamask style)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.tokenCardElevated,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppTheme.brandETH,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text('Ξ',
+                            style: TextStyle(
+                                color: AppTheme.tokenText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Ethereum',
+                      style: TextStyle(
+                        color: AppTheme.tokenText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.keyboard_arrow_down_rounded,
+                        color: AppTheme.slate500, size: 20),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              // Consolidated secondary actions
+              _buildIconButton(
+                icon: Icons.more_horiz,
+                onTap: () => _showMoreActions(context),
+              ),
+              const SizedBox(width: 12),
+
+              // Profile
+              GestureDetector(
+                onTap: () => context.go('/profile'),
+                child: Container(
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF627EEA),
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: isPeP
+                          ? [AppTheme.tokenPePLight, AppTheme.tokenPeP]
+                          : [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
+                    ),
+                    borderRadius: BorderRadius.circular(21),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (isPeP ? AppTheme.tokenPeP : AppTheme.tokenPrimary)
+                                .withAlpha(89),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  child: const Center(
-                    child: Text('Ξ', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Ethereum',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 20),
-              ],
-            ),
-          ),
-          
-          const Spacer(),
-          
-          // Primary CTA shortcuts
-          ElevatedButton.icon(
-            onPressed: () => context.go('/trust'),
-            icon: const Icon(Icons.verified_user, size: 18),
-            label: const Text('Trust check'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-          ),
-          const SizedBox(width: 10),
-          OutlinedButton.icon(
-            onPressed: () => context.go('/transfer'),
-            icon: const Icon(Icons.send_rounded, size: 18),
-            label: const Text('Send'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Color(0xFF6366F1)),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Consolidated secondary actions
-          _buildIconButton(
-            icon: Icons.more_horiz,
-            onTap: () => _showMoreActions(context),
-          ),
-          const SizedBox(width: 12),
-
-          // Profile
-          GestureDetector(
-            onTap: () => context.go('/profile'),
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isPeP
-                      ? [const Color(0xFFFB923C), const Color(0xFFF97316)]
-                      : [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
-                ),
-                borderRadius: BorderRadius.circular(21),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1)).withOpacity(0.35),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  rbacState.displayName.isNotEmpty 
-                      ? rbacState.displayName[0].toUpperCase() 
-                      : 'U',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Text(
+                      rbacState.displayName.isNotEmpty
+                          ? rbacState.displayName[0].toUpperCase()
+                          : 'U',
+                      style: const TextStyle(
+                        color: AppTheme.tokenText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // Row 2: Primary CTA buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => context.go('/trust-check'),
+                  icon: const Icon(Icons.verified_user, size: 18),
+                  label: Text(isNarrow ? 'Trust' : 'Trust check'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.tokenPrimary,
+                    foregroundColor: AppTheme.tokenText,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => context.go('/transfer'),
+                  icon: const Icon(Icons.send_rounded, size: 18),
+                  label: Text(isNarrow ? 'Send' : 'Send ETH'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.tokenText,
+                    side: const BorderSide(color: AppTheme.tokenPrimary),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -772,8 +873,8 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       builder: (ctx) {
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Color(0xFF12121A),
+          decoration: BoxDecoration(
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -787,34 +888,43 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2E),
+                      color: AppTheme.tokenBorderSubtle,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ],
               ),
               ListTile(
-                leading: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                title: const Text('Notifications', style: TextStyle(color: Colors.white)),
-                subtitle: const Text('Compliance and security alerts', style: TextStyle(color: Color(0xFF9CA3AF))),
+                leading: const Icon(Icons.notifications_none_rounded,
+                    color: AppTheme.tokenText),
+                title: const Text('Notifications',
+                    style: TextStyle(color: AppTheme.tokenText)),
+                subtitle: const Text('Compliance and security alerts',
+                    style: TextStyle(color: AppTheme.tokenMutedText)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showNotificationsModal(context);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
-                title: const Text('Scan QR', style: TextStyle(color: Colors.white)),
-                subtitle: const Text('Move scanner into flows when needed', style: TextStyle(color: Color(0xFF9CA3AF))),
+                leading: const Icon(Icons.qr_code_scanner_rounded,
+                    color: AppTheme.tokenText),
+                title: const Text('Scan QR',
+                    style: TextStyle(color: AppTheme.tokenText)),
+                subtitle: const Text('Move scanner into flows when needed',
+                    style: TextStyle(color: AppTheme.tokenMutedText)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showScannerModal(context);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.settings_outlined, color: Colors.white),
-                title: const Text('Preferences', style: TextStyle(color: Colors.white)),
-                subtitle: const Text('Network, limits, accessibility', style: TextStyle(color: Color(0xFF9CA3AF))),
+                leading: const Icon(Icons.settings_outlined,
+                    color: AppTheme.tokenText),
+                title: const Text('Preferences',
+                    style: TextStyle(color: AppTheme.tokenText)),
+                subtitle: const Text('Network, limits, accessibility',
+                    style: TextStyle(color: AppTheme.tokenMutedText)),
                 onTap: () {
                   Navigator.pop(ctx);
                   context.go('/settings');
@@ -846,7 +956,8 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           border: Border.all(color: Colors.white.withOpacity(0.04)),
           boxShadow: [
             BoxShadow(
-              color: (isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1)).withOpacity(0.25),
+              color: (isPeP ? AppTheme.tokenPeP : AppTheme.tokenPrimary)
+                  .withAlpha(64),
               blurRadius: 28,
               offset: const Offset(0, 16),
             ),
@@ -862,13 +973,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: isPeP
-                      ? [const Color(0xFFFB923C), const Color(0xFFF97316)]
-                      : [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
+                      ? [AppTheme.tokenPePLight, AppTheme.tokenPeP]
+                      : [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
                 ),
               ),
               child: Icon(
                 isPeP ? Icons.shield_outlined : Icons.auto_graph,
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 size: 26,
               ),
             ),
@@ -877,21 +988,29 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       Text(
-                        isPeP ? 'Enhanced due diligence enabled' : 'Smart wallet overview',
+                        isPeP
+                            ? 'Enhanced due diligence enabled'
+                            : 'Smart wallet overview',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: (isPeP ? const Color(0xFFF97316) : const Color(0xFF22C55E)).withOpacity(0.14),
+                          color: (isPeP
+                                  ? AppTheme.tokenPeP
+                                  : AppTheme.tokenSuccess)
+                              .withOpacity(0.14),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -899,14 +1018,18 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                           children: [
                             Icon(
                               isPeP ? Icons.shield : Icons.check_circle,
-                              color: isPeP ? const Color(0xFFF97316) : const Color(0xFF22C55E),
+                              color: isPeP
+                                  ? AppTheme.tokenPeP
+                                  : AppTheme.tokenSuccess,
                               size: 14,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               isPeP ? 'PEP MONITORING' : 'TRUSTED',
                               style: TextStyle(
-                                color: isPeP ? const Color(0xFFF97316) : const Color(0xFF22C55E),
+                                color: isPeP
+                                    ? AppTheme.tokenPeP
+                                    : AppTheme.tokenSuccess,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
@@ -923,27 +1046,31 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                         ? 'Politically exposed user • Continuous screening + higher velocity checks active.'
                         : 'Multi-chain balance, smart actions, and live portfolio signals at a glance.',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withAlpha(153),
                       fontSize: 14,
                       height: 1.4,
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Row(
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
                     children: [
                       _buildHeroChip(
                         icon: Icons.timeline_rounded,
                         label: isPeP ? 'Enhanced monitoring' : 'Live insights',
                       ),
-                      const SizedBox(width: 10),
                       _buildHeroChip(
-                        icon: isPeP ? Icons.policy_rounded : Icons.flash_on_rounded,
-                        label: isPeP ? 'Compliance guardrails' : 'Gas-optimized',
+                        icon: isPeP
+                            ? Icons.policy_rounded
+                            : Icons.flash_on_rounded,
+                        label:
+                            isPeP ? 'Compliance guardrails' : 'Gas-optimized',
                       ),
-                      const SizedBox(width: 10),
                       _buildHeroChip(
                         icon: Icons.lock_clock_rounded,
-                        label: isPeP ? 'Screening every 30m' : 'Secure by default',
+                        label:
+                            isPeP ? 'Screening every 30m' : 'Secure by default',
                       ),
                     ],
                   ),
@@ -960,19 +1087,19 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha(13),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withAlpha(20)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF94A3B8), size: 16),
+          Icon(icon, color: AppTheme.slate400, size: 16),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFFCBD5E1),
+              color: AppTheme.slate300,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -990,10 +1117,10 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         decoration: BoxDecoration(
           color: const Color(0xFF1C0F0A),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFF97316).withOpacity(0.4)),
+          border: Border.all(color: AppTheme.tokenPeP.withAlpha(102)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFF97316).withOpacity(0.15),
+              color: AppTheme.tokenPeP.withAlpha(38),
               blurRadius: 20,
               offset: const Offset(0, 12),
             ),
@@ -1005,20 +1132,21 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFF97316).withOpacity(0.14),
+                color: AppTheme.tokenPeP.withOpacity(0.14),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.shield_outlined, color: Color(0xFFF97316), size: 20),
+              child: Icon(Icons.shield_outlined,
+                  color: AppTheme.tokenPeP, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'PEP monitoring active',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.tokenText,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1039,14 +1167,14 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: AppTheme.tokenSurfaceDeep,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFF97316).withOpacity(0.4)),
+                border: Border.all(color: AppTheme.tokenPeP.withAlpha(102)),
               ),
               child: const Text(
                 'Enhanced KYC',
                 style: TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppTheme.tokenPeP,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1068,9 +1196,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             child: _buildInsightCard(
               title: isPeP ? 'Risk score' : 'Portfolio alpha',
               value: isPeP ? 'Low • 18%' : '+12.4%',
-              accent: isPeP ? const Color(0xFFF97316) : const Color(0xFF22C55E),
+              accent: isPeP ? AppTheme.tokenPeP : AppTheme.tokenSuccess,
               subtitle: isPeP ? 'Last scan • 5m ago' : 'Beating benchmark',
-              chartColor: isPeP ? const Color(0xFFF97316) : const Color(0xFF22C55E),
+              chartColor: isPeP ? AppTheme.tokenPeP : AppTheme.tokenSuccess,
             ),
           ),
           const SizedBox(width: 12),
@@ -1079,9 +1207,10 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             child: _buildInsightCard(
               title: isPeP ? 'Controls' : 'Insights',
               value: isPeP ? 'Velocity: 2.5k/day' : '2 signals',
-              accent: isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1),
-              subtitle: isPeP ? 'Manual review above 10k' : 'Gas saving + ARB yield',
-              chartColor: isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1),
+              accent: isPeP ? AppTheme.tokenPeP : AppTheme.tokenPrimary,
+              subtitle:
+                  isPeP ? 'Manual review above 10k' : 'Gas saving + ARB yield',
+              chartColor: isPeP ? AppTheme.tokenPeP : AppTheme.tokenPrimary,
             ),
           ),
         ],
@@ -1099,7 +1228,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: AppTheme.tokenSurfaceDeep,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withOpacity(0.04)),
       ),
@@ -1112,7 +1241,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.15),
+                  color: accent.withAlpha(38),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.analytics_outlined, color: accent, size: 16),
@@ -1121,7 +1250,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               Text(
                 title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1141,19 +1270,15 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           Text(
             subtitle,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: AppTheme.slate400,
               fontSize: 12,
             ),
           ),
           const SizedBox(height: 14),
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [accent.withOpacity(0.5), chartColor],
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
+          // Mini sparkline
+          CustomPaint(
+            size: const Size(double.infinity, 24),
+            painter: _SparklinePainter(color: chartColor),
           ),
         ],
       ),
@@ -1171,13 +1296,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppTheme.tokenCardElevated,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF2D2D44)),
+          border: Border.all(color: AppTheme.tokenBorderStrong),
         ),
         child: Stack(
           children: [
-            Center(child: Icon(icon, color: const Color(0xFF94A3B8), size: 22)),
+            Center(child: Icon(icon, color: AppTheme.slate400, size: 22)),
             if (badge)
               Positioned(
                 top: 8,
@@ -1186,7 +1311,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
+                    color: AppTheme.tokenDanger,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1203,37 +1328,38 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     final isConnected = walletState.isConnected;
     final address = walletState.address ?? '';
     final ethBalance = walletState.ethBalance ?? 0.0;
-    
+
     // Format address for display
-    final formattedAddress = address.length > 10 
+    final formattedAddress = address.length > 10
         ? '${address.substring(0, 6)}...${address.substring(address.length - 4)}'
         : address;
-    
+
     // Format balance (ETH value, not USD for now)
     final balanceWhole = ethBalance.floor();
-    final balanceDecimal = ((ethBalance - balanceWhole) * 100).round().toString().padLeft(2, '0');
-    
+    final balanceDecimal =
+        ((ethBalance - balanceWhole) * 100).round().toString().padLeft(2, '0');
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1E1E3F),
-              Color(0xFF0F0F2D),
+              AppTheme.tokenGradientCard,
+              AppTheme.tokenGradientDark,
             ],
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF2D2D5A).withOpacity(0.5),
+            color: Color(0xFF2D2D5A).withAlpha(128),
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.1),
+              color: AppTheme.tokenPrimary.withAlpha(26),
               blurRadius: 40,
               offset: const Offset(0, 20),
             ),
@@ -1247,20 +1373,22 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               children: [
                 if (isConnected)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withOpacity(0.15),
+                      color: AppTheme.tokenSuccess.withAlpha(38),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, color: Color(0xFF22C55E), size: 14),
+                        Icon(Icons.check_circle,
+                            color: AppTheme.tokenSuccess, size: 14),
                         SizedBox(width: 4),
                         Text(
                           'Connected',
                           style: TextStyle(
-                            color: Color(0xFF22C55E),
+                            color: AppTheme.tokenSuccess,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1270,22 +1398,25 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   )
                 else
                   GestureDetector(
-                    onTap: () => ref.read(walletProvider.notifier).connectWallet(),
+                    onTap: () =>
+                        ref.read(walletProvider.notifier).connectWallet(),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6366F1).withOpacity(0.15),
+                        color: AppTheme.tokenPrimary.withAlpha(38),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.account_balance_wallet, color: Color(0xFF6366F1), size: 14),
+                          Icon(Icons.account_balance_wallet,
+                              color: AppTheme.tokenPrimary, size: 14),
                           SizedBox(width: 4),
                           Text(
                             'Connect Wallet',
                             style: TextStyle(
-                              color: Color(0xFF6366F1),
+                              color: AppTheme.tokenPrimary,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1297,57 +1428,62 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 const Spacer(),
                 if (isConnected)
                   GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: address));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Address copied!'), backgroundColor: Color(0xFF22C55E)),
-                    );
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        formattedAddress,
-                        style: const TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 12,
-                          fontFamily: 'monospace',
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: address));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Address copied!'),
+                            backgroundColor: AppTheme.tokenSuccess),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          formattedAddress,
+                          style: const TextStyle(
+                            color: AppTheme.slate400,
+                            fontSize: 12,
+                            fontFamily: 'JetBrains Mono',
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(8),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(13),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.copy_rounded,
+                            color: AppTheme.slate500,
+                            size: 18,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.copy_rounded,
-                          color: Color(0xFF64748B),
-                          size: 18,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 if (isPeP) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF97316).withOpacity(0.18),
+                      color: AppTheme.tokenPeP.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFF97316).withOpacity(0.35)),
+                      border:
+                          Border.all(color: AppTheme.tokenPeP.withAlpha(89)),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.shield_outlined, color: Color(0xFFF97316), size: 16),
+                        Icon(Icons.shield_outlined,
+                            color: AppTheme.tokenPeP, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'PEP WATCH',
                           style: TextStyle(
-                            color: Color(0xFFF97316),
+                            color: AppTheme.tokenPeP,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.5,
@@ -1359,29 +1495,33 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 ],
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Balance label
             Text(
               isConnected ? 'ETH Balance' : 'Connect to View Balance',
               style: const TextStyle(
-                color: Color(0xFF94A3B8),
+                color: AppTheme.slate400,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Balance amount - show real ETH balance
             if (isConnected)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    ethBalance.toStringAsFixed(4),
+                    ethBalance > 0.001
+                        ? ethBalance.toStringAsFixed(ethBalance >= 100 ? 2 : 4)
+                        : ethBalance > 0
+                            ? '<0.001'
+                            : '0.00',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.tokenText,
                       fontSize: 44,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -2,
@@ -1393,34 +1533,63 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                     child: Text(
                       'ETH',
                       style: TextStyle(
-                        color: Color(0xFF64748B),
+                        color: AppTheme.slate500,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
+                  const Spacer(),
+                  // Approximate USD value
+                  if (ethBalance > 0)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '≈ \$${(ethBalance * AppTheme.ethUsdPrice).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: AppTheme.slate400,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'USD',
+                          style: TextStyle(
+                            color: AppTheme.slate500,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               )
             else
               GestureDetector(
                 onTap: () => ref.read(walletProvider.notifier).connectWallet(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                      colors: [
+                        AppTheme.tokenPrimary,
+                        AppTheme.tokenPrimarySoft
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.account_balance_wallet, color: Colors.white, size: 20),
+                      Icon(Icons.account_balance_wallet,
+                          color: AppTheme.tokenText, size: 20),
                       SizedBox(width: 8),
                       Text(
                         'Connect MetaMask',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1429,26 +1598,27 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   ),
                 ),
               ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Network indicator (only show when connected)
             if (isConnected)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withOpacity(0.1),
+                  color: AppTheme.tokenPrimary.withAlpha(26),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, color: Color(0xFF22C55E), size: 8),
+                    Icon(Icons.circle, color: AppTheme.tokenSuccess, size: 8),
                     SizedBox(width: 6),
                     Text(
                       'Sepolia Testnet',
                       style: TextStyle(
-                        color: Color(0xFF818CF8),
+                        color: AppTheme.tokenPrimaryLight,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1467,56 +1637,60 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Expanded(child: _buildActionButton(
+          Expanded(
+              child: _buildActionButton(
             context,
             icon: Icons.arrow_upward_rounded,
             label: 'Send',
-            gradient: const [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+            gradient: const [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
             onTap: () => context.go('/transfer'),
           )),
           const SizedBox(width: 12),
-          Expanded(child: _buildActionButton(
+          Expanded(
+              child: _buildActionButton(
             context,
             icon: Icons.arrow_downward_rounded,
             label: 'Receive',
-            gradient: const [Color(0xFF22C55E), Color(0xFF16A34A)],
+            gradient: const [AppTheme.tokenSuccess, AppTheme.green600],
             onTap: () => _showReceiveModal(context),
           )),
           const SizedBox(width: 12),
-          Expanded(child: _buildActionButton(
+          Expanded(
+              child: _buildActionButton(
             context,
             icon: Icons.swap_horiz_rounded,
             label: 'Swap',
-            gradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+            gradient: const [AppTheme.tokenWarning, AppTheme.amber700],
             onTap: () => context.go('/nft-swap'),
           )),
           const SizedBox(width: 12),
-          Expanded(child: _buildActionButton(
+          Expanded(
+              child: _buildActionButton(
             context,
             icon: Icons.add_rounded,
             label: 'Buy',
-            gradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
+            gradient: const [AppTheme.cyan500, AppTheme.cyan600],
             onTap: () => _showBuyModal(context),
           )),
         ],
       ),
     );
   }
-  
+
   void _showReceiveModal(BuildContext context) {
     final walletState = ref.read(walletProvider);
     final address = walletState.address ?? '';
-    final formattedAddress = address.length > 10 
+    final formattedAddress = address.length > 10
         ? '${address.substring(0, 6)}...${address.substring(address.length - 4)}'
         : address;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -1526,20 +1700,23 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Receive',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: AppTheme.tokenText,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -1549,15 +1726,17 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                     width: 180,
                     height: 180,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: const Color(0xFF1E1E2E)),
+                      color: AppTheme.tokenText,
+                      border: Border.all(color: AppTheme.tokenBorderSubtle),
                     ),
                     child: address.isNotEmpty
                         ? const Center(
-                            child: Icon(Icons.qr_code_rounded, size: 160, color: Color(0xFF0A0A0F)),
+                            child: Icon(Icons.qr_code_rounded,
+                                size: 160, color: AppTheme.tokenBackground),
                           )
                         : const Center(
-                            child: Text('Connect wallet first', style: TextStyle(color: Colors.grey)),
+                            child: Text('Connect wallet first',
+                                style: TextStyle(color: Colors.grey)),
                           ),
                   ),
                 ],
@@ -1567,15 +1746,20 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      address.isNotEmpty ? formattedAddress : 'No wallet connected',
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'monospace'),
+                      address.isNotEmpty
+                          ? formattedAddress
+                          : 'No wallet connected',
+                      style: const TextStyle(
+                          color: AppTheme.tokenText,
+                          fontSize: 16,
+                          fontFamily: 'JetBrains Mono'),
                     ),
                   ),
                   if (address.isNotEmpty)
@@ -1583,16 +1767,22 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: address));
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Address copied!'), backgroundColor: Color(0xFF22C55E)),
+                          const SnackBar(
+                              content: Text('Address copied!'),
+                              backgroundColor: AppTheme.tokenSuccess),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF6366F1),
+                          color: AppTheme.tokenPrimary,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text('Copy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                        child: const Text('Copy',
+                            style: TextStyle(
+                                color: AppTheme.tokenText,
+                                fontWeight: FontWeight.w600)),
                       ),
                     ),
                 ],
@@ -1604,7 +1794,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
-  
+
   void _showBuyModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -1612,7 +1802,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -1622,40 +1812,44 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Buy Crypto',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: AppTheme.tokenText,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Purchase crypto with card or bank transfer',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+              style:
+                  TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             ),
             const SizedBox(height: 24),
             _buildBuyOption(
               icon: Icons.credit_card_rounded,
               title: 'Card Payment',
               subtitle: 'Visa, Mastercard • Instant',
-              color: const Color(0xFF6366F1),
+              color: AppTheme.tokenPrimary,
             ),
             const SizedBox(height: 12),
             _buildBuyOption(
               icon: Icons.account_balance_rounded,
               title: 'Bank Transfer',
               subtitle: 'SEPA, Wire • 1-2 days',
-              color: const Color(0xFF22C55E),
+              color: AppTheme.tokenSuccess,
             ),
             const SizedBox(height: 12),
             _buildBuyOption(
               icon: Icons.apple,
               title: 'Apple Pay',
               subtitle: 'Fast & Secure',
-              color: const Color(0xFF64748B),
+              color: AppTheme.slate500,
             ),
             const SizedBox(height: 20),
           ],
@@ -1663,7 +1857,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
-  
+
   Widget _buildBuyOption({
     required IconData icon,
     required String title,
@@ -1673,9 +1867,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF2D2D44)),
+        border: Border.all(color: AppTheme.tokenBorderStrong),
       ),
       child: Row(
         children: [
@@ -1683,7 +1877,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withAlpha(38),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 22),
@@ -1693,12 +1887,18 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
-                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13)),
+                Text(title,
+                    style: const TextStyle(
+                        color: AppTheme.tokenText,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600)),
+                Text(subtitle,
+                    style: TextStyle(
+                        color: Colors.white.withAlpha(128), fontSize: 13)),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFF64748B)),
+          const Icon(Icons.chevron_right_rounded, color: AppTheme.slate500),
         ],
       ),
     );
@@ -1716,9 +1916,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppTheme.tokenCardElevated,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2D2D44)),
+          border: Border.all(color: AppTheme.tokenBorderStrong),
         ),
         child: Column(
           children: [
@@ -1730,19 +1930,19 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: gradient[0].withOpacity(0.3),
+                    color: gradient[0].withAlpha(77),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(icon, color: AppTheme.tokenText, size: 24),
             ),
             const SizedBox(height: 10),
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -1755,7 +1955,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
 
   Widget _buildProductCarousel(BuildContext context, bool isPeP) {
     final products = isPeP ? _getPepProducts() : _getStandardProducts();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1767,34 +1967,38 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               const Text(
                 'Discover',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Row(
-                children: List.generate(products.length, (i) => GestureDetector(
-                  onTap: () {
-                    _lastUserInteraction = DateTime.now();
-                    _carouselController.animateToPage(
-                      i,
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: i == _currentCarouselIndex ? 20 : 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(left: 4),
-                    decoration: BoxDecoration(
-                      color: i == _currentCarouselIndex 
-                          ? (isPeP ? const Color(0xFFF97316) : const Color(0xFF6366F1))
-                          : const Color(0xFF374151),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                )),
+                children: List.generate(
+                    products.length,
+                    (i) => GestureDetector(
+                          onTap: () {
+                            _lastUserInteraction = DateTime.now();
+                            _carouselController.animateToPage(
+                              i,
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            width: i == _currentCarouselIndex ? 20 : 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(left: 4),
+                            decoration: BoxDecoration(
+                              color: i == _currentCarouselIndex
+                                  ? (isPeP
+                                      ? AppTheme.tokenPeP
+                                      : AppTheme.tokenPrimary)
+                                  : AppTheme.gray700,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        )),
               ),
             ],
           ),
@@ -1837,8 +2041,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       {
         'icon': Icons.lock_outline_rounded,
         'title': 'zkNAF Privacy',
-        'description': 'Zero-knowledge proof transfers for ultimate financial privacy',
-        'gradient': [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
+        'description':
+            'Zero-knowledge proof transfers for ultimate financial privacy',
+        'gradient': [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
         'route': '/zknaf',
         'cta': 'Try Now',
       },
@@ -1846,7 +2051,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.flash_on_rounded,
         'title': 'Session Keys',
         'description': 'Gas-free transactions with ERC-4337 smart accounts',
-        'gradient': [const Color(0xFF22C55E), const Color(0xFF14B8A6)],
+        'gradient': [AppTheme.tokenSuccess, AppTheme.teal500],
         'route': '/session-keys',
         'cta': 'Enable',
       },
@@ -1854,7 +2059,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.language_rounded,
         'title': 'Cross-Chain',
         'description': 'Bridge assets across 12+ networks instantly',
-        'gradient': [const Color(0xFFF59E0B), const Color(0xFFEF4444)],
+        'gradient': [AppTheme.tokenWarning, AppTheme.tokenDanger],
         'route': '/cross-chain',
         'cta': 'Bridge',
       },
@@ -1862,7 +2067,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.account_balance_rounded,
         'title': 'Safe Multisig',
         'description': 'Enterprise-grade custody with Gnosis Safe',
-        'gradient': [const Color(0xFF06B6D4), const Color(0xFF3B82F6)],
+        'gradient': [AppTheme.cyan500, AppTheme.blue500],
         'route': '/safe',
         'cta': 'Create Safe',
       },
@@ -1875,7 +2080,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.verified_user_outlined,
         'title': 'Enhanced Screening',
         'description': 'Real-time sanctions & watchlist verification',
-        'gradient': [const Color(0xFFF97316), const Color(0xFFEF4444)],
+        'gradient': [AppTheme.tokenPeP, AppTheme.tokenDanger],
         'route': '/trust-check',
         'cta': 'View Status',
       },
@@ -1883,7 +2088,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.speed_rounded,
         'title': 'Velocity Controls',
         'description': 'Smart transaction limits protect your account',
-        'gradient': [const Color(0xFFF59E0B), const Color(0xFFF97316)],
+        'gradient': [AppTheme.tokenWarning, AppTheme.tokenPeP],
         'route': '/settings',
         'cta': 'Configure',
       },
@@ -1891,7 +2096,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.history_rounded,
         'title': 'Audit Trail',
         'description': 'Complete transaction history for compliance',
-        'gradient': [const Color(0xFF8B5CF6), const Color(0xFFA855F7)],
+        'gradient': [AppTheme.tokenPrimarySoft, const Color(0xFFA855F7)],
         'route': '/history',
         'cta': 'View History',
       },
@@ -1899,7 +2104,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         'icon': Icons.group_outlined,
         'title': 'Approved Contacts',
         'description': 'Pre-verified counterparties for faster transfers',
-        'gradient': [const Color(0xFF22C55E), const Color(0xFF14B8A6)],
+        'gradient': [AppTheme.tokenSuccess, AppTheme.teal500],
         'route': '/settings',
         'cta': 'Manage',
       },
@@ -1925,17 +2130,17 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              gradient[0].withOpacity(0.2),
-              gradient[1].withOpacity(0.1),
+              gradient[0].withAlpha(51),
+              gradient[1].withAlpha(26),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: gradient[0].withOpacity(0.3),
+            color: gradient[0].withAlpha(77),
           ),
           boxShadow: [
             BoxShadow(
-              color: gradient[0].withOpacity(0.2),
+              color: gradient[0].withAlpha(51),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -1951,13 +2156,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 gradient: LinearGradient(colors: gradient),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(icon, color: AppTheme.tokenText, size: 24),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -1966,7 +2171,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             Text(
               description,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha(179),
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -2004,13 +2209,13 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF22C55E).withOpacity(0.1),
-                const Color(0xFF22C55E).withOpacity(0.05),
+                AppTheme.tokenSuccess.withAlpha(26),
+                AppTheme.tokenSuccess.withAlpha(13),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF22C55E).withOpacity(0.2),
+              color: AppTheme.tokenSuccess.withAlpha(51),
             ),
           ),
           child: Row(
@@ -2019,12 +2224,12 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E).withOpacity(0.15),
+                  color: AppTheme.tokenSuccess.withAlpha(38),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.shield_rounded,
-                  color: Color(0xFF22C55E),
+                  color: AppTheme.tokenSuccess,
                   size: 24,
                 ),
               ),
@@ -2036,7 +2241,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                     Text(
                       'Trust Check Active',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.tokenText,
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2045,7 +2250,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                     Text(
                       'All transactions are verified',
                       style: TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: AppTheme.slate400,
                         fontSize: 13,
                       ),
                     ),
@@ -2054,7 +2259,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               ),
               const Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF64748B),
+                color: AppTheme.slate500,
               ),
             ],
           ),
@@ -2068,7 +2273,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     final walletState = ref.watch(walletProvider);
     final isConnected = walletState.isConnected;
     final ethBalance = walletState.ethBalance ?? 0.0;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -2079,7 +2284,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               const Text(
                 'Assets',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -2087,22 +2292,25 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               const Spacer(),
               if (isConnected)
                 GestureDetector(
-                  onTap: () => ref.read(walletProvider.notifier).refreshBalance(),
+                  onTap: () =>
+                      ref.read(walletProvider.notifier).refreshBalance(),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A2E),
+                      color: AppTheme.tokenCardElevated,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.refresh_rounded, color: Color(0xFF818CF8), size: 16),
+                        Icon(Icons.refresh_rounded,
+                            color: AppTheme.tokenPrimaryLight, size: 16),
                         SizedBox(width: 4),
                         Text(
                           'Refresh',
                           style: TextStyle(
-                            color: Color(0xFF818CF8),
+                            color: AppTheme.tokenPrimaryLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -2114,7 +2322,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Asset items - show real balance if connected
           if (isConnected) ...[
             _buildAssetItem(
@@ -2124,7 +2332,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               value: 'Testnet',
               change: '',
               isPositive: true,
-              color: const Color(0xFF627EEA),
+              color: AppTheme.brandETH,
               icon: 'Ξ',
             ),
           ] else ...[
@@ -2132,40 +2340,45 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF2D2D44)),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
               ),
               child: Column(
                 children: [
                   const Icon(
                     Icons.account_balance_wallet_outlined,
-                    color: Color(0xFF64748B),
+                    color: AppTheme.slate500,
                     size: 48,
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'Connect your wallet to view assets',
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: AppTheme.slate400,
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 16),
                   GestureDetector(
-                    onTap: () => ref.read(walletProvider.notifier).connectWallet(),
+                    onTap: () =>
+                        ref.read(walletProvider.notifier).connectWallet(),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                          colors: [
+                            AppTheme.tokenPrimary,
+                            AppTheme.tokenPrimarySoft
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Text(
                         'Connect Wallet',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -2194,9 +2407,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF2D2D44)),
+        border: Border.all(color: AppTheme.tokenBorderStrong),
       ),
       child: Row(
         children: [
@@ -2211,7 +2424,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               child: Text(
                 icon,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -2226,7 +2439,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 Text(
                   symbol,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.tokenText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -2234,7 +2447,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 Text(
                   name,
                   style: const TextStyle(
-                    color: Color(0xFF64748B),
+                    color: AppTheme.slate500,
                     fontSize: 13,
                   ),
                 ),
@@ -2247,7 +2460,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               Text(
                 value,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -2258,25 +2471,26 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                   Text(
                     '$balance $symbol',
                     style: const TextStyle(
-                      color: Color(0xFF64748B),
+                      color: AppTheme.slate500,
                       fontSize: 12,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: isPositive 
-                          ? const Color(0xFF22C55E).withOpacity(0.1)
-                          : const Color(0xFFEF4444).withOpacity(0.1),
+                      color: isPositive
+                          ? AppTheme.tokenSuccess.withAlpha(26)
+                          : AppTheme.tokenDanger.withAlpha(26),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       change,
                       style: TextStyle(
-                        color: isPositive 
-                            ? const Color(0xFF22C55E)
-                            : const Color(0xFFEF4444),
+                        color: isPositive
+                            ? AppTheme.tokenSuccess
+                            : AppTheme.tokenDanger,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2292,6 +2506,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
   }
 
   Widget _buildRecentActivity(BuildContext context) {
+    final walletState = ref.watch(walletProvider);
+    final isConnected = walletState.isConnected;
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -2302,7 +2519,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               const Text(
                 'Recent Activity',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -2313,7 +2530,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 child: const Text(
                   'See All',
                   style: TextStyle(
-                    color: Color(0xFF818CF8),
+                    color: AppTheme.tokenPrimaryLight,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -2322,36 +2539,99 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             ],
           ),
           const SizedBox(height: 16),
-          
-          _buildActivityItem(
-            icon: Icons.arrow_upward_rounded,
-            iconBg: const Color(0xFF6366F1),
-            title: 'Sent ETH',
-            subtitle: 'To 0xabcd...efgh',
-            amount: '-0.5 ETH',
-            time: '2 hours ago',
-            isNegative: true,
-          ),
-          const SizedBox(height: 12),
-          _buildActivityItem(
-            icon: Icons.arrow_downward_rounded,
-            iconBg: const Color(0xFF22C55E),
-            title: 'Received USDC',
-            subtitle: 'From 0x1234...5678',
-            amount: '+500 USDC',
-            time: 'Yesterday',
-            isNegative: false,
-          ),
-          const SizedBox(height: 12),
-          _buildActivityItem(
-            icon: Icons.swap_horiz_rounded,
-            iconBg: const Color(0xFFF59E0B),
-            title: 'Swapped',
-            subtitle: 'ETH → USDC',
-            amount: '1.2 ETH',
-            time: '3 days ago',
-            isNegative: false,
-          ),
+          if (!isConnected)
+            // Empty state when wallet not connected
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              decoration: BoxDecoration(
+                color: AppTheme.tokenSurfaceDeep,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.slate800),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: AppTheme.slate800,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.receipt_long_rounded,
+                        color: AppTheme.slate600, size: 28),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No activity yet',
+                    style: TextStyle(
+                        color: AppTheme.tokenText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Connect your wallet to see transaction history',
+                    style: TextStyle(color: AppTheme.slate500, fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () =>
+                        ref.read(walletProvider.notifier).connectWallet(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [
+                          AppTheme.tokenPrimary,
+                          AppTheme.tokenPrimarySoft
+                        ]),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'Connect Wallet',
+                        style: TextStyle(
+                            color: AppTheme.tokenText,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            _buildActivityItem(
+              icon: Icons.arrow_upward_rounded,
+              iconBg: AppTheme.tokenPrimary,
+              title: 'Sent ETH',
+              subtitle: 'To 0xabcd...efgh',
+              amount: '-0.5 ETH',
+              time: '2 hours ago',
+              isNegative: true,
+            ),
+            const SizedBox(height: 12),
+            _buildActivityItem(
+              icon: Icons.arrow_downward_rounded,
+              iconBg: AppTheme.tokenSuccess,
+              title: 'Received USDC',
+              subtitle: 'From 0x1234...5678',
+              amount: '+500 USDC',
+              time: 'Yesterday',
+              isNegative: false,
+            ),
+            const SizedBox(height: 12),
+            _buildActivityItem(
+              icon: Icons.swap_horiz_rounded,
+              iconBg: AppTheme.tokenWarning,
+              title: 'Swapped',
+              subtitle: 'ETH → USDC',
+              amount: '1.2 ETH',
+              time: '3 days ago',
+              isNegative: false,
+            ),
+          ],
         ],
       ),
     );
@@ -2369,9 +2649,9 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF2D2D44)),
+        border: Border.all(color: AppTheme.tokenBorderStrong),
       ),
       child: Row(
         children: [
@@ -2379,7 +2659,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: iconBg.withOpacity(0.15),
+              color: iconBg.withAlpha(38),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconBg, size: 22),
@@ -2392,7 +2672,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.tokenText,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -2400,7 +2680,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Color(0xFF64748B),
+                    color: AppTheme.slate500,
                     fontSize: 13,
                   ),
                 ),
@@ -2413,7 +2693,8 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               Text(
                 amount,
                 style: TextStyle(
-                  color: isNegative ? Colors.white : const Color(0xFF22C55E),
+                  color:
+                      isNegative ? AppTheme.tokenText : AppTheme.tokenSuccess,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -2421,7 +2702,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               Text(
                 time,
                 style: const TextStyle(
-                  color: Color(0xFF64748B),
+                  color: AppTheme.slate500,
                   fontSize: 12,
                 ),
               ),
@@ -2431,4 +2712,64 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
       ),
     );
   }
+}
+
+/// Mini sparkline chart painter for insight cards
+class _SparklinePainter extends CustomPainter {
+  final Color color;
+  _SparklinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Static sparkline data points (0-1 range)
+    final points = [0.3, 0.5, 0.4, 0.7, 0.6, 0.8, 0.65, 0.85, 0.75, 0.9];
+    if (points.isEmpty) return;
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withAlpha(64), color.withOpacity(0.0)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    final fillPath = Path();
+    final dx = size.width / (points.length - 1);
+    final padding = 2.0;
+    final usableHeight = size.height - padding * 2;
+
+    for (int i = 0; i < points.length; i++) {
+      final x = dx * i;
+      final y = padding + usableHeight * (1 - points[i]);
+      if (i == 0) {
+        path.moveTo(x, y);
+        fillPath.moveTo(x, size.height);
+        fillPath.lineTo(x, y);
+      } else {
+        // Smooth curves
+        final prevX = dx * (i - 1);
+        final prevY = padding + usableHeight * (1 - points[i - 1]);
+        final cpx = (prevX + x) / 2;
+        path.cubicTo(cpx, prevY, cpx, y, x, y);
+        fillPath.cubicTo(cpx, prevY, cpx, y, x, y);
+      }
+    }
+
+    fillPath.lineTo(size.width, size.height);
+    fillPath.close();
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

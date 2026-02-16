@@ -4,6 +4,7 @@
 /// - Embeds Next.js network graph (WebGL powered)
 /// - Full-screen mode via shell
 /// - Role-aware integration
+library;
 
 // ignore_for_file: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
@@ -14,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/rbac/rbac_provider.dart';
-import '../../../../shared/shells/role_based_shell.dart';
 
 class GraphExplorerPage extends ConsumerStatefulWidget {
   final String? initialTxId;

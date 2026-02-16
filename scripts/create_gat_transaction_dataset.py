@@ -27,7 +27,7 @@ start_time = time.time()
 
 # Paths
 ETH_DATA = r"C:\Users\Administrator\Downloads\eth_merged_dataset.parquet"
-ADDR_FEATURES = r"c:\amttp\processed\eth_addresses_labeled.parquet"
+ADDR_FEATURES = r"c:\amttp\processed\eth_addresses_labeled_v2.parquet"  # v2: 80 cols, 613 fraud
 OUTPUT_DIR = r"c:\amttp\processed"
 
 Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
@@ -49,26 +49,16 @@ print("\n[2/6] Loading address features with hybrid model scores...")
 addr_df = pd.read_parquet(ADDR_FEATURES)
 print(f"   Loaded {len(addr_df):,} addresses with {len(addr_df.columns)} features")
 
-# Features to join (all hybrid model features + computed features)
-join_features = [
-    'address',
-    # Computed features
-    'sent_count', 'received_count', 'total_transactions',
-    'total_sent', 'total_received', 'balance',
-    'avg_sent', 'avg_received',
-    'max_sent', 'max_received',
-    'unique_receivers', 'unique_senders', 'unique_counterparties',
-    'in_out_ratio', 'active_duration_mins',
-    # Hybrid model features
-    'sophisticated_score', 'pattern_count',
-    'xgb_raw_score', 'xgb_normalized',
-    'pattern_boost', 'soph_normalized', 'hybrid_score',
-    'risk_level', 'fraud', 'risk_class'
-]
-
-# Keep only needed columns
-addr_features = addr_df[[c for c in join_features if c in addr_df.columns]].copy()
-print(f"   Using {len(addr_features.columns)} features per address")
+# Dynamically select all numeric + key categorical columns from v2
+# Always include 'address' as the join key
+_numeric = addr_df.select_dtypes(include=[np.number]).columns.tolist()
+_keep = ['address'] + _numeric
+# Also keep string risk columns if present
+for _extra in ['risk_level', 'risk_class']:
+    if _extra in addr_df.columns and _extra not in _keep:
+        _keep.append(_extra)
+addr_features = addr_df[[c for c in _keep if c in addr_df.columns]].copy()
+print(f"   Using {len(addr_features.columns)} features per address (v2 dataset)")
 
 # ============================================================================
 # STEP 3: Join sender features to transactions
@@ -105,6 +95,9 @@ tx_pd[numeric_cols] = tx_pd[numeric_cols].fillna(0)
 # Fill NaN for string columns
 string_cols = tx_pd.select_dtypes(include=['object']).columns
 tx_pd[string_cols] = tx_pd[string_cols].fillna('')
+
+# Defragment after the two large merges to avoid PerformanceWarning
+tx_pd = tx_pd.copy()
 
 # ============================================================================
 # STEP 5: Create fraud labels for transactions
@@ -152,42 +145,22 @@ print(f"   Edges (transactions): {edge_index.shape[1]:,}")
 edge_features = tx_pd[['value_eth', 'gas_price_gwei', 'gas_used', 'gas_limit']].values.astype(np.float32)
 print(f"   Edge features shape: {edge_features.shape}")
 
-# Node features (from address features)
-node_feature_cols = [
-    'sent_count', 'received_count', 'total_transactions',
-    'total_sent', 'total_received', 'balance',
-    'avg_sent', 'avg_received',
-    'max_sent', 'max_received',
-    'unique_receivers', 'unique_senders', 'unique_counterparties',
-    'in_out_ratio', 'active_duration_mins',
-    'sophisticated_score', 'pattern_count',
-    'xgb_raw_score', 'xgb_normalized',
-    'pattern_boost', 'soph_normalized', 'hybrid_score'
-]
+# Node features (dynamically from all available numeric address features)
+node_feature_cols = [c for c in addr_features.select_dtypes(include=[np.number]).columns
+                     if c != 'address']
+print(f"   Node feature columns: {len(node_feature_cols)}")
 
-# Create node feature matrix
-node_features = np.zeros((len(all_addresses), len(node_feature_cols)), dtype=np.float32)
-addr_df_indexed = addr_df.set_index('address')
-
-for addr, idx in addr_to_idx.items():
-    if addr in addr_df_indexed.index:
-        row = addr_df_indexed.loc[addr]
-        for i, col in enumerate(node_feature_cols):
-            if col in row.index:
-                val = row[col]
-                if pd.notna(val) and not isinstance(val, str):
-                    node_features[idx, i] = float(val)
-
+# Create node feature matrix — VECTORIZED (fast)
+# Build a DataFrame indexed by all_addresses (preserves order → addr_to_idx)
+addr_order = pd.Series(range(len(all_addresses)), index=all_addresses, name='idx')
+addr_df_numeric = addr_df.set_index('address')[node_feature_cols].reindex(addr_order.index)
+addr_df_numeric = addr_df_numeric.fillna(0).astype(np.float32)
+node_features = addr_df_numeric.values
 print(f"   Node features shape: {node_features.shape}")
 
-# Node labels
-node_labels = np.zeros(len(all_addresses), dtype=np.int64)
-for addr, idx in addr_to_idx.items():
-    if addr in addr_df_indexed.index:
-        fraud_val = addr_df_indexed.loc[addr, 'fraud']
-        if pd.notna(fraud_val):
-            node_labels[idx] = int(fraud_val)
-
+# Node labels — VECTORIZED
+fraud_series = addr_df.set_index('address')['fraud'].reindex(addr_order.index).fillna(0).astype(np.int64)
+node_labels = fraud_series.values
 print(f"   Node labels: {(node_labels == 1).sum():,} fraud, {(node_labels == 0).sum():,} normal")
 
 # Normalize node features

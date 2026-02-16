@@ -4,6 +4,7 @@
 /// Pages are ONLY loaded for the authorized role - no hiding, no filtering.
 /// 
 /// This replaces the old approach of loading everything and filtering.
+library;
 
 import 'package:flutter/material.dart';
 import 'roles.dart';

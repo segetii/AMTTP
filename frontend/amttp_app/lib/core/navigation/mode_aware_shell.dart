@@ -5,14 +5,13 @@
 /// 
 /// Focus Mode (R1/R2): Simplified interface for end users
 /// War Room Mode (R3+): Full analytics dashboard for institutional users
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../rbac/roles.dart';
 import '../rbac/rbac_provider.dart';
-import '../theme/app_theme.dart';
 import 'focus_mode_shell.dart';
 import 'war_room_shell.dart';
 

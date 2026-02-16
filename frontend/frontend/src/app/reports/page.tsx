@@ -20,6 +20,7 @@ function ReportsContent() {
   const { profile } = useProfile();
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendOffline, setBackendOffline] = useState(false);
   const [dateRange, setDateRange] = useState<'day' | 'week' | 'month' | 'all'>('week');
 
   useEffect(() => {
@@ -35,7 +36,8 @@ function ReportsContent() {
         setDecisions(data.decisions || []);
       }
     } catch (e) {
-      console.error('Failed to load data:', e);
+      console.warn('[Reports] Backend unavailable, showing offline state.');
+      setBackendOffline(true);
     }
     setLoading(false);
   }
@@ -90,6 +92,13 @@ function ReportsContent() {
     <div>
       <h1 className="text-3xl font-bold mb-2">📈 Compliance Reports</h1>
       <p className="text-gray-400 mb-6">Transaction analytics and compliance metrics</p>
+
+      {backendOffline && (
+        <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 mb-4 flex items-center gap-2 text-yellow-300 text-sm">
+          <span>⚠️</span>
+          <span>Backend services are offline. No report data available.</span>
+        </div>
+      )}
 
       {/* Date Range Filter */}
       <div className="flex gap-2 mb-6">

@@ -2,6 +2,7 @@
 /// 
 /// All API endpoints are defined here.
 /// Use environment variables for different environments.
+library;
 
 abstract class ApiEndpoints {
   // ═══════════════════════════════════════════════════════════════════════════

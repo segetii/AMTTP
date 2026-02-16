@@ -1,5 +1,5 @@
 /// Shell exports
-library shells;
+library;
 
 export 'premium_fintech_shell.dart';  // Premium Metamask/Revolut style shell
 export 'war_room_shell.dart';

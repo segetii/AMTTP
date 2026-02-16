@@ -5,6 +5,7 @@
 /// Padding(padding: Insets.pagePadding, child: ...)
 /// SizedBox(height: Gaps.md)
 /// ```
+library;
 
 import 'package:flutter/material.dart';
 import 'design_tokens.dart';

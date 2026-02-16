@@ -20,7 +20,7 @@
 /// }
 /// ```
 
-library rbac;
+library;
 
 export 'roles.dart';
 export 'rbac_provider.dart';

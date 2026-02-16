@@ -66,46 +66,46 @@ export default function WarRoomLandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">War Room</h1>
-        <p className="text-slate-400 text-lg">
+        <p className="text-mutedText text-lg">
           Institutional compliance console for monitoring, detection, and enforcement
         </p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-5 gap-4 mb-8">
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-3xl font-bold text-green-400">1,247</div>
-          <div className="text-slate-400 text-sm">Transactions Today</div>
+          <div className="text-mutedText text-sm">Transactions Today</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-3xl font-bold text-yellow-400">12</div>
-          <div className="text-slate-400 text-sm">Pending Review</div>
+          <div className="text-mutedText text-sm">Pending Review</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-3xl font-bold text-red-400">3</div>
-          <div className="text-slate-400 text-sm">High Risk Alerts</div>
+          <div className="text-mutedText text-sm">High Risk Alerts</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-3xl font-bold text-purple-400">5</div>
-          <div className="text-slate-400 text-sm">Active Disputes</div>
+          <div className="text-mutedText text-sm">Active Disputes</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-3xl font-bold text-blue-400">8</div>
-          <div className="text-slate-400 text-sm">Awaiting Approval</div>
+          <div className="text-mutedText text-sm">Awaiting Approval</div>
         </div>
       </div>
 
       {/* Sections Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sections.map(section => (
-          <div key={section.title} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div className="p-4 border-b border-slate-700 bg-slate-700/30">
+          <div key={section.title} className="bg-surface rounded-xl border border-borderSubtle overflow-hidden">
+            <div className="p-4 border-b border-borderSubtle bg-slate-700/30">
               <h2 className="font-semibold text-lg">{section.title}</h2>
-              <p className="text-sm text-slate-400">{section.description}</p>
+              <p className="text-sm text-mutedText">{section.description}</p>
             </div>
             <div className="p-2">
               {section.items.map(item => (
@@ -117,7 +117,7 @@ export default function WarRoomLandingPage() {
                   <div className="text-2xl">{item.icon}</div>
                   <div>
                     <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-slate-500">{item.description}</div>
+                    <div className="text-xs text-mutedText">{item.description}</div>
                   </div>
                 </Link>
               ))}
@@ -127,7 +127,7 @@ export default function WarRoomLandingPage() {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-center text-slate-500 text-sm">
+      <div className="mt-8 text-center text-mutedText text-sm">
         <p>AMTTP War Room • Institutional Compliance Console</p>
         <p className="mt-1">Powered by ML Risk Detection, Kleros Arbitration, and On-Chain Policy Engine</p>
       </div>

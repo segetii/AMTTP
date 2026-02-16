@@ -8,6 +8,7 @@
 /// 3. Visual Confirmation (hash-verified data)
 /// 4. Intent Signing (user signs actual data, not UI)
 /// 5. Execution & Monitoring
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -649,9 +650,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget>
             _buildVerifiedDetail('Memo', _intent!.memo!),
           _buildVerifiedDetail(
             'Intent Hash',
-            _intentHash!.substring(0, 16) +
-                '...' +
-                _intentHash!.substring(_intentHash!.length - 8),
+            '${_intentHash!.substring(0, 16)}...${_intentHash!.substring(_intentHash!.length - 8)}',
           ),
 
           const SizedBox(height: 24),
@@ -697,7 +696,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget>
                               ),
                             ),
                           ))
-                      .toList(),
+                      ,
                 ],
               ),
             ),

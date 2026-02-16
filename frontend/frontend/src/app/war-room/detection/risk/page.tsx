@@ -7,7 +7,7 @@
  * RBAC: R4+ required (Institution, Regulator, Admin)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { 
   ArrowPathIcon,
@@ -32,10 +32,10 @@ import { generateMockDistributionData } from '@/components/detection/RiskDistrib
 
 function ChartPlaceholder() {
   return (
-    <div className="h-[300px] bg-slate-900 rounded-lg flex items-center justify-center">
+    <div className="h-[300px] bg-background rounded-lg flex items-center justify-center">
       <div className="text-center">
         <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-2" />
-        <p className="text-slate-400 text-sm">Loading chart...</p>
+        <p className="text-mutedText text-sm">Loading chart...</p>
       </div>
     </div>
   );
@@ -121,14 +121,28 @@ const mockAssessments: RiskAssessment[] = [
 
 export default function RiskScoringPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [riskThreshold, setRiskThreshold] = useState(0.5);
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const distributionData = generateMockDistributionData();
+  useEffect(() => {
+    fetch('http://127.0.0.1:8007/dashboard/stats')
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+      .then(data => setAssessments(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const distributionData = generateMockDistributionData(); // TODO: Replace with real data if available
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    setLoading(true);
+    fetch('http://127.0.0.1:8007/dashboard/stats')
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+      .then(data => setAssessments(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
   };
 
   const getRiskLevel = (score: number) => {
@@ -143,87 +157,89 @@ export default function RiskScoringPage() {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const filteredAssessments = mockAssessments.filter(a =>
-    a.address.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAssessments = assessments.filter(a =>
+    a.address?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const highRiskCount = mockAssessments.filter(a => a.overallScore >= 0.7).length;
-  const avgScore = mockAssessments.reduce((sum, a) => sum + a.overallScore, 0) / mockAssessments.length;
+  const highRiskCount = assessments.filter(a => a.overallScore >= 0.7).length;
+  const avgScore = assessments.length > 0 ? assessments.reduce((sum, a) => sum + a.overallScore, 0) / assessments.length : 0;
 
   return (
     <div className="p-6 space-y-6">
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Risk Scoring</h1>
-          <p className="text-slate-400 mt-1">Assess and monitor wallet risk scores</p>
+          <h1 className="text-2xl font-bold text-text">Risk Scoring</h1>
+          <p className="text-mutedText mt-1">Assess and monitor wallet risk scores</p>
         </div>
         <button 
           onClick={handleRefresh}
-          disabled={isLoading}
+          disabled={loading}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
         >
-          <ArrowPathIcon className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          <ArrowPathIcon className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ChartBarIcon className="w-4 h-4" />
             <span>Total Assessed</span>
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{mockAssessments.length}</p>
+          <p className="text-2xl font-bold text-text mt-2">{assessments.length}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ExclamationTriangleIcon className="w-4 h-4 text-red-400" />
             <span>High Risk</span>
           </div>
           <p className="text-2xl font-bold text-red-400 mt-2">{highRiskCount}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ChartBarIcon className="w-4 h-4" />
             <span>Avg Score</span>
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{avgScore.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-text mt-2">{avgScore.toFixed(2)}</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+          <div className="flex items-center gap-2 text-mutedText text-sm">
             <ShieldCheckIcon className="w-4 h-4 text-green-400" />
             <span>Low Risk</span>
           </div>
           <p className="text-2xl font-bold text-green-400 mt-2">
-            {mockAssessments.filter(a => a.overallScore < 0.3).length}
+            {assessments.filter(a => a.overallScore < 0.3).length}
           </p>
         </div>
       </div>
 
       {/* Distribution Chart */}
-      <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-        <h2 className="text-lg font-semibold text-white mb-4">Risk Distribution</h2>
+      <div className="bg-surface rounded-lg border border-borderSubtle p-4">
+        <h2 className="text-lg font-semibold text-text mb-4">Risk Distribution</h2>
         <RiskDistributionChart data={distributionData} />
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-wrap gap-4 items-center bg-slate-800 rounded-lg p-4 border border-slate-700">
+      <div className="flex flex-wrap gap-4 items-center bg-surface rounded-lg p-4 border border-borderSubtle">
         <div className="relative flex-1 max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-mutedText" />
           <input
             type="text"
             placeholder="Search wallet address..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-background border border-borderSubtle rounded-lg text-text placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <AdjustmentsHorizontalIcon className="w-5 h-5 text-slate-400" />
-          <label className="text-slate-400 text-sm">Threshold:</label>
+          <AdjustmentsHorizontalIcon className="w-5 h-5 text-mutedText" />
+          <label className="text-mutedText text-sm">Threshold:</label>
           <input
             type="range"
             min="0"
@@ -233,7 +249,7 @@ export default function RiskScoringPage() {
             onChange={(e) => setRiskThreshold(Number(e.target.value))}
             className="w-24"
           />
-          <span className="text-white text-sm w-12">{riskThreshold.toFixed(1)}</span>
+          <span className="text-text text-sm w-12">{riskThreshold.toFixed(1)}</span>
         </div>
       </div>
 
@@ -244,7 +260,7 @@ export default function RiskScoringPage() {
           return (
             <div 
               key={assessment.id}
-              className="bg-slate-800 rounded-lg border border-slate-700 p-4 hover:border-slate-600 transition-colors"
+              className="bg-surface rounded-lg border border-borderSubtle p-4 hover:border-borderSubtle transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -256,7 +272,7 @@ export default function RiskScoringPage() {
                       {risk.label} Risk
                     </span>
                   </div>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-mutedText text-sm mt-1">
                     Last assessed: {formatTime(assessment.lastAssessed)}
                   </p>
                 </div>
@@ -264,14 +280,14 @@ export default function RiskScoringPage() {
                   <p className={`text-3xl font-bold ${risk.color}`}>
                     {(assessment.overallScore * 100).toFixed(0)}
                   </p>
-                  <p className="text-slate-500 text-xs">Overall Score</p>
+                  <p className="text-mutedText text-xs">Overall Score</p>
                 </div>
               </div>
 
               {/* Score Breakdown */}
-              <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-700">
+              <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t border-borderSubtle">
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Transaction</p>
+                  <p className="text-mutedText text-xs uppercase">Transaction</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 bg-slate-700 rounded-full h-2">
                       <div 
@@ -279,11 +295,11 @@ export default function RiskScoringPage() {
                         style={{ width: `${assessment.transactionScore * 100}%` }}
                       />
                     </div>
-                    <span className="text-white text-sm">{(assessment.transactionScore * 100).toFixed(0)}</span>
+                    <span className="text-text text-sm">{(assessment.transactionScore * 100).toFixed(0)}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Behavior</p>
+                  <p className="text-mutedText text-xs uppercase">Behavior</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 bg-slate-700 rounded-full h-2">
                       <div 
@@ -291,11 +307,11 @@ export default function RiskScoringPage() {
                         style={{ width: `${assessment.behaviorScore * 100}%` }}
                       />
                     </div>
-                    <span className="text-white text-sm">{(assessment.behaviorScore * 100).toFixed(0)}</span>
+                    <span className="text-text text-sm">{(assessment.behaviorScore * 100).toFixed(0)}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Network</p>
+                  <p className="text-mutedText text-xs uppercase">Network</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 bg-slate-700 rounded-full h-2">
                       <div 
@@ -303,11 +319,11 @@ export default function RiskScoringPage() {
                         style={{ width: `${assessment.networkScore * 100}%` }}
                       />
                     </div>
-                    <span className="text-white text-sm">{(assessment.networkScore * 100).toFixed(0)}</span>
+                    <span className="text-text text-sm">{(assessment.networkScore * 100).toFixed(0)}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs uppercase">Compliance</p>
+                  <p className="text-mutedText text-xs uppercase">Compliance</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 bg-slate-700 rounded-full h-2">
                       <div 
@@ -315,15 +331,15 @@ export default function RiskScoringPage() {
                         style={{ width: `${assessment.complianceScore * 100}%` }}
                       />
                     </div>
-                    <span className="text-white text-sm">{(assessment.complianceScore * 100).toFixed(0)}</span>
+                    <span className="text-text text-sm">{(assessment.complianceScore * 100).toFixed(0)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Risk Factors */}
               {assessment.riskFactors.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-700">
-                  <p className="text-slate-500 text-xs uppercase mb-2">Risk Factors</p>
+                <div className="mt-4 pt-4 border-t border-borderSubtle">
+                  <p className="text-mutedText text-xs uppercase mb-2">Risk Factors</p>
                   <div className="flex flex-wrap gap-2">
                     {assessment.riskFactors.map((factor, idx) => (
                       <span 

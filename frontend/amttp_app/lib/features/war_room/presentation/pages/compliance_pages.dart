@@ -5,6 +5,7 @@
 /// - Enforcement Actions: Freeze/unfreeze controls (R4 with multisig)
 /// - Multisig Queue: Pending multisig approvals
 /// - Pending Approvals: Transfer approval queue
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,7 +91,7 @@ class _PolicyEnginePageState extends ConsumerState<PolicyEnginePage> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedAction,
+                  initialValue: selectedAction,
                   dropdownColor: isDark ? AppTheme.slate700 : Colors.white,
                   style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(
@@ -466,7 +467,7 @@ class _EnforcementActionsPageState extends ConsumerState<EnforcementActionsPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<EnforcementType>(
-                  value: actionType,
+                  initialValue: actionType,
                   dropdownColor: isDark ? AppTheme.slate700 : Colors.white,
                   style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   decoration: InputDecoration(

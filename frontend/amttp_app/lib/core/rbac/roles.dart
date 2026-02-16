@@ -1,7 +1,7 @@
 /// AMTTP Role-Based Access Control (RBAC) System
-/// 
+///
 /// Canonical role definitions aligned with AMTTP UI/UX Ground Truth v2.3
-/// 
+///
 /// Role Hierarchy:
 /// - R1: End User (standard)
 /// - R2: End User PEP (politically exposed person - enhanced monitoring)
@@ -10,34 +10,34 @@
 /// - R5: Platform Admin (system configuration)
 /// - R6: Super Admin (full access, emergency controls)
 
-library rbac;
+library;
 
 /// Canonical role enum - R1 to R6
 enum Role {
   /// Standard end user - wallet, transfers, basic features
   r1EndUser('R1_END_USER', 'End User', 1),
-  
+
   /// Politically Exposed Person - same features, enhanced monitoring
   r2EndUserPep('R2_END_USER_PEP', 'End User (PEP)', 2),
-  
+
   /// Institution Operations - read-only analytics, detection studio
   r3InstitutionOps('R3_INSTITUTION_OPS', 'Institution Ops', 3),
-  
+
   /// Institution Compliance - can enforce policies (with multisig)
   r4InstitutionCompliance('R4_INSTITUTION_COMPLIANCE', 'Compliance Officer', 4),
-  
+
   /// Platform Admin - system configuration, user management
   r5PlatformAdmin('R5_PLATFORM_ADMIN', 'Platform Admin', 5),
-  
+
   /// Super Admin - full access, emergency override
   r6SuperAdmin('R6_SUPER_ADMIN', 'Super Admin', 6);
 
   final String code;
   final String displayName;
   final int level;
-  
+
   const Role(this.code, this.displayName, this.level);
-  
+
   /// Parse role from string code
   static Role fromCode(String code) {
     return Role.values.firstWhere(
@@ -45,25 +45,28 @@ enum Role {
       orElse: () => Role.r1EndUser,
     );
   }
-  
+
   /// Check if this role has at least the given level
   bool hasLevel(int requiredLevel) => level >= requiredLevel;
-  
+
   /// Check if this role is at least as privileged as another
   bool isAtLeast(Role other) => level >= other.level;
+
+  /// Get the default app mode string for this role
+  String get mode => getModeForRole(this).code;
 }
 
 /// Application mode based on role
 enum AppMode {
   /// Simplified interface for end users (R1, R2)
   focusMode('FOCUS_MODE', 'Focus Mode'),
-  
+
   /// Full analytics dashboard for institutional users (R3+)
   warRoomMode('WAR_ROOM_MODE', 'War Room');
 
   final String code;
   final String displayName;
-  
+
   const AppMode(this.code, this.displayName);
 }
 
@@ -115,84 +118,84 @@ class RoleCapabilities {
 const Map<Role, RoleCapabilities> roleCapabilities = {
   // R1: End User - Focus Mode, can initiate own transactions
   Role.r1EndUser: RoleCapabilities(
-    canInitiateOwnTx: true,  // ✅ Per matrix
+    canInitiateOwnTx: true, // ✅ Per matrix
     canViewOthersTx: false,
-    canAccessDetectionStudio: false,  // ❌ Per matrix
-    canEditPolicies: false,  // ❌ Per matrix
-    canEnforceActions: false,  // ❌ Per matrix
-    canSignMultisig: false,  // ❌ Per matrix
-    canViewUISnapshots: 'view',  // View per matrix
-    canEmergencyOverride: false,  // ❌ Per matrix
+    canAccessDetectionStudio: false, // ❌ Per matrix
+    canEditPolicies: false, // ❌ Per matrix
+    canEnforceActions: false, // ❌ Per matrix
+    canSignMultisig: false, // ❌ Per matrix
+    canViewUISnapshots: 'view', // View per matrix
+    canEmergencyOverride: false, // ❌ Per matrix
     canManageUsers: false,
     canExportReports: false,
     canAccessCompliance: false,
   ),
   // R2: End User PEP - Same as R1, enhanced monitoring
   Role.r2EndUserPep: RoleCapabilities(
-    canInitiateOwnTx: true,  // ✅ Per matrix
+    canInitiateOwnTx: true, // ✅ Per matrix
     canViewOthersTx: false,
-    canAccessDetectionStudio: false,  // ❌ Per matrix
-    canEditPolicies: false,  // ❌ Per matrix
-    canEnforceActions: false,  // ❌ Per matrix
-    canSignMultisig: false,  // ❌ Per matrix
-    canViewUISnapshots: 'view',  // View per matrix
-    canEmergencyOverride: false,  // ❌ Per matrix
+    canAccessDetectionStudio: false, // ❌ Per matrix
+    canEditPolicies: false, // ❌ Per matrix
+    canEnforceActions: false, // ❌ Per matrix
+    canSignMultisig: false, // ❌ Per matrix
+    canViewUISnapshots: 'view', // View per matrix
+    canEmergencyOverride: false, // ❌ Per matrix
     canManageUsers: false,
     canExportReports: false,
     canAccessCompliance: false,
   ),
   // R3: Institution Ops - War Room, READ-ONLY analytics
   Role.r3InstitutionOps: RoleCapabilities(
-    canInitiateOwnTx: false,  // ❌ Per matrix - NO TX for institution roles
+    canInitiateOwnTx: false, // ❌ Per matrix - NO TX for institution roles
     canViewOthersTx: true,
-    canAccessDetectionStudio: true,  // ✅ Full access per matrix
-    canEditPolicies: false,  // ❌ READ-ONLY per matrix
-    canEnforceActions: false,  // ❌ CANNOT ENFORCE per matrix
-    canSignMultisig: false,  // ❌ Per matrix
-    canViewUISnapshots: 'view',  // View per matrix
-    canEmergencyOverride: false,  // ❌ Per matrix
+    canAccessDetectionStudio: true, // ✅ Full access per matrix
+    canEditPolicies: false, // ❌ READ-ONLY per matrix
+    canEnforceActions: false, // ❌ CANNOT ENFORCE per matrix
+    canSignMultisig: false, // ❌ Per matrix
+    canViewUISnapshots: 'view', // View per matrix
+    canEmergencyOverride: false, // ❌ Per matrix
     canManageUsers: false,
     canExportReports: true,
     canAccessCompliance: true,
   ),
   // R4: Institution Compliance - War Room, can enforce (with multisig)
   Role.r4InstitutionCompliance: RoleCapabilities(
-    canInitiateOwnTx: false,  // ❌ Per matrix - NO TX for institution roles
+    canInitiateOwnTx: false, // ❌ Per matrix - NO TX for institution roles
     canViewOthersTx: true,
-    canAccessDetectionStudio: true,  // View per matrix (not full)
-    canEditPolicies: true,  // ✅ Per matrix
-    canEnforceActions: true,  // ✅ Per matrix (requires multisig)
-    canSignMultisig: true,  // ✅ Per matrix
-    canViewUISnapshots: 'full',  // Full per matrix
-    canEmergencyOverride: false,  // ❌ Per matrix
+    canAccessDetectionStudio: true, // View per matrix (not full)
+    canEditPolicies: true, // ✅ Per matrix
+    canEnforceActions: true, // ✅ Per matrix (requires multisig)
+    canSignMultisig: true, // ✅ Per matrix
+    canViewUISnapshots: 'full', // Full per matrix
+    canEmergencyOverride: false, // ❌ Per matrix
     canManageUsers: false,
     canExportReports: true,
     canAccessCompliance: true,
   ),
   // R5: Platform Admin - System config (not in matrix, inferred)
   Role.r5PlatformAdmin: RoleCapabilities(
-    canInitiateOwnTx: false,  // Platform admin - not for transactions
+    canInitiateOwnTx: false, // Platform admin - not for transactions
     canViewOthersTx: true,
-    canAccessDetectionStudio: true,  // System oversight
-    canEditPolicies: true,  // Platform-level policies
-    canEnforceActions: false,  // Cannot enforce on behalf of institutions
-    canSignMultisig: false,  // Not institutional
+    canAccessDetectionStudio: true, // System oversight
+    canEditPolicies: true, // Platform-level policies
+    canEnforceActions: false, // Cannot enforce on behalf of institutions
+    canSignMultisig: false, // Not institutional
     canViewUISnapshots: 'full',
-    canEmergencyOverride: false,  // No emergency override
-    canManageUsers: true,  // Primary purpose
+    canEmergencyOverride: false, // No emergency override
+    canManageUsers: true, // Primary purpose
     canExportReports: true,
     canAccessCompliance: true,
   ),
   // R6: Super Admin - Emergency override ONLY
   Role.r6SuperAdmin: RoleCapabilities(
-    canInitiateOwnTx: false,  // ❌ Per matrix - NO TX
+    canInitiateOwnTx: false, // ❌ Per matrix - NO TX
     canViewOthersTx: true,
-    canAccessDetectionStudio: false,  // ❌ Per matrix - NOT for investigation
-    canEditPolicies: false,  // ❌ Per matrix
-    canEnforceActions: false,  // ❌ Per matrix
-    canSignMultisig: false,  // ❌ Per matrix
-    canViewUISnapshots: 'full',  // Full per matrix
-    canEmergencyOverride: true,  // ✅ ONLY R6 can do this
+    canAccessDetectionStudio: false, // ❌ Per matrix - NOT for investigation
+    canEditPolicies: false, // ❌ Per matrix
+    canEnforceActions: false, // ❌ Per matrix
+    canSignMultisig: false, // ❌ Per matrix
+    canViewUISnapshots: 'full', // Full per matrix
+    canEmergencyOverride: true, // ✅ ONLY R6 can do this
     canManageUsers: true,
     canExportReports: true,
     canAccessCompliance: true,

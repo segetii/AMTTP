@@ -1,0 +1,41 @@
+{
+  "formula": "MFLS(x) = \u03b1\u00b7C(x) + \u03b2\u00b7G(x) + \u03b3\u00b7A(x) + \u03b4\u00b7T(x)",
+  "correction": "p*(x) = p(x) + \u03bb\u00b7MFLS(x)\u00b7(1-p(x))\u00b7\ud835\udfd9[p(x)<\u03c4]",
+  "weights": {
+    "alpha": 0.3,
+    "beta": 0.25,
+    "gamma": 0.25,
+    "delta": 0.2
+  },
+  "elliptic": {
+    "lambda": 1.6500000000000006,
+    "threshold": 0.8800000000000001,
+    "recall_before": 0.1350935093509351,
+    "recall_after": 0.6884488448844884,
+    "f1_before": 0.057951864086833414,
+    "f1_after": 0.3036537435101169,
+    "d_max": 51.63912582397461,
+    "mu_caught_tx": 0.200441375374794,
+    "sigma_caught_tx": 0.02894117310643196
+  },
+  "xblock": {
+    "lambda": 0.1,
+    "threshold": 0.22000000000000003,
+    "recall_before": 0.9351692484222605,
+    "recall_after": 0.9644291451520367,
+    "f1_before": 0.4071946040469648,
+    "f1_after": 0.37547464820192095,
+    "d_max": 193472.84375,
+    "mu_caught_tx": 1.6178492307662964,
+    "sigma_caught_tx": 1.2696075439453125
+  },
+  "supplementary_features": [
+    "\u03c6_camouflage",
+    "\u03c6_feature_gap",
+    "\u03c6_activity_anomaly",
+    "\u03c6_dist_normal",
+    "\u03c6_dist_caught",
+    "\u03c6_dist_ratio",
+    "\u03c6_extreme_range"
+  ]
+}

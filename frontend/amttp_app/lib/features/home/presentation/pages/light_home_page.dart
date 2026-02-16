@@ -1,8 +1,12 @@
+/// @deprecated — This file is DEAD CODE. All R1/R2 routing now uses
+/// [FintechHomePage] in `shared/shells/premium_fintech_shell.dart`.
+/// Retained for reference only. Safe to delete.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/rbac/rbac_provider.dart';
-import '../../../../core/theme/app_theme.dart';
 
 /// Light Home Page - Clean white-themed home for end users
 class LightHomePage extends ConsumerStatefulWidget {
@@ -103,7 +107,8 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
@@ -115,7 +120,8 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
                             SizedBox(width: 4),
                             Text(
                               'Protected',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12),
                             ),
                           ],
                         ),
@@ -203,7 +209,8 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
                           color: const Color(0xFF10B981).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.shield, color: Color(0xFF10B981), size: 20),
+                        child: const Icon(Icons.shield,
+                            color: Color(0xFF10B981), size: 20),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
@@ -230,7 +237,8 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: const Color(0xFF10B981).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -269,7 +277,7 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
               ),
             ),
             const SizedBox(height: 12),
-            
+
             _buildActivityItem(
               icon: Icons.arrow_upward,
               iconColor: const Color(0xFFF59E0B),
@@ -294,9 +302,9 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
               amount: 'Verified',
               amountColor: const Color(0xFF6366F1),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // View All Button
             Center(
               child: TextButton(
@@ -312,7 +320,8 @@ class _LightHomePageState extends ConsumerState<LightHomePage>
                       ),
                     ),
                     SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, color: Color(0xFF6366F1), size: 18),
+                    Icon(Icons.arrow_forward,
+                        color: Color(0xFF6366F1), size: 18),
                   ],
                 ),
               ),

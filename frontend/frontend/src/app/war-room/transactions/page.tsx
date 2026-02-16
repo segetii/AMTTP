@@ -21,83 +21,33 @@ import {
 // MOCK DATA
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const mockTransactions = [
-  {
-    id: 'tx_001',
-    hash: '0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890',
-    from: '0x742d35Cc6634C0532925a3b844Bc9e7595f8c2E4',
-    to: '0x8Ba1f109551bD432803012645Ac136ddd64DBA72',
-    amount: '1,250.00',
-    token: 'USDC',
-    timestamp: new Date(Date.now() - 60000).toISOString(),
-    status: 'completed',
-    riskScore: 0.12,
-    type: 'transfer',
-  },
-  {
-    id: 'tx_002',
-    hash: '0x2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890ab',
-    from: '0x9Cd2f109551bD432803012645Ac136ddd64DBA73',
-    to: '0x742d35Cc6634C0532925a3b844Bc9e7595f8c2E4',
-    amount: '50,000.00',
-    token: 'USDT',
-    timestamp: new Date(Date.now() - 120000).toISOString(),
-    status: 'pending',
-    riskScore: 0.67,
-    type: 'transfer',
-  },
-  {
-    id: 'tx_003',
-    hash: '0x3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890abcd',
-    from: '0xABc2f109551bD432803012645Ac136ddd64DBA74',
-    to: '0xDEf35Cc6634C0532925a3b844Bc9e7595f8c2E5',
-    amount: '125,000.00',
-    token: 'DAI',
-    timestamp: new Date(Date.now() - 300000).toISOString(),
-    status: 'flagged',
-    riskScore: 0.89,
-    type: 'cross-chain',
-  },
-  {
-    id: 'tx_004',
-    hash: '0x4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    from: '0xFEd35Cc6634C0532925a3b844Bc9e7595f8c2E6',
-    to: '0x123d35Cc6634C0532925a3b844Bc9e7595f8c2E7',
-    amount: '2,500.00',
-    token: 'USDC',
-    timestamp: new Date(Date.now() - 600000).toISOString(),
-    status: 'completed',
-    riskScore: 0.05,
-    type: 'transfer',
-  },
-  {
-    id: 'tx_005',
-    hash: '0x5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12',
-    from: '0x456d35Cc6634C0532925a3b844Bc9e7595f8c2E8',
-    to: '0x789d35Cc6634C0532925a3b844Bc9e7595f8c2E9',
-    amount: '75,000.00',
-    token: 'USDT',
-    timestamp: new Date(Date.now() - 900000).toISOString(),
-    status: 'completed',
-    riskScore: 0.34,
-    type: 'escrow',
-  },
-];
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const filteredTransactions = mockTransactions.filter(tx => {
+  React.useEffect(() => {
+    fetch('http://127.0.0.1:8007/decisions')
+      .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
+      .then(data => setTransactions(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredTransactions = transactions.filter(tx => {
     const matchesSearch = 
-      tx.hash.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.to.toLowerCase().includes(searchQuery.toLowerCase());
+      tx.hash?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tx.from?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tx.to?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || tx.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -122,7 +72,7 @@ export default function TransactionsPage() {
       case 'flagged':
         return <span className="px-2 py-1 rounded-full text-xs bg-red-900/50 text-red-400 border border-red-700">Flagged</span>;
       default:
-        return <span className="px-2 py-1 rounded-full text-xs bg-slate-700 text-slate-400">{status}</span>;
+        return <span className="px-2 py-1 rounded-full text-xs bg-slate-700 text-mutedText">{status}</span>;
     }
   };
 
@@ -132,12 +82,14 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Transaction Flow</h1>
-          <p className="text-slate-400 mt-1">Monitor real-time transaction activity</p>
+          <h1 className="text-2xl font-bold text-text">Transaction Flow</h1>
+          <p className="text-mutedText mt-1">Monitor real-time transaction activity</p>
         </div>
         <button 
           onClick={handleRefresh}
@@ -151,36 +103,36 @@ export default function TransactionsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">Total Volume (24h)</span>
+            <span className="text-mutedText text-sm">Total Volume (24h)</span>
             <ArrowTrendingUpIcon className="w-5 h-5 text-green-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">$2.4M</p>
+          <p className="text-2xl font-bold text-text mt-2">$2.4M</p>
           <p className="text-green-400 text-sm mt-1">+12.5% from yesterday</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">Transactions</span>
+            <span className="text-mutedText text-sm">Transactions</span>
             <ArrowTrendingUpIcon className="w-5 h-5 text-green-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">1,247</p>
+          <p className="text-2xl font-bold text-text mt-2">1,247</p>
           <p className="text-green-400 text-sm mt-1">+8.3% from yesterday</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">Flagged</span>
+            <span className="text-mutedText text-sm">Flagged</span>
             <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">23</p>
+          <p className="text-2xl font-bold text-text mt-2">23</p>
           <p className="text-red-400 text-sm mt-1">+3 new alerts</p>
         </div>
-        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+        <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-sm">Avg Risk Score</span>
+            <span className="text-mutedText text-sm">Avg Risk Score</span>
             <ArrowTrendingDownIcon className="w-5 h-5 text-green-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">0.24</p>
+          <p className="text-2xl font-bold text-text mt-2">0.24</p>
           <p className="text-green-400 text-sm mt-1">-0.05 from yesterday</p>
         </div>
       </div>
@@ -188,21 +140,21 @@ export default function TransactionsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center">
         <div className="relative flex-1 max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-mutedText" />
           <input
             type="text"
             placeholder="Search by hash, from, or to address..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-surface border border-borderSubtle rounded-lg text-text placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
         <div className="flex items-center gap-2">
-          <FunnelIcon className="w-5 h-5 text-slate-400" />
+          <FunnelIcon className="w-5 h-5 text-mutedText" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+            className="bg-surface border border-borderSubtle rounded-lg px-3 py-2 text-text focus:outline-none focus:border-blue-500"
           >
             <option value="all">All Status</option>
             <option value="completed">Completed</option>
@@ -213,23 +165,23 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+      <div className="bg-surface rounded-lg border border-borderSubtle overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-700 bg-slate-900/50">
-                <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">Time</th>
-                <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">Hash</th>
-                <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">From</th>
-                <th className="text-left py-3 px-4 text-slate-400 font-medium text-sm">To</th>
-                <th className="text-right py-3 px-4 text-slate-400 font-medium text-sm">Amount</th>
-                <th className="text-center py-3 px-4 text-slate-400 font-medium text-sm">Risk</th>
-                <th className="text-center py-3 px-4 text-slate-400 font-medium text-sm">Status</th>
+              <tr className="border-b border-borderSubtle bg-background/50">
+                <th className="text-left py-3 px-4 text-mutedText font-medium text-sm">Time</th>
+                <th className="text-left py-3 px-4 text-mutedText font-medium text-sm">Hash</th>
+                <th className="text-left py-3 px-4 text-mutedText font-medium text-sm">From</th>
+                <th className="text-left py-3 px-4 text-mutedText font-medium text-sm">To</th>
+                <th className="text-right py-3 px-4 text-mutedText font-medium text-sm">Amount</th>
+                <th className="text-center py-3 px-4 text-mutedText font-medium text-sm">Risk</th>
+                <th className="text-center py-3 px-4 text-mutedText font-medium text-sm">Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredTransactions.map((tx) => (
-                <tr key={tx.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                <tr key={tx.id} className="border-b border-borderSubtle/50 hover:bg-slate-700/30 transition-colors">
                   <td className="py-3 px-4 text-slate-300 text-sm">{formatTime(tx.timestamp)}</td>
                   <td className="py-3 px-4">
                     <code className="text-blue-400 text-sm font-mono">
@@ -247,8 +199,8 @@ export default function TransactionsPage() {
                     </code>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <span className="text-white font-medium">{tx.amount}</span>
-                    <span className="text-slate-400 ml-1">{tx.token}</span>
+                    <span className="text-text font-medium">{tx.amount}</span>
+                    <span className="text-mutedText ml-1">{tx.token}</span>
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span className={`font-mono ${getRiskColor(tx.riskScore)}`}>
@@ -265,7 +217,7 @@ export default function TransactionsPage() {
         </div>
         
         {filteredTransactions.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12 text-mutedText">
             No transactions found matching your filters
           </div>
         )}

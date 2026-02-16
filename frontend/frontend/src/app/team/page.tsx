@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import AppLayout, { useProfile } from '@/components/AppLayout';
 
 function TeamContent() {
@@ -14,17 +15,21 @@ function TeamContent() {
     );
   }
 
-  const mockTeam = [
-    { id: 1, name: 'John Smith', email: 'john@company.com', role: 'Admin', status: 'Active' },
-    { id: 2, name: 'Sarah Johnson', email: 'sarah@company.com', role: 'Approver', status: 'Active' },
-    { id: 3, name: 'Mike Brown', email: 'mike@company.com', role: 'Operator', status: 'Active' },
-    { id: 4, name: 'Emily Davis', email: 'emily@company.com', role: 'Viewer', status: 'Pending' },
-  ];
+  const [team] = useState<{ name: string; email: string; role: string; status: string }[]>([]);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>('No team management API configured');
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">👥 Team Management</h1>
       <p className="text-gray-400 mb-6">Manage team members and approval workflows</p>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">
+          ⚠ Backend unavailable: {error}
+        </div>
+      )}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
 
       {/* Add Member */}
       <div className="bg-gray-800 rounded-lg p-6 mb-6">
@@ -42,8 +47,7 @@ function TeamContent() {
           />
           <select className="bg-gray-700 border border-gray-600 rounded px-4 py-2">
             <option>Viewer</option>
-            <option>Operator</option>
-            <option>Approver</option>
+            <option>Analyst</option>
             <option>Admin</option>
           </select>
           <button className="bg-blue-600 hover:bg-blue-700 rounded font-medium">
@@ -66,28 +70,24 @@ function TeamContent() {
             </tr>
           </thead>
           <tbody>
-            {mockTeam.map(member => (
-              <tr key={member.id} className="border-b border-gray-700/50">
-                <td className="p-3 font-medium">{member.name}</td>
-                <td className="p-3 text-gray-400">{member.email}</td>
-                <td className="p-3">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    member.role === 'Admin' ? 'bg-purple-700' :
-                    member.role === 'Approver' ? 'bg-blue-700' :
-                    member.role === 'Operator' ? 'bg-green-700' : 'bg-gray-700'
-                  }`}>
-                    {member.role}
-                  </span>
+            {team.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center text-gray-500 py-8">
+                  No team members found. Add a member above to get started.
                 </td>
+              </tr>
+            )}
+            {team.map((member, i) => (
+              <tr key={i} className="border-b border-gray-700">
+                <td className="p-3">{member.name}</td>
+                <td className="p-3 text-gray-400">{member.email}</td>
+                <td className="p-3">{member.role}</td>
                 <td className="p-3 text-center">
-                  <span className={member.status === 'Active' ? 'text-green-400' : 'text-yellow-400'}>
+                  <span className="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">
                     {member.status}
                   </span>
                 </td>
-                <td className="p-3 text-center">
-                  <button className="text-gray-400 hover:text-white mr-2">Edit</button>
-                  <button className="text-red-400 hover:text-red-300">Remove</button>
-                </td>
+                <td className="p-3 text-center text-gray-500">—</td>
               </tr>
             ))}
           </tbody>

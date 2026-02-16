@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP Unified Platform — Docker Compose
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Single entry point at http://localhost:8888
+#   /           → Login page (RBAC gateway)
+#   /consumer/  → Flutter Consumer App (R1-R6)
+#   /app/       → Next.js War Room (R3-R6 only)
+#   /api/       → All backend APIs (authenticated)
+#   /auth/      → Auth Gateway (public endpoints)
+#
+# Prerequisites (must already be running):
+#   - docker compose up -d          (core infra: mongo, redis, etc.)
+#   - Next.js dev:  npm run dev -p 3006   (in frontend/frontend)
+#   - Flutter web:  npx serve -s -l 3010  (in frontend/amttp_app/build/web)
+#
+# Usage:
+#   docker compose -f docker-compose.platform.yml up -d
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ─── Auth Gateway (FastAPI) ────────────────────────────────────────────
+  auth-gateway:
+    build:
+      context: ./backend/auth-gateway
+      dockerfile: Dockerfile
+    container_name: amttp-auth-gateway
+    ports:
+      - "8020:8020"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-amttp_jwt_secret_change_in_production_2026}
+      JWT_EXPIRY_HOURS: "24"
+      HMAC_SECRET: ${HMAC_SECRET:-amttp_hmac_secret_2026}
+      AUTH_GATEWAY_PORT: "8020"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8020/auth/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ─── Nginx Unified Gateway ────────────────────────────────────────────
+  gateway:
+    image: nginx:alpine
+    container_name: amttp-gateway
+    ports:
+      - "8888:80"
+    volumes:
+      - ./docker/nginx-unified-gateway.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/login-page:/var/www/login:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      auth-gateway:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: amttp-gateway-network

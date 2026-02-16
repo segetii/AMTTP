@@ -7,6 +7,7 @@
 /// - Shell provides back button overlay
 /// - Content fills the entire screen
 /// - No Flutter chrome, pure Next.js experience
+library;
 
 // ignore_for_file: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
@@ -17,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/rbac/rbac_provider.dart';
-import '../../../../shared/shells/role_based_shell.dart';
 
 class WarRoomNextJSPage extends ConsumerStatefulWidget {
   /// Optional deep link path inside Next.js (e.g., '/war-room/alerts')

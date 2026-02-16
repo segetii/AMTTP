@@ -9,6 +9,7 @@
 /// - Authentication & Security
 /// - RBAC & Permissions
 /// - Utilities & Helpers
+library;
 
 // Theme & Design System
 export 'theme/app_theme.dart';

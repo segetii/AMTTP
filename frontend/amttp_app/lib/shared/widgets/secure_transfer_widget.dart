@@ -9,14 +9,15 @@ class SecureTransferWidget extends ConsumerStatefulWidget {
   const SecureTransferWidget({super.key});
 
   @override
-  ConsumerState<SecureTransferWidget> createState() => _SecureTransferWidgetState();
+  ConsumerState<SecureTransferWidget> createState() =>
+      _SecureTransferWidgetState();
 }
 
 class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   final _formKey = GlobalKey<FormState>();
   final _recipientController = TextEditingController();
   final _amountController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _isCheckingRecipient = false;
   bool _isLoadingExplanation = false;
@@ -39,7 +40,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletProvider);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.padding),
@@ -49,130 +50,141 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              // Header
-              Row(
-                children: [
-                  const Icon(
-                    Icons.security,
-                    color: AppTheme.primaryBlue,
-                    size: AppConstants.iconSize,
+                // Header
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.security,
+                      color: AppTheme.primaryBlue,
+                      size: AppConstants.iconSize,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Secure Transfer',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Recipient Address Input
+                TextFormField(
+                  controller: _recipientController,
+                  decoration: const InputDecoration(
+                    labelText: 'Recipient Address',
+                    hintText: '0x...',
+                    prefixIcon: Icon(Icons.person),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Secure Transfer',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter recipient address';
+                    }
+                    if (!RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(value)) {
+                      return 'Invalid Ethereum address';
+                    }
+                    return null;
+                  },
+                  onChanged: (_) => _resetRiskAnalysis(),
+                ),
+                const SizedBox(height: 16),
+
+                // Amount Input
+                TextFormField(
+                  controller: _amountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount (ETH)',
+                    hintText: '0.0',
+                    prefixIcon: Icon(Icons.monetization_on),
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter amount';
+                    }
+                    final amount = double.tryParse(value);
+                    if (amount == null || amount <= 0) {
+                      return 'Please enter valid amount';
+                    }
+                    return null;
+                  },
+                  onChanged: (_) => _resetRiskAnalysis(),
+                ),
+                const SizedBox(height: 16),
+
+                // Balance Display
+                if (walletState.balance != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.slate800
+                          : AppTheme.backgroundGrey,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.slate700
+                            : AppTheme.gray200,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Available Balance:',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        Text(
+                          '${_formatTokenAmount(walletState.balance!)} ETH',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 16),
+
+                // Risk Analysis Button
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _analyzeRisk,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.analytics),
+                  label: Text(_isLoading ? 'Analyzing...' : 'Analyze Risk'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryPurple,
+                    foregroundColor: AppTheme.cleanWhite,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                ),
+
+                // Risk Analysis Results
+                if (_showRiskAnalysis && _riskScore != null) ...[
+                  const SizedBox(height: 16),
+                  _buildRiskAnalysisCard(),
+                ],
+
+                // Transfer Button
+                if (_showRiskAnalysis && _riskScore != null) ...[
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed:
+                        _canProceedWithTransfer() ? _executeTransfer : null,
+                    icon: Icon(
+                        _canProceedWithTransfer() ? Icons.send : Icons.block),
+                    label: Text(_getTransferButtonText()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _getTransferButtonColor(),
+                      foregroundColor: AppTheme.cleanWhite,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 16),
-
-              // Recipient Address Input
-              TextFormField(
-                controller: _recipientController,
-                decoration: const InputDecoration(
-                  labelText: 'Recipient Address',
-                  hintText: '0x...',
-                  prefixIcon: Icon(Icons.person),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter recipient address';
-                  }
-                  if (!RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(value)) {
-                    return 'Invalid Ethereum address';
-                  }
-                  return null;
-                },
-                onChanged: (_) => _resetRiskAnalysis(),
-              ),
-              const SizedBox(height: 16),
-
-              // Amount Input
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Amount (ETH)',
-                  hintText: '0.0',
-                  prefixIcon: Icon(Icons.monetization_on),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter amount';
-                  }
-                  final amount = double.tryParse(value);
-                  if (amount == null || amount <= 0) {
-                    return 'Please enter valid amount';
-                  }
-                  return null;
-                },
-                onChanged: (_) => _resetRiskAnalysis(),
-              ),
-              const SizedBox(height: 16),
-
-              // Balance Display
-              if (walletState.balance != null)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.backgroundGrey,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Available Balance:',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '${_formatTokenAmount(walletState.balance!)} ETH',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 16),
-
-              // Risk Analysis Button
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _analyzeRisk,
-                icon: _isLoading 
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.analytics),
-                label: Text(_isLoading ? 'Analyzing...' : 'Analyze Risk'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryPurple,
-                  foregroundColor: AppTheme.cleanWhite,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                ),
-              ),
-
-              // Risk Analysis Results
-              if (_showRiskAnalysis && _riskScore != null) ...[
-                const SizedBox(height: 16),
-                _buildRiskAnalysisCard(),
               ],
-
-              // Transfer Button
-              if (_showRiskAnalysis && _riskScore != null) ...[
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _canProceedWithTransfer() ? _executeTransfer : null,
-                  icon: Icon(_canProceedWithTransfer() ? Icons.send : Icons.block),
-                  label: Text(_getTransferButtonText()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _getTransferButtonColor(),
-                    foregroundColor: AppTheme.cleanWhite,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ],
-            ],
             ),
           ),
         ),
@@ -183,7 +195,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   Widget _buildRiskAnalysisCard() {
     final riskColor = AppTheme.getRiskColor(_riskScore!.riskScore);
     final riskLabel = AppTheme.getRiskLabel(_riskScore!.riskScore);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -204,7 +216,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: riskColor.withOpacity(0.1),
+                  color: riskColor.withAlpha(26),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -218,7 +230,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             ],
           ),
           const SizedBox(height: 8),
-          
+
           // Risk Score Bar
           Row(
             children: [
@@ -244,14 +256,15 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.dangerRed.withOpacity(0.1),
+                color: AppTheme.dangerRed.withAlpha(26),
                 border: Border.all(color: AppTheme.dangerRed),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning, color: AppTheme.dangerRed, size: 18),
+                  const Icon(Icons.warning,
+                      color: AppTheme.dangerRed, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -290,9 +303,10 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                       children: [
                         Text(
                           'Recipient Reputation: ${_recipientReputation!.tier}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         Text(
                           'Score: ${_recipientReputation!.score}/100 • ${_recipientReputation!.totalTransactions} transactions',
@@ -312,8 +326,9 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _getPolicyColor(_policyResult!.action).withOpacity(0.1),
-                border: Border.all(color: _getPolicyColor(_policyResult!.action)),
+                color: _getPolicyColor(_policyResult!.action).withAlpha(26),
+                border:
+                    Border.all(color: _getPolicyColor(_policyResult!.action)),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -342,9 +357,10 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                         if (_policyResult!.triggeredPolicies.isNotEmpty)
                           Text(
                             'Policies: ${_policyResult!.triggeredPolicies.join(", ")}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontStyle: FontStyle.italic,
+                                    ),
                           ),
                       ],
                     ),
@@ -354,7 +370,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // DQN Model Info
           Container(
             padding: const EdgeInsets.all(8),
@@ -368,8 +384,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                 Text(
                   'DQN Analysis (F1: ${AppConstants.dqnF1Score})',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   'Model: ${_riskScore!.modelVersion}',
@@ -382,21 +398,24 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
               ],
             ),
           ),
-          
+
           // Explain Risk Button
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _isLoadingExplanation ? null : _showExplainabilityModal,
-              icon: _isLoadingExplanation 
+              onPressed:
+                  _isLoadingExplanation ? null : _showExplainabilityModal,
+              icon: _isLoadingExplanation
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.lightbulb_outline),
-              label: Text(_isLoadingExplanation ? 'Loading...' : 'Explain Risk Decision'),
+              label: Text(_isLoadingExplanation
+                  ? 'Loading...'
+                  : 'Explain Risk Decision'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primaryBlue,
                 side: const BorderSide(color: AppTheme.primaryBlue),
@@ -404,7 +423,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
               ),
             ),
           ),
-          
+
           // Transaction Outcome
           const SizedBox(height: 8),
           _buildTransactionOutcome(),
@@ -445,7 +464,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(26),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -514,9 +533,10 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       // Build graph context
       final graphContext = {
         'hops_to_sanctioned': _recipientLabels?.isSanctioned == true ? 1 : 99,
-        'mixer_interaction': _recipientLabels?.labels.any((l) => 
-            l.toLowerCase().contains('mixer') || 
-            l.toLowerCase().contains('tornado')) ?? false,
+        'mixer_interaction': _recipientLabels?.labels.any((l) =>
+                l.toLowerCase().contains('mixer') ||
+                l.toLowerCase().contains('tornado')) ??
+            false,
         'in_degree': 5, // Simulated
         'out_degree': 8, // Simulated
         'pagerank': 0.001, // Simulated
@@ -533,7 +553,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       };
 
       // Generate a pseudo transaction hash for the explanation
-      final txHash = '0x${DateTime.now().millisecondsSinceEpoch.toRadixString(16).padLeft(64, '0')}';
+      final txHash =
+          '0x${DateTime.now().millisecondsSinceEpoch.toRadixString(16).padLeft(64, '0')}';
 
       final explanation = await _apiService.getExplanation(
         transactionHash: txHash,
@@ -613,14 +634,16 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Risk Level Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getRiskColor(explanation.riskLevel).withOpacity(0.2),
+                  color: _getRiskColor(explanation.riskLevel).withAlpha(51),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _getRiskColor(explanation.riskLevel)),
+                  border:
+                      Border.all(color: _getRiskColor(explanation.riskLevel)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -656,7 +679,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                         decoration: BoxDecoration(
                           color: AppTheme.darkBg,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.mutedText.withOpacity(0.3)),
+                          border: Border.all(
+                              color: AppTheme.mutedText.withAlpha(77)),
                         ),
                         child: Text(
                           explanation.narrative,
@@ -680,7 +704,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...explanation.patterns.map((pattern) => _buildPatternCard(pattern)),
+                        ...explanation.patterns
+                            .map((pattern) => _buildPatternCard(pattern)),
                         const SizedBox(height: 16),
                       ],
 
@@ -695,7 +720,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...explanation.factors.map((factor) => _buildFactorCard(factor)),
+                        ...explanation.factors
+                            .map((factor) => _buildFactorCard(factor)),
                         const SizedBox(height: 16),
                       ],
 
@@ -713,23 +739,29 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: explanation.typologies.map((typology) => 
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryPurple.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.5)),
-                              ),
-                              child: Text(
-                                typology,
-                                style: const TextStyle(
-                                  color: AppTheme.primaryPurple,
-                                  fontSize: 12,
+                          children: explanation.typologies
+                              .map(
+                                (typology) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        AppTheme.primaryPurple.withAlpha(51),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: AppTheme.primaryPurple
+                                            .withAlpha(128)),
+                                  ),
+                                  child: Text(
+                                    typology,
+                                    style: const TextStyle(
+                                      color: AppTheme.primaryPurple,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ).toList(),
+                              )
+                              .toList(),
                         ),
                         const SizedBox(height: 16),
                       ],
@@ -743,7 +775,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline, color: AppTheme.mutedText, size: 14),
+                            const Icon(Icons.info_outline,
+                                color: AppTheme.mutedText, size: 14),
                             const SizedBox(width: 8),
                             Text(
                               'Model: ${explanation.modelVersion} • Generated: ${explanation.generatedAt.toString().substring(0, 19)}',
@@ -771,9 +804,9 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: pattern.severityColor.withOpacity(0.1),
+        color: pattern.severityColor.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: pattern.severityColor.withOpacity(0.5)),
+        border: Border.all(color: pattern.severityColor.withAlpha(128)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -787,7 +820,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
             child: Text(
               pattern.severity.toUpperCase(),
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -837,7 +870,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       decoration: BoxDecoration(
         color: AppTheme.darkBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.mutedText.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.mutedText.withAlpha(77)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,8 +899,9 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
           const SizedBox(height: 4),
           LinearProgressIndicator(
             value: factor.impact,
-            backgroundColor: AppTheme.mutedText.withOpacity(0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(_getImpactColor(factor.impact)),
+            backgroundColor: AppTheme.mutedText.withAlpha(51),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(_getImpactColor(factor.impact)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -927,11 +961,11 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       // Fetch labels and reputation individually to avoid type issues
       AddressLabels? labels;
       ReputationResponse? reputation;
-      
+
       try {
         labels = await _apiService.getAddressLabels(recipientAddress);
       } catch (_) {}
-      
+
       try {
         reputation = await _apiService.getReputation(recipientAddress);
       } catch (_) {}
@@ -940,8 +974,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       if (labels != null) {
         if (labels.isSanctioned) {
           warning = '⚠️ SANCTIONED ADDRESS - Transfer blocked';
-        } else if (labels.labels.any((l) => 
-            l.toLowerCase().contains('mixer') || 
+        } else if (labels.labels.any((l) =>
+            l.toLowerCase().contains('mixer') ||
             l.toLowerCase().contains('tornado') ||
             l.toLowerCase().contains('high risk'))) {
           warning = '⚠️ High-risk address detected';
@@ -949,8 +983,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       }
 
       if (reputation != null && reputation.score < 30) {
-        warning = (warning ?? '') + (warning != null ? '\n' : '') +
-            '⚠️ Low reputation score: ${reputation.score}/100 (${reputation.tier})';
+        warning = '${warning ?? ''}${warning != null ? '\n' : ''}⚠️ Low reputation score: ${reputation.score}/100 (${reputation.tier})';
       }
 
       setState(() {
@@ -985,7 +1018,8 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       final amount = double.parse(_amountController.text);
       final recipientAddress = _recipientController.text.trim();
 
-      print('[ANALYZE] Starting risk analysis for $recipientAddress, amount: $amount');
+      print(
+          '[ANALYZE] Starting risk analysis for $recipientAddress, amount: $amount');
 
       // Get risk score first (required)
       RiskScoreResponse? riskScore;
@@ -1006,7 +1040,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       PolicyEvaluationResult? policyResult;
       AddressLabels? labels;
       ReputationResponse? reputation;
-      
+
       // Fetch optional data with individual try-catch
       try {
         policyResult = await _apiService.evaluatePolicy(
@@ -1018,13 +1052,13 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       } catch (e) {
         print('[ANALYZE] Policy error: $e');
       }
-      
+
       try {
         labels = await _apiService.getAddressLabels(recipientAddress);
       } catch (e) {
         print('[ANALYZE] Labels error: $e');
       }
-      
+
       try {
         reputation = await _apiService.getReputation(recipientAddress);
       } catch (e) {
@@ -1038,15 +1072,15 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
       String? warning;
       if (labels != null && labels.isSanctioned) {
         warning = '🚫 SANCTIONED ADDRESS - Transfer blocked by compliance';
-      } else if (labels != null && labels.labels.any((l) => 
-          l.toLowerCase().contains('mixer') || 
-          l.toLowerCase().contains('tornado'))) {
+      } else if (labels != null &&
+          labels.labels.any((l) =>
+              l.toLowerCase().contains('mixer') ||
+              l.toLowerCase().contains('tornado'))) {
         warning = '⚠️ Recipient linked to privacy mixers';
       }
 
       if (reputation != null && reputation.score < 30) {
-        warning = (warning ?? '') + (warning != null ? '\n' : '') +
-            '⚠️ Low reputation: ${reputation.tier} (${reputation.score}/100)';
+        warning = '${warning ?? ''}${warning != null ? '\n' : ''}⚠️ Low reputation: ${reputation.tier} (${reputation.score}/100)';
       }
 
       setState(() {
@@ -1071,7 +1105,7 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   Future<Map<String, dynamic>> _generateTransactionFeatures() async {
     // Incorporate real recipient reputation if available
     final recipientRep = _recipientReputation?.score ?? 80;
-    
+
     return {
       'transaction_amount': double.parse(_amountController.text),
       'user_frequency': 5.0, // Simulated
@@ -1093,16 +1127,16 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
 
   bool _canProceedWithTransfer() {
     if (_riskScore == null) return false;
-    
+
     // Block if sanctioned
     if (_recipientLabels?.isSanctioned ?? false) return false;
-    
+
     // Block if policy rejects
     if (_policyResult?.action == 'reject') return false;
-    
+
     // Block if high risk
     if (_riskScore!.riskScore >= AppConstants.highRiskThreshold) return false;
-    
+
     return true;
   }
 
@@ -1110,10 +1144,12 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
     if (_riskScore == null) return AppTheme.primaryBlue;
     if (_recipientLabels?.isSanctioned ?? false) return AppTheme.dangerRed;
     if (_policyResult?.action == 'reject') return AppTheme.dangerRed;
-    
+
     final riskScore = _riskScore!.riskScore;
     if (riskScore < AppConstants.lowRiskThreshold) return AppTheme.accentGreen;
-    if (riskScore < AppConstants.mediumRiskThreshold) return AppTheme.warningOrange;
+    if (riskScore < AppConstants.mediumRiskThreshold) {
+      return AppTheme.warningOrange;
+    }
     return AppTheme.dangerRed;
   }
 
@@ -1127,48 +1163,68 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
   // Helper methods for reputation display
   IconData _getReputationIcon(String tier) {
     switch (tier.toLowerCase()) {
-      case 'diamond': return Icons.diamond;
-      case 'platinum': return Icons.stars;
-      case 'gold': return Icons.workspace_premium;
-      case 'silver': return Icons.military_tech;
-      default: return Icons.shield;
+      case 'diamond':
+        return Icons.diamond;
+      case 'platinum':
+        return Icons.stars;
+      case 'gold':
+        return Icons.workspace_premium;
+      case 'silver':
+        return Icons.military_tech;
+      default:
+        return Icons.shield;
     }
   }
 
   Color _getReputationColor(String tier) {
     switch (tier.toLowerCase()) {
-      case 'diamond': return const Color(0xFF00BCD4);
-      case 'platinum': return const Color(0xFF9C27B0);
-      case 'gold': return const Color(0xFFFFD700);
-      case 'silver': return const Color(0xFFC0C0C0);
-      default: return const Color(0xFFCD7F32);
+      case 'diamond':
+        return const Color(0xFF00BCD4);
+      case 'platinum':
+        return const Color(0xFF9C27B0);
+      case 'gold':
+        return const Color(0xFFFFD700);
+      case 'silver':
+        return const Color(0xFFC0C0C0);
+      default:
+        return const Color(0xFFCD7F32);
     }
   }
 
   // Helper methods for policy display
   IconData _getPolicyIcon(String action) {
     switch (action.toLowerCase()) {
-      case 'approve': return Icons.check_circle;
-      case 'monitor': return Icons.visibility;
-      case 'escrow': return Icons.pause_circle;
-      case 'reject': return Icons.block;
-      default: return Icons.help;
+      case 'approve':
+        return Icons.check_circle;
+      case 'monitor':
+        return Icons.visibility;
+      case 'escrow':
+        return Icons.pause_circle;
+      case 'reject':
+        return Icons.block;
+      default:
+        return Icons.help;
     }
   }
 
   Color _getPolicyColor(String action) {
     switch (action.toLowerCase()) {
-      case 'approve': return AppTheme.accentGreen;
-      case 'monitor': return AppTheme.warningOrange;
-      case 'escrow': return const Color(0xFFFFA000);
-      case 'reject': return AppTheme.dangerRed;
-      default: return Colors.grey;
+      case 'approve':
+        return AppTheme.accentGreen;
+      case 'monitor':
+        return AppTheme.warningOrange;
+      case 'escrow':
+        return const Color(0xFFFFA000);
+      case 'reject':
+        return AppTheme.dangerRed;
+      default:
+        return Colors.grey;
     }
   }
 
   Future<void> _executeTransfer() async {
     final walletState = ref.read(walletProvider);
-    
+
     if (!walletState.isConnected) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1197,17 +1253,17 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
     try {
       // Execute the actual transfer via MetaMask
       final txHash = await ref.read(walletProvider.notifier).sendTransaction(
-        to: _recipientController.text,
-        amount: double.parse(_amountController.text),
-      );
-      
+            to: _recipientController.text,
+            amount: double.parse(_amountController.text),
+          );
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_policyResult?.action == 'escrow' 
+              Text(_policyResult?.action == 'escrow'
                   ? 'Transaction sent to escrow!'
                   : 'Transfer successful!'),
               Text(
@@ -1216,13 +1272,13 @@ class _SecureTransferWidgetState extends ConsumerState<SecureTransferWidget> {
               ),
             ],
           ),
-          backgroundColor: _policyResult?.action == 'escrow' 
-              ? AppTheme.warningOrange 
+          backgroundColor: _policyResult?.action == 'escrow'
+              ? AppTheme.warningOrange
               : AppTheme.accentGreen,
           duration: const Duration(seconds: 5),
         ),
       );
-      
+
       // Clear form
       _recipientController.clear();
       _amountController.clear();

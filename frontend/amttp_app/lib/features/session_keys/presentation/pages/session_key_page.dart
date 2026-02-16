@@ -192,7 +192,7 @@ class _RegisterAccountTabState extends ConsumerState<_RegisterAccountTab> {
                     onChanged: (v) => setState(() => _enableGasless = v),
                     title: const Text('Enable Gasless Transactions', style: TextStyle(color: AppTheme.cleanWhite)),
                     subtitle: const Text('Use Paymaster for gas sponsorship', style: TextStyle(color: AppTheme.mutedText, fontSize: 12)),
-                    activeColor: AppTheme.primaryBlue,
+                    activeThumbColor: AppTheme.primaryBlue,
                     contentPadding: EdgeInsets.zero,
                   ),
                   SwitchListTile(
@@ -200,7 +200,7 @@ class _RegisterAccountTabState extends ConsumerState<_RegisterAccountTab> {
                     onChanged: (v) => setState(() => _enableSessionKeys = v),
                     title: const Text('Enable Session Keys', style: TextStyle(color: AppTheme.cleanWhite)),
                     subtitle: const Text('Allow creating temporary keys for dApps', style: TextStyle(color: AppTheme.mutedText, fontSize: 12)),
-                    activeColor: AppTheme.primaryBlue,
+                    activeThumbColor: AppTheme.primaryBlue,
                     contentPadding: EdgeInsets.zero,
                   ),
                   const SizedBox(height: 24),

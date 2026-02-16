@@ -15,61 +15,10 @@ interface UISnapshot {
   thumbnailUrl?: string;
 }
 
-const mockSnapshots: UISnapshot[] = [
-  {
-    id: '1',
-    name: 'High-Risk Transaction Approval',
-    description: 'Screenshot of approval flow for transaction #TX-2841',
-    page: '/war-room/pending-approvals',
-    capturedBy: 'compliance@exchange.com',
-    timestamp: '2026-01-31 14:32:15',
-    type: 'audit',
-    tags: ['approval', 'high-risk', 'tx-2841'],
-  },
-  {
-    id: '2',
-    name: 'Account Freeze Action',
-    description: 'UI state during freeze of account 0xSuspect...1234',
-    page: '/war-room/enforcement',
-    capturedBy: 'legal@exchange.com',
-    timestamp: '2026-01-31 10:15:00',
-    type: 'audit',
-    tags: ['freeze', 'enforcement', 'fraud'],
-  },
-  {
-    id: '3',
-    name: 'Daily Dashboard State',
-    description: 'Automated daily snapshot of War Room dashboard',
-    page: '/war-room',
-    capturedBy: 'system',
-    timestamp: '2026-01-31 00:00:00',
-    type: 'automated',
-    tags: ['dashboard', 'daily'],
-  },
-  {
-    id: '4',
-    name: 'Policy Engine Config',
-    description: 'Current state of all active policies',
-    page: '/war-room/policy-engine',
-    capturedBy: 'admin@exchange.com',
-    timestamp: '2026-01-30 16:00:00',
-    type: 'manual',
-    tags: ['policies', 'config'],
-  },
-  {
-    id: '5',
-    name: 'Dispute Resolution Flow',
-    description: 'Screenshot of dispute #D-1892 resolution',
-    page: '/disputes/D-1892',
-    capturedBy: 'compliance@exchange.com',
-    timestamp: '2026-01-29 11:30:00',
-    type: 'audit',
-    tags: ['dispute', 'resolution'],
-  },
-];
-
 export default function UISnapshotsPage() {
-  const [snapshots, setSnapshots] = useState(mockSnapshots);
+  const [snapshots, setSnapshots] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>('No snapshots API endpoint configured');
   const [filter, setFilter] = useState<'all' | 'manual' | 'automated' | 'audit'>('all');
   const [selectedSnapshot, setSelectedSnapshot] = useState<UISnapshot | null>(null);
 
@@ -82,7 +31,7 @@ export default function UISnapshotsPage() {
       case 'audit': return 'bg-purple-500/20 text-purple-400';
       case 'automated': return 'bg-blue-500/20 text-blue-400';
       case 'manual': return 'bg-green-500/20 text-green-400';
-      default: return 'bg-slate-500/20 text-slate-400';
+      default: return 'bg-slate-500/20 text-mutedText';
     }
   };
 
@@ -101,17 +50,19 @@ export default function UISnapshotsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
+      {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Link href="/war-room" className="text-slate-400 hover:text-white">
+            <Link href="/war-room" className="text-mutedText hover:text-text">
               ← War Room
             </Link>
           </div>
           <h1 className="text-3xl font-bold">UI Snapshots</h1>
-          <p className="text-slate-400 mt-1">Audit trail of UI states and actions for compliance</p>
+          <p className="text-mutedText mt-1">Audit trail of UI states and actions for compliance</p>
         </div>
         <button 
           onClick={captureSnapshot}
@@ -123,21 +74,21 @@ export default function UISnapshotsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold">{snapshots.length}</div>
-          <div className="text-slate-400 text-sm">Total Snapshots</div>
+          <div className="text-mutedText text-sm">Total Snapshots</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-purple-400">{snapshots.filter(s => s.type === 'audit').length}</div>
-          <div className="text-slate-400 text-sm">Audit Captures</div>
+          <div className="text-mutedText text-sm">Audit Captures</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-blue-400">{snapshots.filter(s => s.type === 'automated').length}</div>
-          <div className="text-slate-400 text-sm">Automated</div>
+          <div className="text-mutedText text-sm">Automated</div>
         </div>
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-green-400">{snapshots.filter(s => s.type === 'manual').length}</div>
-          <div className="text-slate-400 text-sm">Manual</div>
+          <div className="text-mutedText text-sm">Manual</div>
         </div>
       </div>
 
@@ -149,8 +100,8 @@ export default function UISnapshotsPage() {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-lg capitalize transition-colors ${
               filter === f 
-                ? 'bg-indigo-600 text-white' 
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                ? 'bg-indigo-600 text-text' 
+                : 'bg-surface text-mutedText hover:bg-slate-700'
             }`}
           >
             {f}
@@ -163,7 +114,7 @@ export default function UISnapshotsPage() {
         {filteredSnapshots.map(snapshot => (
           <div 
             key={snapshot.id} 
-            className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hover:border-slate-600 cursor-pointer transition-colors"
+            className="bg-surface rounded-xl border border-borderSubtle overflow-hidden hover:border-borderSubtle cursor-pointer transition-colors"
             onClick={() => setSelectedSnapshot(snapshot)}
           >
             {/* Thumbnail placeholder */}
@@ -178,17 +129,17 @@ export default function UISnapshotsPage() {
                 </span>
               </div>
               <h3 className="font-semibold mb-1">{snapshot.name}</h3>
-              <p className="text-sm text-slate-400 mb-3 line-clamp-2">{snapshot.description}</p>
+              <p className="text-sm text-mutedText mb-3 line-clamp-2">{snapshot.description}</p>
               
               <div className="flex flex-wrap gap-1 mb-3">
                 {snapshot.tags.map(tag => (
-                  <span key={tag} className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-400">
+                  <span key={tag} className="px-2 py-0.5 bg-slate-700 rounded text-xs text-mutedText">
                     {tag}
                   </span>
                 ))}
               </div>
               
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-mutedText">
                 <span>{snapshot.capturedBy}</span>
                 <span>{snapshot.timestamp}</span>
               </div>
@@ -200,7 +151,7 @@ export default function UISnapshotsPage() {
       {/* Detail Modal */}
       {selectedSnapshot && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedSnapshot(null)}>
-          <div className="bg-slate-800 rounded-xl max-w-4xl w-full mx-4 border border-slate-700 overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-surface rounded-xl max-w-4xl w-full mx-4 border border-borderSubtle overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Large preview */}
             <div className="h-96 bg-slate-700 flex items-center justify-center">
               <div className="text-6xl opacity-50">🖼️</div>
@@ -215,21 +166,21 @@ export default function UISnapshotsPage() {
                       {selectedSnapshot.type}
                     </span>
                   </div>
-                  <p className="text-slate-400">{selectedSnapshot.description}</p>
+                  <p className="text-mutedText">{selectedSnapshot.description}</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
                 <div>
-                  <div className="text-slate-500">Page</div>
+                  <div className="text-mutedText">Page</div>
                   <div className="font-mono">{selectedSnapshot.page}</div>
                 </div>
                 <div>
-                  <div className="text-slate-500">Captured By</div>
+                  <div className="text-mutedText">Captured By</div>
                   <div>{selectedSnapshot.capturedBy}</div>
                 </div>
                 <div>
-                  <div className="text-slate-500">Timestamp</div>
+                  <div className="text-mutedText">Timestamp</div>
                   <div>{selectedSnapshot.timestamp}</div>
                 </div>
               </div>

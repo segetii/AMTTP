@@ -2,6 +2,7 @@
 /// 
 /// Provides a type-safe way to handle operations that can fail
 /// without using exceptions for control flow.
+library;
 
 sealed class Result<T> {
   const Result();

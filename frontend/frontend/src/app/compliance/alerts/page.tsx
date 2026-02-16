@@ -169,6 +169,15 @@ export default function AlertsPage() {
       }
     } catch (err) {
       console.error('Failed to update alert:', err);
+      // Optimistically apply the action locally when backend is offline
+      setAlerts(prev => prev.map(a => 
+        a.id === alertId 
+          ? { ...a, status: action === 'escalate' ? 'escalated' : action === 'dismiss' ? 'dismissed' : 'reviewed' }
+          : a
+      ));
+      setSelectedAlert(null);
+      setExplanation(null);
+      setShowExplanation(false);
     }
   };
 
@@ -389,8 +398,8 @@ export default function AlertsPage() {
 
       {/* Error State */}
       {error && (
-        <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-yellow-400">
-          ⚠️ {error} (Showing demo data)
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
+          ⚠️ {error} (Backend error surfaced. No demo data.)
         </div>
       )}
 

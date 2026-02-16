@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import AppLayout, { useProfile } from '@/components/AppLayout';
 import SecurePaymentFlow from '@/components/SecurePayment';
 
@@ -54,9 +55,9 @@ function TransferContent() {
       <div className="bg-red-900/50 rounded-lg p-8 text-center">
         <h2 className="text-xl font-semibold mb-2">🚫 Transfers Disabled</h2>
         <p className="text-gray-300">UNVERIFIED accounts cannot make transfers. Please complete KYC verification.</p>
-        <a href="/settings" className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+        <Link href="/settings" className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
           Complete KYC →
-        </a>
+        </Link>
       </div>
     );
   }

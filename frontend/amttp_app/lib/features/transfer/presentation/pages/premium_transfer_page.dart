@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,9 +37,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   SwapRiskResult? _riskResult;
 
   final List<Map<String, dynamic>> _tokens = [
-    {'symbol': 'ETH', 'name': 'Ethereum', 'balance': '3.245', 'usd': '10,234.56', 'icon': '◆', 'color': Color(0xFF627EEA)},
-    {'symbol': 'USDC', 'name': 'USD Coin', 'balance': '1,847.00', 'usd': '1,847.00', 'icon': '◎', 'color': Color(0xFF2775CA)},
-    {'symbol': 'USDT', 'name': 'Tether', 'balance': '765.32', 'usd': '765.07', 'icon': '₮', 'color': Color(0xFF26A17B)},
+    {'symbol': 'ETH', 'name': 'Ethereum', 'balance': '3.245', 'usd': '10,234.56', 'icon': '◆', 'color': AppTheme.brandETH},
+    {'symbol': 'USDC', 'name': 'USD Coin', 'balance': '1,847.00', 'usd': '1,847.00', 'icon': '◎', 'color': AppTheme.brandUSDC},
+    {'symbol': 'USDT', 'name': 'Tether', 'balance': '765.32', 'usd': '765.07', 'icon': '₮', 'color': AppTheme.brandUSDT},
   ];
 
   final List<Map<String, String>> _recentRecipients = [
@@ -154,11 +154,11 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2D2D44)),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
               ),
-              child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.arrow_back_rounded, color: AppTheme.tokenText, size: 20),
             ),
           ),
           const Expanded(
@@ -166,7 +166,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               'Send',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -176,11 +176,11 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: AppTheme.tokenCardElevated,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF2D2D44)),
+              border: Border.all(color: AppTheme.tokenBorderStrong),
             ),
-            child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 20),
+            child: const Icon(Icons.more_horiz_rounded, color: AppTheme.tokenText, size: 20),
           ),
         ],
       ),
@@ -196,7 +196,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Text(
           'Select Asset',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withAlpha(153),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -207,9 +207,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF12121A),
+              color: AppTheme.tokenSurface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF1E1E2E)),
+              border: Border.all(color: AppTheme.tokenBorderSubtle),
             ),
             child: Row(
               children: [
@@ -217,7 +217,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: (token['color'] as Color).withOpacity(0.15),
+                    color: (token['color'] as Color).withAlpha(38),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -239,7 +239,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       Text(
                         '${token['name']} (${token['symbol']})',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -248,14 +248,14 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       Text(
                         'Balance: ${token['balance']} ${token['symbol']} (\$${token['usd']})',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withAlpha(128),
                           fontSize: 13,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 24),
+                const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.slate500, size: 24),
               ],
             ),
           ),
@@ -270,7 +270,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -281,7 +281,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -290,7 +290,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               child: Text(
                 'Select Token',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -305,7 +305,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: (token['color'] as Color).withOpacity(0.15),
+                  color: (token['color'] as Color).withAlpha(38),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -320,14 +320,14 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               ),
               title: Text(
                 token['name'] as String,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(color: AppTheme.tokenText, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
                 '${token['balance']} ${token['symbol']}',
-                style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                style: TextStyle(color: Colors.white.withAlpha(128)),
               ),
               trailing: _selectedToken == token['symbol']
-                  ? const Icon(Icons.check_circle, color: Color(0xFF22C55E))
+                  ? const Icon(Icons.check_circle, color: AppTheme.tokenSuccess)
                   : null,
             )),
             const SizedBox(height: 20),
@@ -344,7 +344,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Text(
           'Recipient',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withAlpha(153),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -353,21 +353,21 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E1E2E)),
+            border: Border.all(color: AppTheme.tokenBorderSubtle),
           ),
           child: Row(
             children: [
-              const Icon(Icons.person_outline_rounded, color: Color(0xFF64748B), size: 22),
+              Icon(Icons.person_outline_rounded, color: AppTheme.slate500, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
                   controller: _recipientController,
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  style: const TextStyle(color: AppTheme.tokenText, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Enter address or ENS name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -383,13 +383,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                    color: AppTheme.tokenBorderSubtle,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Paste',
                     style: TextStyle(
-                      color: Color(0xFF6366F1),
+                      color: AppTheme.tokenPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -403,10 +403,10 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                    color: AppTheme.tokenBorderSubtle,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF64748B), size: 20),
+                  child: Icon(Icons.qr_code_scanner_rounded, color: AppTheme.slate500, size: 20),
                 ),
               ),
             ],
@@ -418,12 +418,12 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Icon(Icons.shield_rounded, size: 16, color: Colors.white.withOpacity(0.7)),
+              Icon(Icons.shield_rounded, size: 16, color: Colors.white.withAlpha(179)),
               const SizedBox(width: 6),
               Text(
                 'Check trust',
                 style: TextStyle(
-                  color: const Color(0xFF6366F1),
+                  color: AppTheme.tokenPrimary,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -442,7 +442,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Text(
           'Recent',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -467,7 +467,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                         height: 48,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                            colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
                           ),
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -475,7 +475,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                           child: Text(
                             r['initials']!,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.tokenText,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -486,7 +486,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       Text(
                         r['name']!,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.tokenText,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -495,7 +495,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       Text(
                         r['address']!,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withAlpha(102),
                           fontSize: 10,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -506,7 +506,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               )),
               GestureDetector(
                 onTap: () => _showAddContactSheet(context),
-                child: Container(
+                child: SizedBox(
                   width: 72,
                   child: Column(
                     children: [
@@ -514,17 +514,17 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E1E2E),
+                          color: AppTheme.tokenBorderSubtle,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFF2D2D44)),
+                          border: Border.all(color: AppTheme.tokenBorderStrong),
                         ),
-                        child: const Icon(Icons.add_rounded, color: Color(0xFF64748B), size: 24),
+                        child: const Icon(Icons.add_rounded, color: AppTheme.slate500, size: 24),
                       ),
                       const SizedBox(height: 8),
                       const Text(
                         'Add',
                         style: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: AppTheme.slate500,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -549,7 +549,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Text(
           'Amount',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withAlpha(153),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -558,9 +558,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E1E2E)),
+            border: Border.all(color: AppTheme.tokenBorderSubtle),
           ),
           child: Column(
             children: [
@@ -574,13 +574,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.tokenText,
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.2)),
+                        hintStyle: TextStyle(color: Colors.white.withAlpha(51)),
                         border: InputBorder.none,
                       ),
                     ),
@@ -590,7 +590,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               Text(
                 _selectedToken,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withAlpha(128),
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -599,7 +599,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               Text(
                 '≈ \$${_calculateUsdValue()}',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withAlpha(102),
                   fontSize: 14,
                 ),
               ),
@@ -612,13 +612,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E2E),
+                        color: AppTheme.tokenBorderSubtle,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         pct,
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: AppTheme.slate400,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -636,7 +636,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
 
   String _calculateUsdValue() {
     final amount = double.tryParse(_amountController.text) ?? 0;
-    if (_selectedToken == 'ETH') return (amount * 3154.56).toStringAsFixed(2);
+    if (_selectedToken == 'ETH') return (amount * AppTheme.ethUsdPrice).toStringAsFixed(2);
     return amount.toStringAsFixed(2);
   }
 
@@ -672,19 +672,19 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Row(
         children: const [
           SizedBox(
             width: 26,
             height: 26,
-            child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation(Color(0xFF6366F1))),
+            child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation(AppTheme.tokenPrimary)),
           ),
           SizedBox(width: 12),
-          Text('Running trust checks...', style: TextStyle(color: Colors.white)),
+          Text('Running trust checks...', style: TextStyle(color: AppTheme.tokenText)),
         ],
       ),
     );
@@ -694,23 +694,23 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+        border: Border.all(color: AppTheme.tokenDanger.withAlpha(102)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+          const Icon(Icons.error_outline_rounded, color: AppTheme.tokenDanger),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               _trustError ?? 'Trust check failed',
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppTheme.tokenText),
             ),
           ),
           TextButton(
             onPressed: _checkTrust,
-            child: const Text('Retry', style: TextStyle(color: Color(0xFFF59E0B))),
+            child: const Text('Retry', style: TextStyle(color: AppTheme.tokenWarning)),
           ),
         ],
       ),
@@ -723,15 +723,15 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     IconData bucketIcon;
     String label;
     if (bucket == 'TRUSTED') {
-      bucketColor = const Color(0xFF22C55E);
+      bucketColor = AppTheme.tokenSuccess;
       bucketIcon = Icons.verified_rounded;
       label = 'Trusted';
     } else if (bucket == 'CAUTION') {
-      bucketColor = const Color(0xFFF59E0B);
+      bucketColor = AppTheme.tokenWarning;
       bucketIcon = Icons.warning_rounded;
       label = 'Caution';
     } else {
-      bucketColor = const Color(0xFFEF4444);
+      bucketColor = AppTheme.tokenDanger;
       bucketIcon = Icons.dangerous_rounded;
       label = 'High Risk';
     }
@@ -739,10 +739,10 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: bucketColor.withOpacity(0.08),
+        color: bucketColor.withAlpha(20),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: bucketColor.withOpacity(0.3),
+          color: bucketColor.withAlpha(77),
         ),
       ),
       child: Column(
@@ -754,7 +754,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: bucketColor.withOpacity(0.15),
+                  color: bucketColor.withAlpha(38),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(bucketIcon, color: bucketColor, size: 24),
@@ -776,7 +776,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                     Text(
                       'Trust Score: $_trustScore/100 • Bucket: $bucket',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withAlpha(179),
                         fontSize: 12,
                       ),
                     ),
@@ -785,7 +785,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               ),
               TextButton(
                 onPressed: () => context.push('/trust-check?address=${_recipientController.text}'),
-                child: const Text('Details', style: TextStyle(color: Color(0xFF818CF8))),
+                child: Text('Details', style: TextStyle(color: AppTheme.tokenPrimaryLight)),
               ),
             ],
           ),
@@ -799,7 +799,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   children: [
                     Icon(Icons.fiber_manual_record, size: 8, color: bucketColor),
                     const SizedBox(width: 6),
-                    Expanded(child: Text(reason, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12))),
+                    Expanded(child: Text(reason, style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 12))),
                   ],
                 ),
               )).toList(),
@@ -821,9 +821,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
             Expanded(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: bucketColor.withOpacity(0.15),
+                  backgroundColor: bucketColor.withAlpha(38),
                   foregroundColor: bucketColor,
-                  side: BorderSide(color: bucketColor.withOpacity(0.4)),
+                  side: BorderSide(color: bucketColor.withAlpha(102)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
@@ -839,8 +839,8 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
             Expanded(
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF22C55E),
-                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  foregroundColor: AppTheme.tokenSuccess,
+                  side: const BorderSide(color: AppTheme.tokenSuccess),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
@@ -864,15 +864,15 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(risky ? 'Proceeding despite risk' : 'Proceeding to send'),
-                    backgroundColor: risky ? const Color(0xFFEF4444) : const Color(0xFF6366F1),
+                    backgroundColor: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimary,
                   ),
                 );
               }
             },
-            icon: Icon(Icons.send_rounded, color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8)),
+            icon: Icon(Icons.send_rounded, color: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimaryLight),
             label: Text(
               risky ? 'Send anyway (confirm)' : 'Proceed to send',
-              style: TextStyle(color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8), fontWeight: FontWeight.w700),
+              style: TextStyle(color: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimaryLight, fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -884,20 +884,20 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF12121A),
-            title: const Text('Proceed with risk?', style: TextStyle(color: Colors.white)),
-            content: const Text(
+            backgroundColor: AppTheme.tokenSurface,
+            title: Text('Proceed with risk?', style: TextStyle(color: AppTheme.tokenText)),
+            content: Text(
               'This recipient has risk signals. Are you sure you want to continue?',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.tokenText.withAlpha(179)),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+                child: const Text('Cancel', style: TextStyle(color: AppTheme.slate400)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Proceed anyway', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                child: const Text('Proceed anyway', style: TextStyle(color: AppTheme.tokenDanger, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -922,9 +922,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -932,10 +932,10 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Network Fee',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -943,7 +943,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E2E),
+                  color: AppTheme.tokenBorderSubtle,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -951,13 +951,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                     Text(
                       '~\$2.45',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.tokenText,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Icon(Icons.edit_rounded, color: Color(0xFF64748B), size: 14),
+                    Icon(Icons.edit_rounded, color: AppTheme.slate500, size: 14),
                   ],
                 ),
               ),
@@ -966,12 +966,12 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.flash_on_rounded, color: Color(0xFFF59E0B), size: 18),
+              Icon(Icons.flash_on_rounded, color: AppTheme.tokenWarning, size: 18),
               const SizedBox(width: 6),
               Text(
                 '$speedLabel ($speedTime)',
                 style: const TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: AppTheme.slate400,
                   fontSize: 13,
                 ),
               ),
@@ -980,10 +980,10 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           const SizedBox(height: 12),
           SliderTheme(
             data: SliderThemeData(
-              activeTrackColor: const Color(0xFF6366F1),
-              inactiveTrackColor: const Color(0xFF1E1E2E),
-              thumbColor: const Color(0xFF6366F1),
-              overlayColor: const Color(0xFF6366F1).withOpacity(0.2),
+              activeTrackColor: AppTheme.tokenPrimary,
+              inactiveTrackColor: AppTheme.tokenBorderSubtle,
+              thumbColor: AppTheme.tokenPrimary,
+              overlayColor: AppTheme.tokenPrimary.withAlpha(51),
               trackHeight: 6,
             ),
             child: Slider(
@@ -994,9 +994,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Slow', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
-              Text('Normal', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
-              Text('Fast', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+              Text('Slow', style: TextStyle(color: Colors.white.withAlpha(102), fontSize: 11)),
+              Text('Normal', style: TextStyle(color: Colors.white.withAlpha(102), fontSize: 11)),
+              Text('Fast', style: TextStyle(color: Colors.white.withAlpha(102), fontSize: 11)),
             ],
           ),
         ],
@@ -1010,9 +1010,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1020,7 +1020,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           const Text(
             'Summary',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.tokenText,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -1031,7 +1031,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           _buildSummaryRow('Network fee', '~\$2.45'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(color: Color(0xFF1E1E2E)),
+            child: Divider(color: AppTheme.tokenBorderSubtle),
           ),
           _buildSummaryRow('Total', '$amount $_selectedToken + gas', isBold: true),
           _buildSummaryRow('', '≈ \$${_calculateUsdValue()}', isSubtle: true),
@@ -1047,14 +1047,14 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 13,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            color: isSubtle ? Colors.white.withOpacity(0.4) : Colors.white,
+            color: isSubtle ? Colors.white.withAlpha(102) : AppTheme.tokenText,
             fontSize: isBold ? 15 : 13,
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
           ),
@@ -1072,9 +1072,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0A0F),
+        color: AppTheme.tokenBackground,
         border: Border(
-          top: BorderSide(color: const Color(0xFF1E1E2E)),
+          top: BorderSide(color: AppTheme.tokenBorderSubtle),
         ),
       ),
       child: GestureDetector(
@@ -1083,14 +1083,14 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           height: 56,
           decoration: BoxDecoration(
             gradient: isValid
-                ? const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)])
+                ? const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft])
                 : null,
-            color: isValid ? null : const Color(0xFF1E1E2E),
+            color: isValid ? null : AppTheme.tokenBorderSubtle,
             borderRadius: BorderRadius.circular(16),
             boxShadow: isValid
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF6366F1).withOpacity(0.4),
+                      color: AppTheme.tokenPrimary.withAlpha(102),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -1104,7 +1104,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 Text(
                   'Review & Send',
                   style: TextStyle(
-                    color: isValid ? Colors.white : Colors.white.withOpacity(0.3),
+                    color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1112,7 +1112,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_forward_rounded,
-                  color: isValid ? Colors.white : Colors.white.withOpacity(0.3),
+                  color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
                   size: 20,
                 ),
               ],
@@ -1134,7 +1134,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         builder: (context, setModalState) => Container(
           height: MediaQuery.of(context).size.height * 0.7,
           decoration: const BoxDecoration(
-            color: Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -1144,7 +1144,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 height: 4,
                 margin: const EdgeInsets.only(top: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF374151),
+                  color: AppTheme.gray700,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1153,7 +1153,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 child: Text(
                   _isProcessingSwap ? 'Processing...' : 'Confirm Transaction',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.tokenText,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1167,7 +1167,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A0A0F),
+                          color: AppTheme.tokenBackground,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
@@ -1175,7 +1175,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             Text(
                               '${_amountController.text} $_selectedToken',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.tokenText,
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1184,7 +1184,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             Text(
                               '≈ \$${_calculateUsdValue()}',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withAlpha(128),
                                 fontSize: 16,
                               ),
                             ),
@@ -1203,17 +1203,17 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: _riskResult!.isHighRisk 
-                                ? const Color(0xFFDC2626).withOpacity(0.1)
+                                ? AppTheme.tokenDangerStrong.withAlpha(26)
                                 : _riskResult!.isMediumRisk
-                                    ? const Color(0xFFF59E0B).withOpacity(0.1)
-                                    : const Color(0xFF22C55E).withOpacity(0.1),
+                                    ? AppTheme.tokenWarning.withAlpha(26)
+                                    : AppTheme.tokenSuccess.withAlpha(26),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _riskResult!.isHighRisk 
-                                  ? const Color(0xFFDC2626).withOpacity(0.3)
+                                  ? AppTheme.tokenDangerStrong.withAlpha(77)
                                   : _riskResult!.isMediumRisk
-                                      ? const Color(0xFFF59E0B).withOpacity(0.3)
-                                      : const Color(0xFF22C55E).withOpacity(0.3),
+                                      ? AppTheme.tokenWarning.withAlpha(77)
+                                      : AppTheme.tokenSuccess.withAlpha(77),
                             ),
                           ),
                           child: Row(
@@ -1225,10 +1225,10 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                                         ? Icons.info_rounded
                                         : Icons.check_circle_rounded,
                                 color: _riskResult!.isHighRisk 
-                                    ? const Color(0xFFDC2626)
+                                    ? AppTheme.tokenDangerStrong
                                     : _riskResult!.isMediumRisk
-                                        ? const Color(0xFFF59E0B)
-                                        : const Color(0xFF22C55E),
+                                        ? AppTheme.tokenWarning
+                                        : AppTheme.tokenSuccess,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -1238,7 +1238,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                                     Text(
                                       'Risk Score: ${(_riskResult!.riskScore * 100).toStringAsFixed(0)}%',
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppTheme.tokenText,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -1246,7 +1246,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                                       Text(
                                         _riskResult!.reasons.first,
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7),
+                                          color: Colors.white.withAlpha(179),
                                           fontSize: 12,
                                         ),
                                       ),
@@ -1267,7 +1267,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please connect your wallet first'),
-                                backgroundColor: Color(0xFFDC2626),
+                                backgroundColor: AppTheme.tokenDangerStrong,
                               ),
                             );
                             return;
@@ -1296,7 +1296,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Transaction submitted! Hash: ${result.transactionHash?.substring(0, 10)}...'),
-                                  backgroundColor: const Color(0xFF22C55E),
+                                  backgroundColor: AppTheme.tokenSuccess,
                                   duration: const Duration(seconds: 5),
                                 ),
                               );
@@ -1306,8 +1306,8 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                                 SnackBar(
                                   content: Text(result.message),
                                   backgroundColor: result.status == SwapStatus.pendingApproval
-                                      ? const Color(0xFFF59E0B)
-                                      : const Color(0xFFDC2626),
+                                      ? AppTheme.tokenWarning
+                                      : AppTheme.tokenDangerStrong,
                                 ),
                               );
                             }
@@ -1316,7 +1316,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Transaction failed: $e'),
-                                backgroundColor: const Color(0xFFDC2626),
+                                backgroundColor: AppTheme.tokenDangerStrong,
                               ),
                             );
                           } finally {
@@ -1334,9 +1334,9 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             gradient: _isProcessingSwap 
                                 ? null
                                 : const LinearGradient(
-                                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                                    colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft],
                                   ),
-                            color: _isProcessingSwap ? const Color(0xFF374151) : null,
+                            color: _isProcessingSwap ? AppTheme.gray700 : null,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
@@ -1346,13 +1346,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                                     height: 24,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.tokenText),
                                     ),
                                   )
                                 : const Text(
                                     'Confirm & Send',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppTheme.tokenText,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -1379,11 +1379,11 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
           ),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: AppTheme.tokenText, fontSize: 14),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -1400,7 +1400,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         height: MediaQuery.of(context).size.height * 0.6,
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -1409,37 +1409,37 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Scan Address',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppTheme.tokenText, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Scan a QR code to fill recipient address',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+              style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             ),
             const SizedBox(height: 32),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A0A0F),
+                  color: AppTheme.tokenBackground,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2D2D44)),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
                 ),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withOpacity(0.3), size: 80),
+                      Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withAlpha(77), size: 80),
                       const SizedBox(height: 16),
                       Text(
                         'Camera permission required',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
+                        style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
                       ),
                     ],
                   ),
@@ -1466,7 +1466,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
-            color: Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -1478,52 +1478,52 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF374151),
+                    color: AppTheme.gray700,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Add Contact',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppTheme.tokenText, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
-              const Text('Name', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+              Text('Name', style: TextStyle(color: AppTheme.slate400, fontSize: 13)),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppTheme.tokenCardElevated,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF2D2D44)),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
                 ),
                 child: TextField(
                   controller: nameController,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppTheme.tokenText),
                   decoration: InputDecoration(
                     hintText: 'Contact name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Address', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+              Text('Address', style: TextStyle(color: AppTheme.slate400, fontSize: 13)),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppTheme.tokenCardElevated,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF2D2D44)),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
                 ),
                 child: TextField(
                   controller: addressController,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppTheme.tokenText),
                   decoration: InputDecoration(
                     hintText: '0x... or ENS name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                   ),
                 ),
@@ -1535,20 +1535,20 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Contact saved!'),
-                      backgroundColor: Color(0xFF22C55E),
+                      backgroundColor: AppTheme.tokenSuccess,
                     ),
                   );
                 },
                 child: Container(
                   height: 54,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+                    gradient: const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft]),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Center(
                     child: Text(
                       'Save Contact',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: AppTheme.tokenText, fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

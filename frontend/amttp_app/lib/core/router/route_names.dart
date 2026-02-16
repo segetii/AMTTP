@@ -8,6 +8,7 @@
 /// context.goNamed(RouteNames.home);
 /// context.push(RoutePaths.transfer);
 /// ```
+library;
 
 abstract class RoutePaths {
   // ═══════════════════════════════════════════════════════════════════════════

@@ -15,8 +15,9 @@ const String _explainabilityServiceUrl = 'http://localhost:8009';
 
 class ApiService {
   late final Dio _dio;
-  late final Dio _integrityDio;  // Separate Dio instance for integrity service
-  late final Dio _explainabilityDio;  // Separate Dio instance for explainability service
+  late final Dio _integrityDio; // Separate Dio instance for integrity service
+  late final Dio
+      _explainabilityDio; // Separate Dio instance for explainability service
 
   ApiService() {
     _dio = Dio(BaseOptions(
@@ -38,18 +39,24 @@ class ApiService {
       },
     ));
 
-    // Add interceptors for logging and error handling
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (object) => print(object),
-    ));
+    // Only enable detailed logging in debug mode
+    assert(() {
+      _dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (object) => print(object),
+      ));
+      return true;
+    }());
 
-    _integrityDio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (object) => print('[INTEGRITY] $object'),
-    ));
+    assert(() {
+      _integrityDio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (object) => print('[INTEGRITY] $object'),
+      ));
+      return true;
+    }());
 
     // Explainability service needs its own Dio instance with direct URL
     _explainabilityDio = Dio(BaseOptions(
@@ -61,11 +68,14 @@ class ApiService {
       },
     ));
 
-    _explainabilityDio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (object) => print('[EXPLAINABILITY] $object'),
-    ));
+    assert(() {
+      _explainabilityDio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (object) => print('[EXPLAINABILITY] $object'),
+      ));
+      return true;
+    }());
   }
 
   /// Resolve explainability service URL
@@ -108,8 +118,8 @@ class ApiService {
     }
 
     // Use relative URL if nginx is proxying
-    return AppConstants.integrityServiceUrl.isEmpty 
-        ? _integrityServiceUrl 
+    return AppConstants.integrityServiceUrl.isEmpty
+        ? _integrityServiceUrl
         : AppConstants.integrityServiceUrl;
   }
 
@@ -128,7 +138,9 @@ class ApiService {
     print('[API] Current URI: $uri (host=${uri.host}, port=${uri.port})');
 
     // When running on port 3010 (npx serve) or 3003 (flutter dev), use direct URLs
-    if (kIsWeb && uri.host.isNotEmpty && (uri.port == 3010 || uri.port == 3003)) {
+    if (kIsWeb &&
+        uri.host.isNotEmpty &&
+        (uri.port == 3010 || uri.port == 3003)) {
       print('[API] Resolved to orchestrator: $_orchestratorUrl');
       return _orchestratorUrl;
     }
@@ -168,29 +180,33 @@ class ApiService {
               'componentId': integrityReport['componentId'] ?? 'SecureTransfer',
               'sourceHash': integrityReport['handlerHash'] ?? 'flutter-native',
               'domHash': integrityReport['stateHash'] ?? 'flutter-native',
-              'eventHandlersHash': integrityReport['handlerHash'] ?? 'flutter-native',
+              'eventHandlersHash':
+                  integrityReport['handlerHash'] ?? 'flutter-native',
               'combinedHash': integrityReport['stateHash'] ?? 'flutter-native',
               'verified': true,
               'timestamp': DateTime.now().millisecondsSinceEpoch,
             }
           ],
           'mutationAlerts': (integrityReport['violations'] as List?)
-              ?.map((v) => {
-                    'type': v['violation_type'] ?? 'unknown',
-                    'severity': v['severity'] ?? 'low',
-                    'element': integrityReport['componentId'] ?? 'unknown',
-                    'details': v['details'] ?? '',
-                    'timestamp': DateTime.now().millisecondsSinceEpoch,
-                  })
-              .toList() ?? [],
-          'isCompromised': (integrityReport['violations'] as List?)?.isNotEmpty ?? false,
-          'riskLevel': (integrityReport['violations'] as List?)?.isNotEmpty == true
-              ? 'suspicious'
-              : 'safe',
+                  ?.map((v) => {
+                        'type': v['violation_type'] ?? 'unknown',
+                        'severity': v['severity'] ?? 'low',
+                        'element': integrityReport['componentId'] ?? 'unknown',
+                        'details': v['details'] ?? '',
+                        'timestamp': DateTime.now().millisecondsSinceEpoch,
+                      })
+                  .toList() ??
+              [],
+          'isCompromised':
+              (integrityReport['violations'] as List?)?.isNotEmpty ?? false,
+          'riskLevel':
+              (integrityReport['violations'] as List?)?.isNotEmpty == true
+                  ? 'suspicious'
+                  : 'safe',
           'timestamp': DateTime.now().millisecondsSinceEpoch,
         },
       );
-      
+
       final data = response.data;
       return {
         'verified': data['valid'] == true,
@@ -199,13 +215,14 @@ class ApiService {
         'riskLevel': data['riskLevel'] ?? 'safe',
       };
     } on DioException catch (e) {
-      // For demo purposes: If integrity service is unavailable, allow transaction
-      // In production, this should block the transaction
-      print('[INTEGRITY] Service unavailable, allowing for demo: ${e.message}');
+      // SECURITY: Block transaction when integrity service is unavailable
+      // Fail-closed: unknown state must not auto-approve
+      print(
+          '[INTEGRITY] Service unavailable, BLOCKING transaction: ${e.message}');
       return {
-        'verified': true,
-        'demo_mode': true,
-        'reason': 'Integrity service offline - demo mode',
+        'verified': false,
+        'service_unavailable': true,
+        'reason': 'Integrity service offline - transaction blocked for safety',
       };
     }
   }
@@ -235,14 +252,16 @@ class ApiService {
       );
       return ComplianceDecision.fromJson(response.data);
     } on DioException catch (e) {
-      // For demo: Return an approval if orchestrator is unavailable
-      print('[EVALUATE] Service unavailable, allowing for demo: ${e.message}');
+      // SECURITY: Block transaction when orchestrator is unavailable
+      // Fail-closed: compliance check failure must not auto-approve
+      print(
+          '[EVALUATE] Service unavailable, BLOCKING transaction: ${e.message}');
       return ComplianceDecision(
-        action: 'ALLOW',
-        reason: 'Demo mode - orchestrator offline',
-        riskScore: 0.1,
-        warnings: ['Demo mode active'],
-        integrityVerified: true,
+        action: 'BLOCK',
+        reason: 'Orchestrator offline - transaction blocked for safety',
+        riskScore: 1.0,
+        warnings: ['Compliance service unavailable - cannot evaluate'],
+        integrityVerified: false,
       );
     }
   }
@@ -259,7 +278,8 @@ class ApiService {
     required Map<String, dynamic> features,
   }) async {
     try {
-      print('[API] getDQNRiskScore: Calling ${_dio.options.baseUrl}${AppConstants.riskScoringEndpoint}');
+      print(
+          '[API] getDQNRiskScore: Calling ${_dio.options.baseUrl}${AppConstants.riskScoringEndpoint}');
       print('[API] Data: from=$fromAddress, to=$toAddress, amount=$amount');
       // Use relative URL - nginx proxies /risk/ to risk-engine service
       final response = await _dio.post(
@@ -351,25 +371,29 @@ class ApiService {
     final patterns = <ExplainabilityPattern>[];
     final factors = <ExplainabilityFactor>[];
     final typologies = <String>[];
-    
-    final amountEth = (features['amount_eth'] ?? features['value_eth'] ?? 0.0) as num;
+
+    final amountEth =
+        (features['amount_eth'] ?? features['value_eth'] ?? 0.0) as num;
     final txCount24h = (features['tx_count_24h'] ?? 0) as num;
     final velocity24h = (features['velocity_24h'] ?? 0.0) as num;
     final dormancyDays = (features['dormancy_days'] ?? 0) as num;
-    
+
     // Graph context analysis
     final hopsToSanctioned = graphContext?['hops_to_sanctioned'] as num? ?? 99;
-    final mixerInteraction = graphContext?['mixer_interaction'] as bool? ?? false;
+    final mixerInteraction =
+        graphContext?['mixer_interaction'] as bool? ?? false;
     final inDegree = graphContext?['in_degree'] as num? ?? 0;
     final outDegree = graphContext?['out_degree'] as num? ?? 0;
     final pagerank = graphContext?['pagerank'] as num? ?? 0.0;
-    final clusteringCoefficient = graphContext?['clustering_coefficient'] as num? ?? 0.0;
+    final clusteringCoefficient =
+        graphContext?['clustering_coefficient'] as num? ?? 0.0;
 
     // Amount analysis
     if (amountEth > 10) {
       patterns.add(ExplainabilityPattern(
         name: 'large_transfer',
-        description: 'Transaction amount (${amountEth.toStringAsFixed(2)} ETH) exceeds typical threshold',
+        description:
+            'Transaction amount (${amountEth.toStringAsFixed(2)} ETH) exceeds typical threshold',
         severity: amountEth > 50 ? 'high' : 'medium',
         confidence: 0.85,
       ));
@@ -386,7 +410,8 @@ class ApiService {
     if (txCount24h > 5 || velocity24h > 5) {
       patterns.add(ExplainabilityPattern(
         name: 'high_velocity',
-        description: 'High transaction velocity: $txCount24h transactions in 24h',
+        description:
+            'High transaction velocity: $txCount24h transactions in 24h',
         severity: txCount24h > 20 ? 'high' : 'medium',
         confidence: 0.78,
       ));
@@ -403,7 +428,8 @@ class ApiService {
     if (dormancyDays > 180) {
       patterns.add(ExplainabilityPattern(
         name: 'dormant_activation',
-        description: 'Address reactivated after ${dormancyDays.toInt()} days of inactivity',
+        description:
+            'Address reactivated after ${dormancyDays.toInt()} days of inactivity',
         severity: 'high',
         confidence: 0.82,
       ));
@@ -428,7 +454,8 @@ class ApiService {
         name: 'Sanctions Proximity',
         value: hopsToSanctioned.toDouble(),
         impact: hopsToSanctioned == 1 ? 0.5 : 0.35,
-        description: 'Close connection to sanctioned address in transaction graph',
+        description:
+            'Close connection to sanctioned address in transaction graph',
       ));
       typologies.add('Sanctions Evasion Risk');
     }
@@ -454,13 +481,14 @@ class ApiService {
     if (outDegree > 10) {
       patterns.add(ExplainabilityPattern(
         name: 'fan_out_pattern',
-        description: 'Address distributes funds to $outDegree recipients (fan-out)',
+        description:
+            'Address distributes funds to $outDegree recipients (fan-out)',
         severity: outDegree > 50 ? 'high' : 'medium',
         confidence: 0.75,
       ));
       typologies.add('Fund Distribution');
     }
-    
+
     if (inDegree > 10) {
       patterns.add(ExplainabilityPattern(
         name: 'fan_in_pattern',
@@ -475,7 +503,8 @@ class ApiService {
     if (clusteringCoefficient > 0.7) {
       patterns.add(ExplainabilityPattern(
         name: 'tight_cluster',
-        description: 'Address part of tightly connected cluster (coefficient: ${clusteringCoefficient.toStringAsFixed(2)})',
+        description:
+            'Address part of tightly connected cluster (coefficient: ${clusteringCoefficient.toStringAsFixed(2)})',
         severity: 'medium',
         confidence: 0.7,
       ));
@@ -511,28 +540,33 @@ class ApiService {
     // Generate narrative
     String narrative;
     if (riskScore > 0.7) {
-      narrative = 'HIGH RISK: This transaction exhibits ${patterns.length} concerning patterns including ${patterns.map((p) => p.name.replaceAll('_', ' ')).join(', ')}. '
+      narrative =
+          'HIGH RISK: This transaction exhibits ${patterns.length} concerning patterns including ${patterns.map((p) => p.name.replaceAll('_', ' ')).join(', ')}. '
           'The ML model detected behavioral anomalies with ${(riskScore * 100).toStringAsFixed(0)}% risk confidence. '
           'Recommend manual review before approval.';
     } else if (riskScore > 0.4) {
-      narrative = 'MEDIUM RISK: Transaction shows some elevated risk indicators. '
+      narrative =
+          'MEDIUM RISK: Transaction shows some elevated risk indicators. '
           'Detected patterns: ${patterns.map((p) => p.name.replaceAll('_', ' ')).join(', ')}. '
           'Enhanced monitoring recommended.';
     } else {
-      narrative = 'LOW RISK: Transaction appears routine with no significant risk indicators. '
+      narrative =
+          'LOW RISK: Transaction appears routine with no significant risk indicators. '
           'Standard processing recommended.';
     }
 
     return ExplainabilityResponse(
       transactionHash: transactionHash,
       riskScore: riskScore,
-      riskLevel: riskScore > 0.7 ? 'high' : (riskScore > 0.4 ? 'medium' : 'low'),
+      riskLevel:
+          riskScore > 0.7 ? 'high' : (riskScore > 0.4 ? 'medium' : 'low'),
       narrative: narrative,
       patterns: patterns,
       factors: factors,
       typologies: typologies.isEmpty ? ['Standard Transaction'] : typologies,
-      confidence: patterns.isNotEmpty 
-          ? patterns.map((p) => p.confidence).reduce((a, b) => a + b) / patterns.length
+      confidence: patterns.isNotEmpty
+          ? patterns.map((p) => p.confidence).reduce((a, b) => a + b) /
+              patterns.length
           : 0.7,
       modelVersion: 'local-fallback-v2',
       generatedAt: DateTime.now(),
@@ -600,7 +634,8 @@ class ApiService {
   // Get Transaction Details
   Future<TransactionDetailsResponse> getTransactionDetails(String txId) async {
     try {
-      final response = await _dio.get('${AppConstants.transactionEndpoint}/$txId');
+      final response =
+          await _dio.get('${AppConstants.transactionEndpoint}/$txId');
       return TransactionDetailsResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -724,7 +759,8 @@ class ApiService {
   }
 
   /// Get reputation leaderboard
-  Future<List<LeaderboardEntry>> getReputationLeaderboard({int limit = 100}) async {
+  Future<List<LeaderboardEntry>> getReputationLeaderboard(
+      {int limit = 100}) async {
     try {
       final response = await _dio.get(
         '/reputation/leaderboard',
@@ -1138,7 +1174,7 @@ class RiskScoreResponse {
     } catch (_) {
       parsedTimestamp = DateTime.now();
     }
-    
+
     return RiskScoreResponse(
       riskScore: json['risk_score']?.toDouble() ?? 0.0,
       riskLevel: json['risk_level'] ?? 'unknown',
@@ -1185,16 +1221,18 @@ class ExplainabilityResponse {
       riskLevel: json['risk_level'] ?? 'unknown',
       narrative: json['narrative'] ?? '',
       patterns: (json['patterns'] as List<dynamic>?)
-          ?.map((p) => ExplainabilityPattern.fromJson(p))
-          .toList() ?? [],
+              ?.map((p) => ExplainabilityPattern.fromJson(p))
+              .toList() ??
+          [],
       factors: (json['factors'] as List<dynamic>?)
-          ?.map((f) => ExplainabilityFactor.fromJson(f))
-          .toList() ?? [],
+              ?.map((f) => ExplainabilityFactor.fromJson(f))
+              .toList() ??
+          [],
       typologies: List<String>.from(json['typologies'] ?? []),
       confidence: (json['confidence'] ?? 0.7).toDouble(),
       modelVersion: json['model_version'] ?? '',
-      generatedAt: json['generated_at'] != null 
-          ? DateTime.parse(json['generated_at']) 
+      generatedAt: json['generated_at'] != null
+          ? DateTime.parse(json['generated_at'])
           : DateTime.now(),
     );
   }
@@ -1301,9 +1339,9 @@ class KYCStatusResponse {
     return KYCStatusResponse(
       status: json['status'] ?? '',
       isVerified: json['is_verified'] ?? false,
-      verifiedAt: json['verified_at'] != null 
-        ? DateTime.parse(json['verified_at']) 
-        : null,
+      verifiedAt: json['verified_at'] != null
+          ? DateTime.parse(json['verified_at'])
+          : null,
       documentType: json['document_type'],
     );
   }
@@ -1459,7 +1497,8 @@ class DisputeResponse {
     return DisputeResponse(
       disputeId: json['dispute_id'] ?? '',
       status: json['status'] ?? 'pending',
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -1501,11 +1540,15 @@ class DisputeDetails {
       escrowAmount: (json['escrow_amount'] ?? 0).toDouble(),
       status: json['status'] ?? 'pending',
       ruling: json['ruling'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      resolvedAt: json['resolved_at'] != null ? DateTime.parse(json['resolved_at']) : null,
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      resolvedAt: json['resolved_at'] != null
+          ? DateTime.parse(json['resolved_at'])
+          : null,
       evidence: (json['evidence'] as List<dynamic>?)
-          ?.map((e) => EvidenceItem.fromJson(e))
-          .toList() ?? [],
+              ?.map((e) => EvidenceItem.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -1531,7 +1574,8 @@ class EvidenceItem {
       submitterAddress: json['submitter_address'] ?? '',
       evidenceType: json['evidence_type'] ?? '',
       content: json['content'] ?? '',
-      submittedAt: DateTime.parse(json['submitted_at'] ?? DateTime.now().toIso8601String()),
+      submittedAt: DateTime.parse(
+          json['submitted_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -1587,7 +1631,8 @@ class ReputationResponse {
       disputes: json['disputes'] ?? 0,
       disputesWon: json['disputes_won'] ?? 0,
       stakedAmount: (json['staked_amount'] ?? 0).toDouble(),
-      lastUpdated: DateTime.parse(json['last_updated'] ?? DateTime.now().toIso8601String()),
+      lastUpdated: DateTime.parse(
+          json['last_updated'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -1647,8 +1692,9 @@ class BulkScoreResponse {
       processed: json['processed'] ?? 0,
       failed: json['failed'] ?? 0,
       results: (json['results'] as List<dynamic>?)
-          ?.map((e) => BulkScoreResult.fromJson(e))
-          .toList() ?? [],
+              ?.map((e) => BulkScoreResult.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -1694,8 +1740,8 @@ class BulkJobResponse {
       jobId: json['job_id'] ?? '',
       status: json['status'] ?? 'queued',
       totalTransactions: json['total_transactions'] ?? 0,
-      estimatedCompletion: DateTime.parse(
-          json['estimated_completion'] ?? DateTime.now().add(const Duration(minutes: 5)).toIso8601String()),
+      estimatedCompletion: DateTime.parse(json['estimated_completion'] ??
+          DateTime.now().add(const Duration(minutes: 5)).toIso8601String()),
     );
   }
 }
@@ -1779,9 +1825,10 @@ class WebhookInfo {
       url: json['url'] ?? '',
       events: List<String>.from(json['events'] ?? []),
       isActive: json['is_active'] ?? true,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      lastTriggered: json['last_triggered'] != null 
-          ? DateTime.parse(json['last_triggered']) 
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      lastTriggered: json['last_triggered'] != null
+          ? DateTime.parse(json['last_triggered'])
           : null,
     );
   }
@@ -1843,9 +1890,11 @@ class PEPScreeningResult {
       matchScore: (json['match_score'] ?? 0).toDouble(),
       riskLevel: json['risk_level'] ?? 'low',
       matches: (json['matches'] as List<dynamic>?)
-          ?.map((e) => PEPMatch.fromJson(e))
-          .toList() ?? [],
-      screenedAt: DateTime.parse(json['screened_at'] ?? DateTime.now().toIso8601String()),
+              ?.map((e) => PEPMatch.fromJson(e))
+              .toList() ??
+          [],
+      screenedAt: DateTime.parse(
+          json['screened_at'] ?? DateTime.now().toIso8601String()),
       provider: json['provider'] ?? 'unknown',
     );
   }
@@ -1896,7 +1945,8 @@ class EDDCaseResponse {
     return EDDCaseResponse(
       caseId: json['case_id'] ?? '',
       status: json['status'] ?? 'open',
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -1906,7 +1956,8 @@ class EDDCaseDetails {
   final String address;
   final String triggerReason;
   final String riskLevel;
-  final String status; // open, documents_pending, under_review, approved, rejected
+  final String
+      status; // open, documents_pending, under_review, approved, rejected
   final String? assignedAnalyst;
   final List<EDDDocument> documents;
   final List<EDDNote> notes;
@@ -1935,13 +1986,18 @@ class EDDCaseDetails {
       status: json['status'] ?? 'open',
       assignedAnalyst: json['assigned_analyst'],
       documents: (json['documents'] as List<dynamic>?)
-          ?.map((e) => EDDDocument.fromJson(e))
-          .toList() ?? [],
+              ?.map((e) => EDDDocument.fromJson(e))
+              .toList() ??
+          [],
       notes: (json['notes'] as List<dynamic>?)
-          ?.map((e) => EDDNote.fromJson(e))
-          .toList() ?? [],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      resolvedAt: json['resolved_at'] != null ? DateTime.parse(json['resolved_at']) : null,
+              ?.map((e) => EDDNote.fromJson(e))
+              .toList() ??
+          [],
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      resolvedAt: json['resolved_at'] != null
+          ? DateTime.parse(json['resolved_at'])
+          : null,
     );
   }
 }
@@ -1967,7 +2023,8 @@ class EDDDocument {
       documentType: json['document_type'] ?? '',
       fileName: json['file_name'] ?? '',
       status: json['status'] ?? 'pending',
-      uploadedAt: DateTime.parse(json['uploaded_at'] ?? DateTime.now().toIso8601String()),
+      uploadedAt: DateTime.parse(
+          json['uploaded_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -1990,7 +2047,8 @@ class EDDNote {
       noteId: json['note_id'] ?? '',
       author: json['author'] ?? '',
       content: json['content'] ?? '',
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -2034,7 +2092,8 @@ class MonitoringSubscription {
       address: json['address'] ?? '',
       monitoringLevel: json['monitoring_level'] ?? 'standard',
       isActive: json['is_active'] ?? true,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -2061,8 +2120,8 @@ class MonitoringStatus {
       address: json['address'] ?? '',
       isMonitored: json['is_monitored'] ?? false,
       monitoringLevel: json['monitoring_level'],
-      lastScreened: json['last_screened'] != null 
-          ? DateTime.parse(json['last_screened']) 
+      lastScreened: json['last_screened'] != null
+          ? DateTime.parse(json['last_screened'])
           : null,
       alertCount: json['alert_count'] ?? 0,
       unresolvedAlerts: json['unresolved_alerts'] ?? 0,
@@ -2105,8 +2164,11 @@ class MonitoringAlert {
       isResolved: json['is_resolved'] ?? false,
       resolvedBy: json['resolved_by'],
       resolutionNotes: json['resolution_notes'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      resolvedAt: json['resolved_at'] != null ? DateTime.parse(json['resolved_at']) : null,
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      resolvedAt: json['resolved_at'] != null
+          ? DateTime.parse(json['resolved_at'])
+          : null,
     );
   }
 }

@@ -2,6 +2,7 @@
 /// 
 /// Unified header component with app switcher for AMTTP Platform
 /// Provides consistent branding and navigation across Flutter and Next.js apps
+library;
 
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';

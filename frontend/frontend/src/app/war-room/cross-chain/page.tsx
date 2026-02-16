@@ -51,7 +51,7 @@ function AlertBanner({
     [AlertLevel.CRITICAL]: 'bg-red-900/50 border-red-600/50 text-red-300',
     [AlertLevel.WARNING]: 'bg-yellow-900/50 border-yellow-600/50 text-yellow-300',
     [AlertLevel.INFO]: 'bg-blue-900/50 border-blue-600/50 text-blue-300',
-    [AlertLevel.NONE]: 'bg-slate-900/50 border-slate-600/50 text-slate-300',
+    [AlertLevel.NONE]: 'bg-background/50 border-borderSubtle/50 text-slate-300',
   };
   
   return (
@@ -73,7 +73,7 @@ function AlertBanner({
           </div>
           <button
             onClick={() => onAcknowledge(alert.id)}
-            className="px-3 py-1 text-sm bg-slate-800/50 rounded hover:bg-slate-700/50"
+            className="px-3 py-1 text-sm bg-surface/50 rounded hover:bg-slate-700/50"
           >
             Dismiss
           </button>
@@ -92,7 +92,7 @@ function AnalyticsSummary({ analytics }: { analytics: CrossChainAnalytics | null
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-slate-800/50 rounded-lg p-4">
+          <div key={i} className="bg-surface/50 rounded-lg p-4">
             <div className="h-8 bg-slate-700 rounded mb-2" />
             <div className="h-4 bg-slate-700 rounded w-1/2" />
           </div>
@@ -103,29 +103,29 @@ function AnalyticsSummary({ analytics }: { analytics: CrossChainAnalytics | null
   
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-slate-800/50 rounded-lg border border-slate-700 p-4">
-        <p className="text-2xl font-bold text-white">
+      <div className="bg-surface/50 rounded-lg border border-borderSubtle p-4">
+        <p className="text-2xl font-bold text-text">
           ${(analytics.totalVolume / 1000000).toFixed(2)}M
         </p>
-        <p className="text-sm text-slate-400">24h Volume</p>
+        <p className="text-sm text-mutedText">24h Volume</p>
       </div>
-      <div className="bg-slate-800/50 rounded-lg border border-slate-700 p-4">
+      <div className="bg-surface/50 rounded-lg border border-borderSubtle p-4">
         <p className="text-2xl font-bold text-cyan-400">
           {analytics.totalTransfers}
         </p>
-        <p className="text-sm text-slate-400">Total Transfers</p>
+        <p className="text-sm text-mutedText">Total Transfers</p>
       </div>
-      <div className="bg-slate-800/50 rounded-lg border border-slate-700 p-4">
+      <div className="bg-surface/50 rounded-lg border border-borderSubtle p-4">
         <p className="text-2xl font-bold text-green-400">
           {analytics.successRate.toFixed(1)}%
         </p>
-        <p className="text-sm text-slate-400">Success Rate</p>
+        <p className="text-sm text-mutedText">Success Rate</p>
       </div>
-      <div className="bg-slate-800/50 rounded-lg border border-slate-700 p-4">
+      <div className="bg-surface/50 rounded-lg border border-borderSubtle p-4">
         <p className="text-2xl font-bold text-amber-400">
           {analytics.flaggedTransfers}
         </p>
-        <p className="text-sm text-slate-400">Flagged</p>
+        <p className="text-sm text-mutedText">Flagged</p>
       </div>
     </div>
   );
@@ -166,16 +166,16 @@ export default function CrossChainPage() {
   }, [getAnalytics, transfers]);
   
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-text flex items-center gap-3">
               <span className="text-3xl">🌐</span>
               Cross-Chain Dashboard
             </h1>
-            <p className="text-slate-400">Monitor cross-chain transfers and bridge status</p>
+            <p className="text-mutedText">Monitor cross-chain transfers and bridge status</p>
           </div>
           
           {/* Live indicator */}
@@ -186,13 +186,13 @@ export default function CrossChainPage() {
         </div>
         
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-slate-700 pb-4">
+        <div className="flex gap-1 border-b border-borderSubtle pb-4">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'overview'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             📊 Overview
           </button>
@@ -200,8 +200,8 @@ export default function CrossChainPage() {
             onClick={() => setActiveTab('bridges')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'bridges'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             🌉 Bridges
           </button>
@@ -209,8 +209,8 @@ export default function CrossChainPage() {
             onClick={() => setActiveTab('transfers')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'transfers'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             📡 Transfers
           </button>
@@ -258,8 +258,8 @@ export default function CrossChainPage() {
           
           {/* Bridge details panel could go here */}
           {selectedBridge && (
-            <div className="bg-slate-800/30 rounded-lg border border-slate-700 p-6">
-              <h3 className="text-lg font-medium text-white mb-4">Bridge Details</h3>
+            <div className="bg-surface/30 rounded-lg border border-borderSubtle p-6">
+              <h3 className="text-lg font-medium text-text mb-4">Bridge Details</h3>
               {(() => {
                 const bridge = bridges.find(b => b.id === selectedBridge);
                 if (!bridge) return null;
@@ -267,36 +267,36 @@ export default function CrossChainPage() {
                 return (
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <h4 className="text-sm font-medium text-slate-400 mb-2">Fee Structure</h4>
+                      <h4 className="text-sm font-medium text-mutedText mb-2">Fee Structure</h4>
                       <div className="space-y-1 text-sm">
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Base Fee:</span>
-                          <span className="text-white">${bridge.fees.baseFee}</span>
+                          <span className="text-mutedText">Base Fee:</span>
+                          <span className="text-text">${bridge.fees.baseFee}</span>
                         </p>
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Percentage Fee:</span>
-                          <span className="text-white">{bridge.fees.percentageFee / 100}%</span>
+                          <span className="text-mutedText">Percentage Fee:</span>
+                          <span className="text-text">{bridge.fees.percentageFee / 100}%</span>
                         </p>
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Est. Gas:</span>
-                          <span className="text-white">{bridge.fees.gasEstimate} {bridge.fees.currency}</span>
+                          <span className="text-mutedText">Est. Gas:</span>
+                          <span className="text-text">{bridge.fees.gasEstimate} {bridge.fees.currency}</span>
                         </p>
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-slate-400 mb-2">Limits</h4>
+                      <h4 className="text-sm font-medium text-mutedText mb-2">Limits</h4>
                       <div className="space-y-1 text-sm">
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Min Amount:</span>
-                          <span className="text-white">${bridge.limits.minAmount}</span>
+                          <span className="text-mutedText">Min Amount:</span>
+                          <span className="text-text">${bridge.limits.minAmount}</span>
                         </p>
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Max Amount:</span>
-                          <span className="text-white">${bridge.limits.maxAmount.toLocaleString()}</span>
+                          <span className="text-mutedText">Max Amount:</span>
+                          <span className="text-text">${bridge.limits.maxAmount.toLocaleString()}</span>
                         </p>
                         <p className="flex justify-between">
-                          <span className="text-slate-500">Daily Limit:</span>
-                          <span className="text-white">${(bridge.limits.dailyLimit / 1000000).toFixed(1)}M</span>
+                          <span className="text-mutedText">Daily Limit:</span>
+                          <span className="text-text">${(bridge.limits.dailyLimit / 1000000).toFixed(1)}M</span>
                         </p>
                       </div>
                     </div>

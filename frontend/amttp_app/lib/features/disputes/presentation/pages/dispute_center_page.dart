@@ -911,7 +911,7 @@ class _SubmitEvidenceTabState extends ConsumerState<_SubmitEvidenceTab> {
                   
                   // Select Dispute
                   DropdownButtonFormField<String>(
-                    value: _selectedDisputeId,
+                    initialValue: _selectedDisputeId,
                     decoration: InputDecoration(
                       labelText: 'Select Dispute',
                       labelStyle: const TextStyle(color: AppTheme.mutedText),

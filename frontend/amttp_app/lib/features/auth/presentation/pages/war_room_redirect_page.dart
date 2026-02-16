@@ -21,9 +21,8 @@ class _WarRoomRedirectPageState extends State<WarRoomRedirectPage> {
     // browser-level redirect. This avoids conflicts with GoRouter's
     // history API manipulation.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // embed=true bypasses Next.js client-side auth guard
-      // (Flutter already authenticated the user; Next.js uses separate localStorage sessions)
-      html.window.location.replace('/war-room?embed=true');
+      // Now that cross-app auth bridge cookie is set, no need for ?embed=true
+      html.window.location.replace('/war-room');
     });
   }
 

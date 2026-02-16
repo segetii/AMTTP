@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import AppLayout, { useProfile } from '@/components/AppLayout';
 
 function ApiKeysContent() {
@@ -16,14 +16,21 @@ function ApiKeysContent() {
     );
   }
 
-  const mockKeys = [
-    { id: 'key_1', name: 'Production', key: 'amttp_live_k3y...', created: '2026-01-01', lastUsed: '2 hours ago', status: 'Active' },
-    { id: 'key_2', name: 'Development', key: 'amttp_test_d3v...', created: '2026-01-05', lastUsed: '1 day ago', status: 'Active' },
-    { id: 'key_3', name: 'CI/CD Pipeline', key: 'amttp_live_c1c...', created: '2026-01-07', lastUsed: 'Never', status: 'Inactive' },
-  ];
+    const [keys, setKeys] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    React.useEffect(() => {
+      fetch('http://127.0.0.1:8007/api-keys')
+        .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+        .then(data => setKeys(Array.isArray(data) ? data : []))
+        .catch(e => setError(e.message))
+        .finally(() => setLoading(false));
+    }, []);
 
   return (
     <div>
+        {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400">⚠ Backend unavailable: {error}</div>}
+        {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       <h1 className="text-3xl font-bold mb-2">🔑 API Keys</h1>
       <p className="text-gray-400 mb-6">Manage API keys for programmatic access</p>
 
@@ -89,7 +96,7 @@ function ApiKeysContent() {
             </tr>
           </thead>
           <tbody>
-            {mockKeys.map(key => (
+              {keys.map(key => (
               <tr key={key.id} className="border-b border-gray-700/50">
                 <td className="p-3 font-medium">{key.name}</td>
                 <td className="p-3 font-mono text-sm">

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Core pages - consolidated
-import '../../features/home/presentation/pages/home_page.dart';
+// Dead import removed: home_page.dart (only FintechHomePage from premium_fintech_shell.dart is used)
 import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../../features/transfer/presentation/pages/premium_transfer_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
@@ -24,20 +24,27 @@ import '../../shared/shells/premium_fintech_shell.dart';
 
 // Auth & RBAC
 import '../auth/auth_provider.dart';
-import '../rbac/rbac.dart';
 
 /// Simplified navigation sections for bottom nav
 enum AppSection { home, wallet, send, activity, profile }
 
 AppSection sectionForRoute(String route) {
   final path = route.split('?').first.split('#').first;
-  
+
   if (path == '/' || path == '/home') return AppSection.home;
   if (path == '/wallet' || path.startsWith('/wallet')) return AppSection.wallet;
-  if (path == '/transfer' || path == '/trust-check' || path.startsWith('/transfer')) return AppSection.send;
-  if (path == '/history' || path.startsWith('/history')) return AppSection.activity;
-  if (path == '/profile' || path == '/settings' || path == '/more') return AppSection.profile;
-  
+  if (path == '/transfer' ||
+      path == '/trust-check' ||
+      path.startsWith('/transfer')) {
+    return AppSection.send;
+  }
+  if (path == '/history' || path.startsWith('/history')) {
+    return AppSection.activity;
+  }
+  if (path == '/profile' || path == '/settings' || path == '/more') {
+    return AppSection.profile;
+  }
+
   return AppSection.home;
 }
 
@@ -52,25 +59,27 @@ class GoRouterRefreshStream extends ChangeNotifier {
 /// Simplified router provider
 final simplifiedRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  
+
   return GoRouter(
     initialLocation: '/sign-in',
     refreshListenable: GoRouterRefreshStream(ref),
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
-      final isAuthRoute = state.matchedLocation == '/sign-in' || 
-                          state.matchedLocation == '/register';
-      
+      final isAuthRoute = state.matchedLocation == '/sign-in' ||
+          state.matchedLocation == '/register';
+
       // Redirect unauthenticated users to sign-in
-      if (!isAuthenticated && !isAuthRoute && state.matchedLocation != '/unauthorized') {
+      if (!isAuthenticated &&
+          !isAuthRoute &&
+          state.matchedLocation != '/unauthorized') {
         return '/sign-in';
       }
-      
+
       // Redirect authenticated users away from auth pages
       if (isAuthenticated && isAuthRoute) {
         return '/';
       }
-      
+
       return null;
     },
     routes: [
@@ -95,7 +104,7 @@ final simplifiedRouterProvider = Provider<GoRouter>((ref) {
           return UnauthorizedPage(attemptedRoute: attemptedRoute);
         },
       ),
-      
+
       // ════════════════════════════════════════════════════════════════════════
       // MAIN APP (Premium Fintech Shell)
       // ════════════════════════════════════════════════════════════════════════
@@ -135,7 +144,7 @@ final simplifiedRouterProvider = Provider<GoRouter>((ref) {
             name: 'settings',
             builder: (context, state) => const SettingsPage(),
           ),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // UTILITY PAGES
           // ──────────────────────────────────────────────────────────────────────
@@ -152,12 +161,12 @@ final simplifiedRouterProvider = Provider<GoRouter>((ref) {
             name: 'connect',
             builder: (context, state) => const PremiumWalletConnectPage(),
           ),
-          
+
           // Aliases for navigation compatibility
           GoRoute(path: '/wallet-connect', redirect: (_, __) => '/connect'),
           GoRoute(path: '/profile', redirect: (_, __) => '/settings'),
           GoRoute(path: '/more', redirect: (_, __) => '/settings'),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // ADVANCED FEATURES (Consolidated power user tools)
           // ──────────────────────────────────────────────────────────────────────
@@ -171,11 +180,15 @@ final simplifiedRouterProvider = Provider<GoRouter>((ref) {
           ),
           // Deep links into advanced tabs
           GoRoute(path: '/nft-swap', redirect: (_, __) => '/advanced?tab=nft'),
-          GoRoute(path: '/cross-chain', redirect: (_, __) => '/advanced?tab=crosschain'),
+          GoRoute(
+              path: '/cross-chain',
+              redirect: (_, __) => '/advanced?tab=crosschain'),
           GoRoute(path: '/safe', redirect: (_, __) => '/advanced?tab=safe'),
-          GoRoute(path: '/session-keys', redirect: (_, __) => '/advanced?tab=sessions'),
+          GoRoute(
+              path: '/session-keys',
+              redirect: (_, __) => '/advanced?tab=sessions'),
           GoRoute(path: '/zknaf', redirect: (_, __) => '/advanced?tab=privacy'),
-          
+
           // ──────────────────────────────────────────────────────────────────────
           // DISPUTES
           // ──────────────────────────────────────────────────────────────────────

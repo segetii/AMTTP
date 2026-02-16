@@ -9,7 +9,7 @@ class AppUser {
   final String email;
   final String displayName;
   final String passwordHash;
-  final Role role;  // Using RBAC Role instead of UserProfile
+  final Role role; // Using RBAC Role instead of UserProfile
   final String? walletAddress;
   final DateTime createdAt;
   final bool isDemo;
@@ -26,48 +26,49 @@ class AppUser {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'email': email,
-    'displayName': displayName,
-    'passwordHash': passwordHash,
-    'role': role.code,  // Store role code
-    'walletAddress': walletAddress,
-    'createdAt': createdAt.toIso8601String(),
-    'isDemo': isDemo,
-  };
+        'id': id,
+        'email': email,
+        'displayName': displayName,
+        'passwordHash': passwordHash,
+        'role': role.code, // Store role code
+        'walletAddress': walletAddress,
+        'createdAt': createdAt.toIso8601String(),
+        'isDemo': isDemo,
+      };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
-    id: json['id'],
-    email: json['email'],
-    displayName: json['displayName'],
-    passwordHash: json['passwordHash'],
-    role: Role.fromCode(json['role'] ?? 'R1_END_USER'),
-    walletAddress: json['walletAddress'],
-    createdAt: DateTime.parse(json['createdAt']),
-    isDemo: json['isDemo'] ?? false,
-  );
+        id: json['id'],
+        email: json['email'],
+        displayName: json['displayName'],
+        passwordHash: json['passwordHash'],
+        role: Role.fromCode(json['role'] ?? 'R1_END_USER'),
+        walletAddress: json['walletAddress'],
+        createdAt: DateTime.parse(json['createdAt']),
+        isDemo: json['isDemo'] ?? false,
+      );
 
   AppUser copyWith({
     String? displayName,
     Role? role,
     String? walletAddress,
-  }) => AppUser(
-    id: id,
-    email: email,
-    displayName: displayName ?? this.displayName,
-    passwordHash: passwordHash,
-    role: role ?? this.role,
-    walletAddress: walletAddress ?? this.walletAddress,
-    createdAt: createdAt,
-    isDemo: isDemo,
-  );
-  
+  }) =>
+      AppUser(
+        id: id,
+        email: email,
+        displayName: displayName ?? this.displayName,
+        passwordHash: passwordHash,
+        role: role ?? this.role,
+        walletAddress: walletAddress ?? this.walletAddress,
+        createdAt: createdAt,
+        isDemo: isDemo,
+      );
+
   /// Get the app mode for this user's role
   AppMode get appMode => getModeForRole(role);
-  
+
   /// Check if user is in Focus Mode (R1/R2)
   bool get isFocusMode => appMode == AppMode.focusMode;
-  
+
   /// Check if user is in War Room Mode (R3+)
   bool get isWarRoomMode => appMode == AppMode.warRoomMode;
 }
@@ -85,14 +86,14 @@ class AuthResult {
   });
 
   factory AuthResult.success(AppUser user) => AuthResult(
-    success: true,
-    user: user,
-  );
+        success: true,
+        user: user,
+      );
 
   factory AuthResult.failure(String message) => AuthResult(
-    success: false,
-    message: message,
-  );
+        success: false,
+        message: message,
+      );
 }
 
 /// Authentication Service - handles user registration, login, and session management
@@ -106,9 +107,7 @@ class AuthService {
   AppUser? _currentUser;
 
   /// Demo users with predefined credentials for ALL roles (R1-R6)
-  /// Per AMTTP Ground Truth v2.3 RBAC specification
   static final List<AppUser> demoUsers = [
-    // R1: End User - Focus Mode, personal wallet
     AppUser(
       id: 'demo-r1-001',
       email: 'user@amttp.io',
@@ -119,7 +118,6 @@ class AuthService {
       createdAt: DateTime(2025, 1, 1),
       isDemo: true,
     ),
-    // R2: End User PEP - Focus Mode, enhanced monitoring
     AppUser(
       id: 'demo-r2-001',
       email: 'pep@amttp.io',
@@ -130,7 +128,6 @@ class AuthService {
       createdAt: DateTime(2025, 1, 1),
       isDemo: true,
     ),
-    // R3: Institution Ops - War Room (read-only)
     AppUser(
       id: 'demo-r3-001',
       email: 'ops@amttp.io',
@@ -141,7 +138,6 @@ class AuthService {
       createdAt: DateTime(2025, 1, 1),
       isDemo: true,
     ),
-    // R4: Institution Compliance - War Room (full access, multisig)
     AppUser(
       id: 'demo-r4-001',
       email: 'compliance@amttp.io',
@@ -152,7 +148,6 @@ class AuthService {
       createdAt: DateTime(2025, 1, 1),
       isDemo: true,
     ),
-    // R5: Platform Admin - system configuration
     AppUser(
       id: 'demo-r5-001',
       email: 'admin@amttp.io',
@@ -163,7 +158,6 @@ class AuthService {
       createdAt: DateTime(2025, 1, 1),
       isDemo: true,
     ),
-    // R6: Super Admin - emergency override only
     AppUser(
       id: 'demo-r6-001',
       email: 'super@amttp.io',
@@ -175,6 +169,8 @@ class AuthService {
       isDemo: true,
     ),
   ];
+
+  // Demo users removed. Only real backend users are supported.
 
   /// Initialize the auth service
   Future<void> init() async {
@@ -190,7 +186,7 @@ class AuthService {
       final List<dynamic> usersList = jsonDecode(usersJson);
       _users = usersList.map((u) => AppUser.fromJson(u)).toList();
     }
-    
+
     // Always use fresh demo users (overwrite any stale stored versions)
     // This ensures password hashes and role data are always correct
     for (final demoUser in demoUsers) {
@@ -227,7 +223,7 @@ class AuthService {
 
   /// Hash password using SHA-256
   static String _hashPassword(String password) {
-    final bytes = utf8.encode(password + 'amttp_salt_2026');
+    final bytes = utf8.encode('${password}amttp_salt_2026');
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
@@ -285,21 +281,23 @@ class AuthService {
     if (_prefs == null) {
       await init();
     }
-    
+
     // Ensure demo users are available
     if (_users.isEmpty) {
       _users.addAll(demoUsers);
     }
-    
+
     // Find user by email
-    final userMatch = _users.where(
-      (u) => u.email.toLowerCase() == email.toLowerCase(),
-    ).toList();
-    
+    final userMatch = _users
+        .where(
+          (u) => u.email.toLowerCase() == email.toLowerCase(),
+        )
+        .toList();
+
     if (userMatch.isEmpty) {
       return AuthResult.failure('User not found');
     }
-    
+
     final user = userMatch.first;
 
     // Verify password
@@ -367,16 +365,17 @@ class AuthService {
 
   /// Delete user account
   Future<bool> deleteUser(String userId) async {
-    final user = _users.firstWhere((u) => u.id == userId, orElse: () => throw Exception());
+    final user = _users.firstWhere((u) => u.id == userId,
+        orElse: () => throw Exception());
     if (user.isDemo) return false; // Cannot delete demo users
-    
+
     _users.removeWhere((u) => u.id == userId);
     await _saveUsers();
-    
+
     if (_currentUser?.id == userId) {
       await logout();
     }
-    
+
     return true;
   }
 

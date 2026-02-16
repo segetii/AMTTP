@@ -10,6 +10,7 @@
 /// - UI integrity protection
 /// - Intent hashing
 /// - Multi-stage confirmation flow
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/rbac/rbac_provider.dart';
-import '../../../../shared/shells/role_based_shell.dart';
 
 /// Detection Studio Page - Embeds the Next.js SIEM dashboard inside Flutter
 /// This allows Admin and Compliance users to access the full Next.js UI

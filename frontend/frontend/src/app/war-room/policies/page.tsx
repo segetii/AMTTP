@@ -109,45 +109,45 @@ export default function PoliciesPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">Policy Engine</h1>
-            <p className="text-slate-400">Configure and manage transfer policies</p>
+            <h1 className="text-2xl font-bold text-text">Policy Engine</h1>
+            <p className="text-mutedText">Configure and manage transfer policies</p>
           </div>
           
           {/* Quick Stats */}
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <p className="text-2xl font-bold text-white">{stats.total}</p>
-              <p className="text-xs text-slate-500">Policies</p>
+              <p className="text-2xl font-bold text-text">{stats.total}</p>
+              <p className="text-xs text-mutedText">Policies</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-green-400">{stats.active}</p>
-              <p className="text-xs text-slate-500">Active</p>
+              <p className="text-xs text-mutedText">Active</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
-              <p className="text-xs text-slate-500">Pending</p>
+              <p className="text-xs text-mutedText">Pending</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-cyan-400">{stats.totalRules}</p>
-              <p className="text-xs text-slate-500">Rules</p>
+              <p className="text-xs text-mutedText">Rules</p>
             </div>
           </div>
         </div>
         
         {/* Tabs & Actions */}
-        <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <div className="flex items-center justify-between border-b border-borderSubtle pb-4">
           <div className="flex gap-1">
             <button
               onClick={() => setActiveTab('list')}
               className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
                 ${activeTab === 'list'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:text-white'}`}
+                  ? 'bg-surface text-text'
+                  : 'text-mutedText hover:text-text'}`}
             >
               📋 Policies
             </button>
@@ -155,8 +155,8 @@ export default function PoliciesPage() {
               onClick={() => setActiveTab('simulator')}
               className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
                 ${activeTab === 'simulator'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:text-white'}`}
+                  ? 'bg-surface text-text'
+                  : 'text-mutedText hover:text-text'}`}
             >
               🧪 Simulator
             </button>
@@ -164,7 +164,7 @@ export default function PoliciesPage() {
           
           <button
             onClick={handleCreate}
-            className="px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-500 flex items-center gap-2"
+            className="px-4 py-2 bg-cyan-600 text-text rounded-lg text-sm font-medium hover:bg-cyan-500 flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -238,12 +238,12 @@ function PolicyDetailPanel({
   onSuspend: () => void;
 }) {
   return (
-    <div className="bg-slate-800/30 rounded-lg border border-slate-700">
+    <div className="bg-surface/30 rounded-lg border border-borderSubtle">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700">
+      <div className="flex items-center justify-between p-4 border-b border-borderSubtle">
         <div>
-          <h2 className="text-lg font-medium text-white">{policy.name}</h2>
-          <p className="text-sm text-slate-400">Version {policy.version}</p>
+          <h2 className="text-lg font-medium text-text">{policy.name}</h2>
+          <p className="text-sm text-mutedText">Version {policy.version}</p>
         </div>
         <div className="flex items-center gap-2">
           {policy.status === PolicyStatus.ACTIVE && (
@@ -281,41 +281,41 @@ function PolicyDetailPanel({
       <div className="p-4 space-y-6">
         {/* Description */}
         <div>
-          <h3 className="text-sm font-medium text-slate-400 mb-2">Description</h3>
+          <h3 className="text-sm font-medium text-mutedText mb-2">Description</h3>
           <p className="text-slate-300">{policy.description || 'No description'}</p>
         </div>
         
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
-            <p className="text-xl font-bold text-white">{policy.stats?.evaluations.toLocaleString() || 0}</p>
-            <p className="text-xs text-slate-500">Evaluations</p>
+          <div className="bg-background/50 rounded-lg p-3 text-center">
+            <p className="text-xl font-bold text-text">{policy.stats?.evaluations.toLocaleString() || 0}</p>
+            <p className="text-xs text-mutedText">Evaluations</p>
           </div>
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-background/50 rounded-lg p-3 text-center">
             <p className="text-xl font-bold text-amber-400">{policy.stats?.triggers.toLocaleString() || 0}</p>
-            <p className="text-xs text-slate-500">Triggers</p>
+            <p className="text-xs text-mutedText">Triggers</p>
           </div>
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-background/50 rounded-lg p-3 text-center">
             <p className="text-xl font-bold text-red-400">0</p>
-            <p className="text-xs text-slate-500">Blocks</p>
+            <p className="text-xs text-mutedText">Blocks</p>
           </div>
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-background/50 rounded-lg p-3 text-center">
             <p className="text-xl font-bold text-green-400">0.0ms</p>
-            <p className="text-xs text-slate-500">Avg Time</p>
+            <p className="text-xs text-mutedText">Avg Time</p>
           </div>
         </div>
         
         {/* Rules */}
         <div>
-          <h3 className="text-sm font-medium text-slate-400 mb-3">
+          <h3 className="text-sm font-medium text-mutedText mb-3">
             Rules ({policy.rules.length})
           </h3>
           <div className="space-y-2">
             {policy.rules.map((rule, idx) => (
               <div
                 key={rule.id}
-                className={`bg-slate-900/50 rounded-lg p-3 border ${
-                  rule.enabled ? 'border-slate-600' : 'border-slate-700 opacity-50'
+                className={`bg-background/50 rounded-lg p-3 border ${
+                  rule.enabled ? 'border-borderSubtle' : 'border-borderSubtle opacity-50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -323,9 +323,9 @@ function PolicyDetailPanel({
                     <span className="w-5 h-5 bg-slate-700 rounded-full flex items-center justify-center text-xs">
                       {idx + 1}
                     </span>
-                    <span className="font-medium text-white">{rule.name}</span>
+                    <span className="font-medium text-text">{rule.name}</span>
                     {!rule.enabled && (
-                      <span className="px-2 py-0.5 text-xs bg-slate-700 text-slate-400 rounded">Disabled</span>
+                      <span className="px-2 py-0.5 text-xs bg-slate-700 text-mutedText rounded">Disabled</span>
                     )}
                   </div>
                   <span className={`px-2 py-0.5 text-xs rounded ${
@@ -340,14 +340,14 @@ function PolicyDetailPanel({
                 </div>
                 
                 {rule.conditions.length > 0 && (
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-xs text-mutedText space-y-1">
                     {rule.conditions.map((cond, cIdx) => (
                       <div key={cIdx}>
-                        <span className="text-slate-400">{cond.field}</span>
+                        <span className="text-mutedText">{cond.field}</span>
                         {' '}
                         <span className="text-cyan-400">{cond.operator}</span>
                         {' '}
-                        <span className="text-white">{JSON.stringify(cond.value)}</span>
+                        <span className="text-text">{JSON.stringify(cond.value)}</span>
                       </div>
                     ))}
                   </div>
@@ -360,7 +360,7 @@ function PolicyDetailPanel({
         {/* Tags */}
         {policy.tags && policy.tags.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-slate-400 mb-2">Tags</h3>
+            <h3 className="text-sm font-medium text-mutedText mb-2">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {policy.tags.map((tag) => (
                 <span key={tag} className="px-2 py-1 bg-slate-700 text-slate-300 text-sm rounded-full">
@@ -372,7 +372,7 @@ function PolicyDetailPanel({
         )}
         
         {/* Metadata */}
-        <div className="pt-4 border-t border-slate-700 text-xs text-slate-500 flex items-center justify-between">
+        <div className="pt-4 border-t border-borderSubtle text-xs text-mutedText flex items-center justify-between">
           <span>Created by {policy.createdBy}</span>
           <span>Updated {policy.updatedAt ? new Date(policy.updatedAt).toLocaleString() : 'N/A'}</span>
         </div>
@@ -387,18 +387,18 @@ function PolicyDetailPanel({
 
 function EmptyStatePanel({ onCreateClick }: { onCreateClick: () => void }) {
   return (
-    <div className="bg-slate-800/30 rounded-lg border border-slate-700 p-12 text-center">
+    <div className="bg-surface/30 rounded-lg border border-borderSubtle p-12 text-center">
       <svg className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
       <h3 className="text-lg font-medium text-slate-300 mb-2">Select a Policy</h3>
-      <p className="text-sm text-slate-500 mb-6">
+      <p className="text-sm text-mutedText mb-6">
         Select a policy from the list to view details, or create a new one.
       </p>
       <button
         onClick={onCreateClick}
-        className="px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-500"
+        className="px-4 py-2 bg-cyan-600 text-text rounded-lg text-sm font-medium hover:bg-cyan-500"
       >
         Create New Policy
       </button>

@@ -4,6 +4,7 @@
 /// - Pre-Transaction Trust Check in Focus Mode
 /// - Shows risk indicators before proceeding with transfer
 /// - Simple binary outcome with brief explanation
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

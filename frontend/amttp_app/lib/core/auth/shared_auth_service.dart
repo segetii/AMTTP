@@ -2,6 +2,7 @@
 /// 
 /// Provides unified authentication across Flutter and Next.js apps
 /// Uses shared JWT token stored in localStorage/secure storage
+library;
 
 import 'dart:convert';
 import 'package:flutter/foundation.dart';

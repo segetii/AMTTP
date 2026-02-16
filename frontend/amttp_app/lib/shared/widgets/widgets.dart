@@ -1,6 +1,7 @@
 /// AMTTP Shared Widgets
 /// 
 /// Export all shared widgets for easy import
+library;
 
 // =============================================================================
 // STANDARD COMPONENTS (New Standardized Design System)

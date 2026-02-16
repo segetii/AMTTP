@@ -1,3 +1,8 @@
+/// @deprecated — This file is DEAD CODE. All R1/R2 routing now uses
+/// [FintechHomePage] in `shared/shells/premium_fintech_shell.dart`.
+/// Retained for reference only. Safe to delete.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +11,6 @@ import '../../../../core/web3/wallet_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/secure_transfer_widget.dart';
 import '../../../../shared/widgets/risk_visualizer_widget.dart';
-import '../../../../shared/widgets/interactive_wallet_widget.dart';
-import '../../../../shared/widgets/features_carousel.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -44,7 +47,8 @@ class _HomePageState extends ConsumerState<HomePage>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(
+        parent: _animationController, curve: Curves.easeOutCubic));
     _animationController.forward();
   }
 
@@ -79,7 +83,8 @@ class _HomePageState extends ConsumerState<HomePage>
               : _buildWelcomeScreen(),
         ),
       ),
-      bottomNavigationBar: walletState.isConnected ? _buildBottomNavBar() : null,
+      bottomNavigationBar:
+          walletState.isConnected ? _buildBottomNavBar() : null,
     );
   }
 
@@ -107,7 +112,8 @@ class _HomePageState extends ConsumerState<HomePage>
         backgroundColor: AppTheme.darkCard,
         selectedItemColor: AppTheme.primaryPurple,
         unselectedItemColor: AppTheme.textLight,
-        selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        selectedLabelStyle:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontSize: 11),
         items: const [
           BottomNavigationBarItem(
@@ -137,7 +143,7 @@ class _HomePageState extends ConsumerState<HomePage>
       children: [
         // Animated background orbs - already has IgnorePointer built in
         _buildBackgroundOrbs(),
-        
+
         // Main content
         SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -158,18 +164,22 @@ class _HomePageState extends ConsumerState<HomePage>
                   // Welcome Title with Gradient
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
-                      colors: [AppTheme.cleanWhite, AppTheme.primaryPurpleLight],
+                      colors: [
+                        AppTheme.cleanWhite,
+                        AppTheme.primaryPurpleLight
+                      ],
                     ).createShader(bounds),
                     child: Text(
                       'Advanced Money\nTransfer Protocol',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                            color: AppTheme.cleanWhite,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 36,
-                            height: 1.2,
-                            letterSpacing: -1,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: AppTheme.cleanWhite,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 36,
+                                height: 1.2,
+                                letterSpacing: -1,
+                              ),
                     ),
                   ),
 
@@ -197,7 +207,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   _buildModernWalletConnect(),
 
                   const SizedBox(height: 32),
-                  
+
                   // Quick Navigation Links
                   _buildQuickLinks(),
 
@@ -308,21 +318,24 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget _buildFeatureCards() {
     return Row(
       children: [
-        Expanded(child: _buildFeatureCard(
+        Expanded(
+            child: _buildFeatureCard(
           Icons.shield_outlined,
           'AI Protection',
           'Real-time fraud detection',
           AppTheme.primaryPurple,
         )),
         const SizedBox(width: 12),
-        Expanded(child: _buildFeatureCard(
+        Expanded(
+            child: _buildFeatureCard(
           Icons.speed_rounded,
           'Instant',
           'Sub-second transfers',
           AppTheme.accentCyan,
         )),
         const SizedBox(width: 12),
-        Expanded(child: _buildFeatureCard(
+        Expanded(
+            child: _buildFeatureCard(
           Icons.verified_rounded,
           'Compliant',
           'FCA regulated',
@@ -332,7 +345,8 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildFeatureCard(IconData icon, String title, String subtitle, Color color) {
+  Widget _buildFeatureCard(
+      IconData icon, String title, String subtitle, Color color) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -446,12 +460,12 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           ),
           const SizedBox(height: 28),
-          
+
           // Show loading or error state
           Consumer(
             builder: (context, ref, child) {
               final walletState = ref.watch(walletProvider);
-              
+
               if (walletState.isConnecting) {
                 return Container(
                   padding: const EdgeInsets.all(20),
@@ -472,7 +486,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   ),
                 );
               }
-              
+
               if (walletState.hasError && walletState.error != null) {
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -480,11 +494,13 @@ class _HomePageState extends ConsumerState<HomePage>
                   decoration: BoxDecoration(
                     color: AppTheme.dangerRed.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.dangerRed.withOpacity(0.5)),
+                    border:
+                        Border.all(color: AppTheme.dangerRed.withOpacity(0.5)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: AppTheme.dangerRed),
+                      const Icon(Icons.error_outline,
+                          color: AppTheme.dangerRed),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -499,11 +515,11 @@ class _HomePageState extends ConsumerState<HomePage>
                   ),
                 );
               }
-              
+
               return const SizedBox.shrink();
             },
           ),
-          
+
           // MetaMask Button
           ElevatedButton(
             onPressed: () {
@@ -535,7 +551,7 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // WalletConnect Button
           ElevatedButton(
             onPressed: () {
@@ -566,9 +582,9 @@ class _HomePageState extends ConsumerState<HomePage>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Explore Demo Button
           TextButton(
             onPressed: () {
@@ -656,7 +672,8 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildLinkButton(IconData icon, String label, String route, Color color) {
+  Widget _buildLinkButton(
+      IconData icon, String label, String route, Color color) {
     return ElevatedButton(
       onPressed: () {
         debugPrint('Navigating to $route');
@@ -689,7 +706,8 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildConnectButton(String label, IconData icon, Gradient gradient, VoidCallback onTap) {
+  Widget _buildConnectButton(
+      String label, IconData icon, Gradient gradient, VoidCallback onTap) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -765,16 +783,16 @@ class _HomePageState extends ConsumerState<HomePage>
       children: [
         // Background gradient orbs - already has IgnorePointer built in
         _buildBackgroundOrbs(),
-        
+
         // Main content column
         Column(
           children: [
             // Modern App Bar
             _buildModernAppBar(walletState),
-            
+
             // Balance Card
             _buildModernBalanceCard(walletState),
-            
+
             // Tab Content
             Expanded(
               child: Container(
@@ -953,11 +971,13 @@ class _HomePageState extends ConsumerState<HomePage>
               }),
               const SizedBox(width: 8),
               _buildQuickAction(Icons.arrow_downward_rounded, 'Receive', () {
-                _showFullScreenView('Receive ETH', _buildReceiveContent(walletState));
+                _showFullScreenView(
+                    'Receive ETH', _buildReceiveContent(walletState));
               }),
               const SizedBox(width: 8),
               _buildQuickAction(Icons.swap_horiz_rounded, 'History', () {
-                _showFullScreenView('Transaction History', _buildHistoryContent());
+                _showFullScreenView(
+                    'Transaction History', _buildHistoryContent());
               }),
               const SizedBox(width: 8),
               _buildQuickAction(Icons.settings_rounded, 'Settings', () {
@@ -1012,7 +1032,8 @@ class _HomePageState extends ConsumerState<HomePage>
           appBar: AppBar(
             backgroundColor: AppTheme.darkCard,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.cleanWhite),
+              icon: const Icon(Icons.arrow_back_rounded,
+                  color: AppTheme.cleanWhite),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
@@ -1058,7 +1079,8 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
             child: Column(
               children: [
-                const Icon(Icons.qr_code_rounded, color: AppTheme.primaryPurple, size: 80),
+                const Icon(Icons.qr_code_rounded,
+                    color: AppTheme.primaryPurple, size: 80),
                 const SizedBox(height: 24),
                 const Text(
                   'Your Wallet Address',
@@ -1098,7 +1120,8 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget _buildHistoryContent() {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: List.generate(10, (index) => _buildModernTransactionItem(index)),
+      children:
+          List.generate(10, (index) => _buildModernTransactionItem(index)),
     );
   }
 
@@ -1106,9 +1129,12 @@ class _HomePageState extends ConsumerState<HomePage>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildSettingsItem(Icons.security_rounded, 'Security', 'Manage security settings'),
-        _buildSettingsItem(Icons.notifications_rounded, 'Notifications', 'Configure alerts'),
-        _buildSettingsItem(Icons.palette_rounded, 'Appearance', 'Theme and display'),
+        _buildSettingsItem(
+            Icons.security_rounded, 'Security', 'Manage security settings'),
+        _buildSettingsItem(
+            Icons.notifications_rounded, 'Notifications', 'Configure alerts'),
+        _buildSettingsItem(
+            Icons.palette_rounded, 'Appearance', 'Theme and display'),
         _buildSettingsItem(Icons.language_rounded, 'Language', 'English'),
         _buildSettingsItem(Icons.info_rounded, 'About', 'Version 1.0.0'),
       ],
@@ -1150,7 +1176,8 @@ class _HomePageState extends ConsumerState<HomePage>
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: AppTheme.textLight, fontSize: 12),
+                  style:
+                      const TextStyle(color: AppTheme.textLight, fontSize: 12),
                 ),
               ],
             ),
@@ -1170,7 +1197,8 @@ class _HomePageState extends ConsumerState<HomePage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Receive ETH',
-          style: TextStyle(color: AppTheme.cleanWhite, fontWeight: FontWeight.w700),
+          style: TextStyle(
+              color: AppTheme.cleanWhite, fontWeight: FontWeight.w700),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1201,7 +1229,8 @@ class _HomePageState extends ConsumerState<HomePage>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: AppTheme.primaryPurple)),
+            child: const Text('Close',
+                style: TextStyle(color: AppTheme.primaryPurple)),
           ),
         ],
       ),
@@ -1339,7 +1368,8 @@ class _HomePageState extends ConsumerState<HomePage>
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppTheme.successGreen.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -1390,7 +1420,8 @@ class _HomePageState extends ConsumerState<HomePage>
                 child: LinearProgressIndicator(
                   value: 0.314,
                   backgroundColor: AppTheme.cleanWhite.withOpacity(0.1),
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.successGreen),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.successGreen),
                   minHeight: 8,
                 ),
               ),
@@ -1464,7 +1495,18 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget _buildModernTransactionItem(int index) {
     final bool isIncoming = index % 2 == 0;
     final double amount = (index + 1) * 150.0;
-    final List<String> timeAgo = ['2 min', '15 min', '1 hr', '3 hrs', '6 hrs', '12 hrs', '1 day', '2 days', '3 days', '1 week'];
+    final List<String> timeAgo = [
+      '2 min',
+      '15 min',
+      '1 hr',
+      '3 hrs',
+      '6 hrs',
+      '12 hrs',
+      '1 day',
+      '2 days',
+      '3 days',
+      '1 week'
+    ];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1480,13 +1522,16 @@ class _HomePageState extends ConsumerState<HomePage>
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              gradient: isIncoming 
-                ? const LinearGradient(colors: [AppTheme.successGreen, Color(0xFF059669)])
-                : AppTheme.primaryGradient,
+              gradient: isIncoming
+                  ? const LinearGradient(
+                      colors: [AppTheme.successGreen, Color(0xFF059669)])
+                  : AppTheme.primaryGradient,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
-              isIncoming ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+              isIncoming
+                  ? Icons.arrow_downward_rounded
+                  : Icons.arrow_upward_rounded,
               color: AppTheme.cleanWhite,
               size: 22,
             ),
@@ -1497,7 +1542,7 @@ class _HomePageState extends ConsumerState<HomePage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${isIncoming ? 'Received from' : 'Sent to'}',
+                  isIncoming ? 'Received from' : 'Sent to',
                   style: TextStyle(
                     color: AppTheme.cleanWhite.withOpacity(0.7),
                     fontSize: 12,
@@ -1505,7 +1550,8 @@ class _HomePageState extends ConsumerState<HomePage>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatAddress('0x${(1234567890 + index * 111111111).toRadixString(16)}abcd'),
+                  _formatAddress(
+                      '0x${(1234567890 + index * 111111111).toRadixString(16)}abcd'),
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: AppTheme.cleanWhite,
@@ -1523,7 +1569,8 @@ class _HomePageState extends ConsumerState<HomePage>
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: isIncoming ? AppTheme.successGreen : AppTheme.cleanWhite,
+                  color:
+                      isIncoming ? AppTheme.successGreen : AppTheme.cleanWhite,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1579,7 +1626,8 @@ class _HomePageState extends ConsumerState<HomePage>
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),

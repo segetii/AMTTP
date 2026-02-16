@@ -815,7 +815,7 @@ class _AuditChainReplayToolState extends ConsumerState<AuditChainReplayTool>
     required void Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: AppTheme.cleanWhite.withOpacity(0.5)),

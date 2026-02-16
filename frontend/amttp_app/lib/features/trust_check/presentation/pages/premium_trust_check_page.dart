@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,13 +78,13 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     IconData bucketIcon;
     final bucket = result.bucket.toLowerCase();
     if (bucket == 'trusted') {
-      bucketColor = const Color(0xFF22C55E);
+      bucketColor = AppTheme.tokenSuccess;
       bucketIcon = Icons.check_circle_rounded;
     } else if (bucket == 'caution') {
-      bucketColor = const Color(0xFFF59E0B);
+      bucketColor = AppTheme.tokenWarning;
       bucketIcon = Icons.warning_rounded;
     } else {
-      bucketColor = const Color(0xFFEF4444);
+      bucketColor = AppTheme.tokenDanger;
       bucketIcon = Icons.dangerous_rounded;
     }
     
@@ -109,7 +110,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
           'status': 'CLEAR',
           'description': 'Not on OFAC, EU, or UN sanctions lists',
           'icon': Icons.check_circle_rounded,
-          'color': const Color(0xFF22C55E),
+          'color': AppTheme.tokenSuccess,
         });
       }
     });
@@ -123,7 +124,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: AppTheme.tokenBackground,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -195,11 +196,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       final isCompleted = currentStep > step;
       Color color;
       if (isCompleted) {
-        color = const Color(0xFF22C55E);
+        color = AppTheme.tokenSuccess;
       } else if (isActive) {
-        color = const Color(0xFF6366F1);
+        color = AppTheme.tokenPrimary;
       } else {
-        color = const Color(0xFF1E293B);
+        color = AppTheme.slate800;
       }
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -210,15 +211,15 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Center(
               child: isCompleted
-                  ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
-                  : Text(step.toString(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ? Icon(Icons.check_rounded, size: 14, color: AppTheme.tokenText)
+                  : Text(step.toString(), style: const TextStyle(color: AppTheme.tokenText, fontSize: 11, fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.white.withOpacity(0.6),
+              color: isActive ? AppTheme.tokenText : Colors.white.withAlpha(153),
               fontSize: 11,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -233,9 +234,9 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           dot(1, 'Enter'),
-          Container(width: 28, height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withOpacity(0.15)),
+          Container(width: 28, height: 1, margin: EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withAlpha(38)),
           dot(2, 'Analyze'),
-          Container(width: 28, height: 1, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withOpacity(0.15)),
+          Container(width: 28, height: 1, margin: EdgeInsets.symmetric(horizontal: 4), color: Colors.white.withAlpha(38)),
           dot(3, 'Result'),
         ],
       ),
@@ -253,11 +254,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2D2D44)),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
               ),
-              child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.arrow_back_rounded, color: AppTheme.tokenText, size: 20),
             ),
           ),
           const Expanded(
@@ -265,7 +266,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               'Trust Check',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.tokenText,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -277,11 +278,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppTheme.tokenCardElevated,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2D2D44)),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
               ),
-              child: const Icon(Icons.info_outline_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.info_outline_rounded, color: AppTheme.tokenText, size: 20),
             ),
           ),
         ],
@@ -293,10 +294,10 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Verify Address',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.tokenText,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -305,7 +306,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         Text(
           'Enter a wallet address to check its trust score and risk factors',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 13,
           ),
         ),
@@ -313,21 +314,21 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF12121A),
+            color: AppTheme.tokenSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF1E1E2E)),
+            border: Border.all(color: AppTheme.tokenBorderSubtle),
           ),
           child: Row(
             children: [
-              const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 22),
+              Icon(Icons.search_rounded, color: AppTheme.slate500, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
                   controller: _addressController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(color: AppTheme.tokenText, fontSize: 14),
                   decoration: InputDecoration(
                     hintText: '0x... or ENS name',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -343,12 +344,12 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                    color: AppTheme.tokenBorderSubtle,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
                     'Paste',
-                    style: TextStyle(color: Color(0xFF6366F1), fontSize: 12, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppTheme.tokenPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -359,10 +360,10 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
+                    color: AppTheme.tokenBorderSubtle,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF64748B), size: 18),
+                  child: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.slate500, size: 18),
                 ),
               ),
             ],
@@ -378,11 +379,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+          gradient: const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.4),
+              color: AppTheme.tokenPrimary.withAlpha(102),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -392,11 +393,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.search_rounded, color: Colors.white, size: 20),
+              Icon(Icons.search_rounded, color: AppTheme.tokenText, size: 20),
               SizedBox(width: 8),
               Text(
                 'Check Address',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppTheme.tokenText, fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -406,7 +407,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
   }
 
   Widget _buildLoading() {
-    return Container(
+    return SizedBox(
       height: 200,
       child: Center(
         child: Column(
@@ -417,19 +418,19 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               height: 60,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF6366F1)),
-                backgroundColor: const Color(0xFF1E1E2E),
+                valueColor: const AlwaysStoppedAnimation(AppTheme.tokenPrimary),
+                backgroundColor: AppTheme.tokenBorderSubtle,
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Analyzing address...',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: AppTheme.tokenText, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
               'Checking sanctions lists, transaction history, and risk factors',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+              style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 13),
               textAlign: TextAlign.center,
             ),
           ],
@@ -442,23 +443,23 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+        border: Border.all(color: AppTheme.tokenDanger.withAlpha(102)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+          const Icon(Icons.error_outline_rounded, color: AppTheme.tokenDanger),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage ?? 'Trust check failed',
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppTheme.tokenText),
             ),
           ),
           TextButton(
             onPressed: _checkAddress,
-            child: const Text('Retry', style: TextStyle(color: Color(0xFFF59E0B))),
+            child: const Text('Retry', style: TextStyle(color: AppTheme.tokenWarning)),
           ),
         ],
       ),
@@ -473,26 +474,26 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     String scoreLabel;
     switch (_bucket.toLowerCase()) {
       case 'trusted':
-        scoreColor = const Color(0xFF22C55E);
+        scoreColor = AppTheme.tokenSuccess;
         scoreLabel = 'TRUSTED';
         break;
       case 'caution':
-        scoreColor = const Color(0xFFF59E0B);
+        scoreColor = AppTheme.tokenWarning;
         scoreLabel = 'CAUTION';
         break;
       case 'restricted':
-        scoreColor = const Color(0xFFEF4444);
+        scoreColor = AppTheme.tokenDanger;
         scoreLabel = 'RESTRICTED';
         break;
       default:
         if (isGood) {
-          scoreColor = const Color(0xFF22C55E);
+          scoreColor = AppTheme.tokenSuccess;
           scoreLabel = 'TRUSTED';
         } else if (isMedium) {
-          scoreColor = const Color(0xFFF59E0B);
+          scoreColor = AppTheme.tokenWarning;
           scoreLabel = 'CAUTION';
         } else {
-          scoreColor = const Color(0xFFEF4444);
+          scoreColor = AppTheme.tokenDanger;
           scoreLabel = 'HIGH RISK';
         }
     }
@@ -500,12 +501,12 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: scoreColor.withOpacity(0.3)),
+        border: Border.all(color: scoreColor.withAlpha(77)),
         boxShadow: [
           BoxShadow(
-            color: scoreColor.withOpacity(0.15),
+            color: scoreColor.withAlpha(38),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -530,8 +531,8 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                       child: CircularProgressIndicator(
                         value: 1,
                         strokeWidth: 10,
-                        backgroundColor: const Color(0xFF1E1E2E),
-                        valueColor: const AlwaysStoppedAnimation(Color(0xFF1E1E2E)),
+                        backgroundColor: AppTheme.tokenBorderSubtle,
+                        valueColor: const AlwaysStoppedAnimation(AppTheme.tokenBorderSubtle),
                       ),
                     ),
                     // Progress ring
@@ -553,7 +554,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                         Text(
                           _scoreAnimation.value.toInt().toString(),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.tokenText,
                             fontSize: 44,
                             fontWeight: FontWeight.bold,
                           ),
@@ -561,13 +562,13 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                         Container(
                           width: 40,
                           height: 2,
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withAlpha(51),
                         ),
                         const SizedBox(height: 4),
                         const Text(
                           '100',
                           style: TextStyle(
-                            color: Color(0xFF64748B),
+                            color: AppTheme.slate500,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -583,7 +584,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: scoreColor.withOpacity(0.15),
+              color: scoreColor.withAlpha(38),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -613,7 +614,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 ? '${_addressController.text.substring(0, 8)}...${_addressController.text.substring(_addressController.text.length - 6)}'
                 : _addressController.text,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(153),
               fontSize: 14,
             ),
           ),
@@ -629,7 +630,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         const Text(
           'Risk Breakdown',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.tokenText,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -645,9 +646,9 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Row(
         children: [
@@ -655,7 +656,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: (check['color'] as Color).withOpacity(0.15),
+              color: (check['color'] as Color).withAlpha(38),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(check['icon'] as IconData, color: check['color'] as Color, size: 20),
@@ -668,7 +669,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 Text(
                   check['title'] as String,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.tokenText,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -677,7 +678,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 Text(
                   check['description'] as String,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withAlpha(128),
                     fontSize: 12,
                   ),
                 ),
@@ -687,7 +688,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: (check['color'] as Color).withOpacity(0.1),
+              color: (check['color'] as Color).withAlpha(26),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -708,9 +709,9 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF12121A),
+        color: AppTheme.tokenSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E2E)),
+        border: Border.all(color: AppTheme.tokenBorderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,7 +722,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               const Text(
                 'Transaction Graph',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.tokenText,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -731,7 +732,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 child: const Text(
                   'View details',
                   style: TextStyle(
-                    color: Color(0xFF6366F1),
+                    color: AppTheme.tokenPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -747,15 +748,15 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildGraphNode('A', const Color(0xFF22C55E)),
+                  _buildGraphNode('A', AppTheme.tokenSuccess),
                   _buildGraphEdge(),
-                  _buildGraphNode('B', const Color(0xFF22C55E)),
+                  _buildGraphNode('B', AppTheme.tokenSuccess),
                   _buildGraphEdge(),
-                  _buildGraphNode('You', const Color(0xFF6366F1), isMain: true),
+                  _buildGraphNode('You', AppTheme.tokenPrimary, isMain: true),
                   _buildGraphEdge(),
-                  _buildGraphNode('C', const Color(0xFF22C55E)),
+                  _buildGraphNode('C', AppTheme.tokenSuccess),
                   _buildGraphEdge(),
-                  _buildGraphNode('D', const Color(0xFFF59E0B)),
+                  _buildGraphNode('D', AppTheme.tokenWarning),
                 ],
               ),
             ),
@@ -764,11 +765,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem('Clean', const Color(0xFF22C55E)),
+              _buildLegendItem('Clean', AppTheme.tokenSuccess),
               const SizedBox(width: 16),
-              _buildLegendItem('Caution', const Color(0xFFF59E0B)),
+              _buildLegendItem('Caution', AppTheme.tokenWarning),
               const SizedBox(width: 16),
-              _buildLegendItem('Flagged', const Color(0xFFEF4444)),
+              _buildLegendItem('Flagged', AppTheme.tokenDanger),
             ],
           ),
         ],
@@ -781,7 +782,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       width: isMain ? 50 : 40,
       height: isMain ? 50 : 40,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withAlpha(38),
         shape: BoxShape.circle,
         border: Border.all(color: color, width: isMain ? 2 : 1),
       ),
@@ -802,7 +803,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return Container(
       width: 20,
       height: 2,
-      color: const Color(0xFF374151),
+      color: AppTheme.gray700,
     );
   }
 
@@ -822,7 +823,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(128),
             fontSize: 11,
           ),
         ),
@@ -839,9 +840,9 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             Expanded(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E1E2E),
-                  foregroundColor: const Color(0xFF22C55E),
-                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  backgroundColor: AppTheme.tokenBorderSubtle,
+                  foregroundColor: AppTheme.tokenSuccess,
+                  side: const BorderSide(color: AppTheme.tokenSuccess),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
@@ -857,8 +858,8 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             Expanded(
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF22C55E),
-                  side: const BorderSide(color: Color(0xFF22C55E)),
+                  foregroundColor: AppTheme.tokenSuccess,
+                  side: const BorderSide(color: AppTheme.tokenSuccess),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
@@ -880,11 +881,11 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               final proceed = await _confirmSend();
               if (proceed) context.push('/transfer');
             },
-            icon: Icon(Icons.send_rounded, color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8)),
+            icon: Icon(Icons.send_rounded, color: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimaryLight),
             label: Text(
               risky ? 'Send anyway (confirm)' : 'Send',
               style: TextStyle(
-                color: risky ? const Color(0xFFEF4444) : const Color(0xFF818CF8),
+                color: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimaryLight,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -900,20 +901,20 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
     return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF12121A),
-            title: const Text('Proceed despite risk?', style: TextStyle(color: Colors.white)),
-            content: const Text(
+            backgroundColor: AppTheme.tokenSurface,
+            title: Text('Proceed despite risk?', style: TextStyle(color: AppTheme.tokenText)),
+            content: Text(
               'This address is marked high risk. Confirm you want to continue.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.tokenText.withAlpha(179)),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+                child: const Text('Cancel', style: TextStyle(color: AppTheme.slate400)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Proceed anyway', style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                child: const Text('Proceed anyway', style: TextStyle(color: AppTheme.tokenDanger, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -930,7 +931,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         height: MediaQuery.of(context).size.height * 0.7,
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -939,13 +940,13 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Explainability Graph',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: AppTheme.tokenText, fontSize: 18, fontWeight: FontWeight.w700),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(ctx),
-                  icon: const Icon(Icons.close, color: Colors.white54),
+                  icon: Icon(Icons.close, color: AppTheme.tokenText.withAlpha(138)),
                 ),
               ],
             ),
@@ -953,14 +954,14 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A0A0F),
+                  color: AppTheme.tokenBackground,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF1E1E2E)),
+                  border: Border.all(color: AppTheme.tokenBorderSubtle),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
                     'Graph detail placeholder',
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: AppTheme.tokenText.withAlpha(138)),
                   ),
                 ),
               ),
@@ -978,7 +979,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -990,7 +991,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF374151),
+                  color: AppTheme.gray700,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -998,7 +999,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             const SizedBox(height: 20),
             const Text(
               'About Trust Check',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppTheme.tokenText, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildInfoItem(
@@ -1033,7 +1034,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppTheme.tokenCardElevated,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -1042,18 +1043,18 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.15),
+              color: AppTheme.tokenPrimary.withAlpha(38),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF6366F1), size: 20),
+            child: Icon(icon, color: AppTheme.tokenPrimary, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                Text(description, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                Text(title, style: const TextStyle(color: AppTheme.tokenText, fontWeight: FontWeight.w600)),
+                Text(description, style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 12)),
               ],
             ),
           ),
@@ -1071,7 +1072,7 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
         height: MediaQuery.of(context).size.height * 0.6,
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF12121A),
+          color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -1080,27 +1081,27 @@ class _PremiumTrustCheckPageState extends ConsumerState<PremiumTrustCheckPage>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFF374151),
+                color: AppTheme.gray700,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Scan Address', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('Scan Address', style: TextStyle(color: AppTheme.tokenText, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 32),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A0A0F),
+                  color: AppTheme.tokenBackground,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2D2D44)),
+                  border: Border.all(color: AppTheme.tokenBorderStrong),
                 ),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withOpacity(0.3), size: 80),
+                      Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withAlpha(77), size: 80),
                       const SizedBox(height: 16),
-                      Text('Camera permission required', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                      Text('Camera permission required', style: TextStyle(color: Colors.white.withAlpha(128))),
                     ],
                   ),
                 ),

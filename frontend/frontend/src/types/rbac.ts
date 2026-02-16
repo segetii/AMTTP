@@ -81,19 +81,19 @@ export const ROLE_CAPABILITIES: Record<Role, RoleCapabilities> = {
   },
   [Role.R5_PLATFORM_ADMIN]: {
     canInitiateOwnTx: false,
-    canAccessDetectionStudio: false,
-    canEditPolicies: false,
-    canTriggerEnforcement: false,
-    canSignMultisig: false,
+    canAccessDetectionStudio: true,
+    canEditPolicies: true,
+    canTriggerEnforcement: true,
+    canSignMultisig: true,
     canVerifyUISnapshot: 'full',
     canEmergencyOverride: false,
   },
   [Role.R6_SUPER_ADMIN]: {
     canInitiateOwnTx: false,
-    canAccessDetectionStudio: false,
-    canEditPolicies: false,
-    canTriggerEnforcement: false,
-    canSignMultisig: false,
+    canAccessDetectionStudio: true,
+    canEditPolicies: true,
+    canTriggerEnforcement: true,
+    canSignMultisig: true,
     canVerifyUISnapshot: 'full',
     canEmergencyOverride: true,
   },
@@ -199,12 +199,11 @@ export function getRoleCapabilities(role: Role): RoleCapabilities {
 
 export function canAccessRoute(role: Role, route: string): boolean {
   const mode = getRoleMode(role);
-  const capabilities = getRoleCapabilities(role);
   
-  // Focus mode routes
+  // Focus mode routes (R1, R2)
   const focusRoutes = ['/', '/transfer', '/history', '/escrow', '/disputes', '/settings'];
   
-  // War room routes
+  // War room routes (R3+)
   const warRoomRoutes = [
     '/war-room',
     '/detection-studio',
@@ -213,20 +212,44 @@ export function canAccessRoute(role: Role, route: string): boolean {
     '/policies',
     '/analytics',
     '/audit-logs',
+    '/compliance',
+    '/reports',
+    '/flagged-queue',
+    '/pending-approvals',
   ];
   
-  // Compliance-only routes (R4)
-  const complianceOnlyRoutes = ['/compliance-studio', '/policies', '/multisig'];
+  // Compliance-only routes (R4+)
+  const complianceOnlyRoutes = ['/compliance-studio', '/policies', '/multisig', '/enforcement'];
+  
+  // Admin routes (R5+)
+  const adminRoutes = ['/admin', '/user-management', '/system-settings', '/api-keys'];
+  
+  // Super admin routes (R6 only)
+  const superAdminRoutes = ['/ml-models', '/audit'];
   
   if (mode === AppMode.FOCUS) {
     return focusRoutes.some(r => route.startsWith(r));
   }
   
   if (mode === AppMode.WAR_ROOM) {
-    // R3 cannot access compliance-only routes
+    // R3 cannot access compliance-only or admin routes
     if (role === Role.R3_INSTITUTION_OPS && complianceOnlyRoutes.some(r => route.startsWith(r))) {
       return false;
     }
+    if (role === Role.R3_INSTITUTION_OPS && adminRoutes.some(r => route.startsWith(r))) {
+      return false;
+    }
+    
+    // Admin routes require R5+
+    if (adminRoutes.some(r => route.startsWith(r))) {
+      return role === Role.R5_PLATFORM_ADMIN || role === Role.R6_SUPER_ADMIN;
+    }
+    
+    // Super admin routes require R6
+    if (superAdminRoutes.some(r => route.startsWith(r))) {
+      return role === Role.R6_SUPER_ADMIN;
+    }
+    
     return warRoomRoutes.some(r => route.startsWith(r)) || route === '/';
   }
   
@@ -238,7 +261,10 @@ export function isEndUser(role: Role): boolean {
 }
 
 export function isInstitutional(role: Role): boolean {
-  return role === Role.R3_INSTITUTION_OPS || role === Role.R4_INSTITUTION_COMPLIANCE;
+  return role === Role.R3_INSTITUTION_OPS || 
+         role === Role.R4_INSTITUTION_COMPLIANCE ||
+         role === Role.R5_PLATFORM_ADMIN ||
+         role === Role.R6_SUPER_ADMIN;
 }
 
 export function canEnforce(role: Role): boolean {

@@ -29,12 +29,12 @@ type ViewTab = 'events' | 'trail' | 'reports';
 function IntegrityBadge({ isVerifying, isValid }: { isVerifying: boolean; isValid: boolean | null }) {
   if (isVerifying) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-600 rounded-lg">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-borderSubtle rounded-lg">
         <svg className="w-4 h-4 animate-spin text-cyan-400" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
-        <span className="text-sm text-slate-400">Verifying...</span>
+        <span className="text-sm text-mutedText">Verifying...</span>
       </div>
     );
   }
@@ -137,16 +137,16 @@ export default function AuditPage() {
   };
   
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="space-y-6">
       {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-text flex items-center gap-3">
               <span className="text-3xl">📋</span>
               Audit Log
             </h1>
-            <p className="text-slate-400">Complete audit trail and compliance evidence</p>
+            <p className="text-mutedText">Complete audit trail and compliance evidence</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -154,14 +154,14 @@ export default function AuditPage() {
             <button
               onClick={handleVerifyIntegrity}
               disabled={isVerifying}
-              className="px-4 py-2 text-sm bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm bg-surface text-slate-300 rounded-lg hover:bg-slate-700 disabled:opacity-50"
             >
               Verify Chain
             </button>
             <div className="relative group">
               <button
                 disabled={isExporting}
-                className="px-4 py-2 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm bg-cyan-600 text-text rounded-lg hover:bg-cyan-500 disabled:opacity-50 flex items-center gap-2"
               >
                 {isExporting ? (
                   <>
@@ -180,7 +180,7 @@ export default function AuditPage() {
                   </>
                 )}
               </button>
-              <div className="absolute right-0 mt-1 w-32 bg-slate-800 border border-slate-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+              <div className="absolute right-0 mt-1 w-32 bg-surface border border-borderSubtle rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                 <button
                   onClick={() => handleExport('JSON')}
                   className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 rounded-t-lg"
@@ -205,13 +205,13 @@ export default function AuditPage() {
         </div>
         
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-slate-700 pb-4">
+        <div className="flex gap-1 border-b border-borderSubtle pb-4">
           <button
             onClick={() => setActiveTab('events')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'events'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             📝 Events
           </button>
@@ -219,8 +219,8 @@ export default function AuditPage() {
             onClick={() => setActiveTab('trail')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'trail'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             🔗 Trail View
           </button>
@@ -228,8 +228,8 @@ export default function AuditPage() {
             onClick={() => setActiveTab('reports')}
             className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
               ${activeTab === 'reports'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-white'}`}
+                ? 'bg-surface text-text'
+                : 'text-mutedText hover:text-text'}`}
           >
             📊 Statistics
           </button>
@@ -249,51 +249,51 @@ export default function AuditPage() {
           </div>
           <div className="lg:col-span-1">
             {selectedEvent ? (
-              <div className="bg-slate-800/30 rounded-lg border border-slate-700 p-4">
-                <h3 className="text-lg font-medium text-white mb-4">Event Details</h3>
+              <div className="bg-surface/30 rounded-lg border border-borderSubtle p-4">
+                <h3 className="text-lg font-medium text-text mb-4">Event Details</h3>
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="text-slate-500">ID:</span>
+                    <span className="text-mutedText">ID:</span>
                     <span className="text-slate-300 ml-2 font-mono">{selectedEvent.id}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Timestamp:</span>
+                    <span className="text-mutedText">Timestamp:</span>
                     <span className="text-slate-300 ml-2">{new Date(selectedEvent.timestamp).toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Category:</span>
+                    <span className="text-mutedText">Category:</span>
                     <span className="text-slate-300 ml-2">{selectedEvent.category}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Action:</span>
+                    <span className="text-mutedText">Action:</span>
                     <span className="text-slate-300 ml-2">{selectedEvent.action}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Severity:</span>
+                    <span className="text-mutedText">Severity:</span>
                     <span className="text-slate-300 ml-2">{selectedEvent.severity}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Actor:</span>
+                    <span className="text-mutedText">Actor:</span>
                     <span className="text-slate-300 ml-2">{selectedEvent.actorType} ({selectedEvent.actorId})</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Resource:</span>
+                    <span className="text-mutedText">Resource:</span>
                     <span className="text-slate-300 ml-2">{selectedEvent.resourceType}:{selectedEvent.resourceId}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Success:</span>
+                    <span className="text-mutedText">Success:</span>
                     <span className={`ml-2 ${selectedEvent.success ? 'text-green-400' : 'text-red-400'}`}>
                       {selectedEvent.success ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Hash:</span>
+                    <span className="text-mutedText">Hash:</span>
                     <span className="text-slate-300 ml-2 font-mono text-xs">{selectedEvent.hash}</span>
                   </div>
                   {selectedEvent.metadata && Object.keys(selectedEvent.metadata).length > 0 && (
                     <div>
-                      <span className="text-slate-500 block mb-1">Metadata:</span>
-                      <pre className="bg-slate-900 rounded p-2 text-xs overflow-auto">
+                      <span className="text-mutedText block mb-1">Metadata:</span>
+                      <pre className="bg-background rounded p-2 text-xs overflow-auto">
                         {JSON.stringify(selectedEvent.metadata, null, 2)}
                       </pre>
                     </div>
@@ -301,8 +301,8 @@ export default function AuditPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-800/30 rounded-lg border border-slate-700 p-8 text-center">
-                <p className="text-slate-500">Select an event to view details</p>
+              <div className="bg-surface/30 rounded-lg border border-borderSubtle p-8 text-center">
+                <p className="text-mutedText">Select an event to view details</p>
               </div>
             )}
           </div>
