@@ -261,10 +261,8 @@ class ComplianceDataStore {
         return { valid: false, brokenAt: i };
       }
       
-      const computed = this.computeAuditHash({
-        ...entry,
-        integrityHash: undefined as any,
-      });
+      const { integrityHash: _, ...entryWithoutHash } = entry;
+      const computed = this.computeAuditHash(entryWithoutHash);
       
       if (computed !== entry.integrityHash) {
         return { valid: false, brokenAt: i };

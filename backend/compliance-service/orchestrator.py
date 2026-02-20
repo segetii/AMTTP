@@ -805,33 +805,87 @@ async def evaluate_transaction(
             return decision
         
         # ═══════════════════════════════════════════════════════════════════
-        # 2. GEOGRAPHIC RISK CHECK - Based on profiles
+        # 2-6. PARALLEL FAN-OUT: Geo Risk + ML Risk + AML Monitoring
+        # (Paper: "Orchestrator fans out to Risk Engine, Sanctions,
+        #  Monitoring, and Geographic Risk in parallel")
         # ═══════════════════════════════════════════════════════════════════
+
+        # ── Helper coroutines for parallel fan-out ────────────────────────
+
+        async def _geo_risk_parallel():
+            """Run geographic risk checks for both originator and beneficiary."""
+            results = []
+            tasks = []
+            if originator.jurisdiction and originator.jurisdiction != "UNKNOWN":
+                tasks.append(("originator", check_geo_risk(session, originator.jurisdiction)))
+            if beneficiary.jurisdiction and beneficiary.jurisdiction != "UNKNOWN":
+                tasks.append(("beneficiary", check_geo_risk(session, beneficiary.jurisdiction)))
+            if tasks:
+                completed = await asyncio.gather(*[t[1] for t in tasks], return_exceptions=True)
+                for (label, _), result in zip(tasks, completed):
+                    if isinstance(result, Exception):
+                        result = ComplianceCheck(
+                            service="geo_risk", check_type="country_risk",
+                            passed=True, score=50,
+                            reason=f"Geo-risk check failed: {result}"
+                        )
+                    results.append((label, result))
+            return results
+
+        async def _ml_risk_parallel():
+            """Run ML risk scoring."""
+            try:
+                return await check_ml_risk(session, {
+                    "from_address": from_address,
+                    "to_address": to_address,
+                    "value_eth": value_eth,
+                })
+            except Exception as e:
+                return ComplianceCheck(
+                    service="ml_risk", check_type="model_score",
+                    passed=True, score=50,
+                    reason=f"ML risk check failed: {e}"
+                )
+
+        async def _monitoring_parallel():
+            """Run AML monitoring pattern detection."""
+            try:
+                return await check_monitoring(session, {
+                    "tx_hash": tx_hash or decision_id,
+                    "from_address": from_address,
+                    "to_address": to_address,
+                    "value_eth": value_eth,
+                    "timestamp": timestamp or start_time.isoformat(),
+                    "block_number": 0,
+                    "chain": "ethereum"
+                })
+            except Exception as e:
+                return ComplianceCheck(
+                    service="monitoring", check_type="aml_patterns",
+                    passed=True, score=50,
+                    reason=f"Monitoring check failed: {e}"
+                )
+
+        # ── Fan-out: run all three in parallel ────────────────────────────
+        geo_results, ml_check, monitoring_check = await asyncio.gather(
+            _geo_risk_parallel(),
+            _ml_risk_parallel(),
+            _monitoring_parallel(),
+        )
+
+        # ── Process geographic risk results ───────────────────────────────
         geo_checks = []
-        
-        if originator.jurisdiction and originator.jurisdiction != "UNKNOWN":
-            orig_geo = await check_geo_risk(session, originator.jurisdiction)
-            checks.append(orig_geo)
-            geo_checks.append(orig_geo)
-            
-            if orig_geo.action_required == ComplianceAction.BLOCK:
+        for label, geo in geo_results:
+            checks.append(geo)
+            geo_checks.append(geo)
+            if geo.action_required == ComplianceAction.BLOCK:
                 final_action = ComplianceAction.BLOCK
-                reasons.append(f"Originator jurisdiction: {orig_geo.reason}")
-        
-        if beneficiary.jurisdiction and beneficiary.jurisdiction != "UNKNOWN":
-            benef_geo = await check_geo_risk(session, beneficiary.jurisdiction)
-            checks.append(benef_geo)
-            geo_checks.append(benef_geo)
-            
-            if benef_geo.action_required == ComplianceAction.BLOCK:
-                final_action = ComplianceAction.BLOCK
-                reasons.append(f"Beneficiary jurisdiction: {benef_geo.reason}")
-        
-        # High-risk jurisdictions require escrow
+                reasons.append(f"{label.capitalize()} jurisdiction: {geo.reason}")
+
         for geo in geo_checks:
             if geo.action_required == ComplianceAction.ESCROW and final_action != ComplianceAction.BLOCK:
                 requires_escrow = True
-                escrow_duration = 48  # 48 hours for high-risk jurisdictions
+                escrow_duration = 48
                 if final_action == ComplianceAction.APPROVE:
                     final_action = ComplianceAction.ESCROW
         
@@ -901,14 +955,9 @@ async def evaluate_transaction(
         ))
         
         # ═══════════════════════════════════════════════════════════════════
-        # 5. ML RISK SCORING (Skip if already blocked)
+        # PROCESS ML RISK RESULTS (from parallel fan-out)
         # ═══════════════════════════════════════════════════════════════════
         if final_action != ComplianceAction.BLOCK:
-            ml_check = await check_ml_risk(session, {
-                "from_address": from_address,
-                "to_address": to_address,
-                "value_eth": value_eth,
-            })
             checks.append(ml_check)
             
             if ml_check.action_required == ComplianceAction.BLOCK:
@@ -922,18 +971,9 @@ async def evaluate_transaction(
                     escrow_duration = max(escrow_duration, 24)
         
         # ═══════════════════════════════════════════════════════════════════
-        # 6. AML MONITORING (Pattern detection)
+        # PROCESS AML MONITORING RESULTS (from parallel fan-out)
         # ═══════════════════════════════════════════════════════════════════
         if final_action != ComplianceAction.BLOCK:
-            monitoring_check = await check_monitoring(session, {
-                "tx_hash": tx_hash or decision_id,
-                "from_address": from_address,
-                "to_address": to_address,
-                "value_eth": value_eth,
-                "timestamp": timestamp or start_time.isoformat(),
-                "block_number": 0,
-                "chain": "ethereum"
-            })
             checks.append(monitoring_check)
             
             if monitoring_check.action_required:
