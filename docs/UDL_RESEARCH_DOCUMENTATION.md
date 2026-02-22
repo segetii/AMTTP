@@ -20,6 +20,8 @@ Authors: Research Team
    - 5.3 Gravitational Cluster Transform
    - 5.4 MFLS Law-Domain Weighting
    - 5.5 Law Auto-Selection Matrix
+   - 5.6 Deviation-Induced Energy Functional
+   - 5.7 N-Body Gravity Pull Engine
 6. [Root Cause Diagnosis & Why Auto-Selection Matters](#6-root-cause-diagnosis)
 7. [Empirical Results](#7-empirical-results)
 8. [File Map & Code Guide](#8-file-map--code-guide)
@@ -457,6 +459,213 @@ pipe = UDLPipeline(operators='auto', projection_method='qda-magnified')
 
 ---
 
+### 5.6 Deviation-Induced Energy Functional (`udl/energy.py`)
+
+**Theoretical Foundation:**
+The energy framework formalises UDL's anomaly detection as a physical equilibrium problem.
+Normal data sit in stable energy basins; anomalies occupy high-energy, dynamically unstable positions.
+
+**Energy Functional:**
+
+$$E(\mathbf{x}) = \frac{\alpha}{2}\left\|\frac{\mathbf{x} - \boldsymbol{\mu}}{\boldsymbol{\sigma}}\right\|^2 + \sum_{k=1}^{K} \frac{\beta_k}{2}\left\|S_k\bigl(\Phi_k(\mathbf{x}) - \boldsymbol{\mu}_k\bigr)\right\|^2 + \frac{\gamma}{2}\sum_{i \neq j} W(\mathbf{x}_i, \mathbf{x}_j)$$
+
+Three components:
+1. **Radial anchoring** (α-term): penalises raw-space distance from centroid
+2. **Law deviation** (β-term): penalises deviation in each operator's representation
+3. **Density interaction** (γ-term): optional pairwise interaction (Gaussian/LJ/log kernels)
+
+**Key Classes:**
+
+| Class | Purpose | Key Method |
+|-------|---------|------------|
+| `DeviationEnergy` | Per-point energy scoring with 3-component decomposition | `score()`, `per_law_energy()` |
+| `OperatorDiversity` | Checks deviation-separating condition: ∩_k ker(DΦ_k(μ)) = {0} | `compute()` |
+| `EnergyFlow` | N-body gradient flow: ẋ = −η∇E(x) | `fit_transform()` |
+| `StabilityAnalyser` | Hessian analysis at centroid + class separation metrics | `analyse()` |
+
+**Operator Diversity Condition:**
+A family of operators {Φ_k} is *deviation-separating* if no perturbation is invisible to all operators simultaneously:
+
+$$\bigcap_{k=1}^{K} \ker\bigl(D\Phi_k(\boldsymbol{\mu})\bigr) = \{0\}$$
+
+This is verified by stacking numerical Jacobians and checking rank = input dimension.
+
+**Stability Theorem:**
+The radial anchoring term has analytical Hessian ∇²E_rad = α·diag(1/σ_j²) ≻ 0, guaranteeing positive-definiteness.
+For nonlinear operators Φ_k, the full empirical Hessian may be indefinite (Jensen's inequality: E[Φ_k(X)] ≠ Φ_k(E[X])),
+but practical stability is confirmed through energy class separation metrics:
+- Energy separation ratio: E(anomaly)/E(normal)
+- Cohen's d effect size
+
+**Empirical Results (Mammography):**
+
+| Metric | Value |
+|--------|-------|
+| Energy AUC | 0.88 |
+| QDA AUC | 0.89 |
+| E(anomaly)/E(normal) | 9.4× |
+| Cohen's d | 1.6 (large effect) |
+| Radial Hessian PD | ✓ (always) |
+
+**Beta Weight Strategies:**
+
+| Strategy | Description |
+|----------|-------------|
+| `uniform` | Equal weights β_k = 1/K |
+| `fisher` | Fisher discriminant ratio per law |
+| `adaptive` | Per-law AUC-based weights |
+| explicit `ndarray` | User-specified weights |
+
+**Usage:**
+```python
+pipe = UDLPipeline(
+    operators='auto',
+    energy_score=True,      # enable energy scoring
+    energy_alpha=1.0,       # radial anchoring weight
+    energy_gamma=0.01,      # interaction strength
+)
+pipe.fit(X, y)
+energy_scores = pipe.energy_scores(X)          # per-point energy
+decomp = pipe.energy_decompose(X)              # per-law breakdown
+diversity = pipe.operator_diversity_report(X)  # separating family check
+stability = pipe.stability_analysis(X, y=y)    # full stability report
+```
+
+**Energy Calibration (False Alarm Control):**
+
+Raw energy scores have no natural threshold — using a fixed percentile (e.g., P95)
+produces high false alarm rates (4%+ FPR on mammography). Energy calibration maps
+raw E(x) to calibrated P(anomaly) via Platt/isotonic/Beta scaling, then applies
+a cost-sensitive or FPR-constrained threshold.
+
+Three threshold modes:
+1. **Balanced (F1-optimal):** `energy_cost_ratio=1.0` — maximises F1 score
+2. **Cost-sensitive:** `energy_cost_ratio=10.0` — penalises missed anomalies 10× more than false alarms
+3. **FPR-constrained (Neyman-Pearson):** `energy_target_fpr=0.01` — guarantees FPR ≤ 1% on training normals
+
+```python
+# Calibrated energy with FPR cap at 1%
+pipe = UDLPipeline(
+    operators='auto',
+    energy_score=True,
+    energy_calibrate='platt',       # calibration method
+    energy_target_fpr=0.01,         # max 1% false alarm rate
+)
+pipe.fit(X, y)
+
+# Calibrated outputs
+probs = pipe.energy_predict_proba(X_test)      # P(anomaly) ∈ [0, 1]
+preds = pipe.energy_predict(X_test)             # binary {0, 1}
+tiers, probs = pipe.energy_predict_tiered(X_test)  # CLEAR/REVIEW/ALERT
+report = pipe.energy_calibration_summary(X_test, y_test)  # ECE, Brier, F1, etc.
+```
+
+**Calibration Benchmark Results:**
+
+| Config | TP | FP | FPR | Recall | Dataset |
+|--------|-----|-----|------|--------|---------|
+| RAW P95 (uncalibrated) | 34 | 134 | 4.09% | 43.6% | Mammo |
+| Platt FPR≤2% | 31 | 81 | **2.47%** | 39.7% | Mammo |
+| Platt FPR≤1% | 22 | 48 | **1.46%** | 28.2% | Mammo |
+| Isotonic cost=5 | 28 | 61 | **1.86%** | 35.9% | Mammo |
+| RAW P95 (uncalibrated) | 835 | 35 | 0.26% | 22.4% | Shuttle |
+| Platt FPR≤2% | 2156 | 249 | **1.82%** | 57.9% | Shuttle |
+| Platt FPR≤1% | 2002 | 129 | **0.94%** | 53.8% | Shuttle |
+
+Calibration cuts mammography false alarms from 134 → 48 (64% reduction at FPR≤1%)
+while maintaining meaningful recall. On shuttle, it dramatically improves recall
+(22% → 58%) while keeping FPR under the specified cap.
+
+Calibration cuts mammography false alarms from 134 → 48 (64% reduction at FPR≤1%)
+while maintaining meaningful recall. On shuttle, it dramatically improves recall
+(22% → 58%) while keeping FPR under the specified cap.
+
+---
+
+### 5.7 N-Body Gravity Pull Engine (`udl/gravity.py`)
+
+**The problem it solves:** Unsupervised anomaly detection without QDA or labels.
+Treats each data point as a particle in an N-body gravitational system. Normal
+points in dense regions attract each other and settle into tight clusters;
+outliers lack neighbours and drift to high-energy orbits.
+
+**Force Model:**
+
+$$F_i = -\alpha(x_i - \mu) - \gamma \sum_{j \neq i} \nabla K(x_i - x_j)$$
+
+Three force components:
+1. **Radial pull** (α-term): spring restoring force toward global centroid
+2. **Pairwise attraction**: Gaussian kernel $-\exp(-r^2/\sigma^2)$ pulls nearby particles together
+3. **Short-range repulsion**: $\lambda/(r + \epsilon)$ prevents collapse at close range
+
+**Interaction Kernel:**
+$$K(r) = -e^{-r^2/\sigma^2} + \frac{\lambda}{r + \epsilon}$$
+
+**Key Classes & Functions:**
+
+| Component | Purpose |
+|-----------|--------|
+| `GravityEngine` | Main class — `fit_transform()` runs simulation, then `anomaly_scores()` / `displacement_scores()` / `cluster_labels()` |
+| `pairwise_forces()` | O(n²) N-body interaction (auto-selects vectorised for n ≤ 5000) |
+| `radial_pull()` | −α(x − μ) spring force |
+| `total_force()` | Sum of radial + pairwise + optional operator deviation |
+| `compute_system_energy()` | Tracks E_radial + E_attract + E_repel per step |
+| `run_gravity_clustering()` | One-call convenience (returns final positions) |
+
+**Hyperparameters:**
+
+| Parameter | Default | Role |
+|-----------|---------|------|
+| `alpha` | 0.1 | Radial spring constant |
+| `gamma` | 1.0 | Pairwise interaction strength |
+| `sigma` | 1.0 | Attraction Gaussian length-scale |
+| `lambda_rep` | 0.1 | Short-range repulsion coefficient |
+| `eta` | 0.01 | Euler step size |
+| `iterations` | 100 | Number of time steps |
+| `convergence_tol` | 1e-6 | Early stopping threshold on max displacement |
+
+**Anomaly Scoring (two modes):**
+- **Distance from centre:** $\|x_\text{final} - \mu\|$ — outliers end up far from the centroid
+- **Displacement:** $\|x_\text{final} - x_\text{initial}\|$ — outliers drift further during simulation
+
+**Stability Tips:**
+- System explodes → reduce eta/gamma, increase sigma or lambda_rep
+- System collapses → increase lambda_rep, decrease gamma
+
+**Usage:**
+```python
+from udl.gravity import GravityEngine
+
+engine = GravityEngine(
+    alpha=0.1, gamma=0.5, sigma=1.5, lambda_rep=0.2,
+    eta=0.01, iterations=50, track_energy=True,
+)
+X_final = engine.fit_transform(X)
+
+# Anomaly scores
+scores = engine.anomaly_scores()        # distance from centre
+disp = engine.displacement_scores()      # how far each point moved
+
+# Post-dynamics clustering
+labels = engine.cluster_labels(n_clusters=2)
+
+# Convergence diagnostics
+engine.print_summary()
+```
+
+**Benchmark Results (n=1000 subsample, 30 iterations):**
+
+| Dataset | Distance AUC | Displacement AUC | Energy Drop |
+|---------|:------------:|:----------------:|:-----------:|
+| Mammography | 0.767 | 0.550 | −5,463 |
+| Shuttle | 0.795 | 0.701 | −22,499 |
+
+*Note: These are unsupervised scores (no labels during simulation). AUC improves
+with hyperparameter tuning, more iterations, and integration with UDL operator
+deviation terms.*
+
+---
+
 ## 6. Root Cause Diagnosis & Why Auto-Selection Matters
 
 ### The Problem We Discovered
@@ -567,10 +776,12 @@ dimension contributes meaningfully.
 | `spectra.py` | ~497 | 7 spectrum operator classes (the "laws"), all vectorised |
 | `experimental_spectra.py` | ~674 | 8 experimental operators (Approach A + Approach B) |
 | `stack.py` | ~131 | RepresentationStack — composes operators, supports `operators='auto'` |
-| `pipeline.py` | ~454 | Main UDLPipeline — orchestrates everything (incl. v3e scoring, calibration) |
+| `pipeline.py` | ~530 | Main UDLPipeline — orchestrates everything (incl. v3e scoring, calibration, energy) |
 | `magnifier.py` | ~402 | DimensionMagnifier — boundary-centred tanh transform |
 | `projection.py` | ~445 | HyperplaneProjector (Fisher/PCA) + QDAProjector + predict_proba |
 | `gravitational.py` | ~409 | GravitationalTransformVec + TwoPassGravity |
+| `energy.py` | ~860 | Deviation-induced energy functional (DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser) |
+| `gravity.py` | ~380 | N-body gravity pull engine (GravityEngine, pairwise_forces, radial_pull, run_gravity_clustering) |
 | `mfls_weighting.py` | ~364 | MFLS law-domain weighting (6 strategies) |
 | `law_matrix.py` | ~440 | DataProfile + auto-selection matrix |
 | `calibration.py` | ~257 | ScoreCalibrator (isotonic/Platt/Beta) + quality metrics |
@@ -578,7 +789,7 @@ dimension contributes meaningfully.
 | `tensor.py` | ~429 | AnomalyTensor — MDN decomposition + scoring v1/v2/v3a–v3d |
 | `datasets.py` | ~166 | Dataset loaders (synthetic, mimic, mammography, shuttle, pendigits, creditcard) |
 | `bsdt_bridge.py` | ~152 | BSDT-to-UDL compatibility bridge |
-| `__init__.py` | ~70 | Public exports |
+| `__init__.py` | ~78 | Public exports |
 
 ### Benchmarks & Tests
 
