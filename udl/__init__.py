@@ -39,6 +39,8 @@ from .bsdt_bridge import BSDTSpectrum, BSDTAugmentedStack
 from .mfls_weighting import MFLSWeighting
 from .calibration import ScoreCalibrator
 from .law_matrix import DataProfile, select_laws, get_law_matrix_table
+from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
+from .gravity import GravityEngine, run_gravity_clustering
 
 __all__ = [
     # Core pipeline
@@ -68,4 +70,12 @@ __all__ = [
     "DataProfile",
     "select_laws",
     "get_law_matrix_table",
+    # Energy functional
+    "DeviationEnergy",
+    "OperatorDiversity",
+    "EnergyFlow",
+    "StabilityAnalyser",
+    # Gravity engine
+    "GravityEngine",
+    "run_gravity_clustering",
 ]

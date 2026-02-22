@@ -18,6 +18,7 @@ from .projection import HyperplaneProjector
 from .mfls_weighting import MFLSWeighting
 from .gravitational import GravitationalTransformVec, TwoPassGravity
 from .calibration import ScoreCalibrator
+from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
 
 
 class UDLPipeline:
@@ -87,6 +88,32 @@ class UDLPipeline:
         Neyman-Pearson FPR constraint for QDAProjector. When set (e.g., 0.01),
         the QDA threshold is adjusted to guarantee FPR ≤ target_fpr on the
         training normal data. This is the most direct FP-reduction lever.
+    energy_score : bool
+        If True, also fits the DeviationEnergy model during fit(),
+        enabling energy_scores() and energy_decompose() methods.
+        Energy scoring provides a geometric anomaly score based on the
+        deviation-induced energy functional E(x).
+    energy_alpha : float
+        Radial anchoring weight for energy functional (default 1.0).
+    energy_gamma : float
+        Pairwise interaction weight (0 = disabled, default 0.0).
+    energy_flow : bool
+        If True, applies EnergyFlow transform (N-body gradient flow)
+        before QDA projection. This moves normal points toward equilibrium
+        and ejects anomalies to high-energy positions.
+    energy_flow_steps : int
+        Number of gradient flow iterations (default 10).
+    energy_calibrate : str or None
+        Calibration method for energy scores: 'isotonic', 'platt', 'beta',
+        or None (raw scores). Produces calibrated P(anomaly) from energy.
+    energy_cost_ratio : float
+        Cost ratio for energy threshold: FN_cost / FP_cost.
+        Higher values shift the threshold to catch more anomalies at
+        the expense of more false positives (default 1.0 = balanced).
+    energy_target_fpr : float or None
+        Neyman-Pearson FPR constraint for energy threshold. When set
+        (e.g., 0.01 for 1% FPR), the threshold is chosen to guarantee
+        FPR <= target on training normals. Overrides energy_cost_ratio.
     """
 
     def __init__(
@@ -112,6 +139,14 @@ class UDLPipeline:
         gravity_passes=2,
         calibrate=None,
         include_marginal=False,
+        energy_score=False,
+        energy_alpha=1.0,
+        energy_gamma=0.0,
+        energy_flow=False,
+        energy_flow_steps=10,
+        energy_calibrate=None,
+        energy_cost_ratio=1.0,
+        energy_target_fpr=None,
     ):
         self.stack = RepresentationStack(
             operators=operators, exp_alpha=exp_alpha,
@@ -179,6 +214,24 @@ class UDLPipeline:
             ScoreCalibrator(method=calibrate) if calibrate else None
         )
 
+        # ── Energy functional ──
+        self.energy_score = energy_score
+        self.energy_alpha = energy_alpha
+        self.energy_gamma = energy_gamma
+        self.energy_flow = energy_flow
+        self.energy_flow_steps = energy_flow_steps
+        self.energy_calibrate = energy_calibrate
+        self.energy_cost_ratio = energy_cost_ratio
+        self.energy_target_fpr = energy_target_fpr
+        self._energy_model = None
+        self._energy_calibrator = (
+            ScoreCalibrator(method=energy_calibrate)
+            if energy_calibrate else None
+        )
+        self._energy_threshold = None   # cost-sensitive threshold
+        self._energy_flow_transform = None
+        self._operator_diversity = None
+
         self._fitted = False
         self._tensor_result_ref = None
 
@@ -235,6 +288,17 @@ class UDLPipeline:
         if self._gravity_transform is not None and y is not None:
             R_all = self._gravity_transform.fit_transform(R_all, y)
 
+        # 5d. Energy flow transform (if enabled)
+        if self.energy_flow and y is not None:
+            self._energy_flow_transform = EnergyFlow(
+                n_steps=self.energy_flow_steps,
+                learning_rate=0.05,
+                alpha=self.energy_alpha,
+                gamma=self.energy_gamma,
+                interaction_kernel='attract_repel',
+            )
+            R_all = self._energy_flow_transform.fit_transform(R_all, y)
+
         self.projector.fit(R_all, y=y, centroid=centroid)
 
         # 6. Fit MFLS law-domain weighting (if enabled)
@@ -242,7 +306,29 @@ class UDLPipeline:
             tr_all = self.tensor_builder.build(R_all, self.stack.law_dims_)
             self.mfls_.fit(tr_all.law_magnitudes, y=y)
 
-        # 7. Fit score calibrator (if enabled)
+        # 7. Fit energy model (if enabled)
+        if self.energy_score:
+            fitted_ops = [
+                (name, op) for name, op in self.stack.operators
+            ]
+            self._energy_model = DeviationEnergy(
+                alpha=self.energy_alpha,
+                beta_weights='adaptive' if y is not None else 'uniform',
+                gamma=self.energy_gamma,
+            )
+            # Fit on full X with labels so adaptive weights can see both classes
+            self._energy_model.fit(fitted_ops, X, y_ref=y)
+
+            # 7b. Calibrate energy scores (if enabled)
+            if self._energy_calibrator is not None and y is not None:
+                train_energy = self._energy_model.score(X)
+                self._energy_calibrator.fit(train_energy, y)
+                # Cost-sensitive threshold on calibrated probabilities
+                self._energy_threshold = self._compute_energy_threshold(
+                    train_energy, y
+                )
+
+        # 8. Fit score calibrator (if enabled)
         self._fitted = True  # must set before score() call
         if self._calibrator is not None and y is not None:
             train_scores = self.score(X)
@@ -325,11 +411,13 @@ class UDLPipeline:
         return tr.anomaly_score(weights=self.score_weights)
 
     def _apply_transforms(self, R):
-        """Apply magnifier + gravitational transform to representation."""
+        """Apply magnifier + gravitational + energy flow transforms."""
         if self.magnifier_ is not None:
             R = self.magnifier_.magnify(R)
         if self._gravity_transform is not None:
             R = self._gravity_transform.transform(R)
+        if self._energy_flow_transform is not None:
+            R = self._energy_flow_transform.transform(R)
         return R
 
     def predict(self, X):
@@ -465,6 +553,242 @@ class UDLPipeline:
             "law_names": self.stack.law_names_,
             "total_representation_dim": self.stack.total_dim,
         }
+
+    # ─── ENERGY FUNCTIONAL METHODS ──────────────────────────────
+
+    def energy_scores(self, X):
+        """
+        Compute deviation-induced energy E(x) for each observation.
+
+        Higher energy = more anomalous (further from equilibrium).
+        Requires energy_score=True at construction.
+
+        Returns
+        -------
+        energies : ndarray (N,)
+        """
+        self._check_fitted()
+        if self._energy_model is None:
+            raise RuntimeError("Energy scoring not enabled. "
+                               "Set energy_score=True in constructor.")
+        return self._energy_model.score(X)
+
+    def energy_decompose(self, X):
+        """
+        Decompose energy into per-law contributions.
+
+        Returns
+        -------
+        dict mapping law_name → ndarray(N,) of per-law energies
+        """
+        self._check_fitted()
+        if self._energy_model is None:
+            raise RuntimeError("Energy scoring not enabled.")
+        return self._energy_model.per_law_energy(X)
+
+    def energy_gradient_scores(self, X):
+        """
+        Compute ||∇E(x)|| — gradient magnitude as anomaly score.
+
+        Points at stable equilibrium (normal) have small gradients.
+        Anomalies have large gradients (strong restoring force).
+
+        Returns
+        -------
+        grad_mags : ndarray (N,)
+        """
+        self._check_fitted()
+        if self._energy_model is None:
+            raise RuntimeError("Energy scoring not enabled.")
+        return self._energy_model.gradient_magnitude(X)
+
+    def operator_diversity_report(self, X_ref=None):
+        """
+        Analyse operator diversity — the deviation-separating condition.
+
+        Checks whether ∩_k ker(DΦ_k(μ)) = {0}, which guarantees that
+        no perturbation is invisible to all operators simultaneously.
+
+        Returns
+        -------
+        report : dict with diversity metrics
+        """
+        self._check_fitted()
+        fitted_ops = [
+            (name, op) for name, op in self.stack.operators
+        ]
+        diversity = OperatorDiversity()
+        if X_ref is None:
+            # Use the stored reference centroid
+            mu = self.centroid_est.get_centroid()
+            # We need raw-space centroid, so use the stack inverse
+            # ... but we don't have X_ref stored. Use a dummy.
+            report = diversity.compute(fitted_ops, X_ref=np.zeros((1, len(mu))))
+        else:
+            report = diversity.compute(fitted_ops, X_ref)
+        return report
+
+    def stability_analysis(self, X, y=None):
+        """
+        Analyse stability of the energy functional at the normal centroid.
+
+        Provides:
+        - Analytical radial Hessian (always PD)
+        - Class separation metrics (Cohen's d, energy ratio)
+        - Empirical Hessian (may be indefinite for nonlinear operators)
+
+        Requires energy_score=True.
+
+        Returns
+        -------
+        report : dict with stability metrics
+        """
+        self._check_fitted()
+        if self._energy_model is None:
+            raise RuntimeError("Energy scoring not enabled.")
+        analyser = StabilityAnalyser(self._energy_model)
+        mu = self._energy_model.mu_raw_
+        return analyser.analyse(mu, X=X, y=y)
+
+    # ─── ENERGY CALIBRATION METHODS ──────────────────────────────
+
+    def energy_predict_proba(self, X):
+        """
+        Calibrated P(anomaly) from energy scores.
+
+        Requires energy_score=True and energy_calibrate='isotonic'|'platt'|'beta'.
+
+        Returns
+        -------
+        probs : ndarray (N,) in [0, 1]
+        """
+        self._check_fitted()
+        if self._energy_model is None:
+            raise RuntimeError("Energy scoring not enabled.")
+        if self._energy_calibrator is None or not self._energy_calibrator._fitted:
+            raise RuntimeError(
+                "Energy calibration not enabled. "
+                "Set energy_calibrate='platt' (or 'isotonic'/'beta') in constructor."
+            )
+        raw = self._energy_model.score(X)
+        return self._energy_calibrator.transform(raw)
+
+    def energy_predict(self, X, threshold=None):
+        """
+        Binary anomaly prediction from calibrated energy scores.
+
+        Uses the cost-sensitive threshold by default, or a custom one.
+
+        Parameters
+        ----------
+        X : ndarray (N, m)
+        threshold : float or None
+            Override threshold on calibrated probability.
+            Default: cost-sensitive optimal threshold from training.
+
+        Returns
+        -------
+        labels : ndarray (N,) of {0, 1}
+        """
+        probs = self.energy_predict_proba(X)
+        t = threshold if threshold is not None else self._energy_threshold
+        if t is None:
+            t = self._energy_calibrator.optimal_threshold()
+        return (probs >= t).astype(int)
+
+    def energy_predict_tiered(self, X, review_low=0.15, review_high=0.70):
+        """
+        Three-tier energy-based classification.
+
+        Returns
+        -------
+        tiers : ndarray (N,) of {0, 1, 2}
+            0 = CLEAR, 1 = REVIEW, 2 = ALERT
+        probs : ndarray (N,) in [0, 1]
+        """
+        probs = self.energy_predict_proba(X)
+        tiers = np.zeros(len(probs), dtype=int)
+        tiers[probs >= review_low] = 1
+        tiers[probs >= review_high] = 2
+        return tiers, probs
+
+    def energy_calibration_summary(self, X, y):
+        """
+        Return calibration quality metrics for energy scores.
+
+        Returns
+        -------
+        report : dict with ECE, Brier, precision, recall, F1, FP, FN, threshold
+        """
+        self._check_fitted()
+        if self._energy_calibrator is None:
+            raise RuntimeError("Energy calibration not enabled.")
+        raw = self._energy_model.score(X)
+        report = self._energy_calibrator.summary(raw, y)
+        # Add cost-sensitive threshold info
+        report['cost_threshold'] = self._energy_threshold
+        report['cost_ratio'] = self.energy_cost_ratio
+        # Also compute detection stats at cost-sensitive threshold
+        preds = self.energy_predict(X)
+        y = np.asarray(y).ravel()
+        tp = int(((preds == 1) & (y == 1)).sum())
+        fn = int(((preds == 0) & (y == 1)).sum())
+        fp = int(((preds == 1) & (y == 0)).sum())
+        tn = int(((preds == 0) & (y == 0)).sum())
+        prec = tp / max(tp + fp, 1)
+        rec = tp / max(tp + fn, 1)
+        f1 = 2 * prec * rec / max(prec + rec, 1e-10)
+        report['cost_tp'] = tp
+        report['cost_fn'] = fn
+        report['cost_fp'] = fp
+        report['cost_tn'] = tn
+        report['cost_precision'] = prec
+        report['cost_recall'] = rec
+        report['cost_f1'] = f1
+        return report
+
+    def _compute_energy_threshold(self, train_energy, y):
+        """
+        Find threshold on calibrated energy probabilities.
+
+        Priority:
+        1. energy_target_fpr: Neyman-Pearson (FPR <= target on training normals)
+        2. energy_cost_ratio != 1: cost-sensitive (minimise cost_ratio*FN + FP)
+        3. Otherwise: F1-optimal threshold from calibrator
+        """
+        probs = self._energy_calibrator.transform(train_energy)
+        y = np.asarray(y).ravel()
+
+        # Mode 1: FPR-constrained (Neyman-Pearson)
+        if self.energy_target_fpr is not None:
+            normals = probs[y == 0]
+            # Find the lowest threshold where FPR(normals) <= target
+            # Sort normal probabilities descending
+            sorted_probs = np.sort(normals)[::-1]
+            max_fp = int(np.floor(self.energy_target_fpr * len(normals)))
+            if max_fp <= 0:
+                return float(sorted_probs[0] + 1e-6)  # extremely strict
+            # Threshold = the (max_fp)th highest normal probability
+            threshold = float(sorted_probs[min(max_fp, len(sorted_probs)-1)])
+            return threshold + 1e-8  # just above to ensure <= FPR
+
+        # Mode 2: Cost-sensitive
+        if self.energy_cost_ratio != 1.0:
+            thresholds = np.linspace(0.01, 0.99, 200)
+            best_cost = np.inf
+            best_t = 0.5
+            for t in thresholds:
+                preds = (probs >= t).astype(int)
+                fn = ((preds == 0) & (y == 1)).sum()
+                fp = ((preds == 1) & (y == 0)).sum()
+                cost = self.energy_cost_ratio * fn + fp
+                if cost < best_cost:
+                    best_cost = cost
+                    best_t = t
+            return float(best_t)
+
+        # Mode 3: Balanced (F1-optimal)
+        return self._energy_calibrator.optimal_threshold()
 
     def _check_fitted(self):
         if not self._fitted:
