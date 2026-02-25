@@ -62,7 +62,9 @@ $$
 
 # Part I — Deep PAC-Bayes security bound
 
-## Theorem 1 — PAC-Bayes generalisation bound (deep form)
+## Result 1 — PAC-Bayes generalisation bound (McAllester 1999; Catoni 2007)
+
+> *This is a standard result in statistical learning theory. We restate it here for reference and to show how our numerical evaluations relate to the theory.*
 
 Let:
 
@@ -105,7 +107,7 @@ with appropriate conditioning and measurability assumptions.
 
 ---
 
-### Proof of Theorem 1 (outline)
+### Proof of Result 1 (outline)
 
 1. Apply Lemma 1 (change of measure).
 2. Apply an exponential concentration inequality (e.g., Lemma 2).
@@ -147,7 +149,7 @@ Zero-sum structure:
 
 ---
 
-## Theorem 2 — Adversarial optimality (minimax)
+## Observation 2 — Adversarial optimality (Von Neumann minimax, 1928, applied to detection game)
 
 If:
 
@@ -172,9 +174,10 @@ Follows from convexity of expected payoff under mixed strategies and standard pr
 
 ---
 
-### Proof of Theorem 2
+### Proof of Observation 2
 
-Apply the von Neumann minimax theorem. $\square$
+The game as defined in Definition 6 satisfies the conditions of Von Neumann's
+minimax theorem (1928); therefore equilibrium exists. $\square$
 
 ---
 
@@ -191,7 +194,7 @@ yielding a notion of adversarial stability.
 
 # Part III — Unified security learning theorem
 
-## Theorem 3 — Unified PAC-Bayes adversarial security bound (template)
+## Conjecture 3 — Unified PAC-Bayes adversarial security bound (template for future formalisation)
 
 At adversarial equilibrium with posterior $Q^*$,
 $$
@@ -217,7 +220,7 @@ $$
 
 ---
 
-### Proof of Theorem 3 (outline)
+### Proof sketch for Conjecture 3 (outline)
 
 Combine:
 

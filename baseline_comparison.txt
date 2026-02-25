@@ -1,0 +1,48 @@
+================================================================================
+  GRAVITY ENGINE vs STANDARD ANOMALY DETECTORS — FULL DATA BENCHMARK
+================================================================================
+
+----------------------------------------------------------------------
+  MAMMOGRAPHY  n=11183  d=6  anomaly_rate=0.0232
+----------------------------------------------------------------------
+  Method                        AUC       AP     Time
+  --------------------------------------------------
+  LOF (k=20)                 0.7204   0.0905     1.3s
+  IsolationForest (200)      0.8571   0.2056     1.8s
+  One-Class SVM              0.7037   0.1464     3.7s
+  kNN (k=20)                 0.8511   0.1742     5.2s
+  GravityEngine              0.8972   0.2190    52.0s
+
+  GravityEngine as CLASSIFIER (optimal threshold=4.4396):
+    F1=0.2829  Precision=0.3986  Recall=0.2192
+
+  RANKING by AUC:
+    1. gravity              AUC=0.8972 <<<
+    2. iforest              AUC=0.8571
+    3. knn                  AUC=0.8511
+    4. lof                  AUC=0.7204
+    5. ocsvm                AUC=0.7037
+
+----------------------------------------------------------------------
+  PENDIGITS  n=6870  d=16  anomaly_rate=0.0227
+----------------------------------------------------------------------
+  Method                        AUC       AP     Time
+  --------------------------------------------------
+  LOF (k=20)                 0.4821   0.0368     0.6s
+  IsolationForest (200)      0.9385   0.2292     1.3s
+  One-Class SVM              0.8702   0.1168     1.3s
+  kNN (k=20)                 0.8054   0.0853     0.5s
+  GravityEngine              0.9187   0.1775    24.1s
+
+  GravityEngine as CLASSIFIER (optimal threshold=7.4212):
+    F1=0.3227  Precision=0.2500  Recall=0.4551
+
+  RANKING by AUC:
+    1. iforest              AUC=0.9385
+    2. gravity              AUC=0.9187 <<<
+    3. ocsvm                AUC=0.8702
+    4. knn                  AUC=0.8054
+    5. lof                  AUC=0.4821
+
+================================================================================
+DONE

@@ -462,8 +462,9 @@ pipe = UDLPipeline(operators='auto', projection_method='qda-magnified')
 ### 5.6 Deviation-Induced Energy Functional (`udl/energy.py`)
 
 **Theoretical Foundation:**
-The energy framework formalises UDL's anomaly detection as a physical equilibrium problem.
-Normal data sit in stable energy basins; anomalies occupy high-energy, dynamically unstable positions.
+The energy framework provides a scoring functional for UDL's anomaly detection.
+Normal data tend to have low energy scores; anomalies tend to have high energy scores.
+This is a scoring heuristic — not a dynamical system with proven equilibria.
 
 **Energy Functional:**
 
@@ -490,8 +491,8 @@ $$\bigcap_{k=1}^{K} \ker\bigl(D\Phi_k(\boldsymbol{\mu})\bigr) = \{0\}$$
 
 This is verified by stacking numerical Jacobians and checking rank = input dimension.
 
-**Stability Theorem:**
-The radial anchoring term has analytical Hessian ∇²E_rad = α·diag(1/σ_j²) ≻ 0, guaranteeing positive-definiteness.
+**Radial Term Properties:**
+The radial anchoring term has analytical Hessian ∇²E_rad = α·diag(1/σ_j²) ≻ 0, which is positive-definite by construction (it is a weighted Euclidean norm).
 For nonlinear operators Φ_k, the full empirical Hessian may be indefinite (Jensen's inequality: E[Φ_k(X)] ≠ Φ_k(E[X])),
 but practical stability is confirmed through energy class separation metrics:
 - Energy separation ratio: E(anomaly)/E(normal)
