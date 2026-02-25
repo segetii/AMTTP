@@ -1,0 +1,86 @@
+{
+  "dataset": "IEEE-CIS Fraud Detection",
+  "source": "Vesta Corporation via Kaggle",
+  "n_total": 590540,
+  "n_fraud": 20663,
+  "fraud_rate": 0.03499000914417313,
+  "features_mapped": 74,
+  "seeds": [
+    42,
+    123
+  ],
+  "results": {
+    "seed_42": {
+      "Transfer-XGB": {
+        "seed": 42,
+        "n_test": 147635,
+        "n_fraud_test": 5166,
+        "base_f1": 0.5800924360275054,
+        "base_prec": 0.6944669365721997,
+        "base_rec": 0.4980642663569493,
+        "base_auc": 0.9138904726635493,
+        "base_fdr": 0.3055330634278003,
+        "mfls_f1": 0.5804922104312487,
+        "mfls_fdr": 0.3036294691224269,
+        "slr_f1": 0.20671563483735575,
+        "slr_fdr": 0.7742896425297892,
+        "slr_auc": 0.6814440852055197,
+        "quad_f1": 0.5781055019852523,
+        "quad_fdr": 0.3017265004110715,
+        "quad_auc": 0.7590637501930142,
+        "eg_f1": 0.5788142118578815,
+        "eg_fdr": 0.3296815286624204,
+        "eg_auc": 0.9138880120485189,
+        "mfls_auc": 0.5916956362488894
+      }
+    },
+    "seed_123": {
+      "Transfer-XGB": {
+        "seed": 123,
+        "n_test": 147635,
+        "n_fraud_test": 5166,
+        "base_f1": 0.5792255420127278,
+        "base_prec": 0.6540803897685749,
+        "base_rec": 0.5197444831591173,
+        "base_auc": 0.9146985367373235,
+        "base_fdr": 0.3459196102314251,
+        "mfls_f1": 0.5775435577543558,
+        "mfls_fdr": 0.3501936108422072,
+        "slr_f1": 0.21275345283573316,
+        "slr_fdr": 0.784651992861392,
+        "slr_auc": 0.6852972779073262,
+        "quad_f1": 0.5758366420873511,
+        "quad_fdr": 0.3044669772540422,
+        "quad_auc": 0.7604891582570765,
+        "eg_f1": 0.5776926351638996,
+        "eg_fdr": 0.3583924349881797,
+        "eg_auc": 0.9146974912137089,
+        "mfls_auc": 0.5837315136156633
+      }
+    }
+  },
+  "summary": {
+    "Transfer-XGB_base_f1_mean": 0.5796589890201166,
+    "Transfer-XGB_base_f1_std": 0.0004334470073887875,
+    "Transfer-XGB_mfls_f1_mean": 0.5790178840928022,
+    "Transfer-XGB_mfls_f1_std": 0.0014743263384464078,
+    "Transfer-XGB_slr_f1_mean": 0.20973454383654444,
+    "Transfer-XGB_slr_f1_std": 0.0030189089991887047,
+    "Transfer-XGB_quad_f1_mean": 0.5769710720363017,
+    "Transfer-XGB_quad_f1_std": 0.0011344299489506326,
+    "Transfer-XGB_eg_f1_mean": 0.5782534235108905,
+    "Transfer-XGB_eg_f1_std": 0.0005607883469909702,
+    "Transfer-XGB_base_fdr_mean": 0.3257263368296127,
+    "Transfer-XGB_base_fdr_std": 0.0201932734018124,
+    "Transfer-XGB_slr_fdr_mean": 0.7794708176955906,
+    "Transfer-XGB_slr_fdr_std": 0.0051811751658014105,
+    "Transfer-XGB_quad_fdr_mean": 0.30309673883255683,
+    "Transfer-XGB_quad_fdr_std": 0.0013702384214853425,
+    "Transfer-XGB_eg_fdr_mean": 0.34403698182530007,
+    "Transfer-XGB_eg_fdr_std": 0.014355453162879644,
+    "Transfer-XGB_slr_auc_mean": 0.6833706815564229,
+    "Transfer-XGB_slr_auc_std": 0.0019265963509032535,
+    "Transfer-XGB_mfls_auc_mean": 0.5877135749322764,
+    "Transfer-XGB_mfls_auc_std": 0.00398206131661305
+  }
+}
