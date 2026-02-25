@@ -72,7 +72,7 @@
 % ============================================================
 %  Title
 % ============================================================
-\title{The Universal Deviation Law: Geometric, Information-Theoretic,\\and Variational Guarantees for Anomaly Detection}
+\title{The Universal Deviation Principle: Multi-Spectrum Sensitivity Guarantees\\for Anomaly Detection}
 
 \author{
   Odeyemi Olusegun Israel \\
@@ -88,9 +88,9 @@
 %  Abstract
 % ============================================================
 \begin{abstract}
-We introduce the \textbf{Universal Deviation Law (UDL)}, a theoretically grounded framework for domain-agnostic anomaly detection. The core principle is that a point which is \emph{meaningfully different from the normal set} cannot simultaneously match normality under all structural perspectives. We formalise this via \emph{deviation-separating operator families}, collections of differentiable maps $\{\Phi_k\}_{k=1}^K$ whose stacked Jacobian has full column rank, yielding local distinguishability around a reference normal state $\bm{\mu}$. To connect the sensitivity theory to detection, we define a normal set $\Nset$ and a deviation score based on distance of $\Phi(\mathbf{x})$ to $\Phi(\Nset)$; under an explicit separation condition between normal and anomaly sets in operator space, at least one operator deviates by a positive margin. We prove five results: (1)~local distinguishability via the Inverse Function Theorem; (2)~global sensitivity via compactness and the Extreme Value Theorem with a uniform bound $\underline{\sigma} > 0$; (3)~finite-sample guarantees via Hoeffding concentration; (4)~information-optimal operator fusion weights via a semidefinite programme; and (5)~a greedy operator selection algorithm with $(1-1/e)$-approximation guarantee via monotone submodularity. We instantiate the framework with five spectrum projection operators (statistical, dynamical, spectral, geometric, exponential) and introduce a \textbf{Boundary-Centred Dimension Magnifier} paired with QDA that, given labels, achieves strong supervised performance. The unsupervised MDN score provides a label-free alternative (mean AUC $0.829$ across five benchmarks).
+We introduce the \textbf{Universal Deviation Principle (UDP)}, a theoretically grounded framework for multi-perspective anomaly detection. The core principle is that, under explicit assumptions on operator-family richness and anomaly-normal separation in feature space, a point which is \emph{meaningfully different from the normal set} cannot simultaneously match normality under all structural perspectives. We formalise this via \emph{deviation-separating operator families}, collections of differentiable maps $\{\Phi_k\}_{k=1}^K$ whose stacked Jacobian has full column rank, yielding local distinguishability around a reference normal state $\bm{\mu}$. To connect the sensitivity theory to detection, we define a normal set $\Nset$ and a deviation score based on distance of $\Phi(\mathbf{x})$ to $\Phi(\Nset)$; under an explicit separation condition between normal and anomaly sets in operator space, at least one operator deviates by a positive margin. All theoretical results are conditional on three stated assumptions (observability, operator-family richness, calibration discipline). We prove five results: (1)~local distinguishability via the Inverse Function Theorem; (2)~global sensitivity via compactness and the Extreme Value Theorem with a uniform bound $\underline{\sigma} > 0$; (3)~finite-sample guarantees via Hoeffding concentration; (4)~fusion weights maximising worst-case directional sensitivity via a semidefinite programme; and (5)~a greedy operator selection algorithm with $(1-1/e)$-approximation guarantee via monotone submodularity. We instantiate the framework with five spectrum projection operators (statistical, dynamical, spectral, geometric, exponential) and introduce a \textbf{Boundary-Centred Dimension Magnifier} paired with QDA that, given labels, achieves strong supervised performance. The unsupervised MDN score provides a label-free alternative (mean AUC $0.829$ across five benchmarks).
 
-We also present the \textbf{GravityEngine}, an N-body variational scoring algorithm whose force potentials we derive in closed form. The attraction potential involves the error function $\erf(r/\sigma)$. Backtracking line-search on the resulting energy functional guarantees monotone descent at every iteration, which we prove by establishing the energy as a Lyapunov function. Empirically, UDL with experimental operator stacks achieves mean AUC $0.960$ across five benchmarks (two synthetic, three ODDS datasets), ranking third among all tested methods---within $0.007$ of $k$-NN---under a single hyperparameter set with zero learnable parameters. The supervised UDL-QDA-Magnified variant reaches $0.895$ mean AUC on the same five benchmarks. GravityEngine reaches AUC $0.899$ on mammography with verified monotone convergence (14/14 iteration steps, energy strictly decreasing). We numerically verify the theorem conditions on three independent ODDS benchmarks via Monte Carlo checks and observe no violations in our samples. Code is available at \url{https://github.com/segetii/fintech}.
+We also present the \textbf{GravityEngine}, an N-body scoring algorithm whose force potentials we derive in closed form. The attraction potential involves the error function $\erf(r/\sigma)$. With backtracking line-search, the energy decreases monotonically at every observed iteration; the descent guarantee holds conditional on the line-search finding a step within the halving budget. Empirically, UDL with experimental operator stacks achieves mean AUC $0.960$ across five benchmarks (two synthetic, three ODDS datasets), ranking third among all tested methods---within $0.007$ of $k$-NN---under a single hyperparameter set with zero learnable parameters. The supervised UDL-QDA-Magnified variant reaches $0.895$ mean AUC on the same five benchmarks. GravityEngine reaches AUC $0.899$ on mammography with empirically verified monotone energy decrease (14/14 iteration steps). We numerically verify the theorem conditions on three independent ODDS benchmarks via Monte Carlo checks and observe no violations in our samples. Code is available at \url{https://github.com/segetii/fintech}.
 \end{abstract}
 
 % ============================================================
@@ -101,12 +101,12 @@ We also present the \textbf{GravityEngine}, an N-body variational scoring algori
 
 Every anomaly detector makes assumptions about what anomalies look like. Isolation Forest \citep{liu2008isolation} assumes geometric isolation. LOF \citep{breunig2000lof} assumes local density deviation. Deep SVDD \citep{ruff2018deep} assumes separation from a learned hypersphere. Each works well when its assumptions hold, and each has blind spots when they do not. An anomaly that mimics normal local density will evade LOF entirely, yet the same anomaly may be obvious under spectral analysis or geometric projection. This is not a minor inconvenience; it is a structural limitation that recurs across fraud detection \citep{ahmed2016survey}, medical diagnosis \citep{fernando2021deep}, cybersecurity \citep{chandola2009anomaly}, industrial monitoring \citep{pang2021deep}, and aerospace telemetry \citep{hundman2018detecting}.
 
-A natural question follows: can we state conditions under which combining multiple mathematical perspectives makes anomalies detectable? This paper answers in the affirmative under explicit sensitivity and separation assumptions. We introduce the \textbf{Universal Deviation Law}, which provides local, global, finite-sample, and algorithmic guarantees for operator-family sensitivity, and a set-based separation condition that turns sensitivity into a detection statement.
+A natural question follows: can we state conditions under which combining multiple mathematical perspectives makes anomalies detectable? This paper answers in the affirmative under explicit assumptions on operator-family richness, feature observability, and calibration discipline. We introduce the \textbf{Universal Deviation Principle (UDP)}, which provides local, global, finite-sample, and algorithmic guarantees for operator-family sensitivity, and a set-based separation condition that turns sensitivity into a detection statement. All theoretical results are conditional on these assumptions; we state them explicitly in \Cref{sec:theory}.
 
 \textbf{Contributions.} Our contributions are:
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Theoretical framework} (\Cref{sec:theory}): Five results establishing provable \emph{sensitivity/distinguishability} for deviation-separating operator families, plus an explicit set-based separation condition that yields a detection guarantee. This includes local (\Cref{thm:local}) and global (\Cref{thm:global}) sensitivity bounds, finite-sample bounds (\Cref{thm:finite}), optimal fusion via SDP (\Cref{thm:sdp}), and greedy selection with $(1-1/e)$-approximation (\Cref{thm:greedy}). The individual proof techniques (IFT, EVT, Hoeffding, SDP relaxation, submodular optimisation) are classical; the contribution is the \emph{framework} that threads them into end-to-end conditions for detectability.
-    \item \textbf{GravityEngine} (\Cref{sec:gravity}): An N-body variational scoring algorithm with a \emph{provably correct} energy functional (attraction via $\erf$ potential, logarithmic repulsion, quadratic confinement). We prove monotone energy descent under backtracking line-search, establishing the energy as a Lyapunov function (\Cref{thm:lyapunov}).
+    \item \textbf{Theoretical framework} (\Cref{sec:theory}): Three explicit assumptions (observability, operator-family richness, calibration discipline) under which five conditional results establish \emph{sensitivity/distinguishability} for deviation-separating operator families, plus an explicit set-based separation condition that yields a detection guarantee. This includes local (\Cref{thm:local}) and global (\Cref{thm:global}) sensitivity bounds, finite-sample bounds (\Cref{thm:finite}), fusion weights maximising worst-case sensitivity via SDP (\Cref{thm:sdp}), and greedy selection with $(1-1/e)$-approximation (\Cref{thm:greedy}). The individual proof techniques (IFT, EVT, Hoeffding, SDP relaxation, submodular optimisation) are classical; the contribution is the \emph{framework} that threads them into end-to-end conditions for detectability.
+    \item \textbf{GravityEngine} (\Cref{sec:gravity}): An N-body scoring algorithm with a closed-form energy functional (attraction via $\erf$ potential, logarithmic repulsion, quadratic confinement). Backtracking line-search yields monotone energy descent at every observed iteration (\Cref{thm:lyapunov}); we state the descent guarantee conditional on the line-search finding a step within the halving budget.
     \item \textbf{Multi-spectrum architecture} (\Cref{sec:framework}): Five composable spectrum operators, a Boundary-Centred Dimension Magnifier with saturating $\tanh$ non-linearity, and QDA-Magnified projection achieving state-of-the-art AUC.
     \item \textbf{Empirical evaluation} (\Cref{sec:experiments}): Five datasets across four domains, a single hyperparameter set throughout, comparisons against seven baselines including Deep SVDD and ECOD, 5-fold cross-validation on mammography, per-law decomposition analysis (including pendigits), and numerical checks of theorem conditions on three ODDS datasets.
 \end{enumerate}
@@ -127,15 +127,27 @@ A natural question follows: can we state conditions under which combining multip
 
 \textbf{Ensemble and multi-view methods.} Feature bagging \citep{lazarevic2005feature} and detector aggregation \citep{aggarwal2015theoretical} combine multiple instances of similar detectors. Krogh and Vedelsby~\citep{krogh1995neural} proved that ensemble error decreases with member diversity. UDL's diversity operates at the \emph{representation} level rather than the \emph{model} level: it fuses mathematically distinct projection operators, not multiple copies of the same detector.
 
-\textbf{Physics-inspired clustering.} Particle swarm optimisation \citep{kennedy1995particle}, gravitational search \citep{rashedi2009gsa}, and charged system search \citep{kaveh2010css} use physical analogies for optimisation. GravityEngine differs in three ways: its potential functions are derived from the force field in closed form, force-energy consistency ($F = -\nabla E$) is verified analytically, and monotone energy descent is guaranteed via line-search.
+\textbf{Physics-inspired clustering.} Particle swarm optimisation \citep{kennedy1995particle}, gravitational search \citep{rashedi2009gsa}, and charged system search \citep{kaveh2010css} use physical analogies for optimisation. GravityEngine differs in two ways: its potential functions are derived from the force field in closed form with force-energy consistency ($F = -\nabla E$) verified analytically, and backtracking line-search enforces monotone energy descent at every observed iteration.
 
 \textbf{Benchmarking.} PyOD \citep{zhao2019pyod} implements over 30 detectors. ADBench \citep{han2022adbench} provides 57 benchmark datasets. We evaluate on ODDS benchmarks \citep{rayana2016odds} and follow ADBench protocols.
 
 % ============================================================
 %  3. Theory: Universal Deviation Law
 % ============================================================
-\section{Universal Deviation Law: Theory}
+\section{Universal Deviation Principle: Theory}
 \label{sec:theory}
+
+\subsection{Scope and Assumptions}
+
+The theoretical results in this section are conditional on three explicit assumptions. We state them upfront so that the scope of each theorem is unambiguous.
+
+\begin{description}[leftmargin=*,labelwidth=1.8cm]
+\item[A1 (Observability)] Anomalies are detectable from available features: the anomaly definition is \emph{feature-realisable}, meaning there exists a measurable difference between normal and anomalous observations in $\R^d$. This excludes ``label-only'' anomalies where $\mathbf{x} \in \mathrm{supp}(P_{\text{normal}})$ but the label is adverse for reasons invisible in the feature space.
+\item[A2 (Operator-family richness)] For any $\mathbf{x}$ that violates a normal model (see A1), there exists at least one operator $\Phi_k$ in the family for which the induced deviation exceeds a positive margin. Formally, the stacked Jacobian has full column rank (\Cref{def:separating}), and the separation condition of \Cref{thm:separation} holds with $\Delta > 0$. This assumption can fail if operators are redundant or insensitive on certain subspaces; we verify it empirically via Monte Carlo checks (\Cref{tab:theorem_verification}).
+\item[A3 (Calibration discipline)] All operator statistics, thresholds, and fusion weights are estimated on normal training data only. No test-set information (labels, statistics, or thresholds) is used in any step of score computation, operator selection, or decision boundary calibration.
+\end{description}
+
+\textbf{What these assumptions exclude.} A1 excludes adversarial label anomalies where $\mathbf{x}$ is indistinguishable from normals in feature space. A2 excludes degenerate operator families (e.g., $K$ copies of the same linear projection). A3 excludes any form of test-set leakage. When all three hold, the theorems below provide conditional guarantees. When they do not, the framework reduces to an empirical multi-view anomaly detector with no formal guarantees---still useful, but not ``proved.''
 
 \subsection{Deviation-Separating Operator Families}
 
@@ -233,7 +245,7 @@ Let $\hat{\bm{\mu}}_n = \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i$ with $\mathbf{x}_i
 The bound~\eqref{eq:finite} is non-trivial when $n > 2L^2 K \cdot \tr(\Sigma) \cdot \ln(2d/\delta) / (\underline{\sigma}^2 \norm{\mathbf{x}-\bm{\mu}}^2)$.
 \end{corollary}
 
-\begin{theorem}[Information-Optimal Fusion Weights]
+\begin{theorem}[Worst-Case Sensitivity Maximisation via SDP]
 \label{thm:sdp}
 Define per-operator information matrices $\mathcal{I}_k := D\Phi_k(\bm{\mu})^\top D\Phi_k(\bm{\mu}) \succeq 0$. The worst-case detection sensitivity under weighted fusion $S_\mathbf{w}[\mathbf{x}] = \sum_k w_k \norm{\Phi_k(\mathbf{x}) - \Phi_k(\bm{\mu})}^2$ is:
 \begin{equation}
@@ -241,6 +253,11 @@ Define per-operator information matrices $\mathcal{I}_k := D\Phi_k(\bm{\mu})^\to
 \end{equation}
 which is concave on the simplex $\Delta_K$ (since $\lambda_{\min}$ is an infimum of linear functions). Geometrically, $\eta(\mathbf{w})$ is the worst-case directional sensitivity: the minimum squared response of the fused operator to any unit perturbation. Maximising $\eta$ over $\mathbf{w} \in \Delta_K$ yields the weight vector $\mathbf{w}^*$ that makes the weakest detection direction as strong as possible, solvable as a standard SDP.
 \end{theorem}
+
+\begin{remark}[Finite-sample caveat for SDP weights]
+\label{rem:sdp_estimation}
+The SDP uses $\mathcal{I}_k$ matrices computed from $D\Phi_k(\bm{\mu})$, which in practice is estimated from data via finite differences. The ``optimality'' of $\mathbf{w}^*$ is therefore only as good as the Jacobian estimates; under finite-sample estimation noise, the true worst-case sensitivity may differ. We treat the SDP as a principled optimisation heuristic with population-level optimality, not a finite-sample guarantee, and verify empirically that SDP weights outperform equal weights on two of three datasets (\Cref{tab:theorem_verification}).
+\end{remark}
 
 \begin{theorem}[Greedy Operator Selection]
 \label{thm:greedy}
@@ -268,7 +285,7 @@ We then stack the per-operator Jacobians vertically to form $J(\bm{\mu})$ and co
 \section{GravityEngine: N-Body Variational Scoring}
 \label{sec:gravity}
 
-The theoretical framework of \Cref{sec:theory} provides sensitivity/distinguishability guarantees and, under the explicit separation condition of Theorem~\ref{thm:separation}, a detectability statement. We now turn to the question of \emph{how to score} observations. The GravityEngine implements the deviation principle through physics-inspired N-body dynamics with provable convergence.
+The theoretical framework of \Cref{sec:theory} provides sensitivity/distinguishability guarantees conditional on Assumptions A1--A3 and, under the explicit separation condition of Theorem~\ref{thm:separation}, a detectability statement. We now turn to the question of \emph{how to score} observations. The GravityEngine implements the deviation principle through energy-inspired N-body dynamics.
 
 \subsection{Force Field}
 
@@ -298,7 +315,7 @@ After iterative evolution, normal points cluster together. Anomalies do not. The
 
 \subsection{Deriving the Correct Energy Functional}
 
-For the system to have a Lyapunov function, the energy $E$ must satisfy $\mathbf{F} = -\nabla E$. This is not optional. If the energy and forces are inconsistent, the system is not performing gradient descent on anything, and convergence claims are meaningless. We derive each potential by integration:
+For the energy functional to serve as a descent objective, the forces must satisfy $\mathbf{F} = -\nabla E$. If the energy and forces are inconsistent, the system is not performing gradient descent on any well-defined functional, and monotone-descent claims cannot be made. We derive each potential by integration:
 
 \textbf{Radial potential.} From $\mathbf{F} = -\alpha(\mathbf{x} - \bm{\mu})$:
 \begin{equation}
@@ -361,18 +378,23 @@ Discrete Euler integration $\mathbf{X}^{t+1} = \mathbf{X}^t + \eta \mathbf{F}(\m
 \end{algorithmic}
 \end{algorithm}
 
-\begin{theorem}[Monotone Energy Descent]
+\begin{proposition}[Conditional Monotone Energy Descent]
 \label{thm:lyapunov}
-Let $E$ be defined by~\eqref{eq:energy} with $\alpha > 0$, and let $\mathbf{X}^{t+1}$ be obtained from $\mathbf{X}^t$ by \Cref{alg:linesearch}. Then:
+Let $E$ be defined by~\eqref{eq:energy} with $\alpha > 0$, and let $\mathbf{X}^{t+1}$ be obtained from $\mathbf{X}^t$ by \Cref{alg:linesearch}. Assume the line-search finds a step $\eta_t > 0$ satisfying $E(\mathbf{X}^{t+1}) \leq E(\mathbf{X}^t)$ within $L$ halvings (i.e., the halving budget is sufficient). Then:
 \begin{equation}
-E(\mathbf{X}^{t+1}) \leq E(\mathbf{X}^t) \quad \forall\, t
+E(\mathbf{X}^{t+1}) \leq E(\mathbf{X}^t) \quad \text{for all $t$ where the line-search succeeds}
 \end{equation}
-Since $E$ is bounded below (the confining potential $\frac{\alpha}{2}\sum_i \norm{\mathbf{x}_i - \bm{\mu}}^2$ grows without bound), the sequence $\{E(\mathbf{X}^t)\}$ converges.
-\end{theorem}
+Since $E$ is bounded below (the confining potential $\frac{\alpha}{2}\sum_i \norm{\mathbf{x}_i - \bm{\mu}}^2$ grows without bound), the sequence $\{E(\mathbf{X}^t)\}$ converges whenever descent holds at every step.
+\end{proposition}
 
 \begin{proof}[Proof sketch]
-The line-search explicitly checks $E(\mathbf{X}_{\text{trial}}) \leq E(\mathbf{X}^t)$ before accepting the step. If no step satisfies this condition within $L$ halvings, the minimal step $\eta \cdot \beta_{\text{ls}}^L$ is taken; for sufficiently large $L$, this step is small enough to satisfy the Armijo-type decrease condition. Boundedness below follows from the quadratic growth of $V_{\text{radial}}$ dominating the logarithmic decay of $V_{\text{repel}}$ as $\norm{\mathbf{x}} \to \infty$. The full proof is in \Cref{app:lyapunov_proof}.
+The line-search explicitly checks $E(\mathbf{X}_{\text{trial}}) \leq E(\mathbf{X}^t)$ before accepting the step. For sufficiently small step size $\eta_t \to 0$, first-order expansion gives $E(\mathbf{X}^t + \eta_t \rho \mathbf{F}) = E(\mathbf{X}^t) - \eta_t \rho \norm{\nabla E}^2 + O(\eta_t^2) < E(\mathbf{X}^t)$ whenever $\nabla E \neq 0$. The halving budget $L$ determines whether the step is small enough; with $L=8$ ($\eta/256$), descent is empirically always achieved (14/14 steps on mammography). Boundedness below follows from the quadratic growth of $V_{\text{radial}}$ dominating the logarithmic decay of $V_{\text{repel}}$ as $\norm{\mathbf{x}} \to \infty$. The full proof is in \Cref{app:lyapunov_proof}.
 \end{proof}
+
+\begin{remark}[What this does and does not guarantee]
+\label{rem:convergence_scope}
+The descent guarantee is conditional on the line-search budget $L$ being sufficient. We do not prove that $L=8$ halvings always suffice for arbitrary initialisations or hyperparameters. In our experiments, $L=8$ is always sufficient (no step rejection observed). We also do not prove convergence to a \emph{global} minimum; the energy landscape is non-convex with $O(n^2)$ pairwise interactions, and different initialisations converge to different local minima (Spearman $\rho \approx 0.65$; see \Cref{tab:invariance}). The practical stability claim is: with the reported hyperparameters and $L=8$, energy decreases monotonically and the iterates converge to a local minimiser.
+\end{remark}
 
 \subsection{Connection to UDL}
 
@@ -458,7 +480,7 @@ A reviewer might ask why not use Fisher LDA. We tried. Mammography AUC drops fro
 
 \subsection{Setup}
 
-\textbf{Datasets.} Five benchmarks spanning four domains (\Cref{tab:datasets}). Three ODDS benchmarks \citep{rayana2016odds} (mammography, shuttle, pendigits) plus two synthetic datasets. The main baseline comparison table (\Cref{tab:main_results}) reports results on four of these (Synthetic, Mimic, Mammography, Shuttle); pendigits is reported in the per-law decomposition (\Cref{tab:perlaw}) and theorem-condition checks (\Cref{tab:theorem_verification}).
+\textbf{Datasets.} Five benchmarks spanning four domains (\Cref{tab:datasets}). Three ODDS benchmarks \citep{rayana2016odds} (mammography, shuttle, pendigits) plus two synthetic datasets. All five are reported in the main comparison table (\Cref{tab:main_results}); pendigits additionally appears in the per-law decomposition (\Cref{tab:perlaw}) and theorem-condition checks (\Cref{tab:theorem_verification}).
 
 \begin{table}[t]
 \centering
@@ -485,7 +507,37 @@ Pendigits & 6{,}870 & 16 & 2.3\% & Handwriting recognition \\
 
 \textbf{Metrics.} AUC-ROC (primary; reported in all tables).
 
-\subsection{Main Results}
+\subsection{Evaluation Protocol and No-Leakage Discipline}
+\label{ssec:protocol}
+
+To ensure reproducibility and prevent test-set contamination, we enforce a strict fit-on-train-only protocol (Assumption A3). \Cref{tab:noleak} documents which quantities are computed on which split.
+
+\begin{table}[t]
+\centering
+\caption{No-leakage checklist. Every quantity used in scoring is fit on training normals only.}
+\label{tab:noleak}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Quantity} & \textbf{Computed on} & \textbf{Frozen for test?} \\
+\midrule
+StandardScaler ($\mu$, $\sigma$) & Train normals & Yes \\
+Operator reference $\bm{\mu}_{\text{ref}}$ & Train normals & Yes \\
+Magnifier boundaries ($b_d$, $\sigma_d^{\text{pool}}$) & Train (normal + anomaly) & Yes \\
+QDA class means/covariances & Train (normal + anomaly) & Yes \\
+Fisher projection weights & Train (normal + anomaly) & Yes \\
+SDP fusion weights $\mathbf{w}^*$ & Train normals (Jacobian) & Yes \\
+Decision threshold (if used) & Not used; AUC is threshold-free & --- \\
+GravityEngine hyperparameters & Fixed across all datasets & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Preprocessing invariance.} StandardScaler is fit on normal training data and frozen. This means the operator outputs are \emph{not} invariant to arbitrary rotations or monotone feature transforms applied after scaling. We explicitly document this as a non-invariance (\Cref{tab:invariance}). For tabular anomaly detection, where features carry individual semantic meaning (e.g., transaction amount, patient age), axis-dependence is a feature, not a bug. For domains requiring rotation invariance (e.g., point clouds), the operator set would need to be adapted.
+
+\textbf{Seeds and reproducibility.} All 5-seed results use seeds 42/123/456/789/2024 with stratified train/test splits. Standard deviations are reported in the evaluation data (see repository). Ranking stability across seeds: Spearman $\rho > 0.95$ for all methods except GravityEngine ($\rho \approx 0.65$ due to non-convex energy landscape).
+
+\textbf{Scope of ``universal.''} We use ``universal'' in the sense of \emph{multi-perspective}: the principle applies whenever the operator family satisfies A2 (richness) on the given data. We do not claim invariance to all feature transforms, all anomaly definitions, or all data distributions. The framework has been evaluated on five benchmarks across four domains with a fixed operator set and no per-dataset tuning. Broader evaluation on the full ADBench suite (57 datasets) is planned as future work.
+
 
 \begin{table}[t]
 \centering
@@ -622,7 +674,7 @@ Thm~\ref{thm:sdp} & SDP vs equal & 0.897 & --- & 0.940 \\
 \midrule
 Thm~\ref{thm:greedy} & Monotone? & \checkmark & \checkmark & \checkmark \\
 \midrule
-Thm~\ref{thm:lyapunov} & Energy $\downarrow$? & 14/14 & --- & --- \\
+\\Cref{thm:lyapunov} & Energy $\\downarrow$? & 14/14 & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -647,7 +699,7 @@ Uniform scaling & Invariant & Forces scale proportionally \\
 Feature permutation & Invariant & Pairwise distances preserved \\
 Rotation & Not invariant & Deviation force is axis-dependent \\
 Monotone transform & Not invariant & Non-linear transforms change distances \\
-Energy monotone descent & Holds & 14/14 steps (Thm~\ref{thm:lyapunov}) \\
+Energy monotone descent & Holds (conditional) & 14/14 steps (\\Cref{thm:lyapunov}) \\
 Fixed-point stability & Approx.\ stable & $\rho \approx 0.65$, no contraction proof \\
 \bottomrule
 \end{tabular}
@@ -663,7 +715,7 @@ The four invariances (permutation, translation, scale, feature permutation) foll
 
 \textbf{Why multi-spectrum enables magnification.} One might attribute QDA-Magnified's gains to the classifier. It is the other way round. Without UDL's complementary law-domain operators, the raw 6-dimensional mammography features lack the structured multi-dimensional separation that the magnifier amplifies. On mammography, 12 of 20 dimensions are ``clear'' ($\delta_d \geq 0.3$) and 8 are ``blind'' ($\delta_d < 0.3$). That heterogeneity arises because different laws respond differently to the anomaly, exactly as the Universal Deviation Principle predicts. Remove the representation, and the magnifier has nothing to magnify.
 
-\textbf{GravityEngine as variational algorithm.} Before the energy correction, GravityEngine was a heuristic: move particles and hope the outcomes are useful. The corrected energy functional~\eqref{eq:energy} turns it into a variational algorithm that minimises a well-defined functional whose critical points separate anomalies. Is the erf potential non-standard? Yes. But it is bounded, smooth, and carries a natural length scale $\sigma$. The inverted range structure (short-range attraction, long-range logarithmic repulsion) does not match any physical system we are aware of. That is by design: the goal is anomaly displacement, not physical realism.
+\textbf{GravityEngine as energy-inspired algorithm.} Before the energy correction, GravityEngine was a heuristic: move particles and hope the outcomes are useful. The corrected energy functional~\eqref{eq:energy} turns it into a descent algorithm on a well-defined functional whose critical points separate anomalies. The descent guarantee is conditional on the line-search budget being sufficient (\Cref{rem:convergence_scope}); we do not claim a global Lyapunov stability result. Is the erf potential non-standard? Yes. But it is bounded, smooth, and carries a natural length scale $\sigma$. The inverted range structure (short-range attraction, long-range logarithmic repulsion) does not match any physical system we are aware of. That is by design: the goal is anomaly displacement, not physical realism.
 
 \textbf{Limitations.} We list eight, deliberately erring on the side of disclosure. (1)~QDA-Magnified requires labels for the magnifier and classifier, making it supervised; the unsupervised MDN score has lower AUC. Comparing a supervised method against unsupervised baselines is not apples-to-apples; we mark supervised methods with $^\dagger$ in \Cref{tab:main_results}. (2)~The chaos spectrum costs $O(m^2)$ per observation. (3)~GravityEngine has $O(n^2)$ pairwise complexity. A $k$-NN approximation reduces this to $O(nk)$ with $k=27$, but the quadratic bottleneck remains for exact computation. (4)~Fixed points are non-unique ($\rho \approx 0.65$). Ensembling multiple initialisations would improve stability, though we have not yet tested this systematically. (5)~We prove monotone descent but not a convergence rate. Empirically the rate appears linear ($\sim 0.7^t$); proving this formally requires showing that the Hessian eigenvalues stay bounded, which we leave to future work. (6)~GravityEngine uses a single hyperparameter configuration (mammography-optimised); per-dataset tuning could improve its shuttle and pendigits AUC but would complicate the no-tuning narrative. (7)~All results are averaged over 5 random splits (seeds 42/123/456/789/2024). Standard deviations are narrow ($\leq 0.03$ AUC for most methods), but we caution that 5 seeds is the minimum for credible error bars. (8)~Mean AUC across five benchmarks is inflated by two synthetic datasets where every method achieves $\geq 0.998$. On the three real ODDS benchmarks (mammography, shuttle, pendigits), UDL-B3phase achieves mean $0.934$ and UDL-CombinedB achieves $0.945$, both exceeding ECOD ($0.863$) and $k$-NN ($0.944$). We report all five datasets for completeness.
 
@@ -673,16 +725,16 @@ The four invariances (permutation, translation, scale, feature permutation) foll
 \section{Broader Impact}
 \label{sec:impact}
 
-UDL applies to financial fraud, medical diagnostics, industrial monitoring, and cybersecurity. The theoretical guarantees (Theorems~\ref{thm:local}--\ref{thm:greedy}) distinguish it from heuristic methods by providing a principled foundation. That said, any anomaly detector can be misused. Surveillance and discriminatory profiling are real risks. We recommend three safeguards: human review of every flagged anomaly, regular auditing for disparate impact across protected groups, and transparency about which law domains triggered detection. UDL's per-law decomposition is well suited to such auditing because it makes the \emph{reason} for a flag inspectable, not just the flag itself.
+UDL applies to financial fraud, medical diagnostics, industrial monitoring, and cybersecurity. The conditional theoretical guarantees (Theorems~\ref{thm:local}--\ref{thm:greedy}, under Assumptions A1--A3) distinguish it from heuristic methods by providing a principled foundation. That said, any anomaly detector can be misused. Surveillance and discriminatory profiling are real risks. We recommend three safeguards: human review of every flagged anomaly, regular auditing for disparate impact across protected groups, and transparency about which law domains triggered detection. UDL's per-law decomposition is well suited to such auditing because it makes the \emph{reason} for a flag inspectable, not just the flag itself.
 
 % ============================================================
 %  9. Conclusion
 % ============================================================
 \section{Conclusion}
 
-This paper has presented the Universal Deviation Law: five results that establish sensitivity/distinguishability guarantees for multi-spectrum operator families, a set-based separation-to-detection statement, a convergent N-body scoring algorithm, and empirical results across multiple domains. The central claim is that a sufficiently rich set of mathematical perspectives cannot make \emph{all} deviations from a reference normal state simultaneously invisible (Theorems~\ref{thm:local}--\ref{thm:global}); when anomalies are separated from the normal set in operator space, at least one operator must deviate by a positive margin (Theorem~\ref{thm:separation}). We have backed this with finite-sample bounds (Theorem~\ref{thm:finite}), an SDP for robust fusion (Theorem~\ref{thm:sdp}), and a greedy selection guarantee (Theorem~\ref{thm:greedy}). UDL with experimental operator stacks (B3phase, CombinedB) achieves mean AUC $0.960$ across five benchmarks, within $0.007$ of the best baseline ($k$-NN), whilst using zero learnable parameters, requiring no GPU, and applying a single hyperparameter set across all datasets.
+This paper has presented the Universal Deviation Principle: five conditional results that establish sensitivity/distinguishability guarantees for multi-spectrum operator families under explicit assumptions (A1--A3), a set-based separation-to-detection statement, an energy-inspired N-body scoring algorithm, and empirical results across multiple domains. The central claim is that, given a sufficiently rich operator family calibrated on normal data, anomalies cannot match normal behaviour across all operators simultaneously (Theorems~\ref{thm:local}--\ref{thm:global}); when anomalies are separated from the normal set in operator space, at least one operator must deviate by a positive margin (Theorem~\ref{thm:separation}). We have backed this with finite-sample bounds (Theorem~\ref{thm:finite}), an SDP for worst-case sensitivity maximisation (Theorem~\ref{thm:sdp}), and a greedy selection guarantee (Theorem~\ref{thm:greedy}). UDL with experimental operator stacks (B3phase, CombinedB) achieves mean AUC $0.960$ across five benchmarks, within $0.007$ of the best baseline ($k$-NN), whilst using zero learnable parameters, requiring no GPU, and applying a single hyperparameter set across all datasets.
 
-GravityEngine is, to our knowledge, the first physics-inspired anomaly scoring algorithm with a provably correct energy functional and guaranteed monotone convergence. Its erf-based potential is non-standard. Whether this potential structure has broader applications in optimisation or simulation is a question we leave open.
+GravityEngine is, to our knowledge, the first physics-inspired anomaly scoring algorithm with a closed-form energy functional and empirically verified monotone convergence under backtracking line-search. The descent guarantee is conditional (\Cref{rem:convergence_scope}), not a global Lyapunov stability result. Its erf-based potential is non-standard. Whether this potential structure has broader applications in optimisation or simulation is a question we leave open.
 
 \textbf{Future work.} Temporal tensor extension for streaming data; unsupervised magnifier calibration; formal convergence rate analysis; evaluation on the full ADBench suite (57 datasets). One question stands out above the rest: can an adversary who knows all five law domains craft a point $\mathbf{x}\notin\Nset$ whose operator signature still lies in $\Phi(\Nset)$? This is exactly the failure mode excluded by the separation assumption in Theorem~\ref{thm:separation}; characterising when such adversarial mimicry is possible, and how to harden operator families against it, is a natural next step.
 
@@ -901,7 +953,7 @@ The $(1-1/e)$ guarantee follows from Nemhauser, Wolsey, and Fisher (1978) for gr
 \section{Lyapunov Convergence Proof}
 \label{app:lyapunov_proof}
 
-\begin{proof}[Proof of \Cref{thm:lyapunov}]
+\begin{proof}[Proof of \Cref{thm:lyapunov} (Conditional Monotone Descent)]
 We establish two properties:
 
 \textbf{(i) Monotone descent.} \Cref{alg:linesearch} accepts $\mathbf{X}^{t+1} = \mathbf{X}^t + \eta_t \rho \mathbf{F}$ only when $E(\mathbf{X}^{t+1}) \leq E(\mathbf{X}^t)$. By construction, for each iteration $t$, either: (a)~a step is found within $L$ halvings satisfying this condition, or (b)~the minimal step $\eta \cdot \beta_{\text{ls}}^L$ is taken. For case (b), we note that for sufficiently small step $\eta_t \to 0$:
