@@ -41,6 +41,7 @@ from .calibration import ScoreCalibrator
 from .law_matrix import DataProfile, select_laws, get_law_matrix_table
 from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
 from .gravity import GravityEngine, run_gravity_clustering
+from .backend import xp, jit, vmap, to_numpy, from_numpy, BACKEND
 
 __all__ = [
     # Core pipeline
@@ -78,4 +79,11 @@ __all__ = [
     # Gravity engine
     "GravityEngine",
     "run_gravity_clustering",
+    # Backend (JAX / CuPy / NumPy)
+    "xp",
+    "jit",
+    "vmap",
+    "to_numpy",
+    "from_numpy",
+    "BACKEND",
 ]

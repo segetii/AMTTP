@@ -120,8 +120,12 @@ class ChaosSpectrum:
 
             # Recurrence rate (simplified: fraction of values within threshold)
             threshold = np.std(X[i]) * 0.1 + self.eps
-            dist_matrix = np.abs(X[i, :, None] - X[i, None, :])
-            recurrence = (dist_matrix < threshold).sum() / max(m * m, 1)
+            row = X[i]
+            if len(row) > 32:
+                idx = np.linspace(0, len(row) - 1, 32, dtype=int)
+                row = row[idx]
+            dist_matrix = np.abs(row[:, None] - row[None, :])
+            recurrence = (dist_matrix < threshold).sum() / max(len(row) ** 2, 1)
             out[i, 1] = recurrence
 
             # Approximate entropy (simplified)
@@ -132,6 +136,12 @@ class ChaosSpectrum:
     def _approx_entropy(self, signal, m_order=2, r=0.2):
         """Simplified approximate entropy."""
         N = len(signal)
+        # Cap signal length to avoid O(N²) blowup on high-dim data
+        max_len = 32
+        if N > max_len:
+            idx = np.linspace(0, N - 1, max_len, dtype=int)
+            signal = signal[idx]
+            N = max_len
         if N < m_order + 1:
             return 0.0
         r_val = r * (np.std(signal) + self.eps)
