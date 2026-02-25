@@ -15,6 +15,8 @@ Methods compared:
   - One-Class SVM (Scholkopf et al., 2001)
   - Elliptic Envelope / Robust Covariance (Rousseeuw & Driessen, 1999)
   - KNN Distance (Ramaswamy et al., 2000)
+  - Deep SVDD (Ruff et al., 2018) [PyOD]
+  - ECOD (Li et al., 2022) [PyOD]
   - UDL Baseline (5 law domains)
   - UDL B3_phase solo
   - UDL A3_wavelet solo
@@ -36,6 +38,19 @@ from sklearn.svm import OneClassSVM
 from sklearn.covariance import EllipticEnvelope
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+
+# PyOD deep / statistical baselines
+try:
+    from pyod.models.deep_svdd import DeepSVDD
+    HAS_DEEPSVDD = True
+except ImportError:
+    HAS_DEEPSVDD = False
+
+try:
+    from pyod.models.ecod import ECOD
+    HAS_ECOD = True
+except ImportError:
+    HAS_ECOD = False
 
 from udl.spectra import (
     StatisticalSpectrum, ChaosSpectrum, SpectralSpectrum,
@@ -152,6 +167,54 @@ def run_knn(X_train_normal, X_test, y_test):
     distances, _ = nn.kneighbors(X_test)
     scores = distances.mean(axis=1)  # average distance to 10 NNs
     return scores
+
+
+def run_deep_svdd(X_train_normal, X_test, y_test):
+    """Deep SVDD (Ruff et al., 2018) — deep one-class classification.
+    Trained on clean normal data. Capped at 8000 to avoid OOM."""
+    if not HAS_DEEPSVDD:
+        log("    [SKIP] DeepSVDD not installed")
+        return None
+    import gc
+    try:
+        MAX_TRAIN = 8000
+        if len(X_train_normal) > MAX_TRAIN:
+            rng = np.random.RandomState(42)
+            idx = rng.choice(len(X_train_normal), MAX_TRAIN, replace=False)
+            X_fit = X_train_normal[idx]
+        else:
+            X_fit = X_train_normal
+        clf = DeepSVDD(
+            n_features=X_fit.shape[1],
+            hidden_neurons=[64, 32],
+            epochs=50,
+            batch_size=256,
+            contamination=0.01,
+        )
+        clf.fit(X_fit)
+        scores = clf.decision_function(X_test)
+        del clf
+        gc.collect()
+        return scores
+    except Exception as e:
+        log(f"    [DeepSVDD ERROR] {e}")
+        return None
+
+
+def run_ecod(X_train_normal, X_test, y_test):
+    """ECOD (Li et al., 2022) — empirical CDF-based outlier detection.
+    Trained on clean normal data. Non-parametric, fast."""
+    if not HAS_ECOD:
+        log("    [SKIP] ECOD not installed")
+        return None
+    try:
+        clf = ECOD(contamination=0.01, n_jobs=-1)
+        clf.fit(X_train_normal)
+        scores = clf.decision_function(X_test)
+        return scores
+    except Exception as e:
+        log(f"    [ECOD ERROR] {e}")
+        return None
 
 
 # ── UDL runners ──
@@ -296,6 +359,13 @@ def run_comparison():
         "KNN-Distance": run_knn,
     }
 
+    # Deep / statistical baselines (PyOD)
+    deep_methods = {}
+    if HAS_DEEPSVDD:
+        deep_methods["DeepSVDD"] = run_deep_svdd
+    if HAS_ECOD:
+        deep_methods["ECOD"] = run_ecod
+
     # Results: results[method][dataset] = metrics
     all_results = {}
 
@@ -321,6 +391,17 @@ def run_comparison():
 
         # ── Run baseline methods on normal-only scaled data ──
         for method_name, method_fn in baseline_methods.items():
+            t0 = time.time()
+            scores = method_fn(X_train_normal_scaled, X_test_scaled, y_test)
+            elapsed = time.time() - t0
+            metrics = evaluate_scores(scores, y_test)
+            if method_name not in all_results:
+                all_results[method_name] = {}
+            all_results[method_name][ds_name] = metrics
+            log(f"  {method_name:<22s}  AUC={metrics['auc']:.4f}  AP={metrics['ap']:.4f}  F1={metrics['f1']:.4f}  ({elapsed:.2f}s)")
+
+        # ── Run deep/statistical baselines (DeepSVDD, ECOD) ──
+        for method_name, method_fn in deep_methods.items():
             t0 = time.time()
             scores = method_fn(X_train_normal_scaled, X_test_scaled, y_test)
             elapsed = time.time() - t0
@@ -479,7 +560,8 @@ def run_comparison():
     log("  PAIRWISE: UDL-5laws vs EACH BASELINE (wins/ties/losses)")
     log("=" * 90)
     udl_baseline = all_results.get("UDL-5laws", {})
-    for method_name in baseline_methods:
+    all_baseline_names = list(baseline_methods.keys()) + list(deep_methods.keys())
+    for method_name in all_baseline_names:
         wins, ties, losses = 0, 0, 0
         for ds in ds_names:
             udl_auc = udl_baseline.get(ds, {}).get('auc', 0.0)
