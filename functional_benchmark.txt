@@ -1,0 +1,62 @@
+================================================================================
+  FUNCTIONAL FEATURE EXTRACTION + GRAVITY ENGINE BENCHMARK
+================================================================================
+
+Pipeline: Raw x -> FunctionalExtractor -> theta -> GravityEngine -> scores
+Extraction: polynomial coeffs + DCT spectrum + stats + wavelets + gradients
+
+
+======================================================================
+  MAMMOGRAPHY  n=11183  d=6  anomaly_rate=0.0232
+======================================================================
+
+  [1] GravityEngine on RAW features (d=6)
+      AUC(dist)=0.8972  AUC(energy)=0.8528  AUC(ens)=0.8916  AP=0.2190  29.5s
+  [F]   sorted poly=3 dct=5 -> d=28  AUC(d)=0.8174 AUC(e)=0.8426 AUC(ens)=0.8405 AP=0.1233 37.9s
+  [F]   sorted poly=5 dct=5 -> d=30  AUC(d)=0.8284 AUC(e)=0.8566 AUC(ens)=0.8521 AP=0.1503 42.4s
+  [F]   sorted poly=3 dct=8 -> d=29  AUC(d)=0.8250 AUC(e)=0.8416 AUC(ens)=0.8477 AP=0.1207 42.1s
+  [F]   sorted poly=5 dct=8 -> d=31  AUC(d)=0.8290 AUC(e)=0.8536 AUC(ens)=0.8499 AP=0.1409 40.5s
+  [F] variance poly=3 dct=5 -> d=28  AUC(d)=0.8711 AUC(e)=0.8523 AUC(ens)=0.8728 AP=0.1627 43.6s
+  [F] variance poly=5 dct=5 -> d=30  AUC(d)=0.8740 AUC(e)=0.8571 AUC(ens)=0.8708 AP=0.1607 46.3s
+  [F] variance poly=3 dct=8 -> d=29  AUC(d)=0.8724 AUC(e)=0.8451 AUC(ens)=0.8696 AP=0.1560 45.4s
+  [F] variance poly=5 dct=8 -> d=31  AUC(d)=0.8723 AUC(e)=0.8500 AUC(ens)=0.8696 AP=0.1533 41.6s
+  [F]      raw poly=3 dct=5 -> d=28  AUC(d)=0.8640 AUC(e)=0.8351 AUC(ens)=0.8603 AP=0.1517 40.6s
+  [F]      raw poly=5 dct=5 -> d=30  AUC(d)=0.8221 AUC(e)=0.8084 AUC(ens)=0.8291 AP=0.0954 43.7s
+  [F]      raw poly=3 dct=8 -> d=29  AUC(d)=0.8613 AUC(e)=0.8275 AUC(ens)=0.8539 AP=0.1367 37.8s
+  [F]      raw poly=5 dct=8 -> d=31  AUC(d)=0.8215 AUC(e)=0.8001 AUC(ens)=0.8236 AP=0.0894 40.5s
+  [IF] IsolationForest on sorted functional (d=28)  AUC=0.8612  AP=0.1479  2.2s
+  [LOF] LOF on sorted functional (d=28)  AUC=0.7978  AP=0.1058  1.7s
+
+  Extracted 28 features: ['poly_beta0', 'poly_beta1', 'poly_beta2', 'poly_beta3', 'poly_residual_energy', 'dct_0', 'dct_1', 'dct_2', 'dct_3', 'dct_4', 'dct_energy_ratio', 'stat_energy', 'stat_entropy', 'stat_range', 'stat_iqr', 'stat_skewness', 'stat_kurtosis', 'stat_roughness', 'wavelet_energy_L0', 'wavelet_energy_L1', 'wavelet_approx_energy', 'grad_mean', 'grad_std', 'grad_max', 'grad_min', 'curv_mean', 'curv_std', 'curv_max_abs']
+
+======================================================================
+  PENDIGITS  n=6870  d=16  anomaly_rate=0.0227
+======================================================================
+
+  [1] GravityEngine on RAW features (d=16)
+      AUC(dist)=0.9187  AUC(energy)=0.8952  AUC(ens)=0.9232  AP=0.1775  23.2s
+  [F]   sorted poly=3 dct=5 -> d=30  AUC(d)=0.7784 AUC(e)=0.8035 AUC(ens)=0.8044 AP=0.1008 18.2s
+  [F]   sorted poly=5 dct=5 -> d=32  AUC(d)=0.7582 AUC(e)=0.8036 AUC(ens)=0.7916 AP=0.1001 15.5s
+  [F]   sorted poly=3 dct=8 -> d=33  AUC(d)=0.7939 AUC(e)=0.8350 AUC(ens)=0.8276 AP=0.1074 17.3s
+  [F]   sorted poly=5 dct=8 -> d=35  AUC(d)=0.7736 AUC(e)=0.8276 AUC(ens)=0.8110 AP=0.1056 16.5s
+  [F] variance poly=3 dct=5 -> d=30  AUC(d)=0.8376 AUC(e)=0.7877 AUC(ens)=0.8454 AP=0.0905 18.5s
+  [F] variance poly=5 dct=5 -> d=32  AUC(d)=0.7900 AUC(e)=0.7802 AUC(ens)=0.8069 AP=0.0874 16.4s
+  [F] variance poly=3 dct=8 -> d=33  AUC(d)=0.8394 AUC(e)=0.7916 AUC(ens)=0.8455 AP=0.0896 18.1s
+  [F] variance poly=5 dct=8 -> d=35  AUC(d)=0.7889 AUC(e)=0.7819 AUC(ens)=0.8060 AP=0.0855 19.9s
+  [F]      raw poly=3 dct=5 -> d=30  AUC(d)=0.8590 AUC(e)=0.8125 AUC(ens)=0.8641 AP=0.1931 17.4s
+  [F]      raw poly=5 dct=5 -> d=32  AUC(d)=0.8388 AUC(e)=0.8007 AUC(ens)=0.8447 AP=0.1577 18.0s
+  [F]      raw poly=3 dct=8 -> d=33  AUC(d)=0.8439 AUC(e)=0.7983 AUC(ens)=0.8464 AP=0.1891 19.6s
+  [F]      raw poly=5 dct=8 -> d=35  AUC(d)=0.8226 AUC(e)=0.7858 AUC(ens)=0.8262 AP=0.1513 19.7s
+  [IF] IsolationForest on sorted functional (d=30)  AUC=0.8526  AP=0.1329  1.1s
+  [LOF] LOF on sorted functional (d=30)  AUC=0.5631  AP=0.0422  0.8s
+
+  Extracted 30 features: ['poly_beta0', 'poly_beta1', 'poly_beta2', 'poly_beta3', 'poly_residual_energy', 'dct_0', 'dct_1', 'dct_2', 'dct_3', 'dct_4', 'dct_energy_ratio', 'stat_energy', 'stat_entropy', 'stat_range', 'stat_iqr', 'stat_skewness', 'stat_kurtosis', 'stat_roughness', 'wavelet_energy_L0', 'wavelet_energy_L1', 'wavelet_energy_L2', 'wavelet_energy_L3', 'wavelet_approx_energy', 'grad_mean', 'grad_std', 'grad_max', 'grad_min', 'curv_mean', 'curv_std', 'curv_max_abs']
+
+======================================================================
+  SHUTTLE  n=49097  d=9  anomaly_rate=0.0715
+======================================================================
+
+  [1] GravityEngine on RAW features (d=9)
+      AUC(dist)=0.9833  AUC(energy)=0.7052  AUC(ens)=0.8950  AP=0.9110  338.1s
+  [F]   sorted poly=3 dct=5 -> d=29  AUC(d)=0.9801 AUC(e)=0.8581 AUC(ens)=0.9466 AP=0.8038 341.4s
+  [F]   sorted poly=5 dct=5 -> d=31  AUC(d)=0.9833 AUC(e)=0.8913 AUC(ens)=0.9607 AP=0.8391 348.0s ***

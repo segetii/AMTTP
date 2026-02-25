@@ -1,0 +1,234 @@
+================================================================================
+  GRAVITY ENGINE - SCORE CALIBRATION & CLASSIFIER EVALUATION
+================================================================================
+
+----------------------------------------------------------------------
+  MAMMOGRAPHY  n=11183  d=6  anomalies=260 (2.32%)
+----------------------------------------------------------------------
+
+  RAW SCORES (no calibration):
+    Distance:  AUC=0.8972  AP=0.2190  (36.9s)
+    Energy:    AUC=0.8528  AP=0.1780
+
+  DISTANCE + ISOTONIC calibration (5-fold CV):
+    AUC=0.8900  AP=0.1953  Brier=0.0200
+    Probability range: [0.0000, 0.6869]
+    Mean P(anomaly) for normals: 0.0203
+    Mean P(anomaly) for anomalies: 0.1472
+
+    CLASSIFIER (optimal F1 threshold = 0.1667):
+      F1=0.2764  Precision=0.3986  Recall=0.2115
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0106        0.2192   0.2633      0.3295
+             5.00%        0.0526        0.4769   0.2586      0.1774
+            10.00%        0.1075        0.6692   0.2164      0.1291
+
+  DISTANCE + PLATT calibration (5-fold CV):
+    AUC=0.8963  AP=0.2183  Brier=0.0207
+    Probability range: [0.0016, 0.9969]
+    Mean P(anomaly) for normals: 0.0203
+    Mean P(anomaly) for anomalies: 0.1477
+
+    CLASSIFIER (optimal F1 threshold = 0.2254):
+      F1=0.2835  Precision=0.4148  Recall=0.2154
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0101        0.2192   0.2670      0.3413
+             5.00%        0.0501        0.4692   0.2626      0.1824
+            10.00%        0.1001        0.6769   0.2302      0.1387
+
+  ENERGY + ISOTONIC calibration (5-fold CV):
+    AUC=0.8433  AP=0.1608  Brier=0.0208
+    Probability range: [0.0015, 1.0000]
+    Mean P(anomaly) for normals: 0.0210
+    Mean P(anomaly) for anomalies: 0.1151
+
+    CLASSIFIER (optimal F1 threshold = 0.1333):
+      F1=0.2338  Precision=0.3310  Recall=0.1808
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0117        0.1846   0.2202      0.2727
+             5.00%        0.0520        0.3462   0.1961      0.1368
+            10.00%        0.1089        0.5269   0.1728      0.1033
+
+  ENERGY + PLATT calibration (5-fold CV):
+    AUC=0.8480  AP=0.1496  Brier=0.0218
+    Probability range: [0.0000, 0.4237]
+    Mean P(anomaly) for normals: 0.0227
+    Mean P(anomaly) for anomalies: 0.0507
+
+    CLASSIFIER (optimal F1 threshold = 0.0623):
+      F1=0.2024  Precision=0.2606  Recall=0.1654
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0101        0.1423   0.1818      0.2517
+             5.00%        0.0501        0.3385   0.1966      0.1386
+            10.00%        0.1001        0.5385   0.1875      0.1135
+
+  ENSEMBLE (distance + energy, isotonic, rank-averaged):
+    AUC=0.8772  AP=0.2142  Brier=0.0200
+    F1=0.2926  Precision=0.3885  Recall=0.2346
+    FPR-controlled:
+      FPR<=1%: actual_FPR=0.0101  TPR=0.2385  F1=0.2870  Prec=0.3605
+      FPR<=5%: actual_FPR=0.0502  TPR=0.4808  F1=0.2680  Prec=0.1857
+      FPR<=10%: actual_FPR=0.1001  TPR=0.6808  F1=0.2314  Prec=0.1394
+
+----------------------------------------------------------------------
+  PENDIGITS  n=6870  d=16  anomalies=156 (2.27%)
+----------------------------------------------------------------------
+
+  RAW SCORES (no calibration):
+    Distance:  AUC=0.9187  AP=0.1775  (23.5s)
+    Energy:    AUC=0.8952  AP=0.1560
+
+  DISTANCE + ISOTONIC calibration (5-fold CV):
+    AUC=0.9063  AP=0.1581  Brier=0.0198
+    Probability range: [0.0000, 0.3051]
+    Mean P(anomaly) for normals: 0.0202
+    Mean P(anomaly) for anomalies: 0.1403
+
+    CLASSIFIER (optimal F1 threshold = 0.2000):
+      F1=0.3189  Precision=0.2473  Recall=0.4487
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0121        0.0962   0.1190      0.1562
+             5.00%        0.0530        0.5321   0.2790      0.1891
+            10.00%        0.1063        0.6474   0.2080      0.1239
+
+  DISTANCE + PLATT calibration (5-fold CV):
+    AUC=0.9186  AP=0.1767  Brier=0.0228
+    Probability range: [0.0139, 0.8167]
+    Mean P(anomaly) for normals: 0.0223
+    Mean P(anomaly) for anomalies: 0.0461
+
+    CLASSIFIER (optimal F1 threshold = 0.0291):
+      F1=0.3203  Precision=0.2418  Recall=0.4744
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0101        0.1346   0.1714      0.2360
+             5.00%        0.0500        0.5449   0.2946      0.2019
+            10.00%        0.1001        0.6859   0.2289      0.1374
+
+  ENERGY + ISOTONIC calibration (5-fold CV):
+    AUC=0.8893  AP=0.1447  Brier=0.0204
+    Probability range: [0.0000, 0.3750]
+    Mean P(anomaly) for normals: 0.0207
+    Mean P(anomaly) for anomalies: 0.1128
+
+    CLASSIFIER (optimal F1 threshold = 0.1335):
+      F1=0.2681  Precision=0.2304  Recall=0.3205
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0121        0.1667   0.1977      0.2430
+             5.00%        0.0514        0.4423   0.2421      0.1667
+            10.00%        0.1060        0.5769   0.1879      0.1122
+
+  ENERGY + PLATT calibration (5-fold CV):
+    AUC=0.8951  AP=0.1535  Brier=0.0224
+    Probability range: [0.0125, 0.9379]
+    Mean P(anomaly) for normals: 0.0222
+    Mean P(anomaly) for anomalies: 0.0496
+
+    CLASSIFIER (optimal F1 threshold = 0.0339):
+      F1=0.2639  Precision=0.2432  Recall=0.2885
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0101        0.1538   0.1935      0.2609
+             5.00%        0.0500        0.4487   0.2491      0.1724
+            10.00%        0.1001        0.5769   0.1961      0.1181
+
+  ENSEMBLE (distance + energy, isotonic, rank-averaged):
+    AUC=0.9167  AP=0.1770  Brier=0.0198
+    F1=0.3214  Precision=0.2669  Recall=0.4038
+    FPR-controlled:
+      FPR<=1%: actual_FPR=0.0112  TPR=0.1667  F1=0.2023  Prec=0.2574
+      FPR<=5%: actual_FPR=0.0500  TPR=0.5192  F1=0.2827  Prec=0.1942
+      FPR<=10%: actual_FPR=0.1040  TPR=0.6346  F1=0.2078  Prec=0.1242
+
+----------------------------------------------------------------------
+  SHUTTLE  n=49097  d=9  anomalies=3511 (7.15%)
+----------------------------------------------------------------------
+
+  RAW SCORES (no calibration):
+    Distance:  AUC=0.9828  AP=0.9107  (612.8s)
+    Energy:    AUC=0.7284  AP=0.1747
+
+  DISTANCE + ISOTONIC calibration (5-fold CV):
+    AUC=0.9852  AP=0.9467  Brier=0.0049
+    Probability range: [0.0000, 0.9942]
+    Mean P(anomaly) for normals: 0.0053
+    Mean P(anomaly) for anomalies: 0.9315
+
+    CLASSIFIER (optimal F1 threshold = 0.9510):
+      F1=0.9646  Precision=0.9826  Recall=0.9473
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0315        0.9553   0.8080      0.7001
+             5.00%        0.0565        0.9601   0.7128      0.5668
+            10.00%        0.1242        0.9747   0.5433      0.3766
+
+  DISTANCE + PLATT calibration (5-fold CV):
+    AUC=0.9827  AP=0.9106  Brier=0.0078
+    Probability range: [0.0005, 1.0000]
+    Mean P(anomaly) for normals: 0.0147
+    Mean P(anomaly) for anomalies: 0.8094
+
+    CLASSIFIER (optimal F1 threshold = 0.5481):
+      F1=0.9646  Precision=0.9826  Recall=0.9473
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0100        0.9516   0.9143      0.8799
+             5.00%        0.0500        0.9587   0.7352      0.5962
+            10.00%        0.1000        0.9684   0.5929      0.4272
+
+  ENERGY + ISOTONIC calibration (5-fold CV):
+    AUC=0.7262  AP=0.1731  Brier=0.0628
+    Probability range: [0.0000, 0.8703]
+    Mean P(anomaly) for normals: 0.0675
+    Mean P(anomaly) for anomalies: 0.1235
+
+    CLASSIFIER (optimal F1 threshold = 0.1111):
+      F1=0.2289  Precision=0.1556  Recall=0.4332
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0100        0.0752   0.1247      0.3657
+             5.00%        0.0528        0.1911   0.2037      0.2181
+            10.00%        0.1013        0.2956   0.2265      0.1836
+
+  ENERGY + PLATT calibration (5-fold CV):
+    AUC=0.7278  AP=0.1730  Brier=0.0651
+    Probability range: [0.0157, 0.9999]
+    Mean P(anomaly) for normals: 0.0695
+    Mean P(anomaly) for anomalies: 0.0974
+
+    CLASSIFIER (optimal F1 threshold = 0.0864):
+      F1=0.2285  Precision=0.1699  Recall=0.3489
+
+    FPR-CONTROLLED THRESHOLDS:
+        Target FPR    Actual FPR    TPR/Recall       F1   Precision
+             1.00%        0.0100        0.0715   0.1190      0.3550
+             5.00%        0.0500        0.1891   0.2057      0.2255
+            10.00%        0.1000        0.2931   0.2262      0.1841
+
+  ENSEMBLE (distance + energy, isotonic, rank-averaged):
+    AUC=0.9803  AP=0.9015  Brier=0.0196
+    F1=0.9646  Precision=0.9826  Recall=0.9473
+    FPR-controlled:
+      FPR<=1%: actual_FPR=0.0100  TPR=0.9476  F1=0.9120  Prec=0.8790
+      FPR<=5%: actual_FPR=0.0509  TPR=0.9539  F1=0.7297  Prec=0.5909
+      FPR<=10%: actual_FPR=0.1001  TPR=0.9587  F1=0.5885  Prec=0.4246
+
+================================================================================
+DONE

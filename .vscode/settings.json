@@ -49,6 +49,10 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "git push": true
+        "git push": true,
+        "/^git add -A 2>&1 \\| Out-Null; git diff --cached --stat \\| Select-Object -Last 3$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }
