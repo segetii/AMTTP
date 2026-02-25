@@ -1,0 +1,75 @@
+% neurips_2026.sty — Simplified NeurIPS 2026 style file
+% Based on the standard NeurIPS formatting guidelines.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{neurips_2026}[2026/01/01 NeurIPS 2026 Style]
+
+\newif\if@preprint
+\newif\if@final
+\DeclareOption{preprint}{\@preprinttrue}
+\DeclareOption{final}{\@finaltrue}
+\DeclareOption{nonatbib}{}
+\ProcessOptions\relax
+
+% Page layout
+\RequirePackage[
+  letterpaper,
+  textwidth=6.5in,
+  textheight=9in,
+  top=1in,
+  left=1in
+]{geometry}
+
+% Font and encoding
+\RequirePackage{times}
+\RequirePackage{microtype}
+
+% Section formatting
+\RequirePackage[compact]{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection}{1em}{}
+
+% Title formatting
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 2em
+  \begin{center}%
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1.5em
+}
+
+% Abstract formatting
+\renewenvironment{abstract}{%
+  \centerline{\large\bfseries Abstract}%
+  \vspace{0.5em}%
+  \begin{quote}%
+}{%
+  \end{quote}%
+}
+
+% Line spacing
+\RequirePackage{setspace}
+\setstretch{1.05}
+
+% Footnote formatting
+\renewcommand\footnoterule{%
+  \kern-3\p@
+  \hrule\@width 2in
+  \kern 2.6\p@}
+
+% Numbering
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\endinput

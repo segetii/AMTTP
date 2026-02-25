@@ -1,0 +1,373 @@
+{
+  "cross_domain_validation": true,
+  "protocol": "strict_train/cal/val/test; fit-on-train; tune-on-val; report-on-test",
+  "n_datasets": 4,
+  "datasets": {
+    "creditcard": {
+      "dataset": "Credit Card Fraud (ULB)",
+      "source": "Dal Pozzolo et al. 2015, OpenML",
+      "protocol": "strict_train/cal/val/test; fit-on-train; tune-on-val; report-on-test",
+      "total_samples": 56962,
+      "total_fraud": 98,
+      "fraud_rate": 0.0017204452090867595,
+      "baseline": {
+        "threshold": 0.15000000000000002,
+        "recall": 0.7857142857142857,
+        "precision": 0.6470588235294118,
+        "f1": 0.7096774193548386,
+        "caught": 77,
+        "missed": 21
+      },
+      "correction_fixed": {
+        "f1": 0.7307692307692308,
+        "recall": 0.7755102040816326,
+        "precision": 0.6909090909090909,
+        "lambda": 0.1,
+        "threshold": 0.2,
+        "pred_threshold": 0.2,
+        "caught": 76,
+        "missed": 22,
+        "weights": [
+          0.3,
+          0.25,
+          0.25,
+          0.2
+        ]
+      },
+      "correction_mi": {
+        "f1": 0.7096774193548386,
+        "recall": 0.7857142857142857,
+        "precision": 0.6470588235294118,
+        "lambda": 0.1,
+        "threshold": 0.1,
+        "pred_threshold": 0.15,
+        "caught": 77,
+        "missed": 21,
+        "weights": [
+          0.04173553879852605,
+          0.031169264767586132,
+          0.8796055766405865,
+          0.04748961979330137
+        ]
+      },
+      "correction_vr": {
+        "f1": 0.7096774193548386,
+        "recall": 0.7857142857142857,
+        "precision": 0.6470588235294118,
+        "lambda": 0.1,
+        "threshold": 0.1,
+        "pred_threshold": 0.15,
+        "caught": 77,
+        "missed": 21,
+        "weights": [
+          0.03950751030777209,
+          0.011201090365044826,
+          0.9263327042096594,
+          0.0229586951175237
+        ]
+      },
+      "best_correction_method": "MI",
+      "orthogonality": {
+        "active_components": [
+          "C",
+          "G",
+          "A",
+          "T"
+        ],
+        "degenerate_components": [],
+        "mean_abs_pearson": 0.14647051876819805,
+        "max_abs_pearson": 0.41338198660631337,
+        "pca_variance_explained": [
+          0.7739871395391795,
+          0.21853065304373312,
+          0.007454905623686457,
+          2.7301793400867268e-05
+        ],
+        "non_redundancy_pass": true
+      },
+      "predictive_power": {
+        "combined_auc": 0.5341008780182662,
+        "individual_auc_C": 0.3254195445410914,
+        "individual_auc_G": 0.49693542438664584,
+        "individual_auc_A": 0.6362149292375315,
+        "individual_auc_T": 0.4862556146253306
+      },
+      "recall_improvement_pp": 0.0
+    },
+    "shuttle": {
+      "dataset": "Shuttle (NASA)",
+      "source": "ODDS / Statlog Shuttle, 49K samples",
+      "protocol": "strict_train/cal/val/test; fit-on-train; tune-on-val; report-on-test",
+      "total_samples": 9820,
+      "total_fraud": 702,
+      "fraud_rate": 0.0714867617107943,
+      "baseline": {
+        "threshold": 0.4100000000000001,
+        "recall": 0.9757834757834758,
+        "precision": 0.9941944847605225,
+        "f1": 0.98490294751977,
+        "caught": 685,
+        "missed": 17
+      },
+      "correction_fixed": {
+        "f1": 0.98490294751977,
+        "recall": 0.9757834757834758,
+        "precision": 0.9941944847605225,
+        "lambda": 0.05,
+        "threshold": 0.5,
+        "pred_threshold": 0.45000000000000007,
+        "caught": 685,
+        "missed": 17,
+        "weights": [
+          0.3,
+          0.25,
+          0.25,
+          0.2
+        ]
+      },
+      "correction_mi": {
+        "f1": 0.98490294751977,
+        "recall": 0.9757834757834758,
+        "precision": 0.9941944847605225,
+        "lambda": 0.05,
+        "threshold": 0.5,
+        "pred_threshold": 0.45000000000000007,
+        "caught": 685,
+        "missed": 17,
+        "weights": [
+          0.7783420073206615,
+          0.06910319021574614,
+          0.11702804169030918,
+          0.0355267607732833
+        ]
+      },
+      "correction_vr": {
+        "f1": 0.98490294751977,
+        "recall": 0.9757834757834758,
+        "precision": 0.9941944847605225,
+        "lambda": 0.05,
+        "threshold": 0.5,
+        "pred_threshold": 0.45000000000000007,
+        "caught": 685,
+        "missed": 17,
+        "weights": [
+          0.9081316521119748,
+          0.036786894293243035,
+          0.024929600731518235,
+          0.030151852863263977
+        ]
+      },
+      "best_correction_method": "fixed",
+      "orthogonality": {
+        "active_components": [
+          "C",
+          "G",
+          "A",
+          "T"
+        ],
+        "degenerate_components": [],
+        "mean_abs_pearson": 0.1176981158355515,
+        "max_abs_pearson": 0.249050260444202,
+        "pca_variance_explained": [
+          0.5978448601276202,
+          0.3937977594229603,
+          0.007448812524282811,
+          0.0009085679251366933
+        ],
+        "non_redundancy_pass": true
+      },
+      "predictive_power": {
+        "combined_auc": 0.8816628763103732,
+        "individual_auc_C": 0.12280154334507443,
+        "individual_auc_G": 0.22311297261942623,
+        "individual_auc_A": 0.506729632585463,
+        "individual_auc_T": 0.6872205987362813
+      },
+      "recall_improvement_pp": 0.0
+    },
+    "mammography": {
+      "dataset": "Mammography",
+      "source": "ODDS / Woods et al., 11K samples",
+      "protocol": "strict_train/cal/val/test; fit-on-train; tune-on-val; report-on-test",
+      "total_samples": 2237,
+      "total_fraud": 52,
+      "fraud_rate": 0.0232454179704962,
+      "baseline": {
+        "threshold": 0.25000000000000006,
+        "recall": 0.5576923076923077,
+        "precision": 0.5918367346938775,
+        "f1": 0.5742574257425743,
+        "caught": 29,
+        "missed": 23
+      },
+      "correction_fixed": {
+        "f1": 0.5742574257425743,
+        "recall": 0.5576923076923077,
+        "precision": 0.5918367346938775,
+        "lambda": 0.05,
+        "threshold": 0.1,
+        "pred_threshold": 0.25,
+        "caught": 29,
+        "missed": 23,
+        "weights": [
+          0.3,
+          0.25,
+          0.25,
+          0.2
+        ]
+      },
+      "correction_mi": {
+        "f1": 0.6,
+        "recall": 0.5769230769230769,
+        "precision": 0.625,
+        "lambda": 0.15000000000000002,
+        "threshold": 0.30000000000000004,
+        "pred_threshold": 0.30000000000000004,
+        "caught": 30,
+        "missed": 22,
+        "weights": [
+          0.6437936896342171,
+          0.0,
+          0.3384947930375838,
+          0.017711517328199065
+        ]
+      },
+      "correction_vr": {
+        "f1": 0.5742574257425743,
+        "recall": 0.5576923076923077,
+        "precision": 0.5918367346938775,
+        "lambda": 0.05,
+        "threshold": 0.1,
+        "pred_threshold": 0.25,
+        "caught": 29,
+        "missed": 23,
+        "weights": [
+          0.9965417876110102,
+          2.769762463266962e-22,
+          0.0018574928485263849,
+          0.0016007195404634093
+        ]
+      },
+      "best_correction_method": "MI",
+      "orthogonality": {
+        "active_components": [
+          "C",
+          "A",
+          "T"
+        ],
+        "degenerate_components": [
+          "G"
+        ],
+        "mean_abs_pearson": 0.2826677829446314,
+        "max_abs_pearson": 0.5348269210756299,
+        "pca_variance_explained": [
+          0.7444651635949635,
+          0.24079882373079342,
+          0.01473601267424311,
+          0.0
+        ],
+        "non_redundancy_pass": true
+      },
+      "predictive_power": {
+        "combined_auc": 0.7786418443894584,
+        "individual_auc_C": 0.18296610502336907,
+        "individual_auc_G": 0.5,
+        "individual_auc_A": 0.322964533993166,
+        "individual_auc_T": 0.08923451553356114
+      },
+      "recall_improvement_pp": 1.9
+    },
+    "pendigits": {
+      "dataset": "Pendigits",
+      "source": "ODDS / Alimoglu 1996, 6.8K samples",
+      "protocol": "strict_train/cal/val/test; fit-on-train; tune-on-val; report-on-test",
+      "total_samples": 1374,
+      "total_fraud": 31,
+      "fraud_rate": 0.022561863173216887,
+      "baseline": {
+        "threshold": 0.5400000000000001,
+        "recall": 0.9032258064516129,
+        "precision": 0.9032258064516129,
+        "f1": 0.9032258064516129,
+        "caught": 28,
+        "missed": 3
+      },
+      "correction_fixed": {
+        "f1": 0.8450704225352113,
+        "recall": 0.967741935483871,
+        "precision": 0.75,
+        "lambda": 0.05,
+        "threshold": 0.4,
+        "pred_threshold": 0.40000000000000013,
+        "caught": 30,
+        "missed": 1,
+        "weights": [
+          0.3,
+          0.25,
+          0.25,
+          0.2
+        ]
+      },
+      "correction_mi": {
+        "f1": 0.8888888888888888,
+        "recall": 0.9032258064516129,
+        "precision": 0.875,
+        "lambda": 0.1,
+        "threshold": 0.6,
+        "pred_threshold": 0.5500000000000002,
+        "caught": 28,
+        "missed": 3,
+        "weights": [
+          0.26973797232767205,
+          0.0009584176398135871,
+          0.16562645664444,
+          0.5636771533880743
+        ]
+      },
+      "correction_vr": {
+        "f1": 0.8888888888888888,
+        "recall": 0.9032258064516129,
+        "precision": 0.875,
+        "lambda": 0.1,
+        "threshold": 0.6,
+        "pred_threshold": 0.5500000000000002,
+        "caught": 28,
+        "missed": 3,
+        "weights": [
+          0.40963922321091595,
+          0.0005548842047782727,
+          0.1433919435021106,
+          0.4464139490821953
+        ]
+      },
+      "best_correction_method": "fixed",
+      "orthogonality": {
+        "active_components": [
+          "C",
+          "G",
+          "A",
+          "T"
+        ],
+        "degenerate_components": [],
+        "mean_abs_pearson": 0.20369208999890986,
+        "max_abs_pearson": 0.43010698102341405,
+        "pca_variance_explained": [
+          0.75626784456829,
+          0.19169768066779366,
+          0.052025906444565895,
+          8.568319350439329e-06
+        ],
+        "non_redundancy_pass": true
+      },
+      "predictive_power": {
+        "combined_auc": 0.937028932652565,
+        "individual_auc_C": 0.07026501337223437,
+        "individual_auc_G": 0.49781181619256015,
+        "individual_auc_A": 0.21055190858254316,
+        "individual_auc_T": 0.06686117189399465
+      },
+      "recall_improvement_pp": 6.5
+    }
+  },
+  "transfer_artifacts_dir": null
+}
