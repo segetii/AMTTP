@@ -2,7 +2,7 @@
 
 ## One Sentence
 
-> **The geometric blind spots that cause detection failure in financial systems are identical to the geometric sources of instability; the gradient of this blind-spot geometry provides the minimal-intervention stabilising force.**
+> **Financial systems fail to detect the crises they create because detection failure and instability share the same geometric structure — and the gradient of that structure is the provably minimal corrective force.**
 
 This is the claim that unifies UDL, BSDT, the Blind-Spot Gradient Descent algorithm, and adaptive friction into a single contribution.
 
@@ -10,7 +10,7 @@ This is the claim that unifies UDL, BSDT, the Blind-Spot Gradient Descent algori
 
 ## Working Title
 
-*"Blind-Spot Geometry as Systemic Instability: Unified Detection and Adaptive Stabilisation in Networked Financial Systems"*
+*"Systemic Risk as Geometry: A Unified Theory of Financial Instability, Detection, and Adaptive Stabilisation"*
 
 Short version (arXiv/SSRN): *"From Detection Blind Spots to Stability: A Unified Geometric Framework for Networked Financial Systems"*
 
@@ -24,7 +24,7 @@ Short version (arXiv/SSRN): *"From Detection Blind Spots to Stability: A Unified
 |---|---|---|
 | UDL | Deviation geometry; what normal looks like | Derives the deviation operators $\delta_i(X)$ |
 | BSDT | Decomposes missed-detection into $C, G, A, T$ | Shows $\delta_i$ are near-orthogonal and span the failure space |
-| GravityEngine | Computes forces $\nabla\Phi$ over agent configurations | Is the online algorithm that computes $\nabla E$ in real time |
+| BSGD (Blind-Spot Gradient Descent) | Computes forces $\nabla\Phi$ over agent configurations | Is the online algorithm that computes $\nabla E$ in real time |
 | Adaptive friction | Damps dynamics via $\gamma(E)\nabla E$ | Is the optimal response to $E$ under a social planner's problem |
 
 The connection that makes them one paper: the BSDT score
