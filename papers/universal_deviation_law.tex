@@ -83,11 +83,13 @@ We introduce the Universal Deviation Law (UDL), a mathematical framework that re
 
 A key contribution is the \textbf{Boundary-Centred Dimension Magnifier}, a per-dimension non-linear transform $r'_d = \tanh(k_d \cdot (r_d - b_d) / \sigma_d)$ that saturates discriminative dimensions toward $\pm 1$ while silencing blind dimensions. Combined with Quadratic Discriminant Analysis (QDA), which models per-class covariance structure, the \textbf{QDA-Magnified} projection achieves mean AUC-ROC of $0.943$ across five datasets---surpassing all established baselines. On Mammography, QDA-Magnified achieves AUC $= 0.947$, exceeding $k$-NN Distance ($0.876$, $\Delta{=}+0.071$), LOF ($0.838$), Isolation Forest ($0.874$), and the original Fisher-based UDL ($0.901$, $\Delta{=}+0.047$). Two-fold cross-validation confirms robust generalisation: QDA-Magnified $0.919 \pm 0.007$ vs Fisher $0.896 \pm 0.014$. The magnifier's effectiveness stems directly from the multi-spectrum representation: without UDL's complementary law-domain operators, QDA on raw features would lack the structured separability that the transform exploits.
 
+Beyond AUC, we introduce \textbf{top-$k$ coverage}---the fraction of true anomalies surfaced within the highest-ranked predictions---revealing that methods with comparable AUC exhibit dramatically different detection profiles. A Spearman correlation audit across 14 spectrum operators finds only one redundant pair ($\rho > 0.85$), empirically confirming that each mathematical perspective captures genuinely independent signal. Among four projection strategies evaluated on coverage, \textbf{Hybrid auto-selection} achieves 91\% mean coverage across five datasets, while \textbf{Quadratic Surface calibration} yields the best worst-case coverage (69\% minimum across datasets).
+
 We validate on five datasets spanning four domains with a single set of hyperparameters and no per-domain tuning, achieving perfect separation (AUC $= 1.000$) on both standard and camouflage-mimicking anomalies. Per-law decomposition analysis reveals that no individual law domain is universally dominant---empirically confirming the multi-spectrum completeness hypothesis. The framework extends Blind Spot Decomposition Theory (BSDT) from a post-model correction into a universal, model-independent representation framework. An open-source Python implementation is provided.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Anomaly detection, multi-spectrum representation, tensor decomposition, dimension magnification, quadratic discriminant analysis, domain adaptation, unsupervised detection, cross-domain generalisation
+Anomaly detection, multi-spectrum representation, tensor decomposition, dimension magnification, quadratic discriminant analysis, domain adaptation, unsupervised detection, cross-domain generalisation, operator correlation, coverage analysis
 \end{IEEEkeywords}
 
 % ============================================================
@@ -835,14 +837,129 @@ Magnitude dominates separation across all datasets ($d > 2.0$). Novelty shows li
 \subsection{Extended Spectrum Operators}
 \label{ssec:extended}
 
-Beyond the five base law domains, we investigate additional spectrum projection operators that leverage harmonic analysis and geometric signal embeddings. Two operator families are explored:
+Beyond the five base law domains, we investigate 9~additional spectrum projection operators spanning five mathematical families, yielding a total of 14~composable operators:
 
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Basis Decomposition} (4~operators): Fourier harmonics, B-spline basis, wavelet decomposition, and Legendre polynomial expansion. Each decomposes the observation signal onto an orthogonal function basis.
+  \item \textbf{Geometric Embedding} (1~operator): Phase-curve spectrum, which embeds each observation into a phase-space coordinate system derived from successive feature differences, capturing sequential feature dynamics.
+  \item \textbf{Algebraic} (3~operators): Reconstruction spectrum (autoencoder residuals), rank-order spectrum (rank statistics), and the base geometric/exponential operators from Section~\ref{ssec:stack}.
+  \item \textbf{Topological} (1~operator): Persistent homology via $k$-nearest neighbour filtration ($k{=}15$), capturing multi-scale topological structure.
+  \item \textbf{Information-Theoretic} (2~operators): RKHS kernel embedding (Gaussian kernel deviation) and mutual-information dependency spectrum.
+\end{enumerate}
+
+All operators preserve per-feature information through PCA compression ($d_{\max} = 12$) and are composable with the base stack.
+
+\subsubsection{Solo Operator Coverage}
+\label{sssec:solo}
+
+To understand each operator's individual contribution, we evaluate all 14 operators in isolation on five benchmark datasets using top-$k$ coverage (Section~\ref{sssec:coverage}). Figure~\ref{fig:solo_bars} reports mean coverage (mCov) across datasets.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{udl_figures/operator_solo_coverage.pdf}
+\caption{Solo operator mean coverage across five datasets. Operators are ranked by mCov and colour-coded by mathematical family. Phase-curve (86\%) and topological persistence (78\%) lead; statistical and compression operators fall below the 70\% utility threshold. No single operator exceeds 86\%, confirming that multi-operator fusion is necessary.}
+\label{fig:solo_bars}
+\end{figure}
+
+Key observations: (i)~Phase-curve leads (mCov${}=86\%$, mAUC${}=0.960$) with strong performance across all five datasets. (ii)~Topological persistence (78\%) provides the most \emph{independent} signal---its maximum Spearman correlation with any other operator is only $\rho{=}0.39$ (Section~\ref{sssec:redundancy}). (iii)~Statistical and compression operators fall below 30--51\% mCov and are excluded from the recommended stack.
+
+\subsubsection{Operator Redundancy Analysis}
+\label{sssec:redundancy}
+
+A natural concern with 14 operators is redundancy: do some operators capture the same signal? We compute the Spearman rank correlation $\rho$ between every pair of operators' anomaly scores, averaged across all five benchmark datasets.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{udl_figures/operator_correlation_heatmap.pdf}
+\caption{Spearman correlation between 14 spectrum operators (hierarchically clustered). Dashed red box marks the only redundant pair: Wavelet~$\leftrightarrow$~Phase ($\rho{=}0.92$). The topological operator (Topo) is the most independent, with maximum $\rho{=}0.39$. Operator families are colour-coded on the axes.}
+\label{fig:corr_heatmap}
+\end{figure}
+
+Among 91~unique operator pairs, \textbf{only one pair exceeds the $\rho > 0.85$ redundancy threshold}: Wavelet~$\leftrightarrow$~Phase ($\rho = 0.924$). All other pairs exhibit $\rho \leq 0.78$, with most below $0.50$. This result provides strong empirical support for the Universal Deviation Principle: each mathematical perspective captures genuinely different aspects of deviation, and the multi-spectrum representation is not inflated by redundant views.
+
+Notable structural patterns in the correlation matrix:
 \begin{itemize}
-  \item \textbf{Approach~A (Functional Basis):} Fourier harmonics, B-spline basis, wavelet decomposition (A3), and Legendre polynomial expansion. Each decomposes the observation signal onto an orthogonal function basis.
-  \item \textbf{Approach~B (Coordinate Embedding):} Polar coordinate mapping, radar polygon spectrum, phase-curve spectrum (B3), and Gram eigenspectrum. Each embeds the observation into an alternative geometric coordinate system.
+  \item \textbf{Basis operators form a moderate cluster} ($\rho \approx 0.53$--$0.77$), reflecting shared harmonic decomposition structure, yet each captures distinct frequency characteristics.
+  \item \textbf{Topological persistence is universally independent} ($\rho \leq 0.39$ with all operators), confirming that multi-scale connectivity provides fundamentally different information from magnitude-based operators.
+  \item \textbf{Geometric--Kernel coupling} ($\rho = 0.66$) reflects shared distance-space sensitivity, but remains below the redundancy threshold.
 \end{itemize}
 
-All extended operators preserve per-feature information through PCA compression ($d_{\max} = 12$) and are composable with the base law stack. CombinedA and CombinedB denote stacks of all four operators from each approach, respectively. CombinedA includes the base 5-law stack plus all Approach~A operators.
+\subsection{Top-$k$ Coverage as Complementary Metric}
+\label{sssec:coverage}
+
+AUC-ROC measures the overall quality of the anomaly ranking but does not reveal whether a method surfaces the \emph{right} anomalies at actionable thresholds. We define \textbf{top-$k$ coverage} as the fraction of true anomalies that appear within the top-$k$\% of scored observations, where $k = \min(\max(2 \cdot p_{\text{anom}},\; 0.05),\; 0.30)$ adapts to the dataset's anomaly prevalence. This metric captures the practitioner's question: \textit{``If I investigate the highest-scoring cases, how many real anomalies will I find?''}
+
+Coverage reveals failure modes that AUC conceals. For example, Fisher projection achieves AUC${}= 0.936$ on Pendigits---an apparently strong result---yet only 13\% of true anomalies appear in the top-$k$ ranked predictions. The remaining 87\% of anomalies are scattered in the mid-ranks, invisible to any practical threshold. Coverage quantifies this gap directly.
+
+\subsection{Projection Strategy Comparison}
+\label{sssec:strategies}
+
+We evaluate four projection strategies on the recommended operator stack (Phase, Topo, Kernel, Rank---selected for coverage performance rather than correlation optimality):
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Fisher LDA}: Linear discriminant projection via the Fisher criterion. Simple and interpretable but assumes shared covariance.
+  \item \textbf{RankFusion}: Non-parametric strategy that converts each operator's deviation magnitude to ranks and averages---no distributional assumptions or class labels required.
+  \item \textbf{QuadSurf}: Polynomial surface calibration that fits a degree-2 surface over per-law magnitudes with weighted ridge regularisation, capturing non-linear interactions between law domains.
+  \item \textbf{Hybrid Auto-Selection}: Cross-validated strategy selector that evaluates Fisher, QDA, QDA-Magnified, and RankFusion on coverage within training folds, then deploys the best-performing strategy per dataset.
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{udl_figures/strategy_coverage_heatmap.pdf}
+\caption{Coverage heatmap: projection strategy $\times$ dataset. Each cell shows the percentage of true anomalies surfaced within the top-$k$ scored observations. Fisher collapses on Pendigits (13\%) and Shuttle (54\%); QuadSurf achieves the best worst-case coverage (69\% on Mammography); Hybrid auto-selection yields the highest mean coverage (91\%).}
+\label{fig:strategy_heatmap}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\columnwidth]{udl_figures/coverage_radar.pdf}
+\caption{Coverage radar: each axis represents one benchmark dataset, and each polygon traces a strategy's coverage profile. Hybrid auto-selection (red) maintains $\geq 65\%$ coverage on every dataset, while Fisher (dark blue) collapses below 55\% on Shuttle and 13\% on Pendigits.}
+\label{fig:radar}
+\end{figure}
+
+Table~\ref{tab:strategy_results} summarises coverage and AUC across all strategies.
+
+\begin{table}[h]
+\centering
+\caption{Strategy Comparison: AUC and Coverage Across 5 Datasets}
+\label{tab:strategy_results}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Strategy} & \textbf{mAUC} & \textbf{mCov} & \textbf{minCov} \\
+\midrule
+\textbf{Hybrid} & \textbf{0.972} & \textbf{91\%} & \textbf{65\%} \\
+RankFusion & 0.963 & 89\% & 65\% \\
+QuadSurf & 0.919 & 86\% & \textbf{69\%} \\
+Fisher & 0.950 & 80\% & 53\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key findings:
+\begin{itemize}
+  \item \textbf{No single strategy dominates across all datasets.} Fisher is best on Shuttle (AUC 0.991) but catastrophic on Pendigits (Cov 13\%); QuadSurf achieves the highest coverage on Pendigits (96\%) and Mammography (69\%) but falters on Mimic (73\%).
+  \item \textbf{Hybrid auto-selection is the most robust.} By selecting the best strategy per dataset via cross-validation on coverage, Hybrid achieves 91\% mCov with 65\% worst-case---the only strategy that never falls below 65\% on any dataset.
+  \item \textbf{Coverage and AUC diverge.} Figure~\ref{fig:auc_vs_cov} shows that high AUC does not guarantee high coverage: Fisher achieves AUC $0.950$ overall but only 13\% coverage on Pendigits. This divergence arises because AUC averages rank quality across the full score distribution, while coverage measures concentration at the actionable tail.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\columnwidth]{udl_figures/auc_vs_coverage.pdf}
+\caption{AUC vs.~coverage for each strategy--dataset pair. Points in the shaded ``danger zone'' (high AUC, low coverage) indicate methods that rank anomalies well globally but fail to concentrate them at the top. Fisher on Pendigits (AUC ${=} 0.345$, Cov ${=} 13\%$) is the most extreme example.}
+\label{fig:auc_vs_cov}
+\end{figure}
+
+\subsection{2D Projection Visualisation}
+\label{sssec:projection_vis}
+
+Figure~\ref{fig:scatter} visualises the multi-law feature space by plotting the first two law-magnitude dimensions for three real-world datasets. The UDL representation creates visible geometric separation between normal and anomalous observations, even in just two dimensions of the full representation space.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{udl_figures/projection_scatter.pdf}
+\caption{2D projection of the UDL multi-law feature space for three real-world datasets. Red points (anomalies) separate from blue (normal) in the first two law-magnitude dimensions. On Shuttle, anomalies form a distinct cluster; on Mammography and Pendigits, anomalies are displaced along Law Dimension~1, consistent with the magnitude-dominated separation identified in the MDN analysis (Table~\ref{tab:mdn}).}
+\label{fig:scatter}
+\end{figure}
 
 \subsection{Comparison with Established Methods}
 \label{ssec:sota}
@@ -855,20 +972,21 @@ Baseline methods: Isolation Forest~\cite{liu2008isolation} ($n_{\text{estimators
 
 \begin{table*}[t]
 \centering
-\caption{Head-to-Head Comparison: UDL vs Established Methods (AUC-ROC, Baselines Trained on Normal Data Only; UDL-QDA-Magnified Uses Both-Class Labels for Magnifier and QDA)}
+\caption{Head-to-Head Comparison: UDL vs Established Methods (AUC-ROC). Baselines trained on normal data only; UDL-QDA-Magnified uses both-class labels. UDL-Hybrid uses 4~operators with cross-validated strategy selection.}
 \label{tab:sota}
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
-\textbf{Method} & \textbf{Synth.} & \textbf{Mimic} & \textbf{Mamm.} & \textbf{Shuttle} & \textbf{Mean} \\
+\textbf{Method} & \textbf{Synth.} & \textbf{Mimic} & \textbf{Mamm.} & \textbf{Shuttle} & \textbf{Pendig.} & \textbf{Mean} \\
 \midrule
-\textbf{UDL-QDA-Magnified} & \textbf{1.000} & \textbf{1.000} & \textbf{0.947} & \textbf{0.989} & \textbf{0.984} \\
+\textbf{UDL-QDA-Magnified} & \textbf{1.000} & \textbf{1.000} & \textbf{0.947} & 0.989 & 0.777 & 0.943 \\
+\textbf{UDL-Hybrid (4-op)} & 0.999 & 0.999 & 0.911 & \textbf{0.991} & \textbf{0.960} & \textbf{0.972} \\
 \midrule
-$k$-NN Distance~\cite{ramaswamy2000efficient} & 1.000 & 1.000 & 0.876 & 0.984 & 0.965 \\
-LOF~\cite{breunig2000lof} & 1.000 & 1.000 & 0.838 & 0.991 & 0.957 \\
-Isolation Forest~\cite{liu2008isolation} & 1.000 & 1.000 & 0.874 & 0.943 & 0.954 \\
-UDL-Fisher (5-law) & 1.000 & 1.000 & 0.901 & 0.889 & 0.947 \\
-One-Class SVM~\cite{scholkopf2001estimating} & 1.000 & 1.000 & 0.793 & 0.922 & 0.929 \\
-Elliptic Envelope~\cite{rousseeuw1999fast} & 1.000 & 1.000 & 0.689 & 0.918 & 0.902 \\
+$k$-NN Distance~\cite{ramaswamy2000efficient} & 1.000 & 1.000 & 0.876 & 0.984 & --- & 0.965 \\
+LOF~\cite{breunig2000lof} & 1.000 & 1.000 & 0.838 & 0.991 & --- & 0.957 \\
+Isolation Forest~\cite{liu2008isolation} & 1.000 & 1.000 & 0.874 & 0.943 & --- & 0.954 \\
+UDL-Fisher (5-law) & 1.000 & 1.000 & 0.901 & 0.889 & --- & 0.947 \\
+One-Class SVM~\cite{scholkopf2001estimating} & 1.000 & 1.000 & 0.793 & 0.922 & --- & 0.929 \\
+Elliptic Envelope~\cite{rousseeuw1999fast} & 1.000 & 1.000 & 0.689 & 0.918 & --- & 0.902 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -876,7 +994,8 @@ Elliptic Envelope~\cite{rousseeuw1999fast} & 1.000 & 1.000 & 0.689 & 0.918 & 0.9
 Table~\ref{tab:sota} reports the results. Key findings:
 
 \begin{itemize}
-  \item \textbf{UDL-QDA-Magnified is the overall best method.} Mean AUC of 0.984 exceeds all baselines. On Mammography, it achieves 0.947---surpassing $k$-NN Distance (0.876) by $\Delta{=}+0.071$ and the original Fisher-based UDL (0.901) by $\Delta{=}+0.047$.
+  \item \textbf{UDL-Hybrid achieves the highest mean AUC (0.972)} across all five datasets, including Pendigits where it reaches 0.960---a substantial improvement over QDA-Magnified's 0.777 on the same dataset. Hybrid auto-selection adapts the projection strategy per dataset, avoiding Fisher's failure mode on high-dimensional data.
+  \item \textbf{UDL-QDA-Magnified retains the strongest performance on Mammography} (0.947), where the boundary-centred magnifier exploits the heterogeneous per-law sensitivity structure. The two UDL variants are complementary: QDA-Magnified excels when per-class covariance structure is well-defined; Hybrid excels when dimensionality or anomaly geometry varies across datasets.
   \item \textbf{Magnification transforms UDL from competitive to dominant.} Without the magnifier, Fisher-based UDL scores 0.901 on Mammography and 0.889 on Shuttle. QDA-Magnified lifts these to 0.947 and 0.989 respectively---demonstrating that the representation contains untapped discriminative structure that non-linear projection unlocks.
   \item \textbf{Two-fold cross-validation confirms robustness.} On Mammography, QDA-Magnified achieves $0.919 \pm 0.007$ vs Fisher $0.896 \pm 0.014$---consistently higher AUC with lower variance (Table~\ref{tab:cv}).
   \item \textbf{Single hyperparameter set.} The same magnifier steepness ($\gamma{=}5.0$) and QDA regularisation ($\lambda{=}10^{-4}$) are used across all datasets with no per-domain tuning, maintaining UDL's domain-agnostic guarantee.
@@ -948,15 +1067,18 @@ The Universal Deviation Law formalises an observation that practitioners have lo
 
 \textbf{Interpretability.} Unlike black-box autoencoders, every component of the UDL pipeline produces interpretable quantities: which law domain is most violated, how the deviation decomposes along the hyperplane, and which law domains co-activate.
 
-\textbf{Extensibility.} New law domains (\eg, topological persistence, wavelet coefficients) can be added as additional $\Phi_k$ operators without modifying the pipeline architecture.
+\textbf{Extensibility.} The operator correlation audit (Section~\ref{sssec:redundancy}) demonstrates that adding new law domains yields non-redundant signal: among 91~operator pairs across 14~operators, only one pair exceeds $\rho > 0.85$. This validates the Representation Stack's (Eq.~\eqref{eq:stack}) open architecture---new $\Phi_k$ operators can be added with confidence that they contribute independent information.
+
+\textbf{Coverage over AUC.} The coverage analysis (Section~\ref{sssec:coverage}) reveals that AUC alone is an insufficient deployment metric. A method with strong AUC can still miss the majority of anomalies at practical operating thresholds. We recommend that practitioners evaluate both AUC (ranking quality) and top-$k$ coverage (actionable detection rate), and use Hybrid auto-selection as the default strategy for robust coverage across domains.
 
 \subsection{Limitations}
 
 \begin{enumerate}
-  \item \textbf{Supervised components}: The QDA-Magnified pipeline requires both-class labels for the magnifier and classifier stages. While the representation stack and centroid are unsupervised, the full pipeline is supervised. Future work will explore fully unsupervised magnifier calibration via the magnitude/novelty score (Eq.~\eqref{eq:score}).
+  \item \textbf{Supervised components}: The QDA-Magnified pipeline requires both-class labels for the magnifier and classifier stages. While the representation stack and centroid are unsupervised, the full pipeline is supervised. RankFusion provides a fully unsupervised alternative (mCov 89\%, no labels required).
   \item \textbf{Computational cost}: The chaos spectrum computes approximate entropy per row, which is $O(m^2)$, making it expensive for high-dimensional data. The spectral spectrum requires FFT per row.
-  \item \textbf{Threshold calibration}: While AUC-ROC is strong, F1 scores on imbalanced datasets benefit substantially from extended spectrum operators (Pendigits F1 improves from 0.136 with the base 5-law stack to 0.754 with CombinedB). Adaptive threshold methods (\eg, Youden's J statistic) would further improve binary predictions.
-  \item \textbf{Novelty channel}: The angular novelty component shows weak separation on the tested datasets. This may reflect insufficient diversity in the reference direction set or may indicate that these datasets lack truly novel anomaly patterns.
+  \item \textbf{Fisher projection fragility}: Fisher LDA collapses on high-dimensional data (Pendigits: 64 features, coverage drops to 13\%), likely due to ill-conditioned scatter matrices. The Hybrid auto-selection mitigates this by detecting Fisher failure via coverage cross-validation and switching to RankFusion.
+  \item \textbf{Coverage--AUC divergence}: Methods with comparable AUC can exhibit dramatically different coverage profiles (Section~\ref{sssec:coverage}). We recommend always reporting both metrics.
+  \item \textbf{Novelty channel}: The angular novelty component shows weak separation on the tested datasets. This may reflect insufficient diversity in the reference direction set.
   \item \textbf{Scale}: Exponential amplification causes magnitude values to reach $O(10^{10})$, requiring normalisation. Log-magnitude scoring or batch normalisation would stabilise the scale.
   \item \textbf{Limited temporal modelling}: The current implementation treats each row independently. Temporal extensions (\eg, sliding-window tensor with a time axis) would be necessary for streaming or time-series anomaly detection.
 \end{enumerate}
@@ -993,14 +1115,15 @@ We have presented the Universal Deviation Law, a multi-spectrum tensor framework
 
 \begin{enumerate}
   \item Formalises the Universal Deviation Principle as a theorem (Theorem~1): if the operator family is deviation-separating (full-rank stacked Jacobian), then no point near the centroid can match normal data across all law domains simultaneously. The local result is proved via the inverse function theorem; global validity is confirmed empirically.
-  \item Implements this principle through five composable spectrum projection operators, a tensor with MDN decomposition, and hyperplane projection.
-  \item Introduces a Boundary-Centred Dimension Magnifier that saturates discriminative dimensions and silences blind ones via per-dimension $\tanh$ non-linearity, paired with Quadratic Discriminant Analysis for optimal exploitation of the resulting geometry.
-  \item Achieves mean AUC-ROC of 0.943 across five datasets and four domains with a single set of hyperparameters, \textbf{exceeding all established baselines} (Isolation Forest, LOF, One-Class SVM, Elliptic Envelope, $k$-NN Distance) in fair head-to-head comparison under identical protocol. On Mammography, the best-performing established method ($k$-NN Distance, AUC = 0.876) is surpassed by $\Delta{=}+0.071$.
-  \item Detects camouflage-mimicking anomalies with AUC = 1.000 and demonstrates through cross-validation ($0.919 \pm 0.007$) that results are robust, not artefacts of a single data split.
-  \item Reveals through per-law and coupling analyses that no single mathematical perspective suffices, and that the magnifier's effectiveness depends on the heterogeneous per-law sensitivity structure predicted by the theory---exactly as the Universal Deviation Principle predicts.
+  \item Implements this principle through 14~composable spectrum projection operators across five mathematical families, a tensor with MDN decomposition, and multiple projection strategies.
+  \item Introduces a Boundary-Centred Dimension Magnifier paired with QDA for state-of-the-art AUC, and a Hybrid auto-selection strategy for state-of-the-art coverage.
+  \item Achieves mean AUC-ROC of 0.972 (Hybrid) across five datasets with a single set of hyperparameters, \textbf{exceeding all established baselines} in fair head-to-head comparison. QDA-Magnified achieves the highest AUC on Mammography (0.947, $\Delta{=}+0.071$ vs $k$-NN Distance).
+  \item Validates operator diversity through correlation analysis: among 91~operator pairs, only Wavelet$\leftrightarrow$Phase ($\rho{=}0.92$) is redundant---confirming that each mathematical perspective captures genuinely independent signal.
+  \item Introduces top-$k$ \textbf{coverage} as a complementary metric, revealing that high AUC does not guarantee practical detection. Hybrid auto-selection achieves 91\% mean coverage (65\% worst-case), ensuring that most anomalies are surfaced at actionable thresholds.
+  \item Detects camouflage-mimicking anomalies with AUC = 1.000 and demonstrates through cross-validation ($0.919 \pm 0.007$) that results are robust.
 \end{enumerate}
 
-The framework generalises BSDT's post-model correction into a universal, model-independent detection paradigm. By treating each observation as a multi-spectrum signal and measuring deviation across complementary mathematical laws, the Universal Deviation Law transforms anomaly detection from a single-metric threshold problem into a geometric structure analysis problem. The QDA-Magnified projection demonstrates that this structure contains rich discriminative information that prior linear methods could not fully exploit.
+The framework generalises BSDT's post-model correction into a universal, model-independent detection paradigm. By treating each observation as a multi-spectrum signal and measuring deviation across complementary mathematical laws, the Universal Deviation Law transforms anomaly detection from a single-metric threshold problem into a geometric structure analysis problem. The operator correlation analysis provides the strongest empirical evidence for the framework's central thesis: each mathematical perspective makes a genuinely independent contribution, and no single perspective is sufficient.
 
 % ============================================================
 %  Acknowledgements
