@@ -59,6 +59,13 @@ LAW_REQUIREMENTS = {
         "needs_composition": False,
         "description": "Dynamical invariants (Lyapunov, recurrence, approx. entropy)",
     },
+    "phase": {
+        "min_features": 3,        # needs ≥3 for consecutive-pair phase space
+        "min_samples": 20,
+        "needs_ordering": False,  # works on tabular data (all feature pairs)
+        "needs_composition": False,
+        "description": "Phase-curve interaction (pairwise feature displacement structure)",
+    },
     "freq": {
         "min_features": 16,       # FFT needs ≥16 samples for useful resolution
         "min_samples": 30,
@@ -320,6 +327,11 @@ def _check_law_boundaries(profile):
             if m < 50:
                 is_marginal = True
 
+        # Phase: marginal if very low-dim (3-5 features → few pairs)
+        if law_name == "phase":
+            if m < 5:
+                is_marginal = True
+
         # Spectral: marginal if features are 16-32 (low FFT resolution)
         if law_name == "freq":
             if m < 32:
@@ -340,16 +352,16 @@ def _check_law_boundaries(profile):
 # Pre-defined law combinations per data type
 # These are the RECOMMENDED stacks (proven by boundary analysis)
 LAW_MATRIX = {
-    #                         stat  chaos  freq   geom   recon  rank
-    "tabular":               [False, False, False, True,  False, True ],
-    "tabular_wide":          [False, False, False, True,  True,  True ],  # m≥20
-    "short_series":          [True,  False, False, True,  True,  True ],
-    "signal":                [True,  True,  True,  True,  True,  True ],
-    "high_dim":              [False, False, False, True,  True,  True ],
-    "compositional":         [True,  False, False, True,  False, True ],
+    #                         stat  chaos  phase  freq   geom   recon  rank
+    "tabular":               [False, False, True,  False, True,  False, True ],
+    "tabular_wide":          [False, False, True,  False, True,  True,  True ],  # m≥20
+    "short_series":          [True,  False, True,  False, True,  True,  True ],
+    "signal":                [True,  True,  True,  True,  True,  True,  True ],  # full stack: chaos valid here
+    "high_dim":              [False, False, True,  False, True,  True,  True ],
+    "compositional":         [True,  False, True,  False, True,  False, True ],
 }
 
-LAW_NAMES = ["stat", "chaos", "freq", "geom", "recon", "rank"]
+LAW_NAMES = ["stat", "chaos", "phase", "freq", "geom", "recon", "rank"]
 
 
 def select_laws(profile, include_marginal=False):
@@ -373,10 +385,12 @@ def select_laws(profile, include_marginal=False):
         StatisticalSpectrum, ChaosSpectrum, SpectralSpectrum,
         GeometricSpectrum, ReconstructionSpectrum, RankOrderSpectrum,
     )
+    from .experimental_spectra import PhaseCurveSpectrum
 
     OPERATOR_MAP = {
         "stat":  lambda: StatisticalSpectrum(),
         "chaos": lambda: ChaosSpectrum(),
+        "phase": lambda: PhaseCurveSpectrum(),
         "freq":  lambda: SpectralSpectrum(),
         "geom":  lambda: GeometricSpectrum(),
         "recon": lambda: ReconstructionSpectrum(),
@@ -408,7 +422,7 @@ def get_law_matrix_table():
     """
     Return the full law matrix as a formatted string for display.
     """
-    header = f"{'Data Type':<20} {'STAT':>5} {'CHAOS':>6} {'FREQ':>5} {'GEOM':>5} {'RECON':>6} {'RANK':>5} │ {'Min m':>5} {'Ordering':>9}"
+    header = f"{'Data Type':<20} {'STAT':>5} {'CHAOS':>6} {'PHASE':>6} {'FREQ':>5} {'GEOM':>5} {'RECON':>6} {'RANK':>5} │ {'Min m':>5} {'Ordering':>9}"
     lines = [header, "─" * len(header)]
 
     type_info = {
