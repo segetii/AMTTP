@@ -14,6 +14,18 @@ This is a long-horizon programme aimed at a **foundational** contribution: a gen
 
 ---
 
+## Convergence Point
+
+All components of this programme — UDL, BSDT, GravityEngine, and adaptive friction — converge to a single unified paper. See [08_UNIFIED_PAPER.md](./08_UNIFIED_PAPER.md) for the full specification.
+
+The one-sentence claim:
+
+> **The geometry that makes financial systems blind to their own failures is the same geometry that makes them unstable — and the gradient of that geometry is the unique minimum-cost stabilising force.**
+
+The central theorem (Theorem C) proves that the BSDT blind-spot energy and the adaptive damping Lyapunov functional are the same object. Everything else follows from that equivalence.
+
+---
+
 ## Is AMTTP Integration Required?
 
 **No.** AMTTP is a separate engineering/compliance product and is not a prerequisite for the scientific research programme. The core outputs — a mathematical theory of energy-based adaptive stabilisation, empirical validation on macro-financial data, and policy-facing results — stand entirely independently.
@@ -210,7 +222,14 @@ This determines whether we formalise the model as single-system stabilisation or
 
 ## Paper Decomposition
 
-Three papers, each targeting a different audience and venue:
+The **primary output** is one unified paper targeting JPE / Econometrica / RFS (see [08_UNIFIED_PAPER.md](./08_UNIFIED_PAPER.md)). The three papers below are the fallback decomposition if the unified paper proves too ambitious for a single submission, or if referees require splitting by community.
+
+### Primary: The Unified Paper
+**Working title**: *"Blind-Spot Geometry as Instability Energy: A Unified Framework for Detection, Quantification, and Adaptive Stabilisation of Networked Financial Systems"*
+- Combines all four community contributions: mathematics (Theorems C, 1–4, sharp phase transition), CS (online algorithm + regret bounds), OR (dynamic programming + optimal $\gamma^*$), Economics (micro-foundations + welfare calibration)
+- Target: JPE → Econometrica → RFS (in sequence)
+- Preprint: arXiv econ.GN + math.DS + cs.DS; SSRN Finance
+- **Length**: ~28 pages + appendix
 
 ### Paper 1: Energy-Based Adaptive Damping (Pure Theory)
 **Working title**: *"Energy-Dependent Damping in High-Dimensional Feedback Systems"*
@@ -274,13 +293,15 @@ Three papers, each targeting a different audience and venue:
 
 ## Timeline
 
-### Phase 0: Scientific Guardrails (Week 0)
+### Phase 0: Foundations (Week 0)
 
 | Task | Deliverable | Status |
 |------|------------|--------|
-| Define stabilisation claims as conditional statements | Claim inventory | Not started |
-| Define strict evaluation discipline (fit/freeze rules) | Protocol checklist | Not started |
-| Define robustness sweep suite (noise, scaling drift, rotations, subsampling) | Robustness plan | Not started |
+| **Action 1**: Commit to $N$-agent state space $X \in \mathbb{R}^{N \times d}$; confirm GravityEngine compatibility | Architecture decision | Not started |
+| **Action 2**: Verify Theorem C numerically — compute alignment angle $\cos\theta$ between $\nabla E_{\text{BS}}$ and $-\nabla\Phi$ on synthetic $N=50$ system | Alignment plot + number | Not started |
+| **Action 3**: Write 2-page impossibility sketch: constant $\bar\gamma$ fails above critical manifold $\mathcal{C}(\rho,\ell)=0$ | Proof sketch | Not started |
+| Define all claims as conditional statements (no absolute stability language) | Claim inventory | Not started |
+| Define strict evaluation discipline (fit/freeze rules; no leakage) | Protocol checklist | Not started |
 
 ### Phase 1: Formalisation (Weeks 1–2)
 
