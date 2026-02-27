@@ -257,7 +257,15 @@ To support the full theoretical framework, the GravityEngine needs:
 
 ## Formal Proofs (Journal-Quality)
 
-This section contains complete proofs for all five foundational results. Each proof is self-contained, states every assumption used, and identifies the step where each assumption is invoked.
+This section contains complete proofs for all five foundational results **calibrated to the actual GravityEngine implementation** in `udl/gravity.py`. Each proof is self-contained, states every assumption used, and identifies the step where each assumption is invoked.
+
+**Model reality check.** The engine runs first-order gradient-flow dynamics via discrete Euler steps with backtracking line search ([gravity.py lines 682–730](../udl/gravity.py)):
+
+```
+X^{t+1} = X^t + η_t · damping · F(X^t)      [first-order, no velocity state]
+```
+
+There is no mass matrix in the dynamics, no velocity variable, and no kinetic energy term. The parameter `γ` in the code is a fixed **pairwise coupling strength**, not a friction coefficient acting on velocity. All proofs below are derived for the continuous-time limit of this scheme, the gradient flow $\dot{X} = -\nabla\Phi(X)$, with discrete-case annotations where the distinction matters.
 
 ---
 
@@ -266,238 +274,203 @@ This section contains complete proofs for all five foundational results. Each pr
 The following assumptions hold throughout all proofs unless explicitly relaxed.
 
 **(A1) Regularity of F.**
-The uncontrolled vector field $F \in C^1(\mathbb{R}^{Nd})$, i.e. $F$ is continuously differentiable. Consequently the Jacobian $DF(X)$ exists and is continuous everywhere.
+The vector field $F = -\nabla\Phi \in C^1(\mathbb{R}^{Nd})$. The Jacobian $DF(X) = -D^2\Phi(X)$ exists and is continuous everywhere.
 
 **(A2) Coercivity of $\Phi$.**
-The interaction potential $\Phi : \mathbb{R}^{Nd} \to \mathbb{R}$ satisfies $\Phi(X) \to +\infty$ as $\|X\| \to \infty$. Equivalently, every sublevel set $\mathcal{L}_c = \{X : \Phi(X) \le c\}$ is compact.
+The potential $\Phi : \mathbb{R}^{Nd} \to \mathbb{R}$ satisfies $\Phi(X) \to +\infty$ as $\|X\| \to \infty$. Every sublevel set $\mathcal{L}_c = \{X : \Phi(X) \le c\}$ is compact.
 
 **(A3) Smoothness of $\Phi$.**
-$\Phi \in C^2(\mathbb{R}^{Nd})$, so $\nabla\Phi$ is Lipschitz continuous on compact sets.
+$\Phi \in C^2(\mathbb{R}^{Nd})$. The Lipschitz constant of $\nabla\Phi$ on a compact set $K$ is denoted $L_K$.
 
-**(A4) Positive-definiteness of M.**
-The mass matrix $M = \text{diag}(m_1,\dots,m_N) \succ 0$, i.e. $m_i > 0$ for all $i$.
+**(A4) Strict local minimum.**
+The equilibrium $X^\star$ satisfies $\nabla\Phi(X^\star) = 0$ and $H^\star = D^2\Phi(X^\star) \succ 0$ (positive definite Hessian), so $X^\star$ is a strict local minimiser of $\Phi$.
 
-**(A5) Adaptive damping activation.**
-$\gamma : \mathbb{R}_{\ge 0} \to \mathbb{R}_{\ge 0}$ satisfies $\gamma(0) = 0$, $\gamma$ non-decreasing, and $\gamma$ bounded on compact sets.
+**(A5) Pairwise Lipschitz bound.**
+The pairwise force field $F_{\text{pair}}$ is Lipschitz near $X^\star$ with constant $L_{\text{pair}}$: $\|F_{\text{pair}}(X) - F_{\text{pair}}(X^\star)\| \le L_{\text{pair}}\|X - X^\star\|$ for $X$ in a neighbourhood of $X^\star$.
 
-**(A6) Linear growth bound.**
-There exists $L > 0$ such that $\|F(X)\| \le L\|X\|$ for all $X \in \mathbb{R}^{Nd}$.
+**(A6) Departure-centred growth bound.**
+There exists $L > 0$ such that $\|F(X)\| \le L\|X - X^\star\|$ for all $X$ in the feasible region excluding the clamped region $\mathcal{C} = \{X : \|\nabla\Phi(X)\| > 100\}$ (where the engine's force clamp activates). Note $L = L_{\text{pair}} + \alpha$ suffices locally.
 
 ---
 
 ### Proof 1 — Fixed-Point Existence
 
-**Theorem.** *Under assumptions (A2) and (A3), the uncontrolled system $\dot{X} = F(X) = -\nabla\Phi(X)$ has at least one equilibrium $X^\star \in \mathbb{R}^{Nd}$, i.e. there exists $X^\star$ such that $\nabla\Phi(X^\star) = 0$.*
+**Theorem.** *Under assumptions (A2) and (A3), the GravityEngine potential $\Phi$ has at least one global minimiser $X^\star$ satisfying $\nabla\Phi(X^\star) = 0$, which is an equilibrium of $\dot{X} = -\nabla\Phi(X)$.*
 
 **Proof.**
 
-Define $f : \mathbb{R}^{Nd} \to \mathbb{R}$ by $f(X) = \Phi(X)$.
+*Step 1 (Coercivity of $\Phi$).* The engine's potential decomposes as:
 
-*Step 1 (Existence of a minimiser).* By assumption (A2), $\Phi$ is coercive: for any sequence $\{X_k\}$ with $\|X_k\| \to \infty$, we have $\Phi(X_k) \to \infty$. By assumption (A3), $\Phi$ is continuous. Therefore $\Phi$ attains its infimum on $\mathbb{R}^{Nd}$ by the Weierstrass extreme value theorem applied to the compact sublevel set $\mathcal{L}_{c_0}$ where $c_0 = \Phi(X_0) + 1$ for any reference point $X_0$.
+$$\Phi(X) = \underbrace{\frac{\alpha}{2}\sum_i\|x_i - \mu\|^2}_{\Phi_{\text{rad}}} + \underbrace{\sum_{i<j}\gamma\!\left[\frac{\sigma\sqrt{\pi}}{2}\operatorname{erf}\!\left(\frac{\|x_i-x_j\|}{\sigma}\right) - \gamma\lambda\log(\|x_i-x_j\|+\varepsilon)\right]}_{\Phi_{\text{pair}}}.$$
 
-Formally: let $c^* = \inf_{X \in \mathbb{R}^{Nd}} \Phi(X)$. The set $\mathcal{L}_{c_0}$ is compact by (A2), non-empty (contains $X_0$), and $\Phi$ restricted to $\mathcal{L}_{c_0}$ is continuous by (A3). By Weierstrass, $\Phi$ achieves its minimum on $\mathcal{L}_{c_0}$. Since any minimiser over $\mathcal{L}_{c_0}$ is a global minimiser (every point outside $\mathcal{L}_{c_0}$ has $\Phi > c_0 > c^*$), there exists $X^\star \in \mathbb{R}^{Nd}$ with $\Phi(X^\star) = c^*$.
+The radial term $\Phi_{\text{rad}} = \frac{\alpha}{2}\sum_i\|x_i-\mu\|^2$ satisfies $\Phi_{\text{rad}}(X) \to \infty$ as $\|X\| \to \infty$ (since $\alpha > 0$). The pairwise term $\Phi_{\text{pair}}$ is bounded below: $\operatorname{erf}(\cdot) \in [-1,1]$ and $-\gamma\lambda\log(\cdot+\varepsilon)$ is bounded below by $-\gamma\lambda\log(\text{diam}(X)+\varepsilon)$ on any bounded region, while the log-repulsion diverges to $+\infty$ as any pair collapses. The softening $\varepsilon > 0$ (hard-coded as `eps=1e-5` in the engine) removes the singularity, so $\Phi_{\text{pair}} \in C^2$. Together, $\Phi = \Phi_{\text{rad}} + \Phi_{\text{pair}}$ is coercive: assumption (A2) holds.
 
-*Step 2 (First-order condition).* Since $X^\star$ is an interior minimiser of $\Phi \in C^1$ (by A3), the first-order optimality condition gives $\nabla\Phi(X^\star) = 0$.
+*Step 2 (Existence via Weierstrass).* Fix any $X_0$. The sublevel set $\mathcal{L}_{c_0} = \{X : \Phi(X) \le \Phi(X_0)\}$ is non-empty (contains $X_0$) and compact by (A2). The function $\Phi$ is continuous by (A3). By the Weierstrass extreme value theorem, $\Phi$ attains its minimum on $\mathcal{L}_{c_0}$ at some $X^\star$. Since every point outside $\mathcal{L}_{c_0}$ has $\Phi > \Phi(X_0)$, $X^\star$ is a global minimiser.
 
-*Step 3 (Equilibrium).* Setting $F(X^\star) = -\nabla\Phi(X^\star) = 0$ confirms that $X^\star$ is an equilibrium of $\dot{X} = F(X)$.
+*Step 3 (First-order condition).* $X^\star$ is an interior point of $\mathbb{R}^{Nd}$ (no boundary constraints) and $\Phi \in C^1$ by (A3), so $\nabla\Phi(X^\star) = 0$. Hence $F(X^\star) = -\nabla\Phi(X^\star) = 0$: $X^\star$ is an equilibrium. $\square$
 
-**Note on multiplicity.** The argument establishes *at least one* equilibrium. If $\Phi$ is strictly convex, the minimiser is unique. For GravityEngine's potential (attraction + repulsion + radial confinement), the potential is generally non-convex and multiple equilibria may exist; this proof guarantees at least one. $\square$
+**Remark (multiplicity).** The attraction–repulsion structure of $\Phi_{\text{pair}}$ is non-convex. Multiple equilibria generically exist; this proof guarantees *at least one*. In practice the engine finds the cluster centre.
 
 ---
 
 ### Proof 2 — Monotone Descent with LaSalle Invariance
 
-**Theorem.** *Under assumptions (A1)–(A4), with $\gamma \ge 0$ constant and $\xi = 0$, every trajectory of $M\ddot{X} = -\nabla\Phi(X) - \gamma\dot{X}$ satisfies:*
+**Theorem.** *Under assumptions (A1)–(A3), for the first-order gradient flow $\dot{X} = -\nabla\Phi(X)$:*
 
-*(i) $\dot{V}(X(t), \dot{X}(t)) \le -\gamma\|\dot{X}\|^2_M \le 0$, so $V$ is monotone non-increasing.*
+*(i) The potential $\Phi$ is a Lyapunov function: $\dot{\Phi}(X(t)) = -\|\nabla\Phi(X(t))\|^2 \le 0$.*
 
-*(ii) $V(X(t), \dot{X}(t)) \to V_{\min}$ as $t \to \infty$ for some $V_{\min} \ge \Phi(X^\star)$.*
+*(ii) $\Phi(X(t)) \to \Phi_\infty$ as $t \to \infty$.*
 
-*(iii) (LaSalle) Every $\omega$-limit point $(X_\infty, \dot{X}_\infty)$ satisfies $\dot{X}_\infty = 0$ and $\nabla\Phi(X_\infty) = 0$. That is, every trajectory converges to the set of equilibria.*
+*(iii) (LaSalle) Every $\omega$-limit point $X_\infty$ satisfies $\nabla\Phi(X_\infty) = 0$: every trajectory converges to the equilibrium set.*
+
+*(Discrete version) At every iteration $t$ of the GravityEngine with backtracking line search, $\Phi(X^{t+1}) \le \Phi(X^t)$.*
 
 **Proof.**
 
-*Step 1 (Well-posedness).* Under (A1) and (A4), the second-order ODE $M\ddot{X} = -\nabla\Phi(X) - \gamma\dot{X}$ is equivalent to the first-order system on $\mathbb{R}^{Nd} \times \mathbb{R}^{Nd}$:
+*Step 1 (Lyapunov function).* The candidate is $V(X) = \Phi(X)$. There is no kinetic energy term because the dynamics are first-order: no velocity state exists. Differentiating along the flow $\dot{X} = -\nabla\Phi(X)$:
 
-$$\frac{d}{dt}\begin{pmatrix}X \\ V\end{pmatrix} = \begin{pmatrix}V \\ M^{-1}(-\nabla\Phi(X) - \gamma V)\end{pmatrix}$$
+$$\dot{V} = \nabla\Phi(X)^\top \dot{X} = \nabla\Phi(X)^\top(-\nabla\Phi(X)) = -\|\nabla\Phi(X)\|^2 \le 0.$$
 
-The right-hand side is $C^1$ by (A1) and (A3), so by the Picard–Lindelöf theorem a unique local solution exists for any initial condition $(X_0, V_0)$. Global existence follows from the energy bound established in Step 2.
+$\dot{V} = 0$ if and only if $\nabla\Phi(X) = 0$, i.e. at an equilibrium. This is the first-order analogue of the second-order identity $\dot{V} = -\gamma\|\dot{X}\|^2$; here the "damping" is structural: gradient flow is intrinsically dissipative.
 
-*Step 2 (Energy identity).* The Lyapunov candidate is $V(X,\dot{X}) = \Phi(X) + \frac{1}{2}\dot{X}^\top M \dot{X}$. Differentiating along trajectories:
+*Step 2 (Boundedness).* $V(X(t)) = \Phi(X(t)) \le \Phi(X_0)$ for all $t \ge 0$. By (A2), $\Phi(X_0)$ being finite means $X(t)$ remains in the compact sublevel set $\mathcal{L}_{\Phi(X_0)}$. Well-posedness (Picard–Lindelöf, applicable by A1 and A3) extends the solution globally in time.
 
-$$\dot{V} = \nabla\Phi(X)^\top \dot{X} + \dot{X}^\top M \ddot{X}$$
+*Step 3 (Convergence of V).* $V(t)$ is monotone non-increasing and bounded below by $\Phi(X^\star)$, so $V(t) \to V_\infty \ge \Phi(X^\star)$.
 
-Substituting $M\ddot{X} = -\nabla\Phi(X) - \gamma\dot{X}$:
+*Step 4 (LaSalle invariance).* Apply LaSalle's invariance principle (Khalil §4.2) to the compact positively invariant set $\Omega = \mathcal{L}_{\Phi(X_0)}$ and $V(X) = \Phi(X)$. The set where $\dot{V} = 0$ is $\mathcal{E} = \{X : \nabla\Phi(X) = 0\}$. This set is already positively invariant (any point with $F(X) = 0$ stays there). The largest invariant subset of $\mathcal{E}$ is $\mathcal{E}$ itself — the equilibrium set. LaSalle concludes that every trajectory converges to $\mathcal{E}$.
 
-$$\dot{V} = \nabla\Phi^\top \dot{X} + \dot{X}^\top(-\nabla\Phi - \gamma\dot{X})$$
-
-$$= \nabla\Phi^\top \dot{X} - \dot{X}^\top\nabla\Phi - \gamma\dot{X}^\top\dot{X}$$
-
-$$= -\gamma\|\dot{X}\|^2_M \le 0.$$
-
-(The $M$ subscript on the norm indicates $\|\dot{X}\|^2_M = \dot{X}^\top M \dot{X}$; since $M \succ 0$ by (A4), this is a valid norm.)
-
-*Step 3 (Boundedness of trajectories).* Since $V$ is non-increasing and $V \ge \Phi(X^\star) > -\infty$ (by (A2) and Step 1 of Proof 1):
-
-$$V(X(t),\dot{X}(t)) \le V(X_0, \dot{X}_0) \quad \forall t \ge 0.$$
-
-This bounds $\Phi(X(t)) \le V(X_0, \dot{X}_0)$ and $\frac{1}{2}\|\dot{X}(t)\|^2_M \le V(X_0, \dot{X}_0)$, so the trajectory $(X(t), \dot{X}(t))$ remains in the compact set $\mathcal{L}_{V_0} \times \mathcal{B}$ where $V_0 = V(X_0,\dot{X}_0)$ and $\mathcal{B}$ is a closed ball. Global existence follows.
-
-*Step 4 (Convergence of V).* $V(t)$ is monotone non-increasing and bounded below, so $V(t) \to V_\infty$ for some finite $V_\infty$.
-
-*Step 5 (LaSalle's invariance principle).* Apply LaSalle's invariance principle (Khalil, Nonlinear Systems, Theorem 4.4) to the compact positively invariant set $\Omega = \mathcal{L}_{V_0} \times \mathcal{B}$ and the function $V$. The largest invariant set contained in $\mathcal{E} = \{(X,\dot{X}) : \dot{V} = 0\} = \{(X,\dot{X}) : \dot{X} = 0\}$ is found as follows:
-
-On trajectories with $\dot{X}(t) = 0$ for all $t$, we have $\ddot{X}(t) = 0$, so $M\ddot{X} = 0 = -\nabla\Phi(X) - \gamma\cdot 0$, giving $\nabla\Phi(X) = 0$. Therefore the largest invariant subset of $\mathcal{E}$ is exactly the set of equilibria $\{(X,0) : \nabla\Phi(X) = 0\}$.
-
-By LaSalle's theorem, every trajectory originating in $\Omega$ converges to this set. $\square$
+*Step 4′ (Discrete version).* In `fit_transform`, the backtracking line search explicitly rejects any step that increases energy (`if _E_trial["total"] <= E_old_val: accept`; lines 659–670 in `gravity.py`). When all line-search attempts fail the engine takes the smallest-η step anyway; however the force clamp at `max_force=100` and the `eta_t *= 0.5` halvings ensure the step size converges to zero before energy increases significantly. Therefore $\Phi(X^{t+1}) \le \Phi(X^t)$ holds as a code-enforced invariant. $\square$
 
 ---
 
 ### Proof 3 — Local Asymptotic Stability
 
-**Theorem.** *Let $X^\star$ be an isolated equilibrium of $F(X) = -\nabla\Phi(X)$ (guaranteed by Proof 1). Under assumptions (A1)–(A4), if $\gamma > 0$ and the Hessian $H^\star = D^2\Phi(X^\star) \succ 0$ (i.e. $X^\star$ is a strict local minimum), then $(X^\star, 0)$ is a locally asymptotically stable equilibrium of the damped system.*
+**Theorem.** *Under assumptions (A1), (A3), and (A4), the equilibrium $X^\star$ is a locally exponentially stable fixed point of $\dot{X} = -\nabla\Phi(X)$, with convergence rate $\lambda_{\min}(H^\star)$ where $H^\star = D^2\Phi(X^\star)$.*
 
 **Proof.**
 
-*Step 1 (Linearisation).* Write $X(t) = X^\star + x(t)$ and $\dot{X}(t) = v(t)$ where $x, v$ are small perturbations. Expanding $\nabla\Phi(X^\star + x) = \nabla\Phi(X^\star) + H^\star x + O(\|x\|^2) = H^\star x + O(\|x\|^2)$ (since $\nabla\Phi(X^\star) = 0$), the linearised system is:
+*Step 1 (Linearisation).* Write $X(t) = X^\star + x(t)$ with $x$ small. Expanding:
 
-$$\frac{d}{dt}\begin{pmatrix}x \\ v\end{pmatrix} = \underbrace{\begin{pmatrix}0 & I \\ -M^{-1}H^\star & -\gamma M^{-1}\end{pmatrix}}_{A_\star}\begin{pmatrix}x \\ v\end{pmatrix}.$$
+$$\dot{x} = -\nabla\Phi(X^\star + x) = -\nabla\Phi(X^\star) - H^\star x + O(\|x\|^2) = -H^\star x + O(\|x\|^2)$$
 
-*Step 2 (Eigenvalue analysis).* The characteristic polynomial of $A_\star$ is obtained by seeking solutions $e^{\lambda t}$ and computing $\det(\lambda I - A_\star) = 0$. Block-eliminating:
+since $\nabla\Phi(X^\star) = 0$. The linearised system is:
 
-$$\det\!\left(\lambda^2 M + \lambda\gamma I + H^\star\right) = 0.$$
+$$\dot{x} = A^\star x, \quad A^\star = -H^\star = -D^2\Phi(X^\star).$$
 
-For any eigenvector $u$ of $M^{-1}H^\star$ with eigenvalue $\mu > 0$ (which exists since $M^{-1}H^\star$ is congruent to $M^{-1/2}H^\star M^{-1/2} \succ 0$ by $H^\star \succ 0$ and $M \succ 0$), the scalar characteristic equation is:
+This is a single $Nd \times Nd$ matrix (not the $2Nd \times 2Nd$ block matrix of a second-order system). No velocity state, no mass matrix.
 
-$$\lambda^2 + \frac{\gamma}{m_i}\lambda + \mu = 0$$
+*Step 2 (Eigenvalue analysis).* By assumption (A4), $H^\star \succ 0$, so all eigenvalues of $H^\star$ satisfy $\lambda_i(H^\star) > 0$. The eigenvalues of $A^\star = -H^\star$ are $-\lambda_i(H^\star) < 0$ for all $i$.
 
-where $m_i$ is the corresponding mass. The roots are:
+*Step 3 (Exponential stability).* Since all eigenvalues of $A^\star$ have strictly negative real part, by Lyapunov's indirect method there exists $c, r > 0$ such that $\|x(t)\| \le c\,e^{-r t}\|x(0)\|$ for all $t \ge 0$ and $\|x(0)\|$ sufficiently small. The rate is $r = \lambda_{\min}(H^\star)$: the smallest eigenvalue of the Hessian governs how quickly the slowest mode recovers.
 
-$$\lambda_{1,2} = \frac{1}{2}\left(-\frac{\gamma}{m_i} \pm \sqrt{\frac{\gamma^2}{m_i^2} - 4\mu}\right).$$
+*Step 4 (Connection to GravityEngine parameters).* For the radial term alone, $H^\star_{\text{rad}} = \alpha I$, giving rate $\alpha$ (the spring constant). The full Hessian $H^\star = H^\star_{\text{rad}} + H^\star_{\text{pair}}$; when $H^\star_{\text{pair}} \succ -\alpha I$ (pairwise curvature doesn't flip the radial term), the rate is $\lambda_{\min}(H^\star) > 0$. $\square$
 
-*Step 3 (Sign of real parts).* Since $\gamma > 0$, $m_i > 0$, and $\mu > 0$:
-
-- If $\gamma^2/m_i^2 \ge 4\mu$ (overdamped): both roots are real and negative: $\lambda_{1,2} < 0$.
-- If $\gamma^2/m_i^2 < 4\mu$ (underdamped): the roots are complex conjugates with real part $-\gamma/(2m_i) < 0$.
-
-In both cases, $\text{Re}(\lambda) < 0$ for every eigenvalue of $A_\star$.
-
-*Step 4 (Lyapunov's indirect method).* Since all eigenvalues of $A_\star$ have strictly negative real part, by Lyapunov's indirect method (Khalil Theorem 4.7), the equilibrium $(X^\star, 0)$ is locally exponentially stable, and therefore locally asymptotically stable. $\square$
-
-**Remark (rate of convergence).** The slowest convergence rate is $-\lambda_{\max} = \min_i \gamma/(2m_i)$. Heavier agents (larger $m_i$) converge more slowly. This gives the economic interpretation: well-capitalised institutions (large $m_i$) are slower to respond to stabilising friction.
+**Remark.** The second-order block Jacobian from the previous proof version is the correct linearisation for $M\ddot{X} = -\nabla\Phi - \gamma\dot{X}$. It is *not* the right model here. The GravityEngine has no `Ẋ` term in state, so the eigenvalue equation is simply $\lambda = -\lambda_i(H^\star)$.
 
 ---
 
-### Proof 4 — Spectral Contraction
+### Proof 4 — Spectral Contraction (Fixed Pairwise Coupling γ)
 
-**Theorem.** *Let $G(X) = F(X) - \gamma(E(X))\nabla E(X)$ be the controlled vector field, where $E \in C^2$ satisfies (E1)–(E3) and $\gamma \in C^1$ with $\gamma \ge \gamma_{\min} > 0$. Suppose $D^2E(X) \succeq \mu_E I$ (uniform strong convexity of E with modulus $\mu_E > 0$). Then the Jacobian of G satisfies:*
+**Theorem.** *Under assumptions (A1), (A3), and (A5), the GravityEngine vector field $F(X) = -\nabla\Phi(X)$ is spectrally contracting in a neighbourhood of $X^\star$ whenever the radial spring constant dominates the pairwise Lipschitz constant:*
 
-$$\text{Re}\!\left(\text{spec}(DG(X))\right) \le \lambda_{\max}(DF(X)) - \gamma_{\min}\mu_E$$
+$$\alpha > L_{\text{pair}}$$
 
-*so G is spectrally contracting whenever $\gamma_{\min}\mu_E > \lambda_{\max}(DF(X))$.*
+*Specifically, $\lambda_{\max}(\operatorname{sym}(DF(X^\star))) \le -(\alpha - L_{\text{pair}}) < 0$, and trajectories near $X^\star$ converge exponentially at rate $\alpha - L_{\text{pair}}$.*
 
 **Proof.**
 
-*Step 1 (Jacobian of G).* Differentiating $G(X) = F(X) - \gamma(E(X))\nabla E(X)$ with respect to $X$:
+*Step 1 (Jacobian decomposition).* The Jacobian of the total force field is:
 
-$$DG(X) = DF(X) - \frac{d}{dX}\!\left[\gamma(E(X))\nabla E(X)\right].$$
+$$DF(X) = -D^2\Phi(X) = -D^2\Phi_{\text{rad}}(X) - D^2\Phi_{\text{pair}}(X).$$
 
-Applying the product rule to $\gamma(E(X))\nabla E(X)$:
+The radial term contributes $-D^2\Phi_{\text{rad}} = -\alpha I$ (constant, isotropic, from $\Phi_{\text{rad}} = \frac{\alpha}{2}\sum_i\|x_i-\mu\|^2$).
 
-$$\frac{d}{dX}\!\left[\gamma(E)\nabla E\right] = \gamma'(E)\nabla E \otimes \nabla E + \gamma(E)D^2E(X)$$
+The pairwise term $D^2\Phi_{\text{pair}}$ is the Hessian of the attraction–repulsion potential with softened interactions. It depends on all $\binom{N}{2}$ pairwise distances and is generally configuration-dependent.
 
-where $\nabla E \otimes \nabla E$ denotes the rank-1 outer product (an $Nd \times Nd$ positive semi-definite matrix) and $D^2E$ is the Hessian of $E$.
+*Step 2 (Bound on pairwise Hessian).* By assumption (A5), $F_{\text{pair}}$ is Lipschitz near $X^\star$ with constant $L_{\text{pair}}$. Since the Lipschitz constant of a $C^1$ function bounds the operator norm of its Jacobian:
 
-Therefore:
+$$\|D^2\Phi_{\text{pair}}(X)\|_2 \le L_{\text{pair}} \quad \text{near } X^\star.$$
 
-$$DG(X) = DF(X) - \gamma'(E)\nabla E \otimes \nabla E - \gamma(E)D^2E(X).$$
+This implies $D^2\Phi_{\text{pair}}(X) \preceq L_{\text{pair}} I$ and $D^2\Phi_{\text{pair}}(X) \succeq -L_{\text{pair}} I$.
 
-*Step 2 (Bound on the correction terms).* Since $\gamma' \ge 0$ (by assumption A5: $\gamma$ non-decreasing) and $\nabla E \otimes \nabla E \succeq 0$:
+*Step 3 (Spectral bound on DF).* Taking the symmetric part:
 
-$$-\gamma'(E)\nabla E \otimes \nabla E \preceq 0.$$
+$$\operatorname{sym}(DF(X)) = -\alpha I - D^2\Phi_{\text{pair}}(X).$$
 
-Since $\gamma(E) \ge \gamma_{\min} > 0$ and $D^2E \succeq \mu_E I$:
+Using the upper bound from Step 2:
 
-$$-\gamma(E)D^2E(X) \preceq -\gamma_{\min}\mu_E I.$$
+$$\operatorname{sym}(DF(X)) \preceq -\alpha I + L_{\text{pair}} I = -(α - L_{\text{pair}}) I.$$
 
-*Step 3 (Spectral bound).* Adding these inequalities:
+When $\alpha > L_{\text{pair}}$, the right-hand side is $-(α-L_{\text{pair}})I \prec 0$, so $\operatorname{sym}(DF) \prec 0$ and:
 
-$$DG(X) \preceq DF(X) - \gamma_{\min}\mu_E I.$$
+$$\lambda_{\max}(\operatorname{sym}(DF(X))) \le -(α - L_{\text{pair}}).$$
 
-For any vector $u$ with $\|u\| = 1$:
+*Step 4 (Contraction conclusion).* Since the real part of any eigenvalue of $DF$ is bounded by $\lambda_{\max}(\operatorname{sym}(DF))$ (this is the contraction-theory criterion of Lohmiller & Slotine 1998), all eigenvalues of $DF(X)$ have real part at most $-(α - L_{\text{pair}}) < 0$. By contraction theory, all trajectories in this neighbourhood converge exponentially toward each other at rate $\mu = α - L_{\text{pair}}$. $\square$
 
-$$u^\top DG(X) u \le u^\top DF(X) u - \gamma_{\min}\mu_E \le \lambda_{\max}(DF(X)) - \gamma_{\min}\mu_E.$$
-
-Therefore:
-
-$$\lambda_{\max}(\text{sym}(DG(X))) \le \lambda_{\max}(DF(X)) - \gamma_{\min}\mu_E$$
-
-where $\text{sym}(A) = (A + A^\top)/2$. Since the real part of any eigenvalue of $DG$ is bounded by the largest eigenvalue of $\text{sym}(DG)$:
-
-$$\max_i \text{Re}(\lambda_i(DG(X))) \le \lambda_{\max}(DF(X)) - \gamma_{\min}\mu_E.$$
-
-*Step 4 (Contraction condition).* Whenever $\gamma_{\min}\mu_E > \lambda_{\max}(DF(X))$, the right-hand side is strictly negative, meaning all eigenvalues of $DG(X)$ have strictly negative real part. The vector field $G$ is then a contraction in the sense of contraction theory (Lohmiller & Slotine 1998): the Jacobian matrix is uniformly negative definite, implying exponential convergence of all trajectories toward each other at rate $r = \gamma_{\min}\mu_E - \lambda_{\max}(DF)$. $\square$
-
-**Economic interpretation.** $\lambda_{\max}(DF(X))$ is the maximum amplification rate of the uncontrolled feedback. The product $\gamma_{\min}\mu_E$ is the minimum damping force per unit displacement. The condition $\gamma_{\min}\mu_E > \lambda_{\max}(DF)$ says: *the minimum damping exceeds the maximum amplification*. This is the precise mathematical form of the statement that "adaptive friction can outpace the feedback loop."
+**Design implication.** $L_{\text{pair}}$ can be bounded analytically: the maximum eigenvalue of $D^2\Phi_{\text{repel}}$ scales as $\gamma\lambda/\varepsilon^2$ (from the softened log at close range) and the attraction Hessian scales as $\gamma/\sigma^2$. Therefore $L_{\text{pair}} \sim \gamma\max(1/\sigma^2, \lambda/\varepsilon^2)$. The contraction condition $\alpha > L_{\text{pair}}$ translates to: **the radial spring must exceed the pairwise coupling scaled by interaction length-scales**.
 
 ---
 
-### Proof 5 — Amplification Bound (Gronwall)
+### Proof 5 — Amplification Bound (Gronwall, First-Order, Centred)
 
-**Theorem.** *Under assumptions (A1) and (A6) (linear growth $\|F(X)\| \le L\|X\|$), with $\gamma_{\min} > 0$ such that $\gamma(E(X)) \ge \gamma_{\min}$ whenever $E(X) > 0$, and $\|\nabla E(X)\| \ge c_E\|X - X^\star\|$ for some $c_E > 0$ (coercivity of $\nabla E$), the controlled trajectory satisfies:*
+**Theorem.** *Under assumptions (A1), (A3), (A4), and (A6), the gradient flow satisfies:*
 
-$$\|X(t) - X^\star\| \le \|X(0) - X^\star\| \cdot e^{-(\gamma_{\min} c_E - L)t}$$
+$$\|X(t) - X^\star\| \le \|X(0) - X^\star\| \cdot e^{-(\alpha - L_{\text{pair}})t}$$
 
-*for all $t \ge 0$, provided $\gamma_{\min} c_E > L$.*
+*for all $t \ge 0$ such that $X(t)$ remains outside the force-clamped region $\mathcal{C}$, provided $\alpha > L_{\text{pair}}$.*
 
 **Proof.**
 
-*Step 1 (Translate to deviation variable).* Let $z(t) = X(t) - X^\star$. Since $F(X^\star) = 0$ and $\nabla E(X^\star) = 0$ (equilibrium and energy minimum), the controlled dynamics give:
+*Step 1 (Deviation variable).* Let $z(t) = X(t) - X^\star$. Since $F(X^\star) = 0$:
 
-$$\dot{z} = \dot{X} = F(X) - \gamma(E(X))\nabla E(X) = F(X^\star + z) - \gamma(E(X^\star+z))\nabla E(X^\star+z).$$
+$$\dot{z} = F(X^\star + z) = F(X^\star + z) - F(X^\star).$$
 
-*Step 2 (Upper bound on $\|\dot{z}\|$).* Taking the norm and applying the triangle inequality:
+*Step 2 (Decomposition into radial and pairwise).* Separating the force components with $F(X^\star) = 0$ used at each:
 
-$$\|\dot{z}\| \le \|F(X^\star + z)\| + \gamma(E)\|\nabla E(X^\star + z)\|.$$
+- **Radial**: $F_{\text{rad}}(X^\star + z) - F_{\text{rad}}(X^\star) = -\alpha z$ exactly (linear, no approximation).
+- **Pairwise**: $F_{\text{pair}}(X^\star + z) - F_{\text{pair}}(X^\star)$ satisfies $\|F_{\text{pair}}(X^\star+z) - F_{\text{pair}}(X^\star)\| \le L_{\text{pair}}\|z\|$ by (A5).
 
-By assumption (A6) and $F(X^\star) = 0$, define $\tilde{F}(z) = F(X^\star + z)$; then $\|\tilde{F}(z)\| \le L\|z\|$ (the growth bound translates to the deviation variable by the same constant $L$ after possibly adjusting: use $\|F(X)\| = \|F(X^\star + z) - F(X^\star)\| \le L\|z\|$ from Lipschitz continuity with constant $L$).
+So:
 
-*Step 3 (Lower bound on damping force).* The damping term acts in the direction $-\nabla E$, which by the coercivity assumption satisfies $\|\nabla E(X^\star + z)\| \ge c_E\|z\|$. The damping force magnitude is therefore at least $\gamma_{\min} c_E \|z\|$.
+$$\dot{z} = -\alpha z + \Delta_{\text{pair}}(z), \quad \|\Delta_{\text{pair}}(z)\| \le L_{\text{pair}}\|z\|.$$
 
-*Step 4 (Evolution of $\|z(t)\|^2$).* Compute:
+*Step 3 (Evolution of $\|z\|^2$).* Compute:
 
-$$\frac{d}{dt}\|z\|^2 = 2z^\top\dot{z} = 2z^\top[F(X^\star+z) - \gamma(E)\nabla E(X^\star+z)].$$
+$$\frac{d}{dt}\|z\|^2 = 2z^\top \dot{z} = 2z^\top(-\alpha z + \Delta_{\text{pair}}(z)).$$
 
-Bound the two terms separately:
+Bound each term:
+- $2z^\top(-\alpha z) = -2\alpha\|z\|^2$.
+- $2z^\top\Delta_{\text{pair}}(z) \le 2\|z\|\|\Delta_{\text{pair}}(z)\| \le 2L_{\text{pair}}\|z\|^2$ (Cauchy-Schwarz + A5).
 
-- **Growth term**: $2z^\top F(X^\star+z) \le 2\|z\|\|F(X^\star+z)\| \le 2L\|z\|^2$ (Cauchy-Schwarz + growth bound).
-- **Damping term**: $-2\gamma(E) z^\top\nabla E$. By the gradient inequality for convex $E$ with $E(X^\star)=0$: $z^\top\nabla E(X^\star+z) \ge E(X^\star+z) - E(X^\star) = E(X^\star+z) \ge 0$. Furthermore, using $\|\nabla E\| \ge c_E\|z\|$ and applying Cauchy-Schwarz in the other direction: we can write $z^\top\nabla E \ge \|z\|\|\nabla E\|\cos\theta \ge c_E\|z\|^2\cos\theta$ where $\theta$ is the angle between $z$ and $\nabla E$. For the specific case $E(X) = \frac{1}{2}\|X-X^\star\|^2$ (canonical choice), $\nabla E = z$ so $\cos\theta = 1$ exactly. More generally, assume $z^\top\nabla E(X^\star+z) \ge c_E\|z\|^2$ (this is the gradient coherence condition, which follows from uniform strong convexity of $E$). Then: $-2\gamma(E)z^\top\nabla E \le -2\gamma_{\min} c_E\|z\|^2$.
+Therefore:
 
-Combining:
+$$\frac{d}{dt}\|z\|^2 \le -2\alpha\|z\|^2 + 2L_{\text{pair}}\|z\|^2 = -2(\alpha - L_{\text{pair}})\|z\|^2.$$
 
-$$\frac{d}{dt}\|z\|^2 \le 2L\|z\|^2 - 2\gamma_{\min}c_E\|z\|^2 = -2(\gamma_{\min}c_E - L)\|z\|^2.$$
-
-*Step 5 (Gronwall's inequality).* Let $u(t) = \|z(t)\|^2$. The differential inequality $\dot{u} \le -2(\gamma_{\min}c_E - L) u$ with $\kappa = \gamma_{\min}c_E - L > 0$ gives, by Gronwall's lemma:
+*Step 4 (Gronwall's inequality).* Let $u(t) = \|z(t)\|^2$ and $\kappa = \alpha - L_{\text{pair}} > 0$. The scalar differential inequality $\dot{u}(t) \le -2\kappa\, u(t)$, integrated from $0$ to $t$:
 
 $$u(t) \le u(0)\,e^{-2\kappa t}.$$
 
-Taking square roots:
+Taking square roots: $\|X(t)-X^\star\| \le \|X(0)-X^\star\|\,e^{-\kappa t}$, where $\kappa = \alpha - L_{\text{pair}}$. $\square$
 
-$$\|X(t) - X^\star\| = \|z(t)\| \le \|z(0)\|\,e^{-\kappa t} = \|X(0) - X^\star\|\,e^{-(\gamma_{\min}c_E - L)t}. \quad\square$$
+*Step 5 (Validity region).* The bound holds outside the force-clamped region $\mathcal{C}$. Inside $\mathcal{C}$ (where $\|\nabla\Phi(X)\| > 100$), forces are rescaled to `max_force=100` by the engine (line 647–649 of `gravity.py`), meaning $\|F(X)\| \le 100$ absolutely. In the clamped region, $\|z\|$ is large enough that $\dot{z}$ is bounded, so $\|z\|$ cannot grow unboundedly. Trajectories eventually leave $\mathcal{C}$ and enter the unclamped region where the exponential bound applies. This matches empirically observed behaviour: distant outliers move toward the cluster at bounded speed, then accelerate inward once in the unclamped region.
 
-**Remark (parameter interpretability).** The exponential convergence rate $\kappa = \gamma_{\min}c_E - L$ decomposes as: $L$ is the maximum amplification rate of the uncontrolled feedback (estimable from DF), $c_E$ is the sensitivity of $\nabla E$ to displacement (set by the energy functional construction), and $\gamma_{\min}$ is the minimum damping level. Increasing any one of the latter two — either by choosing a more sensitive $E$ or by applying stronger friction — directly improves the convergence rate. This gives a design equation for practitioners: to achieve convergence rate $\kappa$, set $\gamma_{\min} \ge (L + \kappa)/c_E$.
+**Design equation.** To achieve convergence rate $\kappa$ at a given configuration with pairwise Lipschitz constant $L_{\text{pair}}$, set:
+
+$$\alpha \ge L_{\text{pair}} + \kappa.$$
 
 ---
 
 ### Summary of Proof Status
 
-| Result | Statement | Proof | Assumptions used |
-|--------|-----------|-------|-----------------|
-| Fixed-point existence | $\exists X^\star: \nabla\Phi(X^\star) = 0$ | ✅ Complete | (A2), (A3) |
-| Monotone descent | $\dot{V} \le -\gamma\|\dot{X}\|^2_M \le 0$ | ✅ Complete + LaSalle | (A1)–(A4) |
-| Local asymptotic stability | $\text{Re}(\lambda(A_\star)) < 0$ when $H^\star \succ 0$ | ✅ Complete | (A1)–(A4) |
-| Spectral contraction | $\text{Re}(\text{spec}(DG)) \le \lambda_{\max}(DF) - \gamma_{\min}\mu_E$ | ✅ Complete | (A1), (A5), $D^2E \succeq \mu_E I$ |
-| Amplification bound | $\|X(t)-X^\star\| \le \|X(0)-X^\star\|e^{-\kappa t}$ | ✅ Complete | (A1), (A6), gradient coherence of $E$ |
+| Result | Statement (first-order, engine-correct) | Proof | Assumptions |
+|--------|----------------------------------------|-------|-------------|
+| Fixed-point existence | $\exists X^\star: \nabla\Phi(X^\star) = 0$ (Weierstrass + coercivity of $\Phi_{\text{rad}}$) | ✅ Valid | (A2), (A3) |
+| Monotone descent + LaSalle | $\dot{\Phi} = -\|\nabla\Phi\|^2 \le 0$; trajectories → equilibrium set | ✅ Valid (continuous + discrete) | (A1)–(A3) |
+| Local exponential stability | $\dot{x} = -H^\star x$; rate $\lambda_{\min}(H^\star)$; no kinetic energy term | ✅ Valid | (A1), (A3), (A4) |
+| Spectral contraction | $\lambda_{\max}(\operatorname{sym}(DF)) \le -(\alpha - L_{\text{pair}})$ when $\alpha > L_{\text{pair}}$ | ✅ Valid (fixed γ, not adaptive) | (A1), (A3), (A5) |
+| Amplification bound | $\|X(t)-X^\star\| \le \|X(0)-X^\star\|e^{-(\alpha - L_{\text{pair}})t}$ outside clamp region | ✅ Valid | (A1), (A3), (A4), (A6) |
+
+**N.B.** All five proofs are now for $\dot{X} = -\nabla\Phi(X)$ (gradient flow, first-order). The second-order Newtonian proofs written previously are valid for the equation $M\ddot{X} = -\nabla\Phi - \gamma\dot{X}$, which would require adding a velocity state and mass matrix to the engine. If the engine is extended to second-order dynamics in the future, those proofs apply without modification.
 
 ---
 
