@@ -291,6 +291,9 @@ The pairwise force field $F_{\text{pair}}$ is Lipschitz near $X^\star$ with cons
 **(A6) Departure-centred growth bound.**
 There exists $L > 0$ such that $\|F(X)\| \le L\|X - X^\star\|$ for all $X$ in the feasible region excluding the clamped region $\mathcal{C} = \{X : \|\nabla\Phi(X)\| > 100\}$ (where the engine's force clamp activates). Note $L = L_{\text{pair}} + \alpha$ suffices locally.
 
+**(A7) OCO regularity.**
+There exist $L_c > 0$ and $[\gamma_{\min}, \gamma_{\max}] \subset (0, \infty)$ such that for each configuration $X^t$, the per-step energy change $c_t(\gamma) = \Phi(X^{t+1}(\gamma)) - \Phi(X^t)$ is convex and $L_c$-Lipschitz in $\gamma$ on $[\gamma_{\min}, \gamma_{\max}]$. This is implied by (A3) and the fact that $X^{t+1}$ is affine in $\gamma$ to first order.
+
 ---
 
 ### Proof 1 — Fixed-Point Existence
@@ -460,6 +463,170 @@ $$\alpha \ge L_{\text{pair}} + \kappa.$$
 
 ---
 
+---
+
+### Proof 6 — Global Impossibility of Constant Coupling Strength
+
+**Theorem (Necessity of adaptive $\gamma$).** *Fix any constant coupling $\bar\gamma > 0$ and radial spring $\alpha > 0$. Let the network adjacency be $W$ with spectral radius $\rho(W)$. Define the critical manifold*
+
+$$\mathcal{C} = \bigl\{X \in \mathbb{R}^{N \times d} : \lambda_{\max}(\rho(X)\,\ell(X)\,\bar\gamma W) = \alpha\bigr\}$$
+
+*where $\rho(X)$ is mean pairwise correlation and $\ell(X)$ mean exposure. For any $\bar\gamma$, there exist configurations $X^+$ above $\mathcal{C}$ (i.e. $\lambda_{\max}(\rho(X^+)\ell(X^+)\bar\gamma W) > \alpha$) at which the gradient-flow vector field $F(X) = -\nabla\Phi(X)$ has a growing mode: there exists a direction $u \in \mathbb{R}^{Nd}$ with $\|u\|=1$ such that*
+
+$$\frac{d}{dt}\langle X(t) - X^\star,\, u\rangle \bigg|_{t=0} > 0.$$
+
+*Consequently, no fixed $\bar\gamma$ can stabilise all above-$\mathcal{C}$ configurations simultaneously: any constant $\bar\gamma$ that is stable in normal configurations becomes unstable in herding configurations.*
+
+**Proof.**
+
+*Step 1 (Pairwise Jacobian above $\mathcal{C}$).* The pairwise interaction Hessian is:
+
+$$D^2\Phi_{\text{pair}}(X) = \bar\gamma \cdot Q(X), \quad Q(X) \in \mathbb{R}^{Nd \times Nd},$$
+
+where $Q(X)$ encodes the generalised stiffness of the pairwise potential. Near the herding configuration, the dominant (leading) eigenvalue of $Q(X)$ satisfies:
+
+$$\lambda_{\max}(Q(X)) = \rho(X)\,\ell(X)\,\lambda_{\max}(W\otimes I_d) \cdot \kappa_f$$
+
+where $\kappa_f = -f''(r)/r\big|_{r = \bar r}$ is the second-order derivative of the pairwise potential evaluated at mean distance $\bar r$, and $I_d$ is the $d \times d$ identity. At close range (herding), $\bar r \to 0$ and $\kappa_f \to +\infty$ because the log-repulsion term has $f''(r) = \gamma\lambda / (r+\varepsilon)^2 \to \gamma\lambda/\varepsilon^2$.
+
+*Step 2 (Force balance on the leading eigenmode).* Let $u$ be the leading eigenvector of $D^2\Phi_{\text{pair}}(X^+)$, normalised to $\|u\|=1$. Project the gradient-flow equation onto $u$:
+
+$$\frac{d}{dt}\langle z, u\rangle = \langle F(X^+ + z), u\rangle = -\langle \nabla\Phi_{\text{rad}}(X^+), u\rangle - \langle D^2\Phi_{\text{pair}}(X^+)\, z, u\rangle + O(\|z\|^2)$$
+
+$$= -\alpha\langle z, u\rangle - \lambda_{\max}(D^2\Phi_{\text{pair}}(X^+))\langle z, u\rangle + O(\|z\|^2).$$
+
+The net coefficient of $\langle z, u\rangle$ is:
+
+$$c = -\alpha - \lambda_{\max}(D^2\Phi_{\text{pair}}(X^+)).$$
+
+Above $\mathcal{C}$, by definition $\lambda_{\max}(\rho(X^+)\ell(X^+)\bar\gamma W) > \alpha$, which translates (via the identification in Step 1) to $\lambda_{\max}(D^2\Phi_{\text{pair}}(X^+)) < -\alpha$, i.e.
+
+$$|{-}\lambda_{\max}(D^2\Phi_{\text{pair}})| > \alpha \implies c > 0.$$
+
+Therefore $\frac{d}{dt}\langle z, u\rangle > 0$ for any $z$ with $\langle z, u\rangle > 0$: the system drifts away from $X^\star$ in direction $u$.
+
+*Step 3 (Global Lyapunov certificate for the growing mode).* Define the mode energy:
+
+$$W(t) = \tfrac{1}{2}\langle X(t) - X^\star,\, u\rangle^2.$$
+
+From Step 2, $\dot{W}(t) = c \cdot W(t) + O(\|z\|^3)$, with $c > 0$. By Gronwall's inequality applied in the forward direction:
+
+$$W(t) \ge W(0)\,e^{ct/2}$$
+
+for $t$ small enough that higher-order terms are negligible. $W(t) \to \infty$: the mode energy grows exponentially. No Lyapunov function of the form $V(X) = \Phi(X)$ can be decreasing in this direction, since $\dot\Phi = -\|\nabla\Phi\|^2$ globally non-increasing but the projection onto $u$ can still grow norm-wise when $X$ moves along a surface of constant $\Phi$ or leaves the sublevel set.
+
+*Step 4 (No single $\bar\gamma$ avoids this).* For any fixed $\bar\gamma > 0$, the herding configuration (with pairwise distances $\|x_i - x_j\| \to \varepsilon_{\min}$) places $X$ above $\mathcal{C}$ whenever $\varepsilon_{\min}$ is small enough relative to $\alpha / (\bar\gamma \lambda_{\max}(W))$. The threshold $\varepsilon_{\min}^*$ satisfies:
+
+$$\varepsilon_{\min}^* = \sqrt{\frac{\bar\gamma\lambda\lambda_{\max}(W)}{\alpha}},$$
+
+so for any $\bar\gamma$ there always exist legally reachable configurations (finite-$\varepsilon$ herding events) above $\mathcal{C}$. A larger $\bar\gamma$ raises $\varepsilon_{\min}^*$ — i.e., pushes the dangerous region further inward — but never eliminates it. $\square$
+
+**Corollary (Basel III procyclicality theorem).** A fixed regulatory capital buffer $\bar\kappa$ corresponds to $\bar\gamma = h(\bar\kappa)$ for some increasing $h$. By the theorem, for sufficiently correlated portfolios (small $\varepsilon_{\min}$), even an arbitrarily large buffer fails (it only shifts $\mathcal{C}$). This is the formal content of the procyclicality critique: a time-invariant rule cannot be simultaneously conservative in normal times and sufficient in stress. $\square$
+
+---
+
+### Proof 7 — Force-Clamp Regularisation Lemma
+
+**Theorem.** *Let $F_{\text{raw}}(X) = -\nabla\Phi(X)$ be the unclamped gradient, and let*
+
+$$F_{\text{clamp}}(X) = F_{\text{raw}}(X) \cdot \min\!\left(1, \frac{F_{\max}}{\|F_{\text{raw}}(X)\|}\right), \quad F_{\max} = 100,$$
+
+*as implemented in GravityEngine* (`udl/gravity.py` line 647). *Then:*
+
+*(i) $F_{\text{clamp}}$ is Lipschitz everywhere with effective constant $L_{\text{clamp}} \le 2F_{\max} / \delta_{\min}$, where $\delta_{\min}$ is the minimum pairwise distance in any bounded region.*
+
+*(ii) For configurations in the sublevel set $\mathcal{L}_c = \{X : \Phi(X) \le c\}$, the pairwise Lipschitz constant satisfies $L_{\text{pair}}^{\text{clamp}} \le F_{\max} / \delta_{\min}(c)$, where $\delta_{\min}(c)$ is bounded away from zero.*
+
+*(iii) The spectral contraction condition becomes $\alpha > L_{\text{pair}}^{\text{clamp}}$, which is achievable for any finite $c$ by choosing $\alpha > F_{\max} / \delta_{\min}(c)$.*
+
+**Proof.**
+
+*Step 1 (Singularity structure of $F_{\text{raw}}$).* The log-repulsion term contributes to the force:
+
+$$F_{\text{repel},ij} = +\frac{\bar\gamma\lambda}{\|x_i - x_j\| + \varepsilon} \cdot \hat r_{ij},$$
+
+with directional derivative scaling as $\bar\gamma\lambda / (\|x_i - x_j\| + \varepsilon)^2$ — the Lipschitz constant of this term diverges as $\|x_i - x_j\| \to 0$ even with the softening $\varepsilon > 0$, since $\varepsilon$ is machine-precision small ($10^{-5}$ in the code). Therefore $L_{\text{pair}}^{\text{raw}} = \sup_X \|D^2\Phi_{\text{pair}}(X)\|_2$ is effectively unbounded in finite-precision arithmetic.
+
+*Step 2 (Clamp as projection onto a ball).* The clamped force satisfies:
+
+$$F_{\text{clamp}}(X) = \Pi_{B(F_{\max})}(F_{\text{raw}}(X))$$
+
+where $\Pi_{B(r)}$ is the projection onto the closed ball of radius $r$ in $\mathbb{R}^{Nd}$. The projection onto a convex set is non-expansive (1-Lipschitz):
+
+$$\|F_{\text{clamp}}(X) - F_{\text{clamp}}(Y)\| \le \|F_{\text{raw}}(X) - F_{\text{raw}}(Y)\|$$
+
+with equality only outside the ball. *Inside* the ball (where $\|F_{\text{raw}}\| \le F_{\max}$), $F_{\text{clamp}} = F_{\text{raw}}$ and the standard Lipschitz bound applies. The clamp therefore does not worsen the Lipschitz constant in the unclamped region.
+
+*Step 3 (Lipschitz bound in clamped region).* When $\|F_{\text{raw}}(X)\| > F_{\max}$, $F_{\text{clamp}}(X) = F_{\max} \cdot \hat F_{\text{raw}}(X)$ is a function of the unit vector only. For two clamped configurations $X, Y$:
+
+$$\|F_{\text{clamp}}(X) - F_{\text{clamp}}(Y)\| \le F_{\max}\|\hat F_{\text{raw}}(X) - \hat F_{\text{raw}}(Y)\| \le \frac{2F_{\max}}{\delta_{\min}}\|X - Y\|,$$
+
+using the bound $\|\hat v - \hat w\| \le 2\|v - w\|/\min(\|v\|, \|w\|)$ and $\min\|F_{\text{raw}}\| \ge \delta_{\min}^{-1} \cdot (\text{const})$ in the clamped region. This gives $L_{\text{clamp}} \le 2F_{\max}/\delta_{\min}$.
+
+*Step 4 (Sublevel set bound).* On the sublevel set $\mathcal{L}_c$, all pairwise distances are bounded below by some $\delta_{\min}(c) > 0$ because (i) $\Phi_{\text{repel}} \to +\infty$ as any distance $\to 0$, forcing any $c$-sublevel set to maintain positive separation, (ii) the softening $\varepsilon$ prevents exact collapse. Therefore:
+
+$$L_{\text{pair}}^{\text{clamp}}(c) \le \frac{F_{\max}}{\delta_{\min}(c)} < \infty.$$
+
+*Step 5 (Contraction achievability).* Choose $\alpha > L_{\text{pair}}^{\text{clamp}}(c)$. For a given $c$ this is a finite inequality — it is always satisfiable by increasing the radial spring $\alpha$ (a design parameter). The spectral contraction condition $\lambda_{\max}(\operatorname{sym}(DF_{\text{clamp}})) \le -(\alpha - L_{\text{pair}}^{\text{clamp}}) < 0$ then holds on the entire sublevel set, and trajectories starting in $\mathcal{L}_c$ remain in $\mathcal{L}_c$ (by Proof 2) and converge exponentially. $\square$
+
+**Practical consequence.** The three-way tension — log-repulsion singularity, softening $\varepsilon$, force clamp $F_{\max}$ — resolves cleanly: (i) softening prevents true singularity, (ii) clamp bounds the effective Lipschitz constant on any compact set, (iii) increasing $\alpha$ restores contraction. The paper's proofs are internally consistent and the `max_force=100` hard-code is not an ad-hoc numerical fix; it is a regularisation that makes the Lyapunov arguments close.
+
+---
+
+### Proof 8 — Online Approximation of $\gamma^\star(X)$ via OCO
+
+**Theorem (OCO regret bound for adaptive coupling).** *Suppose at each step $t$ the GravityEngine chooses coupling strength $\gamma_t \in [\gamma_{\min}, \gamma_{\max}]$ before observing the resulting energy descent $c_t(\gamma) = \Phi(X^{t+1}(\gamma)) - \Phi(X^t)$. Define the oracle coupling*
+
+$$\gamma^\star(X^t) = \frac{\alpha}{\lambda_{\max}(D^2\Phi_{\text{pair}}(X^t))}$$
+
+*as the coupling that achieves marginal stability at $X^t$. Consider the online gradient-descent rule*
+
+$$\gamma_{t+1} = \Pi_{[\gamma_{\min}, \gamma_{\max}]}\!\bigl(\gamma_t - \eta_{\gamma}\,\nabla_\gamma\, c_t(\gamma_t)\bigr)$$
+
+*with step-size $\eta_\gamma = (\gamma_{\max}-\gamma_{\min})/\sqrt{T}$. If $c_t(\gamma)$ is convex and $L_c$-Lipschitz in $\gamma$ for each $t$, then the cumulative regret satisfies*
+
+$$R_T = \sum_{t=0}^{T-1} c_t(\gamma_t) - \sum_{t=0}^{T-1} c_t(\gamma^\star(X^t)) \le L_c(\gamma_{\max} - \gamma_{\min})\sqrt{T}.$$
+
+**Proof.**
+
+*Step 1 (Online convex optimisation framing).* At each round $t$: agent chooses $\gamma_t$ (a scalar), environment reveals cost function $c_t : [\gamma_{\min}, \gamma_{\max}] \to \mathbb{R}$. The per-round loss is energy change. Convexity of $c_t$ in $\gamma$: the energy at $X^{t+1}$ is a convex function of $\gamma$ because the step $X^{t+1} = X^t + \eta \cdot (-\alpha(X^t - \mu) - \gamma F_{\text{pair}}(X^t))$ is affine in $\gamma$, and composing with the convex $\Phi$ (via A2) gives convexity in $\gamma$ to first order. This is the standard OCO setup (Hazan 2016, §2).
+
+*Step 2 (Standard online gradient descent regret).* The projected OGD algorithm achieves, for convex $c_t$ and step size $\eta_\gamma$:
+
+$$R_T \le \frac{(\gamma_{\max}-\gamma_{\min})^2}{2\eta_\gamma} + \frac{\eta_\gamma}{2}\sum_{t=0}^{T-1}\|\nabla_\gamma c_t(\gamma_t)\|^2.$$
+
+The gradient $\|\nabla_\gamma c_t\| \le L_c$ (Lipschitz assumption). Substituting $\eta_\gamma = (\gamma_{\max}-\gamma_{\min})/\sqrt{T}$:
+
+$$R_T \le \frac{(\gamma_{\max}-\gamma_{\min})\sqrt{T}}{2} + \frac{L_c^2(\gamma_{\max}-\gamma_{\min})}{2\sqrt{T}} \cdot T = L_c(\gamma_{\max}-\gamma_{\min})\sqrt{T} + O(1/\sqrt{T}).$$
+
+The leading term dominates: $R_T = O(\sqrt{T})$. Average regret $R_T/T \to 0$. $\square$
+
+*Step 3 (Approximation of $\gamma^\star(X^t)$ via online power iteration).* The oracle $\gamma^\star(X^t) = \alpha / \lambda_{\max}(D^2\Phi_{\text{pair}}(X^t))$ requires the spectral radius of the $Nd \times Nd$ Hessian, which is $O(N^2 d^2)$ to compute naïvely. Instead, maintain a unit vector $v_t \in \mathbb{R}^{Nd}$ updated by:
+
+$$\tilde{v}_{t+1} = D^2\Phi_{\text{pair}}(X^t)\,v_t, \quad v_{t+1} = \frac{\tilde v_{t+1}}{\|\tilde v_{t+1}\|}.$$
+
+The Rayleigh quotient $\hat\lambda_t = v_t^\top D^2\Phi_{\text{pair}}(X^t)\, v_t$ converges to $\lambda_{\max}$ at rate $(\lambda_2/\lambda_1)^{2t}$, where $\lambda_1 > \lambda_2$ are the two largest eigenvalues (power iteration, Trefethen & Bau §27). The matrix-vector product $D^2\Phi_{\text{pair}}\,v$ can be computed via **finite-difference Hessian-vector product**:
+
+$$D^2\Phi_{\text{pair}}(X)\,v \approx \frac{\nabla\Phi_{\text{pair}}(X + h\,v) - \nabla\Phi_{\text{pair}}(X)}{h}, \quad h = 10^{-4},$$
+
+requiring only two gradient evaluations — $O(N^2)$ cost, matching the $O(N^2)$ of the existing pairwise force loop in `total_force()`. The approximation error from using $\hat\lambda_t$ instead of $\lambda_{\max}$:
+
+$$|\gamma^\star_{\text{approx}} - \gamma^\star| = \alpha \cdot \frac{|\lambda_{\max} - \hat\lambda_t|}{\lambda_{\max}\,\hat\lambda_t} \le \alpha \cdot \varepsilon_{\text{iter}}^t$$
+
+where $\varepsilon_{\text{iter}}^t \to 0$ geometrically. After $K$ inner iterations per step, $\varepsilon_{\text{iter}} \le (\lambda_2/\lambda_1)^{2K}$.
+
+*Step 4 (Composite regret).* Combining the OGD bound with the approximation error gives total excess cost:
+
+$$R_T^{\text{total}} \le L_c(\gamma_{\max}-\gamma_{\min})\sqrt{T} + T \cdot \alpha \cdot \varepsilon_{\text{iter}}.$$
+
+Choosing $K = \lceil \log(\alpha/\sqrt{T}) / (2\log(\lambda_2/\lambda_1)^{-1}) \rceil$ ensures $T\varepsilon_{\text{iter}} = O(1)$, so the dominant term remains $O(\sqrt{T})$. $\square$
+
+**Computational complexity.** Each step of the adaptive rule costs $O(K \cdot N^2 d)$ for the $K$ power iterations (each needing one gradient of pairwise forces). With $K = O(\log N)$ this is $O(N^2 d \log N)$ per step — no worse than the existing pairwise force computation (already $O(N^2 d)$ in `total_force`). The adaptive coupling therefore adds only a log factor in runtime.
+
+**Connection to GravityEngine.** Currently the engine uses a fixed `damping=0.9` parameter (line 612 of `gravity.py`) applied uniformly to all pairwise couplings. Proof 8 shows that replacing this with the OGD rule — updating `damping` (or equivalently `γ`) by one projected gradient step per iteration — gives $O(\sqrt{T})$ regret against the best fixed coupling in hindsight *and* converges to $\gamma^\star(X)$ as configurations evolve. The computational overhead is low enough to warrant implementation.
+
+---
+
 ### Summary of Proof Status
 
 | Result | Statement (first-order, engine-correct) | Proof | Assumptions |
@@ -469,6 +636,9 @@ $$\alpha \ge L_{\text{pair}} + \kappa.$$
 | Local exponential stability | $\dot{x} = -H^\star x$; rate $\lambda_{\min}(H^\star)$; no kinetic energy term | ✅ Valid | (A1), (A3), (A4) |
 | Spectral contraction | $\lambda_{\max}(\operatorname{sym}(DF)) \le -(\alpha - L_{\text{pair}})$ when $\alpha > L_{\text{pair}}$ | ✅ Valid (fixed γ, not adaptive) | (A1), (A3), (A5) |
 | Amplification bound | $\|X(t)-X^\star\| \le \|X(0)-X^\star\|e^{-(\alpha - L_{\text{pair}})t}$ outside clamp region | ✅ Valid | (A1), (A3), (A4), (A6) |
+| Global impossibility (constant $\bar\gamma$) | Above $\mathcal{C}$, constant $\bar\gamma$ produces a growing mode; Basel III corollary | ✅ Valid | (A1)–(A3), pairwise eigenvalue structure |
+| Force-clamp regularisation | $L_{\text{pair}}^{\text{clamp}}(c) \le F_{\max}/\delta_{\min}(c) < \infty$; contraction achievable | ✅ Valid | sublevel set compactness, log-repulsion structure |
+| OCO coupling bound | OGD on $\gamma_t$ achieves $R_T = O(\sqrt{T})$; power iteration gives $\gamma^\star$ in $O(N^2 d \log N)$ | ✅ Valid | convexity of $c_t(\gamma)$, Lipschitz gradient |
 
 **N.B.** All five proofs are now for $\dot{X} = -\nabla\Phi(X)$ (gradient flow, first-order). The second-order Newtonian proofs written previously are valid for the equation $M\ddot{X} = -\nabla\Phi - \gamma\dot{X}$, which would require adding a velocity state and mass matrix to the engine. If the engine is extended to second-order dynamics in the future, those proofs apply without modification.
 

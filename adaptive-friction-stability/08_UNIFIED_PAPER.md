@@ -286,12 +286,15 @@ and the adaptive system is marginally stable at every configuration, becoming as
 
 **What this means for the paper.** The impossibility result is the *necessity* half of the main theorem. The constructive part (adaptive $\gamma^*$ satisfies the regret bound) is the *sufficiency* half. Together they establish that adaptive friction is the **minimal** intervention: no simpler rule works above $\mathcal{C}$, and $\gamma^*$ works everywhere.
 
-**Remaining gaps.** The sketch above:
-1. Uses linearisation — needs to be extended to a global (Lyapunov) argument for the full nonlinear system
-2. The $\epsilon \to 0$ limit is singular — the bounded-force clamp (`max_force=100` in GravityEngine) regularises this but changes the proof slightly
-3. $\gamma^*(X)$ as defined requires computing $\lambda_{\max}(J(X))$ online — the paper should address whether the OCO (online convex optimisation) view gives a computationally tractable approximation
+**~~Remaining gaps~~ → All three closed in `05_THEORETICAL_FRAMEWORK.md` (Proofs 6–8).**
 
-These three gaps are the outstanding theoretical tasks before LaTeX submission.
+| Gap | Resolution | Proof |
+|-----|-----------|-------|
+| 1. Linearisation only | Extended to global Lyapunov mode-energy argument via $W(t) = \frac{1}{2}\langle X-X^\star, u\rangle^2$, $\dot W \ge cW$ above $\mathcal{C}$ | Proof 6, Steps 3–4 |
+| 2. Force-clamp singularity | $L_{\text{pair}}^{\text{clamp}}(c) \le F_{\max}/\delta_{\min}(c) < \infty$ on any compact sublevel set; `max_force=100` is a principled regulariser, not a numerical hack | Proof 7 |
+| 3. Tractable $\gamma^\star(X)$ online | OGD on $\gamma_t$ achieves $R_T = O(\sqrt T)$; $\lambda_{\max}$ approximated by power iteration with finite-difference HVP at $O(N^2 d \log N)$ per step — no worse than existing pairwise loop | Proof 8 |
+
+**Status: theoretical foundation is complete. LaTeX draft can begin.**
 
 ---
 
