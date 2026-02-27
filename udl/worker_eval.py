@@ -1,5 +1,12 @@
-"""Worker script: evaluate all 6 methods on one dataset. Called by validate_phase2.py."""
-import gc, os, sys, json, copy
+"""
+Worker script — evaluate lean method set on one dataset.
+Called by validate_phase2.py in a subprocess for memory isolation.
+
+Methods (paper-ready, non-redundant):
+  Lean 5-op stack: Phase, Topo, Legendre, Geometric, Recon
+  (selected by correlation audit -- diverse, high-coverage, no redundancy)
+"""
+import gc, os, sys, json
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
@@ -9,12 +16,14 @@ from udl.compare_sota import load_all_datasets
 from udl.pipeline import UDLPipeline
 from udl.rank_fusion import RankFusionPipeline
 from udl.hybrid_pipeline import HybridPipeline
-from udl.rl_fusion import RLFusionAgent
+from udl.meta_fusion import MetaFusionPipeline, default_operators
+
 from udl.experimental_spectra import PhaseCurveSpectrum
 from udl.spectra import RankOrderSpectrum
 from udl.new_spectra import TopologicalSpectrum, KernelRKHSSpectrum
 
-OPS = [
+# Old 4-op stack for comparison
+OPS_OLD = [
     ("phase", PhaseCurveSpectrum()),
     ("topo", TopologicalSpectrum(k=15)),
     ("kernel", KernelRKHSSpectrum()),
@@ -45,9 +54,11 @@ def run_method(builder_fn, X_tr, X_te, y_tr, y_te, top_k):
             info = str(pipe._strategy)
         elif hasattr(pipe, 'selected_arm'):
             info = str(pipe.selected_arm)
+        elif hasattr(pipe, 'strategy_names'):
+            info = "+".join(pipe.strategy_names)
         return {"auc": auc, "cov": cov, "det": det, "n": n, "info": info}
     except Exception as e:
-        return {"auc": 0.0, "cov": 0.0, "det": 0, "n": int(y_te.sum()), "info": f"ERR: {e}"}
+        return {"auc": 0.0, "cov": 0.0, "det": 0, "n": int(y_te.sum()), "info": "ERR: " + str(e)}
     finally:
         del pipe
         gc.collect()
@@ -55,7 +66,6 @@ def run_method(builder_fn, X_tr, X_te, y_tr, y_te, top_k):
 
 def main():
     ds_name = sys.argv[1]
-    priors_path = sys.argv[2] if len(sys.argv) > 2 else ""
 
     ds = load_all_datasets()
     X, y = ds[ds_name]
@@ -68,45 +78,66 @@ def main():
     anom_rate = y_te.mean()
     top_k = min(max(anom_rate * 2, 0.05), 0.30)
 
+    LEAN = default_operators  # function that returns fresh ops
     results = {}
 
-    # 1. Fisher
-    results["Fisher"] = run_method(
-        lambda: UDLPipeline(operators=deepcopy(OPS), centroid_method='auto',
+    # ---- Lean 5-op stack (paper methods) ----
+
+    # 1. Fisher (lean)
+    results["Fisher-lean"] = run_method(
+        lambda: UDLPipeline(operators=deepcopy(LEAN()), centroid_method='auto',
                             projection_method='fisher'),
         X_tr, X_te, y_tr, y_te, top_k)
 
-    # 2. RankFuse
-    results["RankFuse"] = run_method(
-        lambda: RankFusionPipeline(operators=deepcopy(OPS), fusion='mean'),
+    # 2. RankFuse (lean)
+    results["Fuse-lean"] = run_method(
+        lambda: RankFusionPipeline(operators=deepcopy(LEAN()), fusion='mean'),
         X_tr, X_te, y_tr, y_te, top_k)
 
-    # 3. Hybrid-auto
-    results["Hybrid-auto"] = run_method(
-        lambda: HybridPipeline(operators=deepcopy(OPS), mode='auto'),
+    # 3. QuadSurf (lean)
+    results["QuadSurf-lean"] = run_method(
+        lambda: UDLPipeline(operators=deepcopy(LEAN()), centroid_method='auto',
+                            projection_method='fisher', mfls_method='quadratic'),
         X_tr, X_te, y_tr, y_te, top_k)
 
-    # 4. Hybrid-blend
-    results["Hybrid-blend"] = run_method(
-        lambda: HybridPipeline(operators=deepcopy(OPS), mode='blend'),
+    # 4. MetaFusion (default: fisher + fusion + quadsurf)
+    results["MetaFusion"] = run_method(
+        lambda: MetaFusionPipeline(
+            operators=LEAN(),
+            strategies=['fisher', 'fusion', 'quadsurf'],
+            verbose=False),
         X_tr, X_te, y_tr, y_te, top_k)
 
-    # 5. RL-fresh
-    results["RL-fresh"] = run_method(
-        lambda: RLFusionAgent(operators=deepcopy(OPS), strategy='thompson',
-                              exploration_rounds=3, verbose=False),
+    # 5. MetaFusion-full (all 6 strategies)
+    results["MetaFusion+"] = run_method(
+        lambda: MetaFusionPipeline(
+            operators=LEAN(),
+            strategies=['fisher', 'fusion', 'quadsurf', 'qs_expo', 'signed_lr', 'magnifier'],
+            verbose=False),
         X_tr, X_te, y_tr, y_te, top_k)
 
-    # 6. RL-pretrained
-    def make_rl_pretrained():
-        agent = RLFusionAgent(operators=deepcopy(OPS), strategy='thompson',
-                              exploration_rounds=3, verbose=False)
-        if priors_path and os.path.exists(priors_path):
-            agent.load_priors(priors_path)
-        return agent
+    # 6. Hybrid-auto (lean)
+    results["Hybrid-lean"] = run_method(
+        lambda: HybridPipeline(operators=deepcopy(LEAN()), mode='auto'),
+        X_tr, X_te, y_tr, y_te, top_k)
 
-    results["RL-pretrained"] = run_method(
-        make_rl_pretrained, X_tr, X_te, y_tr, y_te, top_k)
+    # ---- Old 4-op stack for comparison ----
+
+    # 7. Fisher (old 4-op)
+    results["Fisher-4op"] = run_method(
+        lambda: UDLPipeline(operators=deepcopy(OPS_OLD), centroid_method='auto',
+                            projection_method='fisher'),
+        X_tr, X_te, y_tr, y_te, top_k)
+
+    # 8. RankFuse (old 4-op)
+    results["Fuse-4op"] = run_method(
+        lambda: RankFusionPipeline(operators=deepcopy(OPS_OLD), fusion='mean'),
+        X_tr, X_te, y_tr, y_te, top_k)
+
+    # 9. Hybrid-auto (old 4-op)
+    results["Hybrid-4op"] = run_method(
+        lambda: HybridPipeline(operators=deepcopy(OPS_OLD), mode='auto'),
+        X_tr, X_te, y_tr, y_te, top_k)
 
     print("RESULTS_JSON:" + json.dumps(results))
 

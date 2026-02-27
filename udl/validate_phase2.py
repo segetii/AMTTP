@@ -4,10 +4,13 @@ import subprocess, sys, json, os, numpy as np
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 WORKER_SCRIPT = os.path.join(SCRIPT_DIR, "worker_eval.py")
 DATASETS = ["synthetic", "mimic", "mammography", "shuttle", "pendigits"]
-METHODS = ["Fisher", "RankFuse", "Hybrid-auto", "Hybrid-blend", "RL-fresh", "RL-pretrained"]
+METHODS = [
+    "Fisher-lean", "Fuse-lean", "QuadSurf-lean",
+    "MetaFusion", "MetaFusion+", "Hybrid-lean",
+    "Fisher-4op", "Fuse-4op", "Hybrid-4op",
+]
 
 def main():
-    priors_path = os.path.join(SCRIPT_DIR, "rl_priors.json")
     all_results = {}
 
     for ds_name in DATASETS:
@@ -18,7 +21,7 @@ def main():
         env["PYTHONIOENCODING"] = "utf-8"
         try:
             result = subprocess.run(
-                [sys.executable, "-u", WORKER_SCRIPT, ds_name, priors_path],
+                [sys.executable, "-u", WORKER_SCRIPT, ds_name],
                 capture_output=True, text=True, timeout=1800,
                 cwd=os.path.dirname(SCRIPT_DIR), env=env,
                 encoding="utf-8", errors="replace"
