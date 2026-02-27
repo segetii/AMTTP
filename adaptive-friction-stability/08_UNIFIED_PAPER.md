@@ -4,7 +4,7 @@
 
 > **Financial systems fail to detect the crises they create because detection failure and instability share the same geometric structure — and the gradient of that structure is the provably minimal corrective force.**
 
-This is the claim that unifies UDL, BSDT, the Blind-Spot Gradient Descent algorithm, and adaptive friction into a single contribution.
+This is the claim that unifies UDL, BSDT, GravityEngine, and adaptive friction into a single contribution.
 
 ---
 
@@ -14,7 +14,7 @@ This is the claim that unifies UDL, BSDT, the Blind-Spot Gradient Descent algori
 
 Short version (arXiv/SSRN): *"From Detection Blind Spots to Stability: A Unified Geometric Framework for Networked Financial Systems"*
 
-**Note on terminology.** Throughout the paper, the computational engine is named **Blind-Spot Gradient Descent (BSGD)** rather than "GravityEngine" — this framing communicates the algorithm's role (gradient descent on a blind-spot energy surface) rather than its physical analogy, and is more appropriate for mathematics and economics audiences.
+**Note on terminology (deferred).** A future rename of GravityEngine to a more algorithm-facing name (e.g. "Blind-Spot Gradient Descent") will be applied consistently across all papers at a single point. Until then, all documents use **GravityEngine** to avoid cross-paper inconsistency.
 
 ---
 
@@ -24,7 +24,7 @@ Short version (arXiv/SSRN): *"From Detection Blind Spots to Stability: A Unified
 |---|---|---|
 | UDL | Deviation geometry; what normal looks like | Derives the deviation operators $\delta_i(X)$ |
 | BSDT | Decomposes missed-detection into $C, G, A, T$ | Shows $\delta_i$ are near-orthogonal and span the failure space |
-| BSGD (Blind-Spot Gradient Descent) | Computes forces $\nabla\Phi$ over agent configurations | Is the online algorithm that computes $\nabla E$ in real time |
+| GravityEngine | Computes forces $\nabla\Phi$ over agent configurations | Is the online algorithm that computes $\nabla E$ in real time |
 | Adaptive friction | Damps dynamics via $\gamma(E)\nabla E$ | Is the optimal response to $E$ under a social planner's problem |
 
 The connection that makes them one paper: the BSDT score
@@ -86,7 +86,7 @@ Under regularity assumptions (E1)–(E3) and the deviation-separating condition 
 ---
 
 ### 2. Computer Science contribution
-*Blind-Spot Gradient Descent (BSGD) as an online algorithm: regret bounds and approximation guarantees.*
+*GravityEngine as an online algorithm: regret bounds and approximation guarantees.*
 
 **Framing**: At each time step $t$, the system receives state $X_t$, must output a damping decision $\gamma_t$, then observes the next state $X_{t+1}$. This is an **online convex optimisation** problem with the loss $\ell_t(\gamma) = E(X_{t+1}(\gamma))$.
 
@@ -102,7 +102,7 @@ Under regularity assumptions (E1)–(E3) and the deviation-separating condition 
   $$\|\widehat{\nabla E}(X) - \nabla E(X)\| \le C / k^{1/d}$$
   under a standard smoothness assumption on $E$. For $k = O(\log n)$ and fixed $d$, this is $O(1/\text{polylog}(n))$.
 
-**What this gives CS**: BSGD is not just a simulation tool — it is an **efficient, approximation-guaranteed online algorithm** for adaptive stabilisation. The regret bound means it is competitive with the best fixed policy in hindsight, a meaningful strongest-possible benchmark for online control. The algorithmic framing also opens connections to literature on online convex optimisation over manifolds and non-stationary environments.
+**What this gives CS**: GravityEngine is not just a simulation tool — it is an **efficient, approximation-guaranteed online algorithm** for adaptive stabilisation. The regret bound means it is competitive with the best fixed policy in hindsight, a meaningful strongest-possible benchmark for online control. The algorithmic framing also opens connections to literature on online convex optimisation over manifolds and non-stationary environments.
 
 **Target**: NeurIPS algorithms track, or SODA / ICALP for the approximation result.
 
@@ -192,7 +192,7 @@ This connects the mathematics directly to Pigou (welfare correction), Arrow-Debr
 | 3. Blind-spot energy functional | BSDT operators $\delta_i$ → $E_{\text{BS}}(X)$; regularity theorems | Mathematics |
 | 4. Equivalence theorem | Theorem C: two-sided bounds; LAS sufficiency | Mathematics |
 | 5. Adaptive damping | $\dot{X} = F - \gamma\nabla E$; Theorems 1–4; spectral critical manifold | Mathematics |
-| 6. Online algorithm | BSGD as OCO; regret bound; $O(n\log n)$ complexity | CS |
+| 6. Online algorithm | GravityEngine as OCO; regret bound; $O(n\log n)$ complexity | CS |
 | 7. Optimal policy | DP formulation; Theorems OR1–OR3; closed-form $\gamma^*$ | OR |
 | 8. Empirical validation | FRED + BIS + CRSP data; 2008/2020/2023 stress windows; lead-lag test vs. SRISK, $\Delta$CoVaR | Economics |
 | 9. Welfare calibration | Consumption-equivalent welfare cost; CCyB formula; Pigouvian interpretation | Economics |
