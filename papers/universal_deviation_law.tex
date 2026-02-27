@@ -57,6 +57,7 @@
 \newcommand{\calR}{\mathcal{R}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\DeclareMathOperator{\tr}{tr}
 
 \begin{document}
 
@@ -224,10 +225,12 @@ has full column rank, i.e., $\text{rank}(J(\boldsymbol{\mu})) = m$.
 
 \textbf{Theorem 2 (Universal Deviation --- Global Form).} \textit{Let $\mathcal{K} \subset \R^m$ be a compact set containing both the normal support $\text{supp}(P_{\mathcal{N}})$ and the anomaly set $\mathcal{A}$, and let $\{\Phi_k\}_{k=1}^K$ be $C^1$ operators that are deviation-separating at every $\mathbf{x} \in \mathcal{K}$ (i.e., $\text{rank}(J(\mathbf{x})) = m$ for all $\mathbf{x} \in \mathcal{K}$). Then the joint map $\Phi$ is a local diffeomorphism on $\mathcal{K}$, and:}
 
-\begin{equation}
-\inf_{\mathbf{x} \in \mathcal{A}} \max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})} \geq \frac{\underline{\sigma}}{\sqrt{K}} \cdot \inf_{\mathbf{x} \in \mathcal{A}} \norm{\mathbf{x} - \boldsymbol{\mu}} - C \cdot \sup_{\mathbf{x} \in \mathcal{A}} \norm{\mathbf{x} - \boldsymbol{\mu}}^2
+\begin{multline}
+\inf_{\mathbf{x} \in \mathcal{A}} \max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})}
+  \geq \frac{\underline{\sigma}}{\sqrt{K}} \inf_{\mathbf{x} \in \mathcal{A}} \norm{\mathbf{x} - \boldsymbol{\mu}} \\
+  - C \sup_{\mathbf{x} \in \mathcal{A}} \norm{\mathbf{x} - \boldsymbol{\mu}}^2
 \label{eq:global}
-\end{equation}
+\end{multline}
 
 \textit{where $\underline{\sigma} := \min_{\mathbf{x} \in \mathcal{K}} \sigma_{\min}(J(\mathbf{x})) > 0$ and $C$ depends on the Lipschitz constant of $J$.}
 
@@ -245,10 +248,12 @@ whenever $\mathcal{K}$ is convex and the operators are injective on $\mathcal{K}
 
 \textbf{Theorem 3 (Finite-Sample Deviation Guarantee).} \textit{Let $\hat{\boldsymbol{\mu}}_n = \frac{1}{n}\sum_{i=1}^n \mathbf{x}_i$ be the sample mean from $n$ i.i.d.\ draws from $P_{\mathcal{N}}$ with population mean $\boldsymbol{\mu}$ and covariance $\Sigma$. Let each $\Phi_k$ be $L_k$-Lipschitz and let $L = \max_k L_k$. If the family is deviation-separating with $\underline{\sigma} > 0$, then with probability at least $1 - \delta$ over the draw of the sample:}
 
-\begin{equation}
-\max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\hat{\boldsymbol{\mu}}_n)} \geq \frac{\underline{\sigma}}{\sqrt{K}} \norm{\mathbf{x} - \boldsymbol{\mu}} - \frac{L \sqrt{\text{tr}(\Sigma)} \cdot \sqrt{2 \ln(2m/\delta)}}{\sqrt{n}}
+\begin{multline}
+\max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\hat{\boldsymbol{\mu}}_n)} \geq
+  \frac{\underline{\sigma}}{\sqrt{K}} \norm{\mathbf{x} - \boldsymbol{\mu}} \\
+  - \frac{L \sqrt{\tr(\Sigma)} \cdot \sqrt{2 \ln(2m/\delta)}}{\sqrt{n}}
 \label{eq:finite_sample}
-\end{equation}
+\end{multline}
 
 \textit{for any fixed anomaly $\mathbf{x} \in \mathcal{A}$.}
 
@@ -285,10 +290,11 @@ Note: $\mathcal{I}(\boldsymbol{\mu}) \succ 0$ if and only if the family is devia
 
 \textbf{Theorem 4 (Information-Optimal Fusion Weights).} \textit{Consider the weighted action functional $S_{\mathbf{w}}[\mathbf{x}] = \sum_k w_k \norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})}^2$ with $\sum_k w_k = 1$, $w_k \geq 0$. The worst-case detection sensitivity}
 
-\begin{equation}
-\eta(\mathbf{w}) := \min_{\norm{\mathbf{v}}=1} \sum_{k=1}^K w_k \norm{D\Phi_k(\boldsymbol{\mu})\mathbf{v}}^2 = \lambda_{\min}\!\left(\sum_k w_k D\Phi_k(\boldsymbol{\mu})^\top D\Phi_k(\boldsymbol{\mu})\right)
+\begin{multline}
+\eta(\mathbf{w}) := \min_{\norm{\mathbf{v}}=1} \sum_{k=1}^K w_k \norm{D\Phi_k(\boldsymbol{\mu})\mathbf{v}}^2 \\
+  = \lambda_{\min}\!\left(\sum_k w_k D\Phi_k(\boldsymbol{\mu})^\top D\Phi_k(\boldsymbol{\mu})\right)
 \label{eq:sensitivity}
-\end{equation}
+\end{multline}
 
 \textit{is maximised by the weights:}
 
@@ -565,10 +571,11 @@ where $d_C$ is Cohen's $d$, overlap is the distributional overlap fraction, and 
 
 Quadratic Discriminant Analysis models a separate Gaussian per class with independent covariance matrices:
 
-\begin{equation}
-p(y{=}c \,|\, \mathbf{r}') = \frac{1}{Z} \exp\!\left(-\frac{1}{2}(\mathbf{r}' - \boldsymbol{\mu}_c)^\top \Sigma_c^{-1} (\mathbf{r}' - \boldsymbol{\mu}_c)\right) |\Sigma_c|^{-1/2}
+\begin{multline}
+p(y{=}c \,|\, \mathbf{r}') = \frac{1}{Z}\, |\Sigma_c|^{-1/2} \\
+  \times \exp\!\left(-\tfrac{1}{2}(\mathbf{r}' - \boldsymbol{\mu}_c)^\top \Sigma_c^{-1} (\mathbf{r}' - \boldsymbol{\mu}_c)\right)
 \label{eq:qda}
-\end{equation}
+\end{multline}
 
 After magnification, clear dimensions span $[-1, +1]$ with tight per-class clusters (normal near $-1$, anomaly near $+1$). QDA fits these compressed clusters naturally because it estimates $\Sigma_c$ \textit{per class}---capturing the collapsed variance structure that magnification creates. The combined \textbf{QDA-Magnified} pipeline is:
 
