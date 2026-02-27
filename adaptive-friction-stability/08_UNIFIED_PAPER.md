@@ -2,17 +2,19 @@
 
 ## One Sentence
 
-> **The geometry that makes financial systems blind to their own failures is the same geometry that makes them unstable — and the gradient of that geometry is the unique minimum-cost stabilising force.**
+> **The geometric blind spots that cause detection failure in financial systems are identical to the geometric sources of instability; the gradient of this blind-spot geometry provides the minimal-intervention stabilising force.**
 
-This is the claim that unifies UDL, BSDT, GravityEngine, and adaptive friction into a single contribution.
+This is the claim that unifies UDL, BSDT, the Blind-Spot Gradient Descent algorithm, and adaptive friction into a single contribution.
 
 ---
 
 ## Working Title
 
-*"Blind-Spot Geometry as Instability Energy: A Unified Framework for Detection, Quantification, and Adaptive Stabilisation of Networked Financial Systems"*
+*"Blind-Spot Geometry as Systemic Instability: Unified Detection and Adaptive Stabilisation in Networked Financial Systems"*
 
-Short version: *"From Blind Spots to Stability: A Data-Induced Energy Framework for Networked Financial Systems"*
+Short version (arXiv/SSRN): *"From Detection Blind Spots to Stability: A Unified Geometric Framework for Networked Financial Systems"*
+
+**Note on terminology.** Throughout the paper, the computational engine is named **Blind-Spot Gradient Descent (BSGD)** rather than "GravityEngine" — this framing communicates the algorithm's role (gradient descent on a blind-spot energy surface) rather than its physical analogy, and is more appropriate for mathematics and economics audiences.
 
 ---
 
@@ -35,23 +37,31 @@ are the **same object**: one is a statistical decomposition of deviation from no
 
 ## The Central Theorem (Convergence Theorem)
 
-**Theorem C — Equivalence of Blind-Spot Geometry and Instability Energy.**
+**Theorem C — Equivalence of Blind-Spot Geometry and Instability Energy (Referee-Ready Statement).**
 
-Let $\mathcal{N}$ be a reference distribution of normal system states. Let $\delta_i(X)$ be the BSDT deviation operators (Camouflage, Feature Gap, Activity Anomaly, Temporal Novelty) constructed from $\mathcal{N}$. Define the blind-spot energy:
+Let $\mathcal{N}$ be the reference measure of normal system states. Let $\delta_i(X)$ be the BSDT deviation operators (Camouflage, Feature Gap, Activity Anomaly, Temporal Novelty) calibrated on $\mathcal{N}$. Define the blind-spot energy:
 
-$$E_{\text{BS}}(X) = \sum_{i=1}^{4} \psi_i(\delta_i(X))$$
+$$E_{\text{BS}}(X) = \sum_{i=1}^{4} \psi_i(\delta_i(X)) + \sum_{i<j} \phi(\|X_i - X_j\|)$$
 
-where each $\psi_i$ is convex and increasing.
+where each $\psi_i$ is convex, increasing, and 1-Lipschitz, and $\phi$ is a short-range attractive potential (erf-based, as in BSGD).
 
-Under assumptions (A1)–(A2), (E1)–(E3), the following hold:
+Under regularity assumptions (E1)–(E3) and the deviation-separating condition of Odeyemi (202X), the following hold in a neighbourhood of any equilibrium $X^\star$:
 
-1. **Gradient alignment**: $\nabla E_{\text{BS}}(X) = -\nabla \Phi(X) + r(X)$ where $\|r(X)\| \le \epsilon \|\nabla\Phi(X)\|$ for small $\epsilon > 0$ under regularity conditions. That is, the blind-spot gradient is approximately the restoring force of the interaction potential.
+1. **Gradient alignment (two-sided)**: There exist constants $c_1, c_2 > 0$ such that
+   $$c_1 \|\nabla \Phi(X)\| \le \|\nabla E_{\text{BS}}(X)\| \le c_2 \|\nabla \Phi(X)\|$$
+   uniformly on sublevel sets $\{X : E_{\text{BS}}(X) \le M\}$. The blind-spot gradient and the restoring force are uniformly equivalent in magnitude; they point in approximately the same direction (alignment angle $\cos\theta \ge 1 - \epsilon$ under the separating condition).
 
-2. **Energy equivalence**: $E_{\text{BS}}(X) \asymp V(X, 0)$ (equivalent up to constants) on sublevel sets $\{X : \|X - X^\star\| \le R\}$ for equilibria $X^\star$ of $F$.
+2. **Energy equivalence (two-sided)**: For any $M > 0$ there exist $a, b > 0$ such that
+   $$a\, V(X, X^\star) \le E_{\text{BS}}(X) \le b\, V(X, X^\star)$$
+   on $\{X : V(X, X^\star) \le R\}$, where $V(X, X^\star) = \Phi(X) - \Phi(X^\star)$ is the standard Lyapunov function for the gradient flow. The constants $a, b$ depend only on the Lipschitz constants of $\psi_i$ and the curvature of $\Phi$ at $X^\star$.
 
-3. **Stabilisation sufficiency**: Consequently, the adaptive damping $\dot{X} = F(X) - \gamma(E_{\text{BS}})\nabla E_{\text{BS}}$ satisfies $\frac{d}{dt}E_{\text{BS}} \le 0$ under the descent condition of Theorem 1.
+3. **Stabilisation sufficiency (local asymptotic stability)**: The damped dynamics
+   $$\dot{X} = F(X) - \gamma(E_{\text{BS}}(X))\nabla E_{\text{BS}}(X)$$
+   with $\gamma(E) \ge \kappa > 0$ for $E > \theta > 0$ renders $X^\star$ locally asymptotically stable whenever the uncontrolled system is unstable but the open-loop Jacobian remains Hurwitz under bounded damping.
 
-*Interpretation*: A detector trained only on normal data and decomposed into blind-spot operators already contains the information needed to stabilise the system. Detection and stabilisation are not separate problems — they are dual views of the same geometric structure.
+*Proof strategy.* Part 1 follows from the chain rule and the Lipschitz bound on $\psi_i$ together with the lower bound on $\|\delta_i'(X)\|$ given by the separating condition. Part 2 is a standard energy comparison lemma using the two-sided bound in Part 1. Part 3 applies the LaSalle invariance principle (Proof 2 of the framework) with $V = E_{\text{BS}}$ as the Lyapunov candidate; the descent property $\frac{d}{dt}E_{\text{BS}} \le -\kappa c_1^2 \|\nabla\Phi\|^2$ follows from Parts 1 and 2 combined with the descent rate formula.
+
+*Interpretation*: A statistical detector trained only on normal data, when decomposed into BSDT blind-spot operators, already encodes the complete geometric information needed to stabilise the system. Detection and stabilisation are not separate problems — they are dual views of the same geometric structure. This is the central non-trivial claim of the paper.
 
 ---
 
@@ -63,12 +73,10 @@ Under assumptions (A1)–(A2), (E1)–(E3), the following hold:
 **Core results**:
 
 - **Theorem 1 (Descent)**: $\frac{d}{dt}E(X(t)) \le 0$ when $\gamma(E) > C$ (standard).
-- **Theorem 2 (Sharp phase transition)**: There exists a critical manifold
-  $$\mathcal{C}(\rho, \ell) = \det\!\left(\mathbf{I} - \rho \cdot \ell \cdot \mathbf{W}\right) = 0$$
-  in the space of network density $\rho$ and leverage $\ell$ (where $\mathbf{W}$ is the weighted adjacency matrix of agent interactions), such that:
-  - Below $\mathcal{C}$: any bounded constant damping stabilises the system.
-  - Above $\mathcal{C}$: no bounded constant damping stabilises; state-adaptive $\gamma(E(X))$ is *necessary*.
-  This is an impossibility result for static policy. It is what makes adaptive friction non-trivially required.
+- **Theorem 2 (Sharp phase transition)**: Define the effective coupling operator $\mathcal{L}(\rho,\ell) = \rho\ell\mathbf{W} - \mathbf{I}$, where $\mathbf{W}$ is the row-normalised weighted adjacency matrix of agent interactions. The critical manifold is
+  $$\mathcal{C} = \left\{(\rho,\ell) : \lambda_{\max}(\rho\ell\mathbf{W}) = 1\right\}$$
+  (spectral radius criterion, not determinant — the determinant form only holds in mean-field / rank-1 approximations). Instability occurs when $\lambda_{\max}(\mathcal{L}) > 0$, equivalently when $\lambda_{\max}(\rho\ell\mathbf{W}) > 1$. Below $\mathcal{C}$: any bounded constant $\bar\gamma$ stabilises the system. Above $\mathcal{C}$: no bounded constant damping stabilises; state-adaptive $\gamma(E(X))$ is *necessary*.
+  This is an impossibility result for static policy. The critical surface is directly observable: $\lambda_{\max}(\rho\ell\mathbf{W}) = 1$ can be estimated from network density (BIS bilateral exposures), mean leverage (FRED bank leverage ratios), and the largest eigenvalue of the connectivity matrix (computable from regulatory filings).
 - **Theorem 3 (Equilibrium preservation)**: Equilibria are preserved (standard; needed for policy interpretation).
 - **Theorem 4 (Discrete descent)**: Armijo backtracking guarantees $E^{t+1} \le E^t$ (standard).
 - **Theorem C (Convergence / Equivalence)**: BSDT geometry = instability energy (the new result).
@@ -78,7 +86,7 @@ Under assumptions (A1)–(A2), (E1)–(E3), the following hold:
 ---
 
 ### 2. Computer Science contribution
-*GravityEngine as an online algorithm: regret bounds and approximation guarantees.*
+*Blind-Spot Gradient Descent (BSGD) as an online algorithm: regret bounds and approximation guarantees.*
 
 **Framing**: At each time step $t$, the system receives state $X_t$, must output a damping decision $\gamma_t$, then observes the next state $X_{t+1}$. This is an **online convex optimisation** problem with the loss $\ell_t(\gamma) = E(X_{t+1}(\gamma))$.
 
@@ -94,7 +102,7 @@ Under assumptions (A1)–(A2), (E1)–(E3), the following hold:
   $$\|\widehat{\nabla E}(X) - \nabla E(X)\| \le C / k^{1/d}$$
   under a standard smoothness assumption on $E$. For $k = O(\log n)$ and fixed $d$, this is $O(1/\text{polylog}(n))$.
 
-**What this gives CS**: GravityEngine is not just a simulation tool — it is an **efficient, approximation-guaranteed online algorithm** for adaptive stabilisation. The regret bound means it is competitive with the best fixed policy in hindsight, a meaningful strongest-possible benchmark for online control.
+**What this gives CS**: BSGD is not just a simulation tool — it is an **efficient, approximation-guaranteed online algorithm** for adaptive stabilisation. The regret bound means it is competitive with the best fixed policy in hindsight, a meaningful strongest-possible benchmark for online control. The algorithmic framing also opens connections to literature on online convex optimisation over manifolds and non-stationary environments.
 
 **Target**: NeurIPS algorithms track, or SODA / ICALP for the approximation result.
 
@@ -142,13 +150,13 @@ where $c(\gamma) = \kappa \gamma^2$ is a cost of intervention (friction has a pr
   $$\Delta\text{CCyB}(t) \approx \kappa^{-1} \cdot \gamma^*(X_t) \cdot \sigma_\ell$$
   where $\sigma_\ell$ is the cross-sectional standard deviation of leverage in the banking system (observable from BIS data). This converts the abstract damping coefficient into a Basel III-compatible policy variable.
 
-- **Welfare cost of inaction**: The expected welfare loss from running at $\gamma = 0$ over the 2022 instability window, computed as:
+- **Welfare cost of inaction (multi-period)**: The expected welfare loss from running at $\gamma = 0$ over each instability window, computed as:
   $$\mathcal{L}_{\text{inaction}} = \int_{t_0}^{t_1} \left[E(X_t) - E(X_t^{\gamma^*})\right] dt$$
-  calibrated to consumption-equivalent units via a standard Euler equation. This gives a number comparable to existing SRISK / SES welfare cost estimates.
+  calibrated to consumption-equivalent units via a standard Euler equation. Evaluate over three periods: 2008 GFC (primary flagship), 2020 COVID shock (robustness), 2023 regional banking stress (recency). The 2022 rate-shock window is included as Appendix D (supplementary illustration, 1 page). Multi-period validation prevents over-fitting to a single episode and demonstrates the method is not crisis-specific.
 
-- **Comparison to existing instruments**: Show explicitly that $\gamma^*(X_t)$ is *more responsive* to the 2022 instability onset than either SRISK (Brownlees & Engle 2017) or $\Delta$CoVaR (Adrian & Brunnermeier 2016), using the same FRED data. The advantage is that $\gamma^*$ is forward-looking (derived from $\nabla E$, which reflects current systemic configuration) rather than backward-looking (regression-based tail risk measures).
+- **Comparison to existing instruments**: Show explicitly that $\gamma^*(X_t)$ spikes *before* known stress onset more sharply than either SRISK (Brownlees & Engle 2017) or $\Delta$CoVaR (Adrian & Brunnermeier 2016), across all three periods. Data sources: FRED macro-financial indicators (credit spreads, leverage ratios, term spreads), BIS locational banking statistics (cross-border exposures), CRSP/Compustat firm-level leverage networks (supply-chain or return-correlation networks). The advantage is that $\gamma^*$ is forward-looking (derived from $\nabla E$, which reflects current systemic configuration) rather than backward-looking (regression-based tail risk measures). This property is verifiable via a simple lead-lag test: regress stress indicators on $\gamma^*(t-k)$ for $k = 1, \ldots, 12$ quarters.
 
-**Target**: *American Economic Review* (if the micro-foundations are added), *Journal of Finance* or *Review of Financial Studies* (empirical contribution), *BIS Working Papers* (policy translation).
+**Target**: *Journal of Finance* or *Review of Financial Studies* (empirical contribution); *American Economic Review* if micro-foundations section is complete; *BIS Working Papers* for direct policy circulation.
 
 ---
 
@@ -169,9 +177,9 @@ This is a *quadratic* positive-feedback term — exactly the amplifying dynamics
 $$\mathcal{C} = \left\{(\rho, \ell) : \frac{\rho \cdot \bar\ell^2}{\mu} = 1\right\}$$
 where $\bar\ell$ is mean leverage and $\rho$ is network connectivity. Central banks can estimate all three quantities directly.
 
-**Welfare gap**: The decentralised equilibrium produces $E_{\text{DE}}(X) > E_{\text{SP}}(X)$ (the social planner's outcome) by a gap that equals the *negative externality* of each institution's leverage choice on the system's energy. The Pigouvian tax that closes this gap is exactly $\gamma^*(X)$ times a unit price. Adaptive friction is the Pigouvian correction for systemic risk externalities.
+**Welfare gap**: The decentralised equilibrium produces $E_{\text{DE}}(X) > E_{\text{SP}}(X)$ (the social planner's outcome) by a gap that equals the *negative externality* of each institution's leverage choice on the system's energy. The state-dependent damping coefficient $\gamma^*(X)$ is the Pigouvian correction that internalises the marginal externality of each institution's leverage choice on the system's instability energy $E(X)$. Under quadratic costs of intervention, the optimal policy coincides with the adaptive law derived from the energy gradient, providing a micro-founded justification for state-contingent macroprudential instruments. The tax rate $\gamma^*(X)$ is not a fixed surcharge — it rises with the gradient $\|\nabla E(X)\|$, meaning the correction is largest exactly when the system is most fragile.
 
-This connects the mathematics directly to Pigou, Arrow-Debreu, and the Diamond-Dybvig tradition  — the language economists use to evaluate fundamental contributions.
+This connects the mathematics directly to Pigou (welfare correction), Arrow-Debreu (decentralised equilibrium vs. planner), and the Diamond-Dybvig tradition (systemic fragility from individually rational behaviour) — the three pillars that economists use to evaluate whether a contribution is fundamental.
 
 ---
 
@@ -179,41 +187,47 @@ This connects the mathematics directly to Pigou, Arrow-Debreu, and the Diamond-D
 
 | Section | Content | Community |
 |---|---|---|
-| 1. Introduction | Gap: detection and stabilisation are studied separately; we unify them | All |
+| 1. Introduction | Gap statement; Mathematical Overview box (4 theorems); roadmap | All |
 | 2. Agent model and equilibrium dynamics | $N$-institution game → quadratic feedback → amplifying $F(X)$ | Economics |
-| 3. Blind-spot energy functional | BSDT operators $\delta_i$ → $E(X)$; regularity theorems | Mathematics |
-| 4. Equivalence theorem | Theorem C: blind-spot geometry = instability energy | Mathematics |
-| 5. Adaptive damping | $\dot{X} = F - \gamma\nabla E$; Theorems 1–4; sharp phase transition | Mathematics |
-| 6. Online algorithm | GravityEngine as OCO; regret bound; approximation complexity | CS |
-| 7. Optimal policy | DP formulation; Theorems OR1–OR3; closed form $\gamma^*$ | OR |
-| 8. Empirical validation | FRED + BIS data; 2022 instability window; $\gamma^*$ vs. SRISK vs. $\Delta$CoVaR | Economics |
-| 9. Welfare calibration | Consumption-equivalent welfare cost; CCyB mapping | Economics |
-| 10. Discussion | Limitations; open problems; policy implementation conditions | All |
-| Appendix A | Full proofs (Theorems 1–4, Theorem C, OR1–OR3) | Mathematics |
+| 3. Blind-spot energy functional | BSDT operators $\delta_i$ → $E_{\text{BS}}(X)$; regularity theorems | Mathematics |
+| 4. Equivalence theorem | Theorem C: two-sided bounds; LAS sufficiency | Mathematics |
+| 5. Adaptive damping | $\dot{X} = F - \gamma\nabla E$; Theorems 1–4; spectral critical manifold | Mathematics |
+| 6. Online algorithm | BSGD as OCO; regret bound; $O(n\log n)$ complexity | CS |
+| 7. Optimal policy | DP formulation; Theorems OR1–OR3; closed-form $\gamma^*$ | OR |
+| 8. Empirical validation | FRED + BIS + CRSP data; 2008/2020/2023 stress windows; lead-lag test vs. SRISK, $\Delta$CoVaR | Economics |
+| 9. Welfare calibration | Consumption-equivalent welfare cost; CCyB formula; Pigouvian interpretation | Economics |
+| 10. Discussion | Audience table; limitations; open problems; policy conditions | All |
+| Appendix A | Full proofs (Theorems 1–4, C, OR1–OR3) | Mathematics |
 | Appendix B | Derivation of Nash equilibrium dynamics | Economics |
 | Appendix C | Complexity proofs (CS2, CS3) | CS |
+| Appendix D | 2022 rate-shock supplementary illustration (≤ 1 page) | Economics |
+
+**Mathematical Overview box (to appear in §1 Introduction):** A ½-page boxed environment summarising the four main theorems — Theorem C (equivalence), Theorem 2 (spectral phase transition), Theorem OR2 (closed-form $\gamma^*$), Proposition CS1 (online regret) — with one-sentence non-technical summaries for each. This box allows specialists to locate the contribution relevant to their field without reading the entire paper.
 
 ---
 
 ## Submission Strategy
 
-### Primary target (aim for the top, submit sequentially)
+### Primary target (submit sequentially, one journal at a time)
 
-1. **Journal of Political Economy** — if micro-foundations section is complete. The welfare externality + Pigouvian correction framing fits JPE's tradition exactly.
-2. **Econometrica** — if the mathematical rigour is the primary contribution and the empirical calibration is secondary.
-3. **Review of Financial Studies** — if the empirical validation and CCyB calibration are the strongest sections.
+1. **Journal of Political Economy** — Pigouvian welfare externality framing + micro-foundations makes this a natural fit. Requires micro-foundation section to be complete and tight.
+2. **Econometrica** — if Theorem C and the spectral phase transition are the contributions referees engage with most. The two-sided equivalence bounds and LAS result have the rigour Econometrica expects.
+3. **Review of Financial Studies** — if the multi-period empirical validation (2008/2020/2023) and CCyB calibration formula are the strongest standalone contributions.
 
-### Parallel / fallback
+### Parallel / fallback (by community)
 
-- Math track: *SIAM Journal on Applied Mathematics* or *Journal of Nonlinear Science*
-- CS track: *NeurIPS* (algorithms) or *ICALP/SODA* (complexity)
-- OR track: *Operations Research* or *Management Science*
-- Policy track: *BIS Working Papers* + *Journal of Financial Regulation*
+| Track | Primary | Fallback |
+|---|---|---|
+| Mathematics | *SIAM Journal on Applied Mathematics* | *Journal of Nonlinear Science* |
+| CS | *NeurIPS* (algorithms track) | *ICALP / SODA* (complexity) |
+| OR | *Operations Research* | *Management Science* or *Math. of OR* |
+| Policy | *BIS Working Papers* | *Journal of Financial Regulation* |
 
-### Preprint
+### Preprint strategy
 
-- arXiv: **econ.GN** (economics, general) + **math.DS** + **cs.DS**
-- SSRN: Finance section, immediately upon arXiv posting — this is how central bank economists find work
+- **arXiv**: cross-list to `econ.GN` + `math.DS` + `cs.DS` simultaneously — this is the most efficient way to reach all four communities in one action
+- **SSRN**: Finance section, posted the same day as arXiv — central bank researchers use SSRN, not arXiv
+- **Policy brief**: 2-page version for BIS Quarterly Review submission — this is how the result reaches Basel Committee staff
 
 ---
 
