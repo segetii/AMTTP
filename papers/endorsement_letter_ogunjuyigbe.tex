@@ -1,0 +1,67 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{letter}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue
+}
+
+\onehalfspacing
+
+\signature{Professor Ayo Ogunjuyigbe\\
+Professor of Electrical \& Electronic Engineering\\
+Former Director, Management Information Systems (MIS)\\
+University of Ibadan, Nigeria}
+
+\address{Department of Electrical \& Electronic Engineering\\
+University of Ibadan\\
+Ibadan, Oyo State\\
+Nigeria}
+
+\date{27 February 2026}
+
+\begin{document}
+
+\begin{letter}{UK Visas \& Immigration\\
+Global Talent Visa --- Tech Nation (Digital Technology)\\
+United Kingdom}
+
+\opening{To Whom It May Concern,}
+
+I write to provide my personal endorsement of Odeyemi Olusegun Israel in support of his application for the UK Global Talent Visa under the Digital Technology route. I have known Olusegun for a number of years in the capacity of a mentor, and I have followed his technical development and research output with considerable interest.
+
+By way of background, I am a Professor of Electrical and Electronic Engineering at the University of Ibadan and have previously served as Director of Management Information Systems at the same institution. My own research spans power systems, computational intelligence, and applied machine learning in engineering contexts, so I am reasonably well placed to assess the nature and quality of Olusegun's contributions.
+
+\textbf{The AMTTP Platform.} Olusegun has designed and built, largely by himself, a system called the Anti-Money Laundering Transaction Trust Protocol (AMTTP). This is not a minor side project. It is a four-layer architecture spanning client SDKs, a compliance orchestration engine, a machine learning training pipeline, and a blockchain-native smart contract layer deployed across 18 contracts on Ethereum Sepolia. The system addresses what I consider to be a genuinely difficult unsolved problem in decentralised finance: how to enforce regulatory compliance \textit{before} a transaction settles, rather than generating alerts after the fact.
+
+What distinguishes AMTTP from the commercial tools currently available---Chainalysis, Elliptic, and the like---is that it intervenes at the protocol level. Olusegun's orchestration layer combines ML risk scoring, graph-based analysis, sanctions screening, and policy adjudication into a single deterministic decision matrix. The pipeline processes over 2.6 million transactions using a Composite Teacher model that blends Autoencoder-Enhanced XGBoost, FATF AML pattern detection, and graph structural properties. The infrastructure includes 17 containerised microservices, a zero-knowledge proof framework (zkNAF) for privacy-preserving credential verification, and multi-oracle threshold signatures. He has released the TypeScript and Python client SDKs as open source, which tells me he understands the difference between protecting core intellectual property and contributing to the broader ecosystem.
+
+I am not easily impressed by systems that simply stitch together existing libraries. AMTTP shows genuine architectural thinking---the kind where someone has sat with the regulatory text, understood the engineering constraints of blockchain finality, and designed a system from first principles to reconcile the two.
+
+\textbf{Original Research Contributions.} Beyond the platform itself, Olusegun has produced two research papers that I think deserve serious attention:
+
+\begin{enumerate}
+  \item \textbf{Blind Spot Decomposition Theory (BSDT)} --- This paper identifies a structural limitation that most ML practitioners intuitively recognise but rarely formalise: that every fraud detection model has predictable failure modes. Olusegun decomposes missed fraud into four near-orthogonal components---Camouflage, Feature Gap, Activity Anomaly, and Temporal Novelty---and demonstrates that these account for over 95\% of explainable variance in missed-fraud indicators. The correction operators he proposes recover recall by up to 84.4 percentage points without retraining. The results hold across XGBoost, LightGBM, Random Forest, and Logistic Regression on six datasets spanning five separate domains including blockchain, banking, aerospace, and medical imaging. That kind of cross-domain generalisability is unusual.
+
+  \item \textbf{Universal Deviation Law (UDL)} --- This is a multi-spectrum tensor framework for domain-agnostic anomaly detection. Where BSDT addresses the diagnostic question (why does a model fail?), UDL addresses the detection question at a more fundamental level. It introduces a mathematical formulation for measuring deviation across multiple spectral representations simultaneously, which in practical terms means it can find anomalies that single-method approaches consistently miss.
+\end{enumerate}
+
+What I find particularly noteworthy is that these are not incremental improvements on existing methods. They represent original theoretical frameworks with accompanying experimental validation. The BSDT work, for instance, treats blind spot decomposition as a provable mathematical claim rather than an empirical observation, and then tests it rigorously. That is a level of intellectual discipline I would expect from a well-supervised doctoral programme---and Olusegun has done this as an independent researcher.
+
+\textbf{Assessment of Exceptional Talent.} In my years at the University of Ibadan, I have taught and mentored hundreds of engineering students and researchers. I have seen the full range---from those who competently apply existing techniques to those who push the boundaries of what is known. Olusegun falls firmly in the latter category. The breadth of his technical work is striking: he operates comfortably across machine learning, blockchain architecture, smart contract development, zero-knowledge cryptography, and full-stack systems engineering. More importantly, he does not just use these technologies; he builds things with them that did not previously exist.
+
+The UK stands to benefit from having someone of his calibre working within its technology sector. The intersection of DeFi compliance, privacy-preserving verification, and machine learning is an area where the UK is actively seeking to establish regulatory leadership, particularly through the FCA's forthcoming crypto framework expected in 2027. Olusegun's work aligns directly with that national priority.
+
+I recommend him for the Global Talent Visa without reservation.
+
+\closing{Yours faithfully,}
+
+\end{letter}
+
+\end{document}

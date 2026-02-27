@@ -1,66 +1,47 @@
 """
-Hybrid Pipeline — Adaptive Fisher/RankFusion Selection
-=======================================================
-Auto-detects anomaly heterogeneity from training data and selects
-the optimal fusion strategy:
+Hybrid Pipeline — Adaptive Best-of-All Selection
+==================================================
+Cross-validates ALL available pipeline configurations and picks the
+one that maximises anomaly COVERAGE (not AUC).
 
-  - HOMOGENEOUS anomalies (e.g. shuttle): Use Fisher projection
-    → single discriminant direction captures everything
-  - HETEROGENEOUS anomalies (e.g. mammography): Use RankFusion
-    → preserves each operator's unique detections
+Candidate strategies evaluated on each CV fold:
+  1. Fisher LDA projection    (linear discriminant — best for homogeneous anomalies)
+  2. QDA projection           (quadratic, per-class covariance — captures non-linear boundaries)
+  3. QDA-magnified            (QDA + DimensionMagnifier pre-processing)
+  4. RankFusion (mean)        (rank-average of per-operator scores — best for heterogeneous)
 
-Detection mechanism:
-  On a validation fold, fit each operator independently and measure
-  the pairwise Spearman rank correlation of their anomaly scores.
-  Low mean correlation → heterogeneous → RankFusion.
-  High mean correlation → homogeneous → Fisher.
+Then optionally blends the CV-best projection with RankFusion via learned alpha.
 
-Can also blend both strategies with learned mixing weight α:
-  score = α · fisher_score + (1-α) · rankfuse_score
+Modes:
+  'auto'  — pick the single best candidate by CV coverage (default)
+  'blend' — pick best candidate + learn optimal alpha blend with RankFusion
+  'fisher'/'qda'/'qda-magnified'/'fusion' — force a specific strategy
 
 Usage:
     from udl.hybrid_pipeline import HybridPipeline
 
     pipe = HybridPipeline(operators=[...])
     pipe.fit(X_train, y_train)
-    scores = pipe.score(X_test)  # auto-selects best strategy
+    scores = pipe.score(X_test)
 """
 
+import gc
 import copy
 import warnings
 import numpy as np
-from scipy.stats import spearmanr
 from sklearn.model_selection import StratifiedKFold
 
 from .pipeline import UDLPipeline
 from .rank_fusion import RankFusionPipeline
 
+# All projection-based strategies to compete
+CANDIDATE_PROJECTIONS = ['fisher', 'qda', 'qda-magnified']
+
 
 class HybridPipeline:
     """
-    Adaptive anomaly detection that selects between Fisher projection
-    and rank fusion based on measured operator agreement.
-
-    Parameters
-    ----------
-    operators : list of (name, operator) tuples
-        Spectrum operators.
-    centroid_method : str
-        Centroid estimation for sub-pipelines.
-    score_method : str
-        Scoring mode for sub-pipelines.
-    heterogeneity_threshold : float
-        Mean Spearman |ρ| below this → use RankFusion.
-        Above → use Fisher. Default 0.5 (empirically calibrated).
-    mode : str
-        'auto'  — auto-detect and pick one (default)
-        'blend' — fit both and blend with learned α
-        'fisher' — force Fisher only
-        'fusion' — force RankFusion only
-    n_val_folds : int
-        Number of cross-val folds for heterogeneity estimation (default 2).
-    verbose : bool
-        Print diagnostics during fit.
+    Adaptive anomaly detection that CV-competes Fisher, QDA,
+    QDA-magnified, and RankFusion on coverage, then picks the best.
     """
 
     def __init__(
@@ -68,7 +49,7 @@ class HybridPipeline:
         operators,
         centroid_method="auto",
         score_method="v1",
-        heterogeneity_threshold=0.5,
+        heterogeneity_threshold=0.5,  # kept for backwards compat
         mode="auto",
         n_val_folds=2,
         verbose=True,
@@ -82,266 +63,330 @@ class HybridPipeline:
         self.verbose = verbose
 
         # Fitted state
-        self._fisher_pipe = None
-        self._fusion_pipe = None
-        self._strategy = None       # 'fisher' or 'fusion' or 'blend'
-        self._blend_alpha = 0.5     # mixing weight for blend mode
-        self._heterogeneity = None  # measured mean |ρ|
-        self._pairwise_corr = None  # full correlation matrix
+        self._best_pipe = None       # winning pipeline object
+        self._fusion_pipe = None     # RankFusion (for blend mode)
+        self._strategy = None        # winning strategy name
+        self._blend_alpha = None     # blending weight (blend mode only)
+        self._best_proj = None       # best projection method (blend mode)
+        self._cv_results = {}        # {strategy: mean_coverage}
         self._fitted = False
 
-    def _measure_heterogeneity(self, X, y):
-        """
-        Estimate anomaly heterogeneity by measuring inter-operator
-        score correlation on a validation fold.
+    # ------------------------------------------------------------------
+    #  Coverage helper
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _coverage(scores, y, top_k):
+        """Fraction of true anomalies in the top-k% of scores."""
+        anom_idx = np.where(y == 1)[0]
+        if len(anom_idx) == 0:
+            return 0.0
+        threshold = np.percentile(scores, 100 * (1 - top_k))
+        return float(np.sum(scores[anom_idx] >= threshold)) / len(anom_idx)
 
-        Returns
-        -------
-        mean_abs_corr : float
-            Mean absolute Spearman correlation between operator
-            anomaly scores. Low = heterogeneous, high = homogeneous.
-        corr_matrix : ndarray
-            Pairwise correlation matrix.
+    # ------------------------------------------------------------------
+    #  Build a pipeline for a given strategy
+    # ------------------------------------------------------------------
+    def _build(self, strategy, ops):
+        """Return a pipeline (not yet fitted) for the given strategy."""
+        if strategy == 'fusion':
+            return RankFusionPipeline(
+                operators=ops,
+                centroid_method=self.centroid_method,
+                score_method=self.score_method,
+                fusion='mean',
+            )
+        else:
+            # Fisher, QDA, or QDA-magnified
+            magnify = strategy == 'qda-magnified'
+            return UDLPipeline(
+                operators=ops,
+                centroid_method=self.centroid_method,
+                projection_method=strategy,
+                score_method=self.score_method,
+                magnify=magnify,
+            )
+
+    # ------------------------------------------------------------------
+    #  CV-compete all strategies
+    # ------------------------------------------------------------------
+    def _cv_select(self, X, y):
         """
-        # Use a single validation fold for speed
+        Cross-validate all candidate strategies and return
+        {strategy: mean_coverage}.
+        """
         n_anom = int(y.sum())
         if n_anom < 4 or len(X) < 20:
-            # Too few samples — default to fusion (safer)
-            return 0.0, np.zeros((len(self.operator_specs), len(self.operator_specs)))
+            return {'fusion': 1.0}
 
         try:
-            skf = StratifiedKFold(n_splits=self.n_val_folds, shuffle=True, random_state=42)
-            train_idx, val_idx = next(skf.split(X, y))
+            skf = StratifiedKFold(
+                n_splits=self.n_val_folds, shuffle=True, random_state=42
+            )
+            folds = list(skf.split(X, y))
         except ValueError:
-            return 0.0, np.zeros((len(self.operator_specs), len(self.operator_specs)))
+            return {'fusion': 1.0}
 
-        X_tr, X_val = X[train_idx], X[val_idx]
-        y_tr, y_val = y[train_idx], y[val_idx]
+        candidates = list(CANDIDATE_PROJECTIONS) + ['fusion']
+        fold_scores = {c: [] for c in candidates}
 
-        # Fit each operator independently and collect scores on val set
-        op_scores = {}
-        for name, op in self.operator_specs:
-            try:
-                pipe = UDLPipeline(
-                    operators=[(name, copy.deepcopy(op))],
-                    centroid_method=self.centroid_method,
-                    projection_method='fisher',
-                    score_method=self.score_method,
-                )
-                pipe.fit(X_tr, y_tr)
-                s = pipe.score(X_val)
-                if np.std(s) > 1e-12:  # skip degenerate
-                    op_scores[name] = s
-            except Exception:
-                pass
+        for train_idx, val_idx in folds:
+            X_tr, X_val = X[train_idx], X[val_idx]
+            y_tr, y_val = y[train_idx], y[val_idx]
 
-        if len(op_scores) < 2:
-            return 0.0, np.zeros((len(self.operator_specs), len(self.operator_specs)))
+            anom_rate = y_val.mean()
+            top_k = min(max(anom_rate * 2, 0.05), 0.30)
 
-        # Compute pairwise Spearman correlation
-        names = list(op_scores.keys())
-        n_ops = len(names)
-        corr_matrix = np.eye(n_ops)
+            for strat in candidates:
+                try:
+                    pipe = self._build(
+                        strat, copy.deepcopy(self.operator_specs)
+                    )
+                    pipe.fit(X_tr, y_tr)
+                    s = pipe.score(X_val)
+                    cov = self._coverage(s, y_val, top_k)
+                    fold_scores[strat].append(cov)
+                except Exception:
+                    fold_scores[strat].append(0.0)
+                finally:
+                    gc.collect()
 
-        correlations = []
-        for i in range(n_ops):
-            for j in range(i + 1, n_ops):
-                rho, _ = spearmanr(op_scores[names[i]], op_scores[names[j]])
-                if np.isnan(rho):
-                    rho = 0.0
-                corr_matrix[i, j] = rho
-                corr_matrix[j, i] = rho
-                correlations.append(abs(rho))
+        results = {}
+        for strat in candidates:
+            if fold_scores[strat]:
+                results[strat] = float(np.mean(fold_scores[strat]))
+            else:
+                results[strat] = 0.0
 
-        mean_abs_corr = np.mean(correlations) if correlations else 0.0
-        return mean_abs_corr, corr_matrix
+        return results
 
-    def _estimate_blend_alpha(self, X, y):
+    # ------------------------------------------------------------------
+    #  Blend: CV-learn optimal alpha (best proj + fusion)
+    # ------------------------------------------------------------------
+    def _cv_blend(self, X, y, best_proj):
         """
-        Estimate optimal blending weight α between Fisher and RankFusion
-        using cross-validation on detection coverage.
+        Learn optimal alpha between a projection method and RankFusion.
 
-        α = 1 → pure Fisher, α = 0 → pure RankFusion
+        alpha=1 -> pure projection, alpha=0 -> pure RankFusion
         """
         n_anom = int(y.sum())
         if n_anom < 4:
             return 0.5
 
         try:
-            skf = StratifiedKFold(n_splits=self.n_val_folds, shuffle=True, random_state=42)
+            skf = StratifiedKFold(
+                n_splits=self.n_val_folds, shuffle=True, random_state=42
+            )
+            folds = list(skf.split(X, y))
         except ValueError:
             return 0.5
 
         alphas = [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]
-        alpha_scores = {a: [] for a in alphas}
+        alpha_covs = {a: [] for a in alphas}
 
-        for train_idx, val_idx in skf.split(X, y):
+        for train_idx, val_idx in folds:
             X_tr, X_val = X[train_idx], X[val_idx]
             y_tr, y_val = y[train_idx], y[val_idx]
 
-            # Fit both
-            try:
-                fp = UDLPipeline(
-                    operators=copy.deepcopy(self.operator_specs),
-                    centroid_method=self.centroid_method,
-                    projection_method='fisher',
-                    score_method=self.score_method,
-                )
-                fp.fit(X_tr, y_tr)
-                f_scores = fp.score(X_val)
-                f_ranks = f_scores.argsort().argsort() / max(len(f_scores) - 1, 1)
-            except Exception:
-                f_ranks = None
-
-            try:
-                rp = RankFusionPipeline(
-                    operators=copy.deepcopy(self.operator_specs),
-                    centroid_method=self.centroid_method,
-                    score_method=self.score_method,
-                    fusion='mean',
-                )
-                rp.fit(X_tr, y_tr)
-                r_scores = rp.score(X_val)
-                r_ranks = r_scores.argsort().argsort() / max(len(r_scores) - 1, 1)
-            except Exception:
-                r_ranks = None
-
-            if f_ranks is None and r_ranks is None:
-                continue
-
             anom_rate = y_val.mean()
             top_k = min(max(anom_rate * 2, 0.05), 0.30)
+
+            # Fit projection pipeline
+            proj_ranks = None
+            try:
+                pp = self._build(
+                    best_proj, copy.deepcopy(self.operator_specs)
+                )
+                pp.fit(X_tr, y_tr)
+                ps = pp.score(X_val)
+                proj_ranks = ps.argsort().argsort() / max(len(ps) - 1, 1)
+            except Exception:
+                pass
+            finally:
+                gc.collect()
+
+            # Fit RankFusion
+            fuse_ranks = None
+            try:
+                fp = self._build(
+                    'fusion', copy.deepcopy(self.operator_specs)
+                )
+                fp.fit(X_tr, y_tr)
+                fs = fp.score(X_val)
+                fuse_ranks = fs.argsort().argsort() / max(len(fs) - 1, 1)
+            except Exception:
+                pass
+            finally:
+                gc.collect()
+
+            if proj_ranks is None and fuse_ranks is None:
+                continue
+
             anom_idx = np.where(y_val == 1)[0]
-
             for a in alphas:
-                if f_ranks is not None and r_ranks is not None:
-                    blended = a * f_ranks + (1 - a) * r_ranks
-                elif f_ranks is not None:
-                    blended = f_ranks
+                if proj_ranks is not None and fuse_ranks is not None:
+                    blended = a * proj_ranks + (1 - a) * fuse_ranks
+                elif proj_ranks is not None:
+                    blended = proj_ranks
                 else:
-                    blended = r_ranks
+                    blended = fuse_ranks
+                cov = self._coverage(blended, y_val, top_k)
+                alpha_covs[a].append(cov)
 
-                threshold = np.percentile(blended, 100 * (1 - top_k))
-                caught = np.sum(blended[anom_idx] >= threshold)
-                cov = caught / len(anom_idx) if len(anom_idx) > 0 else 0
-                alpha_scores[a].append(cov)
-
-        # Pick alpha with best mean coverage
         best_alpha = 0.5
         best_cov = -1
         for a in alphas:
-            if alpha_scores[a]:
-                mc = np.mean(alpha_scores[a])
+            if alpha_covs[a]:
+                mc = np.mean(alpha_covs[a])
                 if mc > best_cov:
                     best_cov = mc
                     best_alpha = a
 
         return best_alpha
 
+    # ------------------------------------------------------------------
+    #  Fit
+    # ------------------------------------------------------------------
     def fit(self, X, y=None):
         """
         Fit the hybrid pipeline.
 
-        1. Measure inter-operator heterogeneity
-        2. Select strategy (or learn blend weights)
+        1. CV-compete Fisher / QDA / QDA-magnified / RankFusion on coverage
+        2. Select best (or learn blend weights)
         3. Fit the chosen pipeline(s) on full training data
         """
+        # -- Forced modes --
         if y is None:
-            # No labels → default to fusion (more robust unsupervised)
             self._strategy = 'fusion'
-            self._heterogeneity = None
             if self.verbose:
-                print("[Hybrid] No labels → defaulting to RankFusion")
-        elif self.mode == 'fisher':
-            self._strategy = 'fisher'
-            self._heterogeneity = None
-        elif self.mode == 'fusion':
-            self._strategy = 'fusion'
-            self._heterogeneity = None
-        elif self.mode == 'blend':
-            self._heterogeneity, self._pairwise_corr = self._measure_heterogeneity(X, y)
-            self._blend_alpha = self._estimate_blend_alpha(X, y)
-            self._strategy = 'blend'
-            if self.verbose:
-                print(f"[Hybrid] Blend mode: alpha={self._blend_alpha:.2f} "
-                      f"(heterogeneity={self._heterogeneity:.3f})")
-        else:  # auto
-            self._heterogeneity, self._pairwise_corr = self._measure_heterogeneity(X, y)
-            if self._heterogeneity >= self.het_threshold:
-                self._strategy = 'fisher'
-            else:
-                self._strategy = 'fusion'
-            if self.verbose:
-                print(f"[Hybrid] Heterogeneity={self._heterogeneity:.3f} "
-                      f"(threshold={self.het_threshold}) -> {self._strategy.upper()}")
+                print("[Hybrid] No labels -> defaulting to RankFusion")
 
-        # Fit the selected pipeline(s) on full training data
-        if self._strategy in ('fisher', 'blend'):
-            try:
-                self._fisher_pipe = UDLPipeline(
-                    operators=copy.deepcopy(self.operator_specs),
-                    centroid_method=self.centroid_method,
-                    projection_method='fisher',
-                    score_method=self.score_method,
+        elif self.mode in CANDIDATE_PROJECTIONS or self.mode == 'fusion':
+            self._strategy = self.mode
+
+        elif self.mode in ('auto', 'blend'):
+            # -- CV-compete all strategies --
+            self._cv_results = self._cv_select(X, y)
+
+            if self.verbose:
+                print("[Hybrid] CV coverage results:")
+                for strat, cov in sorted(
+                    self._cv_results.items(), key=lambda x: -x[1]
+                ):
+                    print(f"  {strat:20s} {cov*100:.1f}%")
+
+            if self.mode == 'auto':
+                self._strategy = max(
+                    self._cv_results, key=self._cv_results.get
                 )
-                self._fisher_pipe.fit(X, y)
+                if self.verbose:
+                    print(f"[Hybrid] Auto-selected: {self._strategy.upper()}")
+
+            else:  # blend
+                # Best projection method (not fusion)
+                proj_results = {
+                    k: v
+                    for k, v in self._cv_results.items()
+                    if k != 'fusion'
+                }
+                self._best_proj = (
+                    max(proj_results, key=proj_results.get)
+                    if proj_results
+                    else 'fisher'
+                )
+                self._blend_alpha = self._cv_blend(X, y, self._best_proj)
+                self._strategy = 'blend'
+
+                if self.verbose:
+                    print(
+                        f"[Hybrid] Blend: {self._best_proj} x "
+                        f"alpha={self._blend_alpha:.2f} + "
+                        f"fusion x {1-self._blend_alpha:.2f}"
+                    )
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}")
+
+        # -- Fit final pipeline(s) on full training data --
+        if self._strategy == 'blend':
+            try:
+                self._best_pipe = self._build(
+                    self._best_proj, copy.deepcopy(self.operator_specs)
+                )
+                self._best_pipe.fit(X, y)
             except Exception as e:
                 if self.verbose:
-                    print(f"[Hybrid] Fisher fit failed: {e}")
-                self._fisher_pipe = None
-                if self._strategy == 'fisher':
-                    self._strategy = 'fusion'  # fallback
+                    print(f"[Hybrid] {self._best_proj} fit failed: {e}")
+                self._best_pipe = None
 
-        if self._strategy in ('fusion', 'blend'):
             try:
-                self._fusion_pipe = RankFusionPipeline(
-                    operators=copy.deepcopy(self.operator_specs),
-                    centroid_method=self.centroid_method,
-                    score_method=self.score_method,
-                    fusion='mean',
+                self._fusion_pipe = self._build(
+                    'fusion', copy.deepcopy(self.operator_specs)
                 )
                 self._fusion_pipe.fit(X, y)
             except Exception as e:
                 if self.verbose:
-                    print(f"[Hybrid] RankFusion fit failed: {e}")
+                    print(f"[Hybrid] Fusion fit failed: {e}")
                 self._fusion_pipe = None
-                if self._strategy == 'fusion':
-                    self._strategy = 'fisher'  # fallback
+
+            # Fallback
+            if self._best_pipe is None and self._fusion_pipe is not None:
+                self._strategy = 'fusion'
+                self._best_pipe = self._fusion_pipe
+            elif self._best_pipe is not None and self._fusion_pipe is None:
+                self._strategy = self._best_proj
+        else:
+            try:
+                self._best_pipe = self._build(
+                    self._strategy, copy.deepcopy(self.operator_specs)
+                )
+                self._best_pipe.fit(X, y)
+            except Exception as e:
+                if self.verbose:
+                    print(
+                        f"[Hybrid] {self._strategy} failed: {e}, "
+                        f"trying fusion fallback"
+                    )
+                self._strategy = 'fusion'
+                self._best_pipe = self._build(
+                    'fusion', copy.deepcopy(self.operator_specs)
+                )
+                self._best_pipe.fit(X, y)
 
         self._fitted = True
         return self
 
+    # ------------------------------------------------------------------
+    #  Score
+    # ------------------------------------------------------------------
     def score(self, X):
-        """
-        Score using the auto-selected strategy.
-        """
+        """Score using the auto-selected strategy."""
         assert self._fitted, "Must call fit() first"
 
-        if self._strategy == 'fisher':
-            return self._fisher_pipe.score(X)
-        elif self._strategy == 'fusion':
-            return self._fusion_pipe.score(X)
-        elif self._strategy == 'blend':
+        if self._strategy == 'blend':
             n = len(X)
-            f_ranks = r_ranks = None
-            if self._fisher_pipe is not None:
-                fs = self._fisher_pipe.score(X)
-                f_ranks = fs.argsort().argsort() / max(n - 1, 1)
+            proj_ranks = fuse_ranks = None
+
+            if self._best_pipe is not None:
+                ps = self._best_pipe.score(X)
+                proj_ranks = ps.argsort().argsort() / max(n - 1, 1)
             if self._fusion_pipe is not None:
-                rs = self._fusion_pipe.score(X)
-                r_ranks = rs.argsort().argsort() / max(n - 1, 1)
+                fs = self._fusion_pipe.score(X)
+                fuse_ranks = fs.argsort().argsort() / max(n - 1, 1)
 
             a = self._blend_alpha
-            if f_ranks is not None and r_ranks is not None:
-                return a * f_ranks + (1 - a) * r_ranks
-            elif f_ranks is not None:
-                return f_ranks
-            elif r_ranks is not None:
-                return r_ranks
+            if proj_ranks is not None and fuse_ranks is not None:
+                return a * proj_ranks + (1 - a) * fuse_ranks
+            elif proj_ranks is not None:
+                return proj_ranks
+            elif fuse_ranks is not None:
+                return fuse_ranks
             else:
                 return np.zeros(n)
         else:
-            raise ValueError(f"Unknown strategy: {self._strategy}")
+            return self._best_pipe.score(X)
+
+    def score_samples(self, X):
+        """Alias for score()."""
+        return self.score(X)
 
     def predict(self, X, threshold=0.5):
         scores = self.score(X)
@@ -353,12 +398,14 @@ class HybridPipeline:
         return self._strategy
 
     @property
-    def heterogeneity(self):
-        return self._heterogeneity
+    def cv_results(self):
+        return self._cv_results
 
     def __repr__(self):
         if not self._fitted:
             return "HybridPipeline(not fitted)"
-        return (f"HybridPipeline(strategy='{self._strategy}', "
-                f"heterogeneity={self._heterogeneity}, "
-                f"n_ops={len(self.operator_specs)})")
+        return (
+            f"HybridPipeline(strategy='{self._strategy}', "
+            f"cv={self._cv_results}, "
+            f"n_ops={len(self.operator_specs)})"
+        )

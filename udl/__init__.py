@@ -37,6 +37,7 @@ from .pipeline import UDLPipeline
 from .rank_fusion import RankFusionPipeline
 from .hybrid_pipeline import HybridPipeline
 from .rl_fusion import RLFusionAgent
+from .meta_fusion import MetaFusionPipeline
 from .datasets import load_dataset, list_datasets
 from .bsdt_bridge import BSDTSpectrum, BSDTAugmentedStack
 from .mfls_weighting import MFLSWeighting
