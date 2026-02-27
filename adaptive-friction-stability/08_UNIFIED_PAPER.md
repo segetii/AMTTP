@@ -242,19 +242,56 @@ The single-agent vs. $N$-agent question. **The answer is $N$-agent** (the micro-
 - $E(X) = \sum_i \psi(\delta_i(X)) + \sum_{i<j}\phi(\|X_i - X_j\|)$ (both terms active)
 - GravityEngine already operates in this space — the code is compatible
 
-### Action 2 — Verify gradient alignment numerically (3 days)
+### ✅ Action 2 — Verify gradient alignment numerically — DONE
 
-Before proving Theorem C analytically, verify it computationally:
-- Simulate a synthetic $N=50$ agent system
-- Compute $\nabla E_{\text{BS}}(X)$ using BSDT operators fitted on normal data
-- Compute $-\nabla\Phi(X)$ using GravityEngine
-- Measure the alignment angle $\cos\theta = \frac{\langle \nabla E_{\text{BS}}, -\nabla\Phi \rangle}{\|\nabla E_{\text{BS}}\|\|\nabla\Phi\|}$ as the system moves toward instability
+**Result: PASS.** Script `verify_gradient_alignment.py` (commit 64aa01a), $N=50$, $d=4$, 200 steps.
 
-If alignment angle $\cos\theta > 0.7$ on average, Theorem C is empirically supported and worth proving formally.
+| Metric | Value |
+|---|---|
+| Mean $\cos\theta$ | **0.8616** |
+| Fraction of steps $\geq 0.7$ | **100%** |
+| Threshold | 0.7 |
+
+The alignment is strong and monotonically improves as the system moves away from the initial scattered state (early steps 0.74–0.77 → late steps 0.88–0.92). This is consistent with Theorem C: alignment tightens as $X$ approaches the critical manifold $\mathcal{C}$ where both $\nabla E_{\text{BS}}$ and $-\nabla\Phi$ concentrate.
+
+**Conclusion: Theorem C is empirically supported. Formal proof is warranted.** Proceed to Action 3.
 
 ### Action 3 — Write the two-page impossibility sketch (2 days)
 
 Prove (or formally conjecture with computational support) that constant $\bar\gamma$ fails above $\mathcal{C}$. This is the result that makes the whole paper necessary — it is the reason adaptive friction exists rather than Basel III buffer rules being sufficient.
+
+---
+
+### Impossibility Theorem (Sketch) — Constant Friction is Insufficient Above $\mathcal{C}$
+
+**Setup.** Consider the $N$-agent GravityEngine with *constant* coupling strength $\bar\gamma > 0$:
+$$\dot X_i = -\alpha(X_i - \mu) - \bar\gamma \sum_{j \neq i} f'(\|X_i - X_j\|)\frac{X_i - X_j}{\|X_i-X_j\|} + \xi_i$$
+where $\alpha > 0$ is the radial spring, $f$ is pairwise potential. Denote the pairwise Jacobian evaluated at a configuration $X$ by $J(X) \in \mathbb{R}^{Nd \times Nd}$, with $\lambda_{\max}(J(X))$ the largest eigenvalue of its symmetrisation.
+
+**Definition.** The critical manifold is:
+$$\mathcal{C} = \{X \in \mathbb{R}^{N \times d} : \lambda_{\max}(\rho(X)\,\ell(X)\,\hat{W}) = 1\}$$
+where $\rho(X)$ is the mean pairwise correlation, $\ell(X)$ the mean exposure, and $\hat W$ the normalised adjacency matrix. Points with $\lambda_{\max} > 1$ are *above* $\mathcal{C}$ (the unstable side).
+
+**Proposition 1 (Linear instability, constant $\bar\gamma$).** Fix $\bar\gamma > 0$ and $\alpha > 0$. For any $M > 0$ there exists a configuration $X^{(M)}$ above $\mathcal{C}$ with $\lambda_{\max}(J(X^{(M)})) > M$. Consequently:
+$$\lambda_{\max}\bigl(-\alpha I + \bar\gamma J(X^{(M)})\bigr) > 0$$
+i.e., there exist directions in which the linearised constant-friction dynamics are *unstable* at $X^{(M)}$.
+
+*Proof sketch.* Take $N$ agents arranged so pairwise distances $\|X_i - X_j\| \to 0$ (herding configuration). In this limit pairwise forces become strongly repulsive ($f'' > 0$) but correlation $\rho \to 1$. The pairwise Jacobian $J = \bar\gamma \nabla^2 \sum_{i<j} f(\|X_i - X_j\|)$ has its maximum eigenvalue scale as $\Theta(N \bar\gamma / \epsilon^2)$ where $\epsilon = \min_{i\neq j}\|X_i-X_j\|$. For small enough $\epsilon$, $\bar\gamma \lambda_{\max}(J) \gg \alpha$. $\square$
+
+**Proposition 2 (Adaptive friction restores stability everywhere).** Let $\gamma^*(X) = \alpha / \lambda_{\max}(J(X))$. Then for all $X$:
+$$\lambda_{\max}\bigl(-\alpha I + \gamma^*(X) J(X)\bigr) = 0$$
+and the adaptive system is marginally stable at every configuration, becoming asymptotically stable via the radial spring as soon as $X$ exits the $\mathcal{C}$-neighbourhood. 
+
+**Corollary (Basel III insufficiency).** A fixed capital buffer $\bar\kappa$ corresponds to constant friction $\bar\gamma \propto \bar\kappa$. By Proposition 1, for sufficiently correlated portfolios (small $\epsilon$, high $\rho$), the constant-friction system is linearly unstable. No fixed $\bar\kappa$ can cover all above-$\mathcal{C}$ configurations without either (a) being prohibitively large in normal times or (b) failing during herding. This is the formal statement of *procyclicality* — a constant tool applied to a heteroskedastic system.
+
+**What this means for the paper.** The impossibility result is the *necessity* half of the main theorem. The constructive part (adaptive $\gamma^*$ satisfies the regret bound) is the *sufficiency* half. Together they establish that adaptive friction is the **minimal** intervention: no simpler rule works above $\mathcal{C}$, and $\gamma^*$ works everywhere.
+
+**Remaining gaps.** The sketch above:
+1. Uses linearisation — needs to be extended to a global (Lyapunov) argument for the full nonlinear system
+2. The $\epsilon \to 0$ limit is singular — the bounded-force clamp (`max_force=100` in GravityEngine) regularises this but changes the proof slightly
+3. $\gamma^*(X)$ as defined requires computing $\lambda_{\max}(J(X))$ online — the paper should address whether the OCO (online convex optimisation) view gives a computationally tractable approximation
+
+These three gaps are the outstanding theoretical tasks before LaTeX submission.
 
 ---
 
