@@ -1,0 +1,23 @@
+﻿====================================================================================================
+  FINAL VALIDATION: RankFusionPipeline vs Fisher UDLPipeline
+  Stack: Phase + Topological + KernelRKHS + RankOrder (4 ops)
+  Seeds: [42, 123, 7, 99, 2024]
+====================================================================================================
+
+  --- Seed 42 ---
+    synthetic       Fisher: AUC=0.9618 Cov=12/15 (80%)  RankFuse: AUC=0.9989 Cov=15/15 (100%)
+    mimic           Fisher: AUC=0.9749 Cov=13/15 (87%)  RankFuse: AUC=0.9993 Cov=15/15 (100%)
+    mammography     Fisher: AUC=0.8871 Cov=41/78 (53%)  RankFuse: AUC=0.9109 Cov=51/78 (65%)
+    shuttle         Fisher: AUC=0.9905 Cov=632/643 (98%)  RankFuse: AUC=0.9431 Cov=545/643 (85%)
+    pendigits       Fisher: AUC=0.9355 Cov=45/54 (83%)  RankFuse: AUC=0.9604 Cov=50/54 (93%)
+
+  --- Seed 123 ---
+    synthetic       Fisher: AUC=0.9551 Cov=12/15 (80%)  RankFuse: AUC=0.9998 Cov=15/15 (100%)
+    mimic           Fisher: AUC=0.9816 Cov=14/15 (93%)  RankFuse: AUC=1.0000 Cov=15/15 (100%)
+    mammography     Fisher: AUC=0.8773 Cov=36/78 (46%)  RankFuse: AUC=0.8921 Cov=42/78 (54%)
+    shuttle         Fisher: AUC=0.9941 Cov=634/643 (99%)  RankFuse: AUC=0.9518 Cov=552/643 (86%)
+    pendigits       Fisher: AUC=0.8962 Cov=44/54 (81%)  RankFuse: AUC=0.9368 Cov=46/54 (85%)
+
+  --- Seed 7 ---
+    synthetic       Fisher: AUC=0.9662 Cov=13/15 (87%)  RankFuse: AUC=1.0000 Cov=15/15 (100%)
+    mimic           Fisher: AUC=0.9776 Cov=14/15 (93%)  RankFuse: AUC=1.0000 Cov=15/15 (100%)

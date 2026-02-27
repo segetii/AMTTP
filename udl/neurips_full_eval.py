@@ -33,6 +33,7 @@ from udl.spectra import (
     StatisticalSpectrum, ChaosSpectrum, SpectralSpectrum,
     GeometricSpectrum, ExponentialSpectrum,
 )
+from udl.experimental_spectra import PhaseCurveSpectrum
 from udl.gravity import GravityEngine
 from udl.datasets import load_dataset
 
@@ -50,11 +51,23 @@ GE_PARAMS = dict(
     normalize=True, track_energy=True,
 )
 
-# Default 5-law operator stack (matches paper)
+# Stack T — Tabular (default): Phase Curve replaces Dynamical
 def make_operators():
     return [
         ("statistical", StatisticalSpectrum()),
+        ("phase", PhaseCurveSpectrum()),
+        ("spectral", SpectralSpectrum()),
+        ("geometric", GeometricSpectrum()),
+        ("exponential", ExponentialSpectrum(alpha=1.0)),
+    ]
+
+
+# Stack S — Signal/Time-Series: keeps Dynamical, adds Phase Curve
+def make_signal_operators():
+    return [
+        ("statistical", StatisticalSpectrum()),
         ("chaos", ChaosSpectrum()),
+        ("phase", PhaseCurveSpectrum()),
         ("spectral", SpectralSpectrum()),
         ("geometric", GeometricSpectrum()),
         ("exponential", ExponentialSpectrum(alpha=1.0)),

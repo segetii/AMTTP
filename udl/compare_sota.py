@@ -230,6 +230,29 @@ def get_original_operators():
     ]
 
 
+def get_tabular_operators():
+    """Stack T — Tabular default: Phase Curve replaces Dynamical."""
+    return [
+        ("statistical", StatisticalSpectrum()),
+        ("phase", PhaseCurveSpectrum()),
+        ("spectral", SpectralSpectrum()),
+        ("geometric", GeometricSpectrum()),
+        ("exponential", ExponentialSpectrum(alpha=1.0)),
+    ]
+
+
+def get_signal_operators():
+    """Stack S — Signal/Time-Series: keeps Dynamical + adds Phase Curve (6-law)."""
+    return [
+        ("statistical", StatisticalSpectrum()),
+        ("chaos", ChaosSpectrum()),
+        ("phase", PhaseCurveSpectrum()),
+        ("spectral", SpectralSpectrum()),
+        ("geometric", GeometricSpectrum()),
+        ("exponential", ExponentialSpectrum(alpha=1.0)),
+    ]
+
+
 def get_v2_operators():
     """New 6-law stack: replaces Exponential with Reconstruction + RankOrder."""
     return [
@@ -416,6 +439,8 @@ def run_comparison():
         # ── Run UDL variants ──
         udl_configs = {
             "UDL-5laws": get_original_operators(),
+            "UDL-StackT": get_tabular_operators(),
+            "UDL-StackS": get_signal_operators(),
             "UDL-6laws-v2": get_v2_operators(),
             "UDL-ReconOnly": get_recon_only_operators(),
             "UDL-RankOnly": get_rank_only_operators(),

@@ -1,59 +1,96 @@
 # 07 — Research Plan: Timeline, Papers, and Milestones
 
+## North Star (Personal Ambition)
+
+This is a long-horizon programme aimed at a **foundational** contribution: a general theory of stability and crisis prevention in programmable financial systems (DeFi first, then broader digital and traditional markets).
+
+“Nobel laureate level” here is not a claim about prizes; it is a commitment to the *type* of output that has lasting impact:
+
+- **General**: not tied to one protocol, chain, or crisis.
+- **Mechanistic**: explains collapse dynamics (feedback loops, reflexivity, delay, leverage), not only detection.
+- **Predictive**: makes falsifiable, out-of-sample predictions on real crisis timelines.
+- **Actionable**: yields implementable control primitives (adaptive friction) with governance hooks.
+- **Transferable**: bridges DeFi to systemic-risk phenomena in broader finance as a limit case.
+
+---
+
+## Core Thesis
+
+**Programmable Market Stability via Adaptive Friction.**
+
+Programmable markets can be modeled as controlled dynamical systems with endogenous feedback loops. In this framing, “friction” is an explicit **control input** (not merely a fee) that modifies state transitions: throttling, delay/queuing, dynamic haircuts/margins, circuit breakers/cooldowns, and oracle-confidence gating.
+
+The programme targets four deliverables:
+
+1. **Characterise fragility** (when and why low-/zero-friction regimes become unstable).
+2. **Derive stability thresholds** (critical friction levels and robust stability margins).
+3. **Construct certified controllers** (policies that enforce stability under uncertainty/adversaries).
+4. **Validate on crisis replays** (Terra/Luna as flagship, plus a portfolio of collapse modes).
+
+---
+
+## Flagship Use Case: Terra/Luna Collapse
+
+Terra/Luna is used as the decisive stress event because it combines: reflexive feedback (mint/burn), liquidity spirals, discrete events (liquidations/oracle updates), and correlated/adversarial behavior.
+
+The goal is not “reproduce history.” The goal is:
+
+- **Pre-crash calibration** → **crash-window prediction**;
+- counterfactual evaluation: “if adaptive friction had been applied at time $t_0$, what stability envelope changes?”
+
+The keystone output is a falsifiable prediction of a stability threshold (e.g., $\gamma^*(t)$) and its relationship to observed collapse dynamics.
+
 ## Paper Decomposition
 
 Three papers, each targeting a different audience and venue:
 
 ### Paper 1: Pure Theory
-**Title**: *"Friction Is Not a Distortion: Necessity of Adaptive Damping in Adversarial Decentralised Economies"*
+**Working title**: *"Programmable Market Stability: Adaptive Friction as a Robust Control Primitive"*
 
 **Content**:
-- Formal definition of Adversarial Decentralised Economy as dissipative particle system
-- Theorem: zero-friction equilibria are generically unstable (Lyapunov instability proof)
-- Theorem: adaptive friction γ(t) ≥ γ* guarantees ISS
-- Derivation of critical friction threshold γ*
-- Extension to potential perturbation (oracle attacks) — ISS under model uncertainty
-- Economic interpretation: friction as stabilising control, not market distortion
+- Canonical model class: controlled dynamical system (control-affine or stochastic hybrid system) with endogenous feedback
+- Fragility / impossibility result: static or insufficient friction fails for a defined shock/adversary class
+- Robust stabilisability: ISS / small-gain / passivity-style conditions for stability under bounded disturbances
+- Critical threshold analysis: derive $\gamma^*$ as a *necessary and sufficient* bound under explicit assumptions (or clearly label what is only sufficient)
+- Robustness to model perturbations (oracle attacks / parameter drift) stated as explicit uncertainty sets
+- Interpretation for policy/governance: friction as stability control, not “market distortion” rhetoric
 
 **Target venues** (ranked):
-1. Econometrica (top economics — establishes the economic theory)
-2. Journal of Economic Theory
-3. Management Science
-4. Operations Research
-5. Games and Economic Behavior
+1. Automatica / IEEE Transactions on Automatic Control (if control-theoretic contribution is primary)
+2. Management Science / Operations Research (if the model is tied tightly to market design and measurable outcomes)
+3. Journal of Economic Theory / Games and Economic Behavior (if the economic primitives are the centre)
 
 **Length**: ~25 pages + appendix
 
 ### Paper 2: RL + Simulation
-**Title**: *"Lyapunov-Constrained Adversarial Reinforcement Learning for Optimal Friction Control in Digital Asset Markets"*
+**Working title**: *"Certified Friction Policies for Adversarial DeFi: Safe Control with Stability Certificates"*
 
 **Content**:
-- DPD model calibrated to historical crypto collapses
-- Simulation reproducing Terra/Luna, Iron Finance, FTX contagion, Chainlink oracle attack
-- Demonstration that γ* predicts collapse threshold
-- Lyapunov-constrained SAC architecture
-- Adversarial RL (RARL) for worst-case robustness
-- Results: RL controller prevents all historical collapses in simulation
-- Ablation: unconstrained RL vs constrained RL vs PID vs fixed friction
+- Crisis replay simulator calibrated to historical collapse traces (Terra/Luna as flagship)
+- Evaluation is framed as **out-of-sample** prediction and counterfactual stabilisation within a declared shock class
+- Controller families:
+    - robust MPC / robust control baselines;
+    - shielded RL or policy + safety filter (certificate-first, learning-second);
+    - adversarial evaluation (RARL-style) explicitly bounded
+- Stability metrics and failure envelopes (not “always prevents collapse”): quantify safe region, breakdown modes, and robustness sweeps
+- Ablations: certificate vs no-certificate; static vs adaptive friction; oracle-attack vs non-adversarial
 
 **Target venues** (ranked):
-1. NeurIPS (top ML — novel safe RL application domain)
-2. ICML
-3. AAAI
-4. Financial Cryptography and Data Security (FC)
-5. IEEE Symposium on Security and Privacy (S&P)
+1. NeurIPS / ICML (if the certified-control method is the main novelty)
+2. Financial Cryptography and Data Security (FC) / ICAIF (if the domain + evaluation is the novelty)
+3. AAAI (if positioned as safe decision-making under adversarial market dynamics)
 
 **Length**: ~10 pages (conference format)
 
 ### Paper 3: System Paper (AMTTP Elevation)
-**Title**: *"AMTTP: Adaptive Friction for Deterministic Compliance Enforcement in Institutional DeFi — Theory, Implementation, Evaluation"*
+**Working title**: *"AMTTP as a Stability Layer: Programmable Compliance and Adaptive Friction for Market Integrity"*
 
 **Content**:
 - Existing AMTTP architecture paper, elevated with:
-  - Theoretical foundation (friction = stability mechanism, not just compliance tool)
-  - GravityEngine / DPE integration as the stability monitoring component
-  - RL friction controller as the adaptive compliance decision engine
-  - UDL/BSDT anomaly detection providing risk signal inputs
+    - Theoretical foundation (friction = stability control primitive)
+    - GravityEngine / DPE as stability monitoring + scenario simulator
+    - Certified controller as adaptive friction decision engine (with governance constraints)
+    - UDL/BSDT as risk signal inputs (separate from stability control layer)
 - End-to-end demonstration: transaction → risk scoring → friction decision → on-chain enforcement
 
 **Target venues** (ranked):
@@ -69,11 +106,19 @@ Three papers, each targeting a different audience and venue:
 
 ## Timeline
 
+### Phase 0: Scientific Guardrails (Week 0)
+
+| Task | Deliverable | Status |
+|------|------------|--------|
+| Define anomaly/stability claims as conditional statements | Claim inventory | Not started |
+| Define strict evaluation discipline (fit/freeze rules) | Protocol checklist | Not started |
+| Define robustness sweep suite (noise, scaling drift, rotations, subsampling) | Robustness plan | Not started |
+
 ### Phase 1: Formalisation (Weeks 1–2)
 
 | Task | Deliverable | Status |
 |------|------------|--------|
-| Write dynamical system definition | LaTeX section | Not started |
+| Write canonical dynamical system definition (control-affine or hybrid) | LaTeX section | Not started |
 | Specify Lyapunov candidate V = Φ + ½ẊᵀMẊ | LaTeX section | Drafted (05_THEORETICAL_FRAMEWORK.md) |
 | Prove V̇ ≤ −γ||Ẋ||² (Theorem 1) | Formal proof | Sketch complete |
 | Verify V̇ formula against GravityEngine code | Cross-check | Not started |
@@ -101,19 +146,21 @@ Three papers, each targeting a different audience and venue:
 | Calibrate DPD parameters to Terra collapse dynamics | Calibration script | Not started |
 | Reproduce Terra collapse in DPD model | Simulation + figures | Not started |
 | Reproduce remaining 5 cases | Simulations | Not started |
-| Predict γ* for each case; show it matches collapse point | Analysis | Not started |
+| Predict γ* for each case; evaluate on held-out crash window | Analysis | Not started |
+| Counterfactual: apply friction at time t0; quantify stability envelope change | Counterfactual report | Not started |
 
 ### Phase 4: RL Controller (Weeks 5–8)
 
 | Task | Deliverable | Status |
 |------|------------|--------|
 | Build Gymnasium environment wrapping GravityEngine | `envs/dpd_economy.py` | Not started |
+| Implement robust MPC baseline | Baseline controller | Not started |
 | Implement SAC baseline (Stable-Baselines3) | Training script | Not started |
-| Add Lyapunov safety projection layer | `safety/lyapunov_constraint.py` | Not started |
+| Add safety filter / certificate layer (shield) | `safety/` module | Not started |
 | Implement adversary agent (RARL) | `agents/adversary.py` | Not started |
 | Train on synthetic environments (Stage 1) | Trained models | Not started |
 | Train on historical replays (Stage 2) | Trained models | Not started |
-| Ablation study: constrained vs unconstrained vs PID | Results table | Not started |
+| Ablation study: certificate vs no-certificate vs PID vs static friction | Results table | Not started |
 | Record training curves, stability metrics | Wandb dashboard | Not started |
 
 ### Phase 5: Paper 1 Draft (Weeks 8–9)
@@ -166,7 +213,10 @@ if self.adversary_fn is not None:
 
 if self.gamma_fn is not None:
     gamma_t = self.gamma_fn(X_work, F, t)
-    F *= (1.0 / (1.0 + gamma_t))  # or damping = gamma_t
+    # NOTE: friction should damp velocity / displacement updates, not rescale the force directly.
+    # The code-level choice must match the theoretical model you prove.
+    # Recommended: apply damping to the update term (e.g., dX or velocity state).
+    dX *= (1.0 / (1.0 + gamma_t))
 ```
 
 ### Priority 2 (Needed for Phase 4)
@@ -196,11 +246,12 @@ class DPDEconomyEnv(gymnasium.Env):
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | Lyapunov proof has a gap | Medium | High | Extensive computational validation first; if gap found, weaken theorem to local stability |
+| Overclaim ("universal", "prevents all collapses") | Medium | High | Use conditional theorems + robustness envelopes; publish explicit failure cases |
 | Historical data insufficient for calibration | Medium | Medium | Supplement with synthetic data; qualitative matching is sufficient for first paper |
 | RL doesn't converge on real data | Medium | Medium | Start with synthetic; demonstrate on simpler environments first |
 | Reviewer rejects "gravity" framing | High | Low | Already planned: use "DPD" terminology, footnote explains naming |
 | Someone publishes similar work first | Low | High | Focus on speed for Paper 1 (theory); the working code + AMTTP integration is hard to replicate |
-| Tier 1 (Nobel direction) takes >5 years | Certain | None | Expected. Tier 2 papers provide near-term output. |
+| Foundational track takes >5 years | Certain | None | Expected; publish intermediate results as coherent steps toward the thesis |
 
 ---
 
@@ -233,11 +284,12 @@ class DPDEconomyEnv(gymnasium.Env):
 - [ ] Formal proof of zero-friction instability
 - [ ] Formal proof of adaptive friction stability
 - [ ] At least 2/6 historical collapses reproduced in simulation
-- [ ] Paper 1 draft submitted to a top-3 venue
+- [ ] Terra/Luna: pre-crash calibration → crash-window prediction report
+- [ ] Paper 1 draft ready for submission (venue depends on emphasis)
 
 ### Full Success (All phases complete)
 - [ ] All three papers submitted
-- [ ] RL controller prevents all 6 historical collapses
+- [ ] Certified controller demonstrates bounded-loss / bounded-deviation under declared shock classes
 - [ ] AMTTP integration demonstrated on live transactions
 - [ ] γ* prediction validated against real peg deviation data
 
@@ -245,3 +297,12 @@ class DPDEconomyEnv(gymnasium.Env):
 - [ ] Generalisation beyond crypto to TradFi (bank runs, currency attacks)
 - [ ] Central bank or regulator engagement
 - [ ] Policy paper on friction design for CBDCs
+
+---
+
+## Guardrails (Scientific Credibility)
+
+- Separate (i) proved statements (conditional theorems), (ii) empirical findings, (iii) engineering claims.
+- Prefer “certified under stated assumptions” over “guaranteed in general.”
+- Always include robustness sweeps (noise, scaling drift, subsampling; and only claim invariances you test).
+- Avoid leakage: any parameter/threshold/controller selection is tuned on train/val only and reported on held-out test windows.

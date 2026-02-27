@@ -34,6 +34,9 @@ from .centroid import CentroidEstimator
 from .tensor import AnomalyTensor, TensorResult
 from .projection import HyperplaneProjector
 from .pipeline import UDLPipeline
+from .rank_fusion import RankFusionPipeline
+from .hybrid_pipeline import HybridPipeline
+from .rl_fusion import RLFusionAgent
 from .datasets import load_dataset, list_datasets
 from .bsdt_bridge import BSDTSpectrum, BSDTAugmentedStack
 from .mfls_weighting import MFLSWeighting
@@ -46,6 +49,9 @@ from .backend import xp, jit, vmap, to_numpy, from_numpy, BACKEND
 __all__ = [
     # Core pipeline
     "UDLPipeline",
+    "RankFusionPipeline",
+    "HybridPipeline",
+    "RLFusionAgent",
     "RepresentationStack",
     "AnomalyTensor",
     "TensorResult",
