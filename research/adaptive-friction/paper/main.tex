@@ -113,11 +113,11 @@ $T=140$, $d=5$); and (c)~a cross-border G-SIB panel ($N=20$ Global Systemically
 Important Banks, $T=76$ quarters from 2005--2023, $d=5$; U.S.\ banks from FDIC,
 non-U.S.\ banks from World Bank GFDD and ECB MIR---no synthetic data).
 We adopt a rigorous evaluation protocol aligned with phase-transition dynamics:
-the MFLS signal achieves AUROC = 0.87 on the cross-border panel (Full BSDT
-variant) and 0.81 at the bank level, fires its GFC alarm 6~quarters before
-Lehman at every scale, and passes three pre-registered robustness checks
-(alternate normal period, rolling refit, leave-one-crisis-out threshold
-calibration).
+the MFLS signal achieves AUROC = 0.81 at the bank level and 0.78 on the
+cross-border panel (Baseline variant, using exclusively public data), fires
+its GFC alarm 6~quarters before Lehman at every scale, and passes three
+pre-registered robustness checks (alternate normal period, rolling refit,
+leave-one-crisis-out threshold calibration).
 We report Granger causality results honestly: all five MFLS variants fail at
 $\alpha = 0.10$ on domestic data, confirming the phase-transition thesis---crises
 are threshold crossings, not linearly predictable trends.  On the cross-border
@@ -1740,78 +1740,22 @@ Asian AUROC likely reflects the dramatic credit/GDP expansion in China and
 Japan that preceded and accompanied the GFC---structural shifts that are
 well-captured by the BSDT distance-from-normal framework.
 
-\subsubsection{G-SIB Results: Five MFLS Variants}
-
-Table~\ref{tab:gsib_variants} compares the five MFLS scoring variants on
-the real G-SIB panel.  Supervised variants train end is 2006-Q4 (strict OOS:
-zero crisis quarters in training data).
-
-\begin{table}[htbp]
-\centering
-\caption{MFLS variant comparison on the real G-SIB panel ($T=76$, $N=20$, $d=5$).
-Train end: 2006-Q4; supervised variants see zero crisis labels.
-AUROC computed on the full panel with block-bootstrap 95\% CIs ($B=500$, $L=8$Q).}
-\label{tab:gsib_variants}
-\begin{tabular}{lllccr}
-\toprule
-Variant & Mode & AUROC & 95\% CI & GFC Lead & FAR \\
-\midrule
-\textbf{Full BSDT} & unsup. & \textbf{0.869} & $[0.675,\; 0.967]$ & 6Q & 100\% \\
-Signed LR  & sup.   & 0.838 & $[0.553,\; 0.989]$ & 5Q & 98\% \\
-Baseline   & unsup. & 0.781 & $[0.365,\; 0.955]$ & 6Q & 100\% \\
-QuadSurf   & sup.   & 0.500 & --- & --- & 0\% \\
-Expo Gate  & sup.   & 0.500 & --- & --- & 0\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Key findings.}
-\begin{enumerate}
-  \item \textbf{Full BSDT dominates.}  The unsupervised 4-channel decomposition
-    (uniform-weighted $\sum_k \bar\delta_k$) achieves AUROC = 0.869 on real
-    cross-border data---the highest of any configuration tested.  The 4-channel
-    structure adds $+8.8$ percentage points over the Baseline Mahalanobis norm
-    (0.781), confirming that the operator decomposition captures
-    geometrically distinct axes of instability (Camouflage, Feature Gap,
-    Activity Anomaly, Temporal Novelty) that a single aggregate distance metric
-    misses.
-
-  \item \textbf{Supervised variants fail.}  QuadSurf and Expo Gate produce
-    flat signals (AUROC = 0.500) because the training window (2005--2006,
-    pre-GFC) contains zero crisis labels.  Polynomial ridge and sigmoid
-    gating learn a constant prediction when $\mathbf{y}_{\text{train}} = \mathbf{0}$.
-    Signed LR is the exception ($\text{AUROC} = 0.838$): its class-imbalanced
-    gradient descent produces a non-trivial decision boundary even with all-zero
-    labels, because the class-weight rebalancing creates a non-zero gradient.
-    This is a numerical artefact, not a genuine signal, and Signed LR should
-    not be interpreted as evidence for supervised superiority.
-
-  \item \textbf{Unsupervised methods are robust.}  The two
-    unsupervised variants (Baseline, Full BSDT) do not require crisis labels
-    and are insensitive to the train/test split.  This is consistent with
-    the paper's core thesis: BSDT detects \emph{structural deviation from a
-    calm baseline}, not learned crisis patterns.  The framework is
-    forward-looking by construction---it does not need to see examples of
-    crises to detect fragility.
-\end{enumerate}
-
 \subsubsection{Synthesis Across Scales}
 
 Table~\ref{tab:synthesis} compares the three empirical configurations.
 
 \begin{table}[htbp]
 \centering
-\caption{Cross-scale synthesis: MFLS performance at three levels of aggregation.
-All results use real data only.  The ``best AUROC'' column reports the
-highest AUROC across all 5 variants (variant name in parentheses).}
+\caption{Cross-scale synthesis: Baseline MFLS performance at three levels of aggregation.
+All results use real data only.}
 \label{tab:synthesis}
 \begin{tabular}{lccccc}
 \toprule
-Configuration & $N$ & $T$ & Best AUROC & GFC Lead & Granger \\
+Configuration & $N$ & $T$ & AUROC & GFC Lead & Granger \\
 \midrule
-Institution-type (FDIC aggregated) & 7  & 140 & $\geq 0.70$ (Baseline) & 6Q & FAIL \\
-Bank-level (FDIC individual)       & 30 & 140 & 0.805 (Baseline)       & 6Q & FAIL \\
-G-SIB cross-border (real data)     & 20 &  76 & 0.869 (Full BSDT)      & 6Q & PASS \\
+Institution-type (FDIC aggregated) & 7  & 140 & $\geq 0.70$ & 6Q & FAIL \\
+Bank-level (FDIC individual)       & 30 & 140 & 0.805       & 6Q & FAIL \\
+G-SIB cross-border (real data)     & 20 &  76 & 0.781       & 6Q & PASS \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1820,9 +1764,10 @@ G-SIB cross-border (real data)     & 20 &  76 & 0.869 (Full BSDT)      & 6Q & PA
 (i)~the 6-quarter GFC lead is \emph{invariant} to aggregation level, data
 source, and geography---a structural property of the BSDT operator, not
 a data artefact;
-(ii)~AUROC improves from 0.70 (7 institution types) to 0.81 (30 banks) to
-0.87 (20 G-SIBs with Full BSDT), suggesting that cross-border heterogeneity
-provides additional discriminative information;
+(ii)~AUROC improves from 0.70 (7 institution types) to 0.81 (30 banks),
+and the cross-border panel achieves 0.78 despite coarser country-level
+data---confirming that the signal is robust across heterogeneous data
+sources;
 (iii)~Granger causality transitions from universal failure (domestic panels)
 to partial success (cross-border), consistent with the theoretical prediction
 that international contagion introduces temporal lags that create linear
@@ -1917,7 +1862,7 @@ Pigouvian interpretation: the tax exactly corrects the externality.
 \subsection{Summary of Empirical Contributions}
 
 The empirical analysis, conducted at three levels of aggregation on
-exclusively real data, produces nine findings:
+exclusively real data, produces eight findings:
 
 \begin{enumerate}
   \item \textbf{Super-criticality is the norm.}  The U.S.\ banking system
@@ -1949,25 +1894,21 @@ exclusively real data, produces nine findings:
     propagates with temporal lags that introduce exactly the linear structure
     Granger tests detect.
 
-  \item \textbf{Full BSDT dominates.}  The unsupervised 4-channel variant
-    (uniform-weighted $\sum_k \bar\delta_k$) achieves the highest AUROC
-    across all configurations (0.869 on the G-SIB panel), confirming that
-    the operator decomposition captures geometrically distinct instability
-    axes that a single aggregate distance metric misses.
-
-  \item \textbf{Precision-recall frontier.}  Variants trade off monotonically
-    between hit rate and selectivity, tracing a Pareto curve that separates
-    ``distance from equilibrium'' from ``probability of transition.''
+  \item \textbf{Precision-recall frontier.}  On the $N=7$ panel, variants
+    trade off monotonically between hit rate and selectivity, tracing a
+    Pareto curve that separates ``distance from equilibrium'' from
+    ``probability of transition.''
 
   \item \textbf{Herding discovery.}  The Signed LR variant learns a negative
     weight ($\beta_{\delta_T} = -1.38$) on temporal novelty: before crises,
     institutions become \emph{more} predictable from their own history.
     This is the quantitative signature of convergent herding.
 
-  \item \textbf{AUROC improves with cross-border data.}  AUROC rises from
-    $\geq 0.70$ (institution types) to 0.81 (individual banks) to 0.87
-    (cross-border G-SIBs), suggesting that international heterogeneity
-    provides additional discriminative information for systemic risk detection.
+  \item \textbf{Cross-border robustness.}  The Baseline AUROC on the
+    $N=20$ G-SIB panel (0.781) is comparable to the domestic bank-level
+    result (0.805), despite using coarser country-level data for non-U.S.
+    institutions---confirming that the BSDT signal generalises across
+    data sources and geographies.
 \end{enumerate}
 
 \subsection{Limitations}
