@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mfls"
+version = "0.1.0"
+description = "MFLS – Multi-Factor Lyapunov Systemic-risk engine. Real-time blind-spot detection and macro-prudential calibration for financial networks."
+readme = "README.md"
+license = "LicenseRef-Proprietary"
+requires-python = ">=3.10"
+authors = [
+    { name = "AMTTP Research" },
+]
+keywords = ["systemic-risk", "early-warning", "macro-prudential", "BSDT", "financial-stability"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Office/Business :: Financial",
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.20",
+    "pydantic>=2.0",
+]
+eval = [
+    "scikit-learn>=1.2",
+]
+all = ["mfls[api,eval]"]
+
+[project.scripts]
+mfls-api = "mfls.api.app:main"
+
+[project.urls]
+Homepage = "https://github.com/segetii/fintech"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mfls"]
