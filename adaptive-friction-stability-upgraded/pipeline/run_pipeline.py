@@ -19,6 +19,14 @@ from crisis_analysis import (run_crisis_analysis, bootstrap_lead_ci, oos_backtes
                               latex_lead_table, latex_granger_table, CRISIS_WINDOWS)
 from welfare         import run_welfare_analysis, latex_welfare_table
 
+try:
+    from eval_protocol     import (eval_all_variants, latex_eval_table,
+                                   CRISIS_WINDOWS_EVAL)
+    from robustness_checks import run_all_robustness, latex_robustness_table
+    _EVAL_AVAIL = True
+except ImportError:
+    _EVAL_AVAIL = False
+
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -299,6 +307,30 @@ def main(use_cache=True, fast=False, verbose=True):
     }
     with open(RESULTS_DIR / "pipeline_stats_v2.json", "w") as f:
         json.dump(summary, f, indent=2, default=str)
+
+    # ── Evaluation protocol + robustness ─────────────────────────────────────
+    if _EVAL_AVAIL:
+        print("\n[+] Running evaluation protocol (HR/FAR/AUROC/time-to-alarm) …")
+        mfls_sig = stats["mfls"]
+        pre07_mask = dates < pd.Timestamp("2007-01-01")
+        p75_thr  = float(np.percentile(mfls_sig[pre07_mask], 75))
+        eval_results = eval_all_variants(
+            signals_dict={"Baseline": mfls_sig},
+            dates=dates,
+            thresholds={"Baseline": p75_thr},
+            crisis_windows=CRISIS_WINDOWS_EVAL,
+            out_path=RESULTS_DIR / "eval_protocol.json",
+        )
+        _write(RESULTS_DIR / "eval_table.tex", latex_eval_table(eval_results))
+
+        print("[+] Running robustness checks (alt normal-period, rolling, LOCO) …")
+        rob_results = run_all_robustness(
+            X_std, dates, mfls_sig,
+            out_path=RESULTS_DIR / "robustness.json",
+        )
+        _write(RESULTS_DIR / "robustness_table.tex", latex_robustness_table(rob_results))
+    else:
+        print("[+] eval_protocol / robustness_checks not available – skipping.")
 
     elapsed = time.perf_counter() - t0
     print(f"\n{Sep}\n  v2 pipeline complete in {elapsed:.1f}s\n{Sep}")
