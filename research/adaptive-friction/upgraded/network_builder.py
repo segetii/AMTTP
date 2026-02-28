@@ -1,7 +1,7 @@
 """
 network_builder.py
 ==================
-Construct the inter-sector exposure matrix  W ∈ ℝ^{N×N}  from the empirical
+Construct the inter-sector exposure matrix  W ? ?^{N?N}  from the empirical
 data, using the Ledoit-Wolf Oracle shrinkage estimator.
 
 No free parameters chosen by the researcher.  The shrinkage intensity is
@@ -9,25 +9,25 @@ determined analytically from the data (Ledoit & Wolf 2004, JMVA).
 
 Approach
 --------
-Given the panel X(t) ∈ ℝ^{N×d} over T quarters, we construct W as the
-Ledoit-Wolf shrinkage estimate of the N×N cross-sector *correlation* matrix
+Given the panel X(t) ? ?^{N?d} over T quarters, we construct W as the
+Ledoit-Wolf shrinkage estimate of the N?N cross-sector *correlation* matrix
 of the leverage feature (f0 = loan_to_asset).  Specifically:
 
-    [TxN leverage series] → Ledoit-Wolf covariance → normalise to correlation → W
+    [TxN leverage series] -> Ledoit-Wolf covariance -> normalise to correlation -> W
 
 Rationale (fully defensible):
-  • The phase-transition formula in Theorem 2 depends on λ_max(W), the spectral
+  ? The phase-transition formula in Theorem 2 depends on lambda_max(W), the spectral
     radius of the bilateral-exposure graph.
-  • Cross-sector leverage correlations are the canonical proxy for bilateral
+  ? Cross-sector leverage correlations are the canonical proxy for bilateral
     exposure when granular bilateral claim data are unavailable; this is
     the same approach used in Billio et al. (2012, JFinEcon) and
     Hautsch et al. (2015, RFS).
-  • The Ledoit-Wolf estimator is asymptotically optimal (Oracle-equivalent)
-    for the Frobenius-norm loss; its shrinkage intensity ρ* is closed-form
+  ? The Ledoit-Wolf estimator is asymptotically optimal (Oracle-equivalent)
+    for the Frobenius-norm loss; its shrinkage intensity rho* is closed-form
     and does not require a validation set or cross-validation.
 
 The resulting  W  is symmetric positive semi-definite and its entries have a
-clear economic interpretation: W_ij ≈ empirical cross-sector leverage
+clear economic interpretation: W_ij ? empirical cross-sector leverage
 co-movement, the natural measure of system interconnectedness.
 
 References
@@ -50,15 +50,15 @@ _LEVERAGE_IDX: int = 0   # f0 = loan_to_asset
 
 def lw_correlation_network(X: np.ndarray) -> np.ndarray:
     """
-    Build the N×N exposure network from panel data X (T, N, d).
+    Build the N?N exposure network from panel data X (T, N, d).
 
     Steps
     -----
-    1. Extract the T×N leverage time series  L(t) = X[:, :, 0].
+    1. Extract the T?N leverage time series  L(t) = X[:, :, 0].
     2. Fit Ledoit-Wolf shrinkage on  L  (treating sectors as variables).
        sklearn's LedoitWolf uses the analytical Ledoit-Wolf (2004) formula
-       — no CV, no free hyperparameter.
-    3. Convert the N×N covariance to correlation matrix (unit diagonal).
+       - no CV, no free hyperparameter.
+    3. Convert the N?N covariance to correlation matrix (unit diagonal).
     4. Return the correlation matrix as  W.
 
     Parameters
@@ -68,10 +68,10 @@ def lw_correlation_network(X: np.ndarray) -> np.ndarray:
     Returns
     -------
     W : np.ndarray, shape (N, N), symmetric, entries in [-1, 1], diagonal = 1
-    shrinkage : float — the analytically determined shrinkage coefficient ρ*
+    shrinkage : float - the analytically determined shrinkage coefficient rho*
     """
     T, N, d = X.shape
-    L = X[:, :, _LEVERAGE_IDX]          # T × N  leverage panel
+    L = X[:, :, _LEVERAGE_IDX]          # T ? N  leverage panel
 
     # Remove rows with any NaN
     L = L[~np.isnan(L).any(axis=1)]
@@ -83,8 +83,8 @@ def lw_correlation_network(X: np.ndarray) -> np.ndarray:
         )
 
     lw = LedoitWolf(assume_centered=False, store_precision=False)
-    lw.fit(L)                            # Oracle shrinkage — no free params
-    Sigma_lw = lw.covariance_           # N × N shrunk covariance matrix
+    lw.fit(L)                            # Oracle shrinkage - no free params
+    Sigma_lw = lw.covariance_           # N ? N shrunk covariance matrix
 
     # Normalise to correlation
     diag_inv_sqrt = 1.0 / np.sqrt(np.diag(Sigma_lw))
@@ -96,8 +96,8 @@ def lw_correlation_network(X: np.ndarray) -> np.ndarray:
 
 
 def spectral_radius(W: np.ndarray) -> float:
-    """λ_max(W) — largest eigenvalue (absolute value)."""
-    eigvals = np.linalg.eigvalsh(W)   # symmetric → real eigenvalues
+    """lambda_max(W) - largest eigenvalue (absolute value)."""
+    eigvals = np.linalg.eigvalsh(W)   # symmetric -> real eigenvalues
     return float(np.max(np.abs(eigvals)))
 
 
@@ -108,7 +108,7 @@ def describe_network(W: np.ndarray, sector_names: list[str]) -> str:
     offdiag = W[~np.eye(N, dtype=bool)]
     lines = [
         f"  Sectors (N={N}): {', '.join(sector_names)}",
-        f"  λ_max(W) = {lmax:.4f}   (phase-transition threshold α/λ_max(W))",
+        f"  lambda_max(W) = {lmax:.4f}   (phase-transition threshold alpha/lambda_max(W))",
         f"  Off-diagonal correlations: "
         f"mean={offdiag.mean():.3f}, "
         f"std={offdiag.std():.3f}, "

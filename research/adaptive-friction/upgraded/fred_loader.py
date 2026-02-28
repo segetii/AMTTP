@@ -1,7 +1,7 @@
 """
 fred_loader.py
 ==============
-Fetches publicly available FRED series needed for §8 empirical validation.
+Fetches publicly available FRED series needed for ?8 empirical validation.
 All series are quarterly, 2000-Q1 through 2024-Q4 (cropped to data availability).
 
 No API key required for pandas_datareader FRED access.
@@ -24,11 +24,11 @@ try:
 except ImportError:
     _PDR_AVAILABLE = False
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Series catalogue
 # Each entry: (fred_id, description, transform)
 # transform: 'level' | 'log' | 'growth_yoy' | 'zscore'
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 FRED_SERIES: dict[str, tuple[str, str, str]] = {
     # Leverage / credit
     # DPCREDIT removed: only available from 2003; TOTLL (1947) gives full sample.
@@ -50,8 +50,8 @@ FRED_SERIES: dict[str, tuple[str, str, str]] = {
     "roa":            ("USROA",        "Return on Assets, all insured commercial banks",  "level"),
 }
 
-# Extended sample: 1990-Q1 — VIX begins 1990-01-02; most FRED series available by then.
-# T ≈ 139 quarters vs the v1 79-quarter window — critical for Granger power.
+# Extended sample: 1990-Q1 - VIX begins 1990-01-02; most FRED series available by then.
+# T ? 139 quarters vs the v1 79-quarter window - critical for Granger power.
 START = "1990-01-01"
 END   = "2024-12-31"
 CACHE_DIR = Path(__file__).parent / "fred_cache"
@@ -140,7 +140,7 @@ def apply_transforms(df: pd.DataFrame) -> pd.DataFrame:
             s = s.pct_change(4) * 100           # 4 quarters = YoY
         elif transform == "zscore":
             s = (s - s.mean()) / (s.std() + 1e-12)
-        # 'level' → no transform
+        # 'level' -> no transform
         out[key] = s
     return out.dropna(how="all")
 

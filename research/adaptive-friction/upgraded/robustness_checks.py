@@ -5,13 +5,13 @@ Pre-registered robustness checks for the MFLS paper.
 
 Three checks:
 
-  1. Alternate normal-period  – refit BSDT on 1994-Q1→2001-Q4 (shorter,
+  1. Alternate normal-period  - refit BSDT on 1994-Q1->2001-Q4 (shorter,
      avoids dot-com period) and compare results vs baseline 1994-2003.
 
-  2. Rolling-window refit    – refit BSDT every 4 years on the 40Q window
+  2. Rolling-window refit    - refit BSDT every 4 years on the 40Q window
      ending at t; measure how stable the signal is across fits.
 
-  3. Leave-one-crisis-out    – when calibrating the P75 alarm threshold,
+  3. Leave-one-crisis-out    - when calibrating the P75 alarm threshold,
      exclude each crisis window in turn; report hit-rate stability.
 """
 from __future__ import annotations
@@ -35,7 +35,7 @@ from eval_protocol   import (
 RESULTS_DIR = PIPE_DIR / "results"
 
 
-# ── 1. Alternate normal-period check ────────────────────────────────────────
+# ?? 1. Alternate normal-period check ????????????????????????????????????????
 
 NORMAL_PERIODS = {
     "baseline_1994_2003":  ("1994-01-01", "2003-12-31"),   # default
@@ -110,7 +110,7 @@ def run_alternate_normal_period(
     return results
 
 
-# ── 2. Rolling-window refit ──────────────────────────────────────────────────
+# ?? 2. Rolling-window refit ??????????????????????????????????????????????????
 
 def run_rolling_refit(
     X: np.ndarray,
@@ -168,7 +168,7 @@ def run_rolling_refit(
     }
 
 
-# ── 3. Leave-one-crisis-out threshold calibration ────────────────────────────
+# ?? 3. Leave-one-crisis-out threshold calibration ????????????????????????????
 
 def run_loco_threshold(
     signal: np.ndarray,
@@ -214,7 +214,7 @@ def run_loco_threshold(
     return results
 
 
-# ── Master runner ────────────────────────────────────────────────────────────
+# ?? Master runner ????????????????????????????????????????????????????????????
 
 def run_all_robustness(
     X: np.ndarray,
@@ -248,7 +248,7 @@ def run_all_robustness(
                 if o is None:                     return None
                 raise TypeError(f"Not serializable: {type(o)}")
             json.dump(out, f, indent=2, default=_s)
-        print(f"\n[robustness] Saved → {out_path}")
+        print(f"\n[robustness] Saved -> {out_path}")
 
     return out
 
@@ -292,7 +292,7 @@ def latex_robustness_table(rob: Dict) -> str:
         "\\begin{table}[htbp]\n\\centering\n"
         "\\caption{Robustness checks: alternate normal period, rolling refit, "
         "and leave-one-crisis-out (LOCO) threshold calibration. "
-        "Baseline HR = 71.4\\%, FAR ≈ 35\\% (Table~\\ref{tab:oos}).}\n"
+        "Baseline HR = 71.4\\%, FAR ? 35\\% (Table~\\ref{tab:oos}).}\n"
         "\\label{tab:robustness}\n"
         "\\begin{tabular}{lcccc}\n\\toprule\n"
         "Check & HR & FAR & AUROC & GFC lead (Q) \\\\\n"

@@ -6,13 +6,13 @@ Tight evaluation protocol for the MFLS early-warning signal.
 Replaces Granger causality as the primary validity test with metrics that are
 consistent with phase-transition crisis dynamics:
 
-  1. Hit Rate (HR)        – fraction of crisis-window quarters above threshold
-  2. False-Alarm Rate (FAR) – fraction of calm quarters above threshold
-  3. Selectivity          – HR / FAR  (precision-recall style ratio)
-  4. Time-to-First-Alarm  – quarters from first threshold crossing to crisis onset
-  5. AUROC                – area under the ROC curve
-  6. AUPRC                – area under the precision-recall curve (handles class imbalance)
-  7. Robustness sweep     – repeat all metrics under ±1Q window boundary shifts
+  1. Hit Rate (HR)        - fraction of crisis-window quarters above threshold
+  2. False-Alarm Rate (FAR) - fraction of calm quarters above threshold
+  3. Selectivity          - HR / FAR  (precision-recall style ratio)
+  4. Time-to-First-Alarm  - quarters from first threshold crossing to crisis onset
+  5. AUROC                - area under the ROC curve
+  6. AUPRC                - area under the precision-recall curve (handles class imbalance)
+  7. Robustness sweep     - repeat all metrics under ?1Q window boundary shifts
 """
 from __future__ import annotations
 import json
@@ -28,7 +28,7 @@ except ImportError:
     _SKLEARN = False
 
 
-# ── Crisis / calm window definitions ────────────────────────────────────────
+# ?? Crisis / calm window definitions ????????????????????????????????????????
 # Each entry: (name, onset_quarter_str, end_quarter_str)
 # onset = first "officially distressed" quarter (used for time-to-alarm)
 CRISIS_WINDOWS_EVAL = [
@@ -149,23 +149,23 @@ def run_full_eval(
     if crisis_windows is None:
         crisis_windows = CRISIS_WINDOWS_EVAL
     if robustness_shifts is None:
-        robustness_shifts = [-1, 0, 1]   # ±1 quarter
+        robustness_shifts = [-1, 0, 1]   # ?1 quarter
 
     results: Dict = {"label": label, "threshold": threshold}
 
-    # ── Primary evaluation (shift=0) ────────────────────────────────────────
+    # ?? Primary evaluation (shift=0) ????????????????????????????????????????
     labels_0 = build_binary_labels(dates, crisis_windows, shift_quarters=0)
     base_metrics = threshold_metrics(signal, labels_0, threshold)
     base_roc     = roc_auprc(signal, labels_0)
     results["primary"] = {**base_metrics, **base_roc}
 
-    # ── Time-to-first-alarm per crisis ──────────────────────────────────────
+    # ?? Time-to-first-alarm per crisis ??????????????????????????????????????
     tta = {}
     for name, onset_str, _end_str in crisis_windows:
         tta[name] = time_to_first_alarm(signal, dates, threshold, onset_str)
     results["time_to_alarm_quarters"] = tta
 
-    # ── Robustness sweep ────────────────────────────────────────────────────
+    # ?? Robustness sweep ????????????????????????????????????????????????????
     sweep = []
     for shift in robustness_shifts:
         lab = build_binary_labels(dates, crisis_windows, shift_quarters=shift)
@@ -174,7 +174,7 @@ def run_full_eval(
         sweep.append({"shift_quarters": shift, **m, **rr})
     results["robustness_sweep"] = sweep
 
-    # ── Robustness summary (mean ± std across shifts) ───────────────────────
+    # ?? Robustness summary (mean ? std across shifts) ???????????????????????
     hr_vals   = [s["hr"]   for s in sweep]
     far_vals  = [s["far"]  for s in sweep]
     auroc_vals = [s["auroc"] for s in sweep]
@@ -214,7 +214,7 @@ def eval_all_variants(
                 if isinstance(o, (np.ndarray,)):  return o.tolist()
                 raise TypeError(f"Not serializable: {type(o)}")
             json.dump(all_results, f, indent=2, default=_serial)
-        print(f"[eval_protocol] Saved → {out_path}")
+        print(f"[eval_protocol] Saved -> {out_path}")
 
     return all_results
 
@@ -228,7 +228,7 @@ def latex_eval_table(results: Dict[str, Dict]) -> str:
         r"time-to-alarm across MFLS variants. "
         r"All metrics computed on real FDIC data (T=140, N=7, d=6). "
         r"Threshold = P75 of pre-2007 training signal. "
-        r"Robustness mean±std computed under ±1Q window boundary shifts.}" "\n"
+        r"Robustness mean?std computed under ?1Q window boundary shifts.}" "\n"
         r"\label{tab:eval_protocol}" "\n"
         r"\begin{tabular}{lcccccc}" "\n"
         r"\toprule" "\n"

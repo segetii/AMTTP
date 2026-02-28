@@ -1,4 +1,4 @@
-﻿"""
+"""
 run_pipeline.py  (v2 - upgraded with real FDIC data + Ledoit-Wolf network)
 """
 
@@ -181,7 +181,7 @@ def main(use_cache=True, fast=False, verbose=True):
                 cols.append(pd.Series(0.0, index=std2.index, name=c))
         feat2 = pd.concat(cols, axis=1).dropna()
         Z2 = feat2.values                   # (T, 6)
-        # X[t,i,:] = diag(w_i) * z(t)  —  no noise, heterogeneity comes from weights
+        # X[t,i,:] = diag(w_i) * z(t)  -  no noise, heterogeneity comes from weights
         # Multiply FRED features by sector weights then add small sector-specific
         # noise (sigma=0.08) so the Ledoit-Wolf network captures genuine
         # off-diagonal heterogeneity, not just the trivial correlation = 1.
@@ -308,9 +308,9 @@ def main(use_cache=True, fast=False, verbose=True):
     with open(RESULTS_DIR / "pipeline_stats_v2.json", "w") as f:
         json.dump(summary, f, indent=2, default=str)
 
-    # ── Evaluation protocol + robustness ─────────────────────────────────────
+    # ?? Evaluation protocol + robustness ?????????????????????????????????????
     if _EVAL_AVAIL:
-        print("\n[+] Running evaluation protocol (HR/FAR/AUROC/time-to-alarm) …")
+        print("\n[+] Running evaluation protocol (HR/FAR/AUROC/time-to-alarm) ...")
         mfls_sig = stats["mfls"]
         pre07_mask = dates < pd.Timestamp("2007-01-01")
         p75_thr  = float(np.percentile(mfls_sig[pre07_mask], 75))
@@ -323,14 +323,14 @@ def main(use_cache=True, fast=False, verbose=True):
         )
         _write(RESULTS_DIR / "eval_table.tex", latex_eval_table(eval_results))
 
-        print("[+] Running robustness checks (alt normal-period, rolling, LOCO) …")
+        print("[+] Running robustness checks (alt normal-period, rolling, LOCO) ...")
         rob_results = run_all_robustness(
             X_std, dates, mfls_sig,
             out_path=RESULTS_DIR / "robustness.json",
         )
         _write(RESULTS_DIR / "robustness_table.tex", latex_robustness_table(rob_results))
     else:
-        print("[+] eval_protocol / robustness_checks not available – skipping.")
+        print("[+] eval_protocol / robustness_checks not available - skipping.")
 
     elapsed = time.perf_counter() - t0
     print(f"\n{Sep}\n  v2 pipeline complete in {elapsed:.1f}s\n{Sep}")

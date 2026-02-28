@@ -12,8 +12,8 @@ with open('results/pipeline_stats_v2.json') as f:
 # (signals are stored in variant_comparison.json in variants pipeline)
 import importlib, importlib.util
 from run_pipeline import main as pipe_main
-print('[eval] Re-running pipeline to get signal arrays …')
+print('[eval] Re-running pipeline to get signal arrays ?')
 # The pipeline already saves results; load the OOS signal from the stats
 # Minimal approach: call run_pipeline which recomputes and re-saves.
 pipe_main()
-print('[eval] Done – see results/eval_protocol*.json')
+print('[eval] Done ? see results/eval_protocol*.json')

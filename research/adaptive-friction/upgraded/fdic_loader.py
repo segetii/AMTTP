@@ -8,7 +8,7 @@ Endpoint: https://banks.data.fdic.gov/api/financials
 No API key required.  Data is public regulatory-filing data.
 
 Returns quarterly aggregate financial ratios for 7 FDIC institution-type
-categories (SPECGRP 1-7), giving a real T × N × d panel with:
+categories (SPECGRP 1-7), giving a real T ? N ? d panel with:
     N = 7 real institution types
     d = 6 features: all derived from official call report filings
 
@@ -21,13 +21,13 @@ Feature definitions (all defensible CAMELS-adjacent metrics):
     f5  yield_slope      = T10Y2Y  (FRED)            (common market factor)
 
 SPECGRP sector mapping (FDIC/OCC institutional classification):
-    1 – Mutual savings banks (depositor-owned S&Ls)
-    2 – Stock savings banks  (shareholder-owned savings)
-    3 – State commercial banks, non-Fed-member
-    4 – National commercial banks (OCC-chartered)
-    5 – Federal savings associations (OTS/OCC)
-    6 – State savings associations
-    7 – Foreign-chartered institutions (US branches/agencies)
+    1 - Mutual savings banks (depositor-owned S&Ls)
+    2 - Stock savings banks  (shareholder-owned savings)
+    3 - State commercial banks, non-Fed-member
+    4 - National commercial banks (OCC-chartered)
+    5 - Federal savings associations (OTS/OCC)
+    6 - State savings associations
+    7 - Foreign-chartered institutions (US branches/agencies)
 
 No researcher-chosen weights or heuristic adjustments anywhere in this file.
 All data comes from FDIC regulatory filings, aggregated by institution type.
@@ -164,7 +164,7 @@ def fetch_fdic_specgrp(
     if verbose:
         print(f"[fdic] Fetching SPECGRP aggregates for {len(quarter_dates)} quarters "
               f"from FDIC SDI API ...")
-        print(f"[fdic] Date range: {quarter_dates[0]} – {quarter_dates[-1]}")
+        print(f"[fdic] Date range: {quarter_dates[0]} - {quarter_dates[-1]}")
 
     all_rows: list[dict] = []
     n_ok    = 0
@@ -240,7 +240,7 @@ def fetch_fdic_specgrp(
         dates = df.index.get_level_values(0)
         print(f"[fdic] Final panel: {len(df)} observations, "
               f"{df.index.get_level_values(1).nunique()} sectors, "
-              f"dates {dates.min().date()} – {dates.max().date()}")
+              f"dates {dates.min().date()} - {dates.max().date()}")
 
     with open(CACHE_FILE, "wb") as f:
         pickle.dump(df, f)
@@ -256,12 +256,12 @@ def compute_sector_features(
 
     Parameters
     ----------
-    fdic_df    : result of fetch_fdic_specgrp() — MultiIndex (date, SPECGRP)
+    fdic_df    : result of fetch_fdic_specgrp() - MultiIndex (date, SPECGRP)
     fred_slope : pd.Series, T10Y2Y from FRED, quarterly, aligned by quarter-end date
 
     Returns
     -------
-    Dict {specgrp: DataFrame(T, 6)} — index = quarter-end dates
+    Dict {specgrp: DataFrame(T, 6)} - index = quarter-end dates
     """
     eps = 1e-10   # guard against division by zero
 

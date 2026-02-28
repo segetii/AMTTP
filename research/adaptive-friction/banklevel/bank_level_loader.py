@@ -4,8 +4,8 @@ bank_level_loader.py
 Loads FDIC call-report data at the INDIVIDUAL BANK level (not SPECGRP aggregates).
 
 Uses the FDIC SDI REST API:
-  GET /institutions  – filter to top-N banks by total assets, get CERT IDs
-  GET /financials    – per-quarter financial ratios for each CERT
+  GET /institutions  - filter to top-N banks by total assets, get CERT IDs
+  GET /financials    - per-quarter financial ratios for each CERT
 
 Produces:
   X(t): (T, N, d)  quarterly state matrix for top-N banks
@@ -24,7 +24,7 @@ from typing import Dict, List, Optional
 
 import requests
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+# ?? Configuration ?????????????????????????????????????????????????????????????
 FDIC_BASE        = "https://banks.data.fdic.gov/api"
 CACHE_DIR        = Path(__file__).parent / "fdic_bank_cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ FEATURE_NAMES = [
 ]
 
 
-# ── Institution catalogue ─────────────────────────────────────────────────────
+# ?? Institution catalogue ?????????????????????????????????????????????????????
 
 def fetch_top_banks(
     n: int = 50,
@@ -61,7 +61,7 @@ def fetch_top_banks(
         print(f"[bank_loader] Top-{n} banks loaded from cache ({len(data)} entries)")
         return pd.DataFrame(data)
 
-    print(f"[bank_loader] Fetching top-{n} banks from FDIC /institutions …")
+    print(f"[bank_loader] Fetching top-{n} banks from FDIC /institutions ...")
     params = {
         "filters":  f"ACTIVE:1 AND ASSET:[{min_asset_millions} TO 99999999]",
         "fields":   "CERT,INSTNAME,STNAME,SPECGRP,ASSET",
@@ -82,7 +82,7 @@ def fetch_top_banks(
     return df
 
 
-# ── Per-institution time series ───────────────────────────────────────────────
+# ?? Per-institution time series ???????????????????????????????????????????????
 
 def _quarter_dates(start: str = "1990-03-31", end: str = "2024-12-31") -> List[str]:
     """Generate quarter-end dates YYYYMMDD."""
@@ -148,7 +148,7 @@ def fetch_institution_timeseries(
     return df.set_index("REPDTE").sort_index()
 
 
-# ── Feature computation ───────────────────────────────────────────────────────
+# ?? Feature computation ???????????????????????????????????????????????????????
 
 def compute_features(df: pd.DataFrame) -> pd.Series | None:
     """
@@ -173,17 +173,17 @@ def compute_features(df: pd.DataFrame) -> pd.Series | None:
     return out
 
 
-# ── Master panel builder ──────────────────────────────────────────────────────
+# ?? Master panel builder ??????????????????????????????????????????????????????
 
 def build_bank_panel(
     n_banks: int = 30,
     start: str = "1990-03-31",
     end:   str = "2024-12-31",
-    min_coverage: float = 0.70,   # require ≥70% quarterly coverage
+    min_coverage: float = 0.70,   # require ?70% quarterly coverage
     force_refresh: bool = False,
 ) -> Dict:
     """
-    Build the joint state matrix X(t) ∈ ℝ^{N × d} for institution-level data.
+    Build the joint state matrix X(t) ? ?^{N ? d} for institution-level data.
 
     Returns dict with keys:
       X:          np.ndarray (T, N, d)
@@ -216,7 +216,7 @@ def build_bank_panel(
             continue
         certs_tried += 1
 
-        print(f"  [bank_loader] Fetching CERT {cert} — {row.get('INSTNAME', '?')} …")
+        print(f"  [bank_loader] Fetching CERT {cert} - {row.get('INSTNAME', '?')} ...")
         raw = fetch_institution_timeseries(cert, start=start, end=end,
                                            force_refresh=force_refresh)
         if raw.empty:
@@ -230,7 +230,7 @@ def build_bank_panel(
         feats = feats.reindex(target_dates, method="nearest", tolerance="45D")
         coverage = feats.notna().all(axis=1).mean()
         if coverage < min_coverage:
-            print(f"  [bank_loader]   → skipped (coverage {coverage:.1%} < {min_coverage:.0%})")
+            print(f"  [bank_loader]   -> skipped (coverage {coverage:.1%} < {min_coverage:.0%})")
             continue
 
         # forward-fill small gaps
@@ -242,7 +242,7 @@ def build_bank_panel(
             "state":   row.get("STNAME", ""),
             "specgrp": row.get("SPECGRP", ""),
         })
-        print(f"  [bank_loader]   → included (coverage {coverage:.1%})")
+        print(f"  [bank_loader]   -> included (coverage {coverage:.1%})")
 
     N = len(bank_timeseries)
     if N == 0:
@@ -267,4 +267,4 @@ def build_bank_panel(
 if __name__ == "__main__":
     panel = build_bank_panel(n_banks=20)
     print(f"\nPanel shape: {panel['X'].shape}")
-    print(f"Banks: {[b['name'] for b in panel['bank_meta'][:5]]} …")
+    print(f"Banks: {[b['name'] for b in panel['bank_meta'][:5]]} ...")

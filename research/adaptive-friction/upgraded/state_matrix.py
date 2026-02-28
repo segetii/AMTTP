@@ -1,8 +1,8 @@
 """
-state_matrix.py  (v2 — real FDIC call report data)
+state_matrix.py  (v2 - real FDIC call report data)
 ===================================================
-Builds the joint state matrix  X(t) ∈ ℝ^{N × d}  directly from FDIC call
-report filings — no synthetic loading matrix, no researcher-chosen weights.
+Builds the joint state matrix  X(t) ? ?^{N ? d}  directly from FDIC call
+report filings - no synthetic loading matrix, no researcher-chosen weights.
 
 Data source
 -----------
@@ -30,10 +30,10 @@ try:
 except ImportError:
     from fdic_loader import compute_sector_features, build_panel, FEATURE_NAMES
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Normal-period: post-S&L-resolution quiet decade, pre-boom
 # (FIRREA 1989 resolution substantially complete by 1993)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 NORMAL_START = "1994-01-01"
 NORMAL_END   = "2003-12-31"
 
@@ -43,16 +43,16 @@ def build_state_matrix_fdic(
     fred_slope: pd.Series,
 ) -> tuple[np.ndarray, pd.DatetimeIndex, list[str]]:
     """
-    Build X(t) ∈ ℝ^{T × N × d} directly from FDIC call-report data.
+    Build X(t) ? ?^{T ? N ? d} directly from FDIC call-report data.
 
     Parameters
     ----------
-    fdic_df    : fetch_fdic_specgrp() result — MultiIndex (date, SPECGRP)
+    fdic_df    : fetch_fdic_specgrp() result - MultiIndex (date, SPECGRP)
     fred_slope : FRED T10Y2Y quarterly series
 
     Returns
     -------
-    X       : np.ndarray (T, N, d)  — raw, unstandardised
+    X       : np.ndarray (T, N, d)  - raw, unstandardised
     dates   : pd.DatetimeIndex length T
     sectors : list[str] length N
     """
@@ -72,7 +72,7 @@ def standardise_panel(
     For valid inference, always pass X_ref = normal-period slice, so
     deviations are measured against the documented pre-boom benchmark.
 
-    Returns  (X_std, mu, sigma)  — sigma has shape (d,).
+    Returns  (X_std, mu, sigma)  - sigma has shape (d,).
     """
     src = X_ref if X_ref is not None else X
     flat  = src.reshape(-1, src.shape[-1])

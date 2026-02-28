@@ -2,12 +2,12 @@
 welfare.py
 ==========
 CCyB calibration and consumption-equivalent welfare cost computation.
-Implements §9 of the paper.
+Implements ?9 of the paper.
 
 Equations (from main.tex):
-    ΔCCyB(t) ≈ κ⁻¹ · γ*(t) · σ_ℓ(t)                      [eq:ccyb]
-    L_inaction = ∫[t0,t1] [E(X_t) − E(X_t^{γ*})] dt       [welfare loss]
-    %CL = 100 × (1 − exp(−L_inaction / (σ θ T)))           [consumption pct]
+    ?CCyB(t) ? ??? ? gamma*(t) ? ?_?(t)                      [eq:ccyb]
+    L_inaction = ?[t0,t1] [E(X_t) ? E(X_t^{gamma*})] dt       [welfare loss]
+    %CL = 100 ? (1 ? exp(?L_inaction / (? ? T)))           [consumption pct]
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 
 OUTPUT_DIR = Path(__file__).parent / "results"
 
-# Basel III CCyB range: 0 – 250 basis points
+# Basel III CCyB range: 0 - 250 basis points
 CCyB_MAX_BPS = 250.0
 
 # Euler equation parameters for consumption-equivalent welfare
@@ -28,7 +28,7 @@ SIGMA_EULER   = 2.0    # inverse of intertemporal elasticity of substitution
 THETA_EULER   = 0.02   # time preference rate (annualised)
 DISCOUNT_BETA = 0.96   # annual discount factor
 
-# Intervention cost κ calibration (fraction of GDP loss per unit credit restriction)
+# Intervention cost ? calibration (fraction of GDP loss per unit credit restriction)
 KAPPA: float = 0.5
 
 
@@ -38,11 +38,11 @@ def ccyb_formula(
     kappa: float = KAPPA,
 ) -> np.ndarray:
     """
-    ΔCCyB(t) ≈ κ⁻¹ · γ*(t) · σ_ℓ(t)   in normalised units.
+    ?CCyB(t) ? ??? ? gamma*(t) ? ?_?(t)   in normalised units.
     Rescale to [0, 250] bps by mapping the 99th percentile to 200 bps.
     """
     raw = gamma_star * sigma_leverage / (kappa + 1e-9)
-    # Normalise to bps (99th percentile → 200 bps, same order as Basel III guidance)
+    # Normalise to bps (99th percentile -> 200 bps, same order as Basel III guidance)
     p99 = np.quantile(raw[raw > 0], 0.99) if (raw > 0).any() else 1.0
     bps = np.clip(raw / (p99 + 1e-9) * 200.0, 0.0, CCyB_MAX_BPS)
     return bps
@@ -55,12 +55,12 @@ def energy_counterfactual(
     eta: float = 0.02,
 ) -> np.ndarray:
     """
-    Approximate energy trajectory under γ*(t) vs γ=0.
-    Under γ=0 (inaction): dE/dt ≈ −‖∇Φ‖² + amplification ≈ E stays elevated.
-    Under γ*(t) (policy): the spectral abscissa is set to 0, so
-        E(X_t^{γ*}) ≈ E(X_t^{γ=0}) · exp(−α·t)  within each crisis window.
+    Approximate energy trajectory under gamma*(t) vs gamma=0.
+    Under gamma=0 (inaction): dE/dt ? ?????? + amplification ? E stays elevated.
+    Under gamma*(t) (policy): the spectral abscissa is set to 0, so
+        E(X_t^{gamma*}) ? E(X_t^{gamma=0}) ? exp(?alpha?t)  within each crisis window.
 
-    We approximate the counterfactual as exponential decay at rate α from
+    We approximate the counterfactual as exponential decay at rate alpha from
     crisis onset, calibrated to match the observed post-crisis recovery.
     """
     T = len(energy)
@@ -117,7 +117,7 @@ def welfare_loss(
     # Numerical integration (trapezoidal, quarterly)
     L = float(np.trapz(np.maximum(E_no - E_pol, 0), dx=1.0))
 
-    # Consumption-equivalent loss (quarterly θ = annual / 4)
+    # Consumption-equivalent loss (quarterly ? = annual / 4)
     theta_q = theta / 4.0
     pct_cl  = 100.0 * (1.0 - np.exp(-L / (sigma * theta_q * T_win + 1e-9)))
 
@@ -128,9 +128,9 @@ def welfare_loss(
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Sigma_ℓ proxy from FRED
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
+# Sigma_? proxy from FRED
+# ?????????????????????????????????????????????????????????????????????????????
 
 def sigma_leverage_proxy(
     fred_raw: pd.DataFrame,
@@ -138,7 +138,7 @@ def sigma_leverage_proxy(
     n_sectors: int = 12,
 ) -> np.ndarray:
     """
-    Proxy for cross-sectional s.d. of leverage σ_ℓ(t).
+    Proxy for cross-sectional s.d. of leverage ?_?(t).
     Computed as rolling std of credit_gdp over a 4-quarter window,
     scaled to represent sector dispersion.
     """
@@ -152,13 +152,13 @@ def sigma_leverage_proxy(
     s.index = pd.to_datetime(s.index)
     s = s.reindex(dates, method="ffill").fillna(s.mean())
     rolling_std = s.rolling(4, min_periods=1).std().fillna(0.1)
-    # Scale: sector dispersion ≈ √N × aggregate std (mean-field approximation)
+    # Scale: sector dispersion ? ?N ? aggregate std (mean-field approximation)
     return rolling_std.values * np.sqrt(n_sectors)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Main
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 CRISIS_WINDOWS_WELFARE = {
     "GFC 2008":        ("2007-07-01", "2009-06-30"),
     "COVID 2020":      ("2020-01-01", "2020-12-31"),
@@ -186,7 +186,7 @@ def run_welfare_analysis(
     ccyb    = ccyb_formula(gamma_star, sig_lev)
     E_pol   = energy_counterfactual(energy, gamma_star)
 
-    # ── Welfare table ──
+    # ?? Welfare table ??
     rows = []
     for window_name, (wstart, wend) in CRISIS_WINDOWS_WELFARE.items():
         wl = welfare_loss(energy, E_pol, dates, wstart, wend)
@@ -206,7 +206,7 @@ def run_welfare_analysis(
         print("\n===  Welfare Calibration Table  ===")
         print(welfare_df.to_string(index=False))
 
-    # ── Plot ──
+    # ?? Plot ??
     fig, axes = plt.subplots(2, 1, figsize=(12, 9))
 
     ax = axes[0]
@@ -215,16 +215,16 @@ def run_welfare_analysis(
     ax.axhline(0,   color="k",   ls="-",  lw=0.3)
     _shade_welfare(ax, dates)
     ax.set_ylabel("CCyB (basis points)"); ax.legend()
-    ax.set_title("Panel A: Adaptive CCyB Path  Δ CCyB(t)")
+    ax.set_title("Panel A: Adaptive CCyB Path  ? CCyB(t)")
 
     ax = axes[1]
-    ax.plot(dates, energy,  lw=2, color="steelblue",  label="E(X) — no intervention")
-    ax.plot(dates, E_pol,   lw=2, color="darkorange", label="E(X^{γ*}) — adaptive policy", ls="--")
+    ax.plot(dates, energy,  lw=2, color="steelblue",  label="E(X) - no intervention")
+    ax.plot(dates, E_pol,   lw=2, color="darkorange", label="E(X^{gamma*}) - adaptive policy", ls="--")
     ax.fill_between(dates, E_pol, energy, where=(energy > E_pol),
                     alpha=0.25, color="red", label="Welfare loss area")
     _shade_welfare(ax, dates)
-    ax.set_ylabel("Φ(X) energy"); ax.legend()
-    ax.set_title("Panel B: Energy Counterfactual — Inaction vs Adaptive Policy")
+    ax.set_ylabel("?(X) energy"); ax.legend()
+    ax.set_title("Panel B: Energy Counterfactual - Inaction vs Adaptive Policy")
 
     plt.tight_layout()
     fig_path = OUTPUT_DIR / "welfare_calibration.pdf"
@@ -245,9 +245,9 @@ def _shade_welfare(ax: plt.Axes, dates: pd.DatetimeIndex) -> None:
             ax.axvspan(dates[mask][0], dates[mask][-1], alpha=0.2, color=c, label=name)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LaTeX tables for §9
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
+# LaTeX tables for ?9
+# ?????????????????????????????????????????????????????????????????????????????
 
 def latex_welfare_table(welfare_df: pd.DataFrame) -> str:
     lines = [
