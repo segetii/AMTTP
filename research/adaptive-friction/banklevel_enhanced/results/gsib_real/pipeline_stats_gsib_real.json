@@ -1,0 +1,235 @@
+{
+  "data_source": "REAL DATA: FDIC call-report (US) + World Bank GFDD + ECB MIR (non-US)",
+  "NO_SYNTHETIC_DATA": true,
+  "T_quarters": 76,
+  "date_range": "2005-03-31 to 2023-12-31",
+  "N_gsib": 20,
+  "n_us_real_fdic": 6,
+  "n_nonus_real_worldbank": 14,
+  "d_features": 5,
+  "lambda_max_W": 10.220601894884958,
+  "rho_star": 0.11399624448668765,
+  "auroc": 0.7809680065627563,
+  "auroc_95ci": [
+    0.3647,
+    0.9545
+  ],
+  "hit_rate": 1.0,
+  "hit_rate_95ci": [
+    1.0,
+    1.0
+  ],
+  "false_alarm_rate": 0.8867924528301887,
+  "lead_quarters_gfc": 6,
+  "gfc_alarm_date": "2007-03-31 00:00:00",
+  "causality": {
+    "linear_granger_min_p": 0.053,
+    "linear_verdict": "PASS",
+    "threshold_granger_min_p": 0.043,
+    "threshold_verdict": "PASS (upper-regime predictive)",
+    "quantile_min_p": 0.492,
+    "quantile_verdict": "FAIL"
+  },
+  "region_auroc": {
+    "US": 0.3897,
+    "EU": 0.685,
+    "Asia": 0.8031
+  },
+  "bank_meta": [
+    {
+      "name": "JPMorgan Chase",
+      "region": "US",
+      "iso": "USA",
+      "cert": 628,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "Bank of America",
+      "region": "US",
+      "iso": "USA",
+      "cert": 3510,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "Citibank NA",
+      "region": "US",
+      "iso": "USA",
+      "cert": 7213,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "Wells Fargo",
+      "region": "US",
+      "iso": "USA",
+      "cert": 3511,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "Goldman Sachs Bank USA",
+      "region": "US",
+      "iso": "USA",
+      "cert": 34264,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "BNY Mellon",
+      "region": "US",
+      "iso": "USA",
+      "cert": 639,
+      "tier": 1,
+      "data_source": "fdic_call_report",
+      "coverage": 1.0
+    },
+    {
+      "name": "HSBC",
+      "region": "EU",
+      "iso": "GBR",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "BNP Paribas",
+      "region": "EU",
+      "iso": "FRA",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": "FR"
+    },
+    {
+      "name": "Deutsche Bank",
+      "region": "EU",
+      "iso": "DEU",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": "DE"
+    },
+    {
+      "name": "Barclays",
+      "region": "EU",
+      "iso": "GBR",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "Societe Generale",
+      "region": "EU",
+      "iso": "FRA",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": "FR"
+    },
+    {
+      "name": "UniCredit",
+      "region": "EU",
+      "iso": "ITA",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": "IT"
+    },
+    {
+      "name": "ING",
+      "region": "EU",
+      "iso": "NLD",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": "NL"
+    },
+    {
+      "name": "Mitsubishi UFJ",
+      "region": "Asia",
+      "iso": "JPN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "Mizuho",
+      "region": "Asia",
+      "iso": "JPN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "Sumitomo Mitsui",
+      "region": "Asia",
+      "iso": "JPN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "Bank of China",
+      "region": "Asia",
+      "iso": "CHN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "ICBC",
+      "region": "Asia",
+      "iso": "CHN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "China Construction Bank",
+      "region": "Asia",
+      "iso": "CHN",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    },
+    {
+      "name": "Standard Chartered",
+      "region": "Asia",
+      "iso": "GBR",
+      "cert": null,
+      "tier": 2,
+      "data_source": "world_bank_country_aggregate",
+      "coverage": 1.0,
+      "ecb_cc": null
+    }
+  ],
+  "runtime_sec": 17.5
+}

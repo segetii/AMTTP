@@ -1,0 +1,114 @@
+{
+  "data_source": "REAL DATA: FDIC (US) + World Bank GFDD + ECB MIR (non-US)",
+  "NO_SYNTHETIC_DATA": true,
+  "T": 76,
+  "N": 20,
+  "d": 5,
+  "date_range": "2005-03-31 to 2023-12-31",
+  "normal_period": "2005-01-01 to 2006-12-31",
+  "train_end": "2006-12-31",
+  "crisis_quarters_total": 23,
+  "crisis_in_train": 9,
+  "region_auroc_baseline": {
+    "US": 0.3897,
+    "EU": 0.685,
+    "Asia": 0.8031
+  },
+  "variants": {
+    "Baseline": {
+      "variant": "Baseline",
+      "mode": "baseline",
+      "signal_range": [
+        22.1154,
+        127.8086
+      ],
+      "auroc_full": 0.781,
+      "auroc_test": 0.95,
+      "auroc_95ci": [
+        0.3647,
+        0.9545
+      ],
+      "oos_p75_threshold": 33.6516,
+      "oos_alarm_date": "2013-03-31",
+      "oos_lead_quarters": 0,
+      "oos_gfc_hit_rate": 0.3333,
+      "oos_false_alarm_rate": 0.4318
+    },
+    "FullBSDT": {
+      "variant": "FullBSDT",
+      "mode": "channel_unsup",
+      "signal_range": [
+        0.0051,
+        3.7269
+      ],
+      "auroc_full": 0.8687,
+      "auroc_test": 0.9548,
+      "auroc_95ci": [
+        0.6753,
+        0.9669
+      ],
+      "oos_p75_threshold": 0.5084,
+      "oos_alarm_date": "2019-03-31",
+      "oos_lead_quarters": 0,
+      "oos_gfc_hit_rate": 0.5556,
+      "oos_false_alarm_rate": 0.4545
+    },
+    "QuadSurf": {
+      "variant": "QuadSurf",
+      "mode": "channel_sup",
+      "signal_range": [
+        0.0,
+        1.1049
+      ],
+      "auroc_full": 0.5742,
+      "auroc_test": 0.3214,
+      "auroc_95ci": [
+        0.2905,
+        0.9849
+      ],
+      "oos_p75_threshold": 0.3964,
+      "oos_alarm_date": "2015-06-30",
+      "oos_lead_quarters": 0,
+      "oos_gfc_hit_rate": 0.8889,
+      "oos_false_alarm_rate": 0.4318
+    },
+    "SignedLR": {
+      "variant": "SignedLR",
+      "mode": "channel_sup",
+      "signal_range": [
+        0.0,
+        0.9641
+      ],
+      "auroc_full": 0.6678,
+      "auroc_test": 0.4452,
+      "auroc_95ci": [
+        0.58,
+        1.0
+      ],
+      "oos_p75_threshold": 0.5651,
+      "oos_alarm_date": "2015-06-30",
+      "oos_lead_quarters": 0,
+      "oos_gfc_hit_rate": 0.8889,
+      "oos_false_alarm_rate": 0.4318
+    },
+    "ExpoGate": {
+      "variant": "ExpoGate",
+      "mode": "channel_sup",
+      "signal_range": [
+        0.5,
+        0.9173
+      ],
+      "auroc_full": 0.5742,
+      "auroc_test": 0.3214,
+      "auroc_95ci": [
+        0.2905,
+        0.9849
+      ],
+      "oos_p75_threshold": 0.7461,
+      "oos_alarm_date": "2014-12-31",
+      "oos_lead_quarters": 0,
+      "oos_gfc_hit_rate": 0.8889,
+      "oos_false_alarm_rate": 0.4773
+    }
+  }
+}
