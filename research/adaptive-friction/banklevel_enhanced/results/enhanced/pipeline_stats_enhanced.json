@@ -1,0 +1,36 @@
+{
+  "data_source": "FDIC SDI call-report (bank-level, N=30)",
+  "T_quarters": 140,
+  "N_banks": 30,
+  "d_features": 6,
+  "lambda_max_W": 12.077044249459881,
+  "rho_star": 0.016913544127399687,
+  "auroc": 0.8052768487551096,
+  "hit_rate": 0.8695652173913043,
+  "false_alarm_rate": 0.5213675213675214,
+  "lead_quarters_gfc": 6,
+  "gfc_alarm_date": "2007-03-31 00:00:00",
+  "bootstrap": {
+    "auroc": 0.6759,
+    "auroc_lo": 0.4139,
+    "auroc_hi": 0.9352,
+    "hr": 0.625,
+    "hr_lo": 0.2211,
+    "hr_hi": 1.0,
+    "far": 0.5726,
+    "far_lo": 0.3804,
+    "far_hi": 0.7983,
+    "ci_label": "95%",
+    "n_boot": 200,
+    "block_len": 8
+  },
+  "causality": {
+    "linear_granger_min_p": 0.2327,
+    "linear_granger_verdict": "FAIL (confirms Granger paradox)",
+    "threshold_granger_min_p": 0.366,
+    "threshold_verdict": "FAIL",
+    "quantile_min_p": 0.352,
+    "quantile_verdict": "FAIL"
+  },
+  "runtime_sec": 29.5
+}

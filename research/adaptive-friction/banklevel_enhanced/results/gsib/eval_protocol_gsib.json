@@ -1,0 +1,76 @@
+{
+  "MFLS_GSIB": {
+    "label": "MFLS_GSIB",
+    "threshold": 26.039774756634515,
+    "primary": {
+      "hr": 1.0,
+      "far": 0.5656565656565656,
+      "selectivity": 1.767857142857143,
+      "precision": 0.2911392405063291,
+      "recall": 1.0,
+      "tp": 23,
+      "fp": 56,
+      "n_crisis": 23,
+      "n_calm": 99,
+      "auroc": 0.9609134826526131,
+      "auprc": 0.7710599112076217
+    },
+    "time_to_alarm_quarters": {
+      "GFC": 52.3,
+      "COVID": 101.3,
+      "RateShock": 109.3
+    },
+    "robustness_sweep": [
+      {
+        "shift_quarters": -1,
+        "hr": 1.0,
+        "far": 0.57,
+        "selectivity": 1.7543859649122808,
+        "precision": 0.27848101265822783,
+        "recall": 1.0,
+        "tp": 22,
+        "fp": 57,
+        "n_crisis": 22,
+        "n_calm": 100,
+        "auroc": 0.9486363636363636,
+        "auprc": 0.6589840296000026
+      },
+      {
+        "shift_quarters": 0,
+        "hr": 1.0,
+        "far": 0.5656565656565656,
+        "selectivity": 1.767857142857143,
+        "precision": 0.2911392405063291,
+        "recall": 1.0,
+        "tp": 23,
+        "fp": 56,
+        "n_crisis": 23,
+        "n_calm": 99,
+        "auroc": 0.9609134826526131,
+        "auprc": 0.7710599112076217
+      },
+      {
+        "shift_quarters": 1,
+        "hr": 1.0,
+        "far": 0.5656565656565656,
+        "selectivity": 1.767857142857143,
+        "precision": 0.2911392405063291,
+        "recall": 1.0,
+        "tp": 23,
+        "fp": 56,
+        "n_crisis": 23,
+        "n_calm": 99,
+        "auroc": 0.9415898111550285,
+        "auprc": 0.6974491248752985
+      }
+    ],
+    "robustness_summary": {
+      "hr_mean": 1.0,
+      "hr_std": 0.0,
+      "far_mean": 0.5671043771043771,
+      "far_std": 0.0020475145852539628,
+      "auroc_mean": 0.9503798858146685,
+      "auroc_std": 0.007984609037655785
+    }
+  }
+}

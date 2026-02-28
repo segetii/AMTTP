@@ -1,0 +1,47 @@
+{
+  "banklevel_N30_US_only": {
+    "N": 30,
+    "auroc": 0.8052768487551096,
+    "lead_q": 66.3,
+    "lambda_max": 12.077044249459881,
+    "scope": "US banks only (FDIC call-report)"
+  },
+  "gsib_global": {
+    "N": 22,
+    "auroc": 0.94,
+    "auroc_95ci": [
+      0.872,
+      0.9916
+    ],
+    "lead_q": 6,
+    "lambda_max": 10.494590933095242,
+    "scope": "G-SIBs global (US FDIC + Non-US synthetic proxy)"
+  },
+  "gsib_us": {
+    "N": 8,
+    "auroc": 0.9153,
+    "auroc_95ci": [
+      0.8016,
+      0.9801
+    ],
+    "scope": "G-SIBs US only"
+  },
+  "gsib_eu": {
+    "N": 7,
+    "auroc": 0.9725,
+    "auroc_95ci": [
+      0.9181,
+      1.0
+    ],
+    "scope": "G-SIBs EU only"
+  },
+  "gsib_asia": {
+    "N": 7,
+    "auroc": 0.9697,
+    "auroc_95ci": [
+      0.9114,
+      0.9961
+    ],
+    "scope": "G-SIBs Asia only"
+  }
+}

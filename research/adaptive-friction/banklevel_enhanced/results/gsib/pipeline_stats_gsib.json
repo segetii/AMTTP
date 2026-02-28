@@ -1,0 +1,37 @@
+{
+  "data_source": "G-SIB panel (FSB 2023 list)",
+  "T_quarters": 122,
+  "N_gsib": 22,
+  "n_us_real": 8,
+  "n_non_us_synthetic": 14,
+  "d_features": 5,
+  "lambda_max_W": 10.494590933095242,
+  "rho_star": 0.029517214457557346,
+  "auroc": 0.94,
+  "auroc_95ci": [
+    0.872,
+    0.9916
+  ],
+  "hit_rate": 1.0,
+  "hit_rate_95ci": [
+    1.0,
+    1.0
+  ],
+  "false_alarm_rate": 0.6055,
+  "lead_quarters_gfc": 6,
+  "gfc_alarm_date": "2007-03-31 00:00:00",
+  "causality": {
+    "linear_granger_min_p": 0.0274,
+    "linear_verdict": "PASS",
+    "threshold_granger_min_p": 0.03,
+    "threshold_verdict": "PASS (upper-regime predictive)",
+    "quantile_min_p": 0.56,
+    "quantile_verdict": "FAIL"
+  },
+  "region_auroc": {
+    "US": 0.9153,
+    "EU": 0.9725,
+    "Asia": 0.9697
+  },
+  "runtime_sec": 55.6
+}

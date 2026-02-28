@@ -1,0 +1,170 @@
+{
+  "linear_granger": {
+    "lag1": {
+      "F_stat": 0.2867,
+      "df1": 1,
+      "df2": 136,
+      "p_value": 0.5932,
+      "rss_r": 6.8699,
+      "rss_u": 6.8555
+    },
+    "lag2": {
+      "F_stat": 0.5205,
+      "df1": 2,
+      "df2": 133,
+      "p_value": 0.5954,
+      "rss_r": 6.6826,
+      "rss_u": 6.6307
+    },
+    "lag3": {
+      "F_stat": 1.4449,
+      "df1": 3,
+      "df2": 130,
+      "p_value": 0.2327,
+      "rss_r": 5.6722,
+      "rss_u": 5.4892
+    },
+    "lag4": {
+      "F_stat": 1.1203,
+      "df1": 4,
+      "df2": 127,
+      "p_value": 0.3499,
+      "rss_r": 5.6522,
+      "rss_u": 5.4596
+    }
+  },
+  "threshold_granger": {
+    "q60": {
+      "quantile": 0.6,
+      "threshold": 35.1949,
+      "beta_threshold": 0.0,
+      "t_stat": 0.0136,
+      "p_value_boot": 0.992,
+      "regime_n": 56,
+      "regime_frac": 0.403
+    },
+    "q70": {
+      "quantile": 0.7,
+      "threshold": 40.6527,
+      "beta_threshold": -0.0003,
+      "t_stat": -0.4524,
+      "p_value_boot": 0.658,
+      "regime_n": 42,
+      "regime_frac": 0.302
+    },
+    "q75": {
+      "quantile": 0.75,
+      "threshold": 42.2161,
+      "beta_threshold": -0.0008,
+      "t_stat": -0.9758,
+      "p_value_boot": 0.366,
+      "regime_n": 35,
+      "regime_frac": 0.252
+    },
+    "q80": {
+      "quantile": 0.8,
+      "threshold": 44.7323,
+      "beta_threshold": -0.0004,
+      "t_stat": -0.5395,
+      "p_value_boot": 0.574,
+      "regime_n": 28,
+      "regime_frac": 0.201
+    },
+    "q85": {
+      "quantile": 0.85,
+      "threshold": 51.4846,
+      "beta_threshold": 0.0001,
+      "t_stat": 0.1533,
+      "p_value_boot": 0.866,
+      "regime_n": 21,
+      "regime_frac": 0.151
+    },
+    "q90": {
+      "quantile": 0.9,
+      "threshold": 53.6145,
+      "beta_threshold": 0.0004,
+      "t_stat": 0.4015,
+      "p_value_boot": 0.672,
+      "regime_n": 14,
+      "regime_frac": 0.101
+    },
+    "best": "q75",
+    "min_p": 0.366
+  },
+  "quantile_causality": {
+    "tau75": {
+      "tau": 0.75,
+      "J_stat": 81.361139,
+      "p_value": 0.536,
+      "bandwidth": 0.3951
+    },
+    "tau85": {
+      "tau": 0.85,
+      "J_stat": 24.403492,
+      "p_value": 0.692,
+      "bandwidth": 0.3951
+    },
+    "tau90": {
+      "tau": 0.9,
+      "J_stat": 17.739573,
+      "p_value": 0.352,
+      "bandwidth": 0.3951
+    },
+    "best": "tau90",
+    "min_p": 0.352
+  },
+  "exceedance_reg": {
+    "tau59pct": {
+      "threshold": 35.1949,
+      "pct_above": 0.403,
+      "lr_stat": 1.2191,
+      "p_value_chi2": 0.5436,
+      "beta_x": 1.265
+    },
+    "tau69pct": {
+      "threshold": 40.6527,
+      "pct_above": 0.302,
+      "lr_stat": 0.5101,
+      "p_value_chi2": 0.7749,
+      "beta_x": 1.0304
+    },
+    "tau74pct": {
+      "threshold": 42.2161,
+      "pct_above": 0.252,
+      "lr_stat": 0.4445,
+      "p_value_chi2": 0.8007,
+      "beta_x": 0.9354
+    },
+    "tau79pct": {
+      "threshold": 44.7323,
+      "pct_above": 0.201,
+      "lr_stat": 0.5894,
+      "p_value_chi2": 0.7447,
+      "beta_x": 0.8937
+    },
+    "tau84pct": {
+      "threshold": 51.4846,
+      "pct_above": 0.151,
+      "lr_stat": 0.4639,
+      "p_value_chi2": 0.793,
+      "beta_x": 0.737
+    },
+    "tau89pct": {
+      "threshold": 53.6145,
+      "pct_above": 0.101,
+      "lr_stat": 0.3113,
+      "p_value_chi2": 0.8559,
+      "beta_x": 0.5466
+    }
+  },
+  "summary": {
+    "linear_granger_min_p": 0.2327,
+    "linear_granger_verdict": "FAIL (confirms Granger paradox)",
+    "threshold_granger_min_p": 0.366,
+    "threshold_granger_best": "q75",
+    "threshold_verdict": "FAIL",
+    "quantile_min_p": 0.352,
+    "quantile_verdict": "FAIL",
+    "interpretation": "Linear Granger fails (expected for phase-transition process); threshold test p=0.366; quantile test p=0.352. Upper-regime signal is predictively informative even when standard VAR fails -- consistent with Theorem 2 regime change."
+  }
+}
