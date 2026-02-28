@@ -1,0 +1,12 @@
+Gradient alignment - Theorem C empirical verification
+======================================================
+
+STATIC alignment (FDIC/FRED snapshots, N=7, d=6, T=116):
+  Mean cos theta = -0.2256
+  Expected negative: gradient E_BS opposes F on static snapshots.
+
+DYNAMIC alignment (100-step GravityEngine from crisis onset):
+  GFC 2008: mean cos theta = -0.0342, frac>=0.7 = 0.0%
+  COVID 2020: mean cos theta = -0.0194, frac>=0.7 = 0.0%
+  Rate Shock 2022: mean cos theta = -0.2488, frac>=0.7 = 0.0%
+  Mean = -0.1008  Verdict: FAIL

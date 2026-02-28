@@ -1,0 +1,151 @@
+{
+  "date_range": [
+    "2003-03-31",
+    "2022-09-30"
+  ],
+  "T_quarters": 79,
+  "N_sectors": 12,
+  "d_features": 6,
+  "static_cos_theta_mean": -0.2005,
+  "dynamic_cos_theta_mean": -0.0117,
+  "dynamic_alignment_verdict": "FAIL",
+  "dynamic_crisis_results": {
+    "GFC 2008": {
+      "mean_cos": -0.0171,
+      "min_cos": -0.1352,
+      "frac_above_07": 0.0,
+      "n_steps_run": 100
+    },
+    "COVID 2020": {
+      "mean_cos": -0.0058,
+      "min_cos": -0.0472,
+      "frac_above_07": 0.0,
+      "n_steps_run": 100
+    },
+    "Rate Shock 2022": {
+      "mean_cos": -0.0123,
+      "min_cos": -0.3021,
+      "frac_above_07": 0.0,
+      "n_steps_run": 100
+    }
+  },
+  "frac_above_cman": 0.7975,
+  "gamma_star_mean": 20232.9438,
+  "lead_table": [
+    {
+      "Crisis": "GFC 2008",
+      "Benchmark": "STLFSI",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "GFC 2008",
+      "Benchmark": "VIX",
+      "Lead (quarters)": -2.0
+    },
+    {
+      "Crisis": "GFC 2008",
+      "Benchmark": "SRISK-proxy",
+      "Lead (quarters)": -1.0
+    },
+    {
+      "Crisis": "GFC 2008",
+      "Benchmark": "NFCI",
+      "Lead (quarters)": -1.0
+    },
+    {
+      "Crisis": "COVID 2020",
+      "Benchmark": "STLFSI",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "COVID 2020",
+      "Benchmark": "VIX",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "COVID 2020",
+      "Benchmark": "SRISK-proxy",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "COVID 2020",
+      "Benchmark": "NFCI",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "Rate Shock 2022",
+      "Benchmark": "STLFSI",
+      "Lead (quarters)": 2.0
+    },
+    {
+      "Crisis": "Rate Shock 2022",
+      "Benchmark": "VIX",
+      "Lead (quarters)": 0.0
+    },
+    {
+      "Crisis": "Rate Shock 2022",
+      "Benchmark": "SRISK-proxy",
+      "Lead (quarters)": 1.0
+    },
+    {
+      "Crisis": "Rate Shock 2022",
+      "Benchmark": "NFCI",
+      "Lead (quarters)": 0.0
+    }
+  ],
+  "granger_table": [
+    {
+      "lag_quarters": 1,
+      "F_stat": 3.575,
+      "p_value": 0.0625
+    },
+    {
+      "lag_quarters": 2,
+      "F_stat": 2.671,
+      "p_value": 0.0761
+    },
+    {
+      "lag_quarters": 3,
+      "F_stat": 1.75,
+      "p_value": 0.1649
+    },
+    {
+      "lag_quarters": 4,
+      "F_stat": 1.125,
+      "p_value": 0.3525
+    },
+    {
+      "lag_quarters": 5,
+      "F_stat": 0.97,
+      "p_value": 0.443
+    },
+    {
+      "lag_quarters": 6,
+      "F_stat": 1.546,
+      "p_value": 0.179
+    }
+  ],
+  "welfare_table": [
+    {
+      "Crisis": "GFC 2008",
+      "Quarters": 8,
+      "L_inaction": 26.1999,
+      "Welfare loss (% consump)": 100.0,
+      "Peak CCyB (bps)": 165.6
+    },
+    {
+      "Crisis": "COVID 2020",
+      "Quarters": 4,
+      "L_inaction": 0.0,
+      "Welfare loss (% consump)": 0.0,
+      "Peak CCyB (bps)": 201.8
+    },
+    {
+      "Crisis": "Rate Shock 2022",
+      "Quarters": 3,
+      "L_inaction": 0.2091,
+      "Welfare loss (% consump)": 99.91,
+      "Peak CCyB (bps)": 0.0
+    }
+  ]
+}
