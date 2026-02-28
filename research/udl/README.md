@@ -5,8 +5,8 @@
 This directory contains the complete source code for the **Universal Deviation Law** framework, a multi-spectrum tensor approach for anomaly detection. The framework instantiates 14 composable spectrum operators across five mathematical families and provides multiple projection strategies for converting multi-law representations into anomaly scores.
 
 **Papers:**
-- IEEE version: `papers/universal_deviation_law.tex` (.pdf)
-- NeurIPS version: `papers/universal_deviation_law_neurips.tex` (.pdf)
+- IEEE version: `paper/universal_deviation_law.tex` (.pdf)
+- NeurIPS version: `paper/universal_deviation_law_neurips.tex` (.pdf)
 
 ## Key Results
 
@@ -24,19 +24,19 @@ Results validated on 5 benchmarks: Synthetic (1050×10), Mimic (1050×10), Mammo
 ### Core Pipeline
 | File | Description |
 |------|-------------|
-| `pipeline.py` | Main UDL pipeline — operator stacking, tensor construction, projection |
-| `hybrid_pipeline.py` | Hybrid auto-selection — CV-competes Fisher/QDA/QDA-Magnified/RankFusion |
-| `meta_fusion.py` | MetaFusionPipeline — per-sample rank-average across strategies |
-| `rank_fusion.py` | RankFusion — non-parametric unsupervised strategy |
-| `projection.py` | Fisher LDA and QDA projection implementations |
-| `magnifier.py` | Boundary-Centred Dimension Magnifier (Eq. 8 in paper) |
+| `src/pipeline.py` | Main UDL pipeline — operator stacking, tensor construction, projection |
+| `src/hybrid_pipeline.py` | Hybrid auto-selection — CV-competes Fisher/QDA/QDA-Magnified/RankFusion |
+| `src/meta_fusion.py` | MetaFusionPipeline — per-sample rank-average across strategies |
+| `src/rank_fusion.py` | RankFusion — non-parametric unsupervised strategy |
+| `src/projection.py` | Fisher LDA and QDA projection implementations |
+| `src/magnifier.py` | Boundary-Centred Dimension Magnifier (Eq. 8 in paper) |
 
 ### Spectrum Operators (14 total)
 | File | Operators |
 |------|-----------|
-| `spectra.py` | Statistical, Geometric, Exponential, Reconstruction, RankOrder |
-| `experimental_spectra.py` | Fourier, BSpline, Wavelet, Legendre, Phase-curve |
-| `new_spectra.py` | Topological, Dependency, Kernel, Compression |
+| `src/spectra.py` | Statistical, Geometric, Exponential, Reconstruction, RankOrder |
+| `src/experimental_spectra.py` | Fourier, BSpline, Wavelet, Legendre, Phase-curve |
+| `src/new_spectra.py` | Topological, Dependency, Kernel, Compression |
 
 ### Supporting Modules
 | File | Description |
@@ -59,18 +59,18 @@ Results validated on 5 benchmarks: Synthetic (1050×10), Mimic (1050×10), Mammo
 ### Validation & Results
 | File | Description |
 |------|-------------|
-| `validate_phase2.py` | Validation orchestrator — spawns `worker_eval.py` per dataset |
-| `worker_eval.py` | Per-dataset evaluation worker (9 methods × 5 datasets) |
-| `correlation_audit.py` | 14×14 operator Spearman correlation analysis |
-| `lean_results.txt` | Final validation results (all methods × all datasets) |
-| `correlation_audit.json` | Full correlation matrix (JSON) |
-| `corr_output.txt` | Correlation analysis output log |
+| `src/validate_phase2.py` | Validation orchestrator — spawns `worker_eval.py` per dataset |
+| `src/worker_eval.py` | Per-dataset evaluation worker (9 methods × 5 datasets) |
+| `src/correlation_audit.py` | 14×14 operator Spearman correlation analysis |
+| `results/lean_results.txt` | Final validation results (all methods × all datasets) |
+| `results/correlation_audit.json` | Full correlation matrix (JSON) |
+| `results/corr_output.txt` | Correlation analysis output log |
 
 ### Figures
 | File | Description |
 |------|-------------|
-| `papers/generate_figures.py` | Generates all 6 publication PDF figures |
-| `papers/udl_figures/` | Output directory (10 PDFs) |
+| `paper/generate_figures.py` | Generates all 6 publication PDF figures |
+| `paper/figures/` | Output directory (10 PDFs) |
 
 ## Reproducing Results
 
@@ -84,11 +84,11 @@ pip install numpy scipy scikit-learn pyod
 ### Step 1: Run Validation (All 5 Datasets × 9 Methods)
 
 ```bash
-cd udl
+cd src
 python validate_phase2.py
 ```
 
-This spawns `worker_eval.py` as a subprocess for each dataset to avoid OOM. Results are printed to stdout and saved to `lean_results.txt`.
+This spawns `worker_eval.py` as a subprocess for each dataset to avoid OOM. Results are printed to stdout and saved to `../results/lean_results.txt`.
 
 ### Step 2: Run Correlation Audit (14 Operators)
 
@@ -96,16 +96,16 @@ This spawns `worker_eval.py` as a subprocess for each dataset to avoid OOM. Resu
 python correlation_audit.py
 ```
 
-Computes 14×14 Spearman rank correlation matrix across all operator pairs, averaged over 5 datasets. Output: `corr_output.txt` and `correlation_audit.json`.
+Computes 14×14 Spearman rank correlation matrix across all operator pairs, averaged over 5 datasets. Output: `../results/corr_output.txt` and `../results/correlation_audit.json`.
 
 ### Step 3: Generate Figures
 
 ```bash
-cd ../papers
+cd ../paper
 python generate_figures.py
 ```
 
-Generates 6 publication-quality PDFs in `udl_figures/`:
+Generates 6 publication-quality PDFs in `figures/`:
 - `operator_solo_coverage.pdf` — Solo operator coverage bar chart
 - `operator_correlation_heatmap.pdf` — 14×14 correlation heatmap
 - `strategy_coverage_heatmap.pdf` — Strategy × dataset coverage
@@ -116,7 +116,7 @@ Generates 6 publication-quality PDFs in `udl_figures/`:
 ### Step 4: Compile Papers
 
 ```bash
-cd papers
+cd paper
 pdflatex universal_deviation_law.tex          # IEEE version
 pdflatex universal_deviation_law.tex          # run twice for refs
 

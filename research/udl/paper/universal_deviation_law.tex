@@ -590,14 +590,14 @@ where all operations are element-wise, $\mathbf{k}$, $\mathbf{b}$, and $\boldsym
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/cohen_d_magnifier.pdf}
+\includegraphics[width=\columnwidth]{figures/cohen_d_magnifier.pdf}
 \caption{Per-dimension Cohen's $d$ before and after boundary-centred magnification on the Mammography dataset. Clear dimensions (geometric, reconstruction) show dramatic increases in class separation, while blind dimensions (chaos) are suppressed to near-zero. The heterogeneous law-domain sensitivity---predicted by the Universal Deviation Principle---is what creates the clear/blind structure the magnifier exploits.}
 \label{fig:cohen_d}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/magnifier_heatmap.pdf}
+\includegraphics[width=\columnwidth]{figures/magnifier_heatmap.pdf}
 \caption{Magnifier steepness $k_d$ per dimension on Mammography. Green (high $k_d$): dimensions pushed to $\pm 1$ saturation. Red (low $k_d$): dimensions silenced. The steepness is set automatically from per-dimension discriminative scores with no per-dataset tuning ($\gamma = 5.0$ globally).}
 \label{fig:magnifier_heatmap}
 \end{figure}
@@ -863,7 +863,7 @@ To understand each operator's individual contribution, we evaluate all 14 operat
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/operator_solo_coverage.pdf}
+\includegraphics[width=\columnwidth]{figures/operator_solo_coverage.pdf}
 \caption{Solo operator mean coverage across five datasets. Operators are ranked by mCov and colour-coded by mathematical family. Phase-curve (86\%) and topological persistence (78\%) lead; statistical and compression operators fall below the 70\% utility threshold. No single operator exceeds 86\%, confirming that multi-operator fusion is necessary.}
 \label{fig:solo_bars}
 \end{figure}
@@ -877,7 +877,7 @@ A natural concern with 14 operators is redundancy: do some operators capture the
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/operator_correlation_heatmap.pdf}
+\includegraphics[width=\columnwidth]{figures/operator_correlation_heatmap.pdf}
 \caption{Spearman correlation between 14 spectrum operators (hierarchically clustered). Dashed red box marks the only redundant pair: Wavelet~$\leftrightarrow$~Phase ($\rho{=}0.92$). The topological operator (Topo) is the most independent, with maximum $\rho{=}0.39$. Operator families are colour-coded on the axes.}
 \label{fig:corr_heatmap}
 \end{figure}
@@ -912,14 +912,14 @@ We evaluate four projection strategies on the recommended operator stack (Phase,
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/strategy_coverage_heatmap.pdf}
+\includegraphics[width=\columnwidth]{figures/strategy_coverage_heatmap.pdf}
 \caption{Coverage heatmap: projection strategy $\times$ dataset. Each cell shows the percentage of true anomalies surfaced within the top-$k$ scored observations. Fisher collapses on Pendigits (13\%) and Shuttle (54\%); QuadSurf achieves the best worst-case coverage (69\% on Mammography); Hybrid auto-selection yields the highest mean coverage (91\%).}
 \label{fig:strategy_heatmap}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.9\columnwidth]{udl_figures/coverage_radar.pdf}
+\includegraphics[width=0.9\columnwidth]{figures/coverage_radar.pdf}
 \caption{Coverage radar: each axis represents one benchmark dataset, and each polygon traces a strategy's coverage profile. Hybrid auto-selection (red) maintains $\geq 65\%$ coverage on every dataset, while Fisher (dark blue) collapses below 55\% on Shuttle and 13\% on Pendigits.}
 \label{fig:radar}
 \end{figure}
@@ -951,7 +951,7 @@ Key findings:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\columnwidth]{udl_figures/auc_vs_coverage.pdf}
+\includegraphics[width=0.85\columnwidth]{figures/auc_vs_coverage.pdf}
 \caption{AUC vs.~coverage for each strategy--dataset pair. Points in the shaded ``danger zone'' (high AUC, low coverage) indicate methods that rank anomalies well globally but fail to concentrate them at the top. Fisher on Pendigits (AUC ${=} 0.345$, Cov ${=} 13\%$) is the most extreme example.}
 \label{fig:auc_vs_cov}
 \end{figure}
@@ -963,7 +963,7 @@ Figure~\ref{fig:scatter} visualises the multi-law feature space by plotting the 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/projection_scatter.pdf}
+\includegraphics[width=\columnwidth]{figures/projection_scatter.pdf}
 \caption{2D projection of the UDL multi-law feature space for three real-world datasets. Red points (anomalies) separate from blue (normal) in the first two law-magnitude dimensions. On Shuttle, anomalies form a distinct cluster; on Mammography and Pendigits, anomalies are displaced along Law Dimension~1, consistent with the magnitude-dominated separation identified in the MDN analysis (Table~\ref{tab:mdn}).}
 \label{fig:scatter}
 \end{figure}
@@ -1024,14 +1024,14 @@ Fisher LDA & 0.910 & 0.877 & $0.896 \pm 0.014$ \\
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/qda_mag_comparison.pdf}
+\includegraphics[width=\columnwidth]{figures/qda_mag_comparison.pdf}
 \caption{AUC-ROC comparison on Mammography: QDA-Magnified vs established baselines under identical semi-supervised protocol. UDL-QDA-Magnified (red) achieves the highest AUC (0.947), exceeding the next best established method ($k$-NN Distance, 0.876) by $+0.071$.}
 \label{fig:comparison}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\columnwidth]{udl_figures/cv_boxplot.pdf}
+\includegraphics[width=0.8\columnwidth]{figures/cv_boxplot.pdf}
 \caption{3-fold cross-validation on Mammography: QDA-Magnified vs Fisher LDA. QDA-Magnified achieves higher mean AUC with lower variance, confirming that the improvement is robust across data splits.}
 \label{fig:cv}
 \end{figure}

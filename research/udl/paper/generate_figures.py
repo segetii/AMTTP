@@ -1,7 +1,7 @@
 """
 Generate publication-quality figures for Universal Deviation Law paper.
 
-Produces 6 PDF figures in papers/udl_figures/:
+Produces 6 PDF figures in paper/figures/:
   1. operator_correlation_heatmap.pdf   — 14×14 Spearman ρ, clustered
   2. projection_scatter.pdf             — 2D UDL projection, anomalies vs normal
   3. coverage_radar.pdf                 — coverage profile across 5 datasets
@@ -24,7 +24,7 @@ from copy import deepcopy
 from math import pi
 
 # ── Paths ──────────────────────────────────────────────────────────
-OUT_DIR = os.path.join(os.path.dirname(__file__), "udl_figures")
+OUT_DIR = os.path.join(os.path.dirname(__file__), "figures")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # ── Style ──────────────────────────────────────────────────────────

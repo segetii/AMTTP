@@ -1,4 +1,4 @@
-﻿% !TEX program = pdflatex
+% !TEX program = pdflatex
 \documentclass{article}
 
 % ============================================================
@@ -57,7 +57,7 @@
 \newcommand{\UDL}{\mathrm{UDL}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
-\newcommand{\Nset}{\mathcal{S}}  % Normal set (avoid \mathcal{N} â‰ˆ Gaussian confusion)
+\newcommand{\Nset}{\mathcal{S}}  % Normal set (avoid \mathcal{N} ≈ Gaussian confusion)
 \newcommand{\T}{\mathcal{T}}
 \newcommand{\calR}{\mathcal{R}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
@@ -489,7 +489,7 @@ Beyond the five base law domains, we investigate 9~additional spectrum projectio
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/operator_correlation_heatmap.pdf}
+\includegraphics[width=\columnwidth]{figures/operator_correlation_heatmap.pdf}
 \caption{Spearman correlation between 14 spectrum operators. Only Wavelet$\leftrightarrow$Phase ($\rho{=}0.92$) exceeds the redundancy threshold.}
 \label{fig:corr_heatmap}
 \end{figure}
@@ -498,7 +498,7 @@ Beyond the five base law domains, we investigate 9~additional spectrum projectio
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/operator_solo_coverage.pdf}
+\includegraphics[width=\columnwidth]{figures/operator_solo_coverage.pdf}
 \caption{Solo operator mean coverage across five datasets. Phase-curve (86\%) and Topo (78\%) lead.}
 \label{fig:solo_bars}
 \end{figure}
@@ -533,14 +533,14 @@ Hybrid auto-selection cross-validates Fisher, QDA, QDA-Magnified, and RankFusion
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{udl_figures/strategy_coverage_heatmap.pdf}
+\includegraphics[width=\columnwidth]{figures/strategy_coverage_heatmap.pdf}
 \caption{Coverage heatmap: strategy $\times$ dataset. Fisher collapses on Pendigits (13\%); Hybrid maintains $\geq 65\%$ everywhere.}
 \label{fig:strategy_heatmap}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.9\columnwidth]{udl_figures/coverage_radar.pdf}
+\includegraphics[width=0.9\columnwidth]{figures/coverage_radar.pdf}
 \caption{Coverage radar plot. Hybrid (red) maintains coverage across all datasets.}
 \label{fig:radar}
 \end{figure}
