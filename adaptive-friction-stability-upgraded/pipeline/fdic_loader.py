@@ -17,7 +17,7 @@ Feature definitions (all defensible CAMELS-adjacent metrics):
     f1  equity_ratio     = EQ      / ASSET          (capital adequacy)
     f2  npl_ratio        = NCLNLS  / LNLSNET        (credit stress)
     f3  roa              = NETINC  / ASSET           (profitability)
-    f4  funding_cost     = INTEXP  / LNLSNET        (interest cost per loan $)
+    f4  funding_cost     = EINTEXP / LNLSNET         (interest cost per loan $)
     f5  yield_slope      = T10Y2Y  (FRED)            (common market factor)
 
 SPECGRP sector mapping (FDIC/OCC institutional classification):
@@ -30,6 +30,15 @@ SPECGRP sector mapping (FDIC/OCC institutional classification):
     7 – Foreign-chartered institutions (US branches/agencies)
 
 No researcher-chosen weights or heuristic adjustments anywhere in this file.
+All data comes from FDIC regulatory filings, aggregated by institution type.
+
+API note
+--------
+The FDIC REST API does not support combining ``agg_by`` with date-range
+filters.  This module therefore iterates over each quarter-end date
+individually, issuing one server-side ``agg_by=SPECGRP`` call per quarter.
+For 140 quarters (1990-2024), this takes ~3-4 minutes.  Results are
+cached to ``fred_cache/fdic_specgrp_quarterly.pkl``.
 """
 
 from __future__ import annotations
@@ -60,8 +69,28 @@ SPECGRP_MAP: dict[int, str] = {
     7: "Foreign Institution Branches",
 }
 
-FDIC_FIELDS = ["REPDTE", "SPECGRP", "ASSET", "LNLSNET",
-               "EQ", "NETINC", "INTINC", "INTEXP", "NCLNLS"]
+# Correct FDIC field names (verified against API schema):
+#   EINTEXP  = interest expense  (not 'INTEXP' which doesn't exist)
+#   NCLNLS   = non-current loans & leases ($)
+#   INTINC   = interest income
+#   ASSET    = total assets
+#   LNLSNET  = net loans & leases
+#   EQ       = total equity capital
+#   NETINC   = net income
+AGG_SUM_FIELDS = "ASSET,LNLSNET,EQ,NETINC,EINTEXP,INTINC,NCLNLS"
+
+# Column mapping: agg_by returns fields with 'sum_' prefix
+AGG_RENAME = {
+    "sum_ASSET":   "ASSET",
+    "sum_LNLSNET": "LNLSNET",
+    "sum_EQ":      "EQ",
+    "sum_NETINC":  "NETINC",
+    "sum_EINTEXP": "EINTEXP",
+    "sum_INTINC":  "INTINC",
+    "sum_NCLNLS":  "NCLNLS",
+}
+
+NUMERIC_COLS = ["ASSET", "LNLSNET", "EQ", "NETINC", "EINTEXP", "INTINC", "NCLNLS"]
 
 FEATURE_NAMES = [
     "loan_to_asset",    # f0
@@ -80,14 +109,25 @@ def _fdic_api_call(params: dict, verbose: bool = False) -> list[dict]:
     """
     url = FDIC_BASE + "?" + urlencode(params)
     if verbose:
-        print(f"  [fdic] GET {url[:100]}...")
+        print(f"  [fdic] GET {url[:120]}...")
     try:
-        with urlopen(url, timeout=30) as resp:
+        with urlopen(url, timeout=60) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
         return payload.get("data", [])
     except URLError as e:
         warnings.warn(f"[fdic] API call failed: {e}")
         return []
+
+
+def _quarter_end_dates(start: str, end: str) -> list[str]:
+    """
+    Generate quarter-end date strings in FDIC format (YYYYMMDD).
+    E.g. 19900331, 19900630, 19900930, 19901231, ...
+    """
+    start_dt = pd.Timestamp(start)
+    end_dt   = pd.Timestamp(end)
+    dates    = pd.date_range(start_dt, end_dt, freq="QE")
+    return [d.strftime("%Y%m%d") for d in dates]
 
 
 def fetch_fdic_specgrp(
@@ -99,12 +139,17 @@ def fetch_fdic_specgrp(
     """
     Download quarterly FDIC aggregate call-report data by SPECGRP.
 
+    Strategy: iterate over each quarter-end date and issue a single
+    ``agg_by=SPECGRP`` call per quarter.  The FDIC API does *not*
+    support combining ``agg_by`` with date-range filters, so this
+    per-quarter approach is the only reliable method.
+
     Returns
     -------
     DataFrame with MultiIndex (REPDTE, SPECGRP) and columns:
-        ASSET, LNLSNET, EQ, NETINC, INTINC, INTEXP, NCLNLS
-    All values are *sums* across all institutions in that SPECGRP for the quarter.
-    Dates are quarter-end timestamps.
+        ASSET, LNLSNET, EQ, NETINC, EINTEXP, INTINC, NCLNLS
+    All values are *sums* across all institutions in that SPECGRP for
+    the quarter.  Dates are quarter-end timestamps.
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     if use_cache and CACHE_FILE.exists():
@@ -115,43 +160,72 @@ def fetch_fdic_specgrp(
                   f"Shape: {data.shape}, dates: {data.index.get_level_values(0)[[0,-1]]}")
         return data
 
-    # FDIC date format: YYYYMMDD (no separators)
-    start_fdic = start.replace("-", "")
-    end_fdic   = end.replace("-", "")
-
-    params = {
-        # FDIC API aggregation: use 'limit' (not agg_limit) for result count.
-        # Do not include 'fields' when using agg_by — API derives output columns.
-        "filters":        f"REPDTE:[{start_fdic} TO {end_fdic}]",
-        "agg_by":         "REPDTE,SPECGRP",
-        "agg_sum_fields": "ASSET,LNLSNET,EQ,NETINC,INTINC,INTEXP,NCLNLS",
-        "limit":          10000,
-        "output":         "json",
-    }
-
+    quarter_dates = _quarter_end_dates(start, end)
     if verbose:
-        print("[fdic] Fetching SPECGRP aggregates from FDIC SDI API …")
-    raw = _fdic_api_call(params, verbose=verbose)
+        print(f"[fdic] Fetching SPECGRP aggregates for {len(quarter_dates)} quarters "
+              f"from FDIC SDI API ...")
+        print(f"[fdic] Date range: {quarter_dates[0]} – {quarter_dates[-1]}")
 
-    if not raw:
+    all_rows: list[dict] = []
+    n_ok    = 0
+    n_empty = 0
+    t0      = time.perf_counter()
+
+    for i, qdate in enumerate(quarter_dates):
+        params = {
+            "filters":        f"REPDTE:{qdate}",
+            "agg_by":         "SPECGRP",
+            "agg_sum_fields": AGG_SUM_FIELDS,
+            "limit":          20,
+            "output":         "json",
+        }
+        records = _fdic_api_call(params, verbose=False)
+
+        if records:
+            for r in records:
+                d = r["data"] if "data" in r else r
+                d["REPDTE"] = qdate
+                all_rows.append(d)
+            n_ok += 1
+        else:
+            n_empty += 1
+
+        # Progress every 20 quarters
+        if verbose and (i + 1) % 20 == 0:
+            elapsed = time.perf_counter() - t0
+            pct     = (i + 1) / len(quarter_dates) * 100
+            print(f"  [fdic] {i+1}/{len(quarter_dates)} quarters ({pct:.0f}%) "
+                  f"in {elapsed:.1f}s  ({n_ok} ok, {n_empty} empty)")
+
+        # Polite delay between API calls
+        time.sleep(0.25)
+
+    elapsed = time.perf_counter() - t0
+    if verbose:
+        print(f"[fdic] Completed: {n_ok}/{len(quarter_dates)} quarters "
+              f"in {elapsed:.1f}s.  Total rows: {len(all_rows)}")
+
+    if not all_rows:
         raise RuntimeError(
-            "[fdic] API returned empty data.  "
+            "[fdic] API returned empty data for ALL quarters.  "
             "Check https://banks.data.fdic.gov/api/financials is reachable."
         )
 
-    # Each record is {"data": {...}} — extract inner dict
-    rows = [r["data"] if "data" in r else r for r in raw]
-    df   = pd.DataFrame(rows)
+    df = pd.DataFrame(all_rows)
 
-    # Parse date: FDIC returns REPDTE as string 'YYYYMMDD'
+    # Rename sum_ prefixed columns to clean names
+    df = df.rename(columns=AGG_RENAME)
+
+    # Parse date
     df["REPDTE"]  = pd.to_datetime(df["REPDTE"].astype(str), format="%Y%m%d")
     df["SPECGRP"] = pd.to_numeric(df["SPECGRP"], errors="coerce").astype("Int64")
 
     # Numeric conversion for financial fields
-    for col in FDIC_FIELDS[2:]:   # skip REPDTE and SPECGRP
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    for col in NUMERIC_COLS:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # Keep only known SPECGRP codes
+    # Keep only known SPECGRP codes (1-7)
     df = df[df["SPECGRP"].isin(SPECGRP_MAP.keys())].copy()
     df = df.dropna(subset=["ASSET"])
 
@@ -159,9 +233,12 @@ def fetch_fdic_specgrp(
     df["REPDTE"] = df["REPDTE"] + pd.offsets.QuarterEnd(0)
     df = df.set_index(["REPDTE", "SPECGRP"]).sort_index()
 
+    # Keep only needed columns
+    df = df[NUMERIC_COLS].copy()
+
     if verbose:
         dates = df.index.get_level_values(0)
-        print(f"[fdic] Fetched {len(df)} observations, "
+        print(f"[fdic] Final panel: {len(df)} observations, "
               f"{df.index.get_level_values(1).nunique()} sectors, "
               f"dates {dates.min().date()} – {dates.max().date()}")
 
@@ -203,7 +280,7 @@ def compute_sector_features(
         feat["equity_ratio"]  = sub["EQ"]      / asset
         feat["npl_ratio"]     = sub["NCLNLS"]  / (sub["LNLSNET"].clip(lower=eps))
         feat["roa"]           = sub["NETINC"]   / asset
-        feat["funding_cost"]  = sub["INTEXP"]   / (sub["LNLSNET"].clip(lower=eps))
+        feat["funding_cost"]  = sub["EINTEXP"]  / (sub["LNLSNET"].clip(lower=eps))
 
         # Align yield slope from FRED (same value for all sectors)
         feat = feat.join(fred_slope.rename("yield_slope"), how="left")
