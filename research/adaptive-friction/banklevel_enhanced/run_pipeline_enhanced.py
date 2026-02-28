@@ -46,7 +46,12 @@ for p in [str(THIS_DIR), str(ORIG_BL_DIR), str(UPGRADED_DIR), str(VARIANT_DIR)]:
 from bank_level_loader import build_bank_panel, FEATURE_NAMES
 from network_builder   import lw_correlation_network, spectral_radius
 from gravity_engine    import BSDTOperator, analyse_trajectory, ALPHA
-from eval_protocol     import eval_all_variants, latex_eval_table, CRISIS_WINDOWS_EVAL
+from eval_protocol     import (
+    eval_all_variants,
+    latex_eval_table,
+    CRISIS_WINDOWS_EVAL,
+    build_binary_labels,
+)
 from robustness_checks import run_all_robustness, latex_robustness_table
 
 # Enhanced modules (in this directory)
@@ -76,30 +81,9 @@ def _fetch_t10y2y(dates: pd.DatetimeIndex) -> np.ndarray:
     return np.zeros(len(dates))
 
 
-# ---------------------------------------------------------------------------
-# Crisis label builder aligned to pipeline dates
-# ---------------------------------------------------------------------------
-_CRISIS_QUARTERS = {
-    # S&L crisis tail
-    "1990-09-30", "1990-12-31", "1991-03-31",
-    # GFC
-    "2007-06-30", "2007-09-30", "2007-12-31",
-    "2008-03-31", "2008-06-30", "2008-09-30", "2008-12-31",
-    "2009-03-31", "2009-06-30",
-    # COVID
-    "2020-03-31", "2020-06-30",
-    # Rate shock (soft)
-    "2022-06-30", "2022-09-30",
-}
-
 def _make_crisis_labels(dates: pd.DatetimeIndex) -> np.ndarray:
-    date_strs = {str(d.date()) for d in dates}
-    q_hits    = date_strs & _CRISIS_QUARTERS
-    lbl = np.zeros(len(dates), dtype=int)
-    for i, d in enumerate(dates):
-        if str(d.date()) in _CRISIS_QUARTERS:
-            lbl[i] = 1
-    return lbl
+    """Binary labels aligned with the paper's evaluation protocol windows."""
+    return build_binary_labels(dates, CRISIS_WINDOWS_EVAL, shift_quarters=0)
 
 
 # ---------------------------------------------------------------------------

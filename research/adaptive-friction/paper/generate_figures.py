@@ -1,5 +1,5 @@
 """
-generate_figures.py — Generate all figures for main.tex
+generate_figures.py - Generate all figures for main.tex
 ========================================================
 Produces publication-quality PDF/PNG figures for the paper.
 Uses data from the upgraded pipeline (real FDIC) and variant comparison.
@@ -204,7 +204,7 @@ def fig2_energy_spectral(data):
     for cname, (cs, ce, cp) in CRISIS_WINDOWS.items():
         ax.axvspan(pd.Timestamp(cs), pd.Timestamp(ce), alpha=0.12, color=CRISIS_COLORS[cname])
     ax.set_ylabel(r"$\lambda_{\max}$")
-    ax.set_title(f"(b) Spectral Radius — {frac:.0%} of quarters above critical threshold")
+    ax.set_title(f"(b) Spectral Radius - {frac:.0%} of quarters above critical threshold")
     ax.legend(fontsize=7, loc="upper right")
     ax.grid(alpha=0.2)
 
@@ -218,7 +218,7 @@ def fig2_energy_spectral(data):
     mean_ct = s["cos_theta"].mean()
     ax.axhline(mean_ct, color="#e74c3c", ls=":", lw=0.8, label=f"mean = {mean_ct:.3f}")
     ax.set_ylabel(r"$\cos\theta$")
-    ax.set_title(rf"(c) Gradient Alignment — mean $\cos\theta = {mean_ct:.3f}$")
+    ax.set_title(rf"(c) Gradient Alignment - mean $\cos\theta = {mean_ct:.3f}$")
     ax.legend(fontsize=7, loc="upper right")
     ax.grid(alpha=0.2)
     ax.set_xlabel("Date")
@@ -340,7 +340,7 @@ def fig5_signed_lr_weights(v4):
     ax.set_xticks(range(len(beta)))
     ax.set_xticklabels(labels, fontsize=8)
     ax.set_ylabel("Learned weight")
-    ax.set_title("Signed LR: Learned BSDT Channel Weights (trained 1990–2006)")
+    ax.set_title("Signed LR: Learned BSDT Channel Weights (trained 1990-2006)")
 
     # Annotate values
     for i, (b, bar_) in enumerate(zip(beta, bars)):
@@ -459,7 +459,7 @@ def fig8_granger_pvalues():
     ax.axhline(0.05, color="#e74c3c", ls=":", lw=0.8, alpha=0.5, label=r"$\alpha = 0.05$")
     ax.set_xlabel("Lag (quarters)")
     ax.set_ylabel("p-value")
-    ax.set_title("Granger Causality: MFLS → SRISK-proxy (all variants)")
+    ax.set_title("Granger Causality: MFLS -> SRISK-proxy (all variants)")
     ax.legend(fontsize=7, ncol=2, loc="lower right")
     ax.set_ylim(-0.02, 1.05)
     ax.grid(alpha=0.2)

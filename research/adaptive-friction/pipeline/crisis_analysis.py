@@ -3,10 +3,10 @@ crisis_analysis.py
 ==================
 Crisis window definitions, lead-lag test, and benchmark comparisons.
 
-Implements §8 of the paper:
+Implements ?8 of the paper:
   - Mark three crisis windows (2008 GFC, 2020 COVID, 2022-23 rate shock)
   - Compute peak-signal timing for our model vs STLFSI / VIX benchmarks
-  - Lead-lag regression: lead(model signal, benchmark) → t-test
+  - Lead-lag regression: lead(model signal, benchmark) -> t-test
   - Output: Table 8.1 (lead time by window) and Figure 8.1 (trajectory plot)
 """
 
@@ -20,9 +20,9 @@ import matplotlib.patches as mpatches
 from pathlib import Path
 from scipy import stats as spstats
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Crisis window definitions (quarter start / end, peak label)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 CRISIS_WINDOWS = {
     "GFC 2008":    ("2007-01-01", "2009-06-30", "2008-09-15"),   # Lehman
     "COVID 2020":  ("2019-10-01", "2021-03-31", "2020-03-31"),   # March trough
@@ -32,14 +32,14 @@ CRISIS_WINDOWS = {
 OUTPUT_DIR = Path(__file__).parent / "results"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Lead-lag analysis helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def cross_correlation(x: np.ndarray, y: np.ndarray,
                       max_lag: int = 8) -> tuple[np.ndarray, np.ndarray]:
     """
-    Compute cross-correlation of x and y at lags -max_lag … +max_lag.
+    Compute cross-correlation of x and y at lags -max_lag ... +max_lag.
     Returns (lags, correlations).
     Positive lag = x leads y.
     """
@@ -63,7 +63,7 @@ def peak_lead_quarters(model_signal: np.ndarray,
     """
     Within [window_start, window_end]:
     Find peak quarter of model_signal and peak quarter of benchmark.
-    Return model_peak_date − benchmark_peak_date in quarters (positive = model leads).
+    Return model_peak_date ? benchmark_peak_date in quarters (positive = model leads).
     """
     mask = (dates >= window_start) & (dates <= window_end)
     if mask.sum() < 2:
@@ -101,9 +101,9 @@ def granger_causality_test(
     return pd.DataFrame(rows)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Main analysis function
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def run_crisis_analysis(
     stats: dict[str, np.ndarray],
@@ -120,8 +120,8 @@ def run_crisis_analysis(
 
     Returns
     -------
-    lead_table  : DataFrame — lead time by crisis window
-    granger_df  : DataFrame — Granger causality results
+    lead_table  : DataFrame - lead time by crisis window
+    granger_df  : DataFrame - Granger causality results
     """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -144,7 +144,7 @@ def run_crisis_analysis(
     srisk_proxy = (_rank_norm(stlfsi) + _rank_norm(vix) + _rank_norm(hy_sprd)) / 3.0
     nfci_norm   = _rank_norm(nfci)
 
-    # ── Lead table ──────────────────────────────────────────────────────────
+    # ?? Lead table ??????????????????????????????????????????????????????????
     rows = []
     for window_name, (wstart, wend, _peak) in CRISIS_WINDOWS.items():
         for bench_name, bench in [("STLFSI", stlfsi),
@@ -155,7 +155,7 @@ def run_crisis_analysis(
             rows.append({
                 "Crisis":    window_name,
                 "Benchmark": bench_name,
-                "Lead (quarters)": round(lead_q, 1) if not np.isnan(lead_q) else "—",
+                "Lead (quarters)": round(lead_q, 1) if not np.isnan(lead_q) else "-",
             })
     lead_table = pd.DataFrame(rows)
 
@@ -163,14 +163,14 @@ def run_crisis_analysis(
         print("\n===  Lead-Time Table  ===")
         print(lead_table.to_string(index=False))
 
-    # ── Granger causality ──────────────────────────────────────────────────
+    # ?? Granger causality ??????????????????????????????????????????????????
     granger_df = granger_causality_test(model_signal, srisk_proxy, max_lag=6)
 
     if verbose:
-        print("\n===  Granger Causality (model → SRISK-proxy)  ===")
+        print("\n===  Granger Causality (model -> SRISK-proxy)  ===")
         print(granger_df.to_string(index=False))
 
-    # ── Cross-correlation plot  ────────────────────────────────────────────
+    # ?? Cross-correlation plot  ????????????????????????????????????????????
     lags, corrs_stlfsi  = cross_correlation(model_signal, stlfsi, max_lag=8)
     lags, corrs_vix     = cross_correlation(model_signal, vix,    max_lag=8)
     lags, corrs_srisk   = cross_correlation(model_signal, srisk_proxy, max_lag=8)
@@ -179,7 +179,7 @@ def run_crisis_analysis(
 
     # Panel 1: Energy + MFLS trajectory with crisis bands
     ax = axes[0]
-    ax.plot(dates, energy / (energy.max() + 1e-9), label="Normalised energy Φ(X)", lw=2, color="steelblue")
+    ax.plot(dates, energy / (energy.max() + 1e-9), label="Normalised energy ?(X)", lw=2, color="steelblue")
     ax.plot(dates, model_signal / (model_signal.max() + 1e-9), label="MFLS score", lw=2, color="darkorange", ls="--")
     _shade_crises(ax, dates)
     ax.set_ylabel("Normalised score"); ax.legend(loc="upper left"); ax.set_title("Panel A: GravityEngine Energy and MFLS Detection Signal")
@@ -188,15 +188,15 @@ def run_crisis_analysis(
     # Panel 2: gamma*(t) and spectral radius
     ax = axes[1]
     ax2 = ax.twinx()
-    ax.plot(dates, gamma_star, label="γ*(t) adaptive coupling", lw=2, color="purple")
-    ax2.plot(dates, stats["lambda_max"], label="λ_max(t)", lw=1.5, color="red", ls=":")
-    ax2.axhline(ALPHA := 0.1, color="red", lw=0.8, ls="--", label=f"α={ALPHA} (critical threshold)")
-    ax.set_ylabel("γ*(t)"); ax2.set_ylabel("λ_max", color="red")
+    ax.plot(dates, gamma_star, label="gamma*(t) adaptive coupling", lw=2, color="purple")
+    ax2.plot(dates, stats["lambda_max"], label="lambda_max(t)", lw=1.5, color="red", ls=":")
+    ax2.axhline(ALPHA := 0.1, color="red", lw=0.8, ls="--", label=f"alpha={ALPHA} (critical threshold)")
+    ax.set_ylabel("gamma*(t)"); ax2.set_ylabel("lambda_max", color="red")
     _shade_crises(ax, dates)
     handles1, lbls1 = ax.get_legend_handles_labels()
     handles2, lbls2 = ax2.get_legend_handles_labels()
     ax.legend(handles1 + handles2, lbls1 + lbls2, loc="upper left", fontsize=8)
-    ax.set_title("Panel B: Adaptive Coupling γ*(t) and Spectral Radius λ_max(t)")
+    ax.set_title("Panel B: Adaptive Coupling gamma*(t) and Spectral Radius lambda_max(t)")
 
     # Panel 3: cross-correlation
     ax = axes[2]
@@ -236,12 +236,12 @@ def _shade_crises(ax: plt.Axes, dates: pd.DatetimeIndex) -> None:
             ax.axvspan(dates[mask][0], dates[mask][-1], alpha=0.25, color=c, label=name)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LaTeX table generator for §8
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
+# LaTeX table generator for ?8
+# ?????????????????????????????????????????????????????????????????????????????
 
 def latex_lead_table(lead_table: pd.DataFrame) -> str:
-    """Generate the LaTeX table for §8 (Table 8.1)."""
+    """Generate the LaTeX table for ?8 (Table 8.1)."""
     lines = [
         r"\begin{table}[h]",
         r"\centering",
@@ -263,7 +263,7 @@ def latex_lead_table(lead_table: pd.DataFrame) -> str:
 
 
 def latex_granger_table(granger_df: pd.DataFrame) -> str:
-    """Generate the LaTeX table for §8 (Table 8.2)."""
+    """Generate the LaTeX table for ?8 (Table 8.2)."""
     lines = [
         r"\begin{table}[h]",
         r"\centering",

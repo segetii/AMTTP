@@ -1,22 +1,22 @@
 """
-run_variants.py — Compare MFLS Scoring Variants on Real FDIC Data
+run_variants.py - Compare MFLS Scoring Variants on Real FDIC Data
 ==================================================================
 
 Runs 5 MFLS scoring variants on the same FDIC call-report panel:
 
-    1. Baseline      — Mahalanobis gradient norm (current pipeline)
-    2. Full BSDT     — 4-channel uniform-weighted (δ_C + δ_G + δ_A + δ_T)
-    3. QuadSurf      — degree-2 polynomial + ridge on BSDT channels
-    4. Signed LR     — logistic regression on BSDT channels
-    5. Expo Gate     — quadratic + tanh saturation + sigmoid gate
+    1. Baseline      - Mahalanobis gradient norm (current pipeline)
+    2. Full BSDT     - 4-channel uniform-weighted (?_C + ?_G + ?_A + ?_T)
+    3. QuadSurf      - degree-2 polynomial + ridge on BSDT channels
+    4. Signed LR     - logistic regression on BSDT channels
+    5. Expo Gate     - quadratic + tanh saturation + sigmoid gate
 
 For each variant, computes:
     - Lead times vs STLFSI/VIX/NFCI/SRISK-proxy
-    - Granger causality (MFLS → SRISK-proxy)
-    - OOS backtest (train ≤ 2006, test 2007-2009)
+    - Granger causality (MFLS -> SRISK-proxy)
+    - OOS backtest (train ? 2006, test 2007-2009)
     - Bootstrap CIs on lead times
 
-All variants use the same FDIC data (T=140, N=7, d=6) — the only
+All variants use the same FDIC data (T=140, N=7, d=6) - the only
 difference is how the detection signal is computed.
 
 Usage
@@ -31,7 +31,7 @@ import pandas as pd
 from pathlib import Path
 
 # Import from the upgraded pipeline (reuse data loading)
-UPGRADED_DIR = Path(__file__).parent.parent.parent / "adaptive-friction-stability-upgraded" / "pipeline"
+UPGRADED_DIR = Path(__file__).parent.parent / "upgraded"
 sys.path.insert(0, str(UPGRADED_DIR))
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -52,9 +52,9 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 ALPHA = 0.10
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Helpers (reused from run_pipeline.py)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def _reindex(series, dates, fill=0.0):
     if series is None or (isinstance(series, pd.Series) and series.empty):
@@ -85,7 +85,7 @@ def _lead_time(mfls_signal, bench_signal, dates, crisis_start, crisis_end):
 
 
 def _granger_test(mfls_signal, target_signal, max_lag=6):
-    """Granger causality: mfls → target. Returns list of (lag, F, p)."""
+    """Granger causality: mfls -> target. Returns list of (lag, F, p)."""
     from statsmodels.tsa.stattools import grangercausalitytests
     import warnings
     data = np.column_stack([target_signal, mfls_signal])
@@ -150,19 +150,19 @@ def _oos_backtest(mfls_signal, dates, train_end="2006-12-31",
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Main
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def main(use_cache=True, fast=False, verbose=True):
     t0 = time.perf_counter()
     Sep = "=" * 70
     print(Sep)
-    print("  MFLS Variant Comparison — Real FDIC Call-Report Data")
-    print("  5 variants × same panel × same metrics")
+    print("  MFLS Variant Comparison - Real FDIC Call-Report Data")
+    print("  5 variants ? same panel ? same metrics")
     print(Sep)
 
-    # ── 1. Load data (reuse from upgraded pipeline) ──
+    # ?? 1. Load data (reuse from upgraded pipeline) ??
     print("\n[1/5] Loading FDIC + FRED data...")
     raw_fred = fetch_all(use_cache=use_cache, verbose=verbose)
     slope_col = "slope_10y2y" if "slope_10y2y" in raw_fred.columns else raw_fred.columns[0]
@@ -173,13 +173,13 @@ def main(use_cache=True, fast=False, verbose=True):
 
     X_all, dates, sector_names = build_state_matrix_fdic(fdic_df, fred_slope)
     T, N, d = X_all.shape
-    print(f"  Panel: T={T}, N={N}, d={d}  ({dates[0].date()} → {dates[-1].date()})")
+    print(f"  Panel: T={T}, N={N}, d={d}  ({dates[0].date()} -> {dates[-1].date()})")
 
     # Normal period + standardise
     X_normal, dates_normal = get_normal_period(X_all, dates)
     X_std, _, _ = standardise_panel(X_all, X_ref=X_normal)
     X_norm_std, _, _ = standardise_panel(X_normal, X_ref=X_normal)
-    print(f"  Normal: {dates_normal[0].date()} → {dates_normal[-1].date()} ({len(dates_normal)}Q)")
+    print(f"  Normal: {dates_normal[0].date()} -> {dates_normal[-1].date()} ({len(dates_normal)}Q)")
 
     # Benchmark stress indices
     raw_aligned = raw_fred.copy()
@@ -196,20 +196,20 @@ def main(use_cache=True, fast=False, verbose=True):
     y_labels = make_crisis_labels(dates)
     print(f"  Crisis quarters: {y_labels.sum()}/{len(y_labels)}")
 
-    # ── 2. Compute BSDT channels ──
-    print("\n[2/5] Computing BSDT operators (δ_C, δ_G, δ_A, δ_T)...")
+    # ?? 2. Compute BSDT channels ??
+    print("\n[2/5] Computing BSDT operators (?_C, ?_G, ?_A, ?_T)...")
     ops = BSDTOperators(n_components=4, velocity_pctl=95.0)
     ops.fit(X_norm_std)
     channels = ops.compute_channels(X_std, verbose=verbose)
     ch = channels["channels"]  # (T, 4)
     print(f"  Channel correlations:")
-    ch_names = ["δ_C (Camouflage)", "δ_G (Feature Gap)", "δ_A (Activity)", "δ_T (Temporal)"]
+    ch_names = ["?_C (Camouflage)", "?_G (Feature Gap)", "?_A (Activity)", "?_T (Temporal)"]
     for k, name in enumerate(ch_names):
         corr_srisk = float(np.corrcoef(ch[:, k], srisk)[0, 1])
         print(f"    {name:25s}: mean={ch[:, k].mean():.2f}  "
               f"std={ch[:, k].std():.2f}  corr(SRISK)={corr_srisk:+.3f}")
 
-    # ── 3. Run all variants ──
+    # ?? 3. Run all variants ??
     print("\n[3/5] Running 5 MFLS variants...")
 
     # Train/test split for supervised variants
@@ -254,9 +254,9 @@ def main(use_cache=True, fast=False, verbose=True):
     variant_results["signed_lr"] = {"signal": sig4, "name": v4.name}
     print(f"    Signal range: [{sig4.min():.4f}, {sig4.max():.4f}]")
     if v4.beta_ is not None:
-        labels = ["bias", "δ_C", "δ_G", "δ_A", "δ_T"]
+        labels = ["bias", "?_C", "?_G", "?_A", "?_T"]
         for i, (lbl, b) in enumerate(zip(labels, v4.beta_)):
-            print(f"    β_{lbl} = {b:+.4f}")
+            print(f"    beta_{lbl} = {b:+.4f}")
 
     # --- Variant 5: Expo Gate ---
     print("\n  --- Variant 5: Expo Gate (quad + tanh + sigmoid) ---")
@@ -266,7 +266,7 @@ def main(use_cache=True, fast=False, verbose=True):
     variant_results["expo_gate"] = {"signal": sig5, "name": v5.name}
     print(f"    Signal range: [{sig5.min():.4f}, {sig5.max():.4f}]")
 
-    # ── 4. Compare all variants ──
+    # ?? 4. Compare all variants ??
     print(f"\n[4/5] Comparing variants across all metrics...")
     print(f"\n{'='*70}")
 
@@ -275,7 +275,7 @@ def main(use_cache=True, fast=False, verbose=True):
     for vname, vdata in variant_results.items():
         sig = vdata["signal"]
         display_name = vdata["name"]
-        print(f"\n  ▸ {display_name}")
+        print(f"\n  ? {display_name}")
 
         vresult = {"name": display_name}
 
@@ -322,7 +322,7 @@ def main(use_cache=True, fast=False, verbose=True):
 
         comparison[vname] = vresult
 
-    # ── 5. Summary table ──
+    # ?? 5. Summary table ??
     print(f"\n\n{'='*70}")
     print("  SUMMARY COMPARISON TABLE")
     print(f"{'='*70}")
@@ -347,7 +347,7 @@ def main(use_cache=True, fast=False, verbose=True):
         print(f"{name:<35s} {gfc_lead:>+6.0f}Q   {best_p:>9.4f}   {alarm:<12s} "
               f"{hit:<10s} {fp:<10s} {sel:<8s}")
 
-    # ── Save ──
+    # ?? Save ??
     print(f"\n\n[5/5] Saving results...")
     out = {
         "data_source": "FDIC SDI call-report (real)",
@@ -372,7 +372,7 @@ def main(use_cache=True, fast=False, verbose=True):
         json.dump(out, f, indent=2, default=str)
     print(f"  Wrote: {RESULTS_DIR / 'variant_comparison.json'}")
 
-    # ── Plot ──
+    # ?? Plot ??
     try:
         import matplotlib
         matplotlib.use("Agg")

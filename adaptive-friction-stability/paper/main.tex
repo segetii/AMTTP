@@ -1629,6 +1629,46 @@ thesis is not an artefact of aggregation.  The replication package
 includes \texttt{run\_pipeline\_banklevel.py} which reproduces
 Table~\ref{tab:banklevel} from scratch via the FDIC public API.
 
+\medskip
+\noindent\textbf{Multi-variant robustness at institution level.}
+Table~\ref{tab:banklevel_variants} reports the same strict OOS protocol
+(threshold trained on $\leq2006$ data) for all five MFLS scoring variants
+applied to the $N{=}30$ bank panel.  The unsupervised variants---Baseline
+(Mahalanobis gradient norm) and Full-BSDT (uniform 4-channel sum)---both
+achieve a 6-quarter early warning lead with AUROC $\geq 0.73$ and a
+70\% GFC hit rate.  By contrast, the three supervised variants
+(QuadSurf, Signed-LR, Expo-Gate) are fitted with only the four S\&L crisis
+labels visible in the training window (1990--1991); they achieve a 5-quarter
+lead but lower AUROC (0.31--0.42) and HR (40--50\%), exhibiting the expected
+sensitivity to training-set composition when the crisis regime shifts from
+S\&L to GFC.  This confirms that the paper's choice of the unsupervised
+Mahalanobis-gradient formulation is not opportunistic: it outperforms its
+supervised counterparts out-of-sample by a wide margin at the institution level.
+
+\begin{table}[htbp]
+\centering
+\caption{All five MFLS scoring variants on the top-30 bank panel ($N{=}30$,
+$T{=}140$).  OOS protocol: threshold trained on $\leq 2006$ data;
+evaluated on GFC window 2007-Q1--2009-Q2.  Lead = quarters before
+Lehman (2008-Q3).  Supervised variants (rows 3--5) are trained on
+S\&L labels only (4 positive quarters; GFC and COVID labels withheld).
+FAR measured over all post-2006 non-GFC quarters.}
+\label{tab:banklevel_variants}
+\begin{tabular}{lcccc}
+\toprule
+Variant & AUROC & Alarm & Lead & HR \\
+\midrule
+Baseline (Mahalanobis)    & 0.744 & 2007-Q1 & 6Q & 70.0\% \\
+Full-BSDT (4-ch uniform)  & 0.728 & 2007-Q1 & 6Q & 70.0\% \\
+\midrule
+QuadSurf (poly ridge)$^\dagger$     & 0.416 & 2007-Q2 & 5Q & 50.0\% \\
+Signed-LR (logistic)$^\dagger$      & 0.309 & 2007-Q2 & 5Q & 40.0\% \\
+Expo-Gate (quad+tanh)$^\dagger$     & 0.416 & 2007-Q2 & 5Q & 50.0\% \\
+\bottomrule
+\multicolumn{5}{l}{\small $\dagger$ Supervised: fitted on S\&L crisis labels only (1990-Q2--1991-Q1; $n_+=4$).} \\
+\end{tabular}
+\end{table}
+
 %% ====================================================================
 \section{Welfare Calibration}
 \label{sec:welfare}

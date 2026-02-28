@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 reproduce.py  -  One-command replication for the MFLS paper.
 =============================================================
@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent.resolve()
 PYTHON = sys.executable
 
-# ── Path constants ─────────────────────────────────────────────────────────────
+# ?? Path constants ?????????????????????????????????????????????????????????????
 UPGRADED_PIPE  = ROOT / "adaptive-friction-stability-upgraded" / "pipeline"
 VARIANTS_PIPE  = ROOT / "adaptive-friction-stability-variants" / "pipeline"
 BANKLEVEL_PIPE = ROOT / "adaptive-friction-stability-banklevel" / "pipeline"
@@ -155,7 +155,7 @@ def step7_compile(args):
     return _run(
         [str(TECTONIC), "main.tex"],
         cwd=PAPER_DIR,
-        label="Step 7: Compile LaTeX → main.pdf (tectonic)",
+        label="Step 7: Compile LaTeX -> main.pdf (tectonic)",
         timeout=300,
     )
 

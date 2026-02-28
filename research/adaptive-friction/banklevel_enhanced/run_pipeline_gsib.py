@@ -48,7 +48,12 @@ for p in [str(THIS_DIR), str(ORIG_BL_DIR), str(UPGRADED_DIR), str(VARIANT_DIR)]:
 
 from network_builder   import lw_correlation_network, spectral_radius
 from gravity_engine    import BSDTOperator, analyse_trajectory, ALPHA
-from eval_protocol     import eval_all_variants, latex_eval_table, CRISIS_WINDOWS_EVAL
+from eval_protocol     import (
+    eval_all_variants,
+    latex_eval_table,
+    CRISIS_WINDOWS_EVAL,
+    build_binary_labels,
+)
 from robustness_checks import run_all_robustness
 
 from bootstrap_auroc   import block_bootstrap_ci, latex_bootstrap_table
@@ -62,24 +67,9 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 NORMAL_START = "1994-01-01"
 NORMAL_END   = "2003-12-31"
 
-# ---------------------------------------------------------------------------
-# Crisis labels  (same definition as enhanced pipeline)
-# ---------------------------------------------------------------------------
-_CRISIS_QUARTERS = {
-    "1990-09-30", "1990-12-31", "1991-03-31",
-    "2007-06-30", "2007-09-30", "2007-12-31",
-    "2008-03-31", "2008-06-30", "2008-09-30", "2008-12-31",
-    "2009-03-31", "2009-06-30",
-    "2020-03-31", "2020-06-30",
-    "2022-06-30", "2022-09-30",
-}
-
 def _make_crisis_labels(dates: pd.DatetimeIndex) -> np.ndarray:
-    lbl = np.zeros(len(dates), dtype=int)
-    for i, d in enumerate(dates):
-        if str(d.date()) in _CRISIS_QUARTERS:
-            lbl[i] = 1
-    return lbl
+    """Binary labels aligned with the paper's evaluation protocol windows."""
+    return build_binary_labels(dates, CRISIS_WINDOWS_EVAL, shift_quarters=0)
 
 
 # ---------------------------------------------------------------------------

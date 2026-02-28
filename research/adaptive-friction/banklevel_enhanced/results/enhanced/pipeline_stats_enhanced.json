@@ -11,26 +11,26 @@
   "lead_quarters_gfc": 6,
   "gfc_alarm_date": "2007-03-31 00:00:00",
   "bootstrap": {
-    "auroc": 0.6759,
-    "auroc_lo": 0.4139,
-    "auroc_hi": 0.9352,
-    "hr": 0.625,
-    "hr_lo": 0.2211,
+    "auroc": 0.8053,
+    "auroc_lo": 0.4791,
+    "auroc_hi": 0.965,
+    "hr": 0.8696,
+    "hr_lo": 0.0,
     "hr_hi": 1.0,
-    "far": 0.5726,
-    "far_lo": 0.3804,
-    "far_hi": 0.7983,
+    "far": 0.5214,
+    "far_lo": 0.29,
+    "far_hi": 0.7501,
     "ci_label": "95%",
-    "n_boot": 200,
+    "n_boot": 1000,
     "block_len": 8
   },
   "causality": {
-    "linear_granger_min_p": 0.2327,
+    "linear_granger_min_p": 0.712,
     "linear_granger_verdict": "FAIL (confirms Granger paradox)",
-    "threshold_granger_min_p": 0.366,
+    "threshold_granger_min_p": 0.4695,
     "threshold_verdict": "FAIL",
-    "quantile_min_p": 0.352,
+    "quantile_min_p": 0.42,
     "quantile_verdict": "FAIL"
   },
-  "runtime_sec": 29.5
+  "runtime_sec": 27.6
 }

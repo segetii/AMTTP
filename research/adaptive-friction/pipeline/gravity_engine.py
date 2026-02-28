@@ -2,15 +2,15 @@
 gravity_engine.py  (pipeline version)
 ======================================
 Self-contained GravityEngine implementation for the empirical pipeline.
-Matches the mathematical specification in main.tex §4-§5 exactly.
+Matches the mathematical specification in main.tex ?4-?5 exactly.
 
 Key quantities computed per time step t:
-    Phi(X)          — total potential energy
-    grad_Phi(X)     — restoring force field  (N × d)
-    lambda_max(t)   — leading eigenvalue of D²Φ_pair (power iteration)
-    gamma_star(t)   — adaptive coupling  α / λ_max
-    mfls(t)         — MFLS detection score (blind-spot energy gradient norm)
-    cos_theta(t)    — alignment: ∇E_BS vs −∇Φ  (re-verification on real data)
+    Phi(X)          - total potential energy
+    grad_Phi(X)     - restoring force field  (N ? d)
+    lambda_max(t)   - leading eigenvalue of D??_pair (power iteration)
+    gamma_star(t)   - adaptive coupling  alpha / lambda_max
+    mfls(t)         - MFLS detection score (blind-spot energy gradient norm)
+    cos_theta(t)    - alignment: ?E_BS vs ???  (re-verification on real data)
 """
 
 from __future__ import annotations
@@ -18,9 +18,9 @@ import numpy as np
 from scipy.special import erf as _erf
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Parameters  (match paper Appendix B table)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 ALPHA      = 0.10   # radial spring
 GAMMA      = 1.00   # pairwise coupling baseline
 SIGMA      = 1.00   # attraction length-scale
@@ -29,12 +29,12 @@ EPS        = 1e-5   # softening
 F_MAX      = 100.0  # force clamp
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Potential energy
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def radial_energy(X: np.ndarray, mu: np.ndarray, alpha: float = ALPHA) -> float:
-    """Φ_rad = (α/2) Σᵢ ‖xᵢ − μ‖²"""
+    """?_rad = (alpha/2) ?? ?x? ? ???"""
     diff = X - mu[None, :]                  # (N, d)
     return 0.5 * alpha * float(np.sum(diff ** 2))
 
@@ -42,7 +42,7 @@ def radial_energy(X: np.ndarray, mu: np.ndarray, alpha: float = ALPHA) -> float:
 def pairwise_energy(X: np.ndarray, gamma: float = GAMMA,
                     sigma: float = SIGMA, lam: float = LAMBDA_REP,
                     eps: float = EPS) -> float:
-    """Φ_pair = Σᵢ<ⱼ [γ·erf_potential − γλ·log(rᵢⱼ + ε)]"""
+    """?_pair = ??<? [gamma?erf_potential ? gammalambda?log(r?? + ?)]"""
     N = X.shape[0]
     diff = X[:, None, :] - X[None, :, :]   # (N, N, d)
     dist = np.linalg.norm(diff, axis=2)    # (N, N)
@@ -65,33 +65,33 @@ def total_energy(X: np.ndarray, mu: np.ndarray, **kw) -> float:
                            kw.get("eps", EPS))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Gradient (force) — analytic
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
+# Gradient (force) - analytic
+# ?????????????????????????????????????????????????????????????????????????????
 
 def radial_force(X: np.ndarray, mu: np.ndarray, alpha: float = ALPHA) -> np.ndarray:
-    """-∇Φ_rad = α(μ − X)"""
+    """-??_rad = alpha(? ? X)"""
     return alpha * (mu[None, :] - X)        # (N, d)
 
 
 def pairwise_force(X: np.ndarray, gamma: float = GAMMA, sigma: float = SIGMA,
                    lam: float = LAMBDA_REP, eps: float = EPS) -> np.ndarray:
-    """-∇Φ_pair  shape (N, d)
+    """-??_pair  shape (N, d)
 
     Matches udl/gravity.py formula exactly:
-        magnitude = -γ · (exp(−r²/σ²) − λ/r)
-        force on i = magnitude_ij · unit_ij   summed over j
+        magnitude = -gamma ? (exp(?r?/??) ? lambda/r)
+        force on i = magnitude_ij ? unit_ij   summed over j
 
-    This is -d/dr[Φ_pair] = -d/dr[γ·(σ√π/2)·erf(r/σ) − γλ·ln(r)]
-                          = -γ·exp(-r²/σ²) + γλ/r
+    This is -d/dr[?_pair] = -d/dr[gamma?(???/2)?erf(r/?) ? gammalambda?ln(r)]
+                          = -gamma?exp(-r?/??) + gammalambda/r
     """
     N, d = X.shape
-    diff = X[:, None, :] - X[None, :, :]   # (N, N, d)  diff[i,j] = xᵢ - xⱼ
+    diff = X[:, None, :] - X[None, :, :]   # (N, N, d)  diff[i,j] = x? - x?
     dist = np.linalg.norm(diff, axis=2)    # (N, N)
     np.fill_diagonal(dist, eps)
-    unit = diff / (dist[:, :, None] + eps)  # (N, N, d)  unit direction i←j
+    unit = diff / (dist[:, :, None] + eps)  # (N, N, d)  unit direction i?j
 
-    # -γ·(exp(-r²/σ²) - λ/r) = γ·(λ/r - exp(-r²/σ²))
+    # -gamma?(exp(-r?/??) - lambda/r) = gamma?(lambda/r - exp(-r?/??))
     attraction = np.exp(-(dist ** 2) / (sigma ** 2))  # (N, N), dimensionless
     repulsion  = lam / (dist + eps)                    # (N, N)
     magnitude  = -gamma * (attraction - repulsion)     # (N, N)
@@ -106,7 +106,7 @@ def pairwise_force(X: np.ndarray, gamma: float = GAMMA, sigma: float = SIGMA,
 
 
 def total_force(X: np.ndarray, mu: np.ndarray, **kw) -> np.ndarray:
-    """-∇Φ = F_rad + F_pair"""
+    """-?? = F_rad + F_pair"""
     return radial_force(X, mu, kw.get("alpha", ALPHA)) + \
            pairwise_force(X, kw.get("gamma", GAMMA),
                           kw.get("sigma", SIGMA),
@@ -114,23 +114,23 @@ def total_force(X: np.ndarray, mu: np.ndarray, **kw) -> np.ndarray:
                           kw.get("eps", EPS))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Spectral radius via power iteration (Rayleigh quotient)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def _hvp(X: np.ndarray, v: np.ndarray, h: float = 1e-4, **kw) -> np.ndarray:
-    """Finite-difference Hessian-vector product for Φ_pair."""
+    """Finite-difference Hessian-vector product for ?_pair."""
     v_unit = v / (np.linalg.norm(v) + 1e-12)
     Fp = pairwise_force(X + h * v_unit, **kw)
     Fm = pairwise_force(X - h * v_unit, **kw)
-    # D²Φ_pair · v ≈ (−F(X+hv) + F(X−hv)) / (2h)  [since F = −∇Φ_pair]
+    # D??_pair ? v ? (?F(X+hv) + F(X?hv)) / (2h)  [since F = ???_pair]
     return (Fm - Fp) / (2 * h)
 
 
 def spectral_radius(X: np.ndarray, K: int = 20, rng: np.random.Generator | None = None,
                     **kw) -> tuple[float, np.ndarray]:
     """
-    Estimate λ_max(D²Φ_pair(X)) via K steps of power iteration.
+    Estimate lambda_max(D??_pair(X)) via K steps of power iteration.
     Returns (lambda_max, leading_eigenvector).
     """
     if rng is None:
@@ -145,9 +145,9 @@ def spectral_radius(X: np.ndarray, K: int = 20, rng: np.random.Generator | None 
     return max(lam, 1e-6), v
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # BSDT blind-spot energy (for MFLS score and alignment verification)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 class BSDTOperator:
     """Fitted BSDT reference distribution; computes E_BS gradient."""
@@ -157,7 +157,7 @@ class BSDTOperator:
         self.Sigma0_inv_: np.ndarray | None = None
 
     def fit(self, X_normal: np.ndarray) -> "BSDTOperator":
-        """Fit on normal-period data (T_normal, N, d) — reshape to (T*N, d)."""
+        """Fit on normal-period data (T_normal, N, d) - reshape to (T*N, d)."""
         Xf = X_normal.reshape(-1, X_normal.shape[-1])
         self.mu0_ = Xf.mean(axis=0)
         cov = np.cov(Xf.T) + 1e-6 * np.eye(Xf.shape[1])
@@ -165,27 +165,27 @@ class BSDTOperator:
         return self
 
     def deviation(self, X: np.ndarray) -> np.ndarray:
-        """δᵢ(X) = (xᵢ − μ₀)ᵀ Σ₀⁻¹ (xᵢ − μ₀)   shape (N,)"""
+        """??(X) = (x? ? ??)? ???? (x? ? ??)   shape (N,)"""
         z = X - self.mu0_
         return np.sum(z @ self.Sigma0_inv_ * z, axis=1)
 
     def energy_score(self, X: np.ndarray) -> float:
-        """MFLS = Σᵢ δᵢ(X)  (total blind-spot energy, deviation terms only)"""
+        """MFLS = ?? ??(X)  (total blind-spot energy, deviation terms only)"""
         return float(np.sum(self.deviation(X)))
 
     def gradient(self, X: np.ndarray) -> np.ndarray:
-        """∇E_BS deviation term = 2 Σ₀⁻¹ (X − μ₀)   shape (N, d)"""
+        """?E_BS deviation term = 2 ???? (X ? ??)   shape (N, d)"""
         z = X - self.mu0_
         return 2.0 * (z @ self.Sigma0_inv_.T)
 
     def mfls_score(self, X: np.ndarray) -> float:
-        """‖∇E_BS(X)‖_F — Frobenius norm of gradient as detection score."""
+        """??E_BS(X)?_F - Frobenius norm of gradient as detection score."""
         return float(np.linalg.norm(self.gradient(X)))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Main trajectory analysis
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def simulate_and_align(
     X0: np.ndarray,
@@ -201,7 +201,7 @@ def simulate_and_align(
     at each step.  This replicates the verify_gradient_alignment.py methodology
     on real-data initial conditions.
 
-    Returns mean/min/frac-above-0.7 cos θ over the trajectory.
+    Returns mean/min/frac-above-0.7 cos ? over the trajectory.
     """
     X = X0.copy()
     cos_history = []
@@ -235,7 +235,7 @@ def analyse_trajectory(
     verbose: bool = False,
 ) -> dict[str, np.ndarray]:
     """
-    Given a T-length series of state matrices X(t) ∈ ℝ^{N × d},
+    Given a T-length series of state matrices X(t) ? ?^{N ? d},
     compute per-step statistics.
 
     Parameters
@@ -247,13 +247,13 @@ def analyse_trajectory(
     Returns
     -------
     dict with keys:
-        energy       (T,)  — Φ(X_t)
-        mfls         (T,)  — MFLS detection score
-        lambda_max   (T,)  — spectral radius of D²Φ_pair
-        gamma_star   (T,)  — adaptive coupling α/λ_max
-        above_cman   (T,)  — bool: λ_max(t) > α  (above critical manifold)
-        cos_theta    (T,)  — gradient alignment angle
-        force_norm   (T,)  — ‖−∇Φ‖_F
+        energy       (T,)  - ?(X_t)
+        mfls         (T,)  - MFLS detection score
+        lambda_max   (T,)  - spectral radius of D??_pair
+        gamma_star   (T,)  - adaptive coupling alpha/lambda_max
+        above_cman   (T,)  - bool: lambda_max(t) > alpha  (above critical manifold)
+        cos_theta    (T,)  - gradient alignment angle
+        force_norm   (T,)  - ?????_F
     """
     T, N, d = X_series.shape
     rng = np.random.default_rng(42)
@@ -277,7 +277,7 @@ def analyse_trajectory(
         # Energy (use fixed equilibrium mu for potential comparisons across time)
         energy[t] = total_energy(X, mu, alpha=alpha)
 
-        # Force (= −∇Φ) anchored at current cluster mean
+        # Force (= ???) anchored at current cluster mean
         F = total_force(X, mu_t, alpha=alpha)
         force_norm[t] = float(np.linalg.norm(F))
 
@@ -286,7 +286,7 @@ def analyse_trajectory(
         mfls[t] = float(np.linalg.norm(G_bsdt))
 
         # Per-agent cosine alignment (matching verify_gradient_alignment.py cosine_alignment())
-        # For each agent i: cos_θᵢ = ⟨∇E_BS(xᵢ), F(xᵢ)⟩ / (‖∇E_BS(xᵢ)‖ · ‖F(xᵢ)‖)
+        # For each agent i: cos_?? = ??E_BS(x?), F(x?)? / (??E_BS(x?)? ? ?F(x?)?)
         dot_per  = np.sum(G_bsdt * F, axis=1)           # (N,)
         norm_g   = np.linalg.norm(G_bsdt, axis=1)       # (N,)
         norm_f   = np.linalg.norm(F,      axis=1)       # (N,)

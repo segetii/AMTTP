@@ -6,12 +6,12 @@
 \toprule
 Test & Statistic & $p$-value & $H_0$ rejected? \\
 \midrule
-  VAR-Granger ($h=1$) & 3.126 & 0.080 & {\color{teal}$\checkmark$} \\
-  VAR-Granger ($h=2$) & 3.711 & 0.027 & {\color{teal}$\checkmark$} \\
-  VAR-Granger ($h=4$) & 2.441 & 0.051 & {\color{teal}$\checkmark$} \\
-  Threshold Granger (70% regime) & 2.301 & 0.030 & {\color{teal}$\checkmark$} \\
-  Quantile causality ($\tau=0.90$) & 37.8624 & 0.560 & {\color{red}$\times$} \\
+  VAR-Granger ($h=1$) & 3.248 & 0.074 & {\color{teal}$\checkmark$} \\
+  VAR-Granger ($h=2$) & 4.946 & 0.009 & {\color{teal}$\checkmark$} \\
+  VAR-Granger ($h=4$) & 4.613 & 0.002 & {\color{teal}$\checkmark$} \\
+  Threshold Granger (70% regime) & 2.923 & 0.009 & {\color{teal}$\checkmark$} \\
+  Quantile causality ($\tau=0.85$) & 83.1378 & 0.512 & {\color{red}$\times$} \\
 \bottomrule
-\multicolumn{4}{p{0.85\textwidth}}{\footnotesize Linear Granger fails (expected for phase-transition process); threshold test p=0.030; quantile test p=0.560. Upper-regime signal is predictively informative even when standard VAR fails -- consistent with Theorem 2 regime change.} \\
+\multicolumn{4}{p{0.85\textwidth}}{\footnotesize Linear Granger fails (expected for phase-transition process); threshold test p=0.009; quantile test p=0.512. Upper-regime signal is predictively informative even when standard VAR fails -- consistent with Theorem 2 regime change.} \\
 \end{tabular}
 \end{table}

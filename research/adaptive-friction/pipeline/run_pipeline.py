@@ -1,23 +1,23 @@
 """
 run_pipeline.py
 ===============
-Full §8/§9 empirical pipeline for the adaptive-friction-stability paper.
+Full ?8/?9 empirical pipeline for the adaptive-friction-stability paper.
 
 Usage
 -----
     python run_pipeline.py              # full run, fetches FRED data
     python run_pipeline.py --no-cache   # force re-fetch from FRED
-    python run_pipeline.py --fast       # skip power iteration (use cached λ_max)
+    python run_pipeline.py --fast       # skip power iteration (use cached lambda_max)
 
 Outputs (written to pipeline/results/)
 ---------------------------------------
-    crisis_analysis.pdf / .png     — Fig 8.1
-    welfare_calibration.pdf / .png — Fig 9.1
-    lead_table.tex                 — Table 8.1  (paste into §8)
-    granger_table.tex              — Table 8.2
-    welfare_table.tex              — Table 9.1  (paste into §9)
-    pipeline_stats.json            — machine-readable summary
-    alignment_on_real_data.txt     — cos θ re-verification on real FRED data
+    crisis_analysis.pdf / .png     - Fig 8.1
+    welfare_calibration.pdf / .png - Fig 9.1
+    lead_table.tex                 - Table 8.1  (paste into ?8)
+    granger_table.tex              - Table 8.2
+    welfare_table.tex              - Table 9.1  (paste into ?9)
+    pipeline_stats.json            - machine-readable summary
+    alignment_on_real_data.txt     - cos ? re-verification on real FRED data
 """
 
 from __future__ import annotations
@@ -46,11 +46,11 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> None:
     t0 = time.perf_counter()
     print("=" * 60)
-    print("  Adaptive Friction Stability — Empirical Pipeline")
-    print("  §8 Crisis Windows + Lead-Lag  |  §9 Welfare/CCyB")
+    print("  Adaptive Friction Stability - Empirical Pipeline")
+    print("  ?8 Crisis Windows + Lead-Lag  |  ?9 Welfare/CCyB")
     print("=" * 60)
 
-    # ── Step 1: Fetch FRED data ──────────────────────────────────────────────
+    # ?? Step 1: Fetch FRED data ??????????????????????????????????????????????
     print("\n[1/6] Loading FRED data...")
     try:
         raw = fetch_all(use_cache=use_cache, verbose=verbose)
@@ -60,9 +60,9 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
         raw = _synthetic_fred_fallback()
 
     if verbose:
-        print(f"  Raw FRED: {raw.shape}  ({raw.index[0].date()} → {raw.index[-1].date()})")
+        print(f"  Raw FRED: {raw.shape}  ({raw.index[0].date()} -> {raw.index[-1].date()})")
 
-    # ── Step 2: Transform and standardise ───────────────────────────────────
+    # ?? Step 2: Transform and standardise ???????????????????????????????????
     print("\n[2/6] Transforming and standardising...")
     xf  = apply_transforms(raw)
     std, mu_fred, sig_fred = standardise(xf)
@@ -70,23 +70,23 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
         print(f"  Features: {list(std.columns)}")
         print(f"  Shape after transform: {std.shape}")
 
-    # ── Step 3: Build state matrix ───────────────────────────────────────────
-    print("\n[3/6] Building state matrix X(t) ∈ ℝ^{N × d}...")
+    # ?? Step 3: Build state matrix ???????????????????????????????????????????
+    print("\n[3/6] Building state matrix X(t) ? ?^{N ? d}...")
     X_all, dates = build_state_matrix(std)
     T, N, d = X_all.shape
     if verbose:
         print(f"  Shape: {X_all.shape}   (T={T} quarters, N={N} sectors, d={d} features)")
         print(f"  Sectors: {SECTOR_NAMES}")
 
-    # Fit BSDT on normal period (2002–2006)
+    # Fit BSDT on normal period (2002-2006)
     X_normal = get_normal_period(X_all, dates)
-    mu_eq = X_normal.reshape(-1, d).mean(axis=0)         # equilibrium μ
+    mu_eq = X_normal.reshape(-1, d).mean(axis=0)         # equilibrium ?
     bsdt  = BSDTOperator().fit(X_normal)
     if verbose:
-        print(f"  Normal period: {X_normal.shape[0]} quarters  (2002–2006)")
-        print(f"  BSDT fitted. μ₀ = {mu_eq.round(3)}")
+        print(f"  Normal period: {X_normal.shape[0]} quarters  (2002-2006)")
+        print(f"  BSDT fitted. ?? = {mu_eq.round(3)}")
 
-    # ── Step 4: Run GravityEngine trajectory analysis ────────────────────────
+    # ?? Step 4: Run GravityEngine trajectory analysis ????????????????????????
     print("\n[4/6] Running GravityEngine trajectory analysis...")
     n_power = 5 if fast else 20
     if fast:
@@ -98,8 +98,8 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
 
     # Summary statistics
     ct = stats["cos_theta"]
-    print(f"\n  Static snapshot alignment (cos θ on FRED data):")
-    print(f"    Mean = {ct.mean():.4f}   [expected negative: ∇E_BS ⊥ -∇Φ on snapshots]")
+    print(f"\n  Static snapshot alignment (cos ? on FRED data):")
+    print(f"    Mean = {ct.mean():.4f}   [expected negative: ?E_BS ? -?? on snapshots]")
 
     # Dynamic alignment: simulate GravityEngine from each crisis onset
     print(f"\n  Dynamic trajectory alignment (GravityEngine from FRED crisis states):")
@@ -116,13 +116,13 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
             X_crisis = X_all[idx]
             dyn = simulate_and_align(X_crisis, mu_eq, bsdt, n_steps=100, alpha=ALPHA)
             crisis_sim_results[cname] = dyn
-            print(f"    {cname:20s}: mean cos θ = {dyn['mean_cos']:.4f}, "
-                  f"frac ≥ 0.7 = {dyn['frac_above_07']*100:.1f}%  "
+            print(f"    {cname:20s}: mean cos ? = {dyn['mean_cos']:.4f}, "
+                  f"frac ? 0.7 = {dyn['frac_above_07']*100:.1f}%  "
                   f"({dyn['n_steps_run']} steps)")
         except Exception as e:
             print(f"    {cname}: sim failed ({e})")
 
-    # ── Step 5: Crisis analysis + lead-lag ───────────────────────────────────
+    # ?? Step 5: Crisis analysis + lead-lag ???????????????????????????????????
     print("\n[5/6] Crisis window analysis and lead-lag test...")
     # Align raw FRED to pipeline dates for benchmark construction
     raw_aligned = raw.copy()
@@ -132,22 +132,22 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
         stats, dates, raw_aligned, verbose=verbose
     )
 
-    # ── Step 6: Welfare / CCyB calibration ──────────────────────────────────
+    # ?? Step 6: Welfare / CCyB calibration ??????????????????????????????????
     print("\n[6/6] Welfare calibration and CCyB formula...")
     welfare_df = run_welfare_analysis(
         stats, dates, raw_aligned, verbose=verbose
     )
 
-    # ── Write LaTeX tables ───────────────────────────────────────────────────
+    # ?? Write LaTeX tables ???????????????????????????????????????????????????
     print("\n--- Writing LaTeX tables ---")
     _write(RESULTS_DIR / "lead_table.tex",    latex_lead_table(lead_table))
     _write(RESULTS_DIR / "granger_table.tex", latex_granger_table(granger_df))
     _write(RESULTS_DIR / "welfare_table.tex", latex_welfare_table(welfare_df))
     print(f"  Tables written to {RESULTS_DIR}/")
 
-    # ── Write alignment summary ─────────────────────────────────────────────
+    # ?? Write alignment summary ?????????????????????????????????????????????
     dyn_lines = "\n".join(
-        f"  {k}: mean cos θ = {v['mean_cos']:.4f}, frac ≥ 0.7 = {v['frac_above_07']*100:.1f}%"
+        f"  {k}: mean cos ? = {v['mean_cos']:.4f}, frac ? 0.7 = {v['frac_above_07']*100:.1f}%"
         for k, v in crisis_sim_results.items()
     )
     all_dyn_cos = [v["mean_cos"] for v in crisis_sim_results.values()] if crisis_sim_results else [0.0]
@@ -155,26 +155,26 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
     dyn_verdict = "PASS" if dyn_mean >= 0.7 else ("PARTIAL" if dyn_mean >= 0.0 else "FAIL")
 
     align_txt = (
-        f"Gradient alignment — Theorem C empirical verification\n"
+        f"Gradient alignment - Theorem C empirical verification\n"
         f"======================================================\n\n"
         f"STATIC alignment (FRED quarterly snapshots, N={N}, d={d}, T={T}):\n"
-        f"  Mean cos θ = {ct.mean():.4f}\n"
+        f"  Mean cos ? = {ct.mean():.4f}\n"
         f"  Note: expected negative on static data.\n"
-        f"  ∇E_BS points AWAY from normal (deviation direction);\n"
-        f"  F = -∇Φ points TOWARD normal (restoring direction).\n"
+        f"  ?E_BS points AWAY from normal (deviation direction);\n"
+        f"  F = -?? points TOWARD normal (restoring direction).\n"
         f"  Anti-alignment on snapshots is consistent with Theorem C.\n\n"
         f"DYNAMIC alignment (100-step GravityEngine sim from FRED crisis initial conditions):\n"
         f"{dyn_lines}\n"
         f"  Mean over crises = {dyn_mean:.4f}\n"
         f"  Verdict: {dyn_verdict}\n\n"
-        f"  The verify_gradient_alignment.py result (cos θ = 0.8616) is the gold-standard;\n"
+        f"  The verify_gradient_alignment.py result (cos ? = 0.8616) is the gold-standard;\n"
         f"  it uses N=50, d=4, T=200 sim steps from a displaced initial state.\n"
         f"  Dynamic crisis simulations above replicate this methodology on real FRED initial conditions.\n"
     )
     _write(RESULTS_DIR / "alignment_on_real_data.txt", align_txt)
-    print(f"\n  Dynamic alignment verdict: {dyn_verdict} (mean cos θ = {dyn_mean:.4f})")
+    print(f"\n  Dynamic alignment verdict: {dyn_verdict} (mean cos ? = {dyn_mean:.4f})")
 
-    # ── Write JSON summary ───────────────────────────────────────────────────
+    # ?? Write JSON summary ???????????????????????????????????????????????????
     summary = {
         "date_range":               [str(dates[0].date()), str(dates[-1].date())],
         "T_quarters":               T,
@@ -198,17 +198,17 @@ def main(use_cache: bool = True, fast: bool = False, verbose: bool = True) -> No
     elapsed = time.perf_counter() - t0
     print(f"\n{'=' * 60}")
     print(f"  Pipeline complete in {elapsed:.1f}s")
-    print(f"  Results → {RESULTS_DIR.resolve()}")
+    print(f"  Results -> {RESULTS_DIR.resolve()}")
     print(f"{'=' * 60}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Synthetic fallback (if FRED is unreachable)
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def _synthetic_fred_fallback() -> pd.DataFrame:
     """
-    Generate synthetic quarterly data 2000–2024 that reproduces
+    Generate synthetic quarterly data 2000-2024 that reproduces
     the qualitative pattern of 3 stress spikes (2008, 2020, 2022).
     Used when FRED is unreachable.
     """
@@ -217,7 +217,7 @@ def _synthetic_fred_fallback() -> pd.DataFrame:
     rng = np.random.default_rng(42)
     t = np.arange(T)
 
-    # Slow-moving credit cycle (boom → bust)
+    # Slow-moving credit cycle (boom -> bust)
     credit_cycle = 1.5 * np.sin(2 * np.pi * t / 40) + 0.3 * rng.standard_normal(T)
 
     # Stress spikes at 2008Q3 (~34), 2020Q1 (~81), 2022Q4 (~92)
@@ -250,7 +250,7 @@ def _synthetic_fred_fallback() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 
 def _write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")

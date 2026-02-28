@@ -1,40 +1,40 @@
 """
 state_matrix.py
 ===============
-Builds the joint state matrix  X(t) ∈ ℝ^{N × d}  from FRED aggregate series.
+Builds the joint state matrix  X(t) ? ?^{N ? d}  from FRED aggregate series.
 
 Approach
 --------
-We have d=6 standardised aggregate macrofinancial features  z(t) ∈ ℝ^6
+We have d=6 standardised aggregate macrofinancial features  z(t) ? ?^6
 (one per quarter from FRED).  We construct N=12 synthetic "bank-sector agents"
-by applying sector-specific loading weights  W ∈ ℝ^{N × d}  and adding
+by applying sector-specific loading weights  W ? ?^{N ? d}  and adding
 small idiosyncratic noise:
 
-    x_i(t) = diag(w_i) · z(t) + σ_ε · ε_i(t),   ε_i(t) ~ N(0,I)
+    x_i(t) = diag(w_i) ? z(t) + ?_? ? ?_i(t),   ?_i(t) ~ N(0,I)
 
 The N=12 sectors and their d-dimensional loading profiles are stylised
 representations of documented cross-sectional heterogeneity in U.S. banking.
 The weights are grounded in FDIC Call Report and BIS structural data.
 
 The 6 features (after standardisation) are:
-    0 – leverage   (credit_gdp or total_loans growth)
-    1 – stress     (stlfsi or nfci)
-    2 – credit_spr (hy_spread or baa_spread)
-    3 – yield_slope (T10Y2Y)
-    4 – volatility (VIX)
-    5 – short_rate (fed_funds)
+    0 - leverage   (credit_gdp or total_loans growth)
+    1 - stress     (stlfsi or nfci)
+    2 - credit_spr (hy_spread or baa_spread)
+    3 - yield_slope (T10Y2Y)
+    4 - volatility (VIX)
+    5 - short_rate (fed_funds)
 """
 
 from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 # Sector loading matrix  W[N, d]
 # Rows = 12 sectors, Cols = 6 features
 # Values are multipliers on the aggregate z(t); > 1 means more sensitive,
 # < 1 means less sensitive, negative means counter-cyclical.
-# ─────────────────────────────────────────────────────────────────────────────
+# ?????????????????????????????????????????????????????????????????????????????
 #                     lev   stress credit_spr  slope   vol  short_r
 SECTOR_WEIGHTS = np.array([
     # 0  Large commercial banks (JPM, BAC, WFC, C type)
@@ -111,11 +111,11 @@ def build_state_matrix(
     noise_sigma: float = NOISE_SIGMA,
 ) -> tuple[np.ndarray, pd.DatetimeIndex]:
     """
-    Build X(t) ∈ ℝ^{T × N × d}.
+    Build X(t) ? ?^{T ? N ? d}.
 
     Parameters
     ----------
-    df_std : pd.DataFrame — standardised FRED features (T × k)
+    df_std : pd.DataFrame - standardised FRED features (T ? k)
     rng    : random generator for reproducibility
     noise_sigma : idiosyncratic noise level
 
@@ -134,7 +134,7 @@ def build_state_matrix(
     W = SECTOR_WEIGHTS[:, :d]               # (N, d), trim if d < 6
 
     # X[t, i, :] = W[i, :] * Z[t, :] + noise
-    # Broadcasting: (T,1,d) * (1,N,d)  →  (T,N,d)
+    # Broadcasting: (T,1,d) * (1,N,d)  ->  (T,N,d)
     X = Z[:, None, :] * W[None, :, :]      # (T, N, d)
     noise = rng.standard_normal((T, N, d)) * noise_sigma
     X = X + noise
@@ -163,5 +163,5 @@ if __name__ == "__main__":
 
     X, dates = build_state_matrix(std)
     print(f"State matrix shape: {X.shape}   (T={X.shape[0]}, N={X.shape[1]}, d={X.shape[2]})")
-    print(f"Date range: {dates[0].date()} → {dates[-1].date()}")
+    print(f"Date range: {dates[0].date()} -> {dates[-1].date()}")
     print(f"X mean: {X.mean():.4f},  std: {X.std():.4f},  max|X|: {np.abs(X).max():.4f}")

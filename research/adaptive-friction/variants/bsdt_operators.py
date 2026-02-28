@@ -1,14 +1,14 @@
 """
-bsdt_operators.py — Four BSDT Deviation Operators for Macro Data
+bsdt_operators.py - Four BSDT Deviation Operators for Macro Data
 =================================================================
 
 Implements the four blind-spot operators from Odeyemi (2025) BSDT,
-adapted for quarterly macro panel data X(t) ∈ R^{N × d}:
+adapted for quarterly macro panel data X(t) ? R^{N ? d}:
 
-    δ_C  Camouflage       — Mahalanobis distance from normal distribution
-    δ_G  Feature Gap      — PCA residual in low-variance directions
-    δ_A  Activity Anomaly — velocity excess (quarter-over-quarter change)
-    δ_T  Temporal Novelty — KDE self-history novelty
+    ?_C  Camouflage       - Mahalanobis distance from normal distribution
+    ?_G  Feature Gap      - PCA residual in low-variance directions
+    ?_A  Activity Anomaly - velocity excess (quarter-over-quarter change)
+    ?_T  Temporal Novelty - KDE self-history novelty
 
 All operators are fitted on a normal-period reference sample, then
 evaluated on the full panel.  No researcher-chosen weights; operator
@@ -18,7 +18,7 @@ Usage
 -----
     ops = BSDTOperators(n_components=4).fit(X_normal)
     channels = ops.compute_all(X_series)
-    # channels shape: (T, 4)  — one score per operator per quarter
+    # channels shape: (T, 4)  - one score per operator per quarter
 """
 
 from __future__ import annotations
@@ -33,13 +33,13 @@ class BSDTOperators:
     Parameters
     ----------
     n_components : int
-        Number of PCA components for δ_G (top-k to project out).
+        Number of PCA components for ?_G (top-k to project out).
         Default 4 (out of d=6, leaves 2 gap dimensions).
     velocity_pctl : float
-        Percentile of normal-period velocity to use as v₀ threshold
-        for δ_A.  Default 95.
+        Percentile of normal-period velocity to use as v? threshold
+        for ?_A.  Default 95.
     kde_bandwidth : float or None
-        Bandwidth for δ_T kernel density.  If None, uses Scott's rule.
+        Bandwidth for ?_T kernel density.  If None, uses Scott's rule.
     """
 
     def __init__(self, n_components: int = 4, velocity_pctl: float = 95.0,
@@ -63,25 +63,25 @@ class BSDTOperators:
 
         Parameters
         ----------
-        X_normal : (T_norm, N, d) — normal period state matrices
+        X_normal : (T_norm, N, d) - normal period state matrices
         """
         T, N, d = X_normal.shape
         # Flatten to (T*N, d) for distribution estimation
         Xf = X_normal.reshape(-1, d)
 
-        # ── δ_C: Camouflage — Mahalanobis ──
+        # ?? ?_C: Camouflage - Mahalanobis ??
         self.mu0_ = Xf.mean(axis=0)
         self.Sigma0_ = np.cov(Xf.T) + 1e-6 * np.eye(d)
         self.Sigma0_inv_ = np.linalg.inv(self.Sigma0_)
 
-        # ── δ_G: Feature Gap — PCA decomposition ──
+        # ?? ?_G: Feature Gap - PCA decomposition ??
         eigvals, eigvecs = np.linalg.eigh(self.Sigma0_)
         # eigh returns ascending order; top-k = last k
         k = min(self.n_components, d - 1)
-        self.Vk_ = eigvecs[:, -k:]           # (d, k) — top-k directions
-        self.V_gap_ = eigvecs[:, :-k]         # (d, d-k) — gap directions
+        self.Vk_ = eigvecs[:, -k:]           # (d, k) - top-k directions
+        self.V_gap_ = eigvecs[:, :-k]         # (d, d-k) - gap directions
 
-        # ── δ_A: Activity Anomaly — velocity threshold ──
+        # ?? ?_A: Activity Anomaly - velocity threshold ??
         # Compute quarter-over-quarter velocities in normal period
         velocities = []
         for t in range(1, T):
@@ -91,9 +91,9 @@ class BSDTOperators:
         self.normal_velocities_ = np.array(velocities)
         self.v0_ = float(np.percentile(self.normal_velocities_, self.velocity_pctl))
 
-        # ── δ_T: Temporal Novelty — store bandwidth ──
+        # ?? ?_T: Temporal Novelty - store bandwidth ??
         if self.kde_bandwidth is None:
-            # Scott's rule: h = n^(-1/(d+4)) * σ
+            # Scott's rule: h = n^(-1/(d+4)) * ?
             n_eff = len(Xf)
             self.kde_bandwidth = float(n_eff ** (-1.0 / (d + 4)) * Xf.std())
 
@@ -103,15 +103,15 @@ class BSDTOperators:
         """
         Camouflage deviation: per-agent Mahalanobis distance.
 
-        δ_C(x_i) = (x_i - μ₀)ᵀ Σ₀⁻¹ (x_i - μ₀)
+        ?_C(x_i) = (x_i - ??)? ???? (x_i - ??)
 
         Parameters
         ----------
-        X : (N, d) — single time-step state matrix
+        X : (N, d) - single time-step state matrix
 
         Returns
         -------
-        (N,) — per-agent camouflage score
+        (N,) - per-agent camouflage score
         """
         z = X - self.mu0_
         return np.sum(z @ self.Sigma0_inv_ * z, axis=1)
@@ -120,19 +120,19 @@ class BSDTOperators:
         """
         Feature Gap deviation: variance in low-eigenvalue directions.
 
-        δ_G(x_i) = ||x_i - μ₀||² - ||Π_k(x_i - μ₀)||²
+        ?_G(x_i) = ||x_i - ??||? - ||?_k(x_i - ??)||?
 
         This is the residual norm after projecting out the top-k
-        principal components — measures displacement in directions
+        principal components - measures displacement in directions
         the normal covariance doesn't explain.
 
         Returns
         -------
-        (N,) — per-agent feature gap score
+        (N,) - per-agent feature gap score
         """
         z = X - self.mu0_                    # (N, d)
         total_sq = np.sum(z ** 2, axis=1)    # (N,)
-        proj = z @ self.Vk_                  # (N, k) — projection onto top-k
+        proj = z @ self.Vk_                  # (N, k) - projection onto top-k
         proj_sq = np.sum(proj ** 2, axis=1)  # (N,)
         return np.maximum(total_sq - proj_sq, 0.0)
 
@@ -140,18 +140,18 @@ class BSDTOperators:
         """
         Activity Anomaly: excess velocity above normal threshold.
 
-        δ_A(x_i) = max(0, ||ẋ_i|| - v₀)
+        ?_A(x_i) = max(0, ||?_i|| - v?)
 
-        where ẋ_i ≈ x_i(t) - x_i(t-1) for quarterly data.
+        where ?_i ? x_i(t) - x_i(t-1) for quarterly data.
 
         Parameters
         ----------
-        X_curr : (N, d) — state at time t
-        X_prev : (N, d) — state at time t-1
+        X_curr : (N, d) - state at time t
+        X_prev : (N, d) - state at time t-1
 
         Returns
         -------
-        (N,) — per-agent activity anomaly score
+        (N,) - per-agent activity anomaly score
         """
         dX = X_curr - X_prev
         velocity = np.linalg.norm(dX, axis=1)
@@ -161,18 +161,18 @@ class BSDTOperators:
         """
         Temporal Novelty: KDE-based self-history novelty.
 
-        δ_T(x_i, t) = max(0, -log p_h(x_i(t)))
+        ?_T(x_i, t) = max(0, -log p_h(x_i(t)))
 
         where p_h is Gaussian KDE over the agent's own past states.
 
         Parameters
         ----------
-        X       : (N, d) — current state
-        history : list of (N, d) arrays — past states [X(0), ..., X(t-1)]
+        X       : (N, d) - current state
+        history : list of (N, d) arrays - past states [X(0), ..., X(t-1)]
 
         Returns
         -------
-        (N,) — per-agent temporal novelty score
+        (N,) - per-agent temporal novelty score
         """
         N, d = X.shape
         novelty = np.zeros(N)
@@ -188,7 +188,7 @@ class BSDTOperators:
             past = np.array([H[i] for H in history])  # (T_hist, d)
             T_hist = len(past)
 
-            # Gaussian KDE: p(x) = (1/T) Σ_t K_h(x - past_t)
+            # Gaussian KDE: p(x) = (1/T) ?_t K_h(x - past_t)
             diff = X[i] - past                          # (T_hist, d)
             sq_dist = np.sum(diff ** 2, axis=1)          # (T_hist,)
             log_kernels = -0.5 * sq_dist / h2 - 0.5 * d * np.log(2 * np.pi * h2)
@@ -209,17 +209,17 @@ class BSDTOperators:
 
         Parameters
         ----------
-        X_series : (T, N, d) — full panel
+        X_series : (T, N, d) - full panel
 
         Returns
         -------
         dict with keys:
-            'delta_C'   : (T,) — system-level camouflage score
-            'delta_G'   : (T,) — system-level feature gap score
-            'delta_A'   : (T,) — system-level activity anomaly score
-            'delta_T'   : (T,) — system-level temporal novelty score
-            'channels'  : (T, 4) — all channels stacked
-            'per_agent' : (T, N, 4) — per-agent scores
+            'delta_C'   : (T,) - system-level camouflage score
+            'delta_G'   : (T,) - system-level feature gap score
+            'delta_A'   : (T,) - system-level activity anomaly score
+            'delta_T'   : (T,) - system-level temporal novelty score
+            'channels'  : (T, 4) - all channels stacked
+            'per_agent' : (T, N, 4) - per-agent scores
         """
         T, N, d = X_series.shape
 
@@ -233,17 +233,17 @@ class BSDTOperators:
 
             X = X_series[t]
 
-            # δ_C: always available
+            # ?_C: always available
             pa[t, :, 0] = self.delta_C(X)
 
-            # δ_G: always available
+            # ?_G: always available
             pa[t, :, 1] = self.delta_G(X)
 
-            # δ_A: needs t >= 1
+            # ?_A: needs t >= 1
             if t >= 1:
                 pa[t, :, 2] = self.delta_A(X, X_series[t - 1])
 
-            # δ_T: needs history
+            # ?_T: needs history
             pa[t, :, 3] = self.delta_T(X, history)
             history.append(X.copy())
 
