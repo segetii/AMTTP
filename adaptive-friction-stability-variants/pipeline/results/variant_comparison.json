@@ -1,0 +1,349 @@
+{
+  "data_source": "FDIC SDI call-report (real)",
+  "T": 140,
+  "N": 7,
+  "d": 6,
+  "date_range": [
+    "1990-03-31",
+    "2024-12-31"
+  ],
+  "normal_period": [
+    "1994-03-31",
+    "2003-12-31"
+  ],
+  "crisis_quarters_used": 13,
+  "channel_stats": {
+    "\u03b4_C (Camouflage)": {
+      "mean": 137.221,
+      "std": 147.4526,
+      "corr_srisk": 0.1255
+    },
+    "\u03b4_G (Feature Gap)": {
+      "mean": 13.8298,
+      "std": 13.4113,
+      "corr_srisk": 0.0961
+    },
+    "\u03b4_A (Activity)": {
+      "mean": 0.3452,
+      "std": 0.9442,
+      "corr_srisk": 0.0868
+    },
+    "\u03b4_T (Temporal)": {
+      "mean": 45.0703,
+      "std": 12.523,
+      "corr_srisk": 0.1625
+    }
+  },
+  "variants": {
+    "baseline": {
+      "name": "Baseline (Mahalanobis)",
+      "lead_times": {
+        "GFC 2008/STLFSI": -3.0,
+        "GFC 2008/VIX": -1.0,
+        "GFC 2008/NFCI": -2.0,
+        "GFC 2008/SRISK-proxy": -1.0,
+        "COVID 2020/STLFSI": -3.0,
+        "COVID 2020/VIX": -3.0,
+        "COVID 2020/NFCI": -3.0,
+        "COVID 2020/SRISK-proxy": -3.0,
+        "Rate Shock 2022/STLFSI": 0.0,
+        "Rate Shock 2022/VIX": -1.0,
+        "Rate Shock 2022/NFCI": -1.0,
+        "Rate Shock 2022/SRISK-proxy": 0.0
+      },
+      "granger": [
+        {
+          "lag": 1,
+          "F": 1.032,
+          "p": 0.3115
+        },
+        {
+          "lag": 2,
+          "F": 0.784,
+          "p": 0.4588
+        },
+        {
+          "lag": 3,
+          "F": 0.625,
+          "p": 0.6002
+        },
+        {
+          "lag": 4,
+          "F": 0.474,
+          "p": 0.7551
+        },
+        {
+          "lag": 5,
+          "F": 0.371,
+          "p": 0.868
+        },
+        {
+          "lag": 6,
+          "F": 0.61,
+          "p": 0.7218
+        }
+      ],
+      "oos_backtest": {
+        "threshold_p75": 30.9452,
+        "alarm_date": "2007-03-31",
+        "alarm_lead_quarters": 6,
+        "hit_rate": 0.7143,
+        "false_alarm_rate": null
+      },
+      "corr_srisk": 0.0798,
+      "selectivity": {
+        "crisis_above_p75": 0.9231,
+        "calm_above_p75": 0.4803,
+        "ratio": 1.92
+      }
+    },
+    "full_bsdt": {
+      "name": "Full BSDT (4-channel uniform)",
+      "lead_times": {
+        "GFC 2008/STLFSI": -2.0,
+        "GFC 2008/VIX": 0.0,
+        "GFC 2008/NFCI": -1.0,
+        "GFC 2008/SRISK-proxy": 0.0,
+        "COVID 2020/STLFSI": 0.0,
+        "COVID 2020/VIX": 0.0,
+        "COVID 2020/NFCI": 0.0,
+        "COVID 2020/SRISK-proxy": 0.0,
+        "Rate Shock 2022/STLFSI": 3.0,
+        "Rate Shock 2022/VIX": 2.0,
+        "Rate Shock 2022/NFCI": 2.0,
+        "Rate Shock 2022/SRISK-proxy": 3.0
+      },
+      "granger": [
+        {
+          "lag": 1,
+          "F": 0.109,
+          "p": 0.7423
+        },
+        {
+          "lag": 2,
+          "F": 0.174,
+          "p": 0.8401
+        },
+        {
+          "lag": 3,
+          "F": 0.339,
+          "p": 0.7969
+        },
+        {
+          "lag": 4,
+          "F": 0.204,
+          "p": 0.9358
+        },
+        {
+          "lag": 5,
+          "F": 0.217,
+          "p": 0.9546
+        },
+        {
+          "lag": 6,
+          "F": 0.213,
+          "p": 0.972
+        }
+      ],
+      "oos_backtest": {
+        "threshold_p75": 0.6479,
+        "alarm_date": "2007-03-31",
+        "alarm_lead_quarters": 6,
+        "hit_rate": 0.4286,
+        "false_alarm_rate": null
+      },
+      "corr_srisk": 0.153,
+      "selectivity": {
+        "crisis_above_p75": 0.6923,
+        "calm_above_p75": 0.3307,
+        "ratio": 2.09
+      }
+    },
+    "quadsurf": {
+      "name": "QuadSurf (polynomial ridge)",
+      "lead_times": {
+        "GFC 2008/STLFSI": -2.0,
+        "GFC 2008/VIX": 0.0,
+        "GFC 2008/NFCI": -1.0,
+        "GFC 2008/SRISK-proxy": 0.0,
+        "COVID 2020/STLFSI": 0.0,
+        "COVID 2020/VIX": 0.0,
+        "COVID 2020/NFCI": 0.0,
+        "COVID 2020/SRISK-proxy": 0.0,
+        "Rate Shock 2022/STLFSI": 3.0,
+        "Rate Shock 2022/VIX": 2.0,
+        "Rate Shock 2022/NFCI": 2.0,
+        "Rate Shock 2022/SRISK-proxy": 3.0
+      },
+      "granger": [
+        {
+          "lag": 1,
+          "F": 0.031,
+          "p": 0.8615
+        },
+        {
+          "lag": 2,
+          "F": 0.248,
+          "p": 0.7809
+        },
+        {
+          "lag": 3,
+          "F": 0.502,
+          "p": 0.6819
+        },
+        {
+          "lag": 4,
+          "F": 0.713,
+          "p": 0.5847
+        },
+        {
+          "lag": 5,
+          "F": 0.67,
+          "p": 0.6468
+        },
+        {
+          "lag": 6,
+          "F": 0.561,
+          "p": 0.7605
+        }
+      ],
+      "oos_backtest": {
+        "threshold_p75": 0.0263,
+        "alarm_date": "2008-03-31",
+        "alarm_lead_quarters": 2,
+        "hit_rate": 0.1429,
+        "false_alarm_rate": null
+      },
+      "corr_srisk": 0.1506,
+      "selectivity": {
+        "crisis_above_p75": 0.6154,
+        "calm_above_p75": 0.1417,
+        "ratio": 4.34
+      }
+    },
+    "signed_lr": {
+      "name": "Signed LR (logistic)",
+      "lead_times": {
+        "GFC 2008/STLFSI": -3.0,
+        "GFC 2008/VIX": -1.0,
+        "GFC 2008/NFCI": -2.0,
+        "GFC 2008/SRISK-proxy": -1.0,
+        "COVID 2020/STLFSI": 0.0,
+        "COVID 2020/VIX": 0.0,
+        "COVID 2020/NFCI": 0.0,
+        "COVID 2020/SRISK-proxy": 0.0,
+        "Rate Shock 2022/STLFSI": 3.0,
+        "Rate Shock 2022/VIX": 2.0,
+        "Rate Shock 2022/NFCI": 2.0,
+        "Rate Shock 2022/SRISK-proxy": 3.0
+      },
+      "granger": [
+        {
+          "lag": 1,
+          "F": 0.0,
+          "p": 0.9977
+        },
+        {
+          "lag": 2,
+          "F": 0.062,
+          "p": 0.9398
+        },
+        {
+          "lag": 3,
+          "F": 0.106,
+          "p": 0.9566
+        },
+        {
+          "lag": 4,
+          "F": 0.123,
+          "p": 0.9739
+        },
+        {
+          "lag": 5,
+          "F": 0.657,
+          "p": 0.6564
+        },
+        {
+          "lag": 6,
+          "F": 1.42,
+          "p": 0.2123
+        }
+      ],
+      "oos_backtest": {
+        "threshold_p75": 0.0182,
+        "alarm_date": "2007-03-31",
+        "alarm_lead_quarters": 6,
+        "hit_rate": 0.2857,
+        "false_alarm_rate": null
+      },
+      "corr_srisk": 0.0471,
+      "selectivity": {
+        "crisis_above_p75": 0.5385,
+        "calm_above_p75": 0.2283,
+        "ratio": 2.36
+      }
+    },
+    "expo_gate": {
+      "name": "Expo Gate (quad+tanh+sigmoid)",
+      "lead_times": {
+        "GFC 2008/STLFSI": -2.0,
+        "GFC 2008/VIX": 0.0,
+        "GFC 2008/NFCI": -1.0,
+        "GFC 2008/SRISK-proxy": 0.0,
+        "COVID 2020/STLFSI": 0.0,
+        "COVID 2020/VIX": 0.0,
+        "COVID 2020/NFCI": 0.0,
+        "COVID 2020/SRISK-proxy": 0.0,
+        "Rate Shock 2022/STLFSI": 3.0,
+        "Rate Shock 2022/VIX": 2.0,
+        "Rate Shock 2022/NFCI": 2.0,
+        "Rate Shock 2022/SRISK-proxy": 3.0
+      },
+      "granger": [
+        {
+          "lag": 1,
+          "F": 0.023,
+          "p": 0.8784
+        },
+        {
+          "lag": 2,
+          "F": 0.418,
+          "p": 0.659
+        },
+        {
+          "lag": 3,
+          "F": 0.386,
+          "p": 0.7632
+        },
+        {
+          "lag": 4,
+          "F": 0.26,
+          "p": 0.9028
+        },
+        {
+          "lag": 5,
+          "F": 0.208,
+          "p": 0.9588
+        },
+        {
+          "lag": 6,
+          "F": 0.228,
+          "p": 0.967
+        }
+      ],
+      "oos_backtest": {
+        "threshold_p75": 0.5197,
+        "alarm_date": "2008-03-31",
+        "alarm_lead_quarters": 2,
+        "hit_rate": 0.1429,
+        "false_alarm_rate": null
+      },
+      "corr_srisk": 0.1329,
+      "selectivity": {
+        "crisis_above_p75": 0.6154,
+        "calm_above_p75": 0.1417,
+        "ratio": 4.34
+      }
+    }
+  }
+}
