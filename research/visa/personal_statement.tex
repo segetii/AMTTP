@@ -1,0 +1,56 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!70!black
+}
+
+\onehalfspacing
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Personal Statement}\\[4pt]
+{\large Odeyemi Olusegun Israel}\\[2pt]
+{\normalsize UK Global Talent Visa --- Digital Technology (Exceptional Promise)}
+\end{center}
+
+\bigskip
+
+I am an independent machine learning researcher and systems engineer based in Derby, United Kingdom. Over the past three years, I have designed and built a blockchain-native compliance platform, produced three original research papers, and open-sourced developer tools---all without institutional affiliation, funding, or supervision. I am applying under the Exceptional Promise route because I believe my work demonstrates the capacity to become a leading figure in the UK's financial technology and applied machine learning sectors.
+
+\textbf{What I have built.}
+My central engineering project is AMTTP---the Anti-Money Laundering Transaction Trust Protocol. It addresses a problem that no existing commercial product has solved: enforcing regulatory compliance \textit{before} a blockchain transaction reaches finality, rather than generating alerts after the fact. Chainalysis, Elliptic, and TRM Labs all operate post-settlement. AMTTP intervenes at the protocol level.
+
+The system spans four architectural layers: client SDKs (TypeScript and Python, both open-sourced), a compliance orchestration engine, an offline ML training pipeline, and a smart contract layer with 18 contracts deployed on Ethereum Sepolia. The orchestration engine combines ML risk scoring, graph-based relationship analysis, sanctions list screening, and configurable policy rules into a single deterministic decision---all within the approximately 12-second Ethereum block confirmation window. The infrastructure comprises 17 containerised microservices coordinated through a central gateway. The ML pipeline uses a Composite Teacher architecture trained on 2.64 million transactions, achieving a production ROC-AUC of 0.9879 and F1 of 0.9012 with 21 features and zero training-serving skew.
+
+I also built zkNAF, a zero-knowledge proof framework that allows institutions to verify KYC credentials, risk score ranges, and sanctions non-membership without exposing personal data---resolving the tension between GDPR's data minimisation requirements and AML transparency obligations at the architectural level.
+
+\textbf{What I have discovered.}
+Alongside the engineering work, I have pursued a research programme investigating why anomaly detection systems fail and how to build ones that do not.
+
+My first paper, \textit{Blind Spot Decomposition Theory} (BSDT), provides a mathematical framework for characterising missed fraud. I decompose detection failures into four near-orthogonal components---Camouflage, Feature Gap, Activity Anomaly, and Temporal Novelty---and demonstrate that these account for over 95\% of explainable variance in missed-fraud indicators. The correction operators I derive recover recall by up to 84.4 percentage points without retraining or access to model internals. I validated this across four model architectures (XGBoost, LightGBM, Random Forest, Logistic Regression), seven datasets drawn from six domains (Bitcoin, Ethereum, credit card, shuttle telemetry, mammography, digit recognition), and over 36 model--dataset combinations. My best variant achieves a mean F1 of 0.787 with 88.1\% false positive reduction.
+
+My second paper, the \textit{Universal Deviation Law} (UDL), tackles the detection problem from first principles. I introduce a multi-spectrum tensor framework with 14 composable law-domain operators spanning statistical, geometric, topological, Fourier, wavelet, and information-theoretic families. A 14$\times$14 correlation audit confirms that only one pair out of 91 is redundant, meaning each operator captures a genuinely distinct perspective on deviation. The best configuration achieves a mean AUC of 0.972 and 91\% coverage across five benchmarks---categorically outperforming Isolation Forest (0.788), LOF (0.632), and the current state-of-the-art ECOD (0.921)---with a single hyperparameter set and no per-dataset tuning.
+
+My third paper, \textit{Systemic Risk as Geometry}, applies GravityEngine dynamics and Lyapunov stability theory to systemic financial risk, validated on real Federal Reserve data across 79 quarters and 12 sectors.
+
+These three papers form a coherent arc: BSDT diagnoses why detectors fail; UDL provides a detection framework designed to eliminate those failures; and the systemic risk work extends the mathematical machinery to macroeconomic stability.
+
+\textbf{Why the UK, and why now.}
+The UK is positioning itself as the global leader in responsible fintech regulation. The FCA's forthcoming regulatory framework for crypto-assets, expected by late 2027, will create substantial demand for compliance infrastructure that operates at the protocol level. AMTTP is, as far as I am aware from surveying the literature and commercial landscape, the only system that provides pre-settlement AML enforcement on blockchain transactions. I want to develop it further within the UK ecosystem, where regulatory leadership and technical talent converge.
+
+My immediate plans are to commercialise AMTTP as a compliance-as-a-service product for UK-regulated financial institutions and virtual asset service providers, to submit the BSDT and UDL papers to peer-reviewed journals, and to contribute to the open-source tooling around responsible blockchain adoption. Longer term, I intend to build a research-led company at the intersection of machine learning, financial regulation, and cryptographic privacy---headquartered in the UK.
+
+I have done this work alone, without a university laboratory, a GPU cluster, or a research budget. What I have is the ability to move between mathematical theory and production engineering, and the discipline to validate claims rigorously before making them. I believe I can contribute meaningfully to the UK's digital economy, and I am asking for the opportunity to do so.
+
+\end{document}
