@@ -1,12 +1,13 @@
-"""
-Run the critical Navier-Stokes experiments.
+""" 
+Run the core Navier–Stokes numerical experiments used in the paper.
 
 Experiment 1: Constant ν vs Adaptive ν(E) on Taylor-Green vortex
 Experiment 2: All 4 initial conditions with adaptive ν
 Experiment 3: Vary θ (damping threshold) sensitivity analysis
 Experiment 4: Track δ_A (depletion of nonlinearity) before enstrophy spikes
 
-This produces the evidence needed for the paper.
+Note: these are finite-resolution numerical experiments on a modified-viscosity
+model; they are not a proof of the Clay Millennium problem.
 """
 
 import sys
@@ -22,14 +23,14 @@ from solver import (NSParams, NavierStokesSolver, compare_adaptive_vs_constant,
 
 def experiment_1_adaptive_vs_constant():
     """
-    THE CRITICAL EXPERIMENT.
-    Does adaptive ν(E_BS) delay or prevent blow-up
-    compared to constant ν at the same base Reynolds number?
+    Main comparison experiment.
+    Does adaptive ν(E_BS) reduce extreme-gradient indicators and/or avoid
+    numerical instability compared to constant ν at the same base Reynolds number?
     """
     print("\n" + "="*70)
     print("  EXPERIMENT 1: Adaptive ν(E) vs Constant ν")
     print("  Initial condition: Taylor-Green vortex")
-    print("  This is the evidence that wins or loses the argument.")
+    print("  Goal: compare diagnostics under matched base ν₀.")
     print("="*70)
 
     params = NSParams(
@@ -86,8 +87,8 @@ def experiment_2_all_initial_conditions():
 def experiment_3_theta_sensitivity():
     """
     Vary θ from 0.01 (aggressive damping) to 100 (nearly constant ν).
-    Find the critical θ* below which blow-up is prevented.
-    This defines the boundary of the regularisation.
+    Explore θ from 0.01 (aggressive damping) to 100 (nearly constant ν).
+    Track how diagnostics and numerical stability change with θ.
     """
     print("\n" + "="*70)
     print("  EXPERIMENT 3: θ sensitivity analysis")

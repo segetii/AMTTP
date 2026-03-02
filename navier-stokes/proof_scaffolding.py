@@ -1,11 +1,12 @@
-"""
-Analytical Proof Scaffolding for Navier-Stokes Regularity
-via Adaptive Viscosity and Depletion of Nonlinearity.
+""" 
+Conjectural proof scaffolding and numerical checks for Navier–Stokes-style
+regularity mechanisms via state-dependent viscosity and depletion of
+nonlinearity.
 
 This module contains the formal mathematical structure that connects
 the MFLS framework to the NS regularity problem.
 
-THE ARGUMENT (in outline):
+THE PROGRAM (in outline):
 
 1. SETUP
    Standard 3D incompressible NS on T³:
@@ -19,12 +20,12 @@ THE ARGUMENT (in outline):
      E_BS(u) = δ_C²(u) + δ_G²(u) + δ_A²(u) + δ_T²(u)
      ν(E) = ν₀(1 + E/(E+θ))   (from MFLS optimal damping)
 
-3. KEY LEMMA (Energy inequality for modified system)
+3. KEY LEMMA (Energy inequality for modified system; formal)
    d/dt ||u||²_{H¹} ≤ -ν₀ ||u||²_{H²} + C₁ ||u||³_{H¹}  [standard]
    But with adaptive ν(E):
    d/dt ||u||²_{H¹} ≤ -ν₀(1 + γ*(E)) ||u||²_{H²} + C₁ ||u||³_{H¹}
 
-4. THEOREM A (Boundedness of E_BS implies regularity)
+4. CONDITIONAL CLAIM A (Boundedness of E_BS implies regularity)
    IF E_BS(u(t)) ≤ M for all t ∈ [0,T),
    THEN u remains smooth on [0,T].
 
@@ -33,7 +34,7 @@ THE ARGUMENT (in outline):
    - ν(E) = ν₀(1 + γ*(E)) ≥ ν₀(1 + M/(M+θ)) (enhanced dissipation)
    - Standard energy estimates close with this enhanced ν
 
-5. THEOREM B (Adaptive viscosity keeps E_BS bounded — THE HARD PART)
+5. CONDITIONAL CLAIM B (Adaptive viscosity keeps E_BS bounded — THE HARD PART)
    Under the adaptive viscosity, E_BS satisfies:
      dE_BS/dt ≤ -α E_BS + β √E_BS · ||ω||_∞
 
@@ -41,7 +42,7 @@ THE ARGUMENT (in outline):
    ||ω||_∞ grows at most like E_BS^{1/2 - ε} for some ε > 0,
    then E_BS is bounded.
 
-   THIS IS WHERE THE DEPLETION CONJECTURE ENTERS:
+  THIS IS WHERE THE DEPLETION CONJECTURE ENTERS:
    The vorticity-strain alignment depletes (ω aligns with e₂, not e₁),
    which means the nonlinear term (u·∇)u is effectively weaker than
    its worst-case bound.
@@ -57,12 +58,12 @@ THE ARGUMENT (in outline):
    Numerical evidence suggests YES (the velocity field doesn't collapse
    to a rank-1 structure at finite time).
 
-7. CONNECTION TO BKM CRITERION
+7. CONNECTION TO BKM CRITERION (conditional)
    Beale-Kato-Majda: blow-up at T* ⟺ ∫₀^{T*} ||ω||_∞ dt = ∞
 
-   Our framework: if E_BS is bounded, then ν(E) has a definite lower
-   bound, which implies ||ω||_∞ grows at most exponentially, which
-   makes the BKM integral finite on any compact interval.
+  Our framework: if E_BS is bounded, then ν(E) has a definite lower
+  bound, which supports standard a priori growth controls that would
+  keep the BKM integral finite on any compact interval.
 
    The question reduces to: does adaptive ν prevent the transition
    from exponential to super-exponential growth?
@@ -194,7 +195,7 @@ def verify_regularity_conditions(diagnostics_history: list) -> dict:
     Given a simulation history, verify all regularity conditions.
 
     Returns a dict summarising which conditions hold and which fail.
-    This is the numerical verification of the analytical argument.
+    This is a numerical sanity-check against the conjectural argument.
     """
     results = {
         "duration": 0,
@@ -250,8 +251,8 @@ def verify_regularity_conditions(diagnostics_history: list) -> dict:
     # Conclusion
     if results["enstrophy_bounded"] and results["bkm_finite"]:
         if results["depletion_active"]:
-            results["conclusion"] = ("SMOOTH: Enstrophy bounded, BKM finite, "
-                                     "depletion active → regularity holds")
+            results["conclusion"] = ("SMOOTH (numerical): Enstrophy bounded, BKM finite, "
+                         "depletion active → consistent with the heuristic")
         else:
             results["conclusion"] = ("SMOOTH (without depletion): Enstrophy bounded, "
                                      "BKM finite, but depletion not clearly active")
@@ -264,20 +265,20 @@ def verify_regularity_conditions(diagnostics_history: list) -> dict:
 
 
 # ============================================================
-# The Key Inequality (Theorem B — computational verification)
+# The key inequality (Claim B — heuristic computational check)
 # ============================================================
 
 def verify_theorem_B(diagnostics_history: list) -> dict:
     """
-    Verify Theorem B: adaptive viscosity keeps E_BS bounded.
+  Heuristic check for Claim B: adaptive viscosity tends to keep E_BS bounded.
 
     The theorem states:
       dE_BS/dt ≤ -α·E_BS + β·√E_BS · ||ω||_∞
 
-    We verify:
+    We check (empirically / non-rigorously):
     1. The inequality holds numerically (compute dE_BS/dt from finite differences)
     2. The depletion-adjusted right-hand side is negative when E_BS is large
-    3. This implies E_BS cannot grow without bound
+    3. Whether the fitted dynamics suggest boundedness over the observed window
     """
     if len(diagnostics_history) < 10:
         return {"status": "insufficient_data"}
@@ -334,7 +335,7 @@ def verify_theorem_B(diagnostics_history: list) -> dict:
         "max_E_observed": float(np.max(E_bs)),
         "E_stays_below_critical": float(np.max(E_bs)) < E_critical if np.isfinite(E_critical) else False,
         "interpretation": (
-            "REGULARITY SUPPORTED" if alpha_fit > 0 and float(np.max(E_bs)) < E_critical
-            else "INCONCLUSIVE — α not positive or E exceeds critical"
+          "HEURISTIC SUPPORT (bounded-window)" if alpha_fit > 0 and float(np.max(E_bs)) < E_critical
+          else "INCONCLUSIVE (fit/threshold failed)"
         )
     }

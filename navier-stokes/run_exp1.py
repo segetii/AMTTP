@@ -35,7 +35,7 @@ for label, adaptive in [("constant_nu", False), ("adaptive_nu", True)]:
 
 save_results(results, os.path.join(os.path.dirname(__file__), "exp1_results.json"))
 
-# Now run the proof verification
+# Now run the heuristic verification
 from proof_scaffolding import verify_regularity_conditions, verify_theorem_B
 import json
 
@@ -50,7 +50,7 @@ for label, history in results.items():
         print(f"  {k}: {v}")
 
     thm = verify_theorem_B(history)
-    print(f"\n  Theorem B verification:")
+    print(f"\n  Claim B (heuristic) check:")
     for k, v in thm.items():
         print(f"    {k}: {v}")
 

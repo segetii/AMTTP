@@ -1,12 +1,18 @@
-"""
-Production-grade 3D incompressible Navier-Stokes pseudo-spectral solver
-with BSDT-based adaptive viscosity and full diagnostic suite.
+""" 
+Research-grade 3D incompressible Navier–Stokes pseudo-spectral solver
+with BSDT-based state-dependent viscosity and a diagnostic suite.
 
 Framework:  ∂u/∂t + (u·∇)u = -∇p + ν(E)Δu,  ∇·u = 0
             on T³ = [0,2π]³ with periodic BCs
 
-Adaptive viscosity:  ν(E) = ν₀ · (1 + γ*(E))
-where γ*(E) = E/(E+θ) is the optimal damping from the MFLS framework.
+State-dependent viscosity:  ν(E) = ν₀ · (1 + γ*(E))
+where γ*(E) = E/(E+θ) is the MFLS-derived damping law used here as a
+feedback mechanism.
+
+Important scope note:
+- This code is for numerical experimentation on a modified-viscosity model.
+- It does NOT constitute a proof of global regularity for the standard
+    constant-viscosity 3D Navier–Stokes equations.
 
 Author: Segun Odeyemi
 """
@@ -163,8 +169,9 @@ class SpectralGrid:
 # ============================================================
 
 def taylor_green_vortex(grid: SpectralGrid) -> np.ndarray:
-    """Taylor-Green vortex: classic test case for potential blow-up.
-    Known exact solution at t=0, develops complex vortex dynamics."""
+    """Taylor–Green vortex: classic benchmark for vortex dynamics.
+    It is widely used to study rapid gradient growth and transition to
+    complex small-scale structure in 3D incompressible flow."""
     u = np.zeros((3, grid.N, grid.N, grid.N))
     u[0] = np.sin(grid.X) * np.cos(grid.Y) * np.cos(grid.Z)
     u[1] = -np.cos(grid.X) * np.sin(grid.Y) * np.cos(grid.Z)
@@ -365,12 +372,12 @@ class AdaptiveViscosity:
 
     Key properties:
     - When E → 0 (system near equilibrium): ν(E) → ν₀ (standard NS)
-    - When E → ∞ (blow-up imminent): ν(E) → 2ν₀ (maximum regularisation)
+    - When E → ∞ (high-anomaly / high-gradient regime): ν(E) → 2ν₀
     - The transition is smooth and the derivative γ*'(E) > 0
 
-    This is a NEW member of the Ladyzhenskaya regularisation family
-    where viscosity depends on a GLOBAL functional (E_BS) rather than
-    local gradients.
+    This is a state-dependent viscosity regularisation where viscosity
+    depends on a GLOBAL diagnostic functional (E_BS) rather than local
+    gradients.
     """
 
     def __init__(self, nu_base: float, theta: float, adaptive: bool = True):
@@ -728,9 +735,10 @@ class NavierStokesSolver:
 
 def compare_adaptive_vs_constant(params_base: NSParams, ic_name: str = "taylor_green"):
     """
-    THE CRITICAL EXPERIMENT:
+    Core comparison experiment:
     Run identical simulation with constant ν vs adaptive ν(E).
-    Compare enstrophy growth, BKM integral, and blow-up time.
+    Compare enstrophy growth, BKM integral, and numerical blow-up/instability
+    triggers.
     """
     results = {}
 

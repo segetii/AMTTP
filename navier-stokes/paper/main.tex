@@ -28,8 +28,10 @@
 \geometry{margin=1in}
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 
-% ── Theorem environments ──
-\newtheorem{theorem}{Theorem}[section]
+% ── Claim-style environments ──
+% NOTE: This document contains formal statements and proof sketches
+% for a modified-viscosity model, plus numerical evidence.
+\newtheorem{theorem}{Claim}[section]
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
@@ -55,7 +57,7 @@
 \textbf{A State-Dependent Viscosity Framework for the\\
 3D Incompressible Navier-Stokes Equations:\\
 Adaptive Regularisation via Blind-Spot Detection Theory}\\[10pt]
-\large{Toward the Millennium Prize Problem}
+\large{Toward the Millennium Prize Problem: a modified model and numerical evidence}
 }
 
 \author{
@@ -84,24 +86,21 @@ This construction yields a new member of the Ladyzhenskaya regularisation
 family in which viscosity depends on a \emph{global diagnostic functional}
 rather than local gradients.
 
-We prove three principal results:
-(i) a new regularity criterion (Theorem~\ref{thm:criterion}):
-    boundedness of $\Ebs$ on $[0,T)$ implies smoothness of the solution;
-(ii) an energy inequality (Theorem~\ref{thm:energy}):
-    the adaptive viscosity yields a strictly improved enstrophy bound
-    relative to constant viscosity, with the improvement scaling
-    as $\gammastar(\Ebs)$;
-(iii) a production-dissipation balance theorem (Theorem~\ref{thm:PD}):
-    the ratio of enstrophy production to viscous dissipation is
-    halved under the adaptive mechanism, uniformly across all
-    Reynolds numbers tested.
+We provide three principal components:
+(i) a \emph{conditional} regularity criterion (Claim~\ref{thm:criterion})
+  formulated in terms of boundedness of $\Ebs$ on $[0,T)$;
+(ii) energy/enstrophy inequalities for the \emph{modified-viscosity} system
+  (Claim~\ref{thm:energy});
+(iii) numerical evidence in a pseudo-spectral discretisation suggesting that,
+  in the tested runs, the enstrophy production-to-dissipation proxy
+  $\mathcal{P}/\mathcal{D}$ is reduced by approximately one half.
 
 We support these results with a high-resolution pseudo-spectral numerical
 study across Reynolds numbers $\mathrm{Re} \in [314, 6283]$ using the
 Taylor-Green vortex as initial data.
 The numerical evidence establishes that:
 the production-to-dissipation ratio $\mathcal{P}/\mathcal{D}$ is reduced
-by exactly $50 \pm 2.5\%$ at every Reynolds number;
+by $\approx 50\%$ across the tested Reynolds numbers (within run-to-run variation);
 the $H^2$ Sobolev norm is suppressed by $3{-}7\%$;
 and the effective viscosity converges to $\gammastar \approx 0.994$,
 confirming that the adaptive mechanism is active and nearly saturated.
@@ -116,6 +115,16 @@ a viscosity enhancement mechanism in incompressible fluid dynamics.
 This suggests a deep connection between the regularity of Navier-Stokes
 solutions and the stability theory of complex adaptive systems.
 \end{abstract}
+
+\begin{tcolorbox}[colback=gray!5,colframe=gray!50,title=Scope and non-claims]
+This paper does \emph{not} claim to solve the Clay Millennium Navier--Stokes problem.
+The analytical statements here pertain to a \emph{modified} equation with
+state-dependent viscosity, and several arguments are conditional on regularity
+of the diagnostic functional $\Ebs$.
+All computational results are finite-resolution numerical evidence and should
+not be interpreted as a continuum proof of global regularity (or blow-up)
+for the standard constant-viscosity 3D Navier--Stokes equations.
+\end{tcolorbox}
 
 \tableofcontents
 \newpage
@@ -193,9 +202,9 @@ three key innovations:
   $\delta_T$ (temporal novelty).
 
 \item \textbf{Production-dissipation balance.}
-  We prove and verify numerically that the adaptive viscosity
-  \emph{halves} the ratio of enstrophy production to viscous
-  dissipation, uniformly across Reynolds numbers.
+  We provide analytical motivation and observe numerically that the
+  adaptive viscosity tends to reduce the ratio of enstrophy production
+  to viscous dissipation by about one half over the tested Reynolds numbers.
   This is the mechanism that prevents the nonlinear term
   from dominating the dissipation.
 \end{enumerate}
@@ -345,7 +354,7 @@ The function $\gammastar$ has the following properties:
   the viscosity equals the base value $\nu_0$ (standard NS).
 \item $\gammastar(E) \to 1$ as $E \to \infty$:
   the maximum enhancement is $2\nu_0$ (bounded feedback).
-\item $\gammastar'(E) = \theta/(E+\theta)^2 > 0$:
+\item ${\gammastar}'(E) = \theta/(E+\theta)^2 > 0$:
   the enhancement is strictly increasing and smooth.
 \item $\gammastar$ is Lipschitz: $|\gammastar(E_1) - \gammastar(E_2)|
   \leq \theta^{-1} |E_1 - E_2|$ for $E_1, E_2 \geq 0$.
@@ -414,7 +423,7 @@ Using the Brezis-Gallouet inequality \cite{bg1980}:
 \norm{\boldsymbol{\omega}}_\infty \leq C \norm{\boldsymbol{\omega}}_{H^1}
 \bigl(1 + \log^{1/2}(1 + \norm{\boldsymbol{\omega}}_{H^2}/\norm{\boldsymbol{\omega}}_{H^1})\bigr).
 \]
-Since bounded $\delta_G$ (from bounded $\Ebs$) controls the spectral
+Assuming bounded $\delta_G$ (from bounded $\Ebs$) controls the spectral
 tail and hence the ratio $\norm{\boldsymbol{\omega}}_{H^2}/\norm{\boldsymbol{\omega}}_{H^1}$,
 the logarithmic term remains bounded, giving
 $\norm{\boldsymbol{\omega}}_\infty \leq C'$ on $[0,T)$.
@@ -422,7 +431,7 @@ The BKM integral is then finite: $\int_0^T C' \, dt = C'T < \infty$.
 \end{proof}
 
 \begin{remark}
-Theorem~\ref{thm:criterion} provides a regularity criterion that
+Claim~\ref{thm:criterion} provides a \emph{conditional} regularity criterion that
 is strictly weaker than bounded $\norm{\boldsymbol{\omega}}_\infty$
 (the BKM criterion). The advantage is that $\Ebs$ captures
 \emph{structural} information (alignment, spectral shape, temporal
@@ -459,16 +468,16 @@ The dissipation term is enhanced:
 \mathcal{D}_\omega = \nu_0(1 + \gammastar(\Ebs)) \norm{\nabla\boldsymbol{\omega}}_{L^2}^2
 \geq \nu_0 \norm{\nabla\boldsymbol{\omega}}_{L^2}^2.
 \]
-The improvement over constant viscosity is exactly $\gammastar(\Ebs)$,
+The viscosity multiplier over the baseline is $1+\gammastar(\Ebs)$,
 which is bounded below by $1/(1+\theta)$ when $\Ebs \geq 1$.
 \end{proof}
 
-\subsection{Production-Dissipation Balance Theorem}
+\subsection{Production--Dissipation Balance (Numerical)}
 
 The following is our central numerical discovery, supported by
 analytical reasoning:
 
-\begin{theorem}[P/D Halving Principle]\label{thm:PD}
+\begin{proposition}[P/D Halving (Heuristic / Numerical)]\label{thm:PD}
 For the modified Navier-Stokes equations with adaptive viscosity
 $\nu(\mathbf{u}) = \nu_0(1 + \gammastar(\Ebs))$ and
 $\Ebs \gg \theta$ (fully activated regime),
@@ -479,9 +488,9 @@ the production-to-dissipation ratio satisfies
 \end{equation}
 In the saturated regime where $\gammastar \approx 1$,
 this gives $\mathcal{R}_{\mathrm{adaptive}} \approx \frac{1}{2}\mathcal{R}_{\mathrm{constant}}$.
-\end{theorem}
+\end{proposition}
 
-\begin{proof}
+\begin{proof}[Heuristic justification]
 The production term $\mathcal{P}_\omega$ depends only on the velocity
 field and its gradients, which are modified only indirectly through
 the enhanced dissipation. For the same vortex structure, the production
@@ -500,7 +509,7 @@ When $\gammastar \approx 1$ (which occurs for $\Ebs \gg \theta$),
 this gives $\mathcal{R}_{\mathrm{adaptive}} \approx \mathcal{R}_{\mathrm{constant}}/2$.
 \end{proof}
 
-\begin{corollary}[Delayed Blow-up]\label{cor:delay}
+\begin{corollary}[Delayed Blow-up (Heuristic)]\label{cor:delay}
 If blow-up for constant viscosity requires
 $\mathcal{R}_{\mathrm{constant}} \to \infty$ (production dominating
 dissipation), then the adaptive viscosity delays this by ensuring
@@ -649,7 +658,7 @@ Re & $\Omega_r$ & $\mathcal{R}_c$ & $\mathcal{R}_a$
 \begin{enumerate}
 \item The P/D ratio $\mathcal{R}_a/\mathcal{R}_c$ converges to
   $\mathbf{0.500}$ as Re increases, confirming
-  Theorem~\ref{thm:PD} exactly.
+  Proposition~\ref{thm:PD} to numerical precision in these runs.
 
 \item The constant-viscosity P/D ratio $\mathcal{R}_c$ grows
   approximately \emph{linearly} with Re:
@@ -659,7 +668,7 @@ Re & $\Omega_r$ & $\mathcal{R}_c$ & $\mathcal{R}_a$
   and the ratio continues to grow without bound.
 
 \item The adaptive mechanism keeps
-  $\mathcal{R}_a \approx 0.0013 \cdot \mathrm{Re}$---exactly
+  $\mathcal{R}_a \approx 0.0013 \cdot \mathrm{Re}$---approximately
   half the constant-viscosity rate. The critical Reynolds number
   where $\mathcal{R}_a = 1$ is therefore doubled to Re $\approx 770$.
 
@@ -777,16 +786,16 @@ with constant viscosity $\nu_0$:
 then the solution is smooth on $[0,T]$.
 \end{proposition}
 
-\begin{proof}
-Condition 1 implies regularity by Theorem~\ref{thm:criterion}.
-Condition 2 combined with the P/D halving principle
-(Theorem~\ref{thm:PD}) implies that the adaptive system has
-$\mathcal{R}_{\mathrm{adaptive}} < 1$, hence enstrophy decays,
-hence the adaptive solution is smooth.
-Since the adaptive solution exists and is smooth, and the enhanced
-viscosity only aids regularity (by the maximum principle for the
-viscous term), the constant-viscosity solution inherits regularity
-from the comparison.
+\begin{proof}[Proof sketch / heuristic]
+Condition 1 implies smoothness for the modified-viscosity model via
+Claim~\ref{thm:criterion} (under the stated assumptions on $\Ebs$).
+Condition 2 combined with Proposition~\ref{thm:PD} suggests that, in the
+activated regime, the adaptive model can enter a subcritical enstrophy
+balance ($\mathcal{R}_{\mathrm{adaptive}} < 1$) in which enstrophy decays.
+
+Transferring such control from the modified model back to the standard
+constant-viscosity Navier--Stokes equation is the nontrivial step and
+remains conjectural in this work.
 \end{proof}
 
 \subsection{The Remaining Gap}
@@ -886,8 +895,8 @@ The mathematical structures are identical:
 This cross-domain isomorphism suggests that the regularity of
 Navier-Stokes solutions and the stability of financial systems
 are manifestations of the same mathematical principle:
-\emph{in any dissipative system with nonlinear forcing,
-adaptive state-dependent dissipation can prevent concentration
+\emph{in dissipative systems with nonlinear forcing,
+adaptive state-dependent dissipation may help prevent concentration
 of energy at small scales}.
 
 
@@ -898,22 +907,22 @@ of energy at small scales}.
 \subsection{Summary of Contributions}
 
 \begin{enumerate}
-\item \textbf{New regularity criterion} (Theorem~\ref{thm:criterion}):
-  Bounded blind-spot energy $\Ebs$ implies smoothness.
-  This is a structurally richer sufficient condition than BKM
-  because it incorporates spectral, alignment, and temporal information.
+\item \textbf{Conditional regularity criterion} (Claim~\ref{thm:criterion}):
+  Bounded blind-spot energy $\Ebs$ is proposed as a sufficient condition
+  for smoothness (for the modified-viscosity setting, under assumptions).
+  It is structurally richer than BKM in that it incorporates spectral,
+  alignment, and temporal information.
 
-\item \textbf{Enhanced energy inequality} (Theorem~\ref{thm:energy}):
-  The adaptive viscosity provides a strict improvement over constant
-  viscosity, with the enhancement controlled by $\gammastar(\Ebs)$.
+\item \textbf{Enhanced energy/enstrophy inequality} (Claim~\ref{thm:energy}):
+  The adaptive viscosity increases the viscous dissipation coefficient by a
+  factor $1+\gammastar(\Ebs)$ in the modified model.
 
-\item \textbf{P/D halving principle} (Theorem~\ref{thm:PD}):
-  The central quantitative result. The production-to-dissipation ratio
-  is halved under the adaptive mechanism, \emph{uniformly} across
-  Reynolds numbers. This is verified numerically to within 2.5\%
-  accuracy across $\mathrm{Re} \in [314, 6283]$.
+\item \textbf{P/D halving (heuristic + numerics)} (Proposition~\ref{thm:PD}):
+  The central quantitative observation. In the reported runs the
+  production-to-dissipation ratio is reduced by \,$\approx 50\%$ across
+  $\mathrm{Re} \in [314, 6283]$ (finite-resolution numerical evidence).
 
-\item \textbf{Production-grade numerical framework}:
+\item \textbf{Research-grade numerical framework}:
   A 3D pseudo-spectral NS solver with full BSDT diagnostic suite,
   adaptive viscosity, and comprehensive regularity monitoring.
 

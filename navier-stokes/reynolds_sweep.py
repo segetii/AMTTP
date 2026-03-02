@@ -255,12 +255,12 @@ def run_single_experiment(nu_base, N, T_final, dt, adaptive, ic_name="taylor_gre
 
 def reynolds_sweep():
     """
-    THE CRITICAL EXPERIMENT: Reynolds number sweep.
+    Reynolds number sweep (core numerical experiment).
     
     For each Re: run constant ν vs adaptive ν(E_BS).
     Track the enstrophy suppression ratio.
     
-    Prediction: suppression ratio INCREASES with Re.
+    Hypothesis: suppression effect increases with Re.
     """
     
     # Configuration: push to challenging Reynolds numbers

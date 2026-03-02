@@ -60,7 +60,7 @@ for label, history in results.items():
         print(f"  {k}: {v}")
 
     thm = verify_theorem_B(history)
-    print(f"  --- Theorem B ---")
+    print(f"  --- Claim B (heuristic check) ---")
     for k, v in thm.items():
         print(f"  {k}: {v}")
     summaries[label]["theorem_B"] = thm
