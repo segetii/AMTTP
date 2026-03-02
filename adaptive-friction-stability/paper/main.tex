@@ -124,6 +124,13 @@ produces a current systemic risk assessment of \textbf{elevated but falling},
 with CCyB recommendation of 180~bps and moderate herding (0.42), indicating
 the U.S.\ banking system remains in a persistently super-critical regime
 but is not approaching a phase-transition boundary.
+A global 24-institution panel spanning US, UK, EU, Asia, and Africa
+(AUROC = 0.811, 19-quarter GFC lead) reveals that variant performance is
+regionally specialised: unsupervised methods dominate bank-based economies
+(Asia, EU) while supervised methods dominate market-based economies
+(US, UK).  We provide a full economic interpretation, translating the
+mathematical findings into concrete guidance for central banks, commercial
+banks, and investors.
 \end{abstract}
 
 \tableofcontents
@@ -2089,6 +2096,264 @@ the welfare gap $V_{\bar\gamma} - V^*$ to leading order, confirming the
 Pigouvian interpretation: the tax exactly corrects the externality.
 
 %% ====================================================================
+\section{Economic Interpretation and Practical Guidance}
+\label{sec:economic}
+%% ====================================================================
+
+The mathematical apparatus of Sections~2--8 produces a rich set of quantitative
+findings.  This section translates those findings into the language of economics
+and financial stability, offering concrete guidance to three audiences:
+central banks, commercial banks, and investors.
+
+\subsection{The Current Global Prediction}
+
+The multi-variant, multi-region analysis yields a single, composite prediction:
+\textbf{the global financial system has entered a structurally novel critical
+state---not yet a crisis, but no longer normal.}  Three concrete claims underpin
+this assessment.
+
+\paragraph{Claim~1: Unprecedented structural drift.}
+The Baseline signal now stands at 669.9, approximately 18 times the GFC peak
+of~36.1.  This does not mean the world is 18 times closer to a crisis than in
+2008.  It means the macro-financial configuration of the global banking
+system---the joint distribution of credit-to-GDP ratios, interest rate
+structures, funding costs, and profitability measures---has moved further from
+its historical normal than at any point in two decades.  The post-pandemic,
+post-rate-shock financial architecture is statistically discontinuous from
+everything in the 2003--2021 calibration window.
+
+The underlying economic drivers are identifiable:
+\begin{itemize}
+  \item Interest rates went from near-zero for a decade to 5\%+ in 18~months---the fastest monetary tightening since Volcker.  The entire yield-curve structure that defined ``normal'' from 2009--2021 no longer exists.
+  \item Credit spreads have compressed despite higher base rates, meaning risk premia are historically thin relative to the rate environment---a configuration the model has never observed.
+  \item Bank balance sheets have absorbed unrealised losses on held-to-maturity securities (the SVB mechanism) without broad deleveraging.
+\end{itemize}
+
+\paragraph{Claim~2: The current trajectory does not match past crises.}
+QuadSurf and ExpoGate---the supervised variants specifically trained to
+recognise pre-crisis transition patterns---both return NORMAL ($Z \approx
+-0.7\sigma$).  In Minsky's typology, the supervised variants are reporting
+that the system remains in ``hedge finance'' territory (income covers debt
+service), not yet in ``speculative'' or ``Ponzi'' finance territory.
+If a crisis materialises from this configuration, it will be a
+\emph{new type}---neither a credit bubble (2008) nor a liquidity shock (2020).
+
+\paragraph{Claim~3: Risk is concentrated in specific channels and regions.}
+The $\delta_C$ (credit camouflage) channel dominates 19 of 24 institutions,
+indicating that banks' credit profiles have silently diverged from historical
+norms.  ING stands at $Z = +4.60\sigma$---the single largest institutional
+outlier, driven by Dutch mortgage concentration and wholesale banking
+exposure.  The EU ($Z = +4.61\sigma$) and Asia ($Z = +5.26\sigma$) are in
+persistently critical territory, while the US ($Z = -0.52\sigma$) is the sole
+region \emph{below} its historical mean.  US banks' dominant channel is
+$\delta_T$ (temporal novelty), not $\delta_C$, indicating that American risk
+is driven by the system operating in an unprecedented rate environment rather
+than hidden credit deterioration.
+
+\subsection{The ``Calm Before the Storm'' Finding}
+\label{sec:calm}
+
+The most economically significant single result is the SignedLR weight on
+$\delta_A$ (activity anomaly): $\beta_{\delta_A} = -1.47$.  This negative
+weight means that \emph{reduced} excess velocity---anomalously smooth
+activity---is the strongest crisis predictor in the supervised channel
+decomposition.
+
+The economic content is precise: before crises, market volatility drops,
+trading volumes stabilise, and macroeconomic releases become unusually
+consistent.  This is \emph{not} a random fluctuation but a structural
+phenomenon.  Prolonged stability encourages leverage, compresses risk premia,
+and concentrates exposures---all of which are invisible in activity metrics
+until the system snaps.  The VIX was at historical lows before both the GFC
+and COVID.  Bank earnings volatility was minimal.  GDP growth was steady.
+These are precisely the conditions that $\delta_A$ captures as ``anomalously
+low excess velocity.''
+
+The implication is direct: regulators who rely on volatility-based risk
+measures (Value-at-Risk, stressed VaR) are structurally blind to this
+mechanism.  The MFLS framework's explicit encoding of low-activity-as-risk
+is a quantitative formalisation of the ``low vol = low risk'' fallacy
+embedded in Basel risk-weight calculations.
+
+\subsection{Why Variant Performance Varies by Financial System Architecture}
+\label{sec:architecture}
+
+The region$\times$variant AUROC matrix (Table~\ref{tab:region_variant})
+reveals a pattern that is not statistical noise but reflects the structure
+of different financial systems.
+
+\paragraph{Bank-based systems (Asia, EU): unsupervised methods dominate.}
+FullBSDT achieves AUROC = 0.821 (Asia) and 0.722 (EU), substantially
+exceeding all supervised alternatives in these regions.  Asian and European
+banking systems are relationship-based, bank-intermediated economies where
+risk accumulates in opaque balance-sheet structures: non-performing-loan
+forbearance (Japan, China), sovereign-bank doom loops (Italy, Spain), and
+cross-border exposures within regional banking networks.  The 4-channel
+BSDT decomposition captures this because $\delta_C$ detects when credit
+profiles diverge from historical norms (the ``evergreening'' phenomenon)
+and $\delta_G$ captures when latent macro-financial factors stop explaining
+observed data---something structural has changed in the intermediation
+chain.
+
+\paragraph{Market-based systems (US, UK): supervised methods dominate.}
+QuadSurf achieves AUROC = 0.841 (US) and SignedLR achieves 0.857 (UK),
+far exceeding the unsupervised alternatives (Baseline: 0.451 US, 0.834 UK;
+FullBSDT: 0.364 US, 0.822 UK).  Anglo-Saxon financial systems are
+market-based: risk manifests through asset prices, market liquidity, and
+publicly observable spreads.  Supervised methods trained on observable
+crisis transitions learn the decision boundary between normal market
+fluctuation and crisis-precursor patterns---for example, the simultaneous
+flattening of the yield curve, rising credit growth, and declining bank
+stock prices that preceded every US crisis since 1990.
+
+\paragraph{Why SignedLR collapses in Asia and the EU.}
+SignedLR falls below random in Asia (AUROC = 0.375) and the EU (0.341).
+It learns linear channel weights from labelled GFC and COVID crisis
+episodes, but these crises manifested differently in bank-based systems.
+In Asia, the GFC was a trade shock transmitted through export channels,
+not a domestic banking crisis; in the EU, the real banking crisis
+(2011--2012 sovereign debt) had a macro-financial signature distinct from
+the GFC.  A linear classifier trained on GFC labels produces
+anti-correlated signals for institutions whose crisis dynamics diverge
+from the training episodes.
+
+\paragraph{Frontier markets: supervised methods excel.}
+ExpoGate achieves AUROC = 0.913 in Africa, exceeding Baseline's 0.768.
+Nigerian banks operate in a high-volatility, high-inflation,
+currency-exposed environment where macro indicators exhibit clear,
+learnable transitions.  Naira devaluation cycles, oil-price shocks, and
+banking-sector recapitalisations (2009, 2016, 2020) create sharper,
+more classifiable regime switches than the gradual build-ups in advanced
+economies.  Polynomial decision surfaces cleanly separate these states
+because the macro-financial features move in large, systematic steps.
+
+\subsection{The Regime Disagreement as a Risk Indicator}
+\label{sec:disagreement}
+
+The current regime assessment splits 3:2 across variants:
+Baseline ($Z = +4.11\sigma$), FullBSDT ($Z = +5.46\sigma$), and
+SignedLR ($Z = +1.37\sigma$) signal CRITICAL;
+QuadSurf ($Z = -0.71\sigma$) and ExpoGate ($Z = -0.73\sigma$)
+signal NORMAL.
+
+The disagreement is itself informative.  The unsupervised variants detect
+\emph{structural drift}---the system has moved far from its historical
+baseline.  The supervised variants detect \emph{pattern match}---the
+current trajectory does not resemble the shape of pre-crisis transitions
+in the training data.  The system is in unfamiliar territory but not
+(yet) following a historically recognisable path to crisis.
+
+This is the economic equivalent of \emph{Knightian uncertainty}: measurable
+risk (the supervised variants' domain) versus unmeasurable uncertainty
+(the unsupervised variants' domain).  The anti-correlation between Baseline
+and QuadSurf ($r \approx -0.34$) encodes this tension quantitatively.
+Baseline asks ``How unusual is the current state?''  QuadSurf asks ``Does
+this look like what happened before a crisis?''  When these questions yield
+opposite answers, novel crisis types are most likely to emerge.
+
+\subsection{Guidance for Central Banks}
+\label{sec:advice_cb}
+
+\paragraph{Do not take comfort from low volatility.}
+The negative $\delta_A$ weight ($-1.47$) means that unusually calm markets
+are amber warnings, not green lights.  Central banks should consider
+introducing a ``stability surcharge'' into countercyclical buffer
+calculations: if volatility has been suppressed for an extended period,
+buffers should increase, not decrease.  The current Basel~III
+credit-to-GDP gap measures only aggregate leverage deviation; the MFLS
+framework adds cross-sectional \emph{convergence} as a warning signal.
+
+\paragraph{Look inside bank balance sheets, not at market prices.}
+The $\delta_C$ (credit camouflage) channel dominates 19 of 24 global
+institutions.  Market-based systemic risk indicators (CoVaR, SRISK,
+$\Delta$CoVaR) rely on publicly traded securities.  The risk this
+framework detects is in the banking book---loans, mortgages, and
+sovereign holdings that are not marked to market.  Supervisory attention
+should focus on how far banks' actual credit positions have drifted from
+historical profiles, not only on whether reported non-performing-loan
+ratios have risen.
+
+\paragraph{Do not apply one-size-fits-all policy.}
+The region$\times$variant matrix demonstrates that bank-dominated systems
+(continental Europe, Asia) and market-dominated systems (US, UK) generate
+completely different risk signatures.  A monitoring framework optimised
+for London or New York may be actively misleading when applied to
+Frankfurt, Tokyo, or Beijing.  Regional calibration of macroprudential
+tools is not a luxury but a necessity.
+
+\paragraph{Prepare for a crisis that does not resemble 2008 or 2020.}
+The supervised pattern-recognition variants are not firing.  Whatever
+is building will not be a US subprime crisis or a pandemic liquidity
+shock.  Stress-test scenarios should include ``unknown unknowns''---novel
+crisis types consistent with the structural drift detected by unsupervised
+methods---not just replays of historical episodes.
+
+\subsection{Guidance for Commercial Banks}
+\label{sec:advice_bank}
+
+\paragraph{European banks face the greatest structural divergence.}
+ING ($Z = +4.60\sigma$), UniCredit, BNP~Paribas, Soci\'{e}t\'{e}
+G\'{e}n\'{e}rale, and Deutsche Bank all show credit profiles that have
+drifted far from historical norms.  The combination of the
+negative-to-positive rate transition, sovereign-bank interconnections
+(unresolved since 2012), and commercial real-estate repricing places
+European balance sheets under more statistical stress than at any point
+since measurement began.  That reported earnings appear healthy is part
+of the problem: accounting standards defer recognition of credit
+deterioration until losses are incurred, not when conditions change.
+Internal risk teams should ask: \emph{what does our balance sheet look
+like to someone who has never seen these interest rate levels before?}
+
+\paragraph{Asian banks face genuine precedent gaps.}
+The Big~Four Chinese banks and the three Japanese megabanks are operating
+in a macro-financial environment (deflation risk in China, yield-curve
+normalisation in Japan) that has no analogue in the historical data.
+Stress tests calibrated to past Asian crises (1997, 2015) will miss the
+transmission channels relevant to a Chinese property cascade or a
+Japanese rate regime change.
+
+\paragraph{US banks are the regional exception.}
+All five US banks in the global panel sit near their historical
+normal ($Z = -0.52\sigma$).  If US risk materialises, it will be
+``novelty risk'' ($\delta_T$)---the system adjusting to interest
+rates not seen since 2007---rather than hidden credit problems.
+Interest-rate risk models calibrated on 15~years of near-zero rates
+and only 2~years of high rates are not equally well-calibrated across
+the cycle.
+
+\subsection{Guidance for Investors}
+\label{sec:advice_investor}
+
+\paragraph{The next disruption will probably not start in the US.}
+JPMorgan, Bank of America, Wells Fargo, Citigroup, and Goldman Sachs
+are all near their historical statistical normal.  European bank credit
+spreads, by contrast, are tight relative to the underlying balance-sheet
+stress this framework detects.  Holders of European bank subordinated
+debt and AT1 contingent convertibles may not be receiving compensation
+commensurate with the actual risk.
+
+\paragraph{Low volatility environments are not your friend.}
+Selling volatility---harvesting premium from calm markets---is among the
+most popular institutional strategies.  The framework's strongest single
+finding is that abnormally low activity is the most reliable pre-crisis
+indicator.  The strategy earns premium precisely because the source of
+risk is approaching quietly.
+
+\paragraph{Geographic diversification is unusually valuable right now.}
+The current risk build-up is regional, not global.  US banks near-normal
+while European and Asian banks are far from it.  A geographically
+diversified portfolio is more protective than usual because the risk is
+structural and regional, not cyclical and global.
+
+\paragraph{Tail-risk protection is historically cheap.}
+Structural drift is at record levels, but market-implied crisis
+probabilities (priced into options, CDS, and volatility surfaces) are
+near historical lows.  This divergence between structural risk metrics
+and market-priced risk represents an opportunity: tail-risk hedges are
+as cheap as they have been since 2006.
+
+
+%% ====================================================================
 \section{Discussion}
 \label{sec:discussion}
 %% ====================================================================
@@ -2243,6 +2508,15 @@ indicator should weight \emph{decreasing} behavioural diversity as a warning sig
 not just increasing distance from equilibrium.  The current Basel~III credit-to-GDP
 gap measures only aggregate leverage deviation; the MFLS framework adds
 cross-sectional \emph{convergence} as a crisis predictor.
+
+The economic interpretation (Section~\ref{sec:economic}) distils these technical
+findings into three actionable principles: (i)~low volatility should be treated
+as a warning, not a reassurance; (ii)~monitoring frameworks must be
+regionally calibrated to the architecture of each financial system (bank-based
+vs.\ market-based); and (iii)~stress-test scenarios should include structurally
+novel crisis types, not only replays of past events.  The full guidance for
+central banks, commercial banks, and investors is provided in
+Sections~\ref{sec:advice_cb}--\ref{sec:advice_investor}.
 
 %% ====================================================================
 %%  Appendix
