@@ -1,0 +1,264 @@
+{
+  "timestamp": "2026-03-02T07:04:40.726471",
+  "global": {
+    "n_institutions": 24,
+    "n_quarters": 88,
+    "current_signal": 639.097824336102,
+    "threshold": 34.99118469836521,
+    "z_score": 4.048903045764052,
+    "regime": "CRITICAL",
+    "auroc": 0.8107023411371237,
+    "auroc_ci": [
+      0.66208751393534,
+      0.9818887246621623
+    ],
+    "spectral_radius": 9.694251842540936,
+    "peak_ccyb_bps": 250.0
+  },
+  "regions": {
+    "Africa": {
+      "n_banks": 5,
+      "signal": 4912.341660265715,
+      "threshold": 50.06777301509115,
+      "z_score": 5.438541599191673,
+      "regime": "CRITICAL",
+      "auroc": 0.8929765886287625,
+      "banks": [
+        "Zenith Bank",
+        "GTBank",
+        "First Bank Nigeria",
+        "Access Bank",
+        "UBA"
+      ]
+    },
+    "Asia": {
+      "n_banks": 7,
+      "signal": 119431.63379683877,
+      "threshold": 133.67359829124402,
+      "z_score": 5.264741924469739,
+      "regime": "CRITICAL",
+      "auroc": 0.6581939799331104,
+      "banks": [
+        "MUFG",
+        "Mizuho",
+        "SMFG",
+        "ICBC",
+        "CCB",
+        "Bank of China",
+        "Ag Bank of China"
+      ]
+    },
+    "EU": {
+      "n_banks": 5,
+      "signal": 1557.2809619780428,
+      "threshold": 20.154174637165212,
+      "z_score": 4.608470813670416,
+      "regime": "CRITICAL",
+      "auroc": 0.6655518394648829,
+      "banks": [
+        "BNP Paribas",
+        "Societe Generale",
+        "Deutsche Bank",
+        "ING",
+        "UniCredit"
+      ]
+    },
+    "UK": {
+      "n_banks": 2,
+      "signal": 3496376.3400955917,
+      "threshold": 969.3021617025286,
+      "z_score": 5.262697545845603,
+      "regime": "CRITICAL",
+      "auroc": 0.8347826086956521,
+      "banks": [
+        "HSBC",
+        "Barclays"
+      ]
+    },
+    "US": {
+      "n_banks": 5,
+      "signal": 30.735499112145718,
+      "threshold": 16.36752645816583,
+      "z_score": -0.5244827438949095,
+      "regime": "CRITICAL",
+      "auroc": 0.4,
+      "banks": [
+        "JPMorgan Chase",
+        "Bank of America",
+        "Citigroup",
+        "Wells Fargo",
+        "Goldman Sachs"
+      ]
+    }
+  },
+  "institution_rankings": [
+    {
+      "name": "ING",
+      "region": "EU",
+      "score": 11159.2996,
+      "z_score": 4.6012,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "UniCredit",
+      "region": "EU",
+      "score": 2400.4457,
+      "z_score": 0.5456,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "BNP Paribas",
+      "region": "EU",
+      "score": 1714.9515,
+      "z_score": 0.2282,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Societe Generale",
+      "region": "EU",
+      "score": 1714.9515,
+      "z_score": 0.2282,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "ICBC",
+      "region": "Asia",
+      "score": 1265.3409,
+      "z_score": 0.0201,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "CCB",
+      "region": "Asia",
+      "score": 1265.3409,
+      "z_score": 0.0201,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Bank of China",
+      "region": "Asia",
+      "score": 1265.3409,
+      "z_score": 0.0201,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Ag Bank of China",
+      "region": "Asia",
+      "score": 1265.3409,
+      "z_score": 0.0201,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Deutsche Bank",
+      "region": "EU",
+      "score": 1248.0063,
+      "z_score": 0.012,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "HSBC",
+      "region": "UK",
+      "score": 676.7453,
+      "z_score": -0.2525,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Barclays",
+      "region": "UK",
+      "score": 676.7453,
+      "z_score": -0.2525,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Zenith Bank",
+      "region": "Africa",
+      "score": 640.2688,
+      "z_score": -0.2694,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "GTBank",
+      "region": "Africa",
+      "score": 639.7333,
+      "z_score": -0.2696,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "First Bank Nigeria",
+      "region": "Africa",
+      "score": 639.7333,
+      "z_score": -0.2696,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Access Bank",
+      "region": "Africa",
+      "score": 639.7333,
+      "z_score": -0.2696,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "UBA",
+      "region": "Africa",
+      "score": 639.7333,
+      "z_score": -0.2696,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "MUFG",
+      "region": "Asia",
+      "score": 478.648,
+      "z_score": -0.3442,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "Mizuho",
+      "region": "Asia",
+      "score": 478.648,
+      "z_score": -0.3442,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "SMFG",
+      "region": "Asia",
+      "score": 478.648,
+      "z_score": -0.3442,
+      "dominant_channel": "delta_C"
+    },
+    {
+      "name": "JPMorgan Chase",
+      "region": "US",
+      "score": 8.1253,
+      "z_score": -0.5621,
+      "dominant_channel": "delta_T"
+    },
+    {
+      "name": "Bank of America",
+      "region": "US",
+      "score": 8.1251,
+      "z_score": -0.5621,
+      "dominant_channel": "delta_T"
+    },
+    {
+      "name": "Wells Fargo",
+      "region": "US",
+      "score": 8.1247,
+      "z_score": -0.5621,
+      "dominant_channel": "delta_T"
+    },
+    {
+      "name": "Citigroup",
+      "region": "US",
+      "score": 8.1214,
+      "z_score": -0.5621,
+      "dominant_channel": "delta_T"
+    },
+    {
+      "name": "Goldman Sachs",
+      "region": "US",
+      "score": 8.116,
+      "z_score": -0.5621,
+      "dominant_channel": "delta_T"
+    }
+  ]
+}

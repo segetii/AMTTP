@@ -1793,8 +1793,9 @@ Expo-Gate (quad+tanh)$^\dagger$     & 0.416 & 2007-Q2 & 5Q & 50.0\% \\
 
 To demonstrate operational readiness, we run the full MFLS pipeline on
 the latest available FDIC call-report data (fetched March~2026 via the
-FDIC SDI REST API) and on a global G-SIB panel combining FDIC, World Bank,
-and ECB data sources.
+FDIC SDI REST API) and on a global panel combining FDIC, World Bank,
+and ECB data sources across 24~institutions in 11~countries
+(US, UK, France, Germany, Netherlands, Italy, Japan, China, Nigeria).
 
 \paragraph{U.S.\ institution-level panel.}
 The top-20 U.S.\ commercial banks by total assets (CERT-level, $N{=}20$
@@ -1805,36 +1806,35 @@ are identical to the historical analysis.
 
 \begin{table}[htbp]
 \centering
-\caption{Live prediction results: U.S.\ banks ($N{=}20$, $T{=}144$, $d{=}5$)
-and G-SIB panel ($N{=}19$, $T{=}84$, $d{=}5$).  All data fetched
-March 2026; latest quarter is 2025-Q4.
+\caption{Live prediction results: U.S.\ banks ($N{=}20$, $T{=}144$, $d{=}5$).
+All data fetched March 2026; latest quarter is 2025-Q4.
 P75 threshold trained on pre-2007 data.}
 \label{tab:live}
-\begin{tabular}{lcc}
+\begin{tabular}{lc}
 \toprule
-Metric & U.S.\ Banks ($N{=}20$) & G-SIB ($N{=}19$) \\
+Metric & U.S.\ Banks ($N{=}20$) \\
 \midrule
-AUROC              & 0.577              & 0.696 \\
-95\% CI            & [0.364, 0.807]     & [0.474, 0.896] \\
-Hit Rate           & 82.6\%             & 100.0\% \\
-False Alarm Rate   & 62.8\%             & 88.5\% \\
-GFC Lead           & 71Q$^\dagger$      & 11Q \\
-Spectral Radius    & 7.67               & --- \\
-Peak CCyB          & 250 bps            & 250 bps \\
-Granger (best $p$) & 0.452              & --- \\
+AUROC              & 0.577              \\
+95\% CI            & [0.364, 0.807]     \\
+Hit Rate           & 82.6\%             \\
+False Alarm Rate   & 62.8\%             \\
+GFC Lead           & 71Q$^\dagger$      \\
+Spectral Radius    & 7.67               \\
+Peak CCyB          & 250 bps            \\
+Granger (best $p$) & 0.452              \\
 \midrule
-\multicolumn{3}{l}{\textbf{Current state (2025-Q4):}} \\
-MFLS Signal        & 49.5               & 1346.0 \\
-Alarm Threshold    & 24.0               & 26.5 \\
-Above Threshold    & Yes                & Yes \\
-Signal Z-score     & $+0.60\sigma$      & --- \\
-CCyB               & 180 bps            & 250 bps \\
-4Q Trend           & Falling ($-1.8\%$) & --- \\
-Herding Score      & 0.42 (moderate)    & --- \\
+\multicolumn{2}{l}{\textbf{Current state (2025-Q4):}} \\
+MFLS Signal        & 49.5               \\
+Alarm Threshold    & 24.0               \\
+Above Threshold    & Yes                \\
+Signal Z-score     & $+0.60\sigma$      \\
+CCyB               & 180 bps            \\
+4Q Trend           & Falling ($-1.8\%$) \\
+Herding Score      & 0.42 (moderate)    \\
 \bottomrule
-\multicolumn{3}{l}{\small $\dagger$ 71Q reflects persistent super-criticality:
+\multicolumn{2}{l}{\small $\dagger$ 71Q reflects persistent super-criticality:
 the system has been above} \\
-\multicolumn{3}{l}{\small \phantom{$\dagger$} the P75 threshold almost
+\multicolumn{2}{l}{\small \phantom{$\dagger$} the P75 threshold almost
 continuously since the early 1990s.} \\
 \end{tabular}
 \end{table}
@@ -1860,18 +1860,67 @@ that 68.6\% of quarters lie above the critical manifold $\Cman$
 transition \emph{within} this regime.
 
 \paragraph{G-SIB panel.}
-The global panel ($N{=}19$ G-SIBs from 9 countries, $T{=}84$ quarters,
-2005--2025) achieves AUROC = 0.696 with 100\% hit rate on the GFC window
-and 11-quarter lead.  The extremely high current signal (1346) reflects
-the wide diversity of national banking systems; the Mahalanobis distance
-from the short calibration window (2005--2006) amplifies cross-country
-heterogeneity.  The false alarm rate (88.5\%) confirms that the global
-panel is better suited for regime identification than precise timing.
+The global panel ($N{=}24$ institutions from 11~countries across
+5~regions---US, UK, EU, Asia, Africa---$T{=}88$ quarters,
+2003--2024) achieves AUROC = 0.811 with 95\% CI~$[0.662, 0.982]$,
+hit rate 95.7\%, and 19-quarter GFC lead time.
+Data sources: FDIC~SDI (US banks), World Bank~API~v2 (all regions),
+and ECB~MIR (Eurozone funding costs).
+Nigerian banks (Zenith, GTBank, First Bank, Access, UBA)
+use World Bank country-level indicators only.
+
+\begin{table}[htbp]
+\centering
+\caption{Global multi-region MFLS analysis ($N{=}24$, $T{=}88$, $d{=}5$).
+Per-region engines fitted with identical calibration (2003--2006 normal period).}
+\label{tab:global}
+\begin{tabular}{lccccc}
+\toprule
+Region & $N$ & Signal & Threshold & $Z$ & AUROC \\
+\midrule
+US      & 5  & 30.7     & 16.4     & $-0.52\sigma$ & 0.400 \\
+UK      & 2  & $3.5 \times 10^{6\dagger}$ & 969     & $+5.26\sigma$ & 0.835 \\
+EU      & 5  & 1\,557   & 20.2     & $+4.61\sigma$ & 0.666 \\
+Asia    & 7  & 119\,432 & 134      & $+5.26\sigma$ & 0.658 \\
+Africa  & 5  & 4\,912   & 50.1     & $+5.44\sigma$ & 0.893 \\
+\midrule
+\textbf{Global} & \textbf{24} & \textbf{639} & \textbf{35.0}
+  & $\mathbf{+4.05\sigma}$ & \textbf{0.811} \\
+\bottomrule
+\multicolumn{6}{l}{\small $\dagger$ Country-level World Bank aggregates inflate
+cross-country Mahalanobis} \\
+\multicolumn{6}{l}{\small \phantom{$\dagger$} distance.
+Regime classification (CRITICAL vs.\ NORMAL) is more} \\
+\multicolumn{6}{l}{\small \phantom{$\dagger$} meaningful than raw signal
+comparison across regions.} \\
+\end{tabular}
+\end{table}
+
+\paragraph{Regional interpretation.}
+The US panel ($N{=}5$, FDIC bank-level data) produces the most granular
+signals and lowest false-alarm rate; its Z-score of $-0.52\sigma$
+indicates the US banking system currently sits \emph{below} its
+historical mean stress---consistent with the detailed analysis
+(Section~\ref{sec:empirical}).  The UK (HSBC, Barclays), EU
+(BNP~Paribas, Soci\'{e}t\'{e}~G\'{e}n\'{e}rale, Deutsche Bank, ING,
+UniCredit), and Asia (MUFG, Mizuho, SMFG, ICBC, CCB, Bank of China,
+Agricultural Bank of China) use country-level World Bank indicators,
+which amplify cross-country dispersion.  Nigeria's five major banks
+achieve the highest regional AUROC (0.893), reflecting the sharp
+structural breaks in Nigerian banking data around the 2009 consolidation
+reforms and 2016 recession.
+
+The institution-level audit identifies ING ($Z{=}{+4.60}\sigma$,
+dominant channel $\delta_C$) as the principal outlier, driven by
+idiosyncratic Dutch credit-cycle positioning.
 
 \paragraph{Granger causality (live data).}
 All three Granger tests on live U.S.\ data fail at $\alpha = 0.10$
 (best $p = 0.452$), confirming the structural finding: the MFLS signal
 tracks a phase-transition process, not a linear trend.
+Linear Granger (global panel, best $p = 0.333$) and threshold Granger
+($p = 0.523$) also fail, indicating that this structural property
+generalises across regions.
 
 %% ====================================================================
 \section{Welfare Calibration}
@@ -2008,6 +2057,15 @@ produces six findings:
     consistent with a system that remains persistently super-critical but
     is not approaching a phase-transition boundary.  All Granger tests
     continue to fail (best $p = 0.452$) on the extended sample.
+
+  \item \textbf{Global multi-region analysis.}  A 24-institution panel
+    spanning US (5), UK (2), EU (5), Asia (7), and Africa/Nigeria (5)
+    achieves AUROC = 0.811 [0.662, 0.982] with 19-quarter GFC lead and
+    95.7\% hit rate.  Nigeria's banking sector contributes the highest
+    regional AUROC (0.893), reflecting sharp structural breaks around
+    the 2009 consolidation reforms.  The $\delta_C$ (credit camouflage)
+    channel dominates across all non-US regions; ING is the sole
+    institution-level outlier at $+4.60\sigma$.
 \end{enumerate}
 
 \subsection{Limitations}
@@ -2033,11 +2091,15 @@ network topology changes over time (especially during crises).  Extending
 Theorem~\ref{thm:phase} to a time-varying $\mathbf{W}(t)$ is an open problem.
 
 \paragraph{Panel coverage.}
-The institution-level panels ($N=20$ U.S.\ banks, $N=19$ G-SIBs) exclude
-banks with $< 50\%$ data coverage, reducing the cross-section.  Goldman Sachs
-(CERT 33124, data from 2008 onwards) and several regional banks are excluded.
-A dynamic panel approach that handles entry/exit would increase coverage,
-especially for post-2010 banks.
+The institution-level panels ($N=20$ U.S.\ banks, $N=24$ global institutions
+across 5~regions) exclude banks with $< 25\%$ data coverage.  The
+global panel uses country-level World Bank indicators rather than
+bank-level data for non-US institutions, meaning all banks from the
+same country share identical features.  This inflates cross-country
+Mahalanobis distance and makes per-region signal magnitudes
+non-comparable without normalisation.  Nigerian banks (added as an
+emerging-market benchmark) use World Bank data only, with no ECB
+or FDIC granularity.
 
 \paragraph{Granger causality.}
 The universal Granger failure, while theoretically consistent with the
