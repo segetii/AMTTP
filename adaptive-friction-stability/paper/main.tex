@@ -1922,6 +1922,91 @@ Linear Granger (global panel, best $p = 0.333$) and threshold Granger
 ($p = 0.523$) also fail, indicating that this structural property
 generalises across regions.
 
+\paragraph{Multi-variant robustness on the global panel.}
+Table~\ref{tab:global_variants} reports all five MFLS scoring variants
+on the same 24-institution global panel.  Supervised variants (QuadSurf,
+SignedLR, ExpoGate) are trained on the first 70\% of the timeline
+(2003--2018, including the GFC), with detection evaluated over the
+full period.
+
+\begin{table}[htbp]
+\centering
+\caption{Five MFLS variants on the global panel ($N{=}24$, $T{=}88$).
+Supervised variants ($\dagger$) trained on 70\% of timeline.
+HR/FAR at P75 threshold.}
+\label{tab:global_variants}
+\begin{tabular}{lccccc}
+\toprule
+Variant & AUROC & HR & FAR & Lead & Current~$Z$ \\
+\midrule
+Baseline (Mahalanobis)  & \textbf{0.808} & 91.3\% & 38.5\% & 19Q & $+4.11\sigma$ \\
+Full-BSDT (4-ch)        & 0.785 & 60.9\% & 20.0\% & 17Q & $+5.46\sigma$ \\
+\midrule
+SignedLR$^\dagger$       & 0.795 & 60.9\% & 30.8\% & 15Q & $+1.37\sigma$ \\
+QuadSurf$^\dagger$       & 0.531 & 39.1\% & 16.9\% & 7Q  & $-0.71\sigma$ \\
+ExpoGate$^\dagger$       & 0.531 & 39.1\% & 16.9\% & 7Q  & $-0.73\sigma$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Per-region $\times$ per-variant AUROC matrix.  Each variant fitted
+independently per region with identical normal-period calibration
+(2003--2006).  Best per region in \textbf{bold}.}
+\label{tab:region_variant}
+\begin{tabular}{lccccc}
+\toprule
+Region & Baseline & FullBSDT & QuadSurf$^\dagger$ & SignedLR$^\dagger$ & ExpoGate$^\dagger$ \\
+\midrule
+Africa  & 0.768 & 0.833 & 0.909 & 0.898 & \textbf{0.913} \\
+Asia    & 0.659 & \textbf{0.821} & 0.701 & 0.375 & 0.701 \\
+EU      & 0.666 & \textbf{0.722} & 0.457 & 0.341 & 0.457 \\
+UK      & 0.834 & 0.822 & 0.666 & \textbf{0.857} & 0.673 \\
+US      & 0.451 & 0.364 & \textbf{0.841} & 0.826 & \textbf{0.841} \\
+\midrule
+Global  & \textbf{0.808} & 0.785 & 0.531 & 0.795 & 0.531 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Variant insights.}
+Three findings emerge from the multi-variant analysis:
+\begin{enumerate}
+  \item \textbf{No single variant dominates all regions.}  FullBSDT
+    (unsupervised, 4-channel uniform sum) is best for Asia and EU,
+    where country-level data makes feature-gap and temporal-novelty
+    channels informative.  ExpoGate wins in Africa (AUROC~0.913)
+    where Nigeria's structural breaks suit the sigmoid gating.
+    SignedLR is best for UK (0.857), and QuadSurf/ExpoGate dominate
+    the US (0.841), where polynomial features capture nonlinear
+    interactions invisible to the Mahalanobis baseline.
+
+  \item \textbf{SignedLR channel weights reveal regional risk drivers.}
+    The global SignedLR learns:
+    $\beta_{\delta_T} = {+1.91}$ (temporal novelty),
+    $\beta_{\delta_G} = {+0.84}$ (feature gap),
+    $\beta_{\delta_C} = {+0.52}$ (credit camouflage),
+    $\beta_{\delta_A} = {-1.47}$ (activity anomaly).
+    The negative $\delta_A$ weight is notable: crises are preceded by
+    \emph{reduced} velocity-anomaly, not heightened activity---consistent
+    with the ``calm before the storm'' phenomenon.
+    At the regional level, Africa's crisis signal is dominated by
+    $\delta_C$ ($+4.17$), reflecting credit-driven instability in
+    Nigerian banking, while the UK is driven by $\delta_G$ ($+2.22$),
+    reflecting structural feature gaps.
+
+  \item \textbf{QuadSurf and ExpoGate correlate at $r = 0.998$.}
+    The tanh/sigmoid gating of ExpoGate adds negligible information
+    beyond the polynomial surface, confirming that the degree-2
+    polynomial captures the necessary nonlinearity.
+    Both supervised surface variants are \emph{anti-correlated}
+    with the unsupervised Baseline ($r \approx -0.34$), meaning they
+    detect different aspects of systemic stress---the Baseline tracks
+    distance from equilibrium while supervised variants track
+    probability of transition.
+\end{enumerate}
+
 %% ====================================================================
 \section{Welfare Calibration}
 \label{sec:welfare}

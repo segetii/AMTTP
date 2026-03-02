@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-03-02T07:22:02.635424",
+  "panel": {
+    "T": 88,
+    "N": 24,
+    "d": 5,
+    "regions": {
+      "US": 5,
+      "UK": 2,
+      "EU": 5,
+      "Asia": 7,
+      "Africa": 5
+    }
+  },
+  "global_variants": {
+    "baseline": {
+      "auroc": 0.8080267558528428,
+      "hit_rate": 0.9130434782608695,
+      "false_alarm_rate": 0.38461538461538464,
+      "gfc_lead": 19,
+      "current_signal": 669.8573829442232,
+      "z_score": 4.108670719957008,
+      "threshold": 39.04212278960205,
+      "weights": null
+    },
+    "full_bsdt": {
+      "auroc": 0.7852842809364549,
+      "hit_rate": 0.6086956521739131,
+      "false_alarm_rate": 0.2,
+      "gfc_lead": 17,
+      "current_signal": 4.0,
+      "z_score": 5.456599477994748,
+      "threshold": 0.47719145407216224,
+      "weights": null
+    },
+    "quadsurf": {
+      "auroc": 0.5311036789297658,
+      "hit_rate": 0.391304347826087,
+      "false_alarm_rate": 0.16923076923076924,
+      "gfc_lead": 7,
+      "current_signal": 0.0,
+      "z_score": -0.7052537441734946,
+      "threshold": 0.21262452046487307,
+      "weights": {
+        "beta_norm": 0.9701836450901249
+      }
+    },
+    "signed_lr": {
+      "auroc": 0.7953177257525084,
+      "hit_rate": 0.6086956521739131,
+      "false_alarm_rate": 0.3076923076923077,
+      "gfc_lead": 15,
+      "current_signal": 1.0,
+      "z_score": 1.3664258611210869,
+      "threshold": 0.6329014289956496,
+      "weights": {
+        "bias": -0.48154607608308353,
+        "delta_C": 0.5191986176110601,
+        "delta_G": 0.8409950465763957,
+        "delta_A": -1.470706487562197,
+        "delta_T": 1.9146740687857442
+      }
+    },
+    "expo_gate": {
+      "auroc": 0.5311036789297658,
+      "hit_rate": 0.391304347826087,
+      "false_alarm_rate": 0.16923076923076924,
+      "gfc_lead": 7,
+      "current_signal": 0.5,
+      "z_score": -0.7343417541880171,
+      "threshold": 0.6291444252098358,
+      "weights": null
+    }
+  },
+  "region_variant_aurocs": {
+    "Africa": {
+      "baseline": 0.7678929765886288,
+      "full_bsdt": 0.8334448160535117,
+      "quadsurf": 0.9090301003344482,
+      "signed_lr": 0.8983277591973244,
+      "expo_gate": 0.9130434782608695
+    },
+    "Asia": {
+      "baseline": 0.6588628762541806,
+      "full_bsdt": 0.8214046822742475,
+      "quadsurf": 0.7010033444816054,
+      "signed_lr": 0.3745819397993311,
+      "expo_gate": 0.7010033444816054
+    },
+    "EU": {
+      "baseline": 0.6655518394648829,
+      "full_bsdt": 0.7224080267558528,
+      "quadsurf": 0.4568561872909699,
+      "signed_lr": 0.34046822742474914,
+      "expo_gate": 0.4568561872909699
+    },
+    "UK": {
+      "baseline": 0.834113712374582,
+      "full_bsdt": 0.8220735785953177,
+      "quadsurf": 0.6662207357859532,
+      "signed_lr": 0.8568561872909699,
+      "expo_gate": 0.6729096989966555
+    },
+    "US": {
+      "baseline": 0.4508361204013378,
+      "full_bsdt": 0.36387959866220737,
+      "quadsurf": 0.8408026755852843,
+      "signed_lr": 0.8260869565217391,
+      "expo_gate": 0.8408026755852843
+    }
+  }
+}
