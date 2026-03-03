@@ -1,0 +1,725 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\titleformat{\section}{\large\bfseries\centering}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries PATENT APPLICATION}\\[0.5em]
+{\large UNITED KINGDOM INTELLECTUAL PROPERTY OFFICE}\\[1.5em]
+{\Large\bfseries Adaptive Multi-Spectrum Anomaly Detection, Risk-Aware\\
+Transaction Processing, and Cross-Domain Stability Control System}\\[1.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: \today}\\[0.5em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.3em]
+{\large Nationality: Nigerian}\\[0.3em]
+{\large Address: [INSERT ADDRESS]}
+\end{center}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+%% ============================================================
+%% ABSTRACT
+%% ============================================================
+\section*{ABSTRACT}
+
+A unified system and method for detecting anomalies, scoring risk, enforcing
+compliance, and controlling stability across heterogeneous domains.  The
+invention comprises: (1)~a Blind-Spot Decomposition Theory (BSDT) that
+decomposes classification failures into four independent diagnostic channels and
+produces a Missed Fraud Likelihood Score enabling post-hoc classifier correction
+without retraining; (2)~a Universal Deviation Principle (UDP) employing
+multi-spectrum operator families with provable detection guarantees and
+semidefinite-programming-based optimal fusion; (3)~an N-body variational scoring
+engine (GravityEngine) with closed-form energy potentials for anomaly
+separation; (4)~a boundary-centred dimension magnifier that nonlinearly
+amplifies discriminative features while silencing non-discriminative ones;
+(5)~a risk-aware blockchain transaction processing protocol with tiered escrow,
+ML-oracle risk routing, zero-knowledge compliance verification, and cross-chain
+risk propagation; (6)~a Lyapunov-based adaptive friction stability framework
+for systemic risk detection and optimal macroprudential policy; (7)~a
+state-dependent viscosity method transferring the BSDT functional to
+computational fluid dynamics; and (8)~a UI integrity verification service
+preventing interface manipulation attacks.  The system operates across financial
+fraud detection, blockchain compliance, macroeconomic stability, and
+mathematical physics, unified by a common blind-spot energy functional.
+
+\newpage
+
+%% ============================================================
+%% DESCRIPTION
+%% ============================================================
+\section{FIELD OF THE INVENTION}
+
+This invention relates to computational methods for anomaly detection, risk
+scoring, transaction compliance enforcement, systemic stability control, and
+adaptive viscosity in fluid dynamics.  More particularly, it relates to a
+unified mathematical framework that decomposes classifier blind spots into
+independent diagnostic channels, and applies the resulting energy functional
+across multiple domains including financial fraud detection, blockchain
+transaction processing, macroeconomic stability monitoring, and Navier--Stokes
+simulation.
+
+\section{BACKGROUND OF THE INVENTION}
+
+Machine learning classifiers deployed for fraud detection exhibit systematic
+failure modes that are poorly understood.  Existing approaches treat missed
+detections as residual noise rather than structurally decomposable phenomena.
+This leads to costly retraining cycles, undetected fraud, and inability to
+transfer detection insights across domains.
+
+In blockchain systems, transaction compliance requires reconciling
+anti-money-laundering (AML) requirements with privacy guarantees and
+decentralisation constraints.  No existing system integrates ML risk scoring,
+zero-knowledge cryptographic proofs, cross-chain policy synchronisation, and
+decentralised dispute resolution into a unified protocol.
+
+In macroeconomic regulation, countercyclical capital buffers are set using
+lagging indicators without formal stability guarantees.  In computational fluid
+dynamics, artificial viscosity methods lack principled diagnostic criteria for
+where and when to activate.
+
+The present invention addresses all of these problems through a common
+mathematical framework.
+
+\section{SUMMARY OF THE INVENTION}
+
+The invention provides a computer-implemented system and method comprising
+eight interrelated subsystems, unified by a common blind-spot energy functional
+$E_{\mathrm{BS}}$.  The subsystems are:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Blind-Spot Decomposition Theory (BSDT):} A four-channel
+  diagnostic framework decomposing classification failures into Camouflage~($C$),
+  Feature Gap~($G$), Activity Anomaly~($A$), and Temporal Novelty~($T$)
+  components, with a composite Missed Fraud Likelihood Score (MFLS) enabling
+  post-hoc correction.
+
+\item \textbf{Universal Deviation Principle (UDP):} A multi-spectrum anomaly
+  detection framework using families of deviation-separating operators with
+  provable full-rank detection guarantees, SDP-optimal fusion, and submodular
+  greedy operator selection.
+
+\item \textbf{GravityEngine:} An N-body variational anomaly scoring algorithm
+  with closed-form energy potentials, force--energy consistency, and
+  backtracking line-search convergence.
+
+\item \textbf{Dimension Magnifier:} A boundary-centred nonlinear per-dimension
+  transform using a saturating function whose steepness is proportional to
+  per-dimension discriminative score.
+
+\item \textbf{Risk-Aware Transaction Protocol (AMTTP):} A blockchain protocol
+  integrating ML-oracle risk scoring with tiered escrow
+  (Approve/Review/Escrow/Block), hash time-locked contracts, policy-engine
+  enforcement, and circuit breakers.
+
+\item \textbf{Zero-Knowledge Compliance (zkNAF):} Privacy-preserving
+  compliance verification using Groth16 ZK-SNARK proofs for sanctions
+  non-membership, risk-range attestation, and KYC verification without data
+  disclosure.
+
+\item \textbf{Adaptive Friction Stability Framework:} A Lyapunov-based
+  systemic risk detection and optimal macroprudential policy derivation system,
+  with spectral phase-transition criteria, closed-form optimal damping, and
+  online regret-bounded policy adjustment.
+
+\item \textbf{Cross-Domain Transfer:} Application of the BSDT energy
+  functional as state-dependent viscosity in Navier--Stokes simulations, and
+  as the risk metric in cross-chain propagation, UI integrity verification,
+  and multi-service compliance orchestration.
+\end{enumerate}
+
+\section{DETAILED DESCRIPTION OF THE INVENTION}
+
+\subsection{4.1~~Blind-Spot Decomposition Theory (BSDT)}
+
+Given a trained classifier $f$ and a data instance $x$, the system computes
+four independent diagnostic scores calibrated on known-normal data:
+
+\begin{enumerate}
+\item \textbf{Camouflage Score} $\delta_C(x)$: The Mahalanobis distance from
+  the normal-period distribution:
+  \[
+    \delta_C(x) = \sqrt{(x - \mu_0)^\top \Sigma_0^{-1} (x - \mu_0)}
+  \]
+  where $\mu_0, \Sigma_0$ are the mean and (shrinkage-regularised) covariance
+  of the normal-period data.
+
+\item \textbf{Feature Gap Score} $\delta_G(x)$: The PCA residual norm in
+  low-variance directions:
+  \[
+    \delta_G(x) = \|x - V_k V_k^\top x\|
+  \]
+  where $V_k$ are the top-$k$ eigenvectors of~$\Sigma_0$.
+
+\item \textbf{Activity Anomaly Score} $\delta_A(x)$: The excess velocity
+  beyond a percentile threshold:
+  \[
+    \delta_A(x) = \max\bigl(0, \, \|x_t - x_{t-1}\| - v_0\bigr)
+  \]
+  where $v_0 = \mathrm{percentile}_{95}(\|X_t - X_{t-1}\|)$ on the normal
+  period.
+
+\item \textbf{Temporal Novelty Score} $\delta_T(x)$: The kernel density
+  self-history novelty score.
+\end{enumerate}
+
+The \textbf{Missed Fraud Likelihood Score} is the weighted composite:
+\[
+  \mathrm{MFLS}(x) = \sum_{i \in \{C,G,A,T\}} w_i \, \delta_i(x)
+\]
+with self-calibrating weights computed via one of: mutual information
+weighting, Fisher variance ratio, or Bayesian online updating.
+
+The \textbf{post-hoc correction formula} adjusts classifier outputs:
+\[
+  p^*(x) = p(x) + \lambda \cdot \mathrm{MFLS}(x) \cdot (1 - p(x))
+  \cdot \mathbf{1}[p(x) < \tau]
+\]
+where $p(x)$ is the original classifier output, $\lambda$ is a scaling
+parameter, and $\tau$ is a confidence threshold.
+
+The \textbf{blind-spot energy functional} is:
+\[
+  E_{\mathrm{BS}}(X) = \delta_C^2 + \delta_G^2 + \delta_A^2 + \delta_T^2
+\]
+
+\subsection{4.2~~Universal Deviation Principle (UDP)}
+
+The system employs a family of deviation-separating operators
+$\{\Phi_k\}_{k=1}^K$ spanning five mathematical families:
+
+\begin{enumerate}
+\item \textbf{Statistical Spectrum:} Mahalanobis distance, z-score,
+  interquartile deviation, copula rank
+\item \textbf{Chaos/Dynamical Spectrum:} Lyapunov exponent, recurrence
+  quantification, permutation entropy
+\item \textbf{Spectral/Fourier Spectrum:} Power spectral density ratio,
+  wavelet detail energy, Fourier phase coherence
+\item \textbf{Geometric Spectrum:} Local intrinsic dimensionality, persistent
+  homology, curvature
+\item \textbf{Exponential Spectrum:} Tail index, extreme value deviation,
+  L\'evy stability index
+\end{enumerate}
+
+The system guarantees detection via the \textbf{full-rank condition}: for the
+stacked Jacobian $J = [D\Phi_1; \ldots; D\Phi_K]$, if $\mathrm{rank}(J) = d$
+(the ambient dimension), then no anomaly can simultaneously match normal data
+across all operators.
+
+\textbf{Optimal fusion} weights $\{w_k\}$ are computed via semidefinite
+programming:
+\[
+  \max_{w} \min_{\|v\|=1} \sum_k w_k \, v^\top D\Phi_k^\top D\Phi_k \, v
+  \quad \text{subject to} \quad w_k \geq 0, \; \sum_k w_k = 1
+\]
+
+\textbf{Greedy operator selection} achieves a $(1 - 1/e)$-approximation via
+submodular optimisation for selecting a size-$m$ subset of operators.
+
+\subsection{4.3~~GravityEngine: N-Body Variational Anomaly Scoring}
+
+Data points are modelled as particles evolving under three forces:
+
+\begin{enumerate}
+\item \textbf{Radial anchoring:} $F_{\mathrm{anchor}}(x_i) = -\alpha(x_i - \mu)$
+  pulling each particle toward the data centroid.
+
+\item \textbf{Pairwise interaction:} For each pair $(i,j)$, the interaction
+  kernel combines attraction and repulsion:
+  \[
+    K(r) = -\exp\!\bigl(-r^2/\sigma^2\bigr) + \frac{\lambda_{\mathrm{rep}}}{r + \varepsilon}
+  \]
+  The attraction potential is:
+  \[
+    V_{\mathrm{attract}}(r) = \gamma \cdot \frac{\sigma\sqrt{\pi}}{2}
+    \cdot \mathrm{erf}\!\bigl(r/\sigma\bigr)
+  \]
+
+\item \textbf{Deviation penalty:} $F_{\mathrm{dev}}(x_i)
+  = -\sum_k \beta_k D\Phi_k(x_i)^\top D_k(x_i)$ coupling the particle
+  dynamics to the UDP operator outputs.
+\end{enumerate}
+
+The system satisfies \textbf{force--energy consistency}: $F = -\nabla E$ for
+a total energy $E = E_{\mathrm{anchor}} + E_{\mathrm{interact}} + E_{\mathrm{dev}}$.
+
+Evolution proceeds via discrete integration with \textbf{backtracking
+line-search} ensuring monotone energy descent at each step.  The anomaly score
+for each point is its displacement $\|x_i^{(T)} - x_i^{(0)}\|$ after $T$
+integration steps.
+
+\subsection{4.4~~Boundary-Centred Dimension Magnifier}
+
+For a representation matrix $R \in \mathbb{R}^{N \times D}$ with labels
+$y \in \{0,1\}^N$, the transform processes each dimension~$d$ independently:
+
+\begin{enumerate}
+\item Compute boundary: $b_d = (\mu_{\mathrm{normal},d} + \mu_{\mathrm{anomaly},d})/2$
+\item Standardise: $z = (r_d - b_d) / \sigma_{\mathrm{pooled},d}$
+\item Compute steepness: $k_d = \gamma \cdot \mathrm{disc\_score}_d$
+\item Apply saturating transform: $r'_d = \tanh(k_d \cdot z)$
+\end{enumerate}
+
+For discriminative dimensions (high $k_d$), classes saturate to $\pm 1$ with
+amplified Cohen's~$d$.  For non-discriminative dimensions (low $k_d$), the
+transform approaches zero, effectively silencing the dimension.
+
+\subsection{4.5~~Risk-Aware Transaction Protocol (AMTTP)}
+
+The protocol operates as a system of interconnected smart contracts on
+EVM-compatible blockchains:
+
+\begin{enumerate}
+\item An \textbf{ML Oracle} computes off-chain risk scores in the range
+  $[0, 1000]$ and signs them cryptographically (ECDSA).
+
+\item The \textbf{Risk Router} validates the oracle signature and routes
+  transactions to one of four tiers:
+  \begin{itemize}
+    \item Score $< 300$: \textbf{Approve} --- immediate execution
+    \item Score $300$--$699$: \textbf{Review} --- enhanced monitoring
+    \item Score $700$--$899$: \textbf{Escrow} --- funds locked in HTLC;
+      multi-approver release required
+    \item Score $\geq 900$: \textbf{Block} --- transaction rejected
+  \end{itemize}
+
+\item A \textbf{Circuit Breaker} pauses processing when $n$ consecutive
+  transactions exceed the high-risk threshold.
+
+\item A \textbf{Policy Engine} enforces velocity limits (daily/weekly volume
+  caps), geographic restrictions, whitelist/blacklist management, and
+  adaptive threshold adjustment.
+
+\item \textbf{Hash Time-Locked Contracts (HTLC)} hold escrowed funds with
+  cryptographic preimage release conditions and time-based expiry.
+\end{enumerate}
+
+\subsection{4.6~~Zero-Knowledge Non-Disclosing Anti-Fraud (zkNAF)}
+
+The system implements privacy-preserving compliance using Groth16 ZK-SNARK
+proofs on the BN254 elliptic curve.  Five proof types are supported:
+
+\begin{enumerate}
+\item \textbf{Sanctions Non-Membership:} Proves an address is not on a
+  sanctions list via Merkle non-membership proof without revealing the address
+  or list contents.
+
+\item \textbf{Risk Range (Low/Medium):} Proves a transaction's ML risk
+  score falls within an acceptable range without revealing the exact score.
+
+\item \textbf{KYC Verified:} Proves KYC completion status without
+  disclosing personal identity documents.
+
+\item \textbf{Combined Transaction Compliance:} Composite proof combining
+  all of the above.
+\end{enumerate}
+
+Verification requirements are tiered by transfer amount.  Proof records are
+stored on-chain with expiry timestamps and revocation capability.
+
+\subsection{4.7~~Cross-Chain Risk Propagation}
+
+Risk scores, address block-lists, policy updates, and dispute results are
+propagated across heterogeneous blockchains using a cross-chain messaging
+protocol (LayerZero).  The system provides:
+
+\begin{enumerate}
+\item Per-chain rate limiting to prevent denial-of-service
+\item Independent per-chain pause capability
+\item Failed message retry with replay protection via incrementing nonces
+\item Aggregation of risk scores from multiple source chains
+\item Batch operations capped at 20 chains per call
+\end{enumerate}
+
+\subsection{4.8~~UI Integrity Verification Service}
+
+A server-side verification system prevents UI manipulation attacks (such as
+the February 2025 Bybit attack) by:
+
+\begin{enumerate}
+\item Computing cryptographic hashes of all page components (scripts, styles,
+  forms, buttons) on the client side.
+
+\item Verifying these hashes server-side against a trusted hash registry
+  before executing any transaction.
+
+\item Validating that the \textbf{transaction intent} (submitted data)
+  matches the \textbf{displayed data hash} (what the user saw on screen).
+
+\item Monitoring for real-time DOM mutations that may indicate injection
+  attacks.
+
+\item Per-component integrity checking with individual source, DOM, and
+  event-handler hashes.
+\end{enumerate}
+
+\subsection{4.9~~Adaptive Friction Stability Framework}
+
+The BSDT energy functional is applied to a dynamical system of networked
+financial institutions with state vector $X$ encompassing leverage, correlation,
+and network topology:
+
+\begin{enumerate}
+\item The system detects \textbf{spectral phase transitions} via the criterion:
+  \[
+    \lambda_{\max}\!\bigl(\rho(X) \, \ell(X) \, \mathbf{W}\bigr) = 1
+  \]
+  where $\rho$ is cross-correlation, $\ell$ is leverage, and $\mathbf{W}$ is
+  the network adjacency matrix.
+
+\item The \textbf{optimal adaptive damping coefficient} is derived in closed
+  form:
+  \[
+    \gamma^*(X) \approx
+    \frac{\beta \|\nabla E\|^2}{2\kappa + \beta \|\nabla E\|^2} \cdot
+    \frac{E(X)}{E(X) + \theta}
+  \]
+
+\item An \textbf{online gradient descent} algorithm adjusts the coupling
+  parameter in real time with $O(\sqrt{T})$ regret guarantee.
+
+\item The system generates \textbf{countercyclical capital buffer (CCyB)
+  recommendations} for macroprudential regulators.
+\end{enumerate}
+
+The equivalence between the BSDT blind-spot gradient and the Lyapunov
+restoring force is established:
+$\nabla E_{\mathrm{BS}} \equiv -F_{\mathrm{restore}}$.
+
+\subsection{4.10~~State-Dependent Viscosity for Navier--Stokes Equations}
+
+The BSDT energy functional is adapted for computational fluid dynamics.  Four
+diagnostic channels are defined for velocity fields $\mathbf{u}$:
+
+\begin{enumerate}
+\item Enstrophy growth anomaly $\delta_C$
+\item Spectral cascade deviation $\delta_G$
+\item Vorticity--strain alignment anomaly $\delta_A$
+\item Temporal novelty $\delta_T$
+\end{enumerate}
+
+The adaptive viscosity is:
+\[
+  \nu(\mathbf{u}) = \nu_0 \bigl(1 + \gamma^*(E_{\mathrm{BS}}(\mathbf{u}))\bigr), \qquad
+  \gamma^*(E) = \frac{E}{E + \theta}
+\]
+
+This reduces the enstrophy production-to-dissipation ratio by approximately
+50\% compared to constant viscosity at equivalent Reynolds numbers.
+
+\subsection{4.11~~Compliance Orchestrator}
+
+A central orchestration layer coordinates seven independent compliance
+microservices in parallel:
+
+\begin{enumerate}
+\item ML Risk Scoring
+\item Graph/Network Analysis
+\item FCA Regulatory Compliance
+\item Policy Management
+\item Sanctions Screening
+\item AML Pattern Monitoring (detecting structuring, layering, round-trip,
+  fan-in/fan-out, peeling, and velocity anomalies)
+\item Geographic Risk Assessment
+\end{enumerate}
+
+The orchestrator provides entity-profile-based routing (Retail, Institutional,
+VASP, High-Net-Worth) where each profile type receives a different combination
+of service checks.  Results are fused into a unified risk decision with
+human-readable explainability output.
+
+\newpage
+
+%% ============================================================
+%% CLAIMS
+%% ============================================================
+\section*{CLAIMS}
+
+\bigskip
+\textbf{I/We claim:}
+
+\bigskip
+
+%% --- GROUP A: BSDT ---
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=2em]
+
+\item A computer-implemented method for identifying missed detections of a
+trained classification model, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item computing, for each data instance, four independent diagnostic scores
+    calibrated solely on known-normal data: a camouflage score measuring
+    Mahalanobis distance from normal-period distribution, a feature gap score
+    measuring PCA residual norm in low-variance directions, an activity anomaly
+    score measuring excess velocity beyond a percentile threshold, and a
+    temporal novelty score measuring kernel-density self-history novelty;
+  \item computing a composite missed-prediction likelihood score as a weighted
+    sum of said four scores using self-calibrating weights; and
+  \item adjusting the output probability of said trained classification model
+    using said composite score according to the formula
+    $p^*(x) = p(x) + \lambda \cdot \mathrm{MFLS}(x) \cdot (1-p(x)) \cdot
+    \mathbf{1}[p(x) < \tau]$
+    without retraining said model.
+\end{enumerate}
+
+\item The method of claim~1, wherein the self-calibrating weights are computed
+using one of: mutual information weighting, Fisher variance ratio weighting, or
+Bayesian online updating.
+
+\item The method of claim~1, further comprising computing a blind-spot energy
+functional $E_{\mathrm{BS}} = \delta_C^2 + \delta_G^2 + \delta_A^2 + \delta_T^2$
+as a unified diagnostic signal.
+
+\item A computer-implemented method for generating supplementary features for
+a machine learning model from the four diagnostic scores of claim~1, comprising
+deriving at least seven additional features from the camouflage, feature gap,
+activity anomaly, and temporal novelty components and their interactions.
+
+%% --- GROUP B: UDP ---
+\item A computer-implemented method for anomaly detection, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item projecting data through a family of $K$ deviation-separating operators
+    $\{\Phi_k\}_{k=1}^K$ spanning at least three of: statistical, dynamical,
+    spectral, geometric, and exponential mathematical families;
+  \item verifying that the stacked Jacobian
+    $J = [D\Phi_1; \ldots; D\Phi_K]$ has rank equal to the ambient dimension,
+    thereby guaranteeing that no anomaly can simultaneously match normal data
+    across all operators; and
+  \item computing a composite anomaly score as a weighted combination of
+    operator outputs.
+\end{enumerate}
+
+\item The method of claim~5, wherein the weights are computed via semidefinite
+programming maximising worst-case directional sensitivity subject to
+non-negativity and unit-sum constraints.
+
+\item The method of claim~5, further comprising selecting a size-$m$ subset of
+operators using a greedy algorithm with a $(1-1/e)$-approximation guarantee
+via submodular optimisation.
+
+%% --- GROUP C: GravityEngine ---
+\item A computer-implemented method for anomaly detection using particle
+simulation, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item modelling each data point as a particle in a force field comprising
+    radial anchoring toward a data centroid, pairwise interaction via kernels
+    having attraction and repulsion components, and deviation penalty forces
+    coupled to anomaly operator outputs;
+  \item evolving particle positions via iterative integration with
+    backtracking line-search ensuring monotone energy descent; and
+  \item computing an anomaly score for each data point as its displacement
+    from initial to final position after evolution.
+\end{enumerate}
+
+\item The method of claim~8, wherein the pairwise interaction kernel is
+$K(r) = -\exp(-r^2/\sigma^2) + \lambda_{\mathrm{rep}}/(r + \varepsilon)$ and
+the attraction potential is
+$V_{\mathrm{attract}}(r) = \gamma \cdot (\sigma\sqrt{\pi}/2) \cdot
+\mathrm{erf}(r/\sigma)$.
+
+\item The method of claim~8, satisfying force--energy consistency
+$F = -\nabla E$ for a total energy functional
+$E = E_{\mathrm{anchor}} + E_{\mathrm{interact}} + E_{\mathrm{dev}}$.
+
+%% --- GROUP D: Dimension Magnifier ---
+\item A computer-implemented method for nonlinear feature transformation,
+comprising, for each dimension $d$ of a feature representation:
+\begin{enumerate}[label=(\alph*)]
+  \item computing a decision boundary $b_d$ as the midpoint between mean
+    normal and mean anomaly values;
+  \item standardising each value by the pooled standard deviation;
+  \item computing a steepness $k_d$ proportional to a per-dimension
+    discriminative score; and
+  \item applying a saturating transform $r'_d = \tanh(k_d \cdot z)$,
+    thereby amplifying discriminative dimensions and silencing
+    non-discriminative ones.
+\end{enumerate}
+
+%% --- GROUP E: AMTTP Protocol ---
+\item A blockchain-based transaction processing system, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item an off-chain machine-learning oracle that computes a risk score for
+    each transaction and signs the score cryptographically;
+  \item an on-chain risk router that verifies the oracle signature and routes
+    transactions to one of at least four risk tiers, wherein the highest tier
+    blocks the transaction and an intermediate tier escrows funds in a hash
+    time-locked contract requiring multi-party approval for release;
+  \item a circuit breaker that automatically pauses transaction processing
+    when a configurable number of consecutive transactions exceed a risk
+    threshold; and
+  \item a policy engine enforcing velocity limits, geographic restrictions,
+    and adaptive threshold adjustment.
+\end{enumerate}
+
+\item The system of claim~12, further comprising a hash time-locked escrow
+contract wherein funds are released upon presentation of a cryptographic
+preimage or automatically refunded upon time-based expiry.
+
+%% --- GROUP F: zkNAF ---
+\item A computer-implemented system for privacy-preserving compliance
+verification on a blockchain, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item generating zero-knowledge proofs using a Groth16 ZK-SNARK protocol
+    on a BN254 elliptic curve for at least: sanctions list non-membership via
+    Merkle non-membership proof, risk score range attestation, and KYC
+    completion verification;
+  \item verifying said proofs on-chain without the verifier learning the
+    underlying personal data, sanctions list contents, or exact risk score;
+  \item applying tiered verification requirements wherein the transfer amount
+    determines which proofs are required; and
+  \item storing proof records on-chain with expiry timestamps and revocation
+    capability.
+\end{enumerate}
+
+%% --- GROUP G: Cross-Chain ---
+\item A system for propagating machine-learning-derived risk scores across
+multiple heterogeneous blockchains, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item encoding risk scores, address block/unblock commands, policy updates,
+    and dispute results as typed cross-chain messages;
+  \item transmitting said messages via a cross-chain messaging protocol with
+    per-chain rate limiting and replay protection via incrementing nonces;
+  \item aggregating risk scores received from multiple source chains for a
+    single address; and
+  \item providing independent per-chain pause capability.
+\end{enumerate}
+
+%% --- GROUP H: UI Integrity ---
+\item A computer-implemented method for preventing user-interface manipulation
+attacks on financial applications, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item computing, on a client device, cryptographic hashes of page components
+    including scripts, stylesheets, forms, and interactive elements;
+  \item transmitting said hashes to a server which verifies them against a
+    trusted hash registry;
+  \item validating that a transaction intent submitted by the user matches a
+    displayed-data hash corresponding to the information shown on the user's
+    screen, thereby ensuring the submitted transaction matches the displayed
+    transaction; and
+  \item monitoring for real-time DOM mutations indicating potential injection
+    attacks.
+\end{enumerate}
+
+\item The method of claim~16, further comprising per-component integrity
+checking with individual source hash, DOM hash, and event-handler hash for
+each interactive element.
+
+%% --- GROUP I: Adaptive Friction ---
+\item A computer-implemented method for detecting systemic financial risk and
+generating macroprudential policy recommendations, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item computing the blind-spot energy functional
+    $E_{\mathrm{BS}} = \delta_C^2 + \delta_G^2 + \delta_A^2 + \delta_T^2$
+    from financial institution state data encompassing leverage, correlation,
+    and network topology, where the four diagnostic channels are calibrated
+    solely on normal-market-period data;
+  \item detecting spectral phase transitions via the criterion
+    $\lambda_{\max}(\rho(X) \, \ell(X) \, \mathbf{W}) = 1$ where $\rho$ is
+    cross-correlation, $\ell$ is leverage, and $\mathbf{W}$ is the network
+    adjacency matrix;
+  \item computing an optimal adaptive damping coefficient
+    $\gamma^*(X) = \frac{\beta \|\nabla E\|^2}{2\kappa + \beta \|\nabla E\|^2}
+    \cdot \frac{E(X)}{E(X) + \theta}$; and
+  \item generating countercyclical capital buffer recommendations based on
+    said damping coefficient.
+\end{enumerate}
+
+\item The method of claim~18, further comprising an online gradient descent
+algorithm that adjusts the coupling parameter in real time with
+$O(\sqrt{T})$ regret guarantee.
+
+\item The method of claim~18, wherein the equivalence between the blind-spot
+gradient and a Lyapunov restoring force is exploited:
+$\nabla E_{\mathrm{BS}} \equiv -F_{\mathrm{restore}}$.
+
+%% --- GROUP J: Navier-Stokes ---
+\item A computer-implemented method for adaptive viscosity in computational
+fluid dynamics, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item computing, from a velocity field $\mathbf{u}$, four diagnostic channel
+    scores: enstrophy growth anomaly, spectral cascade deviation,
+    vorticity--strain alignment anomaly, and temporal novelty;
+  \item computing a composite blind-spot energy
+    $E_{\mathrm{BS}}(\mathbf{u}) = \delta_C^2 + \delta_G^2 + \delta_A^2
+    + \delta_T^2$; and
+  \item applying a state-dependent viscosity
+    $\nu(\mathbf{u}) = \nu_0(1 + \gamma^*(E_{\mathrm{BS}}(\mathbf{u})))$
+    where $\gamma^*(E) = E/(E + \theta)$, thereby reducing enstrophy
+    production-to-dissipation ratio without requiring manual tuning.
+\end{enumerate}
+
+%% --- GROUP K: Orchestrator ---
+\item A computer-implemented compliance system comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item a central orchestration layer that invokes, in parallel, at least five
+    independent compliance microservices including machine-learning risk
+    scoring, graph analysis, sanctions screening, AML pattern monitoring, and
+    geographic risk assessment;
+  \item entity-profile-based routing wherein each entity type receives a
+    different combination of compliance checks; and
+  \item a fusion module that combines the outputs of said microservices into
+    a unified risk decision with human-readable explainability.
+\end{enumerate}
+
+\item The system of claim~22, wherein the AML pattern monitoring service
+detects at least: structuring/smurfing, layering, round-trip transactions,
+fan-in/fan-out patterns, peeling chains, and velocity anomalies using
+adaptive thresholds.
+
+%% --- GROUP L: Cross-Domain Unification ---
+\item A computer-implemented method for cross-domain anomaly detection and
+stability control using a unified blind-spot energy functional, wherein the
+same functional $E_{\mathrm{BS}} = \sum_{i \in \{C,G,A,T\}} \delta_i^2$ is
+applied, with domain-specific channel definitions, to at least two of:
+financial fraud detection, macroeconomic systemic risk monitoring, blockchain
+transaction compliance, and computational fluid dynamics viscosity control.
+
+%% --- GROUP M: Dispute Resolution ---
+\item A system for resolving disputes on machine-learning-flagged transactions
+using decentralised arbitration, comprising:
+\begin{enumerate}[label=(\alph*)]
+  \item automatically escrowing funds when a machine-learning model assigns a
+    risk score above a configurable threshold;
+  \item providing a challenge window during which either party may initiate a
+    dispute;
+  \item submitting structured ML evidence to a decentralised arbitration
+    tribunal; and
+  \item executing the tribunal's ruling on-chain, supporting partial
+    percentage-based splits.
+\end{enumerate}
+
+\end{enumerate}
+
+\newpage
+
+%% ============================================================
+%% ABSTRACT (repeated for Form 2)
+%% ============================================================
+\section*{ABSTRACT OF THE DISCLOSURE}
+
+A unified system and method for detecting anomalies, scoring risk, enforcing
+compliance, and controlling stability across heterogeneous domains including
+financial fraud detection, blockchain transaction processing, macroeconomic
+stability, and computational fluid dynamics.  The system is built upon a
+Blind-Spot Decomposition Theory (BSDT) that decomposes classification failures
+into four independent diagnostic channels---Camouflage, Feature Gap, Activity
+Anomaly, and Temporal Novelty---producing a composite energy functional.  This
+functional drives: a Universal Deviation Principle for multi-spectrum anomaly
+detection with provable guarantees; an N-body variational scoring engine with
+closed-form energy potentials; a blockchain transaction protocol with tiered
+risk-aware escrow and zero-knowledge compliance proofs; a Lyapunov-based
+adaptive friction framework for systemic risk detection with closed-form
+optimal macroprudential policy; and a state-dependent viscosity method for
+Navier--Stokes simulation.\quad (148 words)
+
+\end{document}
