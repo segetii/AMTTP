@@ -95,8 +95,9 @@ We provide three principal components:
   in the tested runs, the enstrophy production-to-dissipation proxy
   $\mathcal{P}/\mathcal{D}$ is reduced by approximately one half.
 
-We support these results with a high-resolution pseudo-spectral numerical
-study across Reynolds numbers $\mathrm{Re} \in [314, 6283]$ using the
+We support these results with a pseudo-spectral numerical
+study at $N = 64$ (with $N = 32$ fallback for higher Re) across
+Reynolds numbers $\mathrm{Re} \in [314, 6283]$ using the
 Taylor-Green vortex as initial data.
 The numerical evidence establishes that:
 the production-to-dissipation ratio $\mathcal{P}/\mathcal{D}$ is reduced
@@ -625,9 +626,10 @@ At regular intervals, we compute:
 
 We present results from a systematic sweep across Reynolds numbers
 $\mathrm{Re} = 2\pi/\nu_0 \in \{314, 628, 1257, 3142, 6283\}$
-using $N = 32$ grid points per dimension and the semi-implicit
-integrator. For each Re, we run identical simulations with
-constant viscosity $\nu_0$ and adaptive viscosity
+using $N = 64$ grid points per dimension (with $N = 32$ fallback
+for Re $\geq 3142$ where the $N = 64$ run did not complete in time)
+and the semi-implicit integrator. For each Re, we run identical
+simulations with constant viscosity $\nu_0$ and adaptive viscosity
 $\nu(\Ebs) = \nu_0(1 + \gammastar(\Ebs))$, with $\theta = 1.0$.
 
 \begin{table}[H]
@@ -644,12 +646,13 @@ Re & $\Omega_r$ & $\mathcal{R}_c$ & $\mathcal{R}_a$
 & $\mathcal{R}_a/\mathcal{R}_c$
 & $\gammastar_{\max}$ & $\nu_{\max}/\nu_0$ & Status \\
 \midrule
-314   & 1.000  & 1.214  & 0.548  & 0.451  & 0.995 & 1.995 & Smooth \\
-628   & 0.968  & 2.561  & 1.222  & 0.477  & 0.995 & 1.995 & Smooth \\
-1257  & 0.967  & 5.256  & 2.576  & 0.490  & 0.995 & 1.995 & Smooth \\
-3142  & 0.990  & 11.751 & 5.849  & 0.498  & 0.994 & 1.994 & Smooth \\
-6283  & 0.997  & 16.306 & 8.158  & 0.500  & 0.994 & 1.994 & Smooth \\
+314$^\dag$   & 1.000  & 1.214  & 0.548  & 0.451  & 0.995 & 1.995 & Smooth \\
+628$^\dag$   & 0.968  & 2.561  & 1.221  & 0.477  & 0.995 & 1.995 & Smooth \\
+1257$^\dag$  & 0.990  & 3.218  & 1.589  & 0.494  & 0.995 & 1.995 & Smooth \\
+3142$^\star$ & 0.990  & 11.751 & 5.849  & 0.498  & 0.994 & 1.994 & Smooth \\
+6283$^\star$ & 0.997  & 16.306 & 8.158  & 0.500  & 0.994 & 1.994 & Smooth \\
 \bottomrule
+\multicolumn{8}{l}{\footnotesize $^\dag$\,$N = 64$;\quad $^\star$\,$N = 32$ (fallback).}
 \end{tabular}
 \end{table}
 
@@ -662,15 +665,14 @@ Re & $\Omega_r$ & $\mathcal{R}_c$ & $\mathcal{R}_a$
 
 \item The constant-viscosity P/D ratio $\mathcal{R}_c$ grows
   approximately \emph{linearly} with Re:
-  $\mathcal{R}_c \approx 0.0026 \cdot \mathrm{Re}$.
-  This means that at Re $\approx 385$, the constant-viscosity
-  system reaches $\mathcal{R}_c = 1$ (enstrophy growth onset),
-  and the ratio continues to grow without bound.
+  $\mathcal{R}_c \approx 0.005 \cdot \mathrm{Re}$ (at $N = 64$;
+  the coefficient is resolution-dependent).
+  This means that the constant-viscosity
+  system's P/D ratio grows without bound as Re increases.
 
 \item The adaptive mechanism keeps
-  $\mathcal{R}_a \approx 0.0013 \cdot \mathrm{Re}$---approximately
-  half the constant-viscosity rate. The critical Reynolds number
-  where $\mathcal{R}_a = 1$ is therefore doubled to Re $\approx 770$.
+  $\mathcal{R}_a \approx 0.0025 \cdot \mathrm{Re}$ (at $N = 64$)---approximately
+  half the constant-viscosity rate.
 
 \item The damping parameter $\gammastar$ is nearly saturated
   ($\gammastar \approx 0.994$) at all Reynolds numbers, indicating
@@ -717,7 +719,7 @@ production-to-dissipation ratio:
 
 \begin{equation}\label{eq:PD_scaling}
 \mathcal{R}_{\mathrm{constant}}(\mathrm{Re}) \approx C_0 \cdot \mathrm{Re},
-\quad\text{with } C_0 \approx 2.6 \times 10^{-3}.
+\quad\text{with } C_0 \approx 5.1 \times 10^{-3} \text{ at } N = 64.
 \end{equation}
 
 Under the adaptive mechanism:
@@ -940,11 +942,12 @@ of energy at small scales}.
   either bounded $\Ebs$ or subcritical P/D ratio. Closing these
   conditions to obtain unconditional regularity remains open.
 
-\item \textbf{Resolution limitations}: At $N = 32$, the simulations
-  are under-resolved for the higher Reynolds numbers.
-  While the P/D ratio trend is robust (it follows from the structure
-  of the equations rather than resolution-dependent dynamics),
-  the absolute values should be interpreted with caution.
+\item \textbf{Resolution limitations}: At $N = 64$ (and $N = 32$
+  for Re $\geq 3142$), the simulations are under-resolved for the
+  higher Reynolds numbers. While the P/D ratio trend is robust
+  (it follows from the structure of the equations rather than
+  resolution-dependent dynamics), the absolute values should be
+  interpreted with caution.
 
 \item \textbf{Depletion conjecture}: Conjecture~\ref{conj:depletion}
   is supported by extensive DNS evidence in the literature but

@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "date": "2026-03-03",
+    "resolution": "N=64",
+    "integrator": "semi_implicit",
+    "domain": "T^3 = [0,2pi]^3",
+    "dealiasing": "2/3 rule",
+    "ic": "Taylor-Green",
+    "note": "Partial run — 3 of 5 Re points completed before timeout. Re=3142 and Re=6283 use N=32 fallback data."
+  },
+  "reynolds_sweep": {
+    "Re_314": {
+      "Re": 314,
+      "nu": 0.02,
+      "N": 64,
+      "T": 1.0,
+      "dt": 0.002,
+      "constant": {
+        "peak_enstrophy": 0.3750,
+        "PD_ratio": 1.214,
+        "elapsed_s": 244
+      },
+      "adaptive": {
+        "peak_enstrophy": 0.3750,
+        "PD_ratio": 0.548,
+        "gamma_max": 0.9946,
+        "elapsed_s": 240
+      },
+      "enstrophy_ratio": 1.0000,
+      "bkm_ratio": 0.9810,
+      "PD_ratio_change": 0.4514
+    },
+    "Re_628": {
+      "Re": 628,
+      "nu": 0.01,
+      "N": 64,
+      "T": 1.0,
+      "dt": 0.001,
+      "constant": {
+        "peak_enstrophy": 0.3875,
+        "PD_ratio": 2.561,
+        "elapsed_s": 454
+      },
+      "adaptive": {
+        "peak_enstrophy": 0.3750,
+        "PD_ratio": 1.221,
+        "gamma_max": 0.9949,
+        "elapsed_s": 521
+      },
+      "enstrophy_ratio": 0.9677,
+      "bkm_ratio": 0.9901,
+      "PD_ratio_change": 0.4768
+    },
+    "Re_1257": {
+      "Re": 1257,
+      "nu": 0.005,
+      "N": 64,
+      "T": 0.5,
+      "dt": 0.0005,
+      "constant": {
+        "peak_enstrophy": 0.3787,
+        "PD_ratio": 3.218,
+        "elapsed_s": 598
+      },
+      "adaptive": {
+        "peak_enstrophy": 0.3750,
+        "PD_ratio": 1.589,
+        "gamma_max": 0.9948,
+        "elapsed_s": 619
+      },
+      "enstrophy_ratio": 0.9902,
+      "bkm_ratio": 0.9968,
+      "PD_ratio_change": 0.4937
+    },
+    "Re_3142_n32": {
+      "Re": 3142,
+      "nu": 0.002,
+      "N": 32,
+      "T": 0.5,
+      "dt": 0.0002,
+      "note": "N=32 fallback — N=64 run did not complete",
+      "constant": {
+        "peak_enstrophy": 0.3826,
+        "PD_ratio": 11.751
+      },
+      "adaptive": {
+        "peak_enstrophy": 0.3788,
+        "PD_ratio": 5.849,
+        "gamma_max": 0.994
+      },
+      "enstrophy_ratio": 0.990,
+      "PD_ratio_change": 0.498
+    },
+    "Re_6283_n32": {
+      "Re": 6283,
+      "nu": 0.001,
+      "N": 32,
+      "T": 0.5,
+      "dt": 0.00025,
+      "note": "N=32 fallback — N=64 run did not complete",
+      "constant": {
+        "peak_enstrophy": 0.3828,
+        "PD_ratio": 16.306
+      },
+      "adaptive": {
+        "peak_enstrophy": 0.3818,
+        "PD_ratio": 8.158,
+        "gamma_max": 0.994
+      },
+      "enstrophy_ratio": 0.997,
+      "PD_ratio_change": 0.500
+    }
+  }
+}
