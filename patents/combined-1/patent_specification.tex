@@ -1,0 +1,736 @@
+% Combined UK Patent Application — Specification
+% Application 1: AMTTP + Adaptive Friction
+% Applicant: Odeyemi Olusegun Israel
+% Date: 4 March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{AMTTP/AF --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large State-Adaptive Compliance Enforcement System\\
+for Decentralised Finance Networks}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to systems and methods for enforcing
+anti-money laundering (AML) and regulatory compliance in decentralised
+finance (DeFi) transactions using blockchain smart contracts, machine
+learning risk scoring, and zero-knowledge cryptographic proofs, and more
+particularly to such systems in which enforcement parameters are computed
+in real time from a closed-form state-adaptive controller that models the
+transaction processing network as a multi-body dynamical system with an
+associated energy landscape.
+
+% ============================================================
+\section{BACKGROUND}
+% ============================================================
+
+\subsection{Technical Problems}
+
+Decentralised finance protocols process financial transactions on blockchain
+networks without centralised intermediaries. This architecture creates two
+interacting technical problems that prior art has not solved in combination.
+
+\subsubsection{Pre-Settlement Compliance Enforcement}
+
+Existing blockchain analytics platforms (Chainalysis, Elliptic) operate
+retrospectively: they identify suspicious transactions \emph{after}
+settlement, by which time irrecoverable value transfer has already occurred.
+Platform-level KYC/AML checks are bypassed entirely when users transact
+directly through a DeFi protocol. Supervised fraud detection models require
+large quantities of labelled fraudulent transactions; in practice fewer than
+0.1\% of blockchain transactions are labelled as illicit, producing severe
+class imbalance. Privacy regulations (UK Data Protection Act 2018, EU GDPR)
+conflict with the traditionally disclosure-intensive compliance model.
+
+\subsubsection{Static Enforcement Parameters}
+
+Existing compliance systems apply fixed risk thresholds, fixed escrow rules,
+and fixed proof requirements regardless of the structural state of the
+underlying transaction network. This is provably suboptimal: above a critical
+manifold in state space, any constant enforcement configuration necessarily
+fails to achieve a state-dependent welfare optimum. No prior art derives a
+closed-form optimal state-adaptive enforcement function as a mapping from a
+computed energy landscape to numerical thresholds and proof requirements.
+
+\subsection{Prior Art Limitations}
+
+Prior art known to the applicant includes blockchain analytics retrospective
+monitoring platforms; exchange-level KYC/AML systems that do not extend to
+protocol-level transactions; standard supervised fraud detection systems
+requiring labelled datasets; zero-knowledge privacy protocols (e.g., Zcash)
+that conceal transactions without implementing compliance; macroprudential
+risk measures including CoVaR, SRISK, and the Basel III countercyclical
+capital buffer rule (which applies a constant-friction piecewise-linear
+function to the credit-to-GDP gap and does not derive a closed-form
+state-dependent optimal policy); and agent-based financial network
+simulations lacking closed-form optimal policies and provable stability
+guarantees. None of the prior art provides the combination of pre-settlement
+enforcement, weak supervision, closed-form state-dependent threshold and
+proof-requirement selection, and privacy-preserving verification.
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The invention provides a state-adaptive compliance enforcement system and
+method for DeFi networks whose enforcement configuration is computed in
+real time by a closed-form controller derived from a dynamical model of the
+transaction network. The shared inventive concept is the
+\emph{state-dependent selection of a risk threshold profile and a
+proof-requirement policy as a function of network instability metrics
+computed from an energy landscape derived by modelling the network as a
+multi-body dynamical system}. The primary technical contributions are:
+
+\begin{enumerate}[label=(\roman*)]
+\item A \textbf{four-layer DeFi compliance architecture} comprising interface,
+compliance orchestration, offline training, and blockchain infrastructure
+layers that together implement a deterministic compliance lifecycle enforcing
+policy actions \emph{before} transaction settlement.
+
+\item A \textbf{weak supervision pipeline} comprising a composite teacher
+ensemble (autoencoder--gradient boosting, FATF rule-based, graph-structural)
+generating pseudo-labels from unlabelled blockchain data, and a student model
+trained on those pseudo-labels, eliminating the need for labelled fraud data.
+
+\item A \textbf{state-adaptive transaction flow control module} that computes
+one or more network instability metrics from the transaction graph and
+aggregate risk dynamics, and selects an enforcement profile from a
+predetermined set, the selected profile deterministically defining:
+\begin{enumerate}[label=(\alph*)]
+\item a \emph{risk threshold profile} comprising numerical thresholds for the
+compliance decision matrix; and
+\item a \emph{proof-requirement policy} specifying, for at least one risk
+score tier or transaction class, one or more cryptographic proofs to be
+verified on-chain as a prerequisite to settlement.
+\end{enumerate}
+
+\item A \textbf{gravitational interaction engine} that models financial
+institutions as particles in a feature space under a pairwise potential
+comprising erf-attraction and logarithmic repulsion, with a blind-spot energy
+coupling, producing a combined systemic energy function $E(X)$.
+
+\item A \textbf{spectral phase transition detector} computing the spectral
+radius of the interaction matrix and determining whether the network state
+lies above or below a critical manifold, above which state-adaptive control
+is provably necessary.
+
+\item A \textbf{closed-form optimal adaptive policy} $\gamma^*(X)$ derived
+from the Bellman equation, mapping systemic energy and its gradient to an
+optimal friction coefficient, which is further mapped to the enforcement
+profile defining the risk threshold profile and proof-requirement policy.
+
+\item A \textbf{zero-knowledge proof subsystem} (zkNAF) comprising Groth16
+zk-SNARK circuits for sanctions non-membership, risk score range, and KYC
+verification proofs, enabling privacy-preserving on-chain verification.
+
+\item \textbf{Smart contract infrastructure} that enforces all policy actions
+deterministically before settlement, with an immutable on-chain audit trail.
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION}
+% ============================================================
+
+\subsection{System Architecture Overview}
+
+The system comprises four hierarchically organised layers:
+
+\textbf{Layer~I --- Interface Layer.}
+Client SDKs (TypeScript and Python) and a RESTful API provide the entry
+points through which external applications submit transaction requests,
+query risk scores, and verify compliance status. A web dashboard provides
+visual compliance monitoring.
+
+\textbf{Layer~II --- Compliance Orchestration Layer.}
+The core compliance logic resides here. It comprises:
+\begin{itemize}
+\item A \emph{machine learning risk scoring engine} computing a numerical
+risk score from 167 engineered features (address-level, transaction-level,
+graph-level) for each submitted transaction request.
+\item A \emph{graph analytics module} constructing transaction graphs and
+computing centrality, clustering, PageRank and community features.
+\item A \emph{sanctions screening module} checking counterparties against
+OFAC and EU sanctions databases.
+\item A \emph{state-adaptive transaction flow control module} (the adaptive
+friction controller, described in \S\ref{sec:af}) computing instability
+metrics and selecting the enforcement profile.
+\item A \emph{deterministic policy engine} mapping calibrated risk scores to
+policy actions via a decision matrix with thresholds drawn from the enforced
+profile.
+\end{itemize}
+
+\textbf{Layer~III --- Offline Training Layer.}
+Implements the composite teacher ensemble, pseudo-label generation, student
+model training, cross-validation, and sigmoid score calibration.
+
+\textbf{Layer~IV --- Infrastructure Layer.}
+Blockchain smart contracts, the zkNAF proof subsystem, databases, and
+distributed file storage for immutable audit records.
+
+\subsection{Composite Teacher Weak Supervision Pipeline}
+
+The offline training layer constructs three independent teacher models to
+generate pseudo-labels from unlabelled transaction data:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Autoencoder--Gradient Boosting Teacher ($s_{\text{AE-XGB}}$):}
+An autoencoder learns a compressed representation of transaction features;
+a gradient boosting model is trained on reconstruction errors and latent
+features to estimate anomaly scores.
+
+\item \textbf{FATF Rule-Based Teacher ($s_{\text{FATF}}$):} Encodes
+Financial Action Task Force red-flag indicators (rapid fund movement,
+structuring patterns, round-number transactions, high-risk jurisdiction
+involvement) as deterministic scoring rules.
+
+\item \textbf{Graph-Based Teacher ($s_{\text{Graph}}$):} Computes
+suspicion scores from graph-structural properties: proximity to known
+high-risk addresses, temporal clustering, and unusual connectivity.
+\end{enumerate}
+
+The composite teacher score is:
+\begin{equation}
+s_{\text{teacher}}(x) = w_1 s_{\text{AE-XGB}}(x) +
+w_2 s_{\text{FATF}}(x) + w_3 s_{\text{Graph}}(x)
+\end{equation}
+
+In the preferred embodiment $w_1{=}0.4$, $w_2{=}0.3$, $w_3{=}0.3$.
+Binary pseudo-labels are produced by thresholding and used to train an
+XGBoost student model on 167 engineered features.
+
+\subsection{Risk Score Calibration}
+
+The raw student model output is recalibrated:
+\begin{equation}
+\hat{p}_{\text{cal}}(x) = \sigma\!\left(k\cdot(s(x)-P_{75})\right)
+\end{equation}
+where $\sigma$ is the logistic sigmoid, $k{=}30$ is a steepness parameter,
+and $P_{75}$ is the 75th percentile of the training score distribution. The
+calibrated probability is mapped to an integer score on $[0,1000]$.
+
+\subsection{Compliance Decision Matrix}
+
+The deterministic decision matrix maps integer scores to policy actions:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Score Range} & \textbf{Policy Action} & \textbf{Smart
+Contract Effect} \\
+\midrule
+$[0,\,\tau_1)$ & APPROVE & Immediate execution \\
+$[\tau_1,\,\tau_2)$ & APPROVE + MONITOR & Execution; monitoring flag \\
+$[\tau_2,\,\tau_3)$ & REVIEW & Queue for manual review \\
+$[\tau_3,\,\tau_4)$ & ESCROW & Time-locked escrow \\
+$[\tau_4,\,1000]$ & BLOCK & On-chain rejection \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Under the \emph{stable} enforcement profile the thresholds are $(\tau_1,
+\tau_2, \tau_3, \tau_4) = (200,400,600,800)$. The state-adaptive module
+selects profiles that adjust these thresholds and impose additional proof
+requirements as a function of computed network instability.
+
+\subsection{State-Adaptive Transaction Flow Control Module}
+\label{sec:af}
+
+\subsubsection{Instability Metrics}
+
+The module computes one or more network instability metrics from:
+\begin{enumerate}[label=(\alph*)]
+\item the spectral radius or centrality concentration of the transaction
+graph constructed from recent on-chain activity over a sliding time window;
+\item a temporal burst indicator computed from the transaction count process;
+and/or
+\item a shift of the calibrated risk score distribution relative to a
+reference distribution.
+\end{enumerate}
+
+\subsubsection{Enforcement Profile Selection}
+
+Based on the computed metrics the module selects one profile from a discrete
+set (e.g., \textit{stable}, \textit{stressed}, \textit{critical}). Each
+profile deterministically defines:
+\begin{enumerate}[label=(\alph*)]
+\item a \emph{risk threshold profile} $(\tau_1,\tau_2,\tau_3,\tau_4)$ for
+the decision matrix; and
+\item a \emph{proof-requirement policy} specifying, for at least one risk
+score tier or transaction class, which of the zkNAF proofs (sanctions
+non-membership, risk range, KYC) must be verified on-chain prior to
+settlement.
+\end{enumerate}
+
+For a fixed system state the selected profile and all resulting decisions are
+deterministic and reproducible.
+
+\subsubsection{Macro-Level Systemic Energy Computation}
+
+When financial metric data for multiple institutions is available (e.g.,
+aggregated on-chain liquidity metrics, cross-protocol risk exposures), the
+module further computes network instability using a gravitational interaction
+model. The system models $N$ institutions as particles in $\mathbb{R}^d$
+governed by:
+\begin{equation}
+\dot{X} = -\alpha(X-\mu\mathbf{1}^\top) - \nabla_X\Phi_{\text{pair}}(X)
+- \sum_k \beta_k D\Phi_k(X)^\top D_k(X)
+\end{equation}
+
+where $X \in \mathbb{R}^{N\times d}$ is the state matrix, $\alpha$ is a
+mean-reversion rate, $\Phi_{\text{pair}}$ is the pairwise interaction
+potential, and $\Phi_k$ are external field operators.
+
+\subsubsection{Pairwise Interaction Potential}
+
+The pairwise potential between institutions $i$ and $j$ at distance
+$r = \|x_i - x_j\|$ is:
+\begin{equation}
+\phi(r) = \gamma \cdot \frac{\sigma\sqrt{\pi}}{2}\,
+\mathrm{erf}\!\left(\frac{r}{\sigma}\right)
+- \gamma\lambda_{\mathrm{rep}} \cdot \log(r+\varepsilon)
+\end{equation}
+
+The erf-attraction is bounded (unlike gravitational $1/r$ attraction),
+and the logarithmic repulsion prevents institution collapse. In the preferred
+embodiment: $\alpha{=}0.10$, $\gamma{=}1.00$, $\sigma{=}1.00$,
+$\lambda_{\mathrm{rep}}{=}0.10$, $\varepsilon{=}10^{-5}$.
+
+\subsubsection{Blind-Spot Energy Module}
+
+A complementary energy function is computed from four deviation channels
+relative to reference distributions fitted on a normal period:
+\begin{enumerate}[label=(\alph*)]
+\item enstrophy anomaly $\delta_C$ --- rotational energy deviation;
+\item spectral gap $\delta_G$ --- structural fragility indicator;
+\item alignment anomaly $\delta_A$ --- co-movement deviation; and
+\item temporal novelty $\delta_T$ --- drift from reference state patterns.
+\end{enumerate}
+
+The blind-spot energy is:
+\begin{equation}
+E_{\mathrm{BS}}(X) =
+\|(X-\mu_0)^\top\Sigma_0^{-1}(X-\mu_0)\|_F
+\end{equation}
+where $\mu_0$ and $\Sigma_0$ are the reference mean and covariance estimated
+by Ledoit--Wolf Oracle shrinkage.
+
+\subsubsection{Critical Manifold}
+
+A critical manifold $\mathcal{C}$ separates regimes in which constant
+enforcement parameters are adequate from regimes in which they are provably
+suboptimal:
+
+\textbf{Theorem (Spectral Phase Transition):}
+\begin{equation}
+\mathcal{C} = \{X : \lambda_{\max}(\rho(X)\cdot\ell(X)\cdot W) = 1\}
+\end{equation}
+
+where $\rho(X)$ is the spectral radius of the inter-institution correlation
+matrix, $\ell(X)$ is the system leverage factor, and $W$ is the weighted
+adjacency matrix. Above $\mathcal{C}$ state-adaptive friction is both
+necessary and sufficient for optimality.
+
+\subsubsection{Closed-Form Optimal Adaptive Policy}
+
+\textbf{Theorem (Optimal Friction):} The optimal state-dependent friction
+coefficient solving the associated Bellman equation is:
+
+\begin{equation}
+\gamma^*(X) \approx
+\frac{\beta\|\nabla E\|^2}{2\kappa + \beta\|\nabla E\|^2}\cdot
+\frac{E(X)}{E(X)+\theta}
+\end{equation}
+
+where $E(X)$ is the combined systemic energy, $\kappa$ is the economic cost
+parameter, $\beta$ is the systemic damage coefficient, and
+$\theta=\kappa/\beta$. The policy satisfies $\gamma^*\to 0$ as
+$E\to 0$ (no friction when stable) and $\gamma^*\to 1$ as $E\to\infty$ (maximum friction under severe instability).
+
+The scalar $\gamma^*(X)\in[0,1]$ is used to select the enforcement profile:
+below a lower threshold $\gamma_1$ the \textit{stable} profile is active;
+between $\gamma_1$ and $\gamma_2$ the \textit{stressed} profile is active;
+above $\gamma_2$ the \textit{critical} profile is active.
+
+\subsubsection{Navier--Stokes Analogy (Enhanced Embodiment)}
+
+Institution position changes $\dot{X}$ are treated as a velocity field.
+The velocity gradient tensor is decomposed into strain $S$ and vorticity
+$\Omega$. Enstrophy $\mathcal{E} = \frac{1}{2}\|\omega\|_F^2$ quantifies
+rotational energy. The Beale--Kato--Majda criterion adapted to financial
+networks serves as a singularity indicator. The adaptive friction coefficient
+is reinterpreted as an adaptive viscosity:
+$\nu = \nu_0(1+\gamma^*(E_{\mathrm{BS}}))$. Minsky regime classification
+(hedge, speculative, Ponzi) emerges from the cosine alignment between the
+gravitational gradient and the blind-spot gradient.
+
+\subsection{Zero-Knowledge Proof Subsystem (zkNAF)}
+
+The zkNAF subsystem implements three Groth16 zk-SNARK proof circuits:
+
+\textbf{Sanctions Non-Membership Proof.} The prover demonstrates that a
+blockchain address is not a member of a Merkle tree of sanctioned addresses
+(using the Poseidon hash function) without revealing the address. The
+verifier checks the proof against the published Merkle root.
+
+\textbf{Risk Range Proof.} The prover demonstrates:
+$s_{\min} \leq s(x) \leq s_{\max}$ without revealing the exact score $s(x)$.
+
+\textbf{KYC Verification Proof.} The prover demonstrates completion of
+Know Your Customer verification with an accredited provider without
+revealing identity data.
+
+Each proof has a 24-hour time-to-live. Verification is performed on-chain
+by a dedicated ZK verifier smart contract that performs the bilinear pairing
+check and records the result with a timestamp.
+
+\subsection{Smart Contract Architecture}
+
+\begin{itemize}
+\item \textbf{Core Contract:} Implements the deterministic decision matrix
+on-chain; registers compliance decisions as an immutable audit record.
+\item \textbf{Escrow Contract:} Holds funds in time-locked escrow for
+ESCROW-policy transactions; supports release and dispute escalation.
+\item \textbf{ZK Verifier Contract:} Verifies Groth16 proofs; stores
+binary verification results and timestamps.
+\item \textbf{Cross-Chain Bridge Contract:} Requires compliance verification
+on both source and destination chains before releasing bridged funds.
+\item \textbf{Dispute Resolution Contract:} Structured escalation and
+release process for escrowed transactions under dispute.
+\end{itemize}
+
+All enforcement decisions execute \emph{before} the corresponding
+transaction is settled on the blockchain network.
+
+\subsection{Feature Engineering}
+
+The risk scoring engine operates on 167 features across three categories:
+\begin{itemize}
+\item \textbf{Address-level:} Transaction count, total value, mean and
+variance of amounts, address age, unique counterparty count, temporal
+activity patterns.
+\item \textbf{Transaction-level:} Value, gas parameters, input data
+characteristics, token transfer indicators.
+\item \textbf{Graph-level:} Degree centrality, betweenness centrality,
+clustering coefficient, PageRank, community membership, local graph density.
+\end{itemize}
+
+\subsection{Performance Characteristics}
+
+\textbf{DeFi Compliance System (trained on 2.64 million Ethereum
+transactions):}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Meta-Ensemble ROC-AUC (test) & 1.0000 \\
+Meta-Ensemble ROC-AUC (5-fold CV) & $0.9965\pm0.0049$ \\
+Meta-Ensemble PR-AUC & 0.9999 \\
+Transaction-Level XGBoost AUC & 0.9878 \quad F1: 0.901 \\
+Cross-domain mean AUC (9 datasets) & 0.9962 \\
+Escrow contract gas cost & 287,890 gas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Adaptive Friction Controller (FDIC SDI data, 140 quarters):}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Configuration} & $N$ & \textbf{AUROC} & \textbf{GFC Lead} \\
+\midrule
+Institution-type (7 classes) & 7 & $\geq0.70$ & 6 quarters \\
+Bank-level (individual) & 30 & 0.805 & 6 quarters \\
+G-SIB cross-border & 20 & 0.781 & 6 quarters \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Super-criticality prevalence: 68.6\% of sample above $\mathcal{C}$.
+GFC welfare loss of inaction: 19.57 percentage points
+consumption-equivalent. Adversarial robustness: 5 of 12 attack types never
+break detection across all configurations.
+
+% ============================================================
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Where a claim refers to another claim, the dependency is by claim
+number. Features of any dependent claim may be combined with any independent
+claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+% --- Independent Claim 1: DeFi Compliance System ---
+\item A computer-implemented transaction compliance system for decentralised
+finance networks, the system comprising:
+\begin{enumerate}[label=(\alph*)]
+\item an interface layer configured to receive transaction requests from
+client applications;
+
+\item a compliance orchestration layer comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a machine learning risk scoring engine configured to compute a
+numerical risk score for each transaction request from engineered features
+comprising address-level, transaction-level, and graph-level attributes;
+\item a graph analytics module configured to construct and analyse
+transaction graphs and compute graph-level features;
+\item a sanctions screening module configured to check transaction
+counterparties against maintained sanctions databases;
+\item a state-adaptive transaction flow control module configured to compute
+one or more network instability metrics from recent transaction activity and
+to select, from a predetermined set of enforcement profiles, an enforcement
+configuration comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a risk threshold profile defining numerical thresholds for a
+deterministic compliance decision matrix; and
+\item a proof-requirement policy defining, for at least one risk score tier
+or transaction class, one or more cryptographic proofs required to be
+verified on-chain as a prerequisite to settlement;
+\end{enumerate}
+and
+\item a deterministic policy engine configured to map computed risk scores to
+policy actions according to the selected risk threshold profile, and to
+enforce the proof-requirement policy by rejecting transactions for which the
+required proofs are missing or fail on-chain verification;
+\end{enumerate}
+
+\item an offline training layer comprising a composite teacher ensemble
+that generates pseudo-labels from unlabelled blockchain transaction data
+using a weighted combination of at least two independent teacher models, and
+a student model trained on those pseudo-labels; and
+
+\item an infrastructure layer comprising smart contracts deployed on a
+blockchain network configured to enforce the determined policy actions before
+settlement, including a core contract, an escrow contract, and a
+zero-knowledge proof verifier contract;
+\end{enumerate}
+wherein all compliance decisions are enforced before the corresponding
+transaction is settled on the blockchain network.
+
+% --- Independent Claim 2: DeFi Compliance Method ---
+\item A computer-implemented method of enforcing compliance in decentralised
+finance transactions, the method comprising:
+\begin{enumerate}[label=(\alph*)]
+\item receiving a transaction request comprising at least a sender address,
+a recipient address, and a transaction value;
+\item computing a risk score by applying a trained machine learning model
+to a feature vector comprising address-level, transaction-level, and
+graph-level features;
+\item calibrating the risk score using a sigmoid recalibration function
+anchored at a percentile of a training score distribution;
+\item computing one or more network instability metrics from recent
+transaction activity and selecting an enforcement profile from a
+predetermined set, the selected profile deterministically defining:
+\begin{enumerate}[label=(\roman*)]
+\item a risk threshold profile for a deterministic decision matrix; and
+\item a proof-requirement policy specifying one or more cryptographic proofs
+to be verified on-chain as a prerequisite to settlement for at least one
+risk score tier or transaction class;
+\end{enumerate}
+\item mapping the calibrated risk score to a policy action using the
+decision matrix with thresholds from the selected risk threshold profile;
+\item enforcing the proof-requirement policy by verifying the specified
+proofs on-chain prior to settlement, and applying a non-approval action
+when required proofs are absent or fail verification;
+\item executing a corresponding smart contract function on a blockchain
+network before settlement; and
+\item recording the compliance decision and policy action on-chain as an
+immutable audit record.
+\end{enumerate}
+
+% --- Independent Claim 3: Systemic Risk Controller ---
+\item A computer-implemented system for monitoring systemic risk in a
+financial network and outputting an enforcement configuration for a
+transaction processing network, the system comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a gravitational interaction engine configured to model a plurality
+of financial institutions as particles in a multi-dimensional feature
+space interacting through a pairwise potential comprising a bounded
+erf-attraction term and a logarithmic repulsion term;
+
+\item a spectral monitoring module configured to compute the spectral radius
+of an interaction matrix and to determine whether the network state falls
+above or below a critical manifold defined by the condition that the spectral
+radius equals one;
+
+\item a blind-spot energy module configured to compute, from reference
+distributions fitted on a designated normal period, a complementary energy
+function comprising at least an enstrophy anomaly channel, a spectral gap
+channel, an alignment anomaly channel, and a temporal novelty channel; and
+
+\item an adaptive policy module configured to compute a state-dependent
+friction coefficient from the combined systemic energy and its gradient and
+to output an enforcement configuration comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a risk threshold profile defining numerical thresholds for transaction
+approval decisions in a transaction processing network; and
+\item a proof-requirement policy specifying, for at least one threshold tier
+or transaction class, one or more cryptographic proofs required to be
+verified as a prerequisite to settlement.
+\end{enumerate}
+\end{enumerate}
+
+% --- Dependent Claims ---
+\item A system according to claim 1 or claim 3, wherein the pairwise
+potential is defined as:
+\[
+\phi(r) = \gamma\cdot\frac{\sigma\sqrt{\pi}}{2}\,\mathrm{erf}(r/\sigma)
+- \gamma\lambda_{\mathrm{rep}}\cdot\log(r+\varepsilon)
+\]
+where $r$ is the inter-institution distance, $\gamma$ is an interaction
+strength, $\sigma$ is an interaction scale, $\lambda_{\mathrm{rep}}$ is a
+repulsion strength, and $\varepsilon$ is a regularisation constant.
+
+\item A method according to claim 2 or a system according to claim 3,
+wherein the state-dependent friction coefficient is:
+\[
+\gamma^*(X) \approx \frac{\beta\|\nabla E\|^2}{2\kappa+\beta\|\nabla E\|^2}
+\cdot\frac{E(X)}{E(X)+\theta}
+\]
+where $E(X)$ is the combined systemic energy, $\|\nabla E\|$ is the
+gradient norm, $\kappa$ is an economic cost parameter, $\beta$ is a systemic
+damage coefficient, and $\theta=\kappa/\beta$.
+
+\item A system or method according to claims 1 to 5, wherein the
+enforcement profile is selected from a discrete set of profiles, and
+wherein the selection is determined by whether the computed friction
+coefficient $\gamma^*(X)$ lies between predetermined lower and upper
+thresholds.
+
+\item A system or method according to claims 1 to 6, wherein the
+proof-requirement policy comprises, for at least one enforcement profile,
+requiring at least one of: a sanctions non-membership proof, a risk range
+proof, or a KYC verification proof.
+
+\item A system or method according to claims 1 to 7, wherein the
+zero-knowledge proofs are Groth16 zk-SNARK proofs, the sanctions
+non-membership proof uses a Merkle tree constructed with the Poseidon hash
+function, and each proof has a time-to-live after which it must be
+regenerated.
+
+\item A system or method according to claims 1 to 8, wherein the composite
+teacher ensemble comprises an autoencoder--gradient boosting teacher, a
+rule-based FATF teacher, and a graph-structural teacher, and the composite
+score is a weighted sum of their outputs.
+
+\item A method according to claim 2, wherein the sigmoid recalibration
+function is:
+\[
+\hat{p}_{\mathrm{cal}}(x) = \sigma\!\left(k\cdot(s(x)-P_{75})\right)
+\]
+where $\sigma$ is the logistic sigmoid, $k$ is a steepness parameter, and
+$P_{75}$ is the 75th percentile of the training score distribution.
+
+\item A system or method according to claims 1 to 10, wherein selecting
+the enforcement profile further deterministically defines at least one of:
+a transaction rate limit, a queue delay, an escrow duration, an escrow
+release condition window, or a maximum transaction value limit.
+
+\item A system according to claim 3, further comprising a Navier--Stokes
+analogy module configured to compute a velocity gradient tensor from
+institution position changes, decompose it into strain rate and vorticity
+components, compute enstrophy as $\mathcal{E}=\frac{1}{2}\|\omega\|_F^2$,
+and evaluate a Beale--Kato--Majda blow-up criterion.
+
+\item A system according to claim 12, wherein the adaptive friction
+coefficient is applied as an adaptive viscosity
+$\nu=\nu_0(1+\gamma^*(E_{\mathrm{BS}}))$ in the Navier--Stokes analogy.
+
+\item A system according to claim 3, further comprising a Minsky regime
+classification module configured to classify the network into hedge,
+speculative, and Ponzi regimes based on the cosine alignment between the
+gravitational gradient and the blind-spot energy gradient.
+
+\item A system or method according to claims 3 to 14, wherein the
+spectral radius is computed using power iteration with finite-difference
+Hessian-vector products at $O(N^2 d\log N)$ complexity per time step.
+
+\item A system according to claim 1, further comprising a cross-chain
+bridge contract requiring compliance verification on both a source chain
+and a destination chain before releasing bridged funds.
+
+\item A system or method according to claims 3 to 15, wherein a welfare
+cost of not implementing adaptive friction is computed as:
+\[
+\%CL = 100\times\!\left(1-e^{-\mathcal{L}_{\mathrm{inaction}}/
+(\sigma\theta T)}\right)
+\]
+and the system operates as an online algorithm with $O(\sqrt{T})$
+cumulative regret relative to the best fixed policy in hindsight.
+
+\end{enumerate}
+
+% ============================================================
+\section{DRAWINGS}
+% ============================================================
+
+\textit{[To be filed separately:
+(1) System architecture diagram showing the four compliance layers;
+(2) Flow diagram of the compliance decision lifecycle with proof-gating;
+(3) Schematic of the zkNAF circuits and on-chain verification flow;
+(4) Block diagram of the composite teacher weak supervision pipeline;
+(5) Diagram of the GravityEngine $N$-body interaction model;
+(6) Plot of the erf-log pairwise potential function;
+(7) Diagram of the critical manifold $\mathcal{C}$ in state space with
+enforcement profile regions;
+(8) Time series of the GFC early warning signal at 2007-Q1;
+(9) Navier--Stokes analogy schematic;
+(10) Minsky regime classification diagram.]}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A state-adaptive compliance enforcement system for decentralised finance
+networks enforces regulatory policy before transaction settlement. A
+state-adaptive transaction flow control module computes network instability
+metrics and selects an enforcement profile; the selected profile
+deterministically defines a risk threshold profile for the decision matrix
+and a proof-requirement policy gating settlement. A closed-form optimal
+friction coefficient derived from a multi-body gravitational model of the
+financial network drives profile selection. A machine learning risk scoring
+engine trained via composite teacher weak supervision scores transactions;
+blockchain smart contracts enforce outcomes before settlement. A
+zero-knowledge proof subsystem enables privacy-preserving on-chain
+verification of sanctions status, risk range and KYC without revealing
+underlying data. The system detects the Global Financial Crisis six
+quarters in advance on FDIC data and achieves ROC-AUC of 0.9965 across
+2.64 million Ethereum transactions.
+
+\end{document}

@@ -1,0 +1,64 @@
+pages 13
+
+TERM CHECK (regex / word-boundary match)
+anomaly tensor     -> False
+spectrum operator  -> False
+law domain         -> False
+attribution        -> False
+boundary-centred   -> False
+adaptive friction  -> False
+friction coefficient -> False
+gamma*(x)          -> False
+gamma*             -> False
+enforcement profile -> False
+decision matrix    -> True
+pre-settlement     -> True
+escrow             -> True
+revert             -> False
+time-to-live       -> False
+ttl                -> False
+groth16            -> True
+zk-snark           -> True
+zero-knowledge     -> True
+poseidon           -> False
+merkle             -> False
+sanctions          -> True
+kyc                -> True
+risk range proof   -> True
+
+=== contexts for pre-settlement (showing up to 2) ===
+ transact in cryptocurrency bear the ultimate ﬁnancial risk and regulatory burden. the uk fca has made it very clear through cp25/41 that there are now speciﬁc regulatory expectations regarding the existence of adequate pre- settlement controls [2]. we introduce amttp version 4.0, which has been designed to have a four-layer architecture explicitly intended to support deterministic compliance enforcement in defi institutions. layer i provides sdks, rest apis, and web applications intended for programmatic and human interaction with am
+---
+ransact in cryptocurrency bear the ultimate financial risk and regulatory burden. the uk fca has made it very clear through cp25/41 that there are now specific regulatory expectations regarding the existence of adequate pre-settlement controls [2]. we introduce amttp version 4.0, which has been designed to have a four-layer architecture explicitly intended to sup- port deterministic compliance enforcement in defi institutions. layer i provides sdks, rest apis, and web applications intended for programmatic and human interaction with a
+---
+
+=== contexts for escrow (showing up to 2) ===
+ment and create alerts for identified items within their ecosystem; however, amttp will enable users to normalise disparate signals, thus enabling the user to make real-time compliance decisions of ‘approve’, ‘review’, ‘escrow’ or ‘block’. to provide this capability, zknaf creates a privacy- preserving layer of attestation that bridges the reactive surveil- lance systems used today and that required for institutions to complete their business at an actual institutional-grade level [2], [3]. in conclusion, the comprehensive body of wor
+---
+ent boosted classifiers—trains on these labels, unified by a logistic regression meta-learner and deployed to the production risk engine. table ii: amttp smart contract components contract purpose amttpcore risk oracle, escrow, threshold sigs amttpnft kyc badges (erc-721) disputeresolver kleros arbitration integration crosschain layerzero cross-chain relay policyengine rule & threshold configuration riskrouter multi-chain score routing zknafverifier groth16 proof verification safemodule gnosis safe multi-sig coresecure hardened varian
+---
+
+=== contexts for groth16 (showing up to 2) ===
+ith regulatory requirements by establishing proof of compliance with certain attributes, such as non-sanctioned status, while not disclosing the underlying data [6]. therefore, zero-knowledge proof systems, specifically groth16 circuits, will be in align- ment with the requirements of the general data protection regulation (gdpr) and have significant implications for com- panies implementing these types of systems. for example, on the one hand, zkaml uses zk-snarks to enable whitelist- based anti-money laundering (aml) activities with
+---
+e training pipeline composite teacher ae-xgboost (w=0.4) fatf patterns (w=0.3) graph props (w=0.3) student pipeline model artefacts layer iv: infrastructure & enforcement nginx + cloudflare 18 contracts (sepolia) zknaf (groth16) mongo / redis / memgraph ipfs / audit logs 17 docker containers model deploy fig. 1: amttp four-layer architecture. layer i exposes integration interfaces; layer ii implements compliance decision logic; layer iii trains models offline via weak supervision; layer iv provides infrastructure and on-chain enforcem
+---
+
+=== contexts for sanctions (showing up to 2) ===
+s, rest apis, and web applications intended for programmatic and human interaction with amttp; layer ii provides a compliance orchestration layer that combines (i) machine learning risk scoring (ii) graph analysis (iii) sanctions screening, and (iv) policy adjudication into a single deterministic decision-making matrix; layer iii consists of an oﬄine training pipeline with a composite teacher that uses an autoencoderenhanced xgboost (w = 0.4), seven fatf aml mode patterns (w = 0.3), and graph structural properties (w = 0.3) in order t
+---
+tructure security features multioracle threshold signatures, replay protection & zknaf a zeroknowledge proof framework that allows for privacy preserving veriﬁcation of kyc credentials, risk ranges & non-membership from sanctions. in addition, tls encryption, rate limiting, cloudﬂare tunnel integration & the ui integrity service provide an additional layer of protection at the infrastructure level. this paper aims to demonstrate that deterministic compliance can be integrated into decentralised ﬁnance at an architectural level. in ord
+---
+
+=== contexts for kyc (showing up to 2) ===
+e tier (mongodb, redis, memgraph, ipfs). the infrastructure security features multioracle threshold signatures, replay protection & zknaf a zeroknowledge proof framework that allows for privacy preserving veriﬁcation of kyc credentials, risk ranges & non-membership from sanctions. in addition, tls encryption, rate limiting, cloudﬂare tunnel integration & the ui integrity service provide an additional layer of protection at the infrastructure level. this paper aims to demonstrate that deterministic compliance can be integrated into dec
+---
+r (mongodb, redis, memgraph, ipfs). the infrastructure security features multi- oracle threshold signatures, replay protection & zknaf a zero- knowledge proof framework that allows for privacy preserving verification of kyc credentials, risk ranges & non-membership from sanctions. in addition, tls encryption, rate limiting, cloudflare tunnel integration & the ui integrity service provide an additional layer of protection at the infrastructure level. this paper aims to demonstrate that deterministic compliance can be integrated into de
+---
+
+=== contexts for risk range proof (showing up to 2) ===
+s.18 ethereum smart contracts written in solidity are deployed on the ethereum sepolia blockchain (shown in table ii). zknaf circuits.three types of proof are provided for compliance verification: kyc credential proofs, risk range proofs, and non-membership proofs (shown in table iii). table iii: zknaf proof types proof type purpose kyc credential verify identity status without revealing personal data risk range prove risk score within acceptable bounds without disclosing exact value sanctions non- membership confirm address is not on
+---
+
+PAGES WITH pre-settlement:
+1, 2

@@ -1,0 +1,546 @@
+% BSDT UK Patent Application — Specification
+% Title: Method and System for Detecting Hidden Risk Concentrations in
+%        Financial Networks Using Tensor Decomposition
+% Applicant: Odeyemi Olusegun Israel
+% Date: March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{BSDT --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large Method and System for Detecting Hidden Risk Concentrations\\
+in Financial Networks Using Tensor Decomposition}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to the field of machine learning and 
+anomaly detection, and more particularly to methods and systems for 
+diagnosing and correcting structural failure modes in deployed classification 
+models, with application to fraud detection in financial, aerospace, and 
+medical domains.
+
+% ============================================================
+\section{BACKGROUND OF THE INVENTION}
+% ============================================================
+
+\subsection{Technical Problem}
+
+Machine learning models deployed for fraud detection inevitably fail to 
+detect certain classes of fraudulent activity. These failures are structural 
+in nature---they arise from specific, identifiable deficiencies in how the 
+model represents the data space---rather than from random noise. In 
+production environments, these failures manifest as false negatives: 
+fraudulent transactions that the model classifies as legitimate.
+
+Current approaches to addressing model failures include:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Model retraining:} Collecting new labelled data and 
+retraining the model from scratch. This is expensive, requires fresh 
+labelled data (which may not be available), and may disrupt certified 
+production systems that have undergone regulatory approval.
+
+\item \textbf{Ensemble methods:} Combining multiple models to reduce 
+variance. While effective at reducing random errors, ensembles do not 
+diagnose \emph{why} specific instances are missed, and multiple models may 
+share the same structural blind spot.
+
+\item \textbf{Cost-sensitive reweighting:} Adjusting class weights or 
+decision thresholds. This is a global adjustment that trades precision for 
+recall uniformly, without distinguishing between different failure modes.
+
+\item \textbf{Bias-variance decomposition:} The classical decomposition 
+operates in \emph{error space} (aggregate model performance), not in 
+\emph{feature space} (why a specific instance was missed). It provides no 
+per-instance diagnostic information.
+\end{enumerate}
+
+None of these approaches provides a structured, per-instance diagnosis of 
+\textit{why} a particular observation was missed, nor a targeted correction 
+mechanism that addresses specific failure modes without modifying the 
+underlying model.
+
+\subsection{Prior Art Limitations}
+
+Known prior art techniques for post-hoc model correction include conformal 
+prediction (which provides calibrated prediction sets but does not diagnose 
+failure modes), Bayesian uncertainty estimation (which quantifies overall 
+prediction uncertainty but does not decompose it into actionable components), 
+and SHAP/LIME-based explanation methods (which explain individual 
+predictions but do not identify structural failure patterns or provide 
+correction mechanisms).
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The present invention provides a method and system for decomposing machine 
+learning model failures into four near-orthogonal, measurable components 
+that operate in feature space, and for applying targeted correction operators 
+that recover missed detections without modifying the underlying model. The 
+invention addresses the limitations of the prior art through the following 
+technical contributions:
+
+\begin{enumerate}[label=(\roman*)]
+\item A four-component decomposition of model failure modes into 
+Camouflage ($C$), Feature Gap ($G$), Activity Anomaly ($A$), and Temporal 
+Novelty ($T$), each computed from the feature space of the observation and 
+reference distributions.
+
+\item A self-calibrating weighting mechanism that computes component weights 
+using one or more of Mutual Information, Fisher Variance Ratio, Bayesian 
+Online, or Gradient-based methods.
+
+\item A composite blind-spot score that aggregates the four components into 
+a single scalar indicator of model vulnerability.
+
+\item Post-hoc correction operators---including additive correction, 
+logistic regression, quadratic surface fitting, and exponential gating---that 
+apply targeted adjustments to model predictions based on the decomposed 
+failure profile.
+
+\item Verification of near-orthogonality of the four components by 
+normalised mutual information (mean NMI $< 0.065$) and variance inflation 
+factor (all VIF $< 1.45$), confirming that each component captures an 
+independent aspect of model failure.
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION OF THE INVENTION}
+% ============================================================
+
+\subsection{Four-Component Decomposition}
+
+The method operates on a frozen (unmodified) machine learning model $f$ that 
+produces predicted probabilities $p(x) = f(x)$ for input observations $x$. 
+The method computes four components for each observation, each measuring a 
+distinct structural aspect of why the model may fail on that observation.
+
+\subsubsection{Camouflage Component ($C$)}
+
+The camouflage component measures how closely a potentially fraudulent 
+observation resembles the legitimate data distribution. It is defined as:
+\begin{equation}
+C(x) = 1 - \frac{\|x - \mu_{\text{legit}}\|_2}{d_{\max}}
+\end{equation}
+where $\mu_{\text{legit}}$ is the mean of the legitimate class in the 
+training data and $d_{\max}$ is the maximum distance from 
+$\mu_{\text{legit}}$ observed in the training data. A value of $C(x)$ near 
+1 indicates high camouflage---the observation closely mimics legitimate 
+patterns, making it difficult for the model to distinguish from genuine 
+transactions.
+
+\subsubsection{Feature Gap Component ($G$)}
+
+The feature gap component measures the proportion of features that carry 
+negligible information for the observation:
+\begin{equation}
+G(x) = \frac{|\{j : |x_j| < \varepsilon\}|}{d}
+\end{equation}
+where $d$ is the total number of features and $\varepsilon = 10^{-8}$ is a 
+near-zero threshold. A high value of $G(x)$ indicates that many features 
+are uninformative for this observation, depriving the model of the 
+discriminative signal it relies upon.
+
+\subsubsection{Activity Anomaly Component ($A$)}
+
+The activity anomaly component measures whether the transactional activity 
+profile of the observation deviates from the activity profiles of previously 
+detected fraud:
+\begin{equation}
+A(x) = \sigma\left(\frac{\log(1 + |\text{tx\_count}(x)|) - 
+\mu_{\text{caught}}}{\sigma_{\text{caught}}}\right)
+\end{equation}
+where $\text{tx\_count}(x)$ is the transaction count associated with the 
+observation, $\mu_{\text{caught}}$ and $\sigma_{\text{caught}}$ are the mean 
+and standard deviation of the log-transformed transaction counts of 
+previously detected (``caught'') fraudulent entities, and $\sigma$ is the 
+logistic sigmoid function. A value near 1 indicates that the observation's 
+activity level is anomalous relative to known fraud patterns.
+
+This component has no direct analogue in the classical bias-variance 
+decomposition. It captures a distinct axis of model vulnerability: fraud 
+operating at activity scales the model has not learned to associate with 
+fraud.
+
+\subsubsection{Temporal Novelty Component ($T$)}
+
+The temporal novelty component measures the degree to which the observation 
+represents a pattern that is temporally novel relative to the training data:
+\begin{equation}
+T(x) = \sigma\left(\frac{1}{2}(\bar{m}(x) - 2)\right)
+\end{equation}
+where $\bar{m}(x)$ is the mean distance to the $k$ nearest temporal 
+neighbours in the training set, normalised by the temporal span. A value 
+near 1 indicates high temporal novelty---a pattern that emerged after 
+training and that the model cannot be expected to recognise.
+
+\subsection{Self-Calibrating Weight Computation}
+
+The four component values for an observation are aggregated into a composite 
+blind-spot score (designated MFLS --- Model Failure Likelihood Score) using 
+weights that are computed automatically from the data:
+\begin{equation}
+\text{MFLS}(x) = \sum_{i \in \{C, G, A, T\}} w_i \cdot S_i(x)
+\end{equation}
+
+Four methods for computing the weights $w_i$ are provided:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Mutual Information:} Weights are proportional to the mutual 
+information between each component and the binary label (fraud vs. 
+legitimate) on a held-out calibration set.
+
+\item \textbf{Fisher Variance Ratio:} Weights are proportional to the 
+ratio of between-class variance to within-class variance for each component.
+
+\item \textbf{Bayesian Online:} Weights are updated sequentially using a 
+Bayesian update rule as new labelled observations are received.
+
+\item \textbf{Gradient-based:} Weights are optimised to maximise detection 
+performance on a holdout set via gradient descent.
+\end{enumerate}
+
+The weights are normalised such that $\sum_i w_i = 1$.
+
+\subsection{Correction Operators}
+
+Given the four-component decomposition, the method applies correction 
+operators to the frozen model's predicted probabilities to recover missed 
+detections. Three correction operators are provided:
+
+\subsubsection{Additive Correction}
+
+The simplest correction adds a scaled composite score to the predicted 
+probability for observations below a threshold:
+\begin{equation}
+p^*(x) = p(x) + \lambda \cdot \text{MFLS}(x) \cdot (1 - p(x)) \cdot 
+\mathbb{1}[p(x) < \tau]
+\end{equation}
+where $\lambda$ is a correction strength parameter and $\tau$ is a threshold 
+below which correction is applied.
+
+\subsubsection{Logistic Regression Correction (SignedLR)}
+
+A lightweight logistic regression is trained on the four BSDT components as 
+input features, predicting the true label. The correction is:
+\begin{equation}
+p^*(x) = \text{clip}\left(p(x) + \beta_0 + \sum_{i} \beta_i S_i(x), 
+\ 0, \ 1\right)
+\end{equation}
+
+\subsubsection{Quadratic Surface Correction (QuadSurf)}
+
+A degree-2 polynomial ridge regression is fitted on the four components and 
+their interactions, providing a richer correction surface:
+\begin{equation}
+p^*(x) = \text{clip}\left(p(x) + \phi_2([C, G, A, T])^\top 
+\hat{\beta}, \ 0, \ 1\right)
+\end{equation}
+where $\phi_2$ denotes the degree-2 polynomial feature map that includes 
+all terms $S_i$, $S_i^2$, and $S_i S_j$ for $i \neq j$. In the preferred 
+embodiment, ridge regularisation with coefficient $\alpha = 1.0$ is applied.
+
+\subsubsection{Exponential Gating Correction (ExpGate)}
+
+A gated correction combines a quadratic surface with a sigmoid-activated 
+gate:
+\begin{equation}
+p^*(x) = \text{clip}\left(p(x) + g(x) \cdot q(x), \ 0, \ 1\right)
+\end{equation}
+where $q(x)$ is the quadratic surface output and $g(x) = \sigma(v^\top 
+[C, G, A, T] + b)$ is a learned sigmoid gate that modulates the correction 
+strength.
+
+\subsection{Seven Supplementary Features}
+
+In an enhanced embodiment, seven supplementary features are derived from the 
+core decomposition for use by the correction operators:
+\begin{enumerate}
+\item[$\varphi_1$--$\varphi_4$:] The four raw components $C$, $G$, $A$, $T$.
+\item[$\varphi_5$:] The MFLS composite score.
+\item[$\varphi_6$:] The predicted-vs-actual residual: $|p(x) - y|$ where 
+$y$ is the true label (available only in supervised calibration).
+\item[$\varphi_7$:] An interaction term: $C(x) \cdot A(x)$, capturing the 
+joint effect of high camouflage with anomalous activity.
+\end{enumerate}
+
+\subsection{Orthogonality Verification}
+
+The four components are verified to be near-orthogonal by three independent 
+measures:
+\begin{itemize}
+\item \textbf{Normalised Mutual Information:} Mean NMI across all component 
+pairs ranges from 0.051 to 0.064, well below the redundancy threshold of 
+0.30.
+\item \textbf{Variance Inflation Factor:} All VIF values are below 1.45, 
+confirming negligible multicollinearity.
+\item \textbf{Principal Component Analysis:} All four components carry 
+meaningful variance; no component is dominated by others.
+\end{itemize}
+
+\subsection{Cross-Domain Applicability}
+
+The method has been validated across seven datasets spanning four domains:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Domain} & \textbf{Dataset} & \textbf{Dominant Component} \\
+\midrule
+Blockchain & Elliptic & Temporal Novelty ($T$) \\
+Blockchain & Ethereum Addresses & Temporal Novelty ($T$) \\
+Banking & Credit Card Fraud & Activity Anomaly ($A$) \\
+Banking & IEEE-CIS & Activity Anomaly ($A$) \\
+Aerospace & Shuttle & Camouflage ($C$) \\
+Medical & Mammography & Camouflage ($C$) \\
+Pattern Recognition & Pendigits & Feature Gap ($G$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The domain-dependent variation in dominant components confirms that the 
+decomposition captures genuine structural differences in failure modes 
+across application domains.
+
+\subsection{Performance Characteristics}
+
+In the preferred embodiment, evaluated across 792 variant--model--dataset 
+combinations:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Best variant (QuadSurf) mean F1 & 0.787 ($+43\%$ relative improvement) \\
+False positive reduction (QuadSurf) & 88.1\% (44,740 $\to$ 5,345) \\
+Maximum recall recovery & $+84.4$ percentage points \\
+Shuttle domain rescue: F1 & $0.134 \to 0.968$ \\
+Shuttle domain FP reduction & 99.94\% \\
+Zero-missed-fraud configurations & 10/12 model--dataset combos \\
+Cross-domain credit card MFLS AUC & 0.885 \\
+Cross-domain aerospace MFLS AUC & 0.982 \\
+Cross-domain medical imaging MFLS AUC & 0.916 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Cross-Domain Transfer}
+
+The damping mechanism derived from the BSDT framework transfers to physical 
+systems. Specifically, the adaptive damping function:
+\begin{equation}
+\gamma^*(E) = \frac{E}{E + \theta}
+\end{equation}
+where $E$ is the blind-spot energy and $\theta$ is a damping threshold, has 
+been validated as a viscosity regularisation term in Navier--Stokes fluid 
+dynamics simulations, representing a novel finance-to-physics transfer 
+direction.
+
+% ============================================================
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Where a claim refers to another claim, the dependency is by claim
+number. Features of any dependent claim may be combined with any
+independent claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+% --- Independent Method Claim ---
+\item A computer-implemented method for detecting and correcting failure 
+modes in a deployed machine learning classification model without modifying 
+the model, the method comprising the steps of:
+\begin{enumerate}[label=(\alph*)]
+\item receiving a feature vector $x$ and a predicted probability $p(x)$ 
+output by the deployed classification model;
+
+\item computing a camouflage component $C(x)$ that measures the proximity 
+of the feature vector to the centroid of a reference legitimate population 
+in feature space;
+
+\item computing a feature gap component $G(x)$ that measures the proportion 
+of features in the feature vector having values below a near-zero threshold;
+
+\item computing an activity anomaly component $A(x)$ that measures the 
+deviation of a transactional activity metric of the observation from the 
+activity profile of a reference population of previously detected anomalies;
+
+\item computing a temporal novelty component $T(x)$ that measures the 
+degree to which the observation is temporally distant from patterns present 
+in the training data;
+
+\item computing a composite blind-spot score by aggregating the four 
+components using automatically calibrated weights; and
+
+\item applying a correction operator to the predicted probability $p(x)$ 
+based on values of one or more of the computed components to produce a 
+corrected probability $p^*(x)$.
+\end{enumerate}
+
+% --- Independent System Claim ---
+\item A system for detecting structural failure modes in a deployed machine 
+learning classification model, the system comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a decomposition module configured to compute, for each input 
+observation, four near-orthogonal failure mode components comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a camouflage component measuring proximity to a legitimate-class 
+centroid;
+\item a feature gap component measuring informational sparsity;
+\item an activity anomaly component measuring deviation from detected-anomaly 
+activity patterns; and
+\item a temporal novelty component measuring temporal distance from training 
+data patterns;
+\end{enumerate}
+
+\item a weighting module configured to compute component weights by one or 
+more of mutual information, Fisher variance ratio, Bayesian online updating, 
+or gradient-based optimisation;
+
+\item an aggregation module configured to compute a composite blind-spot 
+score from the weighted components; and
+
+\item a correction module configured to apply one or more correction 
+operators to predicted probabilities output by the deployed model, based on 
+the computed component values, to produce corrected probabilities;
+\end{enumerate}
+wherein the system operates on a frozen deployed model without requiring 
+modification or retraining of the deployed model.
+
+% --- Dependent Claims ---
+\item A method according to claim 1, wherein the camouflage component is 
+computed as:
+\[
+C(x) = 1 - \frac{\|x - \mu_{\text{legit}}\|_2}{d_{\max}}
+\]
+where $\mu_{\text{legit}}$ is the centroid of the legitimate class and 
+$d_{\max}$ is the maximum observed distance from the centroid.
+
+\item A method according to claim 1, wherein the feature gap component is 
+computed as:
+\[
+G(x) = \frac{|\{j : |x_j| < \varepsilon\}|}{d}
+\]
+where $d$ is the number of features and $\varepsilon$ is a near-zero 
+threshold.
+
+\item A method according to claim 1, wherein the activity anomaly component 
+is computed as:
+\[
+A(x) = \sigma\left(\frac{\log(1 + |\text{activity}(x)|) - 
+\mu_{\text{ref}}}{\sigma_{\text{ref}}}\right)
+\]
+where $\text{activity}(x)$ is a transactional activity metric, 
+$\mu_{\text{ref}}$ and $\sigma_{\text{ref}}$ are statistics of a reference 
+detected-anomaly population, and $\sigma$ is the logistic sigmoid function.
+
+\item A method according to claim 1, wherein the correction operator is a 
+quadratic surface correction comprising:
+\[
+p^*(x) = \text{clip}\left(p(x) + \phi_2([C, G, A, T])^\top 
+\hat{\beta}, \ 0, \ 1\right)
+\]
+where $\phi_2$ is a degree-2 polynomial feature map of the four components 
+and $\hat{\beta}$ are coefficients fitted by ridge regression.
+
+\item A method according to claim 1, wherein the correction operator is an 
+additive correction comprising:
+\[
+p^*(x) = p(x) + \lambda \cdot \text{MFLS}(x) \cdot (1 - p(x)) \cdot 
+\mathbb{1}[p(x) < \tau]
+\]
+where $\lambda$ is a correction strength parameter and $\tau$ is a 
+threshold.
+
+\item A method according to claim 1, wherein the correction operator is an 
+exponential gating correction comprising a quadratic surface output 
+modulated by a learned sigmoid gate.
+
+\item A method or system according to any preceding claim, wherein the 
+four components are verified to be near-orthogonal by having normalised 
+mutual information below 0.30 for all pairs and variance inflation factors 
+below 2.0 for all components.
+
+\item A method or system according to any preceding claim, wherein the 
+dominant component varies by application domain, with temporal novelty 
+dominating in blockchain domains, activity anomaly dominating in banking 
+domains, and camouflage dominating in aerospace and medical domains.
+
+\item A method or system according to any preceding claim, further 
+comprising the step of computing seven supplementary features derived from 
+the four components, comprising the four raw components, the composite 
+score, a predicted-vs-actual residual, and an interaction term between the 
+camouflage and activity anomaly components.
+
+\item A method or system according to any preceding claim, wherein the 
+adaptive damping function $\gamma^*(E) = E/(E + \theta)$ derived from the 
+composite blind-spot energy is further applied as a viscosity regularisation 
+term in a computational fluid dynamics simulation.
+
+\end{enumerate}
+
+% ============================================================
+\section{DRAWINGS}
+% ============================================================
+
+\textit{[To be filed separately: Diagram of the four-component 
+decomposition; flow diagram of the correction operator pipeline; 
+orthogonality verification plots (NMI matrix, VIF chart); cross-domain 
+performance comparison chart; schematic of the BSDT layer operating on a 
+frozen model.]}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A computer-implemented method and system detect and correct structural
+failure modes in deployed machine learning classification models without
+model retraining. Model failures are decomposed into four near-orthogonal
+components: a camouflage component measuring similarity of a fraudulent
+observation to legitimate data; a feature gap component measuring
+informational sparsity; an activity anomaly component measuring deviation
+from established fraud detection patterns; and a temporal novelty component
+measuring novelty relative to the training distribution. A composite score
+aggregates the four components using self-calibrating weights. Post-hoc
+correction operators apply targeted adjustments to predicted probabilities
+based on the decomposed failure profile, recovering missed detections at
+improvements of up to 84.4 percentage points of recall. The method operates
+on any classification model without modifying its parameters, provides
+interpretable attribution of failure cause, and is validated across
+financial, aerospace and medical datasets.
+
+\end{document}

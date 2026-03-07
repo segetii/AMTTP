@@ -1,0 +1,1446 @@
+{
+  "mammography": {
+    "Fisher-lean": {
+      "auc": 0.8841830786444762,
+      "cov": 0.48717948717948717,
+      "det": 38,
+      "n": 78,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.9095913241473205,
+      "cov": 0.5897435897435898,
+      "det": 46,
+      "n": 78,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.912341650821968,
+      "cov": 0.6923076923076923,
+      "det": 54,
+      "n": 78,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.9165277810380039,
+      "cov": 0.5769230769230769,
+      "det": 45,
+      "n": 78,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.9147457414927662,
+      "cov": 0.5769230769230769,
+      "det": 45,
+      "n": 78,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.9095913241473205,
+      "cov": 0.5897435897435898,
+      "det": 46,
+      "n": 78,
+      "info": "fusion"
+    },
+    "QDA-lean": {
+      "auc": 0.8841830786444762,
+      "cov": 0.48717948717948717,
+      "det": 38,
+      "n": 78,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.8841830786444762,
+      "cov": 0.48717948717948717,
+      "det": 38,
+      "n": 78,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.8841830786444762,
+      "cov": 0.48717948717948717,
+      "det": 38,
+      "n": 78,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.9058316314953483,
+      "cov": 0.5897435897435898,
+      "det": 46,
+      "n": 78,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.9058316314953483,
+      "cov": 0.5897435897435898,
+      "det": 46,
+      "n": 78,
+      "info": "fusion"
+    },
+    "CombA-Fisher": {
+      "auc": 0.8851220237396619,
+      "cov": 0.4358974358974359,
+      "det": 34,
+      "n": 78,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.8873500622051126,
+      "cov": 0.4358974358974359,
+      "det": 34,
+      "n": 78,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.8851220237396619,
+      "cov": 0.4358974358974359,
+      "det": 34,
+      "n": 78,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.8851220237396619,
+      "cov": 0.4358974358974359,
+      "det": 34,
+      "n": 78,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.8870742470834018,
+      "cov": 0.5256410256410257,
+      "det": 41,
+      "n": 78,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.9108999788737354,
+      "cov": 0.6538461538461539,
+      "det": 51,
+      "n": 78,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.9108999788737354,
+      "cov": 0.6538461538461539,
+      "det": 51,
+      "n": 78,
+      "info": "fusion"
+    },
+    "QSExpo-lean": {
+      "auc": 0.912341650821968,
+      "info": "",
+      "elapsed": 28.0
+    },
+    "SignedLR-lean": {
+      "auc": 0.8955012793126922,
+      "info": "",
+      "elapsed": 24.0
+    },
+    "Magnifier-lean": {
+      "auc": 0.8841830786444762,
+      "info": "",
+      "elapsed": 20.2
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.9186717056720108,
+      "info": "",
+      "elapsed": 160.0
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.918266785599712,
+      "info": "",
+      "elapsed": 21.2
+    },
+    "QSExpo-CombA": {
+      "auc": 0.9262380382307145,
+      "info": "",
+      "elapsed": 3.3
+    },
+    "SignedLR-CombA": {
+      "auc": 0.8630959367151007,
+      "info": "",
+      "elapsed": 4.2
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.8892299085310986,
+      "info": "",
+      "elapsed": 24.4
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.8989108236895847,
+      "info": "",
+      "elapsed": 23.5
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.8885354803877843,
+      "info": "",
+      "elapsed": 21.4
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.8883359545550573,
+      "info": "",
+      "elapsed": 7.4
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.6625724748245346,
+      "info": "",
+      "elapsed": 27.6
+    }
+  },
+  "pendigits": {
+    "Fisher-lean": {
+      "auc": 0.34463115378753234,
+      "cov": 0.12962962962962962,
+      "det": 7,
+      "n": 54,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.9559899405578418,
+      "cov": 0.8888888888888888,
+      "det": 48,
+      "n": 54,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.9656302392927907,
+      "cov": 0.9629629629629629,
+      "det": 52,
+      "n": 54,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.8657978966620943,
+      "cov": 0.5740740740740741,
+      "det": 31,
+      "n": 54,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.8682746532540772,
+      "cov": 0.6111111111111112,
+      "det": 33,
+      "n": 54,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.9559899405578418,
+      "cov": 0.8888888888888888,
+      "det": 48,
+      "n": 54,
+      "info": "fusion"
+    },
+    "QDA-lean": {
+      "auc": 0.34463115378753234,
+      "cov": 0.12962962962962962,
+      "det": 7,
+      "n": 54,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.34463115378753234,
+      "cov": 0.12962962962962962,
+      "det": 7,
+      "n": 54,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.34463115378753234,
+      "cov": 0.12962962962962962,
+      "det": 7,
+      "n": 54,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.9654016156073769,
+      "cov": 0.9444444444444444,
+      "det": 51,
+      "n": 54,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.9654016156073769,
+      "cov": 0.9444444444444444,
+      "det": 51,
+      "n": 54,
+      "info": "fusion"
+    },
+    "CombA-Fisher": {
+      "auc": 0.9623914037494286,
+      "cov": 0.9259259259259259,
+      "det": 50,
+      "n": 54,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.8727137631458619,
+      "cov": 0.6666666666666666,
+      "det": 36,
+      "n": 54,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.9623914037494286,
+      "cov": 0.9259259259259259,
+      "det": 50,
+      "n": 54,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.9623914037494286,
+      "cov": 0.9259259259259259,
+      "det": 50,
+      "n": 54,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.9354519128181681,
+      "cov": 0.8333333333333334,
+      "det": 45,
+      "n": 54,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.960448102423411,
+      "cov": 0.9259259259259259,
+      "det": 50,
+      "n": 54,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.960448102423411,
+      "cov": 0.9259259259259259,
+      "det": 50,
+      "n": 54,
+      "info": "fusion"
+    },
+    "QSExpo-lean": {
+      "auc": 0.9656302392927907,
+      "info": "",
+      "elapsed": 2.7
+    },
+    "SignedLR-lean": {
+      "auc": 0.9553040695016004,
+      "info": "",
+      "elapsed": 1.6
+    },
+    "Magnifier-lean": {
+      "auc": 0.34463115378753234,
+      "info": "",
+      "elapsed": 1.5
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.8755144032921811,
+      "info": "",
+      "elapsed": 12.0
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.9656111873190062,
+      "info": "",
+      "elapsed": 3.8
+    },
+    "QSExpo-CombA": {
+      "auc": 0.6972831885383325,
+      "info": "",
+      "elapsed": 0.5
+    },
+    "SignedLR-CombA": {
+      "auc": 0.7192691662856272,
+      "info": "",
+      "elapsed": 0.6
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.9572854747751867,
+      "info": "",
+      "elapsed": 3.8
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.9703932327389118,
+      "info": "",
+      "elapsed": 1.7
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.9221345831428137,
+      "info": "",
+      "elapsed": 1.5
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.9112178021643041,
+      "info": "",
+      "elapsed": 0.6
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.5051440329218106,
+      "info": "",
+      "elapsed": 2.1
+    }
+  },
+  "annthyroid": {
+    "Fisher-lean": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.9706172839506173,
+      "cov": 0.34814814814814815,
+      "det": 47,
+      "n": 135,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.9792592592592592,
+      "cov": 0.3851851851851852,
+      "det": 52,
+      "n": 135,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.9765432098765432,
+      "cov": 0.34074074074074073,
+      "det": 46,
+      "n": 135,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.9782716049382716,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": "fisher"
+    },
+    "QDA-lean": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.9688888888888889,
+      "cov": 0.34074074074074073,
+      "det": 46,
+      "n": 135,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.9723456790123456,
+      "cov": 0.35555555555555557,
+      "det": 48,
+      "n": 135,
+      "info": "fisher"
+    },
+    "CombA-Fisher": {
+      "auc": 0.982716049382716,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.9728395061728394,
+      "cov": 0.34074074074074073,
+      "det": 46,
+      "n": 135,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.982716049382716,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.982716049382716,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.9358024691358025,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.917037037037037,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.9358024691358025,
+      "cov": 0.3333333333333333,
+      "det": 45,
+      "n": 135,
+      "info": "fisher"
+    },
+    "QSExpo-lean": {
+      "auc": 0.9792592592592593,
+      "info": "",
+      "elapsed": 0.2
+    },
+    "SignedLR-lean": {
+      "auc": 0.974320987654321,
+      "info": "",
+      "elapsed": 0.2
+    },
+    "Magnifier-lean": {
+      "auc": 0.9723456790123456,
+      "info": "",
+      "elapsed": 1.6
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.9745679012345679,
+      "info": "",
+      "elapsed": 1.9
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.9871604938271604,
+      "info": "",
+      "elapsed": 0.7
+    },
+    "QSExpo-CombA": {
+      "auc": 0.9903703703703703,
+      "info": "",
+      "elapsed": 0.0
+    },
+    "SignedLR-CombA": {
+      "auc": 0.9881481481481481,
+      "info": "",
+      "elapsed": 0.0
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.9644444444444444,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.9703703703703703,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.9644444444444444,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.9703703703703702,
+      "info": "",
+      "elapsed": 0.0
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.9185185185185184,
+      "info": "",
+      "elapsed": 0.3
+    }
+  },
+  "arrhythmia": {
+    "Fisher-lean": {
+      "auc": 0.38219267654751526,
+      "cov": 0.27419354838709675,
+      "det": 17,
+      "n": 62,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.5221229293809939,
+      "cov": 0.3548387096774194,
+      "det": 22,
+      "n": 62,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.5736704446381865,
+      "cov": 0.4838709677419355,
+      "det": 30,
+      "n": 62,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.49149956408020923,
+      "cov": 0.3225806451612903,
+      "det": 20,
+      "n": 62,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.5091543156059285,
+      "cov": 0.3387096774193548,
+      "det": 21,
+      "n": 62,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.5221229293809939,
+      "cov": 0.3548387096774194,
+      "det": 22,
+      "n": 62,
+      "info": "fusion"
+    },
+    "QDA-lean": {
+      "auc": 0.38219267654751526,
+      "cov": 0.27419354838709675,
+      "det": 17,
+      "n": 62,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.38219267654751526,
+      "cov": 0.27419354838709675,
+      "det": 17,
+      "n": 62,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.38219267654751526,
+      "cov": 0.27419354838709675,
+      "det": 17,
+      "n": 62,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.5749782040104621,
+      "cov": 0.3548387096774194,
+      "det": 22,
+      "n": 62,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.5749782040104621,
+      "cov": 0.3548387096774194,
+      "det": 22,
+      "n": 62,
+      "info": "fusion"
+    },
+    "CombA-Fisher": {
+      "auc": 0.580209241499564,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.47951176983435045,
+      "cov": 0.3548387096774194,
+      "det": 22,
+      "n": 62,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.580209241499564,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.580209241499564,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.5823888404533567,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.6679380993897122,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.5823888404533567,
+      "cov": 0.3870967741935484,
+      "det": 24,
+      "n": 62,
+      "info": "fisher"
+    },
+    "QSExpo-lean": {
+      "auc": 0.5736704446381865,
+      "info": "",
+      "elapsed": 0.4
+    },
+    "SignedLR-lean": {
+      "auc": 0.5889276373147341,
+      "info": "",
+      "elapsed": 0.4
+    },
+    "Magnifier-lean": {
+      "auc": 0.38219267654751526,
+      "info": "",
+      "elapsed": 0.5
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.4968395815170008,
+      "info": "",
+      "elapsed": 3.3
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.6635789014821273,
+      "info": "",
+      "elapsed": 6.4
+    },
+    "QSExpo-CombA": {
+      "auc": 0.6343722755013076,
+      "info": "",
+      "elapsed": 0.3
+    },
+    "SignedLR-CombA": {
+      "auc": 0.6904969485614647,
+      "info": "",
+      "elapsed": 0.3
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.5442458587619878,
+      "info": "",
+      "elapsed": 0.4
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.5427201394943331,
+      "info": "",
+      "elapsed": 0.4
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.6056015693112466,
+      "info": "",
+      "elapsed": 0.4
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.48169136878814295,
+      "info": "",
+      "elapsed": 0.3
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.5,
+      "info": "",
+      "elapsed": 0.6
+    }
+  },
+  "satellite": {
+    "Fisher-lean": {
+      "auc": 0.8018145887967785,
+      "cov": 0.6098360655737705,
+      "det": 372,
+      "n": 610,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.7971165438297767,
+      "cov": 0.6262295081967213,
+      "det": 382,
+      "n": 610,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.4944878758125256,
+      "cov": 0.6229508196721312,
+      "det": 380,
+      "n": 610,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.7940969934997949,
+      "cov": 0.6163934426229508,
+      "det": 376,
+      "n": 610,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.7915192831131383,
+      "cov": 0.6262295081967213,
+      "det": 382,
+      "n": 610,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.7971165438297767,
+      "cov": 0.6262295081967213,
+      "det": 382,
+      "n": 610,
+      "info": "fusion"
+    },
+    "QDA-lean": {
+      "auc": 0.8018145887967785,
+      "cov": 0.6098360655737705,
+      "det": 372,
+      "n": 610,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.8018145887967785,
+      "cov": 0.6098360655737705,
+      "det": 372,
+      "n": 610,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.8018145887967785,
+      "cov": 0.6098360655737705,
+      "det": 372,
+      "n": 610,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.8138331324028387,
+      "cov": 0.6065573770491803,
+      "det": 370,
+      "n": 610,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.8138331324028387,
+      "cov": 0.6065573770491803,
+      "det": 370,
+      "n": 610,
+      "info": "fusion"
+    },
+    "CombA-Fisher": {
+      "auc": 0.7322698517257237,
+      "cov": 0.660655737704918,
+      "det": 403,
+      "n": 610,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.7289768702071862,
+      "cov": 0.6344262295081967,
+      "det": 387,
+      "n": 610,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.7322698517257237,
+      "cov": 0.660655737704918,
+      "det": 403,
+      "n": 610,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.7322698517257237,
+      "cov": 0.660655737704918,
+      "det": 403,
+      "n": 610,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.6311910413999677,
+      "cov": 0.45081967213114754,
+      "det": 275,
+      "n": 610,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.7957941311723984,
+      "cov": 0.5819672131147541,
+      "det": 355,
+      "n": 610,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.7957941311723984,
+      "cov": 0.5819672131147541,
+      "det": 355,
+      "n": 610,
+      "info": "fusion"
+    },
+    "QSExpo-lean": {
+      "auc": 0.4944878758125256,
+      "info": "",
+      "elapsed": 6.4
+    },
+    "SignedLR-lean": {
+      "auc": 0.7666712238531427,
+      "info": "",
+      "elapsed": 6.1
+    },
+    "Magnifier-lean": {
+      "auc": 0.8018145887967785,
+      "info": "",
+      "elapsed": 8.7
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.8092643458158814,
+      "info": "",
+      "elapsed": 41.5
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.7844535726270523,
+      "info": "",
+      "elapsed": 12.1
+    },
+    "QSExpo-CombA": {
+      "auc": 0.8531699374836874,
+      "info": "",
+      "elapsed": 1.5
+    },
+    "SignedLR-CombA": {
+      "auc": 0.7910413999676855,
+      "info": "",
+      "elapsed": 3.6
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.8235076250015536,
+      "info": "",
+      "elapsed": 6.7
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.8157856796629339,
+      "info": "",
+      "elapsed": 5.7
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.8265706757478964,
+      "info": "",
+      "elapsed": 7.8
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.7292764016455586,
+      "info": "",
+      "elapsed": 2.0
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.5,
+      "info": "",
+      "elapsed": 8.4
+    }
+  },
+  "glass": {
+    "Fisher-lean": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.998015873015873,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 0.8005952380952381,
+      "cov": 0.5555555555555556,
+      "det": 5,
+      "n": 9,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 0.9940476190476191,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 0.9940476190476191,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fisher"
+    },
+    "QDA-lean": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 0.992063492063492,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.9722222222222223,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fisher"
+    },
+    "CombA-Fisher": {
+      "auc": 0.9821428571428572,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 0.9682539682539683,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 0.9821428571428572,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.9821428571428572,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 0.9523809523809524,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.9742063492063492,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 0.9742063492063492,
+      "cov": 1.0,
+      "det": 9,
+      "n": 9,
+      "info": "fusion"
+    },
+    "QSExpo-lean": {
+      "auc": 0.8005952380952381,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "SignedLR-lean": {
+      "auc": 0.9801587301587302,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Magnifier-lean": {
+      "auc": 0.9722222222222223,
+      "info": "",
+      "elapsed": 0.2
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.9920634920634921,
+      "info": "",
+      "elapsed": 1.0
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.9900793650793651,
+      "info": "",
+      "elapsed": 0.7
+    },
+    "QSExpo-CombA": {
+      "auc": 0.9781746031746031,
+      "info": "",
+      "elapsed": 0.0
+    },
+    "SignedLR-CombA": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 0.0
+    },
+    "Fuse-lean-top2": {
+      "auc": 0.9900793650793651,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Fuse-lean-softmax": {
+      "auc": 0.994047619047619,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 0.9880952380952381,
+      "info": "",
+      "elapsed": 0.2
+    },
+    "Fuse-CombA-top2": {
+      "auc": 0.9771825396825397,
+      "info": "",
+      "elapsed": 0.1
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 0.6339285714285714,
+      "info": "",
+      "elapsed": 0.5
+    }
+  },
+  "cardio": {
+    "Fisher-lean": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "Fuse-lean": {
+      "auc": 0.9999999999999999,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "QuadSurf-lean": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "MetaFusion": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher+fusion+quadsurf"
+    },
+    "MetaFusion+": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher+fusion+quadsurf+qs_expo+signed_lr+magnifier"
+    },
+    "Hybrid-lean": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher"
+    },
+    "QDA-lean": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "QDA-Mag-lean": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "BSDT-Fisher": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "BSDT-Fuse": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "BSDT-Hybrid": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher"
+    },
+    "CombA-Fisher": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "CombA-Fuse": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "CombA-Hybrid": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "Fisher-4op": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": ""
+    },
+    "Fuse-4op": {
+      "auc": 0.980104501607717,
+      "cov": 0.75,
+      "det": 12,
+      "n": 16,
+      "info": ""
+    },
+    "Hybrid-4op": {
+      "auc": 1.0,
+      "cov": 1.0,
+      "det": 16,
+      "n": 16,
+      "info": "fisher"
+    },
+    "QSExpo-lean": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 3.7
+    },
+    "SignedLR-lean": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 2.0
+    },
+    "Magnifier-lean": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 1.7
+    },
+    "MetaFusion-BSDT": {
+      "auc": 0.9999999999999999,
+      "info": "",
+      "elapsed": 11.2
+    },
+    "MetaFusion-CombA": {
+      "auc": 0.9999999999999999,
+      "info": "",
+      "elapsed": 5.3
+    },
+    "QSExpo-CombA": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 0.6
+    },
+    "SignedLR-CombA": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 0.5
+    },
+    "Fuse-lean-top2": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 2.1
+    },
+    "Fuse-lean-softmax": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 2.2
+    },
+    "Fuse-BSDT-top2": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 1.8
+    },
+    "Fuse-CombA-top2": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 0.7
+    },
+    "BSDT-QDA-Mag": {
+      "auc": 1.0,
+      "info": "",
+      "elapsed": 2.7
+    }
+  },
+  "shuttle": {
+    "Fisher-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "Fuse-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "QuadSurf-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "MetaFusion": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "MetaFusion+": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "Hybrid-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "QDA-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "QDA-Mag-lean": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "BSDT-Fisher": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "BSDT-Fuse": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "BSDT-Hybrid": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "CombA-Fisher": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "CombA-Fuse": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "CombA-Hybrid": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "CombA-QDA-Mag": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "Fisher-4op": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "Fuse-4op": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    },
+    "Hybrid-4op": {
+      "auc": 0.0,
+      "cov": 0.0,
+      "det": 0,
+      "n": 0,
+      "info": "TIMEOUT"
+    }
+  }
+}

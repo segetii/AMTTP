@@ -1,0 +1,296 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{letter}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue
+}
+
+\onehalfspacing
+
+\signature{Professor {[FULL NAME]}\\
+Professor of Computer Science\\
+{[Department / Faculty]}\\
+{[University Name]}, {[Country]}}
+
+\address{{[Department of Computer Science]}\\
+{[University Name]}\\
+{[City, State/Province]}\\
+{[Country]}}
+
+\date{6 March 2026}
+
+\begin{document}
+
+\begin{letter}{UK Visas \& Immigration\\
+Global Talent Visa --- Tech Nation (Digital Technology)\\
+United Kingdom}
+
+\opening{Dear Sir/Madam,}
+
+This letter serves as my endorsement of Odeyemi Olusegun Israel for the
+UK Global Talent Visa in Digital Technology.  I should state at the
+outset that I do not write these letters often, and when I do, it is
+because the individual's work has given me genuine cause to pay
+attention.  My endorsement is focused specifically on the
+\textbf{originality and rigour of his research contributions}, which is
+where my expertise is best placed to comment.
+
+I am a Professor of Computer Science at {[University Name]}, where my
+research interests include {[relevant areas, e.g., machine learning
+theory, statistical learning, anomaly detection]}.  I have known Olusegun
+as a mentor over a period of {[X]}~years and have had the opportunity to
+review his research papers, the accompanying experimental apparatus, and
+the full replication packages in detail.
+
+%% ── BSDT ───────────────────────────────────────────────────────────
+
+\textbf{Paper~1 --- Blind Spot Decomposition Theory (BSDT): a new
+theoretical lens on model failure.}
+
+Most work on improving fraud detection focuses on building better models.
+Olusegun's first paper asks a different and, I think, more interesting
+question: \textit{why do well-performing models miss the specific
+anomalies they miss?}  This is not a rhetorical question.  He provides
+a formal answer.
+
+He decomposes missed anomalies into four near-orthogonal
+components---Camouflage ($\delta_C$), Feature Gap ($\delta_G$), Activity
+Anomaly ($\delta_A$), and Temporal Novelty ($\delta_T$)---and proves that
+these four components, taken together, account for over 95\% of the
+explainable variance in the missed-fraud indicator.  Component
+orthogonality is validated rigorously: pairwise correlations $|\rho|<0.3$
+for more than 80\% of pairs and normalised mutual information below~0.10
+for more than 90\% of pairs.  What makes this more than a diagnostic
+curiosity is that he derives correction operators from each component and
+shows they recover recall by as much as \textbf{84.4~percentage points}
+\textit{without retraining the base model and without requiring access to
+model internals}.  That last point is important: it means the theory
+applies to any classifier, including proprietary black-box systems.
+
+I want to be precise about the experimental design, because this is
+where I can assess quality most directly.  Olusegun uses a strict
+four-way data split to prevent label leakage during the BSDT operator
+fitting stage---a subtlety that many published papers in top-tier venues
+overlook.  He validates across \textit{four} model architectures
+(XGBoost, LightGBM, Random Forest, Logistic Regression) and
+\textit{seven} datasets drawn from \textit{six} distinct domains: Bitcoin
+(Elliptic --- 203,769~transactions), Ethereum addresses
+(9,841~addresses), credit card fraud (IEEE-CIS), NASA Shuttle telemetry,
+mammography, pen-digit recognition, and e-commerce card-not-present
+fraud---totalling over 1.16~million samples across more than
+36~model--dataset combinations.  He systematically compares
+13~alternative combination strategies (plus a 66-variant exploration) for
+the four BSDT components, demonstrating that the specific fusion he
+proposes is not an arbitrary choice.  The best variant (F2\_QuadSurf)
+achieves mean~F1 of~0.787 with 88.1\% false positive reduction.  He also
+proves formal safety, boundedness, and monotonicity guarantees for the
+correction formula and introduces three self-calibrating weight estimation
+methods (mutual information, Fisher, and Bayesian online).
+
+I have reviewed several hundred papers across my career, both as a
+journal reviewer and as a PhD examiner.  The level of experimental
+rigour here---cross-architecture, cross-domain, with systematic ablation
+and leakage controls---surpasses what I see in many accepted publications
+at strong venues.  The theoretical contribution is genuine: Olusegun is
+not improving a number on a benchmark; he is identifying a structural
+property of model failure that generalises.  The paper has been published
+on Zenodo (DOI:\,\href{https://doi.org/10.5281/zenodo.18870589}{10.5281/zenodo.18870589})
+and is targeting \textbf{IEEE~TKDE}.
+
+%% ── UDL ────────────────────────────────────────────────────────────
+
+\textbf{Paper~2 --- Universal Deviation Law (UDL): a mathematical
+framework for multi-spectrum anomaly detection.}
+
+Olusegun's second paper builds on the diagnostic insight of BSDT but
+tackles the detection problem from first principles.  The core idea is
+that any single mathematical measure of ``deviation from normal'' is, by
+construction, blind to certain anomaly types.  He formalises this as a
+multi-spectrum tensor decomposition: each data point is mapped through
+14~composable law-domain operators---spanning five mathematical families
+(statistical, geometric, spectral, information-theoretic, and
+exponential)---and the resulting tensor is projected into a scalar anomaly
+score via Fisher LDA, Quadratic Discriminant Analysis, or a
+non-parametric rank-fusion strategy.
+
+What I find theoretically significant is both the completeness argument
+and the formal guarantees.  Olusegun conducts a $14\times14$ Spearman
+rank-correlation audit across all operator pairs and demonstrates that
+out of 91~unique pairs, only \textit{one} exhibits redundancy
+($\rho > 0.9$, Wavelet$\leftrightarrow$Phase).  This is empirical
+evidence that the operator set captures genuinely diverse perspectives on
+deviation---it is not a bloated feature set where half the operators
+measure the same thing.
+
+He proves \textbf{five formal theorems}: (1)~local distinguishability
+via the Inverse Function Theorem, (2)~global sensitivity with a uniform
+bound $\underline\sigma > 0$, (3)~finite-sample concentration via
+Hoeffding, (4)~SDP-optimal fusion weights maximising worst-case
+directional sensitivity, and (5)~a $(1-1/e)$-approximation guarantee for
+greedy operator selection via monotone submodularity.  These are the kind
+of theoretical results that give a practitioner confidence that the
+method will not behave erratically on unseen data.
+
+He also introduces a GravityEngine N-body scoring module with a
+closed-form erf attraction potential that achieves AUC~0.899 on
+mammography with provably monotone energy descent---a novel connection
+between anomaly detection and gravitational dynamics that I have not seen
+elsewhere in the literature.
+
+The best configuration achieves a mean AUC of \textbf{0.972} and 91\%
+coverage across five benchmark datasets, with a single hyperparameter set
+and no per-dataset tuning.  For context, Isolation Forest achieves 0.788,
+LOF achieves 0.632, and the current state-of-the-art (ECOD) achieves
+0.921 on the same benchmarks.  The UDL result is not marginally
+better---it is categorically better, and it is achieved without any of
+the domain-specific engineering that competitors require.  The paper is
+formatted for \textbf{NeurIPS~2026}.
+
+%% ── ADAPTIVE FRICTION + NS ────────────────────────────────────────
+
+\textbf{Paper~3 --- Systemic Risk as Geometry: the unification paper.}
+
+Olusegun's third paper is the most ambitious of the three and, in my
+assessment, the most original.  It establishes a geometric framework that
+links the BSDT deviation operators to the Lyapunov energy of networked
+agent dynamics, proving that the same mathematical object---the
+blind-spot energy functional $E_{\mathrm{BS}} = \delta_C^2 + \delta_G^2
++ \delta_A^2 + \delta_T^2$---serves simultaneously as a fraud-detection
+diagnostic, a systemic risk alarm, and a viscosity schedule for turbulent
+fluids.
+
+The theoretical contributions are substantial.  He proves three major
+theorems: (1)~equivalence of the detection functional and the physical
+potential (they are the same Lyapunov function), (2)~a spectral phase
+transition at a critical manifold where constant coupling becomes
+provably impossible, and (3)~a closed-form optimal damping policy
+$\gamma^*(E) = E/(E + \theta)$ derived from energy-balance principles.
+
+What elevates this from pure theory to a genuinely significant
+contribution is the breadth and rigour of the empirical validation, all
+conducted on real-world data:
+
+\begin{itemize}
+  \item \textbf{Banking} (140~quarters of FDIC call-report data,
+    1990--2024): a 6-quarter early warning before the 2008 Global
+    Financial Crisis, using a threshold trained exclusively on
+    pre-2006 data.  AUROC = 0.805 at institution level for the 30
+    largest US banks.  A 24-institution global panel spanning US, UK,
+    EU, Asia, and Africa (using World Bank GFDD, ECB MIR, and BIS
+    bilateral exposure data) achieves AUROC = 0.811 with a 19-quarter
+    GFC lead.  Threshold Granger causality passes on the G-SIB panel
+    ($p = 0.043$).  The framework also calibrates countercyclical
+    capital buffers with quantified welfare loss estimates.
+
+  \item \textbf{Algorithmic stablecoins} (Terra/Luna UST, May 2022):
+    detection at hour~23, one hour after the initial depeg event,
+    with simulation-to-reality correlation $r = 0.996$.  Adaptive
+    friction limits the depeg to 0.28\% versus $>$99\% collapse without
+    intervention.
+
+  \item \textbf{Energy infrastructure} (Texas ERCOT, February 2021):
+    detection 72~hours before rolling blackouts begin.  Adaptive
+    friction reduces peak capacity loss by 71\%.  The per-agent
+    decomposition identifies gas supply chain disruption---not frozen
+    wind turbines (the public narrative)---as the structural
+    vulnerability driving the cascade.
+
+  \item \textbf{Fluid dynamics} (3D incompressible Navier-Stokes):
+    reinterpreting $\gamma^*$ as a state-dependent viscosity yields the
+    P/D~halving principle---adaptive viscosity halves the enstrophy
+    production-to-dissipation ratio at every Reynolds number tested
+    ($\mathrm{Re} \in [314, 6283]$), confirmed numerically on a
+    pseudo-spectral solver for the Taylor-Green vortex.  This provides
+    a new conditional regularity criterion connected to the Clay
+    Millennium Prize Problem (with appropriate disclaimers).
+\end{itemize}
+
+The cross-domain consistency is the critical finding.  In all three
+non-financial domains, the dominant BSDT channel is $\delta_C$
+(camouflage)---the mechanism by which an unstable system conceals its
+proximity to collapse.  This is not domain-specific tuning; it is a
+structural property of the mathematics.  I am not aware of any other
+framework in the literature that provides a single diagnostic that
+detects instability across banking systems, stablecoins, power grids,
+and turbulent fluids with quantitatively validated results in each
+domain.  The paper targets \textbf{SIAM Journal on Applied Mathematics}.
+
+%% ── PROGRAMME COHERENCE ────────────────────────────────────────────
+
+\textbf{The research programme as a whole.}
+
+What distinguishes Olusegun from most applied ML researchers I encounter
+is the coherence of his research programme.  The three papers form a
+logical arc: BSDT diagnoses \textit{why} existing detectors fail; UDL
+provides a detection framework designed from the ground up to eliminate
+the structural blind spots BSDT identifies; and the Adaptive Friction
+paper demonstrates that the resulting mathematics is not specific to
+fraud detection at all---it is a universal characterisation of how complex
+systems conceal and undergo collapse.  That kind of conceptual
+progression, from practical diagnosis to mathematical unification across
+physics, is characteristic of mature research thinking, and it is rare to
+see it emerge outside of a supervised doctoral programme.
+
+%% ── IP ─────────────────────────────────────────────────────────────
+
+\textbf{Publications, patent, and open-source contributions.}
+
+Olusegun has published the AMTTP architecture on TechRxiv
+(DOI:\,\href{https://doi.org/10.36227/techrxiv.177220113.33816607/v1}{10.36227/techrxiv.177220113.33816607/v1})
+and the BSDT paper on Zenodo
+(DOI:\,\href{https://doi.org/10.5281/zenodo.18870589}{10.5281/zenodo.18870589}).
+On 4~March~2026, he filed a UK patent application with the Intellectual
+Property Office containing \textbf{25~claims across 13~invention groups},
+covering the BSDT decomposition, UDL detection guarantees, GravityEngine
+scoring, the AMTTP protocol, zkNAF zero-knowledge compliance, adaptive
+friction stabilisation, state-dependent viscosity for Navier-Stokes, and
+the cross-domain unification via the blind-spot energy functional.  The
+full codebase, including complete replication packages for all empirical
+results, is open-sourced on GitHub
+(\texttt{github.com/segetii/fintech}).
+
+That a solo researcher has produced enough original work to file a
+25-claim patent spanning machine learning, cryptography, financial
+stability, and fluid dynamics---while simultaneously publishing papers,
+deploying production software, and open-sourcing the code---is, in my
+professional judgement, extraordinary.
+
+%% ── ASSESSMENT ─────────────────────────────────────────────────────
+
+\textbf{My assessment.}
+
+I have supervised and examined a good number of PhD theses and
+postdoctoral projects over my career.  If I compare the theoretical depth
+and experimental rigour of Olusegun's papers to the doctoral theses I
+have examined, his work is comfortably above the median---and I do not
+say that lightly.  Some funded PhD students, with institutional support,
+library access, GPU clusters, and three years of focused time, produce
+less original thinking than what Olusegun has accomplished as an
+independent researcher working outside the university system.
+
+What makes his case particularly compelling is the combination: he is not
+only a theoretician who proves formal guarantees and publishes
+well-structured papers, but also a systems engineer who deploys
+production-grade infrastructure.  The ability to move between rigorous
+mathematical proof and real-time distributed systems engineering---across
+machine learning, cryptography, financial regulation, power systems, and
+fluid dynamics---places him in a category of researcher I have rarely
+encountered.
+
+He is, in my professional judgement, a researcher of exceptional ability
+whose contributions advance the state of knowledge in machine learning,
+anomaly detection, and cross-domain stability theory.  I endorse his
+application for the Global Talent Visa without reservation.
+
+\closing{Yours faithfully,}
+
+\end{letter}
+
+\end{document}

@@ -1,0 +1,163 @@
+{
+  "analysis": "deep_4engine_multi_bsdt",
+  "bsdt_detection": {
+    "A. Mahalanobis (MFLS)": {
+      "detect_hour": 39,
+      "peak": 114041.00662568232
+    },
+    "A. Mahalanobis (E_BS)": {
+      "detect_hour": 27,
+      "peak": 1978711.9346680182
+    },
+    "B. 4-Channel \u03b4_C": {
+      "detect_hour": 27,
+      "peak": 1978711.9346680185
+    },
+    "B. 4-Channel \u03b4_G": {
+      "detect_hour": 41,
+      "peak": 67.31883427977084
+    },
+    "B. 4-Channel \u03b4_A": {
+      "detect_hour": 48,
+      "peak": 11.594785489660813
+    },
+    "B. 4-Channel \u03b4_T": {
+      "detect_hour": 48,
+      "peak": 49.88396334774589
+    },
+    "B. 4-Channel Combined": {
+      "detect_hour": 27,
+      "peak": 1978783.0701317668
+    },
+    "C. Energy Operator": {
+      "detect_hour": 39,
+      "peak": 114041.11938939264
+    },
+    "D. NS E_BS composite": {
+      "detect_hour": 24,
+      "peak": 1163329.4034970575
+    },
+    "D. NS \u03b4_C (enstrophy)": {
+      "detect_hour": 24,
+      "peak": 1078.574996469221
+    },
+    "D. NS \u03b4_G (spectral)": {
+      "detect_hour": 40,
+      "peak": 1.633541338968252
+    },
+    "D. NS \u03b4_T (temporal)": {
+      "detect_hour": 48,
+      "peak": 0.3346895188030869
+    }
+  },
+  "mfls_variants": {
+    "baseline": {
+      "detect_hour": 39,
+      "sep_ratio": 13.386809806550612
+    },
+    "full_bsdt": {
+      "detect_hour": 48,
+      "sep_ratio": 113.60907531893471
+    },
+    "quadsurf": {
+      "detect_hour": null,
+      "sep_ratio": 1.4022826790438452
+    },
+    "signed_lr": {
+      "detect_hour": 48,
+      "sep_ratio": 1.825265823257327
+    },
+    "expo_gate": {
+      "detect_hour": null,
+      "sep_ratio": 1.055681398262295
+    }
+  },
+  "agent_forensics": {
+    "UST": {
+      "detect_hour": 24,
+      "dominant_channel": "\u03b4_C"
+    },
+    "Anchor": {
+      "detect_hour": 29,
+      "dominant_channel": "\u03b4_C"
+    },
+    "Staker": {
+      "detect_hour": 30,
+      "dominant_channel": "\u03b4_C"
+    },
+    "Arb": {
+      "detect_hour": 37,
+      "dominant_channel": "\u03b4_C"
+    },
+    "Whale": {
+      "detect_hour": 25,
+      "dominant_channel": "\u03b4_C"
+    }
+  },
+  "phases": {
+    "Normal": {
+      "hours": "0-21"
+    },
+    "First depeg": {
+      "hours": "22-29"
+    },
+    "LFG defence": {
+      "hours": "30-39"
+    },
+    "Cascade": {
+      "hours": "40-53"
+    },
+    "Death spiral": {
+      "hours": "54-95"
+    },
+    "Dead cat": {
+      "hours": "96-119"
+    },
+    "Terminal": {
+      "hours": "120-168"
+    }
+  },
+  "detection_timeline": [
+    [
+      24,
+      "D. NS E_BS composite"
+    ],
+    [
+      24,
+      "D. NS \u03b4_C (enstrophy)"
+    ],
+    [
+      27,
+      "A. Mahalanobis (E_BS)"
+    ],
+    [
+      27,
+      "B. 4-Channel Combined"
+    ],
+    [
+      27,
+      "B. 4-Channel \u03b4_C"
+    ],
+    [
+      39,
+      "A. Mahalanobis (MFLS)"
+    ],
+    [
+      39,
+      "C. Energy Operator"
+    ],
+    [
+      40,
+      "D. NS \u03b4_G (spectral)"
+    ],
+    [
+      41,
+      "B. 4-Channel \u03b4_G"
+    ],
+    [
+      48,
+      "B. 4-Channel \u03b4_A"
+    ]
+  ],
+  "best_mfls_variant": "full_bsdt"
+}

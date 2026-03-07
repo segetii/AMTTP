@@ -1,0 +1,144 @@
+{
+  "analysis": "all_bsdt_variants_terra_luna",
+  "variants_used": [
+    "A_Core",
+    "B_4Channel",
+    "C_Energy",
+    "D_NS",
+    "E_UDL_BSDTSpectrum",
+    "F_SDK_Audit"
+  ],
+  "scoring_methods": [
+    "SDK_baseline",
+    "SDK_full_bsdt",
+    "SDK_quadsurf",
+    "SDK_signed_lr",
+    "SDK_expo_gate",
+    "UDL_equal",
+    "UDL_variance",
+    "UDL_mi",
+    "UDL_logistic",
+    "UDL_quadratic",
+    "UDL_quadratic_smooth",
+    "UDL_conformal",
+    "UDL_quad_fpr05"
+  ],
+  "detection_timeline": [
+    [
+      23,
+      "MFLS:UDL_variance"
+    ],
+    [
+      24,
+      "D: NS E_BS"
+    ],
+    [
+      24,
+      "D: NS enstrophy"
+    ],
+    [
+      24,
+      "D: NS \u03b4_C (enstrophy)"
+    ],
+    [
+      24,
+      "D: NS \u2016\u03c9\u2016_\u221e (BKM)"
+    ],
+    [
+      27,
+      "A: Mahalanobis E_BS"
+    ],
+    [
+      27,
+      "B: 4-ch combined"
+    ],
+    [
+      27,
+      "B: \u03b4_C (camouflage)"
+    ],
+    [
+      27,
+      "F: SDK \u03b4_C"
+    ],
+    [
+      27,
+      "MFLS:UDL_equal"
+    ],
+    [
+      27,
+      "MFLS:UDL_mi"
+    ],
+    [
+      39,
+      "A: Mahalanobis MFLS"
+    ],
+    [
+      39,
+      "C: Energy MFLS"
+    ],
+    [
+      39,
+      "E-Raw: T (novelty)"
+    ],
+    [
+      39,
+      "MFLS:SDK_baseline"
+    ],
+    [
+      40,
+      "C: Energy E_BS"
+    ],
+    [
+      40,
+      "D: NS \u03b4_G (spectral)"
+    ],
+    [
+      41,
+      "B: \u03b4_G (feature gap)"
+    ],
+    [
+      41,
+      "F: SDK \u03b4_G"
+    ],
+    [
+      48,
+      "B: \u03b4_A (activity)"
+    ],
+    [
+      48,
+      "B: \u03b4_T (temporal)"
+    ],
+    [
+      48,
+      "D: NS \u03b4_T (temporal)"
+    ],
+    [
+      48,
+      "F: SDK \u03b4_A"
+    ],
+    [
+      48,
+      "MFLS:SDK_full_bsdt"
+    ],
+    [
+      48,
+      "MFLS:SDK_signed_lr"
+    ]
+  ],
+  "lr_weights": {
+    "bias": 1.2897941734121714,
+    "delta_C": 1.7936800585987247,
+    "delta_G": 0.34225247823367416,
+    "delta_A": 0.7542364811976985,
+    "delta_T": 1.1995216638453938
+  },
+  "audit_hours": [
+    0,
+    22,
+    30,
+    48,
+    54,
+    72,
+    120
+  ]
+}

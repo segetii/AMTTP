@@ -1,0 +1,742 @@
+% Adaptive Friction UK Patent Application — Specification
+% Title: System and Method for Dynamic Transaction Flow Control in Financial
+%        Networks Using Fluid Dynamics Modelling
+% Applicant: Odeyemi Olusegun Israel
+% Date: March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{Adaptive Friction --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large System and Method for Dynamic Transaction Flow Control\\
+in Financial Networks Using Fluid Dynamics Modelling}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to the field of computer-implemented control 
+systems for financial transaction processing networks, and more particularly 
+to systems and methods for dynamically monitoring systemic risk and 
+computing state-adaptive transaction-flow control actions using mathematical 
+models drawn from classical mechanics, fluid dynamics, and spectral graph 
+theory.
+
+% ============================================================
+\section{BACKGROUND OF THE INVENTION}
+% ============================================================
+
+\subsection{Technical Problem}
+
+Transaction processing networks, including interbank payment systems and 
+distributed ledger transaction networks, are tasked with processing large 
+volumes of value-transfer events under adversarial and rapidly changing 
+conditions. Operators of such systems (including protocol operators, 
+compliance gateways, and transaction validators) require mechanisms to 
+dynamically control transaction flow in response to systemic risk conditions. 
+Current approaches suffer from several fundamental limitations:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Static enforcement parameters:} Existing systems often apply 
+fixed risk thresholds, fixed transaction rate limits, or fixed escrow rules 
+regardless of the structural state of the underlying transaction network.
+
+\item \textbf{No formal phase transition detection:} Existing approaches 
+do not identify the critical threshold above which constant controls 
+necessarily fail and state-adaptive controls become essential.
+
+\item \textbf{Retroactive indicators:} Many systemic risk measures are 
+contemporaneous or lagging indicators. They confirm that instability is 
+occurring or has occurred, rather than providing advance warning usable for 
+real-time transaction flow control.
+
+\item \textbf{Absence of interaction modelling:} Standard approaches 
+treat institutions or addresses independently or through pairwise 
+conditional measures. They do not model the $N$-body interaction dynamics 
+that give rise to emergent systemic phenomena such as herding, contagion 
+cascades, and collective phase transitions.
+
+\item \textbf{No closed-form optimal controller:} While optimal control 
+theory is well-developed in engineering, no prior work derives a closed-form 
+expression for the optimal state-adaptive friction (flow control) as a 
+function of the financial network state for use in transaction processing 
+systems.
+\end{enumerate}
+
+\subsection{Prior Art Limitations}
+
+Prior art known to the applicant includes:
+
+\begin{itemize}
+\item \textbf{CoVaR} (Adrian and Brunnermeier): Measures the Value-at-Risk 
+of the financial system conditional on one institution being in distress. 
+This is a pairwise conditional measure and does not model $N$-body 
+interactions.
+
+\item \textbf{SRISK} (Brownlees and Engle): Measures the expected capital 
+shortfall of an institution in a systemic event. This is an 
+institution-level measure and does not derive regulatory policy.
+
+\item \textbf{Basel III CCyB rule:} Maps the credit-to-GDP gap to a buffer 
+using a fixed piecewise-linear function. This is a constant-friction policy 
+and does not adapt to the structural state of the network.
+
+\item \textbf{Agent-based models:} Simulate financial networks using 
+behavioural rules. While capable of generating complex dynamics, they 
+typically lack analytical gradient flow, provable stability guarantees, 
+and closed-form optimal policies.
+
+\item \textbf{Network contagion models} (Acemoglu, Ozdaglar, and 
+Tahbaz-Salehi): Model contagion on known network topologies using 
+equilibrium analysis. They do not model dynamic energy landscapes or derive 
+spectral phase transition criteria from the interaction matrix.
+\end{itemize}
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The present invention provides a system and method for monitoring systemic 
+risk and computing state-adaptive transaction-flow control actions in real 
+time. 
+The key contributions are:
+
+\begin{enumerate}[label=(\roman*)]
+\item A \textbf{gravitational interaction engine} (GravityEngine) that 
+models $N$ financial institutions as particles in $\mathbb{R}^d$ 
+interacting through a pairwise potential comprising erf-attraction and 
+logarithmic repulsion, with mean-reversion and blind-spot energy coupling.
+
+\item A \textbf{critical manifold} $\mathcal{C}$ defined by the condition 
+$\lambda_{\max}(\rho(X) \cdot \ell(X) \cdot W) = 1$, above which constant 
+friction provably fails and state-adaptive regulation is necessary.
+
+\item A \textbf{closed-form optimal adaptive policy} $\gamma^*(X)$ derived 
+from the Bellman equation, with the property that $\gamma^* \to 0$ when 
+systemic energy approaches zero.
+
+\item An \textbf{equivalence theorem} proving that the blind-spot energy 
+and the gravitational potential are equivalent Lyapunov functions, providing 
+dual perspectives on systemic stability.
+
+\item A \textbf{Navier--Stokes fluid dynamics analogy} computing vorticity, 
+enstrophy, and blow-up criteria from the financial network state for regime 
+classification (hedge, speculative, Ponzi).
+
+\item \textbf{CCyB calibration} mapping the adaptive friction coefficient 
+to countercyclical capital buffer recommendations in basis points.
+\item A \textbf{transaction-flow control mapping} that maps the adaptive 
+friction coefficient to one or more enforcement actions comprising one or 
+more of: risk threshold selection, transaction rate limiting, queue delay, 
+escrow duration control, maximum value limits, and additional verification 
+requirements for high-risk conditions.
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION OF THE INVENTION}
+% ============================================================
+
+\subsection{GravityEngine: Multi-Body Financial Dynamics}
+
+The system models $N$ financial institutions as particles in a 
+$d$-dimensional feature space, where the feature vector of each institution 
+encodes financial metrics including leverage ratio, asset size, 
+interconnectedness, and risk-weighted capital adequacy. The dynamics are 
+governed by:
+
+\begin{equation}
+\dot{X} = -\alpha(X - \mu\mathbf{1}^\top) - \nabla_X \Phi_{\text{pair}}(X) 
+- \sum_{k} \beta_k D\Phi_k(X)^\top D_k(X)
+\end{equation}
+
+where:
+\begin{itemize}
+\item $X \in \mathbb{R}^{N \times d}$ is the state matrix (rows are 
+institutions, columns are features);
+\item $\alpha$ is a mean-reversion rate pulling institutions toward the 
+system centroid $\mu$;
+\item $\Phi_{\text{pair}}$ is the pairwise interaction potential;
+\item $\Phi_k$ are external field operators including blind-spot energy 
+channels; and
+\item $\beta_k$ are coupling strengths for each external field.
+\end{itemize}
+
+\subsubsection{Pairwise Interaction Potential}
+
+The pairwise interaction between institutions $i$ and $j$ is governed by a 
+potential comprising erf-attraction and logarithmic repulsion:
+
+\begin{equation}
+\phi(r) = \gamma \cdot \frac{\sigma\sqrt{\pi}}{2} \cdot 
+\text{erf}\left(\frac{r}{\sigma}\right) - \gamma \lambda_{\text{rep}} 
+\cdot \log(r + \varepsilon)
+\end{equation}
+
+where $r = \|x_i - x_j\|$ is the inter-institution distance, $\gamma$ is 
+the interaction strength, $\sigma$ the interaction scale, 
+$\lambda_{\text{rep}}$ the repulsion strength, and $\varepsilon$ a 
+regularisation constant preventing divergence at zero distance.
+
+The erf-attraction provides a smooth, bounded attractive force that 
+saturates at large distances (unlike gravitational $1/r$ attraction which 
+is unbounded), while the logarithmic repulsion prevents institution 
+collapse---analogous to the Pauli exclusion principle in quantum mechanics.
+
+The equilibrium distance at which attraction and repulsion balance is:
+\begin{equation}
+r^* = \sigma\sqrt{\log(1/\lambda_{\text{rep}})}
+\end{equation}
+
+In the preferred embodiment: $\alpha = 0.10$, $\gamma = 1.00$, $\sigma = 
+1.00$, $\lambda_{\text{rep}} = 0.10$, $\varepsilon = 10^{-5}$, with force 
+clamping at $F_{\max} = 100.0$.
+
+\subsection{Blind-Spot Energy Module}
+
+The system incorporates a blind-spot energy function computed from four 
+deviation channels, referred to herein by the Blind Spot Decomposition 
+Theory (BSDT) framework:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Enstrophy anomaly channel ($\delta_C$):} Measures deviation 
+of the system's enstrophy (rotational energy) from the reference period.
+
+\item \textbf{Spectral gap channel ($\delta_G$):} Measures deviation of 
+the spectral gap of the correlation matrix from reference levels, indicating 
+structural fragility.
+
+\item \textbf{Alignment anomaly channel ($\delta_A$):} Measures deviation 
+of the co-movement alignment of institutions from reference patterns.
+
+\item \textbf{Temporal novelty channel ($\delta_T$):} Measures the degree 
+to which the current system state is temporally novel relative to the 
+reference period.
+\end{enumerate}
+
+The blind-spot energy is computed as:
+\begin{equation}
+E_{\text{BS}}(X) = \|(X - \mu_0)^\top \Sigma_0^{-1} (X - \mu_0)\|_F
+\end{equation}
+
+where $\mu_0$ and $\Sigma_0$ are the mean and covariance of the reference 
+(normal) period, computed using Ledoit--Wolf Oracle shrinkage estimation.
+
+The gradient of the blind-spot energy provides the BSDT score:
+\begin{equation}
+\nabla E_{\text{BS}} = 2\Sigma_0^{-1}(X - \mu_0)
+\end{equation}
+
+\subsection{Equivalence Theorem}
+
+A key theoretical result establishes the equivalence of the blind-spot 
+energy and the gravitational potential as stability indicators:
+
+\textbf{Theorem C (Lyapunov Equivalence):} The blind-spot energy 
+$E_{\text{BS}}$ and the GravityEngine potential $\Phi$ are equivalent 
+Lyapunov functions in the sense that there exist constants $c_1, c_2 > 0$ 
+such that:
+\begin{equation}
+c_1 \|\nabla\Phi\| \leq \|\nabla E_{\text{BS}}\| \leq c_2 \|\nabla\Phi\|
+\end{equation}
+
+Empirically, the cosine similarity between the two gradients is 
+$\cos\theta = -0.335$, confirming that the two energy functions are 
+anti-aligned: they measure \emph{complementary} aspects of systemic 
+instability. The gravitational potential captures interaction-driven 
+instability, while the blind-spot energy captures drift-driven instability 
+invisible to equilibrium measures.
+
+\subsection{Critical Manifold and Phase Transition}
+
+The system computes a critical manifold $\mathcal{C}$ in the state space 
+that demarcates the phase transition between regimes where constant friction 
+suffices and regimes where it necessarily fails:
+
+\textbf{Theorem 2 (Spectral Phase Transition):}
+\begin{equation}
+\mathcal{C} = \{X : \lambda_{\max}(\rho(X) \cdot \ell(X) \cdot W) = 1\}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\rho(X)$ is the spectral radius of the inter-institution correlation 
+matrix at state $X$;
+\item $\ell(X)$ is a leverage factor derived from the system leverage; and
+\item $W$ is the weighted adjacency matrix of the interaction network.
+\end{itemize}
+
+Below $\mathcal{C}$: the system is in a sub-critical regime where constant 
+flow-control parameters provide adequate damping.
+
+Above $\mathcal{C}$: the system is in a super-critical regime where any 
+constant friction coefficient is provably suboptimal. State-adaptive 
+friction is necessary and sufficient for stability.
+
+The spectral radius is computed using power iteration with finite-difference 
+Hessian-vector products ($h = 10^{-4}$), achieving $O(N^2 d \log N)$ 
+computational complexity per time step.
+
+\subsection{Optimal Adaptive Policy}
+
+\textbf{Theorem OR2 (Closed-Form Optimal Friction):} The optimal 
+state-dependent friction coefficient solving the associated Bellman equation 
+is:
+
+\begin{equation}
+\gamma^*(X) \approx \frac{\beta\|\nabla E\|^2}{2\kappa + 
+\beta\|\nabla E\|^2} \cdot \frac{E(X)}{E(X) + \theta}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $E(X)$ is the combined systemic energy (gravitational + blind-spot);
+\item $\|\nabla E\|$ is the gradient norm measuring the rate of energy 
+change;
+\item $\kappa$ is the economic cost parameter of imposing friction;
+\item $\beta$ is the systemic damage coefficient; and
+\item $\theta = \kappa/\beta$ is a damping threshold.
+\end{itemize}
+
+This policy has the desirable property that $\gamma^*(X) \to 0$ as 
+$E(X) \to 0$: no regulatory friction is imposed when the system is stable. 
+Conversely, $\gamma^*(X) \to 1$ as $E(X) \to \infty$: maximum friction is 
+applied during severe instability.
+
+\textbf{Theorem OR3 (Necessity of State-Dependence):} For any constant 
+friction $\bar{\gamma}$, the welfare gap $V^*(X) - V_{\bar{\gamma}}(X) > 0$ 
+whenever the system state $X$ lies above the critical manifold 
+$\mathcal{C}$.
+
+\subsection{Transaction Flow Control Mapping}
+
+The adaptive friction coefficient is mapped to one or more technical 
+transaction-flow control actions in a transaction processing network. In a 
+preferred embodiment, the mapping produces one or more of:
+\begin{enumerate}[label=(\alph*)]
+\item a selected risk threshold profile for transaction classification;
+\item a transaction rate limit for high-risk counterparties or regions of 
+the transaction graph;
+\item a queue delay or priority adjustment for transactions requiring 
+review;
+\item an escrow duration or lock-up parameter for escrowed transactions;
+\item a maximum allowed transaction value for designated categories; and
+\item additional verification requirements, including requiring proofs or 
+attestations during stressed or critical regimes.
+\end{enumerate}
+
+The mapping may be implemented as one or more monotone functions of 
+$\gamma^*(X)$ and/or discrete regime selection based on whether the system 
+state lies above or below the critical manifold $\mathcal{C}$.
+
+\subsubsection{Regulatory Mapping (Optional)}
+
+In an optional embodiment, the adaptive friction coefficient is also mapped 
+to a countercyclical capital buffer recommendation:
+
+\begin{equation}
+\Delta\text{CCyB}(t) \approx \kappa^{-1} \cdot \gamma^*(X_t) \cdot 
+\sigma_\ell(t)
+\end{equation}
+
+where $\sigma_\ell(t)$ is the system leverage volatility. The output is 
+in basis points and represents the recommended adjustment to the 
+countercyclical buffer at time $t$.
+
+\subsection{Welfare Cost of Inaction}
+
+The system computes the welfare cost of not implementing adaptive friction:
+
+\begin{equation}
+\%CL = 100 \times \left(1 - e^{-\mathcal{L}_{\text{inaction}} / 
+(\sigma \theta T)}\right)
+\end{equation}
+
+where $\mathcal{L}_{\text{inaction}}$ is the accumulated loss under no 
+intervention, $\sigma$ is a scaling constant, and $T$ is the time horizon.
+
+\subsection{Navier--Stokes Fluid Dynamics Analogy}
+
+In an enhanced embodiment, the system implements a full fluid dynamics 
+analogy that provides additional regime classification capabilities:
+
+\subsubsection{Velocity Field and Strain}
+
+The matrix $\dot{X}$ of institution position changes is treated as a 
+velocity field. The velocity gradient tensor is decomposed into symmetric 
+(strain rate) and antisymmetric (vorticity) components:
+
+\begin{equation}
+\nabla v = \frac{1}{2}(\nabla v + (\nabla v)^\top) + 
+\frac{1}{2}(\nabla v - (\nabla v)^\top) = S + \Omega
+\end{equation}
+
+\subsubsection{Vorticity and Enstrophy}
+
+The vorticity tensor $\omega = \nabla v - (\nabla v)^\top$ measures 
+rotational flows in the financial system (characteristic of herding 
+and feedback loops). The enstrophy:
+\begin{equation}
+\mathcal{E} = \frac{1}{2}\|\omega\|_F^2
+\end{equation}
+quantifies the total rotational energy. Rising enstrophy indicates 
+increasing systemic rotational stress.
+
+\subsubsection{BKM Blow-Up Criterion}
+
+The Beale--Kato--Majda blow-up criterion from fluid dynamics theory is 
+adapted as a financial singularity indicator:
+\begin{equation}
+\int_0^T \|\omega(t)\|_\infty \, dt < \infty
+\end{equation}
+
+If this integral diverges, the system is approaching a financial 
+singularity analogous to turbulence breakdown in fluid mechanics.
+
+\subsubsection{Navier--Stokes BSDT Channels}
+
+Four composite channels merge the fluid dynamics variables with the 
+blind-spot decomposition:
+\begin{enumerate}
+\item $\delta_C$: Enstrophy anomaly (vorticity-based camouflage)
+\item $\delta_G$: Spectral gap (strain-based feature gap)
+\item $\delta_A$: Alignment anomaly (flow alignment deviation)
+\item $\delta_T$: Temporal novelty (flow pattern novelty)
+\end{enumerate}
+
+\subsubsection{Adaptive Viscosity}
+
+The adaptive friction coefficient is reinterpreted as an adaptive viscosity 
+in the Navier--Stokes analogy:
+\begin{equation}
+\nu(E_{\text{BS}}) = \nu_0\left(1 + \gamma^*(E_{\text{BS}})\right)
+\end{equation}
+
+where $\nu_0$ is a baseline viscosity. Higher blind-spot energy increases 
+the viscosity (regulatory friction), damping dangerous vortical flows.
+
+\subsubsection{Minsky Regime Classification}
+
+The system classifies the financial regime into three Minsky stages based 
+on the cosine alignment $\cos\theta$ between the gravitational gradient 
+and the blind-spot gradient:
+\begin{itemize}
+\item \textbf{Hedge regime:} Gradients well-aligned ($\cos\theta > 
+\tau_H$); standard risk measures capture the dominant sources of 
+instability.
+\item \textbf{Speculative regime:} Gradients moderately misaligned; hidden 
+risk building but not yet critical.
+\item \textbf{Ponzi regime:} Gradients strongly anti-aligned ($\cos\theta 
+< \tau_P$); systemic risk is dominated by blind-spot energy invisible to 
+equilibrium-based measures.
+\end{itemize}
+
+\subsection{Online Algorithm and Computational Complexity}
+
+The system operates as an online algorithm within an Online Convex 
+Optimisation (OCO) framework:
+\begin{itemize}
+\item \textbf{Per-step complexity:} $O(N^2 d \log N)$ dominated by the 
+power iteration for spectral radius computation.
+\item \textbf{Regret bound:} $O(\sqrt{T})$ cumulative regret relative to 
+the best fixed policy in hindsight.
+\item \textbf{Memory:} $O(N^2 d)$ for the interaction matrix and state.
+\end{itemize}
+
+\subsection{Data Sources and Reference Period}
+
+In the preferred embodiment:
+\begin{itemize}
+\item \textbf{FDIC SDI call reports:} Quarterly financial data for US 
+commercial banks, 1994--2028 (140+ quarters).
+\item \textbf{Reference (normal) period:} 1994-Q1 to 2003-Q4 (40 
+quarters), pre-dating the Global Financial Crisis.
+\item \textbf{Covariance estimation:} Ledoit--Wolf Oracle shrinkage 
+estimator applied to inter-institution leverage correlations.
+\item \textbf{Institution types:} Seven categories (large commercial, 
+community, savings, credit unions, investment banks, insurance, GSEs) in 
+the aggregated model; 30 individual banks in the bank-level model; 20 
+global systemically important banks (G-SIBs) in the cross-border model.
+\end{itemize}
+
+\subsection{Performance Characteristics}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Configuration} & \textbf{$N$} & \textbf{$T$} & \textbf{AUROC} & 
+\textbf{GFC Lead} \\
+\midrule
+Institution-type (aggregated) & 7 & 140 & $\geq 0.70$ & 6Q \\
+Bank-level (individual) & 30 & 140 & 0.805 & 6Q \\
+G-SIB cross-border & 20 & 76 & 0.781 & 6Q \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Finding} & \textbf{Value} \\
+\midrule
+Super-criticality prevalence & 68.6\% of sample above $\mathcal{C}$ \\
+Out-of-sample GFC alarm & 2007-Q1 (6 quarters before Lehman) \\
+GFC welfare loss of inaction & 19.57 pp consumption-equivalent \\
+Peak control intensity (optional CCyB mapping) & 231 basis points \\
+Herding discovery & $\beta_{\delta_T} = -1.38$ (negative temporal novelty) \\
+Scale invariance & Exact ($\rho = 2.41$ across scales $10^{-3}$--$10^3$) \\
+Adversarial robustness & 5 of 12 attack types never break detection \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Robustness Verification}
+
+The system includes three robustness checks:
+\begin{enumerate}
+\item \textbf{Alternate normal period:} Shifting the reference period by 
+$\pm 4$ quarters.
+\item \textbf{Rolling-window refit:} Refitting reference distributions on 
+a rolling basis.
+\item \textbf{Leave-one-crisis-out:} Excluding each crisis in turn and 
+testing detection of the excluded crisis.
+\end{enumerate}
+
+Additionally, 12 adversarial attacks are tested, including bank removal, 
+coordinated shift, gradient attack, noise injection, and data poisoning. 
+Five of twelve attack types never break detection across all configurations.
+
+% ============================================================
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Where a claim refers to another claim, the dependency is by claim
+number. Features of any dependent claim may be combined with any
+independent claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+% --- Independent System Claim ---
+\item A computer-implemented system for monitoring and controlling systemic 
+risk in a financial network comprising a plurality of financial institutions, 
+the system comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a gravitational interaction engine configured to model the plurality 
+of financial institutions as particles in a multi-dimensional feature space 
+interacting through a pairwise potential comprising a bounded attractive 
+component and a repulsive component;
+
+\item a spectral monitoring module configured to compute the spectral radius 
+of an interaction matrix derived from the financial network state, and to 
+determine whether the financial network is above or below a critical 
+manifold defined by the condition that the spectral radius exceeds a 
+threshold;
+
+\item a blind-spot energy module configured to compute a complementary 
+energy function from reference distributions fitted on a normal reference 
+period; and
+
+\item an adaptive policy module configured to compute a state-dependent 
+friction coefficient from the combined systemic energy and its gradient, 
+and to map the friction coefficient to a transaction-flow control 
+configuration for a transaction processing network, the configuration 
+comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a risk threshold profile defining numerical thresholds for transaction 
+approval decisions; and
+\item a proof-requirement policy defining, for at least one threshold tier 
+or transaction class, one or more cryptographic proofs required to be 
+verified as a prerequisite to settlement.
+\end{enumerate}
+\end{enumerate}
+
+% --- Independent Method Claim ---
+\item A computer-implemented method for computing a state-adaptive 
+transaction-flow control action for a financial transaction processing 
+network, the method 
+comprising:
+\begin{enumerate}[label=(\alph*)]
+\item receiving financial metric data for a plurality of financial 
+institutions at a current time step;
+
+\item computing a state matrix $X \in \mathbb{R}^{N \times d}$ from the 
+received data, where $N$ is the number of institutions and $d$ is the 
+number of features;
+
+\item computing a pairwise interaction potential comprising an erf-attraction 
+term and a logarithmic repulsion term for each pair of institutions;
+
+\item computing the spectral radius $\lambda_{\max}$ of an interaction 
+matrix;
+
+\item determining whether the state matrix lies above or below a critical 
+manifold $\mathcal{C} = \{X : \lambda_{\max}(\rho(X) \cdot \ell(X) \cdot 
+W) = 1\}$;
+
+\item computing a blind-spot energy $E_{\text{BS}}(X)$ from a Mahalanobis 
+distance to reference distributions fitted on a normal period;
+
+\item computing an optimal adaptive friction coefficient:
+\[
+\gamma^*(X) \approx \frac{\beta\|\nabla E\|^2}{2\kappa + 
+\beta\|\nabla E\|^2} \cdot \frac{E(X)}{E(X) + \theta}
+\]
+where $E$ is the combined energy, $\kappa$ is an economic cost parameter, 
+$\beta$ is a systemic damage coefficient, and $\theta = \kappa/\beta$; and
+
+\item mapping the adaptive friction coefficient to a risk threshold profile 
+defining numerical thresholds for transaction approval decisions; and
+\item mapping the adaptive friction coefficient to a proof-requirement 
+policy defining, for at least one threshold tier or transaction class, one 
+or more cryptographic proofs required to be verified as a prerequisite to 
+settlement.
+\end{enumerate}
+
+% --- Dependent Claims ---
+\item A system according to claim 1, wherein the pairwise potential is 
+defined as:
+\[
+\phi(r) = \gamma \cdot \frac{\sigma\sqrt{\pi}}{2} \cdot 
+\text{erf}(r/\sigma) - \gamma\lambda_{\text{rep}} \cdot 
+\log(r + \varepsilon)
+\]
+where $r$ is the inter-institution distance, $\gamma$ is an interaction 
+strength, $\sigma$ is an interaction scale, $\lambda_{\text{rep}}$ is a 
+repulsion strength, and $\varepsilon$ is a regularisation constant.
+
+\item A method according to claim 2, further comprising the step of 
+computing the welfare cost of not implementing adaptive friction as:
+\[
+\%CL = 100 \times \left(1 - e^{-\mathcal{L}_{\text{inaction}} / 
+(\sigma\theta T)}\right)
+\]
+where $\mathcal{L}_{\text{inaction}}$ is the accumulated loss under no 
+intervention.
+
+\item A method according to claim 2, wherein at least one further 
+transaction-flow control action comprises applying a transaction rate limit, 
+applying a queue delay, setting an escrow duration, or setting a maximum 
+transaction value limit.
+
+\item A method according to claim 2, wherein a further output comprises a 
+countercyclical capital buffer adjustment computed as:
+\[
+\Delta\text{CCyB}(t) \approx \kappa^{-1} \cdot \gamma^*(X_t) \cdot 
+\sigma_\ell(t)
+\]
+where $\sigma_\ell(t)$ is the system leverage volatility.
+
+\item A system or method according to any preceding claim, further 
+comprising a Navier--Stokes analogy module configured to:
+\begin{enumerate}[label=(\roman*)]
+\item compute a velocity gradient tensor from changes in institution 
+positions over successive time steps;
+\item decompose the velocity gradient tensor into symmetric (strain rate) 
+and antisymmetric (vorticity) components;
+\item compute enstrophy as $\mathcal{E} = \frac{1}{2}\|\omega\|_F^2$ from 
+the vorticity tensor $\omega$; and
+\item evaluate a Beale--Kato--Majda blow-up criterion for detection of 
+financial singularities.
+\end{enumerate}
+
+\item A system or method according to any preceding claim, wherein the 
+adaptive friction coefficient is reinterpreted as an adaptive viscosity 
+$\nu = \nu_0(1 + \gamma^*(E_{\text{BS}}))$ in the Navier--Stokes analogy.
+
+\item A system or method according to any preceding claim, further 
+comprising a Minsky regime classification module configured to classify 
+the financial network state into hedge, speculative, and Ponzi regimes 
+based on the cosine alignment between the gradient of the gravitational 
+potential and the gradient of the blind-spot energy.
+
+\item A system or method according to any preceding claim, wherein the 
+spectral radius is computed using power iteration with finite-difference 
+Hessian-vector products, achieving $O(N^2 d \log N)$ per-step complexity.
+
+\item A system or method according to any preceding claim, wherein the 
+blind-spot energy comprises four deviation channels: an enstrophy anomaly 
+channel, a spectral gap channel, an alignment anomaly channel, and a 
+temporal novelty channel, each computed relative to reference distributions 
+fitted on a designated normal period.
+
+\item A system or method according to claim 1 or claim 2, further 
+comprising a Lyapunov equivalence verification module configured to verify 
+that the blind-spot energy and the gravitational potential are equivalent 
+Lyapunov functions satisfying 
+$c_1\|\nabla\Phi\| \leq \|\nabla E_{\text{BS}}\| \leq c_2\|\nabla\Phi\|$
+for positive constants $c_1, c_2$.
+
+\item A method according to any preceding claim, wherein the method 
+operates as an online algorithm within an online convex optimisation 
+framework with $O(\sqrt{T})$ cumulative regret relative to the best 
+fixed policy in hindsight.
+
+\item A system or method according to any preceding claim, wherein the 
+financial metric data comprises quarterly regulatory filings from a 
+financial regulatory authority, and the reference period comprises at 
+least 20 consecutive quarters of pre-crisis data.
+
+\end{enumerate}
+
+% ============================================================
+\section{DRAWINGS}
+% ============================================================
+
+\textit{[To be filed separately: Schematic of the GravityEngine showing 
+$N$-body interactions; plot of the erf-log pairwise potential function; 
+diagram of the critical manifold $\mathcal{C}$ in state space; flow diagram 
+of the adaptive policy computation; time series showing the GFC early 
+warning signal at 2007-Q1; Navier--Stokes analogy schematic showing 
+velocity field, vorticity, and enstrophy; Minsky regime classification 
+diagram.]}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A computer-implemented system monitors and controls systemic risk in
+financial networks by modelling the financial system as a multi-body
+dynamical system. A gravitational interaction engine models financial
+institutions as particles with erf-attraction and logarithmic repulsion. A
+spectral monitoring module computes the spectral radius of the interaction
+network to detect phase transitions toward a critical manifold. A blind-spot
+energy module computes a complementary Lyapunov function from a four-channel
+failure mode decomposition. An adaptive policy module derives a
+state-dependent friction coefficient from the Bellman equation; the
+coefficient is mapped to transaction-flow control comprising a dynamically
+selected risk threshold profile and a proof-requirement policy gating
+settlement. The system is validated on 140 quarters of FDIC regulatory data,
+detecting the Global Financial Crisis six quarters in advance without using
+crisis labels during training.
+
+\end{document}
