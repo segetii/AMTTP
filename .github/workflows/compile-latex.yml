@@ -1,0 +1,33 @@
+name: Compile LaTeX Paper
+
+on:
+  push:
+    branches:
+      - main
+      - sync/merge-2025-10-22
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: research/siam-paper
+          latexmk_use_pdflatex: true
+          latexmk_shell_escape: false
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: siam-paper-pdf
+          path: research/siam-paper/main.pdf
