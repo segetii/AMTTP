@@ -1,0 +1,703 @@
+% AMTTP UK Patent Application — Specification
+% Title: A Multi-Layer Transaction Processing System for Compliance Enforcement
+%        in Decentralised Finance Networks
+% Applicant: Odeyemi Olusegun Israel
+% Date: March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{AMTTP --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large A Multi-Layer Transaction Processing System for Compliance\\
+Enforcement in Decentralised Finance Networks}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to the field of financial technology, and more 
+particularly to systems and methods for enforcing anti-money laundering (AML) 
+and regulatory compliance in decentralised finance transactions using 
+blockchain smart contracts, machine learning risk scoring, and 
+zero-knowledge cryptographic proofs.
+
+% ============================================================
+\section{BACKGROUND OF THE INVENTION}
+% ============================================================
+
+\subsection{Technical Problem}
+
+Decentralised finance (DeFi) protocols process financial transactions on 
+blockchain networks without centralised intermediaries. While this 
+architecture offers advantages in transparency and accessibility, it creates 
+significant regulatory compliance challenges. Current compliance approaches 
+suffer from several deficiencies:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Retroactive enforcement:} Existing blockchain analytics 
+platforms (e.g., Chainalysis, Elliptic) operate as retrospective monitoring 
+tools. They identify suspicious transactions \emph{after} settlement, by 
+which time value transfer has already occurred and may be irrecoverable.
+
+\item \textbf{Platform-level rather than protocol-level compliance:} 
+Conventional KYC/AML checks are performed at the exchange or platform level. 
+When a user transacts through a DeFi protocol directly, these checks are 
+bypassed entirely. Compliance is bound to the platform, not to the 
+transaction.
+
+\item \textbf{Reliance on labelled training data:} Supervised fraud detection 
+models require large quantities of labelled fraudulent transactions. In 
+practice, fewer than 0.1\% of blockchain transactions are labelled as 
+illicit, creating severe class imbalance and data scarcity problems.
+
+\item \textbf{Privacy-compliance tension:} Compliance verification 
+traditionally requires disclosure of sensitive personal and financial data. 
+This conflicts with the pseudonymous nature of blockchain transactions and 
+with data protection regulations such as the UK Data Protection Act 2018 and 
+the EU General Data Protection Regulation.
+\end{enumerate}
+
+\subsection{Prior Art Limitations}
+
+Prior art systems known to the applicant include:
+
+\begin{itemize}
+\item Blockchain analytics platforms that provide post-hoc transaction 
+tracing and address clustering but do not enforce compliance at the point of 
+transaction.
+
+\item Exchange-level compliance systems that implement KYC/AML at 
+centralised access points but cannot extend to protocol-level DeFi 
+transactions.
+
+\item Standard machine learning fraud detection systems that require 
+extensive labelled datasets and do not integrate with blockchain smart 
+contract enforcement mechanisms.
+
+\item Zero-knowledge proof systems used in cryptocurrency privacy (e.g., 
+Zcash) that conceal transaction details but do not implement compliance 
+verification.
+\end{itemize}
+
+None of the prior art systems provides a unified architecture that combines 
+pre-settlement compliance enforcement, weak supervision for label-scarce 
+environments, graph-based analytics, sanctions screening, deterministic 
+policy enforcement via smart contracts, and privacy-preserving verification 
+via zero-knowledge proofs.
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The present invention provides a multi-layer transaction processing system 
+that enforces regulatory compliance \emph{before} on-chain settlement in 
+decentralised finance networks. The system addresses the limitations of the 
+prior art through the following technical contributions:
+
+\begin{enumerate}[label=(\roman*)]
+\item A four-layer architecture comprising interface, compliance 
+orchestration, offline training, and infrastructure layers that together 
+implement a deterministic compliance lifecycle.
+
+\item A weak supervision machine learning pipeline comprising a composite 
+teacher ensemble that generates pseudo-labels from unlabelled blockchain 
+transaction data, enabling the training of a student model without requiring 
+labelled fraud data.
+
+\item A deterministic compliance decision matrix that maps continuous risk 
+scores to discrete policy actions (approve, review, escrow, block) via fixed 
+thresholds, ensuring reproducible and auditable decisions.
+
+\item A zero-knowledge proof subsystem (zkNAF) comprising three proof 
+circuits---sanctions non-membership, risk range, and KYC verification---that 
+enable privacy-preserving compliance verification on-chain.
+
+\item Smart contract infrastructure that enforces compliance decisions 
+deterministically, including automatic escrow of high-risk transactions and 
+blocking of transactions exceeding risk thresholds.
+
+\item A state-adaptive transaction flow control module configured to compute 
+network instability metrics and to select, from a predetermined set of 
+enforcement profiles, one or more enforcement parameters that modulate the 
+deterministic compliance decision process in response to the computed system 
+state.
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION OF THE INVENTION}
+% ============================================================
+
+\subsection{System Architecture Overview}
+
+The system comprises four hierarchically organised processing layers, 
+described below from the outermost (user-facing) to the innermost 
+(infrastructure):
+
+\textbf{Layer I --- Interface Layer.} This layer provides the entry points 
+through which external systems interact with the compliance system. It 
+comprises:
+\begin{itemize}
+\item Client software development kits (SDKs) in TypeScript and Python that 
+expose methods for submitting transactions, querying risk scores, and 
+verifying compliance status.
+\item A RESTful application programming interface (API) providing HTTP 
+endpoints for transaction submission, risk score retrieval, compliance 
+status queries, and administrative functions.
+\item A web-based dashboard application providing visual interfaces for 
+compliance monitoring, transaction review, and system administration.
+\end{itemize}
+
+\textbf{Layer II --- Compliance Orchestration Layer.} This layer implements 
+the core compliance logic. It comprises:
+\begin{itemize}
+\item A machine learning risk scoring engine that computes a numerical risk 
+score for each submitted transaction based on engineered features derived 
+from address-level, transaction-level, and graph-level attributes.
+\item A graph analytics module that constructs and analyses transaction 
+graphs using a graph database, computing graph-level features including 
+degree centrality, betweenness centrality, clustering coefficient, and 
+community membership.
+\item A sanctions screening module that checks transaction counterparties 
+against maintained sanctions lists including OFAC (Office of Foreign Assets 
+Control) and EU sanctions databases.
+\item A policy engine that applies a deterministic compliance decision matrix 
+to map computed risk scores to policy actions.
+\item A state-adaptive transaction flow control module configured to compute 
+one or more network instability metrics and to select a predetermined 
+enforcement profile that determines one or more enforcement parameters used 
+by the policy engine.
+\end{itemize}
+
+\textbf{Layer III --- Offline Training Layer.} This layer implements the 
+machine learning model training pipeline. It comprises:
+\begin{itemize}
+\item A composite teacher ensemble for generating pseudo-labels on 
+unlabelled data.
+\item A student model training pipeline using the pseudo-labels.
+\item Cross-validation and calibration procedures.
+\end{itemize}
+
+\textbf{Layer IV --- Infrastructure Layer.} This layer provides the 
+persistent data storage, blockchain smart contracts, and cryptographic proof 
+systems. It comprises:
+\begin{itemize}
+\item Blockchain smart contracts deployed on an Ethereum-compatible network 
+that enforce compliance decisions deterministically.
+\item A zero-knowledge proof subsystem (zkNAF).
+\item Database systems for transaction records, graph data, and audit trails.
+\item Distributed file storage for immutable audit records.
+\end{itemize}
+
+\subsection{Composite Teacher Weak Supervision Pipeline}
+
+The offline training layer implements a novel weak supervision approach to 
+address the scarcity of labelled fraud data in blockchain transactions. The 
+composite teacher ensemble generates pseudo-labels as follows.
+
+Three independent teacher models are constructed:
+\begin{enumerate}[label=(\alph*)]
+\item An autoencoder--gradient boosting teacher ($s_{\text{AE-XGB}}$) that 
+trains an autoencoder on transaction features to learn a compressed 
+representation, then trains a gradient boosting model on the reconstruction 
+errors and latent features to estimate anomaly scores.
+
+\item A rule-based FATF teacher ($s_{\text{FATF}}$) that encodes Financial 
+Action Task Force red-flag indicators as deterministic scoring rules, 
+including rapid fund movement patterns, round-number transactions, 
+structuring behaviour, and high-risk jurisdiction involvement.
+
+\item A graph-based teacher ($s_{\text{Graph}}$) that computes suspicion 
+scores based on graph-structural properties of the transaction network, 
+including proximity to known high-risk addresses, unusual connectivity 
+patterns, and temporal clustering of transactions.
+\end{enumerate}
+
+The composite teacher score for each transaction $x$ is computed as:
+\begin{equation}
+s_{\text{teacher}}(x) = w_1 \cdot s_{\text{AE-XGB}}(x) + w_2 \cdot 
+s_{\text{FATF}}(x) + w_3 \cdot s_{\text{Graph}}(x)
+\end{equation}
+where in the preferred embodiment, $w_1 = 0.4$, $w_2 = 0.3$, $w_3 = 0.3$.
+
+The composite teacher scores are thresholded to generate binary 
+pseudo-labels, which are then used to train a student model. In the 
+preferred embodiment, the student model is an XGBoost gradient boosting 
+classifier trained on 167 engineered features.
+
+\subsection{Risk Score Calibration}
+
+The raw output of the student model is recalibrated using a sigmoid 
+recalibration function:
+\begin{equation}
+\hat{p}_{\text{cal}}(x) = \sigma\left(k \cdot (s(x) - P_{75})\right)
+\end{equation}
+where $\sigma$ is the logistic sigmoid function, $k$ is a steepness 
+parameter (in the preferred embodiment, $k = 30$), and $P_{75}$ is the 75th 
+percentile of the training score distribution. This recalibration compresses 
+mid-range scores and amplifies boundary decisions, improving discrimination 
+at the critical decision thresholds.
+
+The calibrated probability is then mapped to an integer risk score on a 
+0--1000 scale for use by the compliance decision matrix.
+
+\subsection{Compliance Decision Matrix}
+
+The policy engine applies a deterministic decision matrix that maps 
+integer risk scores to policy actions:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Score Range} & \textbf{Policy Action} & \textbf{Smart Contract Effect} \\
+\midrule
+$[0, 200)$ & APPROVE & Transaction executed immediately \\
+$[200, 400)$ & APPROVE with monitoring & Transaction executed; monitoring flag set \\
+$[400, 600)$ & REVIEW & Transaction queued for manual review \\
+$[600, 800)$ & ESCROW & Funds locked in escrow smart contract \\
+$[800, 1000]$ & BLOCK & Transaction rejected on-chain \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These thresholds are fixed and public, ensuring that compliance decisions are 
+reproducible, auditable, and deterministic. Every transaction receives 
+identical treatment for identical risk scores, regardless of the time, 
+venue, or identity of the transacting parties.
+
+\subsection{State-Adaptive Transaction Flow Control (Adaptive Friction)}
+
+In an enhanced embodiment, the compliance orchestration layer comprises a 
+state-adaptive transaction flow control module (also referred to herein as an 
+adaptive friction controller). The purpose of this module is to modulate the 
+enforcement strictness of the deterministic compliance lifecycle in response 
+to system-wide instability, while preserving determinism and auditability.
+
+The module computes one or more network instability metrics from:
+\begin{enumerate}[label=(\alph*)]
+\item a transaction graph constructed from recent on-chain activity; and/or
+\item aggregate transaction-risk dynamics comprising one or more of: 
+risk score distribution shift, high-risk transaction rate, graph centrality 
+concentration, and temporal burst indicators.
+\end{enumerate}
+
+Based on the computed instability metrics, the module selects an enforcement 
+profile from a predetermined set of profiles (for example: \textit{stable}, 
+\textit{stressed}, and \textit{critical}). Each profile deterministically 
+defines one or more enforcement parameters used by the policy engine and/or 
+smart contracts, including:
+\begin{enumerate}[label=(\alph*)]
+\item one or more risk score thresholds used by the decision matrix;
+\item a transaction rate limit or queue delay for review actions;
+\item an escrow duration or release condition window; and
+\item additional proof requirements (e.g., requiring a risk-range proof or 
+sanctions proof for specific classes of transactions).
+\end{enumerate}
+
+Accordingly, for a fixed system state (instability metrics and profile 
+selection inputs), the selected enforcement profile and all resulting 
+enforcement decisions are deterministic and reproducible.
+
+\subsection{Zero-Knowledge Proof Subsystem (zkNAF)}
+
+The zero-knowledge non-disclosing anti-fraud (zkNAF) subsystem enables 
+participants to prove compliance properties without revealing underlying 
+sensitive data. The subsystem implements three distinct proof circuits using 
+the Groth16 zero-knowledge succinct non-interactive argument of knowledge 
+(zk-SNARK) protocol:
+
+\subsubsection{Sanctions Non-Membership Proof}
+
+This circuit proves that a blockchain address is not a member of a set of 
+sanctioned addresses, without revealing the address being verified. The 
+circuit operates as follows:
+\begin{enumerate}
+\item The sanctioned address set is organised as a Merkle tree using the 
+Poseidon hash function (chosen for its efficiency within arithmetic circuits).
+\item The prover demonstrates possession of a valid Merkle non-membership 
+proof---i.e., that the address does not appear at any leaf of the tree.
+\item The verifier checks the proof against the published Merkle root of the 
+current sanctions list without learning the prover's address.
+\end{enumerate}
+
+\subsubsection{Risk Range Proof}
+
+This circuit proves that a computed risk score falls within a specified 
+acceptable range, without revealing the exact score. Formally, the prover 
+demonstrates:
+\begin{equation}
+\text{score}_{\min} \leq s(x) \leq \text{score}_{\max}
+\end{equation}
+where $s(x)$ is the computed risk score and $[\text{score}_{\min}, 
+\text{score}_{\max}]$ is the acceptable range, without revealing $s(x)$.
+
+\subsubsection{KYC Verification Proof}
+
+This circuit proves that a participant has completed Know Your Customer 
+verification with an accredited provider without revealing the participant's 
+identity data. The circuit verifies a digital commitment to the KYC status 
+and provider attestation.
+
+\subsubsection{Proof Lifecycle}
+
+Each zero-knowledge proof has a time-to-live of 24 hours, after which it 
+must be regenerated. Proofs are verified on-chain by a dedicated verifier 
+smart contract that stores verification results. The verification function 
+accepts the proof components ($\pi_a$, $\pi_b$, $\pi_c$) and public inputs, 
+performs the bilinear pairing check, and records the result with a timestamp.
+
+\subsection{Smart Contract Architecture}
+
+The infrastructure layer comprises a plurality of smart contracts deployed 
+on an Ethereum-compatible blockchain network. The principal contracts 
+include:
+
+\begin{itemize}
+\item \textbf{Core Contract:} Receives transaction risk scores from the 
+compliance orchestration layer and registers compliance decisions on-chain. 
+Implements the deterministic decision matrix as an on-chain mapping from 
+score ranges to policy actions.
+
+\item \textbf{Escrow Contract:} Implements a time-locked escrow mechanism 
+for transactions assigned the ESCROW policy action. Funds are held for a 
+configurable review period during which authorised reviewers may release the 
+funds (if the review outcome is favourable) or initiate a dispute resolution 
+process.
+
+\item \textbf{ZK Verifier Contract:} Verifies Groth16 zero-knowledge proofs 
+on-chain. Accepts proof components and public inputs, performs the 
+elliptic-curve pairing verification, and stores the binary verification 
+result with a timestamp for subsequent reference by other contracts.
+
+\item \textbf{Cross-Chain Bridge Contract:} Extends compliance enforcement 
+to cross-chain transactions by implementing a bridge mechanism that requires 
+compliance verification on both the source and destination chains before 
+releasing bridged funds.
+
+\item \textbf{Dispute Resolution Contract:} Implements a structured process 
+for resolving disputes arising from escrowed transactions, including 
+escalation procedures and release conditions.
+\end{itemize}
+
+\subsection{Feature Engineering}
+
+The machine learning risk scoring engine operates on 167 engineered features 
+derived from three categories:
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Address-level features:} Transaction count, total value 
+transferred, mean and variance of transaction amounts, age of address, 
+number of unique counterparties, and temporal activity patterns.
+
+\item \textbf{Transaction-level features:} Transaction value, gas 
+parameters, input data characteristics, number of internal transactions, 
+and token transfer indicators.
+
+\item \textbf{Graph-level features:} Degree centrality, betweenness 
+centrality, closeness centrality, clustering coefficient, PageRank score, 
+community membership identifier, and local graph density.
+\end{enumerate}
+
+\subsection{Performance Characteristics}
+
+In the preferred embodiment, trained on 2.64 million Ethereum transactions, 
+the system achieves the following performance:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Meta-Ensemble ROC-AUC (test) & 1.0000 \\
+Meta-Ensemble ROC-AUC (5-fold CV) & $0.9965 \pm 0.0049$ \\
+Meta-Ensemble PR-AUC & 0.9999 \\
+Transaction-Level XGBoost ROC-AUC & 0.9878 \\
+Transaction-Level XGBoost F1 & 0.901 \\
+Cross-domain mean ROC-AUC (9 datasets) & 0.9962 \\
+Escrow smart contract gas cost & 287,890 gas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Where a claim refers to another claim, the dependency is by claim
+number. Features of any dependent claim may be combined with any
+independent claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+% --- Independent System Claim ---
+\item A computer-implemented transaction compliance system for decentralised 
+finance networks, the system comprising:
+\begin{enumerate}[label=(\alph*)]
+\item an interface layer configured to receive transaction requests from 
+client applications via software development kits or application programming 
+interfaces;
+
+\item a compliance orchestration layer comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a machine learning risk scoring engine configured to compute a 
+numerical risk score for each received transaction request based on a 
+plurality of engineered features derived from address-level, 
+transaction-level, and graph-level attributes;
+\item a graph analytics module configured to construct and analyse 
+transaction graphs and compute graph-level features;
+\item a sanctions screening module configured to check transaction 
+counterparties against maintained sanctions databases; and
+\item a state-adaptive transaction flow control module configured to compute 
+one or more network instability metrics from recent transaction activity and 
+to select, from a predetermined set of enforcement profiles, an enforcement 
+configuration comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a risk threshold profile defining numerical thresholds for mapping risk 
+scores to policy actions; and
+\item a proof-requirement policy defining, for at least one risk score tier 
+or transaction class, one or more cryptographic proofs that are required to 
+be verified as a prerequisite to settlement;
+\end{enumerate}
+and
+\item a deterministic policy engine configured to:
+\begin{enumerate}[label=(\alph*)]
+\item map computed risk scores to policy actions selected from the group 
+consisting of: approve, approve with monitoring, review, escrow, and block, 
+according to numerical thresholds defined by the selected risk threshold 
+profile; and
+\item enforce the selected proof-requirement policy by causing verification 
+of the required cryptographic proofs on-chain prior to settlement, and by 
+assigning a non-approval policy action when the required cryptographic proofs 
+are missing or fail verification;
+\end{enumerate}
+\end{enumerate}
+
+\item an offline training layer comprising a composite teacher ensemble 
+configured to generate pseudo-labels from unlabelled blockchain transaction 
+data using a weighted combination of at least two independent teacher 
+models, and a student model trained on the generated pseudo-labels;
+
+\item an infrastructure layer comprising a plurality of smart contracts 
+deployed on a blockchain network, the smart contracts being configured to 
+enforce the policy actions determined by the policy engine, including:
+\begin{enumerate}[label=(\roman*)]
+\item a core contract configured to register compliance decisions on the 
+blockchain;
+\item an escrow contract configured to hold funds in time-locked escrow for 
+transactions assigned the escrow policy action; and
+\item a zero-knowledge proof verifier contract configured to verify 
+cryptographic proofs on-chain;
+\end{enumerate}
+\end{enumerate}
+wherein the system is configured to enforce compliance decisions 
+\emph{before} the corresponding transaction is settled on the blockchain 
+network.
+
+% --- Independent Method Claim ---
+\item A computer-implemented method of enforcing compliance in decentralised 
+finance transactions, the method comprising the steps of:
+\begin{enumerate}[label=(\alph*)]
+\item receiving a transaction request comprising at least a sender address, 
+a recipient address, and a transaction value;
+\item computing a risk score for the transaction request by applying a 
+trained machine learning model to a feature vector comprising address-level 
+features, transaction-level features, and graph-level features derived from 
+the transaction request and associated blockchain data;
+\item calibrating the computed risk score using a sigmoid recalibration 
+function anchored at a percentile of a training score distribution;
+\item computing one or more network instability metrics from recent 
+transaction activity and selecting an enforcement profile from a 
+predetermined set of enforcement profiles, the selected enforcement profile 
+deterministically defining:
+\begin{enumerate}[label=(\roman*)]
+\item a risk threshold profile defining numerical thresholds for a 
+deterministic decision matrix; and
+\item a proof-requirement policy defining one or more cryptographic proofs 
+to be verified on-chain as a prerequisite to settlement for at least one 
+risk score tier or transaction class;
+\end{enumerate}
+\item mapping the calibrated risk score to a policy action selected from a 
+predetermined set of policy actions according to the deterministic decision 
+matrix using numerical thresholds defined by the selected risk threshold 
+profile;
+\item enforcing the proof-requirement policy by verifying the one or more 
+cryptographic proofs on-chain prior to settlement, and assigning a non-
+approval policy action when the required cryptographic proofs are missing or 
+fail verification;
+\item enforcing the policy action by executing a corresponding smart 
+contract function on a blockchain network, prior to settlement of the 
+transaction; and
+\item recording the compliance decision and policy action on the blockchain 
+as an immutable audit record.
+\end{enumerate}
+
+% --- Dependent Claims ---
+\item A system according to claim 1, wherein the composite teacher ensemble 
+comprises:
+\begin{enumerate}[label=(\alph*)]
+\item an autoencoder--gradient boosting teacher configured to compute 
+anomaly scores based on reconstruction errors of an autoencoder applied to 
+transaction features;
+\item a rule-based teacher configured to compute suspicion scores based on 
+Financial Action Task Force (FATF) red-flag indicators; and
+\item a graph-based teacher configured to compute suspicion scores based on 
+graph-structural properties of the transaction network;
+\end{enumerate}
+and wherein the composite teacher score is a weighted sum of the outputs of 
+the at least three teacher models.
+
+\item A system according to claim 1, further comprising a zero-knowledge 
+proof subsystem configured to generate and verify one or more of:
+\begin{enumerate}[label=(\alph*)]
+\item a sanctions non-membership proof demonstrating that an address is not 
+a member of a set of sanctioned addresses represented as a Merkle tree, 
+without revealing the address;
+\item a risk range proof demonstrating that a risk score falls within a 
+specified range, without revealing the exact risk score; and
+\item a KYC verification proof demonstrating that a participant has 
+completed identity verification, without revealing identity data.
+\end{enumerate}
+
+\item A system according to claim 4, wherein the Merkle tree of sanctioned 
+addresses is constructed using the Poseidon hash function, and wherein the 
+zero-knowledge proofs are Groth16 zk-SNARK proofs with a time-to-live after 
+which the proofs must be regenerated.
+
+\item A method according to claim 2, wherein the step of computing a risk 
+score comprises:
+\begin{enumerate}[label=(\alph*)]
+\item computing address-level features comprising transaction count, total 
+value transferred, mean and variance of transaction amounts, address age, 
+number of unique counterparties, and temporal activity patterns;
+\item computing transaction-level features comprising transaction value, gas 
+parameters, input data characteristics, and token transfer indicators;
+\item computing graph-level features by constructing a transaction graph and 
+computing degree centrality, betweenness centrality, clustering coefficient, 
+PageRank score, and community membership; and
+\item applying the trained machine learning model to the combined feature 
+vector.
+\end{enumerate}
+
+\item A system according to claim 1, wherein the deterministic decision 
+matrix maps risk scores as follows:
+\begin{enumerate}[label=(\alph*)]
+\item scores below a first threshold to an approve action;
+\item scores between the first threshold and a second threshold to an 
+approve-with-monitoring action;
+\item scores between the second threshold and a third threshold to a review 
+action;
+\item scores between the third threshold and a fourth threshold to an escrow 
+action; and
+\item scores at or above the fourth threshold to a block action.
+\end{enumerate}
+
+\item A method according to claim 2, wherein verifying the one or more 
+cryptographic proofs comprises verifying one or more zero-knowledge proofs 
+submitted with the transaction request on-chain, wherein successful 
+verification is a prerequisite for approving the transaction request.
+
+\item A system or method according to claim 1 or claim 2, wherein the one or 
+more network instability metrics comprise at least one of: a spectral radius 
+or centrality concentration of a transaction graph computed over a sliding 
+time window, a temporal burst indicator computed from a transaction count 
+process, or a shift of a calibrated risk score distribution relative to a 
+reference distribution.
+
+\item A system or method according to claim 1 or claim 2, wherein selecting 
+the enforcement profile comprises selecting one profile from a discrete set 
+of profiles, and wherein each profile deterministically defines a distinct 
+set of risk score thresholds for the deterministic decision matrix.
+
+\item A system or method according to claim 1 or claim 2, wherein the proof-
+requirement policy comprises, for at least one of the enforcement profiles, 
+requiring a sanctions non-membership proof, a risk range proof, a KYC 
+verification proof, or a combination thereof.
+
+\item A system or method according to claim 1 or claim 2, wherein selecting 
+the enforcement profile further deterministically defines at least one of: a 
+transaction rate limit, a queue delay, an escrow duration, an escrow release 
+condition window, or a maximum transaction value limit.
+
+\item A system according to claim 1, further comprising a cross-chain bridge 
+contract configured to extend compliance enforcement to cross-chain 
+transactions by requiring compliance verification on both a source chain and 
+a destination chain before releasing bridged funds.
+
+\item A method according to claim 2, wherein the trained machine learning 
+model is a student model trained using pseudo-labels generated by a 
+composite teacher ensemble operating on unlabelled blockchain transaction 
+data, the composite teacher ensemble comprising at least an unsupervised 
+anomaly detection model, a rule-based model encoding regulatory red-flag 
+indicators, and a graph-structural model.
+
+\item A system or method according to any preceding claim, wherein the 
+sigmoid recalibration function is defined as:
+\[
+\hat{p}_{\text{cal}}(x) = \sigma\left(k \cdot (s(x) - P_{75})\right)
+\]
+where $\sigma$ is the logistic sigmoid, $k$ is a steepness parameter, $s(x)$ 
+is the raw model output, and $P_{75}$ is the 75th percentile of the training 
+score distribution.
+
+\end{enumerate}
+
+% ============================================================
+\section{DRAWINGS}
+% ============================================================
+
+\textit{[To be filed separately: System architecture diagram showing the 
+four layers; flow diagram of the compliance decision process; schematic of 
+the zkNAF proof generation and verification pipeline; block diagram of the 
+composite teacher weak supervision pipeline.]}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A computer-implemented system enforces regulatory compliance in decentralised
+finance transactions before settlement. An interface layer receives
+transaction requests. A compliance orchestration layer comprising a machine
+learning risk scoring engine, graph analytics module, sanctions screening
+module and state-adaptive transaction flow control module computes network
+instability metrics and selects an enforcement profile; the selected profile
+deterministically defines a risk threshold profile for the compliance decision
+matrix and a proof-requirement policy specifying cryptographic proofs to be
+verified on-chain before settlement. A deterministic policy engine maps
+calibrated risk scores to approve, review, escrow or block actions using
+thresholds defined by the selected profile. Blockchain-deployed smart
+contracts enforce those actions before transaction settlement, with an
+immutable audit trail. A zero-knowledge proof subsystem enables
+privacy-preserving verification of sanctions non-membership, risk score range
+and KYC status without revealing underlying data.
+
+\end{document}

@@ -1,0 +1,785 @@
+% Combined UK Patent Application — Specification
+% Application 2: BSDT + UDL
+% Applicant: Odeyemi Olusegun Israel
+% Date: 4 March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{UDL/BSDT --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large Multi-Spectrum Anomaly Detection and Failure-Mode\\
+Correction System for Machine Learning Classifiers}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to unsupervised anomaly detection and
+post-hoc correction of deployed machine learning classifiers. More
+particularly, it provides a two-stage framework in which a Universal
+Deviation Layer (UDL) simultaneously measures deviations across multiple
+independent mathematical law domains to construct an attribution-rich
+anomaly tensor, and a Blind Spot Decomposition Theory (BSDT) layer uses
+that tensor to detect and correct structural failure modes in any deployed
+classification model without modifying the model's parameters. Applications
+include fraud detection in financial, aerospace, and medical domains.
+
+% ============================================================
+\section{BACKGROUND}
+% ============================================================
+
+\subsection{Technical Problems}
+
+\subsubsection{Limitation of Single-Perspective Anomaly Detection}
+
+Standard anomaly detectors (Isolation Forest, Local Outlier Factor,
+One-Class SVM, autoencoders) each produce a single scalar anomaly score.
+They identify \emph{that} an observation is anomalous but not
+\emph{which mathematical aspect} makes it anomalous. Because each detector
+imposes its own implicit representation of normality, an observation
+appearing normal under one representation may simultaneously violate a
+different mathematical law. No single detector spans the full space of
+mathematical anomaly, and none provides per-dimension attribution.
+Furthermore, achieving high AUC (area under the ROC curve) does not
+guarantee high coverage---anomaly scores may concentrate in a narrow band,
+failing to discriminate among subtypes (the ``coverage--AUC gap'').
+
+\subsubsection{Structural Failure Modes in Deployed Classifiers}
+
+Supervised machine learning models deployed for fraud detection fail to
+detect certain fraudulent observations for structural reasons arising from
+specific, identifiable deficiencies in the model's representation of data
+space. Retraining addresses failures only if fresh labelled data is
+available, which it typically is not (fewer than 0.1\% of blockchain
+transactions are labelled as illicit). Ensemble methods do not diagnose
+\emph{why} specific instances are missed and may share the same structural
+blind spot. Cost-sensitive reweighting is a global adjustment that does not
+distinguish between failure modes. Classical bias-variance decomposition
+operates in error space, not in feature space, providing no per-instance
+diagnostic information of why a specific observation was missed.
+
+\subsection{Prior Art Limitations}
+
+Known prior art includes:
+\begin{itemize}
+\item Isolation Forest (Liu et al., 2008); Local Outlier Factor (Breunig
+et al., 2000); One-Class SVM (Sch\"{o}lkopf et al., 1999): single-score
+general-purpose detectors providing no attribution.
+\item Deep autoencoders and out-of-distribution detection methods (ODIN,
+energy-based OOD): based on a single latent representation; no multi-law
+decomposition.
+\item SHAP and LIME: explain individual predictions in terms of input
+features but do not identify structural failure patterns or provide
+correction mechanisms.
+\item Conformal prediction: provides calibrated prediction sets but does not
+diagnose failure modes.
+\end{itemize}
+
+None provides simultaneous multi-law-domain anomaly tensor construction,
+MDN decomposition, boundary-centred dimension magnification, four-component
+failure mode decomposition, or post-hoc correction operators that operate
+on a frozen model.
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The invention provides a unified two-stage framework. The shared inventive
+concept is \emph{projecting observations through mathematically independent
+law domains to produce an attribution-rich deviation decomposition, and
+using that decomposition to discriminate and correct anomalies and
+classification failures without model retraining}. The primary technical
+contributions are:
+
+\begin{enumerate}[label=(\roman*)]
+\item The \textbf{Universal Deviation Principle}: a formal theorem that if
+a family of spectrum operators $\{\Phi_k\}$ is deviation-separating (the
+stacked Jacobian has full column rank), no anomalous observation can
+simultaneously match normal data across all operators. This provides a
+coverage guarantee absent from all single-perspective detectors.
+
+\item A \textbf{multi-spectrum anomaly tensor} $T_{i,k,d}$ constructed by
+projecting each observation through at least five independent mathematical
+law domains: statistical, dynamical (chaos), spectral (frequency),
+geometric, and exponential.
+
+\item A \textbf{Magnitude--Direction--Novelty (MDN) decomposition}
+separating how much ($r_i$), what type ($\hat{D}_i$), and how novel
+($\theta_i$) each deviation is.
+
+\item A \textbf{Boundary-Centred Dimension Magnifier} rescaling each
+tensor dimension by its empirical class-separability, amplifying
+well-separated dimensions and suppressing overlapping ones, using a
+single global hyperparameter set.
+
+\item A \textbf{four-component failure mode decomposition} (BSDT) of
+the anomaly tensor into near-orthogonal components: Camouflage ($C$),
+Feature Gap ($G$), Activity Anomaly ($A$), and Temporal Novelty ($T$),
+serving as a per-instance diagnosis of why a deployed model fails.
+
+\item \textbf{Self-calibrating weight computation} producing a composite
+blind-spot score (MFLS) from the four components using mutual information,
+Fisher variance ratio, Bayesian online updating, or gradient optimisation.
+
+\item \textbf{Post-hoc correction operators} (additive, SignedLR,
+QuadSurf, ExpGate) that apply targeted adjustments to the deployed model's
+predicted probabilities based on the failure profile, recovering missed
+detections without model retraining.
+
+\item A formal \textbf{orthogonality verification} of the four components
+(mean NMI $< 0.065$, all VIF $< 1.45$) confirming that each captures an
+independent aspect of model failure.
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION}
+% ============================================================
+
+\subsection{Stage 1: Universal Deviation Layer (UDL)}
+\label{sec:udl}
+
+\subsubsection{Universal Deviation Principle}
+
+\textbf{Definition (Deviation-Separating Family):} An operator family
+$\{\Phi_k\}_{k=1}^{K}$ is \emph{deviation-separating} if the stacked
+Jacobian:
+\begin{equation}
+J(x) = \begin{bmatrix}D\Phi_1(x)\\\vdots\\D\Phi_K(x)\end{bmatrix}
+\end{equation}
+has full column rank for all $x$ in the data domain.
+
+\textbf{Theorem~1 (Local Deviation Guarantee):} If $\{\Phi_k\}$ is
+deviation-separating, then for any anomalous point $x^*$ not identical
+to the normal centroid, there exists at least one operator under which
+$x^*$ deviates from the projection of normal data.
+
+\textbf{Theorem~2 (Global Deviation Guarantee):} On a compact anomaly
+set, a quantitative lower bound on minimum deviation across all operators
+can be established.
+
+\textbf{Theorem~3 (Finite-Sample Guarantee):} Given $n$ normal training
+samples the detection guarantee holds with probability $\geq 1-\delta$
+for a sample complexity depending on the operator family's covering number.
+
+\textbf{Theorem~4 (Information-Optimal Fusion):} Optimal weights for
+combining operator outputs are the solution to a semidefinite programme.
+
+\textbf{Theorem~5 (Greedy Operator Selection):} A greedy algorithm
+selecting the most informative operator subset achieves a $(1-1/e)$
+approximation to the optimal subset under a submodular information
+criterion.
+
+\subsubsection{Spectrum Operators}
+
+At least five mathematical law domains are instantiated as spectrum
+operators $\Phi_k$:
+
+\paragraph{Statistical Operator ($\Phi_{\mathrm{stat}}$).}
+Measures distributional deviations: Shannon entropy of the local
+neighbourhood; Kullback--Leibler divergence from the reference normal
+distribution; Hellinger distance; skewness and kurtosis of local feature
+distributions.
+
+\paragraph{Dynamical Operator ($\Phi_{\mathrm{chaos}}$).}
+Measures temporal dynamics: Lyapunov exponent from the temporal context;
+recurrence rate from recurrence plot analysis; approximate entropy
+measuring regularity.
+
+\paragraph{Spectral Operator ($\Phi_{\mathrm{freq}}$).}
+Measures frequency-domain deviations: power spectral density divergence;
+frequency ratio (low-frequency to high-frequency energy); spectral entropy;
+spectral centroid shift.
+
+\paragraph{Geometric Operator ($\Phi_{\mathrm{geom}}$).}
+Measures geometric relationships: Mahalanobis distance from the reference
+centroid; cosine similarity to the reference direction; norm ratio.
+
+\paragraph{Exponential Operator ($\Phi_{\mathrm{exp}}$).}
+Amplifies small deviations invisible under linear representations:
+\begin{equation}
+\Phi_{\mathrm{exp}}(x) = \exp\!\left(\alpha\cdot\frac{x-\mu}{\sigma}
+\right)
+\end{equation}
+where $\mu$,$\sigma$ are reference statistics.
+
+In an enhanced embodiment, up to 14 composable operators are available
+including phase-space, topological, kernel, rank, and wavelet operators.
+An operator correlation audit confirms that at most one pair exceeds the
+redundancy threshold ($\rho<0.85$).
+
+\subsubsection{Anomaly Tensor Construction}
+
+Each observation $x_i$ is projected through all $K$ operators to yield
+a full anomaly tensor:
+\begin{equation}
+T_{i,k,d} \quad\text{for observation }i,\ \text{operator }k,
+\ \text{dimension }d
+\end{equation}
+
+\subsubsection{Magnitude--Direction--Novelty Decomposition}
+
+The tensor is decomposed into three interpretable components:
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Magnitude} $r_i = \|T_i\|$: total deviation amount.
+\item \textbf{Direction} $\hat{D}_i = T_i/\|T_i\|$: unit tensor
+indicating deviation type.
+\item \textbf{Novelty} $\theta_i$: angular distance of $\hat{D}_i$ from
+reference deviation directions in training data.
+\end{enumerate}
+
+\subsubsection{Boundary-Centred Dimension Magnifier}
+
+Each tensor dimension is rescaled:
+\begin{equation}
+r'_d = \tanh\!\left(k_d\cdot\frac{r_d - b_d}{\sigma_d}\right)
+\end{equation}
+where $b_d$ is the decision boundary in dimension $d$, $\sigma_d$ is the
+boundary-region scale, and $k_d = \gamma\cdot\delta_d$ is the steepness
+with $\delta_d$ computed from three complementary measures:
+\begin{enumerate}
+\item Cohen's $d$ (effect size) between normal and anomalous distributions;
+\item class-distribution overlap area; and
+\item per-dimension AUC.
+\end{enumerate}
+
+The magnifier amplifies dimensions where classes are well-separated and
+suppresses dimensions where they overlap. In the preferred embodiment
+$\gamma{=}5.0$ and QDA regularisation $\lambda{=}10^{-4}$ constitute
+the single global hyperparameter set used across all datasets.
+
+\subsubsection{Classification Stage}
+
+Four classification strategies, with hybrid auto-selection:
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Fisher projection:} LDA projection followed by thresholding.
+\item \textbf{QDA:} Quadratic discriminant analysis with regularised
+per-class covariance.
+\item \textbf{QDA-Magnified:} QDA on the magnifier-rescaled tensor
+(preferred strategy).
+\item \textbf{RankFusion:} Fully unsupervised rank-statistic fusion.
+\end{enumerate}
+
+Hybrid auto-selection evaluates all strategies via cross-validation and
+selects the one maximising coverage while maintaining AUC above a floor.
+
+\subsubsection{Centroid Estimation}
+
+Seven centroid strategies (sample mean, trimmed mean, geometric median,
+MCD, medoid, Huber M-estimator, density-weighted centroid) are provided,
+with auto-selection minimising within-class scatter.
+
+\subsubsection{Coverage Metric}
+
+\begin{equation}
+\mathrm{Coverage@}k
+= \frac{|\{x : \mathrm{rank}(x)\leq k,\ x\in\mathrm{anomaly}\}|}
+{|\mathrm{anomaly}|}
+\end{equation}
+
+Coverage addresses the AUC--coverage gap. In the preferred embodiment
+mean coverage exceeds 91\%.
+
+\subsection{Stage 2: Blind Spot Decomposition Theory (BSDT) Layer}
+\label{sec:bsdt}
+
+The BSDT layer receives the anomaly tensor from Stage~1 (or may operate
+directly on classifier outputs) and decomposes each observation's failure
+profile into four near-orthogonal components.
+
+\subsubsection{Relationship to Stage 1}
+
+The BSDT four components correspond to specialised instantiations of the
+UDL operator domains applied to a deployed classifier's feature space.
+BSDT Camouflage ($C$) corresponds to the geometric operator applied to
+the legitimate-class centroid; Feature Gap ($G$) corresponds to the
+statistical operator measuring informational sparsity; Activity Anomaly
+($A$) corresponds to the dynamical operator measuring deviation from known
+fraud activity profiles; Temporal Novelty ($T$) corresponds to the spectral
+and dynamical operators applied over the temporal axis of the training
+distribution.
+
+\subsubsection{Camouflage Component ($C$)}
+
+Measures proximity of the observation to the legitimate-class distribution:
+\begin{equation}
+C(x) = 1 - \frac{\|x-\mu_{\mathrm{legit}}\|_2}{d_{\max}}
+\end{equation}
+where $\mu_{\mathrm{legit}}$ is the legitimate-class centroid and
+$d_{\max}$ is the maximum centroid distance in the training data.
+$C(x)\approx 1$ indicates high camouflage: the observation mimics
+legitimate patterns, causing the model to under-estimate its suspicion.
+
+\subsubsection{Feature Gap Component ($G$)}
+
+Measures informational sparsity:
+\begin{equation}
+G(x) = \frac{|\{j : |x_j|<\varepsilon\}|}{d}
+\end{equation}
+where $d$ is the feature dimension and $\varepsilon=10^{-8}$.
+High $G(x)$ indicates that many features are uninformative, depriving the
+model of discriminative signal.
+
+\subsubsection{Activity Anomaly Component ($A$)}
+
+Measures deviation of transactional activity from the activity profile of
+previously detected fraud:
+\begin{equation}
+A(x) = \sigma\!\left(
+\frac{\log(1+|\mathrm{activity}(x)|)-\mu_{\mathrm{ref}}}
+{\sigma_{\mathrm{ref}}}\right)
+\end{equation}
+where $\mathrm{activity}(x)$ is a transactional activity metric,
+$\mu_{\mathrm{ref}}$ and $\sigma_{\mathrm{ref}}$ are statistics of the
+reference detected-anomaly population, and $\sigma$ is the logistic
+sigmoid. This component captures fraud operating at activity scales the
+model has not learned to associate with fraud.
+
+\subsubsection{Temporal Novelty Component ($T$)}
+
+Measures the degree to which the observation is temporally novel relative
+to training data:
+\begin{equation}
+T(x) = \sigma\!\left(\tfrac{1}{2}(\bar{m}(x)-2)\right)
+\end{equation}
+where $\bar{m}(x)$ is the mean distance to the $k$ nearest temporal
+neighbours in the training set, normalised by the temporal span.
+
+\subsubsection{Self-Calibrating Weight Computation}
+
+The four components are aggregated into a composite blind-spot score (MFLS):
+\begin{equation}
+\mathrm{MFLS}(x) = \sum_{i\in\{C,G,A,T\}} w_i\cdot S_i(x)
+\end{equation}
+
+The weights $w_i$ (normalised to sum to 1) are computed automatically by
+one or more of:
+\begin{enumerate}[label=(\alph*)]
+\item Mutual Information between each component and the binary label on a
+held-out calibration set;
+\item Fisher Variance Ratio (between-class to within-class variance);
+\item Bayesian Online updating as labelled observations arrive; or
+\item Gradient-based optimisation maximising detection performance.
+\end{enumerate}
+
+\subsubsection{Correction Operators}
+
+Four correction operators apply targeted adjustments to the frozen model's
+predicted probabilities $p(x)$:
+
+\paragraph{Additive Correction.}
+\begin{equation}
+p^*(x) = p(x) + \lambda\cdot\mathrm{MFLS}(x)\cdot(1-p(x))\cdot
+\mathbb{1}[p(x)<\tau]
+\end{equation}
+
+\paragraph{Logistic Regression (SignedLR).}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+\beta_0+\textstyle\sum_i\beta_i S_i(x),
+\ 0,\ 1\right)
+\end{equation}
+
+\paragraph{Quadratic Surface (QuadSurf).}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+\phi_2([C,G,A,T])^\top\hat{\beta},
+\ 0,\ 1\right)
+\end{equation}
+where $\phi_2$ is the degree-2 polynomial feature map (raw components,
+squared components, pairwise products) and $\hat{\beta}$ are coefficients
+fitted by ridge regression ($\alpha{=}1.0$).
+
+\paragraph{Exponential Gate (ExpGate).}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+g(x)\cdot q(x),\ 0,\ 1\right)
+\end{equation}
+where $q(x)$ is the QuadSurf output and
+$g(x)=\sigma(v^\top[C,G,A,T]+b)$ is a learned sigmoid gate.
+
+\subsubsection{Seven Supplementary Features}
+
+In an enhanced embodiment, seven supplementary features supplement the
+core components for use by correction operators: the four raw components
+$C,G,A,T$; the composite MFLS score; the predicted-vs-actual residual
+$|p(x)-y|$ (available in supervised calibration); and the interaction
+term $C(x)\cdot A(x)$.
+
+\subsubsection{Orthogonality Verification}
+
+The four components are verified near-orthogonal by three independent
+measures:
+\begin{itemize}
+\item Normalised Mutual Information: mean NMI $\in[0.051,0.064]$ across all
+pairs, well below the 0.30 redundancy threshold.
+\item Variance Inflation Factor: all VIF $<1.45$, confirming negligible
+multicollinearity.
+\item PCA: all four components carry meaningful variance; none is dominated.
+\end{itemize}
+
+\subsubsection{Cross-Domain Transfer}
+
+The adaptive damping function derived from the composite blind-spot energy:
+\begin{equation}
+\gamma^*(E)=\frac{E}{E+\theta}
+\end{equation}
+is also applicable as a viscosity regularisation term in Navier--Stokes
+fluid dynamics simulations, representing a novel finance-to-physics transfer
+and linking the BSDT framework to the systemic risk controller described in
+related Application~1 (AMTTP/AF).
+
+\subsection{Cross-Domain Performance}
+
+Domain-dependent dominant components confirm genuine structural differences
+across application domains:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Domain} & \textbf{Dataset} & \textbf{Dominant Component} \\
+\midrule
+Blockchain & Elliptic & Temporal Novelty ($T$) \\
+Blockchain & Ethereum Addresses & Temporal Novelty ($T$) \\
+Banking & Credit Card Fraud & Activity Anomaly ($A$) \\
+Banking & IEEE-CIS & Activity Anomaly ($A$) \\
+Aerospace & Shuttle & Camouflage ($C$) \\
+Medical & Mammography & Camouflage ($C$) \\
+Pattern Recognition & Pendigits & Feature Gap ($G$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Performance Characteristics}
+
+\textbf{UDL --- Single hyperparameter set ($\gamma{=}5.0$,
+$\lambda{=}10^{-4}$):}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Dataset} & \textbf{QDA-Magnified AUC} & \textbf{Hybrid AUC} \\
+\midrule
+Synthetic & 1.000 & 0.999 \\
+Mimic (camouflage adversarial) & 1.000 & 0.999 \\
+Mammography & 0.947 & 0.911 \\
+Shuttle & 0.989 & 0.991 \\
+Pendigits & 0.777 & 0.960 \\
+\textbf{Mean} & \textbf{0.943} & \textbf{0.972} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{BSDT --- Evaluated across 792 variant--model--dataset
+combinations:}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Best variant (QuadSurf) mean F1 & 0.787 \quad ($+43\%$ relative) \\
+False positive reduction & 88.1\% (44,740 $\to$ 5,345) \\
+Maximum recall recovery & $+84.4$ percentage points \\
+Shuttle rescue (F1) & $0.134\to 0.968$ \\
+Shuttle FP reduction & 99.94\% \\
+Zero-missed-fraud configurations & 10\,/\,12 model--dataset combos \\
+Cross-domain credit card MFLS AUC & 0.885 \\
+Cross-domain aerospace MFLS AUC & 0.982 \\
+Cross-domain medical imaging MFLS AUC & 0.916 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Where a claim refers to another claim, the dependency is by claim
+number. Features of any dependent claim may be combined with any independent
+claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+% --- Independent Claim 1: UDL Detection Method ---
+\item A computer-implemented method for detecting and characterising anomalies
+in data, the method comprising:
+\begin{enumerate}[label=(\alph*)]
+\item receiving an input observation comprising a feature vector;
+
+\item projecting the observation through a plurality of spectrum operators,
+each computing deviation measurements under a different mathematical law
+domain, the plurality comprising at least:
+\begin{enumerate}[label=(\roman*)]
+\item a statistical operator measuring distributional deviations;
+\item a dynamical operator measuring temporal dynamical deviations;
+\item a spectral operator measuring frequency-domain deviations;
+\item a geometric operator measuring geometric relationship deviations; and
+\item an exponential operator measuring deviations under exponential
+amplification;
+\end{enumerate}
+
+\item constructing a multi-dimensional anomaly tensor from the deviation
+measurements across all spectrum operators;
+
+\item decomposing the anomaly tensor into magnitude, direction, and novelty
+components, wherein the magnitude measures total deviation amount, the
+direction measures deviation type, and the novelty measures angular distance
+of the deviation direction from reference directions in the training data;
+
+\item applying a boundary-centred dimension magnifier that rescales each
+dimension of the anomaly tensor by a per-dimension steepness coefficient
+$k_d = \gamma \cdot \delta_d$ where $\delta_d$ is a discriminability score
+computed from empirical class-separability in that dimension; and
+
+\item classifying the rescaled anomaly tensor to produce an anomaly score
+and per-law-domain attribution identifying which mathematical law domains
+contribute to the anomaly determination.
+\end{enumerate}
+
+% --- Independent Claim 2: Combined UDL + BSDT System ---
+\item A computer-implemented system for detecting anomalies and correcting
+failure modes in deployed machine learning classifiers, the system
+comprising:
+\begin{enumerate}[label=(\alph*)]
+\item a plurality of spectrum operator modules collectively satisfying a
+deviation-separating condition such that the stacked Jacobian of the
+operators has full column rank, each module computing deviation measurements
+under a different mathematical law domain;
+
+\item a tensor construction module configured to assemble the deviation
+measurements into a multi-dimensional anomaly tensor;
+
+\item a decomposition module configured to decompose the anomaly tensor into
+magnitude, direction, and novelty components;
+
+\item a magnifier module configured to rescale each dimension of the anomaly
+tensor using a boundary-centred rescaling function with per-dimension
+steepness computed from empirical class separability;
+
+\item a classifier module configured to produce an anomaly score and
+per-law-domain attribution from the rescaled tensor;
+
+\item a failure-mode decomposition module configured to compute, for each
+input observation and an associated predicted probability output by a
+deployed frozen classification model, four near-orthogonal failure mode
+components comprising:
+\begin{enumerate}[label=(\roman*)]
+\item a camouflage component measuring proximity of the observation to a
+legitimate-class centroid;
+\item a feature gap component measuring the proportion of near-zero features;
+\item an activity anomaly component measuring deviation of a transactional
+activity metric from a reference detected-anomaly population; and
+\item a temporal novelty component measuring temporal distance from training
+data patterns;
+\end{enumerate}
+
+\item a weighting module configured to compute component weights using one
+or more of mutual information, Fisher variance ratio, Bayesian online
+updating, or gradient-based optimisation, and to aggregate the weighted
+components into a composite blind-spot score; and
+
+\item a correction module configured to apply one or more correction
+operators to the predicted probabilities of the deployed model based on
+the computed component values, to produce corrected probabilities;
+\end{enumerate}
+wherein the failure-mode decomposition module and correction module operate
+on a frozen deployed model without requiring modification or retraining of
+that model.
+
+% --- Independent Claim 3: BSDT Correction Method ---
+\item A computer-implemented method for detecting and correcting structural
+failure modes in a deployed frozen machine learning classification model
+without modifying the model, the method comprising:
+\begin{enumerate}[label=(\alph*)]
+\item receiving a feature vector $x$ and a predicted probability $p(x)$
+output by the deployed model;
+
+\item computing a camouflage component $C(x)$ measuring proximity of the
+feature vector to a legitimate-class centroid in feature space;
+
+\item computing a feature gap component $G(x)$ measuring the proportion of
+features having values below a near-zero threshold;
+
+\item computing an activity anomaly component $A(x)$ measuring deviation
+of a transactional activity metric from the activity profile of a reference
+detected-anomaly population;
+
+\item computing a temporal novelty component $T(x)$ measuring the degree
+to which the observation is temporally distant from patterns present in
+the training data;
+
+\item computing a composite blind-spot score by aggregating the four
+components using automatically calibrated weights; and
+
+\item applying a correction operator to the predicted probability $p(x)$
+based on values of one or more computed components to produce a corrected
+probability $p^*(x)$.
+\end{enumerate}
+
+% --- Dependent Claims ---
+\item A method according to claim 1, wherein the boundary-centred dimension
+magnifier applies the rescaling function:
+\[
+r'_d = \tanh\!\left(k_d\cdot\frac{r_d - b_d}{\sigma_d}\right)
+\]
+where $k_d=\gamma\cdot\delta_d$, $\gamma$ is a global steepness parameter,
+and $\delta_d$ is a per-dimension discriminability score computed from
+Cohen's $d$, class-distribution overlap, and per-dimension AUC.
+
+\item A method according to claim 1, wherein classifying the rescaled tensor
+uses quadratic discriminant analysis with regularised per-class covariance
+matrices applied to the rescaled anomaly tensor.
+
+\item A method according to claim 1, further comprising a hybrid
+auto-selection step that evaluates a plurality of classification strategies
+on cross-validation folds and selects the strategy maximising a coverage
+metric while maintaining AUC above a minimum threshold, wherein the coverage
+metric is:
+\[
+\mathrm{Coverage@}k = \frac{|\{x : \mathrm{rank}(x)\leq k,\
+x\in\mathrm{anomaly}\}|}{|\mathrm{anomaly}|}
+\]
+
+\item A method or system according to any of claims 1 to 6, further
+comprising an operator correlation audit verifying independence of the
+spectrum operators by confirming pairwise correlation coefficients are
+below a redundancy threshold.
+
+\item A method or system according to any of claims 1 to 7, further
+comprising a centroid auto-selection module selecting from a plurality of
+centroid estimation strategies the strategy minimising within-class scatter
+of normal data in the rescaled space.
+
+\item A method or system according to any of claims 1 to 8, wherein a
+single global hyperparameter set is used across all datasets without
+per-dataset tuning.
+
+\item A method or system according to any of claims 1 to 9, further
+comprising a greedy operator selection step that selects a subset of
+operators from a larger candidate set achieving a $(1-1/e)$ approximation
+to the optimal subset under a submodular information criterion.
+
+\item A method according to claim 3, wherein the camouflage component is:
+\[
+C(x) = 1 - \frac{\|x-\mu_{\mathrm{legit}}\|_2}{d_{\max}}
+\]
+\item A method according to claim 3, wherein the feature gap component is:
+\[
+G(x) = \frac{|\{j : |x_j|<\varepsilon\}|}{d}
+\]
+\item A method according to claim 3, wherein the activity anomaly component is:
+\[
+A(x) = \sigma\!\left(\frac{\log(1+|\mathrm{activity}(x)|)-\mu_{\mathrm{ref}}}
+{\sigma_{\mathrm{ref}}}\right)
+\]
+
+\item A method according to claim 3, wherein the correction operator is a
+QuadSurf correction:
+\[
+p^*(x) = \mathrm{clip}\!\left(p(x)+\phi_2([C,G,A,T])^\top\hat{\beta},
+\ 0,\ 1\right)
+\]
+where $\phi_2$ is the degree-2 polynomial feature map and $\hat{\beta}$
+are ridge-regression coefficients.
+
+\item A method according to claim 3, wherein the correction operator is an
+additive correction:
+\[
+p^*(x) = p(x) + \lambda\cdot\mathrm{MFLS}(x)\cdot(1-p(x))
+\cdot\mathbb{1}[p(x)<\tau]
+\]
+
+\item A method according to claim 3, wherein the correction operator is an
+exponential gating correction comprising a QuadSurf output modulated by a
+learned sigmoid gate $g(x)=\sigma(v^\top[C,G,A,T]+b)$.
+
+\item A method or system according to any of claims 3 to 16, wherein the
+four components are verified near-orthogonal by having normalised mutual
+information below 0.30 for all pairs and variance inflation factors below
+2.0 for all components.
+
+\item A method or system according to any of claims 3 to 17, wherein the
+dominant component varies by application domain: temporal novelty in
+blockchain domains, activity anomaly in banking domains, and camouflage
+in aerospace and medical domains.
+
+\item A method or system according to any of claims 3 to 18, further
+comprising the step of computing seven supplementary features comprising the
+four raw components, the composite blind-spot score, a predicted-vs-actual
+residual, and a camouflage-activity interaction term.
+
+\item A method or system according to any preceding claim, wherein the
+adaptive damping function $\gamma^*(E)=E/(E+\theta)$ derived from the
+composite blind-spot energy is applied as a viscosity regularisation term
+in a computational fluid dynamics simulation.
+
+\end{enumerate}
+
+% ============================================================
+\section{DRAWINGS}
+% ============================================================
+
+\textit{[To be filed separately:
+(1) Architecture diagram of the two-stage UDL + BSDT pipeline;
+(2) Diagram of the five spectrum operators and the anomaly tensor
+construction;
+(3) Visualisation of the MDN magnitude--direction--novelty decomposition;
+(4) Schematic of the boundary-centred dimension magnifier with per-dimension
+discriminability;
+(5) Operator correlation matrix confirming independence;
+(6) Four-component BSDT decomposition diagram;
+(7) Flow diagram of the correction operator pipeline;
+(8) NMI matrix and VIF chart confirming near-orthogonality;
+(9) Cross-domain performance comparison chart;
+(10) Schematic of BSDT operating on a frozen deployed classifier.]}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A two-stage computer-implemented framework detects anomalies and corrects
+structural failure modes in deployed machine learning classifiers without
+model retraining. Stage~1 (Universal Deviation Layer) projects each
+observation through at least five independent mathematical law domains,
+constructs a multi-dimensional anomaly tensor, decomposes it into magnitude,
+direction and novelty components, and applies a boundary-centred dimension
+magnifier to produce an attributed anomaly score. A formal deviation
+guarantee proves that no anomaly can simultaneously match normal data across
+all law domains. Stage~2 (Blind Spot Decomposition Theory) decomposes each
+observation's failure profile into four near-orthogonal components:
+camouflage, feature gap, activity anomaly and temporal novelty. A composite
+blind-spot score with self-calibrating weights drives post-hoc correction
+operators that adjust a frozen model's predicted probabilities, recovering
+up to 84.4 percentage points of recall. The framework is validated across
+financial, aerospace and medical datasets using a single hyperparameter set.
+
+\end{document}

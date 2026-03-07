@@ -1,0 +1,1135 @@
+% UK Patent Application — Combined Specification
+% AMTTP + Adaptive Friction + UDL + BSDT (four inventions, single filing)
+% Applicant / Inventor: Odeyemi Olusegun Israel
+% Date: 4 March 2026
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Patent Application}
+\lhead{AMTTP/AF/UDL/BSDT --- Odeyemi O.I.}
+\rfoot{Page \thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries PATENT SPECIFICATION}\\[1em]
+{\Large State-Adaptive Compliance Enforcement System\\
+with Multi-Spectrum Anomaly Detection and\\
+Failure-Mode Correction for Decentralised Finance Networks}\\[2em]
+{\large Applicant: Odeyemi Olusegun Israel}\\[0.5em]
+{\large Inventor:  Odeyemi Olusegun Israel}\\[0.5em]
+{\large Date of Filing: 4 March 2026}\\[0.5em]
+{\large Application Number: [TO BE ASSIGNED]}\\[0.3em]
+{\normalsize \textit{Filed pursuant to the Patents Act 1977}}
+\end{center}
+
+\vspace{2em}
+
+% ============================================================
+\section{TECHNICAL FIELD}
+% ============================================================
+
+The present invention relates to systems and methods for enforcing
+anti-money laundering (AML) and regulatory compliance in decentralised
+finance (DeFi) transactions using blockchain smart contracts, machine
+learning risk scoring, and zero-knowledge cryptographic proofs. More
+particularly it relates to a compliance system that performs \\emph{pre-settlement}
+transaction flow control in a distributed ledger network by causing smart
+contracts to permit, delay (escrow), or reject execution of a transaction
+request based on: (i) a machine learning risk score; and (ii) a selected
+enforcement profile that deterministically defines numerical risk thresholds
+and cryptographic proof requirements to be verified on-chain as a
+prerequisite to settlement. In preferred embodiments the risk score is
+computed using (a) a multi-spectrum deviation representation that projects
+the transaction feature vector through multiple law-domain operators to form
+an attribution-rich anomaly tensor, and (b) a failure-mode correction layer
+that applies post-hoc correction operators to a frozen deployed model
+without retraining. In further embodiments the enforcement profile is
+selected in real time by a closed-form state-adaptive controller derived
+from a dynamical energy model of the transaction network.
+
+% ============================================================
+\section{BACKGROUND}
+% ============================================================
+
+\subsection{Technical Problems}
+
+DeFi protocols process financial transactions on blockchain networks
+without centralised intermediaries, creating four interacting technical
+problems that known art has not resolved in combination.
+
+\subsubsection{Single-Perspective Anomaly Detection Fails to Cover
+the Full Space of Fraud Patterns}
+
+Standard anomaly detectors (Isolation Forest, LOF, One-Class SVM,
+autoencoders) each produce a single scalar score. They reveal \emph{that}
+a transaction is anomalous but not \emph{which mathematical aspect} makes
+it so. No single detector spans the full space of mathematical anomaly.
+Scores may concentrate in a narrow band, failing to discriminate among
+fraud subtypes (the coverage-AUC gap). No prior detector provides
+per-law-domain attribution required for downstream failure diagnosis.
+
+\subsubsection{Structural Blind Spots in Deployed Scoring Models}
+
+Supervised models deployed for fraud detection fail to detect certain
+fraudulent transactions for structural reasons: mimicry of legitimate
+patterns (camouflage), informational sparsity (feature gap), novel
+activity scale (activity anomaly), and temporal distributional shift
+(temporal novelty). Fewer than 0.1\% of blockchain transactions are
+labelled illicit, making retraining impractical. SHAP and LIME explain
+individual predictions in input-feature space but do not diagnose
+structural failure patterns or provide correction mechanisms without
+model retraining.
+
+\subsubsection{Pre-Settlement Enforcement Gap}
+
+Blockchain analytics platforms (Chainalysis, Elliptic) operate
+retrospectively, identifying suspicious transactions after settlement
+when value transfer is irrecoverable. Protocol-level KYC/AML checks
+are bypassed when users transact directly through DeFi smart contracts.
+Privacy regulations (UK Data Protection Act 2018, EU GDPR) conflict with
+disclosure-intensive compliance models.
+
+\subsubsection{Static Enforcement Parameters}
+
+Existing compliance systems apply fixed risk thresholds and fixed proof
+requirements regardless of the network's structural state. This is
+provably suboptimal: above a critical manifold in state space any constant
+enforcement configuration fails to achieve the state-dependent welfare
+optimum. No prior art derives a closed-form optimal enforcement function
+mapping a computed energy landscape to numerical thresholds and proof
+requirements.
+
+\subsection{Prior Art Limitations}
+
+Known prior art includes: Isolation Forest, LOF, One-Class SVM (single-score,
+no attribution); deep autoencoders and ODIN (single latent representation);
+SHAP, LIME (feature-wise explanation, no structural correction); conformal
+prediction (calibrated sets, no failure diagnosis); blockchain analytics
+retrospective monitoring platforms; exchange-level KYC/AML not extending
+to protocol transactions; Basel~III countercyclical capital buffer rule
+applying a fixed piecewise-linear function to credit-to-GDP gap with no
+closed-form state-dependent optimal policy; and agent-based financial
+network simulations lacking closed-form optimal policies and provable
+stability guarantees. None provides multi-law-domain anomaly tensor
+construction, four-component failure-mode correction on a frozen model,
+pre-settlement blockchain enforcement, and closed-form state-adaptive
+threshold and proof-requirement selection in combination.
+
+% ============================================================
+\section{SUMMARY OF THE INVENTION}
+% ============================================================
+
+The invention provides a unified state-adaptive compliance enforcement
+system for DeFi networks. The shared inventive concept is
+\emph{controlling pre-settlement execution of decentralised finance
+transactions by selecting, from a predetermined set, an enforcement profile
+that deterministically defines numerical risk thresholds and on-chain
+cryptographic proof requirements, wherein the selection is computed from
+network instability metrics and the resulting policy is enforced by smart
+contracts before settlement}. Preferred embodiments further compute the risk
+score using a multi-spectrum anomaly tensor and correct structural blind
+spots of a frozen deployed model without retraining. The primary technical
+contributions are:
+
+\begin{enumerate}[label=(\roman*)]
+
+\item A \textbf{four-layer DeFi compliance architecture} (interface,
+compliance orchestration, offline training, infrastructure) enforcing
+policy actions before transaction settlement.
+
+\item A \textbf{multi-spectrum transaction anomaly engine} projecting
+each transaction feature vector through at least five independent
+mathematical law domains---statistical, dynamical, spectral, geometric,
+and exponential---to construct a multi-dimensional anomaly tensor
+$T_{i,k,d}$, with a formal coverage guarantee; and decomposing that
+tensor into magnitude, direction, and novelty components for per-law-domain
+attribution.
+
+\item A \textbf{boundary-centred dimension magnifier} rescaling each
+tensor dimension by its empirical class-separability, amplifying
+well-separated dimensions using a single global hyperparameter set
+$(\gamma{=}5.0,\ \lambda{=}10^{-4})$.
+
+\item A \textbf{weak-supervision offline training pipeline} comprising
+a composite teacher ensemble (autoencoder--gradient boosting, FATF
+rule-based, graph-structural) generating pseudo-labels from unlabelled
+blockchain data and an XGBoost student model trained on those labels.
+
+\item A \textbf{failure-mode correction layer} operating on the frozen
+deployed student model: it decomposes each transaction into four
+near-orthogonal components---Camouflage ($C$), Feature Gap ($G$), Activity
+Anomaly ($A$), Temporal Novelty ($T$)---computes a composite blind-spot
+score (MFLS) with self-calibrating weights, and applies a post-hoc
+correction operator to the student model's predicted probability, producing
+a corrected risk score without model retraining.
+
+\item A \textbf{state-adaptive transaction flow control module} computing
+one or more network instability metrics from recent on-chain activity and
+selecting, from a predetermined set of enforcement profiles, a
+configuration deterministically defining: (a) a risk threshold profile
+$(\tau_1,\tau_2,\tau_3,\tau_4)$ for the five-tier decision matrix; and
+(b) a proof-requirement policy specifying, for at least one tier or
+transaction class, one or more cryptographic proofs required on-chain
+prior to settlement.
+
+\item A \textbf{gravitational interaction engine} modelling $N$ financial
+institutions as particles under a pairwise erf-attraction plus logarithmic
+repulsion potential; a \textbf{spectral phase-transition detector}
+determining whether the network lies above the critical manifold; a
+\textbf{blind-spot energy module} computing a macro-level complementary
+energy function from four deviation channels; and a \textbf{closed-form
+optimal adaptive policy} $\gamma^*(X)$ derived from the Bellman equation
+that drives profile selection.
+
+\item A \textbf{zero-knowledge proof subsystem} configured to verify, on-chain,
+one or more privacy-preserving compliance predicates as prerequisites to
+settlement according to the proof-requirement policy, wherein the proofs are
+verifiable without revealing underlying personal data.
+
+\item \textbf{Smart contract infrastructure} enforcing all policy actions
+deterministically before settlement with an immutable audit trail.
+
+\end{enumerate}
+
+% ============================================================
+\section{DETAILED DESCRIPTION}
+% ============================================================
+
+\subsection{System Architecture Overview}
+\label{sec:arch}
+
+The system comprises four hierarchically organised layers.
+
+\textbf{Layer~I --- Interface Layer.}
+Client SDKs (TypeScript, Python) and a RESTful API receive transaction
+requests, return risk scores, and surface compliance status. A web
+dashboard provides visual monitoring.
+
+\textbf{Layer~II --- Compliance Orchestration Layer.}
+\begin{itemize}
+\item \emph{Multi-spectrum transaction anomaly engine} (\S\ref{sec:udl})
+\item \emph{Failure-mode correction layer} (\S\ref{sec:bsdt})
+\item \emph{Graph analytics module}: transaction graph construction;
+centrality, PageRank, community detection.
+\item \emph{Sanctions screening module}: OFAC and EU database checks.
+\item \emph{State-adaptive transaction flow control module}
+(\S\ref{sec:af}).
+\item \emph{Deterministic policy engine}: maps corrected scores to policy
+actions via the thresholds of the selected enforcement profile.
+\end{itemize}
+
+\textbf{Layer~III --- Offline Training Layer.}
+Composite teacher ensemble, pseudo-label generation, student model training,
+cross-validation, sigmoid calibration.
+
+\textbf{Layer~IV --- Infrastructure Layer.}
+Blockchain smart contracts, privacy-preserving proof circuits, databases,
+distributed file storage.
+
+\subsection{Pre-Settlement Smart Contract Enforcement Workflow}
+\label{sec:workflow}
+
+In a preferred embodiment the system enforces compliance by controlling
+execution of a transaction request at the point of settlement in the
+blockchain transaction processing network. A representative workflow is:
+
+\begin{enumerate}[label=(\alph*)]
+\item A client application submits a transaction request to a core smart
+contract function, the request comprising at least a sender address, a
+recipient address, and a transaction value.
+
+\item The compliance orchestration layer computes a risk score from the
+feature vector and selects an enforcement profile based on instability
+metrics computed over a recent sliding time window of on-chain activity.
+
+\item The selected enforcement profile deterministically defines (i) a set
+of numerical thresholds for the compliance decision matrix, and (ii) a
+proof-requirement policy specifying which cryptographic proofs must be
+verified for one or more threshold tiers or transaction classes.
+
+\item If the proof-requirement policy requires one or more proofs, the
+transaction is prevented from settling unless verification succeeds on-chain.
+In a preferred embodiment the proof is verified by calling a verifier
+contract that records a verification result, a proof identifier, and a
+timestamp, and the core contract checks the verification result and that the
+verification is fresh within a predetermined validity window and has not been
+replayed.
+
+\item Based on the risk score and the selected thresholds, the core contract
+either (i) authorises execution, (ii) transfers value into an escrow
+contract (time-lock), or (iii) rejects execution by reverting.
+\end{enumerate}
+
+This workflow provides a technical effect beyond risk scoring \emph{per se}:
+it prevents irreversible settlement of non-compliant transactions by
+enforcing deterministic preconditions within the transaction processing
+network itself, and it enforces privacy-preserving proof-gating without
+requiring disclosure of underlying identity or score values.
+
+% ============================================================
+\subsection{Multi-Spectrum Transaction Anomaly Engine (UDL)}
+\label{sec:udl}
+% ============================================================
+
+\subsubsection{Universal Deviation Principle}
+
+\textbf{Definition (Deviation-Separating Family):}
+An operator family $\{\Phi_k\}_{k=1}^{K}$ is
+\emph{deviation-separating} if the stacked Jacobian
+$J(x) = [D\Phi_1(x)^\top \cdots D\Phi_K(x)^\top]^\top$
+has full column rank for all $x$ in the transaction feature domain.
+
+\textbf{Theorem~1 (Coverage Guarantee):}
+If $\{\Phi_k\}$ is deviation-separating, no anomalous transaction
+can simultaneously match the normal projection under all operators.
+This provides a detection guarantee absent from every single-perspective
+detector.
+
+\textbf{Theorem~2 (Global Bound):}
+On a compact anomaly set a quantitative lower bound on minimum deviation
+across all operators can be established.
+
+\textbf{Theorem~3 (Finite-Sample Guarantee):}
+Given $n$ normal training samples the coverage guarantee holds with
+probability $\geq 1-\delta$ for a sample complexity depending on the
+operator family's covering number.
+
+\textbf{Theorem~4 (Information-Optimal Fusion):}
+Optimal operator-output weights are the solution to a semidefinite
+programme.
+
+\textbf{Theorem~5 (Greedy Operator Selection):}
+A greedy algorithm achieves a $(1-1/e)$ approximation to the optimal
+operator subset under a submodular information criterion.
+
+\subsubsection{Spectrum Operators}
+\label{sec:ops}
+
+Five spectrum operators $\Phi_k$ are instantiated on the 167-dimensional
+transaction feature vector:
+
+\paragraph{Statistical Operator ($\Phi_{\mathrm{stat}}$).}
+Shannon entropy of the local neighbourhood; KL divergence from the
+reference distribution; Hellinger distance; skewness; kurtosis.
+
+\paragraph{Dynamical Operator ($\Phi_{\mathrm{chaos}}$).}
+Lyapunov exponent from the temporal transaction context; recurrence rate;
+approximate entropy.
+
+\paragraph{Spectral Operator ($\Phi_{\mathrm{freq}}$).}
+Power spectral density divergence; low-to-high frequency energy ratio;
+spectral entropy; spectral centroid shift.
+
+\paragraph{Geometric Operator ($\Phi_{\mathrm{geom}}$).}
+Mahalanobis distance from the reference centroid; cosine similarity to
+the reference direction; norm ratio.
+
+\paragraph{Exponential Operator ($\Phi_{\mathrm{exp}}$).}
+\begin{equation}
+\Phi_{\mathrm{exp}}(x) = \exp\!\left(\alpha\cdot\tfrac{x-\mu}{\sigma}\right)
+\end{equation}
+amplifying small deviations invisible under linear representations.
+$\mu$, $\sigma$ are reference statistics computed on normal transactions.
+
+In an enhanced embodiment up to 14 composable operators are available
+(phase-space, topological, kernel, rank, wavelet). An operator correlation
+audit confirms at most one pair exceeds the redundancy threshold
+$(\rho<0.85)$.
+
+\subsubsection{Anomaly Tensor Construction}
+
+Each transaction feature vector $x_i$ is projected through all $K$
+operators to yield a three-dimensional anomaly tensor:
+\begin{equation}
+T_{i,k,d} \quad\text{for transaction }i,\ \text{operator }k,
+\ \text{dimension }d
+\end{equation}
+
+\subsubsection{Magnitude--Direction--Novelty Decomposition}
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Magnitude} $r_i = \|T_i\|$: total deviation amount.
+\item \textbf{Direction} $\hat{D}_i = T_i/\|T_i\|$: unit tensor
+indicating which law domains drive the anomaly.
+\item \textbf{Novelty} $\theta_i$: angular distance of $\hat{D}_i$ from
+reference deviation directions in training data.
+\end{enumerate}
+
+\subsubsection{Boundary-Centred Dimension Magnifier}
+
+Each tensor dimension $d$ is rescaled:
+\begin{equation}
+r'_d = \tanh\!\left(k_d\cdot\tfrac{r_d-b_d}{\sigma_d}\right)
+\end{equation}
+where $b_d$ is the decision boundary in dimension $d$, $\sigma_d$ is the
+local scale, and $k_d = \gamma\cdot\delta_d$ is the per-dimension
+steepness. The discriminability score $\delta_d$ is computed from three
+complementary measures: Cohen's $d$ (effect size), class-distribution
+overlap area, and per-dimension AUC. The global parameters $\gamma{=}5.0$
+and QDA regularisation $\lambda{=}10^{-4}$ constitute the single
+hyperparameter set used across all deployments.
+
+\subsubsection{Classification and Coverage}
+
+The rescaled tensor is classified by QDA-Magnified (preferred) or a hybrid
+auto-selector that evaluates multiple strategies and maximises coverage:
+\begin{equation}
+\mathrm{Coverage@}k = \frac{|\{x:\mathrm{rank}(x)\leq k,\
+x\in\mathrm{anomaly}\}|}{|\mathrm{anomaly}|}
+\end{equation}
+In the preferred embodiment mean coverage exceeds 91\%. The anomaly
+tensor is the primary input to both the failure-mode correction layer
+(\S\ref{sec:bsdt}) and the risk scoring engine.
+
+% ============================================================
+\subsection{Failure-Mode Correction Layer (BSDT)}
+\label{sec:bsdt}
+% ============================================================
+
+The failure-mode correction layer receives the anomaly tensor from
+\S\ref{sec:udl} and the predicted probability $p(x)$ from the deployed
+frozen student model, and produces a corrected probability $p^*(x)$
+without modifying the model's parameters.
+
+\subsubsection{Relationship to Spectrum Operators}
+
+The four BSDT components correspond to specialised instantiations of
+the UDL spectrum operators applied to the student model's feature space:
+Camouflage ($C$) corresponds to the geometric operator applied to the
+legitimate-class centroid; Feature Gap ($G$) corresponds to the
+statistical operator measuring informational sparsity; Activity Anomaly
+($A$) corresponds to the dynamical operator measuring deviation from
+known fraud activity; Temporal Novelty ($T$) corresponds to the spectral
+and dynamical operators applied over the temporal axis of the training
+distribution. At the macro level the same four channel types reappear in
+the blind-spot energy module of the systemic risk controller
+(\S\ref{sec:af}).
+
+\subsubsection{Camouflage Component}
+
+\begin{equation}
+C(x) = 1 - \frac{\|x-\mu_{\mathrm{legit}}\|_2}{d_{\max}}
+\end{equation}
+$C(x)\approx 1$ indicates that the transaction mimics legitimate patterns,
+depressing the student model's suspicion score.
+
+\subsubsection{Feature Gap Component}
+
+\begin{equation}
+G(x) = \frac{|\{j:|x_j|<\varepsilon\}|}{d}, \quad \varepsilon=10^{-8}
+\end{equation}
+High $G(x)$ indicates many uninformative features, depriving the model
+of discriminative signal.
+
+\subsubsection{Activity Anomaly Component}
+
+\begin{equation}
+A(x) = \sigma\!\left(
+\frac{\log(1+|\mathrm{activity}(x)|)-\mu_{\mathrm{ref}}}
+{\sigma_{\mathrm{ref}}}\right)
+\end{equation}
+Measures deviation of transaction activity from the reference
+detected-fraud population; captures fraud operating at scales not
+represented in training labels.
+
+\subsubsection{Temporal Novelty Component}
+
+\begin{equation}
+T(x) = \sigma\!\left(\tfrac{1}{2}(\bar{m}(x)-2)\right)
+\end{equation}
+$\bar{m}(x)$ is the mean temporal distance to the $k$ nearest training
+neighbours, normalised by the temporal span.
+
+\subsubsection{Composite Blind-Spot Score and Self-Calibrating Weights}
+
+\begin{equation}
+\mathrm{MFLS}(x) = \sum_{i\in\{C,G,A,T\}} w_i\cdot S_i(x)
+\end{equation}
+The weights $w_i$ (normalised to sum to 1) are computed by one or more
+of: mutual information; Fisher variance ratio; Bayesian online updating;
+gradient-based optimisation. The four components are verified
+near-orthogonal: mean NMI $\in[0.051,0.064]$ across all pairs (threshold
+0.30); all VIF $<1.45$.
+
+\subsubsection{Correction Operators}
+
+Four post-hoc correction operators adjust $p(x)$ based on the MFLS:
+
+\paragraph{Additive.}
+\begin{equation}
+p^*(x) = p(x) + \lambda\cdot\mathrm{MFLS}(x)\cdot(1-p(x))
+\cdot\mathbb{1}[p(x)<\tau]
+\end{equation}
+
+\paragraph{SignedLR.}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+\beta_0+\textstyle\sum_i\beta_i S_i(x),0,1\right)
+\end{equation}
+
+\paragraph{QuadSurf (preferred).}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+\phi_2([C,G,A,T])^\top\hat{\beta},0,1\right)
+\end{equation}
+$\phi_2$ is the degree-2 polynomial feature map;
+$\hat{\beta}$ are ridge-regression coefficients ($\alpha{=}1.0$).
+
+\paragraph{ExpGate.}
+\begin{equation}
+p^*(x) = \mathrm{clip}\!\left(p(x)+g(x)\cdot q(x),0,1\right)
+\end{equation}
+$q(x)$ is the QuadSurf output; $g(x)=\sigma(v^\top[C,G,A,T]+b)$ is a
+learned sigmoid gate.
+
+The corrected probability $p^*(x)$ is multiplied by 1000 to yield the
+integer risk score used by the decision matrix.
+
+% ============================================================
+\subsection{Weak Supervision Offline Training Pipeline}
+\label{sec:ws}
+% ============================================================
+
+Three independent teacher models generate pseudo-labels from unlabelled
+blockchain transaction data:
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Autoencoder--Gradient Boosting Teacher} ($s_{\mathrm{AE-XGB}}$):
+autoencoder reconstruction error and latent features feed an XGBoost
+model.
+\item \textbf{FATF Rule-Based Teacher} ($s_{\mathrm{FATF}}$): encodes FATF
+red-flag indicators as deterministic scoring rules.
+\item \textbf{Graph-Based Teacher} ($s_{\mathrm{Graph}}$): suspicion scores
+from proximity to high-risk addresses, temporal clustering, and unusual
+connectivity.
+\end{enumerate}
+Composite teacher score:
+\begin{equation}
+s_{\mathrm{teacher}}(x) = w_1 s_{\mathrm{AE-XGB}}(x) +
+w_2 s_{\mathrm{FATF}}(x) + w_3 s_{\mathrm{Graph}}(x)
+\end{equation}
+Preferred: $w_1{=}0.4$, $w_2{=}0.3$, $w_3{=}0.3$.
+Binary pseudo-labels train an XGBoost student model on 167 engineered
+features. Raw output is sigmoid-recalibrated:
+\begin{equation}
+\hat{p}_{\mathrm{cal}}(x) = \sigma\!\left(k\cdot(s(x)-P_{75})\right)
+\end{equation}
+where k = 30 and P75 is the 75th percentile of the training
+score distribution. The BSDT correction layer (\S\ref{sec:bsdt}) then
+produces the final corrected integer risk score.
+
+% ============================================================
+\subsection{Compliance Decision Matrix}
+\label{sec:matrix}
+% ============================================================
+
+The deterministic policy engine maps integer scores $[0,1000]$ to policy
+actions according to thresholds drawn from the active enforcement profile:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Score Range} & \textbf{Policy Action} & \textbf{Smart Contract Effect}\\
+\midrule
+$[0,\tau_1)$ & APPROVE & Immediate execution \\
+$[\tau_1,\tau_2)$ & APPROVE + MONITOR & Execution; monitoring flag \\
+$[\tau_2,\tau_3)$ & REVIEW & Queued for manual review \\
+$[\tau_3,\tau_4)$ & ESCROW & Time-locked escrow \\
+$[\tau_4,1000]$ & BLOCK & On-chain rejection \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Under the stable profile: $(\tau_1,\tau_2,\tau_3,\tau_4) =
+(200,400,600,800)$. The state-adaptive module (\S\ref{sec:af}) selects
+profiles that adjust these thresholds and impose additional proof
+requirements.
+
+\subsubsection{Example Enforcement Profiles}
+
+In a preferred embodiment the predetermined set of enforcement profiles
+includes at least a \textit{stable} profile, a \textit{stressed} profile, and
+a \textit{critical} profile. Each profile deterministically defines both a
+threshold tuple $(\tau_1,\tau_2,\tau_3,\tau_4)$ and a proof-requirement
+policy.
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+\textbf{Profile} & $(\tau_1,\tau_2,\tau_3,\tau_4)$ & \textbf{Proof-gated tiers} & \textbf{Required proofs}\\
+\midrule
+Stable & (200, 400, 600, 800) & $[\tau_3,1000]$ & non-membership predicate \\
+Stressed & (250, 450, 650, 850) & $[\tau_2,1000]$ & non-membership + range predicate \\
+Critical & (300, 500, 700, 900) & $[\tau_1,1000]$ & non-membership + range + credential predicate \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The example profiles are illustrative and may be modified for a given
+deployment. For a fixed system state, the selected profile and the resulting
+on-chain decisions are deterministic and reproducible.
+
+% ============================================================
+\subsection{State-Adaptive Transaction Flow Control Module}
+\label{sec:af}
+% ============================================================
+
+\subsubsection{Instability Metrics}
+
+Network instability metrics are computed from:
+\begin{enumerate}[label=(\alph*)]
+\item spectral radius or centrality concentration of the transaction graph
+over a sliding time window;
+\item a temporal burst indicator from the transaction count process; and/or
+\item a shift of the corrected risk score distribution relative to its
+reference distribution.
+\end{enumerate}
+
+\subsubsection{Enforcement Profile Selection}
+
+The module selects one profile from the discrete set
+$\{\textit{stable},\, \textit{stressed},\, \textit{critical}\}$.
+Each profile deterministically defines:
+\begin{enumerate}[label=(\alph*)]
+\item a risk threshold profile $(\tau_1,\tau_2,\tau_3,\tau_4)$; and
+\item a proof-requirement policy specifying which privacy-preserving
+compliance predicate proofs must be verified on-chain for at least one tier
+or transaction class, the compliance predicates comprising at least one of:
+(i) a set non-membership predicate, (ii) a numerical range predicate, or
+(iii) a credential validity predicate.
+\end{enumerate}
+
+\subsubsection{Gravitational Interaction Engine}
+
+When multi-institution financial metrics are available, the module models
+$N$ institutions as particles in $\mathbb{R}^d$:
+\begin{equation}
+\dot{X} = -\alpha(X-\mu\mathbf{1}^\top) - \nabla_X\Phi_{\mathrm{pair}}(X)
+- \sum_k \beta_k D\Phi_k(X)^\top D_k(X)
+\end{equation}
+
+\subsubsection{Pairwise Interaction Potential}
+
+\begin{equation}
+\phi(r) = \gamma\cdot\frac{\sigma\sqrt{\pi}}{2}\,\mathrm{erf}(r/\sigma)
+- \gamma\lambda_{\mathrm{rep}}\cdot\log(r+\varepsilon)
+\end{equation}
+Preferred parameters: $\alpha{=}0.10$, $\gamma{=}1.00$,
+$\sigma{=}1.00$, $\lambda_{\mathrm{rep}}{=}0.10$, $\varepsilon{=}10^{-5}$.
+
+\subsubsection{Macro-Level Blind-Spot Energy Module}
+
+A macro-level energy function is computed from four deviation channels
+that mirror, at the network level, the BSDT components at the transaction
+level:
+\begin{enumerate}[label=(\alph*)]
+\item enstrophy anomaly $\delta_C$: rotational energy deviation (analogous
+to Camouflage);
+\item spectral gap $\delta_G$: structural fragility indicator (analogous
+to Feature Gap);
+\item alignment anomaly $\delta_A$: co-movement deviation (analogous to
+Activity Anomaly); and
+\item temporal novelty $\delta_T$: drift from reference state patterns
+(analogous to Temporal Novelty).
+\end{enumerate}
+
+\begin{equation}
+E_{\mathrm{BS}}(X) =
+\|(X-\mu_0)^\top\Sigma_0^{-1}(X-\mu_0)\|_F
+\end{equation}
+$\mu_0$ and $\Sigma_0$ are reference mean and covariance estimated by
+Ledoit--Wolf Oracle shrinkage.
+
+\subsubsection{Critical Manifold}
+
+\textbf{Theorem (Spectral Phase Transition):}
+\begin{equation}
+\mathcal{C} = \{X:\lambda_{\max}(\rho(X)\cdot\ell(X)\cdot W)=1\}
+\end{equation}
+Above $\mathcal{C}$ state-adaptive friction is both necessary and
+sufficient for welfare optimality.
+
+\subsubsection{Closed-Form Optimal Adaptive Policy}
+
+\textbf{Theorem (Optimal Friction):} The Bellman-optimal friction
+coefficient is:
+\begin{equation}
+\gamma^*(X) \approx
+\frac{\beta\|\nabla E\|^2}{2\kappa+\beta\|\nabla E\|^2}
+\cdot\frac{E(X)}{E(X)+\theta}
+\end{equation}
+$\gamma^*\to 0$ as $E\to 0$ (minimum friction when stable);
+$\gamma^*\to 1$ as $E\to\infty$ (maximum friction under severe
+instability). The adaptive damping factor $E/(E+\theta)$ is the same
+functional form as the BSDT damping function $\gamma^*(E)=E/(E+\theta)$
+applied at the transaction level by the correction operators, linking
+both levels of the system through a single analytical form.
+
+Profile selection: below $\gamma_1$ --- \textit{stable};
+between $\gamma_1$ and $\gamma_2$ --- \textit{stressed};
+above $\gamma_2$ --- \textit{critical}.
+
+\subsubsection{Navier--Stokes Analogy}
+
+Institution position changes $\dot{X}$ are interpreted as a velocity
+field decomposed into strain $S$ and vorticity $\Omega$. Enstrophy
+$\mathcal{E}=\frac{1}{2}\|\omega\|_F^2$ quantifies rotational energy.
+The Beale--Kato--Majda criterion adapted to financial networks serves
+as a singularity indicator. The adaptive friction coefficient is applied
+as an adaptive viscosity $\nu=\nu_0(1+\gamma^*(E_{\mathrm{BS}}))$.
+Minsky regime classification (hedge, speculative, Ponzi) emerges from
+the cosine alignment between the gravitational and blind-spot gradients.
+
+% ============================================================
+\subsection{Zero-Knowledge Proof Subsystem (zkNAF)}
+\label{sec:zknaf}
+% ============================================================
+
+In preferred embodiments, the system includes one or more zero-knowledge proof
+circuits implementing privacy-preserving compliance predicates. In one
+embodiment the proof system is a succinct non-interactive argument of
+knowledge (SNARK), for example Groth16.
+
+\textbf{Example: Set Non-Membership Predicate.}
+The prover shows an address is absent from a cryptographic set commitment
+without revealing the address.
+
+\textbf{Example: Numerical Range Predicate.}
+The prover demonstrates $s_{\min}\leq s(x)\leq s_{\max}$ without
+revealing the exact corrected score.
+
+\textbf{Example: Credential Validity Predicate.}
+The prover demonstrates satisfaction of an identity or credential status with
+an accredited provider without revealing identity data.
+
+Each proof may carry a predetermined validity interval. An on-chain verifier
+contract performs verification and records the result together with a
+timestamp and a proof identifier.
+
+% ============================================================
+\subsection{Smart Contract Architecture}
+\label{sec:sc}
+% ============================================================
+
+\begin{itemize}
+\item \textbf{Core Contract:} on-chain decision matrix; immutable audit
+record.
+\item \textbf{Escrow Contract:} time-locked escrow; release and dispute
+escalation.
+\item \textbf{ZK Verifier Contract:} verification of selected zero-knowledge
+proofs; binary result stored with timestamp and proof identifier.
+\item \textbf{Cross-Chain Bridge Contract:} requires compliance
+verification on both source and destination chains.
+\item \textbf{Dispute Resolution Contract:} structured escalation for
+escrowed disputes.
+\end{itemize}
+
+All enforcement decisions execute before the corresponding transaction
+settles on the blockchain network.
+
+% ============================================================
+\subsection{Performance Characteristics}
+\label{sec:perf}
+% ============================================================
+
+\textbf{DeFi Compliance System} (2.64 million Ethereum transactions):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Meta-Ensemble ROC-AUC (test) & 1.0000 \\
+Meta-Ensemble ROC-AUC (5-fold CV) & $0.9965\pm0.0049$ \\
+Meta-Ensemble PR-AUC & 0.9999 \\
+Transaction XGBoost AUC & 0.9878 \quad F1: 0.901 \\
+Cross-domain mean AUC (9 datasets) & 0.9962 \\
+Escrow contract gas cost & 287,890 gas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{UDL Anomaly Engine} (single hyperparameter set, $\gamma{=}5.0$):
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Dataset} & \textbf{QDA-Magnified AUC} & \textbf{Hybrid AUC}\\
+\midrule
+Synthetic & 1.000 & 0.999 \\
+Mimic (adversarial) & 1.000 & 0.999 \\
+Mammography & 0.947 & 0.911 \\
+Shuttle & 0.989 & 0.991 \\
+Pendigits & 0.777 & 0.960 \\
+Mean & 0.943 & 0.972 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{BSDT Correction Layer} (792 variant--model--dataset combinations):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Best variant (QuadSurf) mean F1 & 0.787 ($+43\%$ relative) \\
+False positive reduction & 88.1\% (44,740 $\to$ 5,345) \\
+Maximum recall recovery & $+84.4$ percentage points \\
+Shuttle rescue F1 & $0.134\to 0.968$ \\
+Cross-domain credit card MFLS AUC & 0.885 \\
+Cross-domain aerospace MFLS AUC & 0.982 \\
+Cross-domain medical imaging MFLS AUC & 0.916 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Adaptive Friction Controller} (FDIC SDI data, 140 quarters):
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Configuration} & $N$ & \textbf{AUROC} & \textbf{GFC Lead}\\
+\midrule
+Institution-type (7 classes) & 7 & $\geq0.70$ & 6 quarters \\
+Bank-level (individual) & 30 & 0.805 & 6 quarters \\
+G-SIB cross-border & 20 & 0.781 & 6 quarters \\
+\bottomrule
+\end{tabular}
+\end{center}
+Super-criticality: 68.6\% of sample above $\mathcal{C}$.
+GFC welfare loss of inaction: 19.57 pp consumption-equivalent.
+
+% ============================================================
+\clearpage
+\section{CLAIMS}
+% ============================================================
+
+\noindent\textit{The following claims define the scope of protection
+sought. Features of any dependent claim may be combined with any
+independent claim or with other dependent claims.}
+\vspace{0.8em}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+
+%──────────────────────────────────────────────────────────
+% Independent Claim 1 — DeFi Compliance System (Technical Transaction Control)
+%──────────────────────────────────────────────────────────
+\item A computer-implemented transaction compliance system for a decentralised
+finance transaction processing network, the system comprising:
+\begin{enumerate}[label=(\alph*)]
+
+\item an interface layer configured to receive, from a client application,
+a transaction request comprising at least a sender address, a recipient
+address, and a transaction value;
+
+\item a risk scoring engine configured to compute a numerical risk score
+for the transaction request by:
+\begin{enumerate}[label=(\roman*)]
+  \item constructing a feature vector comprising address-level,
+  transaction-level, and graph-level features;
+  \item projecting the feature vector through a plurality of spectrum
+  operators each computing deviation measurements under a different
+  mathematical law domain to construct a multi-dimensional anomaly tensor;
+  \item applying a trained machine learning model to the anomaly tensor to
+  compute the numerical risk score;
+\end{enumerate}
+
+\item a state-adaptive transaction flow control module configured to
+compute one or more network instability metrics from recent transaction
+activity and to compute a state-dependent friction coefficient
+$\gamma^*(X)$ based on the one or more network instability metrics, and to
+select, from a predetermined set of enforcement profiles, an enforcement
+configuration based on the computed friction coefficient $\gamma^*(X)$,
+the enforcement configuration comprising:
+\begin{enumerate}[label=(\roman*)]
+  \item a risk threshold profile defining numerical thresholds for a
+  deterministic compliance decision matrix; and
+  \item a proof-requirement policy defining, for at least one threshold tier
+  or transaction class, one or more cryptographic proofs required to be
+  verified on-chain as a prerequisite to settlement;
+\end{enumerate}
+
+\item a deterministic policy engine configured to map the risk score to a
+policy action according to the selected risk threshold profile and to
+enforce the proof-requirement policy by causing a settlement-preventing
+action when required proofs are absent, expired, or fail on-chain
+verification, wherein the settlement-preventing action comprises at least
+one of: causing a core smart contract function to revert execution of a
+transaction call, or preventing release of value from an escrow smart
+contract; and
+
+\item smart contract infrastructure deployed on a blockchain network and
+configured to implement, before settlement, the policy action determined by
+the deterministic policy engine, including a core contract configured to
+reject or authorise execution, an escrow contract configured to time-lock
+value transfers for an escrow policy action, and a zero-knowledge proof
+verifier contract configured to verify said cryptographic proofs,
+wherein the core contract is further configured to require, for a
+transaction class or threshold tier specified by the proof-requirement
+policy, a successful verification result from the zero-knowledge proof
+verifier contract prior to permitting execution;
+\end{enumerate}
+
+\noindent wherein the smart contract infrastructure prevents settlement of
+the transaction request unless the policy action permits execution and, when
+required by the proof-requirement policy, the cryptographic proofs are
+verified on-chain.
+
+%──────────────────────────────────────────────────────────
+% Independent Claim 2 — DeFi Compliance Method (Pre-Settlement Enforcement)
+%──────────────────────────────────────────────────────────
+\item A computer-implemented method of enforcing compliance in decentralised
+finance transactions on a blockchain network, the method comprising:
+\begin{enumerate}[label=(\alph*)]
+
+\item receiving a transaction request comprising at least a sender address,
+a recipient address, and a transaction value;
+
+\item computing a numerical risk score by:
+\begin{enumerate}[label=(\roman*)]
+  \item constructing a feature vector comprising address-level,
+  transaction-level, and graph-level features;
+  \item projecting the feature vector through a plurality of spectrum
+  operators each computing deviation measurements under a different
+  mathematical law domain to construct a multi-dimensional anomaly tensor;
+  \item applying a trained machine learning model to the anomaly tensor to
+  compute the numerical risk score;
+\end{enumerate}
+
+\item computing one or more network instability metrics from recent
+transaction activity, computing a state-dependent friction coefficient
+$\gamma^*(X)$ based on the one or more network instability metrics, and
+selecting an enforcement profile from a predetermined set based on the
+computed friction coefficient $\gamma^*(X)$, the selected profile
+deterministically defining:
+\begin{enumerate}[label=(\roman*)]
+  \item a risk threshold profile for a deterministic decision matrix; and
+  \item a proof-requirement policy specifying one or more cryptographic
+  proofs to be verified on-chain as a prerequisite to settlement for at
+  least one threshold tier or transaction class;
+\end{enumerate}
+
+\item mapping the risk score to a policy action using the decision matrix
+with thresholds from the selected risk threshold profile;
+
+\item before settlement, enforcing the proof-requirement policy by
+verifying the specified cryptographic proofs on-chain using a zero-knowledge
+proof verifier smart contract and preventing execution of the transaction
+when required proofs are absent, expired, or fail verification, wherein
+preventing execution comprises reverting a core smart contract function call
+or preventing release of value from an escrow smart contract; and
+
+\item executing a corresponding smart contract function on a blockchain
+network to implement the policy action, including at least one of:
+authorising execution, transferring value into escrow, maintaining value in
+escrow until a release condition is satisfied, or rejecting execution by
+reversion; and recording the outcome on-chain as an immutable audit record.
+\end{enumerate}
+
+%──────────────────────────────────────────────────────────
+% Dependent Claims
+%──────────────────────────────────────────────────────────
+\item A system according to claim 1 or a method according to claim 2,
+wherein computing the risk score comprises projecting the feature vector
+through a plurality of spectrum operators each computing deviation
+measurements under a different mathematical law domain to construct a
+multi-dimensional anomaly tensor, and using the anomaly tensor as an input
+to the trained machine learning model.
+
+\item A system or method according to claim 3, wherein the plurality of
+spectrum operators comprises at least: a statistical operator measuring
+distributional deviations, a dynamical operator measuring temporal dynamical
+deviations, a spectral operator measuring frequency-domain deviations, a
+geometric operator measuring geometric relationship deviations, and an
+exponential operator measuring deviations under exponential amplification.
+
+\item A system or method according to claim 3 or claim 4, wherein the
+anomaly tensor is decomposed into magnitude, direction, and novelty
+components, and the direction and novelty components provide per-law-domain
+attribution identifying which law domains contribute to a risk assessment.
+
+\item A system or method according to any of claims 3 to 5, wherein the
+spectrum operators collectively satisfy a deviation-separating condition
+such that the stacked Jacobian of the operators has full column rank over
+the transaction feature domain, providing a coverage guarantee that no
+anomalous transaction can simultaneously match normal data across all
+operators.
+
+\item A system or method according to any of claims 1 to 6,
+wherein the boundary-centred dimension magnifier rescales each anomaly
+tensor dimension by:
+\[
+r'_d = \tanh\!\left(k_d\cdot\tfrac{r_d-b_d}{\sigma_d}\right)
+\]
+where $k_d=\gamma\cdot\delta_d$, $\delta_d$ is a per-dimension
+discriminability score computed from Cohen's $d$, class-distribution
+overlap, and per-dimension AUC, and $\gamma$ is a single global steepness
+parameter.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein computing the risk score further comprises computing, from an anomaly
+tensor and a predicted probability output by a frozen deployed student model,
+four near-orthogonal failure-mode components comprising camouflage, feature
+gap, activity anomaly and temporal novelty, aggregating them into a
+composite blind-spot score, and applying a correction operator to the
+predicted probability to produce a corrected risk score without retraining
+or updating parameters of the trained machine learning model.
+
+\item A system or method according to claim 8,
+wherein the correction operator is a QuadSurf correction:
+\[
+p^*(x) = \mathrm{clip}\!\left(p(x)+\phi_2([C,G,A,T])^\top\hat{\beta},0,1\right)
+\]
+where $\phi_2$ is the degree-2 polynomial feature map and $\hat{\beta}$
+are ridge-regression coefficients.
+
+\item A system or method according to claim 8,
+wherein the correction operator is an exponential gating correction
+comprising a QuadSurf output modulated by a learned sigmoid gate
+$g(x)=\sigma(v^\top[C,G,A,T]+b)$.
+
+\item A system or method according to any of claims 8 to 10, wherein the
+four failure-mode components are aggregated as:
+\[
+\mathrm{MFLS}(x)=\textstyle\sum_{i\in\{C,G,A,T\}} w_i\cdot S_i(x)
+\]
+and the weights $w_i$ are automatically computed using one or more of
+mutual information, Fisher variance ratio, Bayesian online updating, or
+gradient-based optimisation.
+
+\item A system or method according to claim 1 or claim 2, wherein the
+enforcement profile is selected from a discrete set and the selection
+is determined by whether the computed friction coefficient $\gamma^*(X)$
+lies between predetermined lower and upper thresholds.
+
+\item A system or method according to claim 1 or claim 2, wherein the
+proof-requirement policy comprises, for at least one enforcement profile,
+requiring at least one privacy-preserving cryptographic proof establishing
+satisfaction of a compliance predicate, wherein the compliance predicate
+comprises at least one of: (i) a set non-membership predicate, (ii) a
+numerical range predicate, or (iii) a credential validity predicate.
+
+\item A system or method according to claim 13, wherein the
+verifier smart contract records, for a successful proof verification, at
+least a proof identifier and a verification timestamp, and the core smart
+contract prevents settlement when the proof identifier has been previously
+used or when the verification timestamp is older than a predetermined
+validity threshold.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein the proof-requirement policy deterministically defines one or more
+proof types as a function of (i) the computed state-dependent friction
+coefficient $\gamma^*(X)$ and (ii) a per-law-domain attribution derived from
+the anomaly tensor, such that at least one of: (a) $\gamma^*(X)$ exceeding a
+friction threshold or (b) an attribution component exceeding an attribution
+threshold causes the deterministic policy engine to require at least one of:
+a set non-membership predicate proof, a numerical range predicate proof, or a
+credential validity predicate proof.
+
+\item A system or method according to claim 1 or claim 2, wherein the
+state-dependent friction coefficient is:
+\[
+\gamma^*(X)\approx
+\frac{\beta\|\nabla E\|^2}{2\kappa+\beta\|\nabla E\|^2}
+\cdot\frac{E(X)}{E(X)+\theta}
+\]
+where $E(X)$ is the combined systemic energy, $\kappa$ is an economic
+cost parameter, $\beta$ is a systemic damage coefficient, and
+$\theta=\kappa/\beta$; and wherein the adaptive damping factor
+$E(X)/(E(X)+\theta)$ is the same functional form applied by the
+failure-mode correction module at the transaction level.
+
+\item A system or method according to claim 16, wherein a state-adaptive
+transaction flow control module comprises a gravitational interaction engine
+configured to model financial institutions as particles interacting through a
+pairwise potential, a spectral monitoring module configured to determine a
+phase-transition condition, and an adaptive policy module configured to
+compute the friction coefficient.
+
+\item A system or method according to claim 1 or claim 2, wherein selecting
+the enforcement profile further deterministically defines at least one of:
+a transaction rate limit, a queue delay, an escrow duration, an escrow
+release condition window, or a maximum transaction value limit.
+
+\item A system according to claim 1, further comprising a cross-chain
+bridge contract requiring compliance verification on both a source chain
+and a destination chain before releasing bridged funds.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein computing the one or more network instability metrics comprises
+constructing, over a sliding time window of on-chain activity, a
+transaction graph and computing at least one of: (i) a spectral radius of an
+adjacency or interaction matrix derived from the transaction graph, (ii) a
+centrality concentration metric, or (iii) a temporal burst metric from a
+transaction count process.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein computing the one or more network instability metrics comprises
+modelling, over the sliding time window, aggregated transaction flow as a
+fluid-like flow field and computing at least one of: a divergence metric, a
+vorticity metric, or an effective viscosity parameter indicative of
+liquidity friction, and selecting the enforcement profile based on the at
+least one computed metric.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein computing the one or more network instability metrics comprises
+classifying at least one entity, address cluster, or counterparty into a
+Minsky regime comprising at least one of: hedge, speculative, or Ponzi,
+based on refinancing dependence inferred from on-chain behaviour, and
+selecting the enforcement profile based on the classification.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein the predetermined set of enforcement profiles is stored in an
+on-chain data structure of the core contract as a mapping from a profile
+identifier to (i) the risk threshold profile and (ii) the proof-requirement
+policy, and wherein selecting the enforcement profile comprises selecting a
+said profile identifier.
+
+\item A system according to claim 1 or a method according to claim 2,
+wherein enforcing the proof-requirement policy comprises: (i) calling a
+zero-knowledge proof verifier contract that stores a verification result, a
+proof identifier, and a verification timestamp, and (ii) checking in the core
+contract that the stored verification result indicates success, that the
+proof identifier has not been previously used, and that the verification
+timestamp is within a predetermined validity window prior to permitting
+execution or release from escrow.
+
+\item A system according to claim 1, wherein the core contract emits an
+on-chain event log comprising at least: a transaction identifier, a selected
+profile identifier, a policy action identifier, and a proof-verification
+status, thereby providing an immutable audit trail of pre-settlement
+enforcement.
+
+\end{enumerate}
+
+% ============================================================
+\newpage
+\section*{ABSTRACT}
+% ============================================================
+
+A computer-implemented system controls pre-settlement execution of DeFi
+transactions on a blockchain network. A risk scoring engine constructs an
+anomaly tensor by applying multiple spectrum operators to transaction
+features and applies a trained model to compute a risk score. A
+state-adaptive module computes network instability metrics and a
+state-dependent friction coefficient $\gamma^*(X)$ and selects an
+enforcement profile that sets risk thresholds and a proof-requirement
+policy. Smart contracts enforce the profile before settlement by reverting
+execution or time-locking value in escrow unless required zero-knowledge
+proofs are verified on-chain. A verifier contract stores verification
+results with timestamps and proof identifiers and the core contract checks
+freshness within a predetermined validity window and prevents replay.
+On-chain events record the selected profile and
+outcome as an immutable audit trail.
+
+\end{document}

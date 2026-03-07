@@ -1,0 +1,499 @@
+﻿total_pages 13
+
+================================================================================
+PAGE 1
+decision matrix: False
+proof: True
+escrow: False
+groth16: False
+ttl: True
+Posted on 27 Feb 2026 ÔÇö CC-BY 4.0 ÔÇö https://doi.org/10.36227/techrxiv.177220113.33816607/v1 ÔÇö e-Prints posted on TechRxiv are preliminary reports that are not peer reviewed. They should not b...
+AMTTP: A Four-Layer Architecture for Deterministic Compliance
+Enforcement in Institutional DeFi
+Olusegun Odeyemi1
+1A´¼âliation not available
+February 27, 2026
+Abstract
+Decentralised ´¼ünance (DeFi) has profoundly reshaped global capital markets, enabling automatic transactions, eliminating the
+need for intermediaries, and accelerating transaction settlement times. Despite these signi´¼ücant advancements, institutional
+involvement in DeFi remains very low. The lack of institutional participation can be attributed to the lack of an enforceable
+compliance mechanism at the protocol level; that is, once a transaction is con´¼ürmed as having been completed on the blockchain,
+it cannot be undone or disputed in any meaningful way. The existing compliance mechanisms are primarily retrospective,
+meaning that they generate alerts after a transaction has occurred instead of preventing illicit transfers in advance. Regulated
+´¼ünancial institutions that transact in cryptocurrency bear the ultimate ´¼ünancial risk and regulatory burden. The UK FCA has
+made it very clear through CP25/41 that there are now speci´¼üc regulatory expectations regarding the existence of adequate pre-
+settlement controls [2]. We introduce AMTTP Version 4.0, which has been designed to have a four-layer architecture explicitly
+intended to support deterministic compliance enforcement in DeFi institutions. Layer I provides SDKs, REST APIs, and web
+applications intended for programmatic and human interaction with AMTTP; Layer II provides a compliance orchestration layer
+that combines (i) machine learning risk scoring (ii) graph analysis (iii) sanctions screening, and (iv) policy adjudication into a
+single deterministic decision-making matrix; Layer III consists of an o´¼äine training pipeline with a Composite Teacher that uses
+an AutoencoderEnhanced XGBoost (w = 0.4), seven FATF AML Mode Patterns (w = 0.3), and graph structural properties
+(w = 0.3) in order to produce pseudo-labels (SLPs) for the Student pipeline across 2,640,000 transactions; and ´¼ünally, Layer
+IV supports the physical infrastructure for AMTTP deployment, which consists of 18 smart contracts on Ethereum Sepolia, 17
+containerised microservices, and a Database Persistence Tier (MongoDB, Redis, Memgraph, IPFS). The Infrastructure Security
+features multioracle threshold signatures, replay protection & zkNAF a zeroknowledge proof framework that allows for pri
+
+================================================================================
+PAGE 2
+decision matrix: False
+proof: True
+escrow: False
+groth16: False
+ttl: True
+1
+AMTTP: A Four-Layer Architecture for
+Deterministic Compliance Enforcement in
+Institutional DeFi
+Odeyemi Olusegun Israel Independent Researcher
+Derby, United Kingdom
+Email: segettii@gmail.com
+ORCID: 0009-0004-2309-6436
+AbstractÔÇöDecentralised finance (DeFi) has profoundly re-
+shaped global capital markets, enabling automatic transactions,
+eliminating the need for intermediaries, and accelerating trans-
+action settlement times. Despite these significant advancements,
+institutional involvement in DeFi remains very low. The lack of
+institutional participation can be attributed to the lack of an
+enforceable compliance mechanism at the protocol level; that is,
+once a transaction is confirmed as having been completed on the
+blockchain, it cannot be undone or disputed in any meaningful
+way. The existing compliance mechanisms are primarily retro-
+spective, meaning that they generate alerts after a transaction
+has occurred instead of preventing illicit transfers in advance.
+Regulated financial institutions that transact in cryptocurrency
+bear the ultimate financial risk and regulatory burden. The UK
+FCA has made it very clear through CP25/41 that there are
+now specific regulatory expectations regarding the existence of
+adequate pre-settlement controls [2].
+We introduce AMTTP Version 4.0, which has been designed
+to have a four-layer architecture explicitly intended to sup-
+port deterministic compliance enforcement in DeFi institutions.
+Layer I provides SDKs, REST APIs, and web applications
+intended for programmatic and human interaction with AMTTP;
+Layer II provides a compliance orchestration layer that combines
+(i) machine learning risk scoring (ii) graph analysis (iii) sanctions
+screening, and (iv) policy adjudication into a single deterministic
+decision-making matrix; Layer III consists of an offline training
+pipeline with a Composite Teacher that uses an Autoencoder-
+Enhanced XGBoost (w= 0.4), seven FATF AML Mode Patterns
+(w= 0.3), and graph structural properties (w= 0.3) in
+order to produce pseudo-labels (SLPs) for the Student pipeline
+across 2,640,000 transactions; and finally, Layer IV supports the
+physical infrastructure for AMTTP deployment, which consists
+of 18 smart contracts on Ethereum Sepolia, 17 containerised
+microservices, and a Database Persistence Tier (MongoDB, Redis,
+Memgraph, IPFS). The Infrastructure Security features multi-
+oracle threshold signatures, replay protection & zkNAF a zero-
+knowledge proof framework that allows for privacy preserving
+verification of KYC credentials, risk ranges & non-membership
+from sanctions. In addition, TLS En
+
+================================================================================
+PAGE 3
+decision matrix: False
+proof: True
+escrow: False
+groth16: True
+ttl: True
+2
+Anti-Money Laundering Transaction Trust Protocol (AMTTP)
+to include the expectations associated with conducting trans-
+actions, such as anti-money laundering. The design combines
+machine learning risk assessment with graph-based and de-
+terministic references and tools using smart contracts, which
+will be distributed in four layers of a full stack solution.
+The use of a zero knowledge configuration will allow for
+privacy compliant auditing, relative to General Data Protection
+Regulation (GDPR) regulated transactions [6]; therefore the
+AMTTP is an actual working application, contained as a full
+applicable production version with an operational dashboard
+for monitoring compliance in real time.
+II. RELATEDWORK
+There has been a substantial increase over the last five
+years in scholarship regarding DeFi compliance due primarily
+to the growing gap between traditional AML/CFT regimes
+and modern decentralised protocols. Early academic works
+on the risk of blockchain applied somewhat broad or even
+vague definitions of ÔÇ£risk,ÔÇØ whereas recent scholarship has
+become much more focused on privacy-preserving regulation,
+on-chain real-time enforcement, and the particular issues faced
+by institutional participants in DeFi [1].
+Commercial anti-money laundering platforms (such as
+Chainalysis, Elliptic, etc.) utilise a centralised monitoring
+approach to perform retrospective analysis on each transac-
+tion. These platforms are able to produce graph-based traces,
+use heuristic pattern matching and generate alerts before a
+transaction occurs; however, none of these platforms are able
+to stop a transaction from going through on a permissionless
+blockchain, where finality occurs almost instantly (i.e., in
+seconds) [17].
+From a research perspective, the techniques we have used
+from machine learning to improve the detection of transactions
+on graphs have made significant strides. Specifically, the use
+of GraphSAGE and other graph neural networks (GNNs) on
+transaction graphs is an example of how well they can identify
+wallet-to-wallet interactions at the wallet level. In fact, GNN
+methods routinely achieve over 0.90 ROC-AUC scores on
+standard datasets. To demonstrate how far these methods have
+come, since they are only being used on off-chain data, none
+of the existing techniques enforce any actions or changes on
+the blockchain ledger itself [5].
+The authors of this article have compiled a comprehensive
+compilation of commercial platforms (41) and academic pro-
+totypes (28) studied between 2015ÔÇô2025. They have further
+broken down these studies into categories based upon three
+dom
+
+================================================================================
+PAGE 4
+decision matrix: True
+proof: True
+escrow: True
+groth16: False
+ttl: True
+3
+AMTTP builds upon all existing frameworks previously
+developed, including and similar to those described earlier;
+likewise, AMTTP addresses the largest void observed, which
+is in the area of pre-emptive (proactive) enforcement prior to
+settlement. In order to complete deterministic actions on-chain,
+off-chain analytics (ML via ensembles and the temporal graph)
+feed into on-chain actions through a four-layered, structured
+process. Various existing tools currently document and create
+alerts for identified items within their ecosystem; however,
+AMTTP will enable users to normalise disparate signals, thus
+enabling the user to make real-time compliance decisions of
+ÔÇÿapproveÔÇÖ, ÔÇÿreviewÔÇÖ, ÔÇÿescrowÔÇÖ or ÔÇÿblockÔÇÖ.
+To provide this capability, zkNAF creates a privacy-
+preserving layer of attestation that bridges the reactive surveil-
+lance systems used today and that required for institutions
+to complete their business at an actual institutional-grade
+level [2], [3].
+In conclusion, the comprehensive body of work clearly
+illustrates the advancements in detection and privacy. How-
+ever, when observed holistically, it is clear there is no
+full-stack (production-grade), protocol-enabled AML enforce-
+ment mechanism specifically designed for institutional DeFi.
+AMTTP will fulfil that need [10], [13], [14].
+III. SYSTEMARCHITECTURE
+The chart shows the protocol segmented into layers, as
+shown in Fig. 1; each layer has a specified area of coverage.
+From an audience perspective on enforceable on-chain actions,
+these boundaries for the layers are intentionally separated from
+each other so that each can be scalable independently; this
+modularity of the boundaries enables a development lifecycle
+for the overall protocol that does not have to be rebuilt over
+time.
+A. Layer I: Integration and Interface Layer
+Layer I is the protocolÔÇÖs public surface. It exposes interfaces
+for human operators, third-party applications, and automated
+systems alike.
+AMTTP Open-Source SDK.Using both TypeScript and
+Python as their respective client libraries for construction and
+signing of transactions, with WebSocket-enabled connections
+to keep rapidly streaming real-time events, and batched scor-
+ing interfaces if necessary to meet throughput requirements
+between them too.
+RESTful API Interface.FastAPI service running on
+port 8000 which exposes production-compliance endpoints:
+/scoreendpoint evaluating individual transaction(s) against
+model-type(s), returning risk score(s) and accompanying
+reference-type metadata;/batchendpoint accepting arrays;
+/model/infoendpoint providing metadata about model
+versio
+
+================================================================================
+PAGE 5
+decision matrix: False
+proof: False
+escrow: False
+groth16: True
+ttl: False
+4
+Layer I: Integration & Interface
+TypeScript &
+Python SDK
+RESTful API
+(:8000)
+Auth Gateway
+(JWT + RBAC)
+Flutter
+Consumer App
+Next.js
+War Room
+WebSocket
+Events
+Layer II: Compliance Logic
+Orchestrator
+(:8007)
+ML Risk
+Engine (:8000)
+Graph API
+(:8001)
+Sanctions
+Svc (:8002)
+Decision
+Matrix
+Layer III: Offline Training Pipeline
+Composite
+Teacher
+AE-XGBoost
+(w=0.4)
+FATF Patterns
+(w=0.3)
+Graph Props
+(w=0.3)
+Student
+Pipeline
+Model
+Artefacts
+Layer IV: Infrastructure & Enforcement
+NGINX +
+Cloudflare
+18 Contracts
+(Sepolia)
+zkNAF
+(Groth16)
+Mongo / Redis
+/ Memgraph
+IPFS /
+Audit Logs
+17 Docker
+Containers
+model deploy
+Fig. 1: AMTTP four-layer architecture. Layer I exposes integration interfaces; Layer II implements compliance decision logic;
+Layer III trains models offline via weak supervision; Layer IV provides infrastructure and on-chain enforcement. The dashed
+arrow indicates model artefact deployment from the training pipeline to the production risk engine.
+publicly available Kaggle datasets: BitcoinHeist and Ethereum,
+with 2,640,911 rows over 177 features and a 0.87% fraud
+rate (total class imbalance of 113 to 1), which is relatively
+conservative compared to real-world experiences.
+V AE Featurisation.The V AEWithAttention model runs
+on GPU to produce latent vectors for the data with less
+complexity than the original feature set, yet still preserves the
+underlying data/relevant information. The reconstruction error
+from the V AE is also treated as an anomaly signal and is added
+directly to the feature set.
+Stage 2ÔÇöTeacher Labelling.The Teacher takes the form
+of a composite of (3) different types of teachers that were
+fused/combined and weighted together to create one composite
+pseudo-label:
+ÔÇóAE enhanced XGBoost (w= 0.4) output on 1,670 fresh
+BigQuery transactions based on 171 engineered features
+and latent outputs derived from autoencoders;
+ÔÇóFATF Pattern Detectors (w= 0.3) generated using (7)
+behavioural rules that are based on AML typologies
+(e.g., SMURFING, FAN OUT, FAN IN, LAYERING,
+STRUCTURING, VELOCITY , and PEELING);
+ÔÇóGraph-Structural Properties (w= 0.3) derived from
+network study and analysis (e.g., degree centrality, com-
+munity detection, handling of distance from verified ille-
+gitimate nodes).
+The combination of the above (weighted) resulted in the
+pseudo-labels for the studentsÔÇÖ training to be produced.
+Stage 3aÔÇöStudent V AE/GNN Pipeline.This procedure
+allows a combined variational autoencoder (V AE) and graph
+neural network (GNN) to be trained using the pseudo-labels
+assigned to the student by the teacher. This is done using
+ColabÔÇÖs GPU infrastructure.
+
+
+================================================================================
+PAGE 6
+decision matrix: False
+proof: True
+escrow: True
+groth16: True
+ttl: False
+5
+BitcoinHeist
+(Kaggle)
+Ethereum
+(Kaggle)
+BigQuery
+(1,670 tx)
+AE-XGBoost
+w=0.4
+7 FATF Patterns
+w=0.3
+Graph Properties
+w=0.3
+Composite Teacher
+Fusion
+Pseudo-Labels
+(2.64 M transactions)
+╬▓-V AE
+(GPU)
+GraphSAGE /
+GATv2 (GPU)
+XGBoost +
+LightGBM
+Logistic Regression
+Meta-Learner
+Docker V olume
+Deploy
+Fig. 2: Layer III offline training pipeline. Two public datasets feed the composite teacher: autoencoder-enhanced XGBoost
+predictions (w=0.4), FATF typology pattern detectors (w=0.3), and graph-structural properties (w=0.3) are fused into pseudo-
+labels. The student pipelineÔÇöV AE/GNN and gradient boosted classifiersÔÇötrains on these labels, unified by a logistic regression
+meta-learner and deployed to the production risk engine.
+TABLE II: AMTTP Smart Contract Components
+Contract Purpose
+AMTTPCore Risk oracle, escrow, threshold sigs
+AMTTPNFT KYC badges (ERC-721)
+DisputeResolver Kleros arbitration integration
+CrossChain LayerZero cross-chain relay
+PolicyEngine Rule & threshold configuration
+RiskRouter Multi-chain score routing
+zkNAFVerifier Groth16 proof verification
+SafeModule Gnosis Safe multi-sig
+CoreSecure Hardened variant, reentrancy guards
+Streamlined Gas-optimised compliance
+BiconomyModule Gasless meta-transactions
+PolicyManager Policy & threshold management
+a Cloudflare Tunnel that supplies the secure connection from
+outside the public Internet.
+On-Chain VerificationÔÇöEthereum Smart Contracts.18
+Ethereum smart contracts written in Solidity are deployed on
+the Ethereum Sepolia blockchain (shown in Table II).
+zkNAF Circuits.Three types of proof are provided for
+compliance verification: KYC Credential Proofs, Risk Range
+Proofs, and Non-Membership Proofs (shown in Table III).
+TABLE III: zkNAF Proof Types
+Proof Type Purpose
+KYC Credential Verify identity status without revealing
+personal data
+Risk Range Prove risk score within acceptable bounds
+without disclosing exact value
+Sanctions Non-
+Membership
+Confirm address is not on watchlists with-
+out exposing the full list
+Data Persistence Layer.The various data storage technolo-
+gies provide distinct functionalities:
+ÔÇóMongoDB stores entity profiles, alerts, transaction his-
+tory, and audit trails.
+ÔÇóRedis provides in-memory sessions, rate limits for send-
+ing, and sender feature vector caching.
+ÔÇóMemgraph is used for the graph layer: entity relationships
+and risk propagation paths.
+ÔÇóHelia/IPFS provides immutable audit logs, evidence pack-
+ages, and cryptographic proof records.
+ÔÇóBigQuery is used for ingestion of training data for 30
+daysÔÇÖ worth of Ethereum transactions, 30 daysÔÇÖ worth of
+
+================================================================================
+PAGE 12
+decision matrix: True
+proof: False
+escrow: True
+groth16: False
+ttl: True
+11
+TABLE X: Smart Contract Gas Consumption (Solidity 0.8.24)
+Contract / Method Avg Gas % Limit
+Dispute.escrowTransaction 287,890 0.96%
+Dispute.challengeTransaction 149,512 0.50%
+CrossChain.setTrustedRemote 100,047 0.33%
+CoreSecure.addOracle 81,381 0.27%
+CoreSecure.addApprover 80,792 0.27%
+CoreSecure.setUserPolicy 76,649 0.26%
+CoreSecure.pause 52,394 0.17%
+Deploy: CoreSecure 5,011,664 16.7%
+Deploy: CrossChain 3,309,779 11.0%
+Deploy: DisputeResolver 2,197,434 7.3%
+Theorem 3ÔÇöUnified Adversarial Bounds:At the worst
+case (meaning with¤Á= 0.30), we estimate the empirical
+Bayes frameworkÔÇÖs upper bound (0.3184), made up of three
+components (Clean Risk: 0.0007; Model Complexity: 0.3018;
+and Attack Complexity: 0.0159).
+I. Smart Contract Gas Benchmarks
+Gas refers to the tax of determinism, and gas costs in
+production environments must be managed appropriately. Ta-
+ble X lists the consumption per action for a variety of
+operations through Solidity 0.8.24, optimizer run count=50,
+viaIR=true. The operation that complies with the greatest
+amount of rules (escrow) consumed 287,890 gas (0.96% of
+the 30M limit for a single block of gas). The amount of
+gas consumed in the dispute challenge was 149,512. The
+gas consumed by administrative actions (pause, threshold
+adjustment) was<80,000 for each. The gas required to deploy
+the three main contracts combined=10,518,877 (35% of a
+block), requiring multiple transactions.
+J. System Integration Testing
+System integration testing will be carried out from start to
+finish to test all elements of the deployment stack. A total of 53
+API route tests have cleared across all back-end services (i.e.,
+/score,/batch,/alerts, &/health). A total of 32
+browser-based tests have confirmed that the Flutter application
+(for use by consumers) and the Next.js War Room dashboard
+are rendering correctly and responding to user interactions as
+expected. The complete 17-service Docker Compose stack is
+able to boot on commodity hardware in less than 90 seconds.
+K. Limitations
+Candour about shortcomings matters. The V2 pipelineÔÇÖs
+headline test metrics can be misleading, as a teacher must use
+a separate label structure rather than relying solely on what
+would be expected relative to each other (i.e., the ROC-AUC
+is 1.0000) and therefore would be consistent only internally
+rather than externally. A much less flattering ROC-AUC value
+of 0.9957 is obtained from using data from 372 fraud addresses
+with valid labels from a third party. The validation dataset
+from the Etherscan contains only 23 addresses, three of which
+are known to be fraudulent, so the sample is 
+
+================================================================================
+PAGE 13
+decision matrix: False
+proof: True
+escrow: False
+groth16: False
+ttl: False
+12
+fraud and not any other ontology. A companion paper presents
+a sound mathematical (i.e., domain-agnostic) theory for de-
+composing the blind spots of any classifier in terms of four
+orthogonally decomposable components that can be used to
+resurrect the ROC-AUC from less than 0.87 back to above .87
+for all datasets where the baseline model has a zero recall for
+that particular dataset. The findings were tested with XGBoost,
+LightGBM, Random Forest, and Logistic Regression across
+six datasets with five different domains without requiring any
+retraining or knowledge of model internals.
+Cross-chain expansion.Expansion of the CrossChain con-
+tract is our highest priority engineering task at this time
+because it needs to be done right away.
+Enhanced zero-knowledge capabilities.We currently have
+multiple zero-knowledge proof types in active development
+that can enhance compliance scenarios.
+Temporal graph analysis.We want to ensure that we can
+continue to analyse transactions over time periods greater than
+one year so that we can factor in those evolving patterns when
+generating risk scores for new transactions.
+Layer 2 deployment and gas optimisation.We will also
+be investigating the possibility of deploying onto Arbitrum
+and Optimism (two major Ethereum Layer 2 networks) to see
+if we can achieve both increased transaction throughput and
+decreased costs by doing so.
+Regulatory expansion.We have plans to expand our reg-
+ulatory coverage beyond the UK FCA regime to increase the
+number of jurisdictions covered by the protocol.
+REFERENCES
+[1] J. Joseph, F. John, and B. Teslim, ÔÇ£Anti-money laundering (AML) in
+DeFi platforms: Global enforcement trends,ÔÇØMultidisciplinary Research
+and Development Journal International, vol. 6, no. 1, pp. 1ÔÇô12, 2025.
+[2] Financial Conduct Authority, ÔÇ£CP25/41: Regulating Cryptoassets: Ad-
+missions & Disclosures,ÔÇØ 2025.
+[3] Financial Action Task Force, ÔÇ£International standards on combating
+money laundering and the financing of terrorism and proliferation: The
+FATF recommendations,ÔÇØ 2023.
+[4] Q. A. Mao, J. Wang, Y . Liu, L. Zhu, J. Chen, and J. Yan, ÔÇ£SoK:
+Web3 RegTech for cryptocurrency V ASP AML/CFT compliance,ÔÇØarXiv
+preprint arXiv:2512.24888, 2025.
+[5] W. Hamilton, Z. Ying, and J. Leskovec, ÔÇ£Inductive representation
+learning on large graphs,ÔÇØ inAdvances in Neural Information Processing
+Systems, 2017, pp. 1024ÔÇô1034.
+[6] J. Groth, ÔÇ£On the size of pairing-based non-interactive arguments,ÔÇØ in
+Advances in Cryptology ÔÇô EUROCRYPT 2016, Springer, 2016, pp. 305ÔÇô
+326.
+[7] S. Herold, ÔÇ£Architectural compliance in component-based systems,ÔÇØ
+Doctor

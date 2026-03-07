@@ -1,0 +1,241 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!70!black
+}
+
+\onehalfspacing
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Personal Statement}\\[4pt]
+{\large Odeyemi Olusegun Israel}\\[2pt]
+{\normalsize UK Global Talent Visa --- Digital Technology (Exceptional Promise)}
+\end{center}
+
+\bigskip
+
+I am an independent researcher and systems engineer based in Derby,
+United Kingdom.  Over the past three years---without institutional
+affiliation, funding, or supervision---I have built a blockchain-native
+compliance platform processing 2.64~million transactions, produced three
+original research papers establishing a unified mathematical theory of
+instability detection across finance, energy infrastructure, and fluid
+dynamics, filed a UK patent application covering four inventions, and
+open-sourced developer tools in TypeScript and Python.  I am applying
+under the Exceptional Promise route because my work demonstrates the
+capacity to become a leading figure in the UK's applied mathematics,
+financial technology, and machine learning sectors.
+
+%% ── SECTION 1: ENGINEERING ─────────────────────────────────────────
+
+\textbf{1. What I have built.}
+
+My central engineering project is \textbf{AMTTP}---the Anti-Money
+Laundering Transaction Trust Protocol.  It addresses a problem that no
+existing commercial product has solved: enforcing regulatory compliance
+\textit{before} a blockchain transaction reaches finality, rather than
+generating alerts after the fact.  Chainalysis, Elliptic, and TRM~Labs
+all operate post-settlement; AMTTP intervenes at the protocol level,
+within the approximately 12-second Ethereum block confirmation window.
+
+The system spans four architectural layers: client SDKs (TypeScript and
+Python, both open-sourced on GitHub), a compliance orchestration engine
+combining ML risk scoring, graph-based relationship analysis, sanctions
+screening, and configurable policy rules, an offline ML training pipeline,
+and a smart contract layer with 18~contracts deployed on Ethereum Sepolia.
+The infrastructure comprises 17~containerised microservices coordinated
+through a central gateway.  The ML pipeline uses a Composite Teacher
+architecture trained on 2.64~million transactions, achieving a production
+ROC-AUC of \textbf{0.9879} and F1 of \textbf{0.9012} with 21~features and
+zero training-serving skew.
+
+I also built \textbf{zkNAF}, a zero-knowledge proof framework that allows
+institutions to verify KYC credentials, risk score ranges, and sanctions
+non-membership without exposing personal data---resolving the tension
+between GDPR's data minimisation requirements and AML transparency
+obligations at the architectural level.
+
+The AMTTP architecture is described in my published paper:
+\textit{Olusegun Odeyemi, ``AMTTP: A Four-Layer Architecture for
+Deterministic Compliance Enforcement in Institutional DeFi,''
+TechRxiv, February~27, 2026},
+\href{https://doi.org/10.36227/techrxiv.177220113.33816607/v1}{DOI:\,10.36227/techrxiv.177220113.33816607/v1}.
+
+%% ── SECTION 2: RESEARCH ────────────────────────────────────────────
+
+\textbf{2. What I have discovered.}
+
+Alongside the engineering work, I have pursued a research programme that
+began with a practical question---why do fraud detectors miss what they
+are designed to find?---and evolved into a unified mathematical theory of
+instability in complex systems, with results spanning machine learning,
+systemic financial risk, electrical grid failure, algorithmic stablecoin
+collapse, and the regularity of the 3D Navier-Stokes equations.
+
+\textit{Paper~1: Blind Spot Decomposition Theory (BSDT).}\;
+Building on the engineering experience of AMTTP (see published paper
+above), my first research paper provides a mathematical framework for
+characterising missed fraud.  I decompose detection failures into four near-orthogonal
+components---Camouflage~($\delta_C$), Feature Gap~($\delta_G$), Activity
+Anomaly~($\delta_A$), and Temporal Novelty~($\delta_T$)---and demonstrate
+that these account for over 95\% of explainable variance in missed-fraud
+indicators.  The correction operators recover recall by up to
+\textbf{84.4~percentage points} without retraining or access to model
+internals.  Validated across 4~model architectures, 7~datasets from
+6~domains, and over 36~model--dataset combinations, the best variant
+achieves mean~F1 of~0.787 with 88.1\% false positive reduction.
+Target journal: \textbf{IEEE~TKDE}.
+
+\textit{Paper~2: Universal Deviation Law (UDL).}\;
+My second paper tackles anomaly detection from first principles.
+I introduce a multi-spectrum tensor framework with 14~composable
+operators spanning statistical, geometric, spectral, and
+information-theoretic families.  A $14\times14$ correlation audit
+confirms that only 1~pair out of~91 is redundant: each operator captures
+a genuinely distinct perspective on deviation.  The best configuration
+achieves mean AUC of~\textbf{0.972} and 91\% coverage across five
+benchmarks---categorically outperforming Isolation Forest~(0.788),
+LOF~(0.632), and the current state-of-the-art ECOD~(0.921)---with a
+single hyperparameter set and no per-dataset tuning.  I prove five
+formal theorems providing local distinguishability, global sensitivity,
+and finite-sample guarantees.
+Target venue: \textbf{NeurIPS~2026}.
+
+\textit{Paper~3: Systemic Risk as Geometry (AF+NS merged).}\;
+My third paper---and the centrepiece of the research programme---establishes
+a geometric framework linking the BSDT deviation operators to the
+Lyapunov energy of networked agent dynamics.  It proves three theorems
+(equivalence of the detection functional and the physical potential;
+a spectral phase transition at a critical manifold; and a closed-form
+optimal damping policy $\gamma^*(E) = E/(E+\theta)$) and validates
+them across four domains:
+
+\begin{itemize}[nosep, leftmargin=2em]
+  \item \textbf{Banking} (140~quarters of FDIC call-report data):
+    6-quarter lead before the 2008 GFC using a threshold trained
+    exclusively on pre-2006 data; AUROC~$= 0.805$ at institution level;
+    a 24-institution global panel spanning US, UK, EU, Asia, and Africa
+    achieves AUROC~$= 0.811$ with a 19-quarter GFC lead.
+
+  \item \textbf{Algorithmic stablecoins} (Terra/Luna UST, May 2022):
+    detection at hour~23, one hour after the initial depeg event,
+    with simulation-to-reality correlation $r = 0.996$.  Adaptive
+    friction limits the depeg to 0.28\% (versus $>$99\% collapse
+    without intervention).
+
+  \item \textbf{Energy infrastructure} (Texas ERCOT, February 2021):
+    detection at hour~24, a full $+$72~hours before rolling blackouts
+    begin.  Adaptive friction reduces peak capacity loss by 71\%.
+    The per-agent decomposition reveals that the cascade origin shifted
+    from frozen wind turbines (the public narrative) to gas supply chain
+    disruption (the structural vulnerability)---a finding invisible to
+    event-study analysis.
+
+  \item \textbf{Fluid dynamics} (3D incompressible Navier-Stokes):
+    reinterpreting $\gamma^*$ as a state-dependent viscosity yields the
+    \textbf{P/D halving principle}---adaptive viscosity halves the enstrophy
+    production-to-dissipation ratio at every Reynolds number, confirmed
+    numerically across $\mathrm{Re} \in [314, 6283]$.  This provides a
+    new conditional regularity criterion connected to the Clay Millennium
+    Prize Problem and identifies three strategies toward closing the gap
+    to unconditional regularity.
+\end{itemize}
+
+\noindent
+In all three non-financial domains, the dominant BSDT channel is
+$\delta_C$ (camouflage)---the mechanism by which an unstable system
+conceals its proximity to collapse---demonstrating that the mathematical
+structure is genuinely universal, not fitted to any single domain.
+Target journal: \textbf{SIAM Journal on Applied Mathematics}.
+
+%% ── SECTION 3: IP ──────────────────────────────────────────────────
+
+\textbf{3. Intellectual property.}
+
+On 4~March~2026, I filed a UK patent application with the Intellectual
+Property Office (Patents Act~1977) covering four inventions unified by
+the blind-spot energy functional: AMTTP's pre-settlement compliance
+architecture, the Adaptive Friction stabilisation mechanism, the
+Universal Deviation Law's multi-spectrum tensor framework, and the BSDT
+failure-mode correction operators.  The specification describes the
+combined system as a \textit{``State-Adaptive Compliance Enforcement
+System with Multi-Spectrum Anomaly Detection and Failure-Mode Correction
+for Decentralised Finance Networks.''}
+
+%% ── SECTION 4: IMPACT ──────────────────────────────────────────────
+
+\textbf{4. Open-source contributions and tools.}
+
+The full codebase---research code, pipeline implementations, client SDKs,
+smart contracts, and replication packages for all three papers---is
+publicly available on GitHub at
+\texttt{github.com/segetii/fintech}.  Specific open-source components
+include:
+
+\begin{itemize}[nosep, leftmargin=2em]
+  \item TypeScript and Python client SDKs for AMTTP integration;
+  \item A MetaMask Snap for browser-based compliance verification;
+  \item A GravityEngine simulation toolkit for networked agent dynamics;
+  \item A 3D pseudo-spectral Navier-Stokes solver with BSDT diagnostic
+        suite and adaptive viscosity;
+  \item Complete replication packages for all empirical results.
+\end{itemize}
+
+%% ── SECTION 5: UK FIT ──────────────────────────────────────────────
+
+\textbf{5. Why the UK, and why now.}
+
+The UK is positioning itself as the global leader in responsible fintech
+regulation.  The FCA's evolving framework for crypto-assets will create
+substantial demand for compliance infrastructure that operates at the
+protocol level.  AMTTP is, as far as I am aware from surveying the
+commercial landscape, the only system that provides pre-settlement AML
+enforcement on blockchain transactions.
+
+The cross-domain reach of my research---from banking regulation to energy
+grid resilience to pure mathematics---aligns with the UK's strategic
+priorities in financial stability (Bank of England, PRA), infrastructure
+resilience (Ofgem, National Grid ESO), and mathematical sciences (EPSRC,
+the Heilbronn Institute).  The Navier-Stokes extension, in particular,
+connects directly to the UK's world-leading position in applied
+mathematics and fluid dynamics research.
+
+My immediate plans are: (1)~submit the three papers to their target
+journals (IEEE~TKDE, NeurIPS~2026, SIAM~J.~Applied Math);
+(2)~prepare a short letter for \textit{Nature Communications}
+summarising the cross-domain universality result for broader scientific
+visibility; (3)~commercialise AMTTP as a compliance-as-a-service product
+for UK-regulated financial institutions and virtual asset service
+providers; and (4)~build a research-led company at the intersection of
+machine learning, financial regulation, and mathematical stability
+theory---headquartered in the UK.
+
+%% ── CLOSING ────────────────────────────────────────────────────────
+
+\medskip
+
+I have done this work alone, without a university laboratory, a GPU
+cluster, or a research budget.  In three years, I have gone from a
+practical question about missed fraud to a unified mathematical framework
+that detects collapse across banking systems, stablecoins, power grids,
+and turbulent fluids---and I have built the production engineering to
+deploy it.  What I bring is the ability to move between rigorous
+mathematical theory and production-grade systems, and the discipline to
+validate claims before making them.  I believe I can contribute
+meaningfully to the UK's digital economy, scientific reputation, and
+regulatory leadership, and I am asking for the opportunity to do so.
+
+\end{document}

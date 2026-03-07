@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Friction Control — Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d29;
+      --border: #2a2d3a;
+      --text: #e4e6eb;
+      --text-dim: #8b8e99;
+      --accent: #4f8df9;
+      --accent-glow: rgba(79, 141, 249, 0.15);
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --success: #22c55e;
+      --crisis-bg: rgba(239, 68, 68, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a1d29 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header h1 span { color: var(--accent); }
+
+    .header .status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* KPI cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .kpi-card.blue::before { background: var(--accent); }
+    .kpi-card.red::before { background: var(--danger); }
+    .kpi-card.amber::before { background: var(--warn); }
+    .kpi-card.green::before { background: var(--success); }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+
+    /* Charts */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+    }
+
+    .chart-card.wide { grid-column: 1 / -1; }
+
+    .chart-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-title .badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .badge-live { background: rgba(34,197,94,0.15); color: var(--success); }
+    .badge-eq { background: rgba(79,141,249,0.15); color: var(--accent); }
+
+    canvas { max-height: 320px; }
+
+    /* Control panel */
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .controls h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .control-group .val {
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      float: right;
+    }
+
+    .control-group select,
+    .control-group input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #3b7de8;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Tables */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid rgba(42, 45, 58, 0.5);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:hover td { background: rgba(79, 141, 249, 0.04); }
+
+    .lead-positive { color: var(--success); font-weight: 600; }
+    .lead-zero { color: var(--text-dim); }
+    .lead-negative { color: var(--danger); }
+
+    /* Simulation output */
+    .sim-results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--text-dim);
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.8rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 1024px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .sim-results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>&#9670;</span> Adaptive Friction Control</h1>
+  <div class="status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Connecting...</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI Row -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card blue">
+      <div class="kpi-label">MFLS Current</div>
+      <div class="kpi-value" id="kpiMfls">—</div>
+      <div class="kpi-sub" id="kpiMflsSub">Detection score</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">&gamma;*(t) Coupling</div>
+      <div class="kpi-value" id="kpiGamma">—</div>
+      <div class="kpi-sub" id="kpiGammaSub">Adaptive damping</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">&lambda;<sub>max</sub></div>
+      <div class="kpi-value" id="kpiLambda">—</div>
+      <div class="kpi-sub" id="kpiLambdaSub">Spectral radius</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Phase State</div>
+      <div class="kpi-value" id="kpiPhase">—</div>
+      <div class="kpi-sub" id="kpiPhaseSub">Above critical manifold</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">CCyB Rec.</div>
+      <div class="kpi-value" id="kpiCcyb">—</div>
+      <div class="kpi-sub">Capital buffer (bps)</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">cos &theta;</div>
+      <div class="kpi-value" id="kpiCos">—</div>
+      <div class="kpi-sub">Gradient alignment</div>
+    </div>
+  </div>
+
+  <!-- Main charts -->
+  <div class="chart-grid">
+    <div class="chart-card wide">
+      <div class="chart-title">
+        MFLS Detection Score & Energy Trajectory
+        <span class="badge badge-live">HISTORICAL</span>
+      </div>
+      <canvas id="chartMfls"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        Spectral Phase Diagram
+        <span class="badge badge-eq">&lambda;<sub>max</sub> vs &alpha;</span>
+      </div>
+      <canvas id="chartPhase"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        Adaptive Coupling &gamma;*(t)
+        <span class="badge badge-eq">OPTIMAL</span>
+      </div>
+      <canvas id="chartGamma"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        Gradient Alignment cos &theta;
+      </div>
+      <canvas id="chartAlignment"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">
+        CCyB Recommendation
+        <span class="badge badge-live">BASIS POINTS</span>
+      </div>
+      <canvas id="chartCcyb"></canvas>
+    </div>
+  </div>
+
+  <!-- Control Panel -->
+  <div class="controls">
+    <h3>&#9881; Simulation Controls — GravityEngine Parameter Sweep</h3>
+    <div class="control-grid">
+      <div class="control-group">
+        <label>&alpha; (radial spring) <span class="val" id="valAlpha">0.10</span></label>
+        <input type="range" id="sliderAlpha" min="0.01" max="1.0" step="0.01" value="0.10">
+      </div>
+      <div class="control-group">
+        <label>&gamma; (pairwise coupling) <span class="val" id="valGamma">1.00</span></label>
+        <input type="range" id="sliderGamma" min="0.1" max="5.0" step="0.1" value="1.0">
+      </div>
+      <div class="control-group">
+        <label>&sigma; (attraction scale) <span class="val" id="valSigma">1.00</span></label>
+        <input type="range" id="sliderSigma" min="0.1" max="5.0" step="0.1" value="1.0">
+      </div>
+      <div class="control-group">
+        <label>&lambda;<sub>rep</sub> (repulsion) <span class="val" id="valLambdaRep">0.10</span></label>
+        <input type="range" id="sliderLambdaRep" min="0.01" max="1.0" step="0.01" value="0.10">
+      </div>
+      <div class="control-group">
+        <label>&eta; (step size) <span class="val" id="valEta">0.02</span></label>
+        <input type="range" id="sliderEta" min="0.001" max="0.1" step="0.001" value="0.02">
+      </div>
+      <div class="control-group">
+        <label>Crisis onset</label>
+        <select id="selectCrisis">
+          <option value="2008-09-30">GFC 2008 (Sep)</option>
+          <option value="2020-03-31">COVID 2020 (Mar)</option>
+          <option value="2022-09-30">Rate Shock 2022 (Sep)</option>
+          <option value="2007-06-30">Pre-GFC 2007 (Jun)</option>
+          <option value="2019-12-31">Pre-COVID 2019 (Dec)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Steps</label>
+        <input type="number" id="inputSteps" min="10" max="500" value="100">
+      </div>
+      <div class="control-group" style="display:flex;align-items:flex-end;">
+        <button class="btn btn-primary" id="btnSimulate" onclick="runSimulation()">
+          &#9654; Run Simulation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulation results -->
+  <div class="sim-results" id="simResults" style="display:none;">
+    <div class="chart-card">
+      <div class="chart-title">Simulation — Energy Descent</div>
+      <canvas id="chartSimEnergy"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Simulation — Gradient Alignment</div>
+      <canvas id="chartSimAlignment"></canvas>
+    </div>
+  </div>
+
+  <!-- Tables -->
+  <div class="chart-grid" style="margin-top: 1.5rem;">
+    <div class="table-card">
+      <div class="chart-title">Lead-Lag Analysis</div>
+      <table id="tableLead">
+        <thead>
+          <tr><th>Crisis</th><th>Benchmark</th><th>Lead (Q)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-card">
+      <div class="chart-title">Granger Causality</div>
+      <table id="tableGranger">
+        <thead>
+          <tr><th>Lag (Q)</th><th>F-stat</th><th>p-value</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="chart-grid" style="margin-top: 1.5rem;">
+    <div class="table-card wide">
+      <div class="chart-title">Welfare Analysis — Consumption-Equivalent Loss</div>
+      <table id="tableWelfare">
+        <thead>
+          <tr><th>Crisis</th><th>Quarters</th><th>L<sub>inaction</sub></th><th>Welfare Loss (%)</th><th>Peak CCyB (bps)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Adaptive Friction Stability Framework &mdash; Lyapunov-BSDT Systemic Risk Control &mdash; &copy; Odeyemi Olusegun Israel 2026
+</div>
+
+<script>
+const API = 'http://localhost:8050';
+const charts = {};
+const crisisAnnotations = {
+  gfc: { type: 'box', xMin: null, xMax: null, backgroundColor: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)', borderWidth: 1, label: { display: true, content: 'GFC', position: 'start', color: '#ef4444', font: { size: 10 } } },
+  covid: { type: 'box', xMin: null, xMax: null, backgroundColor: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.2)', borderWidth: 1, label: { display: true, content: 'COVID', position: 'start', color: '#f59e0b', font: { size: 10 } } },
+  rate: { type: 'box', xMin: null, xMax: null, backgroundColor: 'rgba(168,85,247,0.06)', borderColor: 'rgba(168,85,247,0.2)', borderWidth: 1, label: { display: true, content: 'Rate Shock', position: 'start', color: '#a855f7', font: { size: 10 } } },
+};
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  animation: { duration: 600 },
+  plugins: {
+    legend: { labels: { color: '#8b8e99', font: { size: 11 } } },
+  },
+  scales: {
+    x: { ticks: { color: '#8b8e99', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: 'rgba(42,45,58,0.5)' } },
+    y: { ticks: { color: '#8b8e99', font: { size: 10 } }, grid: { color: 'rgba(42,45,58,0.5)' } },
+  },
+};
+
+function findDateIndex(dates, target) {
+  let best = 0, bestDiff = Infinity;
+  for (let i = 0; i < dates.length; i++) {
+    const diff = Math.abs(new Date(dates[i]) - new Date(target));
+    if (diff < bestDiff) { bestDiff = diff; best = i; }
+  }
+  return best;
+}
+
+function setCrisisIndices(dates) {
+  crisisAnnotations.gfc.xMin = findDateIndex(dates, '2007-01-01');
+  crisisAnnotations.gfc.xMax = findDateIndex(dates, '2009-06-30');
+  crisisAnnotations.covid.xMin = findDateIndex(dates, '2019-10-01');
+  crisisAnnotations.covid.xMax = findDateIndex(dates, '2021-03-31');
+  crisisAnnotations.rate.xMin = findDateIndex(dates, '2022-01-01');
+  crisisAnnotations.rate.xMax = findDateIndex(dates, '2023-06-30');
+}
+
+function makeAnnotationPlugin() {
+  return {
+    annotation: {
+      annotations: { ...crisisAnnotations }
+    }
+  };
+}
+
+// Slider bindings
+document.querySelectorAll('input[type="range"]').forEach(el => {
+  const valEl = document.getElementById('val' + el.id.replace('slider', ''));
+  if (valEl) {
+    el.addEventListener('input', () => { valEl.textContent = parseFloat(el.value).toFixed(el.step.includes('.00') ? 2 : 2); });
+  }
+});
+
+// ── Load data ───────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [summaryRes, trajectoryRes] = await Promise.all([
+      fetch(`${API}/api/summary`),
+      fetch(`${API}/api/trajectory`),
+    ]);
+
+    if (!summaryRes.ok || !trajectoryRes.ok) throw new Error('API error');
+
+    const summary = await summaryRes.json();
+    const traj = await trajectoryRes.json();
+
+    document.getElementById('statusDot').style.background = 'var(--success)';
+    document.getElementById('statusText').textContent = `Connected — ${traj.dates.length} quarters loaded`;
+
+    // KPIs
+    const lastIdx = traj.mfls.length - 1;
+    document.getElementById('kpiMfls').textContent = traj.mfls[lastIdx].toFixed(2);
+    document.getElementById('kpiGamma').textContent = traj.gamma_star[lastIdx].toFixed(4);
+    document.getElementById('kpiLambda').textContent = traj.lambda_max[lastIdx].toFixed(4);
+    document.getElementById('kpiPhase').textContent = traj.above_cman[lastIdx] ? 'ABOVE' : 'BELOW';
+    document.getElementById('kpiPhase').style.color = traj.above_cman[lastIdx] ? 'var(--danger)' : 'var(--success)';
+    document.getElementById('kpiPhaseSub').textContent = `${(traj.above_cman.filter(Boolean).length / traj.above_cman.length * 100).toFixed(0)}% quarters above`;
+    document.getElementById('kpiCos').textContent = traj.cos_theta[lastIdx].toFixed(4);
+
+    setCrisisIndices(traj.dates);
+    const labels = traj.dates.map(d => d.substring(0, 7));
+
+    // Chart 1: MFLS + Energy
+    charts.mfls = new Chart(document.getElementById('chartMfls'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'MFLS', data: traj.mfls, borderColor: '#4f8df9', backgroundColor: 'rgba(79,141,249,0.1)', fill: true, pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+          { label: 'Energy', data: traj.energy, borderColor: '#f59e0b', backgroundColor: 'transparent', pointRadius: 0, borderWidth: 1.5, borderDash: [4,4], tension: 0.3, yAxisID: 'y1' },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: { ...chartDefaults.plugins, ...makeAnnotationPlugin() },
+        scales: {
+          ...chartDefaults.scales,
+          y: { ...chartDefaults.scales.y, position: 'left', title: { display: true, text: 'MFLS', color: '#8b8e99' } },
+          y1: { ...chartDefaults.scales.y, position: 'right', grid: { display: false }, title: { display: true, text: 'Energy', color: '#8b8e99' } },
+        }
+      }
+    });
+
+    // Chart 2: Phase diagram
+    charts.phase = new Chart(document.getElementById('chartPhase'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'λ_max', data: traj.lambda_max, borderColor: '#ef4444', pointRadius: 0, borderWidth: 2, tension: 0.3 },
+          { label: 'α (threshold)', data: Array(traj.dates.length).fill(0.1), borderColor: '#22c55e', pointRadius: 0, borderWidth: 1.5, borderDash: [6,3] },
+        ]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, ...makeAnnotationPlugin() } }
+    });
+
+    // Chart 3: Gamma star
+    charts.gamma = new Chart(document.getElementById('chartGamma'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'γ*(t)', data: traj.gamma_star, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.1)', fill: true, pointRadius: 0, borderWidth: 2, tension: 0.3 },
+        ]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, ...makeAnnotationPlugin() } }
+    });
+
+    // Chart 4: Alignment
+    charts.alignment = new Chart(document.getElementById('chartAlignment'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'cos θ', data: traj.cos_theta, borderColor: '#06b6d4', pointRadius: 1, pointBackgroundColor: traj.cos_theta.map(v => v > 0 ? '#22c55e' : '#ef4444'), borderWidth: 1.5, tension: 0.3 },
+          { label: 'Zero line', data: Array(traj.dates.length).fill(0), borderColor: '#4a4d5a', pointRadius: 0, borderWidth: 1, borderDash: [4,4] },
+        ]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, ...makeAnnotationPlugin() } }
+    });
+
+    // CCyB chart: compute from summary welfare data
+    const ccybRes = await fetch(`${API}/api/ccyb`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kappa: 0.5, ccyb_max_bps: 250 })
+    });
+    if (ccybRes.ok) {
+      const ccyb = await ccybRes.json();
+      document.getElementById('kpiCcyb').textContent = ccyb.summary.max_ccyb_bps.toFixed(0);
+
+      charts.ccyb = new Chart(document.getElementById('chartCcyb'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'CCyB (bps)', data: ccyb.ccyb_bps, backgroundColor: ccyb.ccyb_bps.map(v => v > 200 ? 'rgba(239,68,68,0.7)' : v > 100 ? 'rgba(245,158,11,0.7)' : 'rgba(34,197,94,0.5)'), borderWidth: 0, borderRadius: 2 },
+          ]
+        },
+        options: {
+          ...chartDefaults,
+          plugins: { ...chartDefaults.plugins, ...makeAnnotationPlugin() },
+          scales: {
+            ...chartDefaults.scales,
+            y: { ...chartDefaults.scales.y, title: { display: true, text: 'Basis Points', color: '#8b8e99' }, max: 260 },
+          }
+        }
+      });
+    }
+
+    // Tables
+    if (summary.lead_table) {
+      const tbody = document.querySelector('#tableLead tbody');
+      summary.lead_table.forEach(r => {
+        const lead = r['Lead (quarters)'];
+        const cls = lead > 0 ? 'lead-positive' : lead < 0 ? 'lead-negative' : 'lead-zero';
+        const sign = lead > 0 ? '+' : '';
+        tbody.innerHTML += `<tr><td>${r.Crisis}</td><td>${r.Benchmark}</td><td class="${cls}">${sign}${lead}</td></tr>`;
+      });
+    }
+
+    if (summary.granger_table) {
+      const tbody = document.querySelector('#tableGranger tbody');
+      summary.granger_table.forEach(r => {
+        const sig = r.p_value < 0.05 ? 'lead-positive' : r.p_value < 0.1 ? 'lead-zero' : 'lead-negative';
+        tbody.innerHTML += `<tr><td>${r.lag_quarters}</td><td>${r.F_stat.toFixed(3)}</td><td class="${sig}">${r.p_value.toFixed(4)}</td></tr>`;
+      });
+    }
+
+    if (summary.welfare_table) {
+      const tbody = document.querySelector('#tableWelfare tbody');
+      summary.welfare_table.forEach(r => {
+        tbody.innerHTML += `<tr>
+          <td>${r.Crisis}</td>
+          <td>${r.Quarters}</td>
+          <td>${r.L_inaction.toFixed(2)}</td>
+          <td>${r['Welfare loss (% consump)'].toFixed(1)}%</td>
+          <td>${r['Peak CCyB (bps)'].toFixed(0)}</td>
+        </tr>`;
+      });
+    }
+
+  } catch (err) {
+    document.getElementById('statusDot').style.background = 'var(--danger)';
+    document.getElementById('statusDot').style.animation = 'none';
+    document.getElementById('statusText').textContent = `Disconnected — ${err.message}`;
+    console.error(err);
+  }
+}
+
+// ── Simulation ──────────────────────────────────────────────────────────────
+async function runSimulation() {
+  const btn = document.getElementById('btnSimulate');
+  btn.disabled = true;
+  btn.textContent = '⟳ Running...';
+
+  const params = {
+    alpha: parseFloat(document.getElementById('sliderAlpha').value),
+    gamma: parseFloat(document.getElementById('sliderGamma').value),
+    sigma: parseFloat(document.getElementById('sliderSigma').value),
+    lambda_rep: parseFloat(document.getElementById('sliderLambdaRep').value),
+    eta: parseFloat(document.getElementById('sliderEta').value),
+    n_steps: parseInt(document.getElementById('inputSteps').value),
+    crisis_date: document.getElementById('selectCrisis').value,
+  };
+
+  try {
+    const res = await fetch(`${API}/api/simulate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+
+    document.getElementById('simResults').style.display = 'grid';
+
+    // Destroy old sim charts
+    if (charts.simEnergy) charts.simEnergy.destroy();
+    if (charts.simAlignment) charts.simAlignment.destroy();
+
+    const stepLabels = data.trajectory.steps.map(String);
+
+    charts.simEnergy = new Chart(document.getElementById('chartSimEnergy'), {
+      type: 'line',
+      data: {
+        labels: stepLabels,
+        datasets: [
+          { label: 'Energy', data: data.trajectory.energy, borderColor: '#f59e0b', pointRadius: 0, borderWidth: 2, tension: 0.3, fill: true, backgroundColor: 'rgba(245,158,11,0.1)' },
+          { label: 'MFLS', data: data.trajectory.mfls, borderColor: '#4f8df9', pointRadius: 0, borderWidth: 2, tension: 0.3, yAxisID: 'y1' },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          x: { ...chartDefaults.scales.x, title: { display: true, text: 'Step', color: '#8b8e99' } },
+          y: { ...chartDefaults.scales.y, position: 'left', title: { display: true, text: 'Energy', color: '#8b8e99' } },
+          y1: { ...chartDefaults.scales.y, position: 'right', grid: { display: false }, title: { display: true, text: 'MFLS', color: '#8b8e99' } },
+        }
+      }
+    });
+
+    charts.simAlignment = new Chart(document.getElementById('chartSimAlignment'), {
+      type: 'line',
+      data: {
+        labels: stepLabels,
+        datasets: [
+          { label: 'cos θ', data: data.trajectory.cos_theta, borderColor: '#06b6d4', pointRadius: 1, borderWidth: 2, tension: 0.3, pointBackgroundColor: data.trajectory.cos_theta.map(v => v > 0.7 ? '#22c55e' : v > 0 ? '#f59e0b' : '#ef4444') },
+          { label: '0.7 threshold', data: Array(data.trajectory.steps.length).fill(0.7), borderColor: '#22c55e', borderDash: [4,4], pointRadius: 0, borderWidth: 1 },
+          { label: 'Zero', data: Array(data.trajectory.steps.length).fill(0), borderColor: '#4a4d5a', borderDash: [2,2], pointRadius: 0, borderWidth: 1 },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          x: { ...chartDefaults.scales.x, title: { display: true, text: 'Step', color: '#8b8e99' } },
+          y: { ...chartDefaults.scales.y, min: -1, max: 1, title: { display: true, text: 'cos θ', color: '#8b8e99' } },
+        }
+      }
+    });
+
+  } catch (err) {
+    alert('Simulation failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ Run Simulation';
+  }
+}
+
+// Boot
+loadDashboard();
+</script>
+
+</body>
+</html>

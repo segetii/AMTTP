@@ -1,0 +1,348 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!70!black
+}
+
+\onehalfspacing
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Personal Statement}\\[4pt]
+{\large Odeyemi Olusegun Israel}\\[2pt]
+{\normalsize UK Global Talent Visa --- Digital Technology (Exceptional Promise)}
+\end{center}
+
+\bigskip
+
+I am an independent researcher and systems engineer based in Derby,
+United Kingdom.  Over the past three years---without institutional
+affiliation, funding, or supervision---I have designed and built a
+blockchain-native compliance platform spanning 17~containerised
+microservices and 18~smart contracts, trained machine-learning models on
+2.64~million Ethereum transactions, produced three original research
+papers establishing a unified mathematical theory of instability
+detection across finance, energy infrastructure, and fluid dynamics,
+filed a UK patent application covering 25~claims across 13~invention
+groups, published on TechRxiv and Zenodo, and open-sourced developer
+tools in TypeScript, Python, and Dart.  I am applying under the
+Exceptional Promise route because my work demonstrates the capacity to
+become a leading figure in the UK's applied mathematics, financial
+technology, and machine learning sectors.
+
+%% ── SECTION 1: ENGINEERING ─────────────────────────────────────────
+
+\textbf{1.\enspace What I have built.}
+
+My central engineering project is \textbf{AMTTP}---the Anti-Money
+Laundering Transaction Trust Protocol.  It addresses a problem that
+no existing commercial product has solved: enforcing regulatory compliance
+\textit{before} a blockchain transaction reaches finality, rather than
+generating alerts after the fact.  Chainalysis, Elliptic, and TRM~Labs
+all operate post-settlement; AMTTP intervenes at the protocol level
+within the approximately 12-second Ethereum block confirmation window.
+
+\textit{Architecture.}\;
+The system spans four layers.  At the outermost layer sit open-source
+client SDKs in TypeScript (19+~service endpoints covering risk, KYC,
+transactions, disputes, reputation, sanctions, GeoRisk, MEV~protection,
+and bulk operations for up to 10,000~transactions) and Python
+(17~matching services, full async API).  The compliance orchestration
+layer comprises 7~parallel microservices---ML risk scoring, graph-based
+relationship analysis, policy engine, sanctions screening, continuous
+monitoring, geographic risk, and an explainability module---coordinated
+through a central gateway with NGINX TLS termination, RS256 JWT
+validation, per-key rate limiting, and Ed25519~oracle-signed responses
+with 90-day rotation.  The ML pipeline (described below) supplies risk
+scores to the orchestrator.  Finally, the smart contract layer enforces
+on-chain compliance through 18~Solidity contracts deployed on Ethereum
+Sepolia, including risk-tiered policy enforcement
+(Approve / Review / Escrow / Block), Kleros-integrated decentralised
+dispute resolution, LayerZero cross-chain policy synchronisation, Gnosis
+Safe and Biconomy account-abstraction modules, and Compliance NFTs.  The
+full infrastructure totals 17~containerised microservices---each with
+health checks, circuit breaker patterns, and Prometheus / Grafana
+monitoring---orchestrated through Docker Compose.
+
+\textit{ML pipeline.}\;
+The production fraud-detection model uses a Composite Teacher
+architecture (40\% XGBoost, 30\% FATF pattern detectors, 30\% graph
+structural properties) that generates pseudo-labels across
+2.64~million Ethereum mainnet transactions sourced from Google BigQuery.
+A stacked ensemble of XGBoost (500~estimators) and LightGBM
+(500~estimators) with a logistic regression meta-learner achieves a
+production ROC-AUC of \textbf{0.9879}, PR-AUC of \textbf{0.9715}, and
+F1 of \textbf{0.9012} with 21~features and \textbf{zero
+training-serving skew}.  An earlier v2 student pipeline integrating
+BetaVAE (64 latent dimensions), GraphSAGE (3~layers), and GATv2
+(4~attention heads) reaches ROC-AUC~0.9229.  Achieving zero skew was
+itself a significant engineering challenge: v2 models trained on
+71~features but served with only~5 (66~features hardcoded to zero);
+diagnosing and correcting this lifted ROC-AUC from 0.64~to~0.99 in a
+single iteration.
+
+\textit{zkNAF.}\;
+I also built \textbf{zkNAF}---a zero-knowledge Non-disclosing Anti-Fraud
+framework using Groth16~ZK-SNARK proofs on the BN254~elliptic curve.
+zkNAF provides four proof types: sanctions non-membership (Merkle
+non-membership without revealing address or list), risk-range proofs
+(ML~score within acceptable bounds without exposing the exact value),
+KYC~verification (credential completeness without identity disclosure),
+and combined transaction compliance.  This resolves the tension between
+GDPR's data minimisation requirements and AML transparency obligations
+at the cryptographic level, with dedicated on-chain verifier contracts
+routed through a single \texttt{ZkNAFVerifierRouter}.
+
+\textit{Consumer application.}\;
+To make pre-settlement compliance accessible to end users, I built a
+cross-platform Flutter consumer application targeting six platforms
+(iOS, Android, Web, Windows, macOS, Linux) from a single Dart codebase.
+The app includes a wallet dashboard, pre-transfer trust check with
+traffic-light interstitial, transaction history, dispute filing, and
+MetaMask wallet connection.  It communicates with the compliance backend
+through a hybrid Flutter / Next.js architecture using a bidirectional
+JavaScript Channel bridge.  A separate Next.js~15 ``War Room'' dashboard
+serves institutional compliance analysts.
+
+\textit{Security architecture.}\;
+Security spans every layer: EIP-712 typed signing for request integrity,
+server-enforced nonce + TTL (300\,s) replay protection via Redis,
+HMAC-SHA256 webhook authentication, a 6-tier RBAC hierarchy, and a
+UI Integrity Service that monitors DOM mutations and verifies per-component
+hashes to prevent address-swap attacks of the kind used in the 2025
+Bybit exploit.
+
+The AMTTP architecture is described in my published paper:
+\textit{Olusegun Odeyemi, ``AMTTP: A Four-Layer Architecture for
+Deterministic Compliance Enforcement in Institutional DeFi,''
+TechRxiv, February~27, 2026},
+\href{https://doi.org/10.36227/techrxiv.177220113.33816607/v1}{DOI:\,10.36227/techrxiv.177220113.33816607/v1}.
+
+%% ── SECTION 2: RESEARCH ────────────────────────────────────────────
+
+\textbf{2.\enspace What I have discovered.}
+
+Alongside the engineering work, I have pursued a research programme that
+began with a practical question---why do fraud detectors miss what they
+are designed to find?---and evolved into a unified mathematical theory of
+instability in complex systems, with results spanning machine learning,
+systemic financial risk, electrical grid failure, algorithmic stablecoin
+collapse, and the regularity of the 3D Navier-Stokes equations.
+
+\textit{Paper~1: Blind Spot Decomposition Theory (BSDT).}\;
+My first paper provides a mathematical framework for characterising
+missed fraud.  I decompose detection failures into four near-orthogonal
+components---Camouflage~($\delta_C$), Feature Gap~($\delta_G$), Activity
+Anomaly~($\delta_A$), and Temporal Novelty~($\delta_T$)---and prove that
+these account for over 95\% of explainable variance in missed-fraud
+indicators (component correlations $|\rho|<0.3$ for $>$80\% of pairs;
+NMI~$<$~0.10 for $>$90\% of pairs).  The correction operators recover
+recall by up to \textbf{84.4~percentage points} without retraining or
+access to model internals.  Validated across 4~model architectures
+(XGBoost, LightGBM, Random Forest, Logistic Regression), 7~datasets
+from 6~domains (Bitcoin / Elliptic with 203,769~transactions, Ethereum
+addresses, IEEE-CIS credit card, NASA Shuttle telemetry, mammography,
+pen-digit recognition, e-commerce card-not-present), and over
+36~model--dataset combinations, the best variant (F2\_QuadSurf) achieves
+mean~F1 of~0.787 with 88.1\% false positive reduction.  The paper also
+proves formal safety, boundedness, and monotonicity guarantees for the
+correction formula and introduces three self-calibrating weight estimation
+methods (mutual information, Fisher, Bayesian online).
+Published on Zenodo (DOI:\,\href{https://doi.org/10.5281/zenodo.18870589}{10.5281/zenodo.18870589});
+target journal: \textbf{IEEE~TKDE}.
+
+\textit{Paper~2: Universal Deviation Law (UDL).}\;
+My second paper tackles anomaly detection from first principles.
+I introduce a multi-spectrum tensor framework with 14~composable
+operators spanning five mathematical families---statistical, dynamical,
+spectral, geometric, and exponential---each designed to capture a
+distinct axis of deviation.  A $14\times14$ correlation audit confirms
+that only 1~pair out of~91 is redundant (Wavelet$\leftrightarrow$Phase,
+$\rho=0.92$): every other operator adds genuinely new information.
+The best configuration achieves mean AUC of~\textbf{0.972} and 91\%
+coverage across five benchmarks---categorically outperforming Isolation
+Forest~(0.788), LOF~(0.632), and the current state-of-the-art
+ECOD~(0.921)---with a single hyperparameter set and no per-dataset
+tuning.  I prove five formal theorems providing local distinguishability
+(via the Inverse Function Theorem), global sensitivity (uniform
+bound~$\underline\sigma>0$), finite-sample concentration (Hoeffding),
+SDP-optimal fusion weights, and a $(1-1/e)$-approximation guarantee for
+greedy operator selection via monotone submodularity.  The paper also
+introduces a GravityEngine N-body scoring module with a closed-form
+erf attraction potential that achieves AUC~0.899 on mammography with
+monotone energy descent.
+Target venue: \textbf{NeurIPS~2026}.
+
+\textit{Paper~3: Systemic Risk as Geometry (Adaptive Friction + Navier-Stokes).}\;
+My third paper---and the centrepiece of the research programme---establishes
+a geometric framework linking the BSDT deviation operators to the
+Lyapunov energy of networked agent dynamics.  It proves three theorems
+(equivalence of the detection functional and the physical potential;
+a spectral phase transition at a critical manifold where constant
+coupling becomes impossible; and a closed-form optimal damping policy
+$\gamma^*(E) = E/(E+\theta)$) and validates them across four domains
+using exclusively real-world data:
+
+\begin{itemize}[nosep, leftmargin=2em]
+  \item \textbf{Banking} (140~quarters of FDIC call-report data, 1990--2024):
+    6-quarter lead before the 2008 GFC using a threshold trained
+    exclusively on pre-2006 data; AUROC~$= 0.805$ at institution level
+    for the 30 largest US banks.
+    A 24-institution global panel spanning US, UK, EU, Asia, and Africa
+    (using World Bank GFDD, ECB MIR, and BIS bilateral exposure data)
+    achieves AUROC~$= 0.811$ with a 19-quarter GFC lead.  Threshold
+    Granger causality passes on the G-SIB panel ($p = 0.043$).
+    The framework also calibrates countercyclical capital buffers:
+    the 2008~GFC consumption-equivalent welfare loss reached 19.57
+    percentage points; the COVID peak CCyB calibration was 231~basis
+    points.
+
+  \item \textbf{Algorithmic stablecoins} (Terra/Luna UST, May 2022):
+    detection at hour~23, one hour after the initial depeg event,
+    with simulation-to-reality correlation $r = 0.996$.  Adaptive
+    friction limits the depeg to 0.28\% (versus $>$99\% collapse
+    without intervention).
+
+  \item \textbf{Energy infrastructure} (Texas ERCOT, February 2021):
+    detection at hour~24, a full $+$72~hours before rolling blackouts
+    begin.  Adaptive friction reduces peak capacity loss by 71\%.
+    The per-agent decomposition reveals that the cascade origin shifted
+    from frozen wind turbines (the public narrative) to gas supply chain
+    disruption (the structural vulnerability)---a finding invisible to
+    event-study analysis.
+
+  \item \textbf{Fluid dynamics} (3D incompressible Navier-Stokes):
+    reinterpreting $\gamma^*$ as a state-dependent viscosity yields the
+    \textbf{P/D halving principle}---adaptive viscosity halves the enstrophy
+    production-to-dissipation ratio at every Reynolds number tested
+    ($\mathrm{Re} \in [314, 6283]$), confirmed numerically on a
+    pseudo-spectral solver for the Taylor-Green vortex.  This constitutes
+    a new conditional regularity criterion connected to the Clay
+    Millennium Prize Problem and identifies three strategies toward
+    closing the gap to unconditional regularity (with explicit disclaimers
+    that it does not solve the Clay problem).
+\end{itemize}
+
+\noindent
+In all three non-financial domains, the dominant BSDT channel is
+$\delta_C$ (camouflage)---the mechanism by which an unstable system
+conceals its proximity to collapse---demonstrating that the mathematical
+structure is genuinely universal, not fitted to any single domain.  The
+unifying object is the blind-spot energy functional
+$E_{\mathrm{BS}} = \delta_C^2 + \delta_G^2 + \delta_A^2 + \delta_T^2$,
+which serves simultaneously as a fraud-detection diagnostic, a systemic
+risk alarm, and a viscosity schedule for turbulent fluids.
+Target journal: \textbf{SIAM Journal on Applied Mathematics}.
+
+%% ── SECTION 3: IP ──────────────────────────────────────────────────
+
+\textbf{3.\enspace Intellectual property.}
+
+On 4~March~2026, I filed a UK patent application with the Intellectual
+Property Office (Patents Act~1977) titled \textit{``Adaptive
+Multi-Spectrum Anomaly Detection, Risk-Aware Transaction Processing,
+and Cross-Domain Stability Control System.''} The application contains
+25~claims organised into 13~groups covering: (A)~BSDT four-channel
+decomposition and post-hoc correction, (B)~UDL full-rank detection
+guarantees, (C)~GravityEngine N-body scoring, (D)~Dimension Magnifier
+nonlinear transform, (E)~AMTTP risk-aware blockchain protocol with
+4-tier escrow, (F)~zkNAF zero-knowledge compliance, (G)~cross-chain risk
+propagation, (H)~UI integrity verification (anti-Bybit),
+(I)~adaptive friction for systemic risk and CCyB calibration,
+(J)~state-dependent viscosity for Navier-Stokes, (K)~compliance
+orchestrator with parallel microservices, (L)~cross-domain unification
+via the blind-spot energy functional, and (M)~decentralised dispute
+resolution for ML-flagged transactions.
+
+%% ── SECTION 4: OPEN-SOURCE ─────────────────────────────────────────
+
+\textbf{4.\enspace Open-source contributions and tools.}
+
+The full codebase---research code, pipeline implementations, client SDKs,
+smart contracts, and replication packages---is publicly available on
+GitHub at \texttt{github.com/segetii/fintech}.  Major open-source
+components include:
+
+\begin{itemize}[nosep, leftmargin=2em]
+  \item \textbf{TypeScript client SDK} (\texttt{@amttp/client-sdk}):
+    19+ service modules with EIP-712 typed signing, Flashbots MEV
+    protection, HMAC-SHA256 webhook signing, and batch scoring for
+    up to 10,000 transactions.
+  \item \textbf{Python client SDK} (\texttt{amttp-sdk}):
+    17~async service modules mirroring the TypeScript API, MIT licensed.
+  \item \textbf{MFLS SDK} (\texttt{mfls}):
+    complete implementation of the BSDT/MFLS systemic risk engine with
+    BSDT operators, 5~scoring variants, GravityEngine, phase-transition
+    detection, and a FastAPI~REST~API for systemic risk signal, blind-spot
+    audit, CCyB calibration, and herding monitoring.
+  \item \textbf{MetaMask Snap}: browser-based compliance verification
+    for everyday users.
+  \item \textbf{GravityEngine toolkit}: N-body simulation for networked
+    agent dynamics with erf-attraction, log-repulsion potentials,
+    spectral radius computation, and trajectory analysis.
+  \item \textbf{3D Navier-Stokes solver}: pseudo-spectral solver with
+    BSDT diagnostic suite and adaptive viscosity, including Taylor-Green
+    vortex benchmarks across $\mathrm{Re}\in[314,6283]$.
+  \item \textbf{Complete replication packages} for all empirical results
+    in all three research papers.
+\end{itemize}
+
+%% ── SECTION 5: WHY UK ──────────────────────────────────────────────
+
+\textbf{5.\enspace Why the UK, and why now.}
+
+The UK is positioning itself as the global leader in responsible fintech
+regulation.  The FCA's evolving framework for crypto-assets will create
+substantial demand for compliance infrastructure that operates at the
+protocol level.  AMTTP is, as far as I am aware from surveying the
+commercial landscape, the only system that provides pre-settlement AML
+enforcement on blockchain transactions.
+
+The cross-domain reach of my research---from banking regulation to energy
+grid resilience to pure mathematics---aligns with the UK's strategic
+priorities in financial stability (Bank of England, PRA), infrastructure
+resilience (Ofgem, National Grid ESO), and mathematical sciences (EPSRC,
+the Heilbronn Institute).  The Navier-Stokes extension, in particular,
+connects directly to the UK's world-leading position in applied
+mathematics and fluid dynamics research.
+
+My immediate plans are: (1)~submit the three papers to their target
+journals (IEEE~TKDE, NeurIPS~2026, SIAM~J.~Applied Math);
+(2)~prepare a short letter for \textit{Nature Communications}
+summarising the cross-domain universality result for broader scientific
+visibility; (3)~commercialise AMTTP as a compliance-as-a-service product
+for UK-regulated financial institutions and virtual asset service
+providers; and (4)~build a research-led company at the intersection of
+machine learning, financial regulation, and mathematical stability
+theory---headquartered in the UK.
+
+%% ── CLOSING ────────────────────────────────────────────────────────
+
+\medskip
+
+I have done this work alone, without a university laboratory, a GPU
+cluster, or a research budget.  In three years, I have gone from a
+practical question about missed fraud to a unified mathematical framework
+that detects collapse across banking systems, stablecoins, power grids,
+and turbulent fluids---published two papers, filed a patent with
+25~claims, deployed 18~smart contracts, trained models on 2.64~million
+transactions to ROC-AUC~0.9879, and open-sourced the complete stack.
+What I bring is the ability to move between rigorous mathematical theory
+and production-grade systems, and the discipline to validate claims
+before making them.  I believe I can contribute meaningfully to the UK's
+digital economy, scientific reputation, and regulatory leadership, and
+I am asking for the opportunity to do so.
+
+\end{document}
