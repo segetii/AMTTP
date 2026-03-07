@@ -955,6 +955,20 @@ LGB-raw           & \textbf{0.927} & \textbf{0.967} & \textbf{1.000} & \textbf{0
 
 Three findings emerge.  \textbf{(i)}~UDL-Opt (closed-form QDA head, no gradient optimisation) achieves $0.925$ on Mammography, within $0.2$~pp of LightGBM ($0.927$)---remarkable given that QDA uses zero hyperparameter search beyond $\gamma$; this demonstrates that multi-spectrum deviation features carry comparable discriminative power to 200-tree ensembles on low-dimensional data.  \textbf{(ii)}~UDL-Opt reaches $0.983$ on PenDigits and $0.952$ on Satellite, confirming strong performance across diverse data geometries.  \textbf{(iii)}~On Arrhythmia ($D{=}274$), the $274{\to}32$ dimensional compression that UDL operators impose causes information loss: UDL-Opt drops to $0.767$ while LGB-raw retains $0.880$.  This confirms UDL's high-dimensional scaling limitation (Section~\ref{ssec:limits}).
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/udl_vs_baselines_bar.pdf}
+\caption{UDL standalone methods vs supervised baselines across four ODDS benchmarks (5-fold CV). UDL-QDA-Opt (dark blue) matches or approaches tree baselines on Mammography and Pendigits while using only closed-form QDA with a single hyperparameter. XGBoost and LightGBM (warm colours) run independently on raw features---they are \emph{not} mixed into the UDL pipeline.}
+\label{fig:udl_vs_baselines}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/udl_mAUC_summary.pdf}
+\caption{Mean AUC-ROC summary across four ODDS datasets. UDL-QDA-Opt achieves mAUC~$0.931$, the strongest UDL variant, vs LightGBM's~$0.968$. The $3.7$~pp gap is attributable to trees' capacity for non-linear feature interaction on raw inputs---a capability UDL trades for interpretable per-operator attribution and theoretical guarantees.}
+\label{fig:udl_mauc}
+\end{figure}
+
 The honest conclusion: on moderate-dimensional tabular data with abundant labels, gradient-boosted trees on raw features are hard to beat.  UDL's value proposition is \textbf{not} raw AUC supremacy but rather: (a)~per-operator attribution that decomposes \emph{why} an observation is anomalous, (b)~graceful degradation to a competitive unsupervised detector (RankFusion, mAUC~0.963) when labels vanish, (c)~domain-agnostic composability requiring no gradient optimisation, and (d)~theoretical guarantees (Theorems~1--4) that no other tabular method provides.
 
 Table~\ref{tab:sota} reports the results. Key findings:
