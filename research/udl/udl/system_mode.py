@@ -868,7 +868,9 @@ class MolecularEngine:
                  k_neighbors: int = 15,
                  normalize: bool = True,
                  max_samples: int = 3000,
-                 use_fused: bool = True):
+                 use_fused: bool = True,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
         self.epsilon = epsilon
         self.sigma_lj = sigma_lj
         self.alpha_radial = alpha_radial
@@ -878,10 +880,13 @@ class MolecularEngine:
         self.normalize = normalize
         self.max_samples = max_samples
         self.use_fused = use_fused
+        self.calibrate = calibrate
+        self.target_far = target_far
 
         self.stabiliser = LyapunovStabiliser()
         self.alarm = MorseTopologyAlarm(k=k_neighbors)
         self.fused_scorer = FusedSystemScorer(k=k_neighbors) if use_fused else None
+        self._far_calibrator = None
 
         self.scaler_: Optional[StandardScaler] = None
         self.mu_: Optional[np.ndarray] = None
@@ -1057,6 +1062,17 @@ class MolecularEngine:
             else:
                 scores = self.alarm.score(X_work)
 
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
         return scores
 
 
@@ -1083,7 +1099,9 @@ class GravityModeEngine:
                  k_neighbors: int = 15,
                  normalize: bool = True,
                  max_samples: int = 3000,
-                 use_fused: bool = True):
+                 use_fused: bool = True,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
         self.alpha = alpha
         self.gamma = gamma
         self.sigma = sigma
@@ -1094,10 +1112,13 @@ class GravityModeEngine:
         self.normalize = normalize
         self.max_samples = max_samples
         self.use_fused = use_fused
+        self.calibrate = calibrate
+        self.target_far = target_far
 
         self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
         self.alarm = MorseTopologyAlarm(k=k_neighbors)
         self.fused_scorer = FusedSystemScorer(k=k_neighbors) if use_fused else None
+        self._far_calibrator = None
 
         self.scaler_: Optional[StandardScaler] = None
         self.mu_: Optional[np.ndarray] = None
@@ -1254,6 +1275,17 @@ class GravityModeEngine:
             else:
                 scores = np.linalg.norm(X_work - X_initial, axis=1)
 
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
         return scores
 
 
@@ -1284,13 +1316,18 @@ class HybridGravityEngine:
     def __init__(self,
                  blend_weight: Union[float, str] = 'auto',
                  molecular_params: Optional[dict] = None,
-                 gravity_params: Optional[dict] = None):
+                 gravity_params: Optional[dict] = None,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
         self.blend_weight = blend_weight
+        self.calibrate = calibrate
+        self.target_far = target_far
         mol_kw = molecular_params or {}
         grav_kw = gravity_params or {}
 
         self.molecular = MolecularEngine(**mol_kw)
         self.gravity = GravityModeEngine(**grav_kw)
+        self._far_calibrator = None
 
         self._blend_w: float = 0.5  # resolved blend weight
         self._cv_scores: Optional[Dict] = None
@@ -1317,6 +1354,18 @@ class HybridGravityEngine:
             self._blend_w = 0.5
 
         blended = self._blend_w * scores_mol + (1 - self._blend_w) * scores_grav
+
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(blended, y)
+            blended = cal.transform(blended)
+            self._far_calibrator = cal
+
         return blended
 
     def _normalise(self, s: np.ndarray) -> np.ndarray:

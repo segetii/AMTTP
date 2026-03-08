@@ -41,7 +41,7 @@ from .meta_fusion import MetaFusionPipeline
 from .datasets import load_dataset, list_datasets
 from .bsdt_bridge import BSDTSpectrum, BSDTAugmentedStack
 from .mfls_weighting import MFLSWeighting
-from .calibration import ScoreCalibrator
+from .calibration import ScoreCalibrator, FARTargetCalibrator
 from .law_matrix import DataProfile, select_laws, get_law_matrix_table
 from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
 from .gravity import GravityEngine, run_gravity_clustering
@@ -88,6 +88,7 @@ __all__ = [
     "BSDTAugmentedStack",
     # Calibration
     "ScoreCalibrator",
+    "FARTargetCalibrator",
     # Law auto-selection
     "DataProfile",
     "select_laws",
