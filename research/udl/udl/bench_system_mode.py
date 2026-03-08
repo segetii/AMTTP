@@ -36,6 +36,7 @@ from udl.system_mode import (
     SystemModeEngine, SystemMode,
     MolecularEngine, GravityModeEngine, HybridGravityEngine,
     SpectraFalseAlarmFilter, _MorseReplacementSpectrum,
+    BettiBarcodeSuite, UDLPostSimScorer, FusedSystemScorer,
 )
 from udl.pipeline import UDLPipeline
 from udl.stack import RepresentationStack
@@ -71,22 +72,34 @@ def compute_far_at_recall(y_true, scores, target_recall=0.95):
 
 def benchmark_system_modes():
     """Run full benchmark across datasets and modes."""
-    datasets = ['mammography', 'pendigits', 'shuttle', 'creditcard']
+    datasets = ['mammography', 'pendigits', 'shuttle']
     n_splits = 3
     results = {}
 
     print("=" * 70)
-    print("  SYSTEM MODE BENCHMARK")
-    print("  Molecular | Gravity | Hybrid vs Baseline UDL")
-    print("  With Morse Topology Alarm (false-alarm suppression)")
+    print("  SYSTEM MODE BENCHMARK v2")
+    print("  Fused (Morse+Betti+UDL) vs Morse-only vs Baseline")
+    print("  BettiBarcode + Phase+Topo+KernelRKHS+Rank operators")
     print("=" * 70)
 
     methods = {
         'UDL_Baseline': lambda: 'baseline',
-        'UDL_Molecular': lambda: SystemModeEngine(mode='molecular', filter_spectra=False),
-        'UDL_Gravity': lambda: SystemModeEngine(mode='gravity', filter_spectra=False),
-        'UDL_Hybrid': lambda: SystemModeEngine(mode='hybrid', filter_spectra=False),
-        'UDL_MolFilter': lambda: SystemModeEngine(mode='molecular', filter_spectra=True),
+        'UDL_Mol_Morse': lambda: SystemModeEngine(
+            mode='molecular', filter_spectra=False,
+            molecular_params={'use_fused': False}),
+        'UDL_Mol_Fused': lambda: SystemModeEngine(
+            mode='molecular', filter_spectra=False,
+            molecular_params={'use_fused': True}),
+        'UDL_Grav_Morse': lambda: SystemModeEngine(
+            mode='gravity', filter_spectra=False,
+            gravity_params={'use_fused': False}),
+        'UDL_Grav_Fused': lambda: SystemModeEngine(
+            mode='gravity', filter_spectra=False,
+            gravity_params={'use_fused': True}),
+        'UDL_Hybrid_Fused': lambda: SystemModeEngine(
+            mode='hybrid', filter_spectra=False,
+            molecular_params={'use_fused': True},
+            gravity_params={'use_fused': True}),
     }
 
     for ds_name in datasets:
@@ -382,10 +395,6 @@ def test_chaos_spectrum_comparison():
 
 
 if __name__ == '__main__':
+    benchmark_system_modes()
     test_mode_toggle()
     test_chaos_spectrum_comparison()
-
-    if '--full' in sys.argv:
-        benchmark_system_modes()
-    else:
-        print("\n  Run with --full for complete benchmark across datasets")

@@ -22,6 +22,7 @@ from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAna
 from .system_mode import (
     SystemModeEngine, SystemMode, MorseTopologyAlarm,
     SpectraFalseAlarmFilter, _MorseReplacementSpectrum,
+    FusedSystemScorer, BettiBarcodeSuite, UDLPostSimScorer,
 )
 
 
@@ -164,6 +165,7 @@ class UDLPipeline:
         energy_calibrate=None,
         energy_cost_ratio=1.0,
         energy_target_fpr=None,
+        use_fused_scoring=True,
     ):
         self.stack = RepresentationStack(
             operators=operators, exp_alpha=exp_alpha,
@@ -252,11 +254,14 @@ class UDLPipeline:
         # ── System mode engine (Molecular / Gravity / Hybrid) ──
         self.system_mode = system_mode
         self.filter_spectra = filter_spectra
+        self.use_fused_scoring = use_fused_scoring
         self._system_engine = None
         if system_mode is not None:
             self._system_engine = SystemModeEngine(
                 mode=system_mode,
                 filter_spectra=filter_spectra,
+                molecular_params={'use_fused': use_fused_scoring},
+                gravity_params={'use_fused': use_fused_scoring},
             )
 
         self._fitted = False
