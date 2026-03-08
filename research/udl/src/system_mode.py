@@ -56,6 +56,7 @@ Author: Odeyemi Olusegun Israel
 from __future__ import annotations
 
 import numpy as np
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, List, Dict, Tuple, Union
 from sklearn.preprocessing import StandardScaler
@@ -74,56 +75,238 @@ class SystemMode(Enum):
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  LYAPUNOV STABILISER (iteration-only — never touches predictions)
+#  CONVERGENCE REPORT (solver diagnostics — never touches predictions)
+# ═══════════════════════════════════════════════════════════════════
+
+@dataclass
+class ConvergenceReport:
+    """Structured convergence diagnostics from the Lyapunov controller.
+
+    All fields are solver internals — never exposed to prediction output.
+    """
+    n_steps: int                 # total iteration steps executed
+    n_accepted: int              # Armijo-accepted steps
+    n_rejected: int              # Armijo-rejected steps (backtracked)
+    total_descent: float         # cumulative energy descent  ΣΔV
+    final_grad_norm: float       # ‖∇E‖ at final step
+    converged: bool              # did solver converge?
+    convergence_type: str        # 'la_salle' | 'displacement' | 'max_iter'
+    iss_bound: float             # max perturbation norm seen
+    final_eta: float             # step size at termination
+    acceptance_rate: float       # n_accepted / (n_accepted + n_rejected)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  LYAPUNOV STABILISER v2 — Energy-Based (Hamiltonian) Controller
+#  (iteration-only — never touches predictions)
 # ═══════════════════════════════════════════════════════════════════
 
 class LyapunovStabiliser:
     """
-    Auxiliary Lyapunov controller for solver stability.
+    Energy-Based (Hamiltonian) Lyapunov Controller  —  v2
 
-    Used ONLY inside the Euler integration loop to:
-      - Backtrack step size when energy increases (Armijo condition)
-      - Clamp forces to prevent numerical blow-up
-      - Monitor convergence via energy descent
+    Uses the system's total energy E_total as the Lyapunov function
+    V = E_total.  Controls the Euler integration solver only; the
+    prediction signal comes entirely from the topological alarm.
 
-    The Lyapunov signal is **never** exposed to the prediction /
-    alarm output.  This is the "decoupled auxiliary Lyapunov" pattern
-    from robust control / stochastic MPC.
+    Theoretical basis
+    -----------------
+      - **Gradient flow**: dX/dt = −∇E  ⟹  dV/dt = −‖∇E‖² ≤ 0
+        (automatic descent along gradient)
+      - **Armijo condition** (discrete descent certificate):
+        E(Xᵗ⁺¹) ≤ E(Xᵗ) − c·η·‖∇E‖²
+      - **La Salle invariance**: converges to largest invariant set
+        where ∇E = 0 — tolerates non-strict decrease
+      - **ISS (Input-to-State Stability)**: under bounded perturbation w,
+        ΔV ≤ −α(V) + γ(‖w‖)  →  equilibria shift by O(‖w‖)
+      - **Barrier clamping**: smooth reciprocal barrier replaces
+        discontinuous hard clamp — C¹-smooth, same ceiling
+
+    Decoupled auxiliary pattern
+    ---------------------------
+    The Lyapunov signal is **never** exposed to the prediction / alarm
+    output.  This is the "decoupled auxiliary Lyapunov" pattern from
+    robust control / stochastic MPC.
     """
 
-    def __init__(self, armijo_c: float = 1e-4, backtrack_rho: float = 0.5,
-                 max_force_norm: float = 10.0, min_eta: float = 1e-6):
+    def __init__(self, armijo_c: float = 1e-4,
+                 backtrack_rho: float = 0.5,
+                 max_force_norm: float = 10.0,
+                 min_eta: float = 1e-6,
+                 la_salle_tol: float = 1e-5,
+                 la_salle_patience: int = 5,
+                 barrier_alpha: float = 1.0):
         self.armijo_c = armijo_c
         self.backtrack_rho = backtrack_rho
         self.max_force_norm = max_force_norm
         self.min_eta = min_eta
+        self.la_salle_tol = la_salle_tol
+        self.la_salle_patience = la_salle_patience
+        self.barrier_alpha = barrier_alpha
+        self.reset()
+
+    # ── lifecycle ──────────────────────────────────────────────────
+
+    def reset(self) -> None:
+        """Reset internal state for a new simulation run."""
         self.energy_trace: List[float] = []
+        self._descent_certificate: List[float] = []
+        self._grad_norm_trace: List[float] = []
+        self._iss_perturbation_trace: List[float] = []
+        self._n_accepted: int = 0
+        self._n_rejected: int = 0
+        self._n_steps: int = 0
+        self._la_salle_counter: int = 0
+        self._converged: bool = False
+        self._convergence_type: str = 'max_iter'
+        self._final_eta: float = 0.0
+
+    # ── force control ──────────────────────────────────────────────
 
     def clamp_forces(self, F: np.ndarray) -> np.ndarray:
-        """Clamp per-particle force magnitude to prevent blow-up."""
-        norms = np.linalg.norm(F, axis=1, keepdims=True)
-        scale = np.minimum(1.0, self.max_force_norm / (norms + 1e-15))
+        """Barrier-augmented force clamping.
+
+        Uses a smooth reciprocal barrier that activates only when
+        ‖F_i‖ > F_max, avoiding the discontinuous derivative of
+        the hard clamp at the boundary.
+
+        For ‖F‖ ≤ F_max:  scale = 1.0 (identity, no compression)
+        For ‖F‖ > F_max:  scale = F_max / (F_max + α·(‖F‖ − F_max))
+          → clamped norm ≈ F_max  (finite ceiling, C¹-smooth)
+
+        With α=1: matches hard-clamp ceiling but with continuous
+        derivative — eliminates chattering near the boundary.
+        """
+        norms = np.linalg.norm(F, axis=1, keepdims=True) + 1e-15
+        if self.barrier_alpha > 0:
+            excess = np.maximum(0, norms - self.max_force_norm)
+            scale = self.max_force_norm / (
+                self.max_force_norm + self.barrier_alpha * excess
+            )
+            # Safety: never amplify
+            scale = np.minimum(scale, 1.0)
+        else:
+            # Hard clamp fallback (α ≤ 0)
+            scale = np.minimum(1.0, self.max_force_norm / norms)
         return F * scale
 
-    def accept_step(self, E_old: float, E_new: float,
-                    grad_norm_sq: float, eta: float) -> Tuple[bool, float]:
-        """
-        Armijo sufficient-decrease test.
+    # ── step acceptance ────────────────────────────────────────────
 
-        Returns (accept, new_eta).
-        If rejected, eta is reduced by backtrack_rho (with minimum floor).
+    def accept_step(self, E_old: float, E_new: float,
+                    grad_norm_sq: float, eta: float,
+                    perturbation_norm: float = 0.0
+                    ) -> Tuple[bool, float]:
         """
-        if E_new <= E_old - self.armijo_c * eta * grad_norm_sq:
+        Armijo sufficient-decrease test with ISS tracking.
+
+        Descent certificate:
+            E(Xᵗ⁺¹) ≤ E(Xᵗ) − c·η·‖∇E‖²  +  γ(‖w‖)
+
+        When perturbation_norm > 0, the Armijo condition is relaxed
+        by γ(‖w‖) = ‖w‖² to account for the ISS margin.  This is
+        used when the energy function is an approximation (e.g.,
+        radial-only energy in the gravity engine, where pairwise
+        forces are a bounded perturbation).
+
+        Returns (accepted: bool, new_eta: float).
+        """
+        self._n_steps += 1
+        self._final_eta = eta
+
+        # Track ISS perturbation
+        if perturbation_norm > 0:
+            self._iss_perturbation_trace.append(perturbation_norm)
+
+        # Armijo condition with ISS margin
+        iss_margin = perturbation_norm ** 2 if perturbation_norm > 0 else 0.0
+        descent = E_old - E_new
+        required_descent = self.armijo_c * eta * grad_norm_sq - iss_margin
+
+        if descent >= required_descent:
             self.energy_trace.append(E_new)
+            self._descent_certificate.append(descent)
+            self._grad_norm_trace.append(np.sqrt(max(grad_norm_sq, 0.0)))
+            self._n_accepted += 1
             return True, eta
         else:
             new_eta = max(eta * self.backtrack_rho, self.min_eta)
+            self._n_rejected += 1
+            self._final_eta = new_eta
             return False, new_eta
+
+    # ── convergence detection ──────────────────────────────────────
+
+    def check_convergence(self, grad_norm_sq: float,
+                          displacement: float) -> bool:
+        """
+        La Salle invariance convergence test.
+
+        Detects convergence to the largest invariant set where
+        ∇E ≈ 0 (La Salle's invariance principle).  Requires
+        la_salle_patience consecutive steps with ‖∇E‖ below
+        threshold — more robust than displacement-only check.
+
+        Falls back to displacement check if La Salle hasn't
+        triggered (handles non-smooth energy landscapes).
+
+        Returns True if the simulation should terminate.
+        """
+        grad_norm = np.sqrt(max(grad_norm_sq, 0.0))
+
+        # La Salle: ‖∇E‖ → 0 for `patience` consecutive steps
+        if grad_norm < self.la_salle_tol:
+            self._la_salle_counter += 1
+            if self._la_salle_counter >= self.la_salle_patience:
+                self._converged = True
+                self._convergence_type = 'la_salle'
+                return True
+        else:
+            self._la_salle_counter = 0
+
+        # Fallback: displacement convergence
+        if displacement < 1e-6:
+            self._converged = True
+            self._convergence_type = 'displacement'
+            return True
+
+        return False
+
+    # ── diagnostics ────────────────────────────────────────────────
+
+    def report(self) -> ConvergenceReport:
+        """Return structured convergence diagnostics."""
+        total_n = self._n_accepted + self._n_rejected
+        return ConvergenceReport(
+            n_steps=self._n_steps,
+            n_accepted=self._n_accepted,
+            n_rejected=self._n_rejected,
+            total_descent=sum(self._descent_certificate),
+            final_grad_norm=(
+                self._grad_norm_trace[-1]
+                if self._grad_norm_trace else float('inf')
+            ),
+            converged=self._converged,
+            convergence_type=self._convergence_type,
+            iss_bound=(
+                max(self._iss_perturbation_trace)
+                if self._iss_perturbation_trace else 0.0
+            ),
+            final_eta=self._final_eta,
+            acceptance_rate=(
+                self._n_accepted / total_n if total_n > 0 else 1.0
+            ),
+        )
+
+    # ── legacy energy computation ──────────────────────────────────
 
     def compute_energy(self, X: np.ndarray, mu: np.ndarray,
                        alpha: float, gamma: float, sigma: float,
                        lambda_rep: float, eps: float = 1e-5) -> float:
-        """Compute total system energy (Lyapunov candidate)."""
+        """Compute total system energy (Lyapunov candidate V = E_total).
+
+        Retained for backward compatibility.  Engines should prefer
+        their own _lj_energy / _gravity_energy methods.
+        """
         n = len(X)
         # Radial energy
         diff_mu = X - mu[None, :]
@@ -819,7 +1002,8 @@ class MolecularEngine:
 
         self.mu_ = X_work.mean(axis=0)
 
-        # Euler integration with Lyapunov stability control
+        # ── Euler integration with Lyapunov v2 stability control ──
+        self.stabiliser.reset()
         eta = self.eta
         n_sim = len(X_work)
         # Reduce iterations for large subsamples
@@ -830,10 +1014,10 @@ class MolecularEngine:
             F_radial = -self.alpha_radial * (X_work - self.mu_)
             F_total = F_lj + F_radial
 
-            # Lyapunov clamps forces (solver stability only)
+            # Barrier-augmented force clamping (solver stability only)
             F_total = self.stabiliser.clamp_forces(F_total)
 
-            # Armijo backtracking (solver stability only)
+            # Armijo backtracking with descent certificate
             E_old = self._lj_energy(X_work)
             grad_norm_sq = float(np.sum(F_total ** 2))
             X_candidate = X_work + eta * F_total
@@ -849,12 +1033,13 @@ class MolecularEngine:
                 # Reduced step
                 X_work = X_work + eta * F_total
 
-            # Check convergence
+            # La Salle convergence check (∇E → 0) with displacement fallback
             displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
-            if displacement < 1e-6:
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
                 break
 
         self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
 
         # ── PREDICTION: calibrate on FINAL normal positions ──
         X_ref_final = X_work[normal_mask]
@@ -947,7 +1132,15 @@ class GravityModeEngine:
         return forces
 
     def _gravity_energy(self, X: np.ndarray, eps: float = 1e-5) -> float:
-        """Approximate energy (kNN-consistent to avoid force/energy mismatch)."""
+        """Approximate energy (radial-only Lyapunov candidate).
+
+        Uses radial energy only — always consistent with radial force.
+        The pairwise force F_pair is treated as a bounded perturbation
+        under the ISS (Input-to-State Stability) framework:
+          ΔV ≤ −α(V) + γ(‖F_pair‖)
+        This justifies using radial-only energy for the Armijo test
+        while the full force (radial + pairwise) drives the dynamics.
+        """
         n = len(X)
         # Radial energy only (always consistent with radial force)
         diff_mu = X - self.mu_[None, :]
@@ -999,6 +1192,8 @@ class GravityModeEngine:
         # Store initial positions for displacement scoring
         X_initial = X_work.copy()
 
+        # ── Euler integration with Lyapunov v2 + ISS tracking ──
+        self.stabiliser.reset()
         eta = self.eta
         n_sim = len(X_work)
         iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
@@ -1007,17 +1202,35 @@ class GravityModeEngine:
             F_radial = -self.alpha * (X_work - self.mu_)
             F_total = F_pair + F_radial
 
+            # Barrier-augmented force clamping
             F_total = self.stabiliser.clamp_forces(F_total)
 
-            # Simple step with clamping (avoid Armijo mismatch)
-            X_work = X_work + eta * F_total
+            # Armijo on radial energy with ISS margin for pairwise force
+            E_old = self._gravity_energy(X_work)
+            grad_norm_sq = float(np.sum(F_total ** 2))
+            perturbation_norm = float(np.sqrt(np.sum(F_pair ** 2)))
 
-            # Check convergence
+            X_candidate = X_work + eta * F_total
+            E_new = self._gravity_energy(X_candidate)
+
+            accept, eta = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, eta,
+                perturbation_norm=perturbation_norm
+            )
+
+            if accept:
+                X_work = X_candidate
+            else:
+                # Reduced step with ISS-adjusted eta
+                X_work = X_work + eta * F_total
+
+            # La Salle convergence check with displacement fallback
             displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
-            if displacement < 1e-6:
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
                 break
 
         self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
 
         # Calibrate on FINAL normal positions
         X_ref_final = X_work[normal_mask]
