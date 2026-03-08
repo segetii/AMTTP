@@ -45,6 +45,16 @@ from .calibration import ScoreCalibrator
 from .law_matrix import DataProfile, select_laws, get_law_matrix_table
 from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
 from .gravity import GravityEngine, run_gravity_clustering
+from .system_mode import (
+    SystemModeEngine,
+    SystemMode,
+    MolecularEngine,
+    GravityModeEngine,
+    HybridGravityEngine,
+    MorseTopologyAlarm,
+    LyapunovStabiliser,
+    SpectraFalseAlarmFilter,
+)
 from .backend import xp, jit, vmap, to_numpy, from_numpy, BACKEND
 
 __all__ = [
@@ -86,6 +96,15 @@ __all__ = [
     # Gravity engine
     "GravityEngine",
     "run_gravity_clustering",
+    # System mode (Molecular / Gravity / Hybrid)
+    "SystemModeEngine",
+    "SystemMode",
+    "MolecularEngine",
+    "GravityModeEngine",
+    "HybridGravityEngine",
+    "MorseTopologyAlarm",
+    "LyapunovStabiliser",
+    "SpectraFalseAlarmFilter",
     # Backend (JAX / CuPy / NumPy)
     "xp",
     "jit",

@@ -19,6 +19,10 @@ from .mfls_weighting import MFLSWeighting
 from .gravitational import GravitationalTransformVec, TwoPassGravity
 from .calibration import ScoreCalibrator
 from .energy import DeviationEnergy, OperatorDiversity, EnergyFlow, StabilityAnalyser
+from .system_mode import (
+    SystemModeEngine, SystemMode, MorseTopologyAlarm,
+    SpectraFalseAlarmFilter, _MorseReplacementSpectrum,
+)
 
 
 class UDLPipeline:
@@ -97,6 +101,17 @@ class UDLPipeline:
         Radial anchoring weight for energy functional (default 1.0).
     energy_gamma : float
         Pairwise interaction weight (0 = disabled, default 0.0).
+    system_mode : str or None
+        Physics system mode for scoring.  None = disabled (default).
+        'molecular' = Lennard-Jones potential + Morse topology alarm.
+        'gravity'   = N-body gravitational + Morse topology alarm.
+        'hybrid'    = Adaptive blend of molecular + gravity.
+        When enabled, adds noise-immune topological scores that suppress
+        false alarms from ChaosSpectrum / SpectralSpectrum operators.
+    filter_spectra : bool
+        If True (default when system_mode is set), replaces the
+        ChaosSpectrum operator with a Morse-topology replacement that
+        is structurally stable under noise / chaos perturbations.
     energy_flow : bool
         If True, applies EnergyFlow transform (N-body gradient flow)
         before QDA projection. This moves normal points toward equilibrium
@@ -139,6 +154,8 @@ class UDLPipeline:
         gravity_passes=2,
         calibrate=None,
         include_marginal=False,
+        system_mode=None,
+        filter_spectra=True,
         energy_score=False,
         energy_alpha=1.0,
         energy_gamma=0.0,
@@ -231,6 +248,16 @@ class UDLPipeline:
         self._energy_threshold = None   # cost-sensitive threshold
         self._energy_flow_transform = None
         self._operator_diversity = None
+
+        # ── System mode engine (Molecular / Gravity / Hybrid) ──
+        self.system_mode = system_mode
+        self.filter_spectra = filter_spectra
+        self._system_engine = None
+        if system_mode is not None:
+            self._system_engine = SystemModeEngine(
+                mode=system_mode,
+                filter_spectra=filter_spectra,
+            )
 
         self._fitted = False
         self._tensor_result_ref = None
@@ -328,7 +355,37 @@ class UDLPipeline:
                     train_energy, y
                 )
 
-        # 8. Fit score calibrator (if enabled)
+        # 8. Fit system mode engine (if enabled)
+        if self._system_engine is not None:
+            self._system_engine.fit_score(X, y)
+            # If filter_spectra is active, replace ChaosSpectrum in stack
+            if self.filter_spectra and self.stack.operators is not None:
+                morse_op = self._system_engine.get_morse_operator()
+                morse_op.fit(X_ref if self.stack.standardize is False
+                             else (X_ref - self.stack._input_mu) / self.stack._input_sigma
+                             if self.stack._input_mu is not None else X_ref)
+                new_ops = []
+                for name, op in self.stack.operators:
+                    if name in ('chaos', 'freq'):
+                        new_ops.append(('morse_' + name, morse_op))
+                    else:
+                        new_ops.append((name, op))
+                # Only replace if chaos/freq were actually present
+                if any(n.startswith('morse_') for n, _ in new_ops):
+                    self.stack.operators = new_ops
+                    # Rebuild stack metadata
+                    dims = []
+                    names = []
+                    for name, op in self.stack.operators:
+                        out = op.transform(X_ref[:1] if not self.stack.standardize
+                                          else ((X_ref[:1] - self.stack._input_mu) / self.stack._input_sigma
+                                                if self.stack._input_mu is not None else X_ref[:1]))
+                        dims.append(out.shape[1])
+                        names.append(name)
+                    self.stack.law_dims_ = dims
+                    self.stack.law_names_ = names
+
+        # 9. Fit score calibrator (if enabled)
         self._fitted = True  # must set before score() call
         if self._calibrator is not None and y is not None:
             train_scores = self.score(X)
@@ -553,6 +610,54 @@ class UDLPipeline:
             "law_names": self.stack.law_names_,
             "total_representation_dim": self.stack.total_dim,
         }
+
+    # ─── SYSTEM MODE METHODS ──────────────────────────────────
+
+    def system_mode_scores(self, X):
+        """
+        Compute anomaly scores from the physics system mode engine.
+
+        Returns noise-immune topological scores using Morse theory /
+        persistence filtering.  Requires system_mode to be set.
+
+        Returns
+        -------
+        scores : ndarray (N,) — higher = more anomalous
+        """
+        self._check_fitted()
+        if self._system_engine is None:
+            raise RuntimeError(
+                "System mode not enabled. Set system_mode='molecular'|"
+                "'gravity'|'hybrid' in constructor."
+            )
+        return self._system_engine.fit_score(X)
+
+    def set_system_mode(self, mode):
+        """
+        Toggle the active physics system mode.
+
+        Parameters
+        ----------
+        mode : str
+            'molecular', 'gravity', or 'hybrid'. Use None to disable.
+        """
+        if mode is None:
+            self._system_engine = None
+            self.system_mode = None
+        else:
+            self.system_mode = mode
+            if self._system_engine is None:
+                self._system_engine = SystemModeEngine(
+                    mode=mode, filter_spectra=self.filter_spectra
+                )
+            else:
+                self._system_engine.set_mode(mode)
+
+    def system_mode_summary(self):
+        """Return summary of the active system mode engine."""
+        if self._system_engine is None:
+            return {'mode': None, 'enabled': False}
+        return self._system_engine.summary()
 
     # ─── ENERGY FUNCTIONAL METHODS ──────────────────────────────
 
