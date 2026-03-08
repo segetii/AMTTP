@@ -450,6 +450,40 @@ sublevel set $\{W \le W(X_0)\}$ concludes that all trajectories converge to
 $\Xst$. \qed
 \end{proof}
 
+\begin{theorem}[Entropy Structure of BSDT]
+\label{thm:entropy}
+The BSDT energy functional $\Ebs$ satisfies the following entropy-like
+properties along trajectories of the damped system~\eqref{eq:bsdamped}:
+\begin{enumerate}
+  \item[\textup{(E1)}] \textbf{Monotone dissipation:}
+    $\dfrac{d}{dt}\Ebs(X(t)) \le 0$.
+  \item[\textup{(E2)}] \textbf{Non-negative entropy production:}
+    $\sigma(X) := \gamma(\Ebs(X))\norm{\grad\Ebs(X)}^2 \ge 0$.
+  \item[\textup{(E3)}] \textbf{Entropy-neutral equilibrium:}
+    $\sigma(X) = 0$ if and only if $X = \Xst$.
+\end{enumerate}
+Moreover, the dynamics~\eqref{eq:bsdamped} constitute a
+\textbf{generalised Onsager gradient flow}
+$\dot{X} = -M(X)\grad\Ebs$ with mobility tensor
+$M(X) = \gamma(\Ebs)\,I \succeq 0$.
+\end{theorem}
+
+\begin{proof}
+(E1)--(E3) follow directly from Theorem~C(C3) and LaSalle's invariance
+principle.  The Onsager structure is immediate from~\eqref{eq:bsdamped}
+with $M = \gamma(\Ebs)\,I$.
+\end{proof}
+
+\begin{remark}[Onsager gradient flows]
+\label{rem:onsager}
+Generalised Onsager gradient flows of the form
+$\dot{X} = -M(X)\nabla\mathcal{F}$ appear in thermodynamics, kinetic theory,
+and dissipative PDEs~\cite{JKO1998}.  The condition $M(X) \succeq 0$ is the
+fluctuation-dissipation structure ensuring entropy production is non-negative.
+The BSDT dynamics~\eqref{eq:bsdamped} fit precisely into this class with
+$\mathcal{F} = \Ebs$.
+\end{remark}
+
 %% --- 4.4  Discussion and Consequences --------------------------------
 \subsection{Discussion}
 \label{sec:equiv:disc}
@@ -541,6 +575,17 @@ $\mathbf{W}$ the row-normalised weighted adjacency matrix.
 \end{theorem}
 
 % TODO: Proof (see Framework Proof 6).
+
+\begin{remark}[Curvature-controlled mobility]
+\label{rem:curvature}
+The adaptive law $\gamma^*(X) = \alpha/\lmax(D^2\Phi_{\mathrm{pair}})$ is a
+curvature-regulated mobility: when the interaction Hessian has large spectral
+radius (high curvature), the mobility $M = \gamma^* I$ is reduced, damping
+the flow.  This is structurally analogous to curvature-controlled geometric
+flows (e.g., mean curvature flow, Ricci flow regularisation) and to natural
+gradient descent, where curvature of the loss landscape governs step-size
+adaptation.
+\end{remark}
 
 \begin{corollary}[Basel III Procyclicality]
 \label{cor:procyclical}
@@ -644,6 +689,23 @@ The alignment tightens as the system evolves away from the initial scattered
 configuration (steps $0$--$40$: mean $0.77$; steps $80$--$199$: mean $0.90$),
 consistent with Theorem~C: alignment concentrates as $X$ approaches $\Cman$.
 
+\subsection{Production/Dissipation Balance}
+\label{sec:pd}
+
+% TODO: Table 8.1 showing $P/D \to 0.500$ for three crisis windows under
+%       adaptive friction, versus $P/D > 1$ under constant coupling.
+
+\begin{remark}[Entropy interpretation]
+\label{rem:entropy_pd}
+The P/D halving principle is the fluid analogue of the entropy production
+balance in Theorem~\ref{thm:entropy}(E2): adaptive viscosity drives
+$\sigma^{\mathrm{fluid}}(t)
+  = \nu_{\mathrm{eff}}(t)\norm{\nabla\omega}^2_{L^2} - P(t) \to 0$
+(where $P(t)$ denotes the turbulent kinetic energy production rate),
+holding the system at marginal stability.  This connects the financial
+entropy structure to the Navier--Stokes setting through a single mechanism.
+\end{remark}
+
 %% ====================================================================
 \section{Welfare Calibration}
 \label{sec:welfare}
@@ -729,6 +791,11 @@ Some extensions of Liapunov's second method.
 Lohmiller, W. and Slotine, J.-J.E. (1998).
 On contraction analysis for non-linear systems.
 \textit{Automatica}, 34(6), 683--696.
+
+\bibitem{JKO1998}
+R.~Jordan, D.~Kinderlehrer, and F.~Otto,
+\textit{The variational formulation of the Fokker--Planck equation},
+SIAM J. Math. Anal., 29 (1998), pp.~1--17.
 
 \bibitem{trefethen1997numerical}
 Trefethen, L.N. and Bau, D. (1997).
