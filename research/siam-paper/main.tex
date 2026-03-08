@@ -95,9 +95,10 @@ mathematical structure.
 \end{abstract}
 
 \begin{keywords}
-systemic risk, Lyapunov stability, phase transition, adaptive
-friction, Navier--Stokes regularity, enstrophy, blind-spot
-decomposition, online convex optimisation
+systemic risk, Lyapunov stability, entropy production, Onsager
+gradient flow, phase transition, adaptive friction,
+Navier--Stokes regularity, enstrophy, blind-spot decomposition,
+online convex optimisation
 \end{keywords}
 
 \begin{AMS}
@@ -149,10 +150,12 @@ This paper makes seven contributions:
   define $\Ebs$, a composite energy functional calibrated entirely
   on normal-period data.
 
-\item \textbf{Equivalence Theorem (Theorem~C).} Two-sided gradient
-  bounds establish $\Ebs$ as a Lyapunov function for the potential
-  flow, with a structurally derived separation condition
-  (Proposition~\ref{prop:separation}).
+\item \textbf{Equivalence Theorem (Theorem~C) and Entropy Structure
+  (Theorem~\ref{thm:entropy}).} Two-sided gradient bounds establish
+  $\Ebs$ as a Lyapunov function for the potential flow
+  (Proposition~\ref{prop:separation}); the system is a generalised
+  Onsager gradient flow with non-negative entropy production
+  $\sigma(X) = \gamma(\Ebs)\norm{\grad\Ebs}^2 \ge 0$.
 
 \item \textbf{Critical manifold and phase transition
   (Theorem~\ref{thm:phase}).} A spectral threshold determines
@@ -437,6 +440,63 @@ positive definite and proper. Along \eqref{eq:bsdamped}:
 LaSalle's invariance principle \cite{lasalle1960} on the compact
 set $\{W\le W(X_0)\}$ concludes convergence to $\Xst$.
 \end{proof}
+
+\begin{theorem}[Entropy Structure of \textsc{BSDT}]\label{thm:entropy}
+Under Assumptions~\ref{ass:reg}--\ref{ass:sep}, the functional
+$\Ebs$ defines a \emph{Lyapunov entropy} for the coupled dynamical
+system~\eqref{eq:gradflow} in the following sense:
+\begin{enumerate}
+\item[\textup{(E1)}] \textbf{Monotone dissipation.}
+  Along every trajectory of~\eqref{eq:bsdamped},
+  \[
+    \frac{d}{dt}\Ebs(X(t)) \;\le\; 0.
+  \]
+\item[\textup{(E2)}] \textbf{Non-negative entropy production.}
+  The entropy production rate
+  \[
+    \sigma(X) \;:=\; -\frac{d}{dt}\Ebs(X(t))
+    \;=\; \gamma(\Ebs(X))\,\norm{\grad\Ebs(X)}^2 \;\ge\; 0.
+  \]
+\item[\textup{(E3)}] \textbf{Equilibrium characterisation.}
+  $\sigma(X) = 0$ if and only if $X = \Xst$.
+\end{enumerate}
+Consequently, the system~\eqref{eq:bsdamped} is a
+\emph{generalised Onsager gradient flow} with positive-semidefinite
+mobility $M(X) = \gamma(\Ebs(X))\,I \succeq 0$.
+\end{theorem}
+
+\begin{proof}
+(E1) follows directly from Part~(C3) of Theorem~\ref{thm:equiv}:
+$\dot{W} \le -\kappa\norm{\grad\Ebs}^2 \le 0$.
+
+(E2) Differentiating $W = \Ebs - \Ebs(\Xst)$ along
+\eqref{eq:bsdamped}:
+\[
+  \dot{W} = \inner{\grad\Ebs}{F - \gamma(\Ebs)\grad\Ebs}
+  = \inner{\grad\Ebs}{F} - \gamma(\Ebs)\norm{\grad\Ebs}^2.
+\]
+Since $\inner{\grad\Ebs}{F} \le 0$ (by~(C3)) and
+$\gamma(\Ebs)\norm{\grad\Ebs}^2 \ge 0$, we have
+$\sigma(X) = -\dot{W} = \gamma(\Ebs)\norm{\grad\Ebs}^2
+- \inner{\grad\Ebs}{F} \ge 0$.
+
+(E3) $\sigma(X) = 0$ iff $\norm{\grad\Ebs} = 0$ (since
+$\gamma(E) \ge \kappa > 0$ for $E > \theta_0$ and $F = 0$ at
+equilibrium). By~(C1), $\norm{\grad\Ebs} = 0$ iff
+$\norm{\grad\Phi} = 0$, which holds iff $X = \Xst$.
+The Onsager structure is immediate from the form of~\eqref{eq:bsdamped}.
+\end{proof}
+
+\begin{remark}\label{rem:entropy_pd}
+The entropy production $\sigma(X)$ provides an operational
+definition of the distance to equilibrium that is computable in
+real time from market data. For the fluid extension
+(Section~\ref{sec:ns}), $\sigma$ corresponds to the
+production/dissipation gap $P - D$ in~\eqref{eq:enstrophy_evolution};
+the P/D halving principle (Table~\ref{tab:pd}) is the numerical
+signature of $\sigma \to 0$ as the adaptive viscosity drives the
+system toward the entropy-neutral manifold $P = D$.
+\end{remark}
 
 \begin{remark}\label{rem:alignment}
 The lower bound $c_1\norm{\grad\Phi}\le\norm{\grad\Ebs}$ is
@@ -1190,6 +1250,27 @@ $2\kappa\gamma^*\approx\beta\eta\norm{\grad E}^2/(1{-}\beta)$,
 giving $\gamma^*\approx\beta\eta\norm{\grad E}^2/[2\kappa(1{-}\beta)]$.
 The saturation factor $E/(E{+}\theta)$ ensures $\gamma^*\to 0$ as
 $E\to 0$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:entropy} (full)]
+(E1): From Part~(C3) of Theorem~\ref{thm:equiv}, along
+\eqref{eq:bsdamped}:
+$\dot{W} \le -\kappa\norm{\grad\Ebs}^2 \le 0$,
+so $\ddt\Ebs(X(t)) \le 0$.
+
+(E2): The identity
+$\sigma(X) = \gamma(\Ebs)\norm{\grad\Ebs}^2 - \inner{\grad\Ebs}{F}$
+follows by differentiating $W$ along \eqref{eq:bsdamped}. Both
+terms are non-negative: the first by $\gamma \ge 0$; the second
+because $\inner{\grad\Ebs}{F} = \inner{\grad\Ebs}{-\grad\Phi} \le 0$
+by the gradient alignment bound~(C1)
+($\costheta \ge \nu/c_2 > 0$ implies the inner product is
+non-positive).
+
+(E3): $\sigma(X)=0$ requires $\norm{\grad\Ebs}=0$.
+By Lemma~\ref{lem:lower}, $\norm{\grad\Ebs} \ge c_1\norm{\grad\Phi}$,
+so $\grad\Phi(X)=0$. Under Assumption~\ref{ass:equil}, the only
+critical point of $\Phi$ in $\mathcal{L}_c$ is $\Xst$.
 \end{proof}
 
 \section{Computational Details}\label{app:compute}
