@@ -53,6 +53,7 @@ from .system_mode import (
     HybridGravityEngine,
     MorseTopologyAlarm,
     LyapunovStabiliser,
+    ConvergenceReport,
     SpectraFalseAlarmFilter,
     BettiBarcodeSuite,
     UDLPostSimScorer,
@@ -107,6 +108,7 @@ __all__ = [
     "HybridGravityEngine",
     "MorseTopologyAlarm",
     "LyapunovStabiliser",
+    "ConvergenceReport",
     "SpectraFalseAlarmFilter",
     # Backend (JAX / CuPy / NumPy)
     "xp",
