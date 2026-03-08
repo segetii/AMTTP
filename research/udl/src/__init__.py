@@ -54,6 +54,9 @@ from .system_mode import (
     MorseTopologyAlarm,
     LyapunovStabiliser,
     SpectraFalseAlarmFilter,
+    BettiBarcodeSuite,
+    UDLPostSimScorer,
+    FusedSystemScorer,
 )
 from .backend import xp, jit, vmap, to_numpy, from_numpy, BACKEND
 

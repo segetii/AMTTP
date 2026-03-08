@@ -37,6 +37,19 @@ False-Alarm Suppression
   features that are automatically filtered; only true phase-transition
   crossings of the critical manifold C* trigger alarms.
 
+Fused Scoring (v2)
+------------------
+  Post-simulation positions are scored by three complementary signal
+  families, then fused via min-max normalisation + equal-weight average:
+
+  1. **MorseTopologyAlarm** — kNN distance features (4D)
+  2. **BettiBarcodeSuite** — multi-scale β₀/β₁/χ/Conley (19D)
+  3. **UDLPostSimScorer**  — best-4 UDL operators: Phase + Topological
+     + KernelRKHS + Rank (≈27D), mAUC 0.972 on paper benchmarks
+
+  For large-N scoring, Morse + Betti score directly (kNN-based),
+  while UDL scores are kNN-interpolated from the simulation subset.
+
 Author: Odeyemi Olusegun Israel
 """
 
@@ -265,6 +278,387 @@ class MorseTopologyAlarm:
 
 
 # ═══════════════════════════════════════════════════════════════════
+#  BETTI / EULER / CONLEY TOPOLOGY SUITE
+# ═══════════════════════════════════════════════════════════════════
+
+class BettiBarcodeSuite:
+    """
+    Persistent-homology proxies via kNN filtration — no TDA library.
+
+    Extends MorseTopologyAlarm with multi-scale Betti-number tracking,
+    Euler characteristic curves, and Conley index stability analysis.
+    Fully vectorised — O(N log N_ref) dominant cost via kNN search.
+
+    Theory
+    ------
+    At filtration scale ε, the Vietoris–Rips complex R_ε connects
+    points within distance ε.  β₀(ε) and β₁(ε) count connected
+    components and independent 1-cycles respectively.
+
+    Normal (dense cluster interior):
+      β₀ drops smoothly k→1, β₁ ≈ 0, χ decreases monotonically,
+      Conley CV low (stable topology).
+
+    Anomaly (boundary / isolated / transition):
+      β₀ stays high (slow connection), β₁ spikes (sparse loops),
+      χ shows jumps (topological phase transitions),
+      Conley CV high (unstable critical point).
+
+    Features  (total: 3 + 2 × n_scales)
+    --------
+    [0]          β₀ proxy at median filtration scale
+    [1]          β₁ proxy at median scale
+    [2]          Conley stability index: CoV(β₀) across scales
+    [3:3+ns]     Euler characteristic curve χ(ε)
+    [3+ns:]      β₀ reachability curve
+    """
+
+    def __init__(self, k: int = 20, n_scales: int = 8):
+        self.k = k
+        self.n_scales = n_scales
+        self._X_ref = None
+        self._ref_mean = None
+        self._ref_std = None
+        self._scales = None
+
+    @property
+    def n_features(self) -> int:
+        return 3 + 2 * self.n_scales
+
+    def fit(self, X_ref: np.ndarray) -> 'BettiBarcodeSuite':
+        """Calibrate on reference (normal) data."""
+        from sklearn.neighbors import NearestNeighbors
+
+        self._X_ref = X_ref.copy()
+        k = min(self.k, len(X_ref) - 1)
+        if k < 2:
+            self._scales = np.linspace(0.1, 1.0, self.n_scales)
+            self._ref_mean = np.zeros(self.n_features)
+            self._ref_std = np.ones(self.n_features)
+            return self
+
+        nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+        nn.fit(X_ref.astype(np.float32))
+        dists, _ = nn.kneighbors(X_ref.astype(np.float32))
+        nn_dists = dists[:, 1:]
+
+        self._scales = np.linspace(
+            np.percentile(nn_dists[:, 0], 10),
+            np.percentile(nn_dists[:, -1], 90) * 1.2,
+            self.n_scales,
+        )
+
+        features = self._compute_features(X_ref, X_ref, is_self=True)
+        self._ref_mean = features.mean(axis=0)
+        self._ref_std = features.std(axis=0) + 1e-10
+        return self
+
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """Z-scored topology features."""
+        features = self._compute_features(X, self._X_ref, is_self=False)
+        return (features - self._ref_mean) / self._ref_std
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        """Anomaly score: mean positive z-deviation across features."""
+        z = self.transform(X)
+        return np.mean(np.maximum(z, 0), axis=1)
+
+    def _compute_features(self, X_query, X_ref, is_self=False):
+        """Vectorised Betti / Euler / Conley from kNN distances."""
+        from sklearn.neighbors import NearestNeighbors
+
+        N = len(X_query)
+        k = min(self.k, len(X_ref) - 1)
+        ns = self.n_scales
+        n_feat = 3 + 2 * ns
+
+        if k < 2:
+            return np.zeros((N, n_feat), dtype=np.float64)
+
+        if is_self:
+            nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+            nn.fit(X_ref.astype(np.float32))
+            dists, _ = nn.kneighbors(X_query.astype(np.float32))
+            nn_dists = dists[:, 1:]
+        else:
+            nn = NearestNeighbors(n_neighbors=k, algorithm='auto')
+            nn.fit(X_ref.astype(np.float32))
+            dists, _ = nn.kneighbors(X_query.astype(np.float32))
+            nn_dists = dists
+
+        scales = self._scales
+        out = np.zeros((N, n_feat), dtype=np.float64)
+
+        # Multi-scale reachability (vectorised over N and k)
+        reach = np.zeros((N, ns), dtype=np.float64)
+        for s in range(ns):
+            reach[:, s] = (nn_dists <= scales[s]).sum(axis=1) / k
+
+        # β₀ proxy: 1 − reach (disconnected fraction)
+        b0_curve = 1.0 - reach
+
+        # β₁ proxy: excess connectivity at non-uniform distances
+        dist_cv = (nn_dists.std(axis=1, keepdims=True) /
+                   (nn_dists.mean(axis=1, keepdims=True) + 1e-10))
+        b1_curve = reach * dist_cv
+
+        # Euler χ(ε) = β₀ − β₁
+        euler_curve = b0_curve - b1_curve
+
+        # Assemble
+        mid = ns // 2
+        out[:, 0] = b0_curve[:, mid]
+        out[:, 1] = b1_curve[:, mid]
+        out[:, 2] = b0_curve.std(axis=1) / (b0_curve.mean(axis=1) + 1e-10)
+        out[:, 3:3 + ns] = euler_curve
+        out[:, 3 + ns:3 + 2 * ns] = b0_curve
+
+        return out
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  UDL POST-SIMULATION OPERATOR SCORER
+# ═══════════════════════════════════════════════════════════════════
+
+class UDLPostSimScorer:
+    """
+    Applies the best-performing UDL operator combination to
+    post-simulation positions.
+
+    Operators (Table 5, §5.2 of the UDL paper):
+      Phase + Topological + KernelRKHS + Rank  →  mAUC 0.972
+
+    Each operator views data from a complementary perspective:
+      PhaseCurve     : sequential feature structure (trajectory)
+      Topological    : intrinsic geometry (LID, persistence)
+      KernelRKHS     : nonlinear manifold deviation (RKHS recon)
+      RankOrder      : distribution-free extremity (rank statistics)
+
+    After physics simulation separates anomalies structurally,
+    these operators capture the separation from four independent
+    mathematical viewpoints — maximising detection coverage.
+    """
+
+    def __init__(self, k: int = 15, max_dim: int = 12,
+                 n_components: int = 10):
+        self.k = k
+        self.max_dim = max_dim
+        self.n_components = n_components
+        self._operators = None
+        self._fitted = False
+        self._ref_mean = None
+        self._ref_std = None
+
+    def _build_operators(self):
+        """Lazy-import and construct operator instances."""
+        try:
+            from .spectra import RankOrderSpectrum
+            from .new_spectra import TopologicalSpectrum, KernelRKHSSpectrum
+            from .experimental_spectra import PhaseCurveSpectrum
+        except (ImportError, SystemError):
+            try:
+                from udl.spectra import RankOrderSpectrum
+                from udl.new_spectra import (TopologicalSpectrum,
+                                             KernelRKHSSpectrum)
+                from udl.experimental_spectra import PhaseCurveSpectrum
+            except ImportError:
+                return None
+
+        return [
+            ('phase', PhaseCurveSpectrum(max_dim=self.max_dim)),
+            ('topo', TopologicalSpectrum(k=self.k)),
+            ('kernel', KernelRKHSSpectrum(n_components=self.n_components)),
+            ('rank', RankOrderSpectrum()),
+        ]
+
+    def fit(self, X_ref: np.ndarray) -> 'UDLPostSimScorer':
+        """Fit all operators on reference (normal) data."""
+        if X_ref.shape[0] < 5 or X_ref.shape[1] < 2:
+            self._fitted = False
+            return self
+
+        self._operators = self._build_operators()
+        if self._operators is None:
+            self._fitted = False
+            return self
+
+        live = []
+        for name, op in self._operators:
+            try:
+                op.fit(X_ref)
+                live.append((name, op))
+            except Exception:
+                pass
+        self._operators = live
+
+        if not live:
+            self._fitted = False
+            return self
+
+        # Compute unified reference statistics for z-scoring
+        ref_features = self._raw_transform(X_ref)
+        self._ref_mean = ref_features.mean(axis=0)
+        self._ref_std = ref_features.std(axis=0) + 1e-10
+        self._fitted = True
+        return self
+
+    def _raw_transform(self, X: np.ndarray) -> np.ndarray:
+        """Concatenated raw features from all live operators."""
+        blocks = []
+        for name, op in self._operators:
+            try:
+                feats = op.transform(X)
+                if feats.ndim == 1:
+                    feats = feats.reshape(-1, 1)
+                blocks.append(feats)
+            except Exception:
+                pass
+        if not blocks:
+            return np.zeros((len(X), 1), dtype=np.float64)
+        return np.hstack(blocks)
+
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """Unified z-scored features from all operators."""
+        if not self._fitted:
+            return np.zeros((len(X), 1), dtype=np.float64)
+        raw = self._raw_transform(X)
+        return (raw - self._ref_mean) / self._ref_std
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        """Score via RMS z-deviation across all operator features."""
+        z = self.transform(X)
+        return np.sqrt(np.mean(z ** 2, axis=1))
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  FUSED SYSTEM SCORER
+# ═══════════════════════════════════════════════════════════════════
+
+class FusedSystemScorer:
+    """
+    Combines Morse topology alarm + Betti barcode suite + UDL
+    operator ensemble into a single anomaly scorer.
+
+    Architecture
+    ------------
+    1. **MorseTopologyAlarm** — kNN distance features (4D):
+       Mean kNN, d₁, persistence proxy, density ratio.
+       Scales to any N via kNN search.
+
+    2. **BettiBarcodeSuite** — multi-scale topology (3 + 2·ns D):
+       β₀/β₁/χ curves, Conley stability.
+       Scales to any N via kNN search.
+
+    3. **UDLPostSimScorer** — best-4 UDL operators (~27D):
+       Phase + Topological + KernelRKHS + Rank.
+       Applied to simulation subset, kNN-interpolated for full data.
+
+    Fusion: min-max normalise each component, equal-weight average.
+    For simulation-size inputs, all three score directly.
+    For larger inputs, Morse + Betti score directly (fast kNN),
+    while UDL scores are kNN-interpolated from the simulation subset.
+    """
+
+    def __init__(self, k: int = 15, use_betti: bool = True,
+                 use_udl: bool = True):
+        self.k = k
+        self.morse = MorseTopologyAlarm(k=k)
+        self.betti = BettiBarcodeSuite(k=min(k + 5, 25)) if use_betti else None
+        self.udl = UDLPostSimScorer(k=k) if use_udl else None
+        self._X_sim = None
+        self._sim_enriched = None
+
+    def fit(self, X_ref: np.ndarray,
+            X_sim: np.ndarray = None) -> 'FusedSystemScorer':
+        """
+        Fit all sub-scorers on reference data.
+
+        Parameters
+        ----------
+        X_ref : array (n_ref, d)
+            Normal reference points (post-simulation positions).
+        X_sim : array (n_sim, d), optional
+            All simulation points — used for enriched scoring and
+            kNN interpolation when scoring larger datasets.
+        """
+        self.morse.fit(X_ref)
+
+        if self.betti is not None:
+            try:
+                self.betti.fit(X_ref)
+            except Exception:
+                self.betti = None
+
+        if self.udl is not None:
+            try:
+                self.udl.fit(X_ref)
+            except Exception:
+                self.udl = None
+
+        # Pre-compute enriched scores on simulation subset
+        if X_sim is not None:
+            self._X_sim = X_sim.copy()
+            self._sim_enriched = self._enrich_score(X_sim)
+
+        return self
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        """
+        Score with auto-interpolation for large datasets.
+
+        For simulation-size inputs → direct multi-view scoring.
+        For larger inputs → Morse (direct) + kNN-interpolated enriched.
+        """
+        N = len(X)
+
+        # Fast path: if X matches simulation points exactly
+        if (self._X_sim is not None and N == len(self._X_sim)
+                and np.array_equal(X, self._X_sim)):
+            return self._sim_enriched
+
+        # Morse scores all points (fast kNN-based)
+        morse_s = self._minmax(self.morse.score(X))
+
+        # If we have simulation-enriched scores, interpolate
+        if self._X_sim is not None and self._sim_enriched is not None:
+            from sklearn.neighbors import KNeighborsRegressor
+            k_interp = min(5, len(self._X_sim))
+            knn = KNeighborsRegressor(n_neighbors=k_interp,
+                                      weights='distance')
+            knn.fit(self._X_sim, self._sim_enriched)
+            enriched_s = self._minmax(knn.predict(X))
+            return 0.4 * morse_s + 0.6 * enriched_s
+        else:
+            # Direct scoring (small dataset)
+            return self._enrich_score(X)
+
+    def _enrich_score(self, X: np.ndarray) -> np.ndarray:
+        """Full multi-view scoring (≤ simulation-size inputs)."""
+        components = [self.morse.score(X)]
+
+        if self.betti is not None:
+            try:
+                components.append(self.betti.score(X))
+            except Exception:
+                pass
+        if self.udl is not None and self.udl._fitted:
+            try:
+                components.append(self.udl.score(X))
+            except Exception:
+                pass
+
+        normed = [self._minmax(s) for s in components]
+        return np.mean(normed, axis=0)
+
+    @staticmethod
+    def _minmax(s: np.ndarray) -> np.ndarray:
+        s_min, s_max = s.min(), s.max()
+        if s_max - s_min > 1e-15:
+            return (s - s_min) / (s_max - s_min)
+        return np.zeros_like(s)
+
+
+# ═══════════════════════════════════════════════════════════════════
 #  MOLECULAR DYNAMICS ENGINE
 # ═══════════════════════════════════════════════════════════════════
 
@@ -290,7 +684,8 @@ class MolecularEngine:
                  iterations: int = 80,
                  k_neighbors: int = 15,
                  normalize: bool = True,
-                 max_samples: int = 3000):
+                 max_samples: int = 3000,
+                 use_fused: bool = True):
         self.epsilon = epsilon
         self.sigma_lj = sigma_lj
         self.alpha_radial = alpha_radial
@@ -299,9 +694,11 @@ class MolecularEngine:
         self.k_neighbors = k_neighbors
         self.normalize = normalize
         self.max_samples = max_samples
+        self.use_fused = use_fused
 
         self.stabiliser = LyapunovStabiliser()
         self.alarm = MorseTopologyAlarm(k=k_neighbors)
+        self.fused_scorer = FusedSystemScorer(k=k_neighbors) if use_fused else None
 
         self.scaler_: Optional[StandardScaler] = None
         self.mu_: Optional[np.ndarray] = None
@@ -371,10 +768,11 @@ class MolecularEngine:
         """
         Run molecular dynamics simulation and return anomaly scores.
 
-        Scores are produced by the MorseTopologyAlarm (noise-immune).
+        Scores are produced by the FusedSystemScorer (Morse + Betti +
+        UDL operators) or MorseTopologyAlarm fallback (noise-immune).
         The Lyapunov stabiliser controls only the solver iterations.
         For large datasets, subsamples to max_samples for simulation
-        then scores all points via the fitted MorseTopologyAlarm.
+        then scores all points via kNN interpolation.
         """
         # Normalise
         if self.normalize:
@@ -458,15 +856,22 @@ class MolecularEngine:
 
         self.X_final_ = X_work
 
-        # ── PREDICTION: calibrate alarm on FINAL normal positions ──
+        # ── PREDICTION: calibrate on FINAL normal positions ──
         X_ref_final = X_work[normal_mask]
-        self.alarm.fit(X_ref_final)
 
-        if subsampled:
-            # Score ALL points using the fitted alarm
-            scores = self.alarm.score(X_all)
+        if self.fused_scorer is not None and len(X_ref_final) > 1:
+            self.fused_scorer.fit(X_ref_final, X_sim=X_work)
+            if subsampled:
+                scores = self.fused_scorer.score(X_all)
+            else:
+                scores = self.fused_scorer.score(X_work)
         else:
-            scores = self.alarm.score(X_work)
+            self.alarm.fit(X_ref_final)
+            if subsampled:
+                scores = self.alarm.score(X_all)
+            else:
+                scores = self.alarm.score(X_work)
+
         return scores
 
 
@@ -492,7 +897,8 @@ class GravityModeEngine:
                  iterations: int = 60,
                  k_neighbors: int = 15,
                  normalize: bool = True,
-                 max_samples: int = 3000):
+                 max_samples: int = 3000,
+                 use_fused: bool = True):
         self.alpha = alpha
         self.gamma = gamma
         self.sigma = sigma
@@ -502,9 +908,11 @@ class GravityModeEngine:
         self.k_neighbors = k_neighbors
         self.normalize = normalize
         self.max_samples = max_samples
+        self.use_fused = use_fused
 
         self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
         self.alarm = MorseTopologyAlarm(k=k_neighbors)
+        self.fused_scorer = FusedSystemScorer(k=k_neighbors) if use_fused else None
 
         self.scaler_: Optional[StandardScaler] = None
         self.mu_: Optional[np.ndarray] = None
@@ -611,14 +1019,21 @@ class GravityModeEngine:
 
         self.X_final_ = X_work
 
-        # Calibrate alarm on FINAL normal positions
+        # Calibrate on FINAL normal positions
         X_ref_final = X_work[normal_mask]
         if len(X_ref_final) > 1:
-            self.alarm.fit(X_ref_final)
-            if subsampled:
-                scores = self.alarm.score(X_all)
+            if self.fused_scorer is not None:
+                self.fused_scorer.fit(X_ref_final, X_sim=X_work)
+                if subsampled:
+                    scores = self.fused_scorer.score(X_all)
+                else:
+                    scores = self.fused_scorer.score(X_work)
             else:
-                scores = self.alarm.score(X_work)
+                self.alarm.fit(X_ref_final)
+                if subsampled:
+                    scores = self.alarm.score(X_all)
+                else:
+                    scores = self.alarm.score(X_work)
         else:
             # Fallback: displacement from initial position
             if subsampled:
