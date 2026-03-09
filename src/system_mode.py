@@ -899,7 +899,9 @@ class BSDTChannels:
 
         return 0.5 * e_n + 0.5 * m_n
 
-    # -- Supervised MFLS scoring variants ---------------------------
+    # -- MFLS scoring variants ----------------------------------------
+    #   QuadSurf & ExpoGate are post-hoc analytical formulas.
+    #   SignedLR is the only supervised variant (needs labels).
 
     def _channel_matrix(self, X: np.ndarray) -> np.ndarray:
         """Return (N, 4) matrix of channel scores."""
@@ -919,40 +921,39 @@ class BSDTChannels:
                 features.append((C[:, k] * C[:, j]).reshape(-1, 1))
         return np.hstack(features)
 
-    def fit_quadsurf(self, X: np.ndarray, y: np.ndarray,
-                     ridge_alpha: float = 1.0) -> 'BSDTChannels':
-        """Fit QuadSurf: degree-2 polynomial ridge on BSDT channels.
+    def fit_quadsurf(self, X_ref: np.ndarray) -> 'BSDTChannels':
+        """Calibrate QuadSurf: post-hoc degree-2 polynomial of BSDT channels.
 
-        Score = beta_0 + sum_k beta_k c_k + sum_{k<=j} beta_{kj} c_k c_j
+        QuadSurf is an analytical formula -- no labels required.
+        The score is the sum of all degree-2 polynomial features
+        (linear + squared + cross-terms) of the standardised channels:
+
+          Q(c) = sum_k c_k' + sum_k c_k'^2 + sum_{k<j} c_k' c_j'
+
+        where c_k' = (c_k - mu_k) / sigma_k are standardised against
+        reference-period channel statistics.
 
         Parameters
         ----------
-        X : (N, d) array -- training features
-        y : (N,) array -- binary labels (0 = normal, 1 = anomaly)
-        ridge_alpha : float -- regularisation strength
+        X_ref : (N, d) array -- reference (normal-period) features
         """
-        C = self._channel_matrix(X)
+        C = self._channel_matrix(X_ref)
         self._qs_mu = C.mean(axis=0)
         self._qs_std = C.std(axis=0) + self.eps
-        C_std = (C - self._qs_mu) / self._qs_std
-
-        Phi = self._poly_features(C_std)
-        n_feat = Phi.shape[1]
-        I = np.eye(n_feat)
-        I[0, 0] = 0.0  # don't regularise bias
-        self._qs_beta = np.linalg.solve(
-            Phi.T @ Phi + ridge_alpha * I,
-            Phi.T @ y.astype(float)
-        )
         self._qs_fitted = True
         return self
 
     def score_quadsurf(self, X: np.ndarray) -> np.ndarray:
-        """QuadSurf score: polynomial surface over channel values."""
+        """QuadSurf score: post-hoc polynomial surface over channel values.
+
+        Returns sum of all non-bias polynomial features (unit weights),
+        clipped to [0, inf).  Higher = more anomalous.
+        """
         C = self._channel_matrix(X)
         C_std = (C - self._qs_mu) / self._qs_std
         Phi = self._poly_features(C_std)
-        return np.maximum(Phi @ self._qs_beta, 0.0)
+        # Sum all features except bias (column 0); clip negative
+        return np.maximum(Phi[:, 1:].sum(axis=1), 0.0)
 
     def fit_signed_lr(self, X: np.ndarray, y: np.ndarray,
                       lr: float = 0.1, n_iter: int = 500,
@@ -1005,24 +1006,25 @@ class BSDTChannels:
         Xb = np.hstack([np.ones((len(C_std), 1)), C_std])
         return 1.0 / (1.0 + np.exp(-np.clip(Xb @ self._lr_beta, -500, 500)))
 
-    def fit_expogate(self, X: np.ndarray, y: np.ndarray,
-                     ridge_alpha: float = 1.0,
+    def fit_expogate(self, X_ref: np.ndarray,
                      smooth_sigma: float = 1.0,
                      gate_scale: float = 3.0) -> 'BSDTChannels':
-        """Fit ExpoGate: QuadSurf + tanh saturation + sigmoid gating.
+        """Calibrate ExpoGate: post-hoc QuadSurf + tanh + sigmoid gating.
 
+        Analytical formula -- no labels required.
         Prevents false-alarm inflation by capping extreme QuadSurf
-        scores with tanh, then gating through sigmoid for calibration.
+        scores with tanh saturation, then gating through sigmoid
+        for calibrated [0, 1] output.
+
+        score = sigmoid(gate_scale * tanh(Q(c) / sigma))
 
         Parameters
         ----------
-        X : (N, d) array -- training features
-        y : (N,) array -- binary labels
-        ridge_alpha : float -- ridge strength for QuadSurf
+        X_ref : (N, d) array -- reference (normal-period) features
         smooth_sigma : float -- tanh saturation scale
         gate_scale : float -- sigmoid gate steepness
         """
-        self.fit_quadsurf(X, y, ridge_alpha=ridge_alpha)
+        self.fit_quadsurf(X_ref)
         self._eg_sigma = smooth_sigma
         self._eg_scale = gate_scale
         self._eg_fitted = True
@@ -2926,9 +2928,9 @@ class ReducedTensorDescriptor:
         Runs 5 scoring strategies on the BSDT channels:
           1. Baseline  -- E_BS + MFLS composite (unsupervised)
           2. FullBSDT  -- uniform-weighted channel sum (unsupervised)
-          3. QuadSurf  -- degree-2 polynomial ridge (supervised)
+          3. QuadSurf  -- degree-2 polynomial surface (post-hoc)
           4. SignedLR  -- logistic regression (supervised)
-          5. ExpoGate  -- QuadSurf + tanh + sigmoid (supervised)
+          5. ExpoGate  -- QuadSurf + tanh + sigmoid (post-hoc)
 
         Parameters
         ----------
@@ -2985,9 +2987,9 @@ class ReducedTensorDescriptor:
             'time': _time.time() - t0,
         }
 
-        # 3. QuadSurf (supervised)
+        # 3. QuadSurf (post-hoc analytical)
         t0 = _time.time()
-        bsdt.fit_quadsurf(X, y)
+        bsdt.fit_quadsurf(X_ref)
         s = bsdt.score_quadsurf(X)
         results['quadsurf'] = {
             'scores': s,
@@ -2995,7 +2997,7 @@ class ReducedTensorDescriptor:
             'time': _time.time() - t0,
         }
 
-        # 4. SignedLR (supervised)
+        # 4. SignedLR (supervised -- the only variant needing labels)
         t0 = _time.time()
         bsdt.fit_signed_lr(X, y)
         s = bsdt.score_signed_lr(X)
@@ -3006,9 +3008,9 @@ class ReducedTensorDescriptor:
             'weights': bsdt._lr_beta.tolist(),
         }
 
-        # 5. ExpoGate (supervised)
+        # 5. ExpoGate (post-hoc analytical)
         t0 = _time.time()
-        bsdt.fit_expogate(X, y)
+        bsdt.fit_expogate(X_ref)
         s = bsdt.score_expogate(X)
         results['expo_gate'] = {
             'scores': s,

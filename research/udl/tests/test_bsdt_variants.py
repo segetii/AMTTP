@@ -1,8 +1,7 @@
-"""
-Tests for BSDT supervised scoring variants:
-  - QuadSurf  (degree-2 polynomial ridge)
-  - SignedLR  (logistic regression, discovers herding)
-  - ExpoGate  (QuadSurf + tanh + sigmoid gating)
+"""Tests for BSDT scoring variants:
+  - QuadSurf  (post-hoc degree-2 polynomial surface)
+  - SignedLR  (supervised logistic regression, discovers herding)
+  - ExpoGate  (post-hoc QuadSurf + tanh + sigmoid gating)
   - score_variants() comparison helper on ReducedTensorDescriptor
 """
 import sys, os
@@ -41,25 +40,25 @@ def fitted_bsdt(labelled_data):
 
 class TestQuadSurf:
     def test_fit_returns_self(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        result = fitted_bsdt.fit_quadsurf(X, y)
+        _, _, X_ref = labelled_data
+        result = fitted_bsdt.fit_quadsurf(X_ref)
         assert result is fitted_bsdt
 
     def test_score_shape(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_quadsurf(X, y)
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_quadsurf(X_ref)
         scores = fitted_bsdt.score_quadsurf(X)
         assert scores.shape == (len(X),)
 
     def test_scores_nonnegative(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_quadsurf(X, y)
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_quadsurf(X_ref)
         scores = fitted_bsdt.score_quadsurf(X)
         assert np.all(scores >= 0), f"Min score: {scores.min()}"
 
     def test_anomalies_score_higher(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_quadsurf(X, y)
+        X, y, X_ref = labelled_data
+        fitted_bsdt.fit_quadsurf(X_ref)
         scores = fitted_bsdt.score_quadsurf(X)
         mean_normal = scores[y == 0].mean()
         mean_anom = scores[y == 1].mean()
@@ -73,14 +72,13 @@ class TestQuadSurf:
         # 1 bias + 4 linear + 10 quadratic = 15
         assert Phi.shape == (10, 15)
 
-    def test_ridge_alpha_effect(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_quadsurf(X, y, ridge_alpha=0.001)
-        s_low = fitted_bsdt.score_quadsurf(X).copy()
-        fitted_bsdt.fit_quadsurf(X, y, ridge_alpha=100.0)
-        s_high = fitted_bsdt.score_quadsurf(X)
-        # Higher regularisation should shrink coefficients
-        assert np.std(s_high) <= np.std(s_low) + 0.01
+    def test_no_labels_needed(self, fitted_bsdt, labelled_data):
+        """QuadSurf is post-hoc: only needs reference data, not labels."""
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_quadsurf(X_ref)  # no y argument
+        scores = fitted_bsdt.score_quadsurf(X)
+        assert scores.shape == (len(X),)
+        assert np.all(np.isfinite(scores))
 
 
 # ── SignedLR tests ────────────────────────────────────────────────
@@ -135,43 +133,51 @@ class TestSignedLR:
 
 class TestExpoGate:
     def test_fit_returns_self(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        result = fitted_bsdt.fit_expogate(X, y)
+        _, _, X_ref = labelled_data
+        result = fitted_bsdt.fit_expogate(X_ref)
         assert result is fitted_bsdt
 
     def test_score_shape(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_expogate(X, y)
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_expogate(X_ref)
         scores = fitted_bsdt.score_expogate(X)
         assert scores.shape == (len(X),)
 
     def test_scores_in_01(self, fitted_bsdt, labelled_data):
         """Sigmoid output must be in (0, 1)."""
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_expogate(X, y)
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_expogate(X_ref)
         scores = fitted_bsdt.score_expogate(X)
         assert np.all(scores > 0) and np.all(scores < 1), (
             f"Range: [{scores.min():.4f}, {scores.max():.4f}]")
 
     def test_anomalies_score_higher(self, fitted_bsdt, labelled_data):
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_expogate(X, y)
+        X, y, X_ref = labelled_data
+        fitted_bsdt.fit_expogate(X_ref)
         scores = fitted_bsdt.score_expogate(X)
         mean_normal = scores[y == 0].mean()
         mean_anom = scores[y == 1].mean()
         assert mean_anom > mean_normal
 
     def test_gate_scale_effect(self, fitted_bsdt, labelled_data):
-        """Higher gate_scale → sharper sigmoid → more extreme scores."""
-        X, y, _ = labelled_data
-        fitted_bsdt.fit_expogate(X, y, gate_scale=1.0)
-        s_gentle = fitted_bsdt.score_expogate(X).copy()
-        fitted_bsdt.fit_expogate(X, y, gate_scale=10.0)
-        s_sharp = fitted_bsdt.score_expogate(X)
+        """Higher gate_scale -> sharper sigmoid -> more extreme scores."""
+        _, _, X_ref = labelled_data
+        fitted_bsdt.fit_expogate(X_ref, gate_scale=1.0)
+        s_gentle = fitted_bsdt.score_expogate(X_ref).copy()
+        fitted_bsdt.fit_expogate(X_ref, gate_scale=10.0)
+        s_sharp = fitted_bsdt.score_expogate(X_ref)
         # Sharper gate should have more extreme values (further from 0.5)
         dev_gentle = np.abs(s_gentle - 0.5).mean()
         dev_sharp = np.abs(s_sharp - 0.5).mean()
         assert dev_sharp >= dev_gentle - 0.01
+
+    def test_no_labels_needed(self, fitted_bsdt, labelled_data):
+        """ExpoGate is post-hoc: only needs reference data, not labels."""
+        X, _, X_ref = labelled_data
+        fitted_bsdt.fit_expogate(X_ref)  # no y argument
+        scores = fitted_bsdt.score_expogate(X)
+        assert scores.shape == (len(X),)
+        assert np.all(np.isfinite(scores))
 
 
 # ── score_variants on ReducedTensorDescriptor ─────────────────────
@@ -196,18 +202,18 @@ class TestScoreVariants:
             assert 0.0 <= r['auroc'] <= 1.0, (
                 f"{name} auroc out of range: {r['auroc']}")
 
-    def test_supervised_beat_baseline(self, labelled_data):
-        """Supervised variants should match or beat unsupervised baseline."""
+    def test_variants_beat_baseline(self, labelled_data):
+        """Post-hoc and supervised variants should match or beat baseline."""
         X, y, X_ref = labelled_data
         desc = ReducedTensorDescriptor(k_neighbors=5)
         desc.fit(X_ref)
         results = desc.score_variants(X, y, X_ref=X_ref)
         base = results['baseline']['auroc']
         for name in ['quadsurf', 'signed_lr', 'expo_gate']:
-            sup = results[name]['auroc']
+            var = results[name]['auroc']
             # Allow small margin for edge cases
-            assert sup >= base - 0.05, (
-                f"{name} ({sup:.4f}) too far below baseline ({base:.4f})")
+            assert var >= base - 0.05, (
+                f"{name} ({var:.4f}) too far below baseline ({base:.4f})")
 
     def test_signed_lr_has_weights(self, labelled_data):
         X, y, X_ref = labelled_data
