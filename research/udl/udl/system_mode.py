@@ -1610,6 +1610,8 @@ class ReducedTensorDescriptor:
         self._ref_cov_inv: Optional[np.ndarray] = None
         self._ref_medoid: Optional[np.ndarray] = None
         self._ref_data: Optional[np.ndarray] = None
+        self._gmm = None
+        self._eps_adapted: float = eps_hessian
         self._fitted = False
 
     def fit(self, X_ref: np.ndarray) -> 'ReducedTensorDescriptor':
@@ -1652,6 +1654,22 @@ class ReducedTensorDescriptor:
         if self.n_eigs is None:
             self.n_eigs = min(d, 10)
 
+        # -- GMM for non-trivial energy landscape --
+        # A single-Gaussian Mahalanobis energy is strictly convex
+        # (Hessian = cov_inv, always PD), so Morse index = 0 always.
+        # A GMM with k>=2 components creates saddle points between
+        # cluster boundaries, enabling meaningful Morse index detection.
+        from sklearn.mixture import GaussianMixture
+        n_comp = min(max(2, int(np.sqrt(N / 20))), 8)
+        self._gmm = GaussianMixture(
+            n_components=n_comp, covariance_type='full',
+            random_state=42, n_init=3, max_iter=200)
+        self._gmm.fit(self._ref_data)
+
+        # Adapt finite-difference step to data scale
+        self._eps_adapted = max(np.std(self._ref_data, axis=0).mean() * 0.01,
+                                1e-6)
+
         self._fitted = True
         return self
 
@@ -1687,32 +1705,37 @@ class ReducedTensorDescriptor:
         #         + morse_index(1) = n_eigs + 6
         out = np.zeros((N, n_eigs + 6), dtype=np.float64)
 
-        # \u2500\u2500 1. Gradient norm \u2016\u2207E_BS\u2016 \u2014 O(Nd) \u2500\u2500
-        for i in range(N):
-            xi = X[i]
-            if gradient_fn is not None:
-                grad = gradient_fn(xi)
-            elif energy_fn is not None:
-                grad = self._numerical_gradient(xi, energy_fn)
-            else:
-                # Mahalanobis gradient: \u03a3\u207b\u00b9(x - \u03bc) / \u03b4_C
-                diff = xi - self._ref_mean
-                grad = self._ref_cov_inv @ diff
-            out[i, 0] = np.linalg.norm(grad)
+        # -- 1 & 2.  Gradient + Hessian (vectorised) --
+        if gradient_fn is not None or energy_fn is not None:
+            # Per-point fallback for custom energy / gradient
+            for i in range(N):
+                xi = X[i]
+                if gradient_fn is not None:
+                    grad = gradient_fn(xi)
+                elif energy_fn is not None:
+                    grad = self._numerical_gradient(xi, energy_fn)
+                else:
+                    diff = xi - self._ref_mean
+                    grad = self._ref_cov_inv @ diff
+                out[i, 0] = np.linalg.norm(grad)
 
-        # \u2500\u2500 2. Hessian eigenvalues \u2014 O(d\u00b3) per point \u2500\u2500
-        for i in range(N):
-            xi = X[i]
-            if energy_fn is not None:
-                eigs = self._hessian_eigenvalues(xi, energy_fn, n_eigs)
-            else:
-                # Mahalanobis Hessian is \u03a3\u207b\u00b9 (constant)
-                eigs = np.linalg.eigvalsh(self._ref_cov_inv)[:n_eigs]
-            out[i, 1:1+n_eigs] = np.sort(eigs)  # ascending
-
-            # \u2500\u2500 5. Trace of Hessian \u2014 sum of eigenvalues \u2500\u2500
-            out[i, n_eigs + 3] = np.sum(eigs)
-
+            for i in range(N):
+                xi = X[i]
+                if energy_fn is not None:
+                    eigs = self._hessian_eigenvalues(
+                        xi, energy_fn, n_eigs)
+                else:
+                    eigs = np.linalg.eigvalsh(
+                        self._ref_cov_inv)[:n_eigs]
+                out[i, 1:1+n_eigs] = np.sort(eigs)
+                out[i, n_eigs + 3] = np.sum(eigs)
+        else:
+            # Batch GMM-based computation -- non-trivial Hessian
+            # that can have negative eigenvalues (saddle points).
+            grad_mat, hess_eigs = self._batch_gmm_compute(X, n_eigs)
+            out[:, 0] = np.linalg.norm(grad_mat, axis=1)
+            out[:, 1:1+n_eigs] = hess_eigs
+            out[:, n_eigs + 3] = hess_eigs.sum(axis=1)  # trace
         # \u2500\u2500 3. Mahalanobis distance \u03b4_C \u2014 O(d\u00b2) per point \u2500\u2500
         diff = X - self._ref_mean  # (N, d)
         maha_sq = np.sum(diff @ self._ref_cov_inv * diff, axis=1)
@@ -1796,6 +1819,85 @@ class ReducedTensorDescriptor:
         }
 
     # \u2500\u2500 private helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+    def _batch_gmm_compute(self, X: np.ndarray,
+                           n_eigs: int):
+        """Vectorised gradient + Hessian eigenvalues via GMM energy.
+
+        Uses ``-log p_GMM(x)`` as the energy function.  The GMM creates
+        saddle points at cluster boundaries, giving non-trivial
+        Morse indices (number of negative Hessian eigenvalues).
+
+        Total GMM score_samples calls = 2d + 4*d(d+1)/2
+        = 2d + 2d(d+1) ~ 2d^2 + 4d  (e.g. 70 calls for d=5).
+
+        Returns
+        -------
+        grad : (N, d) array  -- gradient vectors
+        eigs : (N, n_eigs)   -- sorted ascending Hessian eigenvalues
+        """
+        N, d = X.shape
+        eps = self._eps_adapted
+
+        # -- Gradient via central difference --
+        grad = np.zeros((N, d), dtype=np.float64)
+        for i in range(d):
+            delta = np.zeros(d, dtype=np.float64)
+            delta[i] = eps
+            fp = -self._gmm.score_samples(X + delta)
+            fm = -self._gmm.score_samples(X - delta)
+            grad[:, i] = (fp - fm) / (2 * eps)
+
+        # -- Hessian via finite difference (symmetric) --
+        H = np.zeros((N, d, d), dtype=np.float64)
+        eps2_inv = 1.0 / (4 * eps * eps)
+        for i in range(d):
+            ei = np.zeros(d, dtype=np.float64); ei[i] = eps
+            for j in range(i, d):
+                ej = np.zeros(d, dtype=np.float64); ej[j] = eps
+                fpp = -self._gmm.score_samples(X + ei + ej)
+                fpm = -self._gmm.score_samples(X + ei - ej)
+                fmp = -self._gmm.score_samples(X - ei + ej)
+                fmm = -self._gmm.score_samples(X - ei - ej)
+                H[:, i, j] = (fpp - fpm - fmp + fmm) * eps2_inv
+                if j != i:
+                    H[:, j, i] = H[:, i, j]
+
+        eigs = np.linalg.eigvalsh(H)          # (N, d) ascending
+        return grad, eigs[:, :n_eigs]
+
+    def score(self, X: np.ndarray,
+              energy_fn=None,
+              gradient_fn=None) -> np.ndarray:
+        """Combined anomaly score from the descriptor.
+
+        Uses robust percentile normalisation (instead of min-max)
+        and learned weights that emphasise Morse index + Mahalanobis.
+
+        Returns
+        -------
+        scores : (N,) array -- higher = more anomalous
+        """
+        D = self.transform(X, energy_fn, gradient_fn)
+        n_eigs = min(self.n_eigs, X.shape[1])
+
+        grad_norm = D[:, 0]
+        mahalanobis = D[:, n_eigs + 1]
+        medoid_dist = D[:, n_eigs + 2]
+        trace_h = D[:, n_eigs + 3]
+        morse_idx = D[:, n_eigs + 5]
+
+        def robust_norm(x):
+            q1, q99 = np.percentile(x, [1, 99])
+            xn = (x - q1) / (q99 - q1 + 1e-15)
+            return np.clip(xn, 0.0, 1.0)
+
+        s = (0.25 * robust_norm(grad_norm) +
+             0.30 * robust_norm(mahalanobis) +
+             0.15 * robust_norm(medoid_dist) +
+             0.10 * robust_norm(np.abs(trace_h)) +
+             0.20 * robust_norm(morse_idx.astype(np.float64)))
+        return s
 
     @staticmethod
     def _to_scalar(val) -> float:
