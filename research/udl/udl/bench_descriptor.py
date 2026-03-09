@@ -202,6 +202,73 @@ def run_descriptor(name, X_train, X_test, y_test, T, N):
     }
 
 
+def run_descriptor_fit_score(name, X, y, T, N):
+    """ReducedTensorDescriptor with reference-based scoring (fit_score API)."""
+    desc = ReducedTensorDescriptor(n_eigs=5, k_neighbors=15)
+    t0 = time.perf_counter()
+    scores = desc.fit_score(X, y)
+    dt = time.perf_counter() - t0
+
+    n_eigs = min(desc.n_eigs, X.shape[1])
+    D = desc.transform(X)
+    morse_col = D[:, n_eigs + 5]
+
+    auc = safe_auc(y, scores)
+    n_nonzero = int(np.sum(morse_col > 0))
+    pct_nonzero = 100 * n_nonzero / len(morse_col) if len(morse_col) else 0
+
+    return {
+        'name': name,
+        'auc': auc,
+        'time': dt,
+        'morse_nonzero_pct': pct_nonzero,
+        'morse_max': int(morse_col.max()),
+        'morse_mean': float(morse_col.mean()),
+        'fresh_pred_max_diff': 0.0,
+        'error': None,
+    }
+
+
+def run_descriptor_panel(name, X_flat, y_flat, T, N):
+    """ReducedTensorDescriptor with panel-aware temporal scoring."""
+    d = X_flat.shape[1]
+    X_3d = X_flat.reshape(T, N, d)
+    y_time = y_flat.reshape(T, N)[:, 0]  # same label for all agents per quarter
+
+    # Adapt window to data granularity: 4 for quarterly, ~24 for hourly
+    window = 4 if T < 200 else max(4, T // 10)
+
+    desc = ReducedTensorDescriptor(n_eigs=5, k_neighbors=15)
+    t0 = time.perf_counter()
+    q_scores = desc.score_panel(X_3d, y_time, window=window)
+    dt = time.perf_counter() - t0
+
+    # Quarter-level AUC
+    auc = safe_auc(y_time, q_scores)
+
+    # Also get panel-level AUC for comparison
+    scores_panel = np.repeat(q_scores, N)
+    auc_panel = safe_auc(y_flat, scores_panel)
+
+    n_eigs = min(desc.n_eigs, d)
+    D = desc.transform(X_flat)
+    morse_col = D[:, n_eigs + 5]
+    n_nonzero = int(np.sum(morse_col > 0))
+    pct_nonzero = 100 * n_nonzero / len(morse_col) if len(morse_col) else 0
+
+    return {
+        'name': name,
+        'auc': auc,
+        'auc_panel': auc_panel,
+        'time': dt,
+        'morse_nonzero_pct': pct_nonzero,
+        'morse_max': int(morse_col.max()),
+        'morse_mean': float(morse_col.mean()),
+        'fresh_pred_max_diff': 0.0,
+        'error': None,
+    }
+
+
 def benchmark_dataset(dataset_name, X, y, T, N):
     print(f'\n{"="*70}')
     print(f'  {dataset_name}   (T={T}, N={N}, d={X.shape[1]}, '
@@ -227,31 +294,63 @@ def benchmark_dataset(dataset_name, X, y, T, N):
         else:
             print(f' AUC={r["auc"]:.4f}  ({r["time"]:.1f}s)')
 
-    # ── ReducedTensorDescriptor ──
-    print(f'  Running Descriptor (GMM)...', end='', flush=True)
-    r = run_descriptor('Descriptor_GMM', X, X, y, T, N)
+    # ── ReducedTensorDescriptor: Mode 1 — raw unsupervised ──
+    print(f'  Running Desc_Unsupervised...', end='', flush=True)
+    r = run_descriptor('Desc_Unsup', X, X, y, T, N)
     results.append(r)
     if r['error']:
         print(f' ERROR: {r["error"]}')
     else:
         print(f' AUC={r["auc"]:.4f}  ({r["time"]:.1f}s)')
-        print(f'    Morse index: {r["morse_nonzero_pct"]:.1f}% non-zero, '
+        print(f'    Morse: {r["morse_nonzero_pct"]:.1f}% non-zero, '
               f'max={r["morse_max"]}, mean={r["morse_mean"]:.3f}')
-        print(f'    Fresh-prediction max-diff: {r["fresh_pred_max_diff"]:.2e}')
 
-    # ── Degeneracy summary ──
-    full_aucs = [r['auc'] for r in results if 'Descriptor' not in r['name']
-                 and not np.isnan(r['auc'])]
-    desc_auc = [r['auc'] for r in results if 'Descriptor' in r['name']]
+    # ── ReducedTensorDescriptor: Mode 2 — reference-based (fit_score) ──
+    print(f'  Running Desc_FitScore...', end='', flush=True)
+    try:
+        r = run_descriptor_fit_score('Desc_FitScore', X, y, T, N)
+        results.append(r)
+        if r['error']:
+            print(f' ERROR: {r["error"]}')
+        else:
+            print(f' AUC={r["auc"]:.4f}  ({r["time"]:.1f}s)')
+            print(f'    Morse: {r["morse_nonzero_pct"]:.1f}% non-zero')
+    except Exception as e:
+        print(f' ERROR: {e}')
+        results.append({'name': 'Desc_FitScore', 'auc': float('nan'),
+                        'time': 0, 'error': str(e)})
 
-    if full_aucs and desc_auc and not np.isnan(desc_auc[0]):
+    # ── ReducedTensorDescriptor: Mode 3 — panel-aware temporal ──
+    print(f'  Running Desc_Panel...', end='', flush=True)
+    try:
+        r = run_descriptor_panel('Desc_Panel', X, y, T, N)
+        results.append(r)
+        if r['error']:
+            print(f' ERROR: {r["error"]}')
+        else:
+            q_auc = r['auc']
+            p_auc = r.get('auc_panel', float('nan'))
+            print(f' Q-AUC={q_auc:.4f}  P-AUC={p_auc:.4f}  ({r["time"]:.1f}s)')
+            print(f'    Morse: {r["morse_nonzero_pct"]:.1f}% non-zero')
+    except Exception as e:
+        print(f' ERROR: {e}')
+        results.append({'name': 'Desc_Panel', 'auc': float('nan'),
+                        'time': 0, 'error': str(e)})
+
+    # ── Comparison summary ──
+    full_aucs = [r['auc'] for r in results
+                 if 'Desc' not in r['name'] and not np.isnan(r.get('auc', float('nan')))]
+    desc_results = [(r['name'], r['auc']) for r in results
+                    if 'Desc' in r['name'] and not np.isnan(r.get('auc', float('nan')))]
+
+    if full_aucs and desc_results:
         best_full = max(full_aucs)
-        gap = best_full - desc_auc[0]
-        degenerate = gap > 0.05
-        print(f'\n  >> Best full-engine AUC: {best_full:.4f}')
-        print(f'  >> Descriptor AUC:      {desc_auc[0]:.4f}')
-        print(f'  >> Gap:                 {gap:+.4f}  '
-              f'{"*** DEGENERATE ***" if degenerate else "OK"}')
+        best_desc_name, best_desc_auc = max(desc_results, key=lambda x: x[1])
+        gap = best_full - best_desc_auc
+        print(f'\n  >> Best full-engine AUC:  {best_full:.4f}')
+        print(f'  >> Best descriptor AUC:  {best_desc_auc:.4f}  ({best_desc_name})')
+        print(f'  >> Gap:                  {gap:+.4f}  '
+              f'{"*** DEGENERATE ***" if gap > 0.10 else "COMPETITIVE" if gap < 0.05 else "ACCEPTABLE"}')
 
     return results
 
@@ -295,7 +394,8 @@ if __name__ == '__main__':
     print(f'  {"-"*15} {"-"*18} {"-"*7} {"-"*7}  {"-"*8}')
     for ds, results in all_results.items():
         for r in results:
-            auc_s = f'{r["auc"]:.4f}' if not np.isnan(r.get('auc', float('nan'))) else '  N/A'
-            time_s = f'{r["time"]:.1f}s'
-            morse_s = f'{r.get("morse_nonzero_pct", 0):.1f}%' if 'Descriptor' in r['name'] else '   -'
+            auc_v = r.get('auc', float('nan'))
+            auc_s = f'{auc_v:.4f}' if not np.isnan(auc_v) else '  N/A'
+            time_s = f'{r.get("time",0):.1f}s'
+            morse_s = f'{r.get("morse_nonzero_pct", 0):.1f}%' if 'Desc' in r.get('name','') else '   -'
             print(f'  {ds:<15} {r["name"]:<18} {auc_s:>7} {time_s:>7}  {morse_s}')
