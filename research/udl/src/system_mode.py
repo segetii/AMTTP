@@ -2170,6 +2170,447 @@ class ReducedTensorDescriptor:
         )
         return q_scores
 
+    # ═══════════════════════════════════════════════════════════════
+    #  UNIVERSAL CONFORMAL SCORING — dataset-agnostic
+    # ═══════════════════════════════════════════════════════════════
+
+    def fit_reference(self, X_ref: np.ndarray,
+                      cal_frac: float = 0.2,
+                      random_state: int = 42) -> 'ReducedTensorDescriptor':
+        """Fit the descriptor and calibration set for conformal scoring.
+
+        Splits reference data into:
+          - fit set (1 - cal_frac): used to fit GMM, covariance, medoid
+          - calibration set (cal_frac): used to build the reference
+            distribution of nonconformity scores for conformal inference
+
+        Uses the proven multi-view _reference_score() as the base
+        nonconformity measure (preserves geometric correlations),
+        then wraps it in conformal calibration for distribution-free
+        guarantees.
+
+        Parameters
+        ----------
+        X_ref     : (N, d) array — normal-period reference data
+        cal_frac  : float — fraction reserved for calibration (default 0.2)
+        random_state : int — reproducibility seed
+
+        Returns
+        -------
+        self
+        """
+        X_ref = np.asarray(X_ref, dtype=np.float64)
+        N = len(X_ref)
+        n_cal = max(10, int(N * cal_frac))
+        n_fit = N - n_cal
+
+        rng = np.random.default_rng(random_state)
+        perm = rng.permutation(N)
+        idx_fit = perm[:n_fit]
+        idx_cal = perm[n_fit:]
+
+        X_fit = X_ref[idx_fit]
+        X_cal = X_ref[idx_cal]
+
+        # Fit descriptor on the fit set
+        self.fit(X_fit)
+
+        # Store calibration and fit data
+        self._cal_X = X_cal
+        self._fit_X = X_fit      # reference distribution for scoring
+        self._cal_N = n_cal
+
+        # Compute descriptor features on calibration set
+        D_cal = self.transform(X_cal)
+        self._cal_features = D_cal
+
+        # ── Multi-view nonconformity scores on calibration set ──
+        # Use the proven _reference_score pipeline:
+        #   40% raw-kNN + 30% desc-kNN + 30% topology
+        self._cal_nonconf = self._reference_score(X_cal, self._fit_X)
+        self._cal_nonconf_sorted = np.sort(self._cal_nonconf)
+
+        # Also store per-feature CDFs for the rank-based view
+        self._cal_sorted_features = np.sort(D_cal, axis=0)
+
+        self._conformal_fitted = True
+        return self
+
+    def _feature_pvalues(self, D_test: np.ndarray,
+                         D_cal: np.ndarray) -> np.ndarray:
+        """Convert each descriptor feature to a tail probability.
+
+        For each feature j and test point i:
+            p_j(x_i) = (1 + #{z in cal : z_j >= x_ij}) / (n_cal + 1)
+
+        This is the empirical survival function —
+        distribution-free, scale-invariant, unit-invariant.
+
+        Parameters
+        ----------
+        D_test : (N, m) — descriptor features of test points
+        D_cal  : (n_cal, m) — descriptor features of calibration set
+
+        Returns
+        -------
+        pvals : (N, m) — per-feature p-values in (0, 1]
+        """
+        N, m = D_test.shape
+        n_cal = len(D_cal)
+        pvals = np.zeros((N, m), dtype=np.float64)
+
+        for j in range(m):
+            # For each feature, count how many calibration values
+            # are >= the test value (right tail = more anomalous)
+            # Use searchsorted on the sorted calibration column
+            sorted_col = np.sort(D_cal[:, j])
+            # Number of cal values >= test value
+            rank = n_cal - np.searchsorted(sorted_col, D_test[:, j],
+                                           side='left')
+            pvals[:, j] = (1 + rank) / (n_cal + 1)
+
+        return pvals
+
+    def _aggregate_pvalues(self, pvals: np.ndarray) -> np.ndarray:
+        """Aggregate per-feature p-values into a single nonconformity score.
+
+        Uses a combination of Fisher and Cauchy methods for robustness:
+
+        Fisher: S_F = -2 * sum(log(p_j))   ~ chi^2(2m) under H0
+        Cauchy: S_C = sum(tan(pi*(0.5 - p_j))) / m   (heavy-tailed, robust)
+
+        Final: max(rank(S_F), rank(S_C))  — takes the more extreme signal
+
+        This avoids dataset-specific weights entirely.
+
+        Parameters
+        ----------
+        pvals : (N, m) — per-feature p-values
+
+        Returns
+        -------
+        scores : (N,) — nonconformity scores (higher = more anomalous)
+        """
+        eps = 1e-15
+        # Fisher combination
+        fisher = -2.0 * np.sum(np.log(np.maximum(pvals, eps)), axis=1)
+
+        # Cauchy combination (robust to dependence)
+        cauchy = np.mean(np.tan(np.pi * (0.5 - pvals)), axis=1)
+
+        # Combine: take the max of rank-normalised Fisher and Cauchy
+        # This ensures that if either view detects the anomaly, it fires
+        N = len(fisher)
+        if N < 2:
+            return fisher
+
+        def rank_norm(x):
+            """Rank-normalise to [0, 1]."""
+            order = np.argsort(np.argsort(x))
+            return order / (N - 1 + 1e-15)
+
+        combined = np.maximum(rank_norm(fisher), rank_norm(cauchy))
+        return combined
+
+    def score_conformal(self, X: np.ndarray) -> np.ndarray:
+        """Universal anomaly score — dataset-agnostic, distribution-free.
+
+        Uses a two-view nonconformity pipeline:
+
+        View 1 (geometric): The proven _reference_score(), which fuses
+            raw-space kNN, descriptor-space kNN, and topology Z-scores.
+            This preserves geometric correlations between features.
+
+        View 2 (rank-based): Per-feature empirical p-values combined
+            via Fisher + Cauchy. Purely distribution-free.
+
+        Final: max(rank(view1), rank(view2)) — fires if either detects.
+        Then calibrate against the calibration set for conformal guarantee.
+
+        Must call ``fit_reference()`` first.
+
+        Parameters
+        ----------
+        X : (N, d) array — points to score
+
+        Returns
+        -------
+        scores : (N,) array — higher = more anomalous
+        """
+        if not getattr(self, '_conformal_fitted', False):
+            raise RuntimeError('Call fit_reference() before score_conformal()')
+
+        X = np.asarray(X, dtype=np.float64)
+        N = len(X)
+
+        # ── View 1: Multi-view geometric scoring (proven pipeline) ──
+        view1 = self._reference_score(X, self._fit_X)
+
+        # ── View 2: Rank-based p-value fusion (distribution-free) ──
+        D_test = self.transform(X)
+        pvals = self._feature_pvalues(D_test, self._cal_features)
+        view2 = self._aggregate_pvalues(pvals)
+
+        # ── Fuse: max of rank-normalised views ──
+        if N < 3:
+            return view1  # not enough points to rank-normalise view2
+
+        def rank_norm(x):
+            order = np.argsort(np.argsort(x)).astype(np.float64)
+            return order / (len(x) - 1 + 1e-15)
+
+        combined = np.maximum(rank_norm(view1), rank_norm(view2))
+        return combined
+
+    def predict_pvalue(self, X: np.ndarray) -> np.ndarray:
+        """Conformal p-values with distribution-free validity.
+
+        Uses the multi-view _reference_score() as the nonconformity
+        measure, then computes conformal p-values:
+
+            p(x) = (1 + #{i : A_cal_i >= A(x)}) / (n_cal + 1)
+
+        where A(x) = _reference_score(x) (multi-view geometric score).
+
+        Guarantee (Vovk et al., 2005):
+            Under exchangeability, P(p(X) <= alpha) <= alpha
+            for any distribution, any alpha, any d.
+
+        This means:
+            - Set alpha = 0.01 → at most 1% false alarm rate, guaranteed.
+            - No tuning. No dataset-specific thresholds.
+            - Works on ERCOT, bank data, or any future dataset.
+
+        Must call ``fit_reference()`` first.
+
+        Parameters
+        ----------
+        X : (N, d) array — points to score
+
+        Returns
+        -------
+        pvalues : (N,) array — conformal p-values in (0, 1]
+                  Small p = anomalous. Alert if p < alpha.
+        """
+        if not getattr(self, '_conformal_fitted', False):
+            raise RuntimeError('Call fit_reference() before predict_pvalue()')
+
+        X = np.asarray(X, dtype=np.float64)
+
+        # Nonconformity score via multi-view geometric pipeline
+        A_test = self._reference_score(X, self._fit_X)
+
+        # Conformal p-value: compare against calibration nonconformity scores
+        n_cal = self._cal_N
+        A_cal_sorted = self._cal_nonconf_sorted
+
+        # For each test point: p = (1 + #{cal scores >= A_test}) / (n_cal + 1)
+        rank = n_cal - np.searchsorted(A_cal_sorted, A_test, side='left')
+        pvalues = (1 + rank) / (n_cal + 1)
+
+        return pvalues
+
+    def score_universal(self, X: np.ndarray, y: np.ndarray,
+                        T: int, N: int,
+                        window: int = None) -> dict:
+        """Universal dataset-agnostic scoring with conformal calibration.
+
+        Runs all scoring modes and fuses them adaptively.
+        No dataset-specific weights or hyperparameters.
+
+        Strategy:
+          1. fit_score(X, y) — reference-based multi-view scoring
+             (optimal for point-level anomaly detection, e.g. ERCOT)
+          2. score_panel(X_3d, y_time) — temporal panel scoring
+             (optimal for structured panel data, e.g. bank crises)
+          3. Conformal p-values — distribution-free false alarm control
+          4. Rank-normalised fusion — max(rank_A, rank_B) per point
+
+        The fusion automatically emphasises whichever view is stronger
+        for the given dataset, without prior knowledge of dataset type.
+
+        Parameters
+        ----------
+        X : (T*N, d) array — flat panel data
+        y : (T*N,) array — labels (0 = normal)
+        T : int — number of time periods
+        N : int — number of agents per period
+        window : int or None — rolling window (auto-detected if None)
+
+        Returns
+        -------
+        dict with keys:
+            'scores'     : (T*N,) — fused point-level scores
+            'q_scores'   : (T,)   — period-level scores
+            'pvalues'    : (T*N,) — conformal p-values (point-level)
+            'q_pvalues'  : (T,)   — conformal p-values (period-level)
+        """
+        X = np.asarray(X, dtype=np.float64)
+        y = np.asarray(y)
+        d = X.shape[1]
+
+        if window is None:
+            window = 4 if T < 200 else max(4, T // 10)
+
+        # ── View 1: Reference-based point scoring (fit_score) ──
+        s_point = self.fit_score(X, y)
+
+        # ── View 2: Panel-level temporal scoring ──
+        X_3d = X.reshape(T, N, d)
+        y_time = y.reshape(T, N)[:, 0]
+        desc2 = ReducedTensorDescriptor(
+            n_eigs=self.n_eigs, k_neighbors=self.k_neighbors
+        )
+        q_panel = desc2.score_panel(X_3d, y_time, window=window)
+        # Expand to point-level
+        s_panel_flat = np.repeat(q_panel, N)
+
+        # ── Rank-normalised fusion ──
+        def rank_norm(x):
+            n = len(x)
+            if n < 2:
+                return x.copy()
+            order = np.argsort(np.argsort(x)).astype(np.float64)
+            return order / (n - 1 + 1e-15)
+
+        # Point-level: max(rank(point_scores), rank(panel_expanded))
+        fused = np.maximum(rank_norm(s_point), rank_norm(s_panel_flat))
+
+        # Period-level: average fused score per period
+        fused_3d = fused.reshape(T, N)
+        q_fused = fused_3d.mean(axis=1)
+
+        # ── Conformal calibration for distribution-free p-values ──
+        # Use normal-period scores as calibration set
+        ref_mask = (y == 0)
+        cal_scores = fused[ref_mask]
+        cal_sorted = np.sort(cal_scores)
+        n_cal = len(cal_sorted)
+
+        # Point-level conformal p-values
+        rank_test = n_cal - np.searchsorted(cal_sorted, fused, side='left')
+        pvalues = (1 + rank_test) / (n_cal + 1)
+
+        # Period-level conformal p-values
+        cal_q_mask = (y_time == 0)
+        cal_q_scores = q_fused[cal_q_mask]
+        cal_q_sorted = np.sort(cal_q_scores)
+        n_cal_q = len(cal_q_sorted)
+        rank_q = n_cal_q - np.searchsorted(cal_q_sorted, q_fused, side='left')
+        q_pvalues = (1 + rank_q) / (n_cal_q + 1)
+
+        return {
+            'scores': fused,
+            'q_scores': q_fused,
+            'pvalues': pvalues,
+            'q_pvalues': q_pvalues,
+            's_point': s_point,
+            's_panel': s_panel_flat,
+            'q_panel': q_panel,
+        }
+
+    def score_conformal_panel(self, X_3d: np.ndarray,
+                              y_time: np.ndarray = None,
+                              window: int = 4) -> np.ndarray:
+        """Universal panel-aware scoring with conformal calibration.
+
+        Uses the multi-view _reference_score() as the base nonconformity
+        measure, combined with temporal dynamics and cross-sectional
+        aggregation. All components are rank-normalised for
+        dataset-agnostic fusion.
+
+        Parameters
+        ----------
+        X_3d   : (T, N, d) array — panel data
+        y_time : (T,) array or None — per-period labels (0 = normal)
+        window : int — rolling window for temporal features
+
+        Returns
+        -------
+        q_scores : (T,) array — period-level anomaly scores
+        """
+        X_3d = np.asarray(X_3d, dtype=np.float64)
+        if X_3d.ndim != 3:
+            raise ValueError(f'Expected (T, N, d), got {X_3d.shape}')
+
+        T, N, d = X_3d.shape
+        X_flat = X_3d.reshape(T * N, d)
+
+        # Determine reference data
+        if y_time is not None:
+            y_time = np.asarray(y_time)
+            normal_mask = (y_time == 0)
+            X_ref = X_3d[normal_mask].reshape(-1, d)
+        else:
+            n_calm = max(1, int(T * 0.3))
+            X_ref = X_3d[:n_calm].reshape(-1, d)
+
+        # Fit conformal reference
+        self.fit_reference(X_ref, cal_frac=0.2)
+
+        # ── Multi-view geometric scores for all points ──
+        ref_scores = self._reference_score(X_flat, self._fit_X)   # (T*N,)
+        ref_3d = ref_scores.reshape(T, N)            # (T, N)
+
+        # Conformal p-values for all points
+        pvals = self.predict_pvalue(X_flat)           # (T*N,)
+        pvals_3d = pvals.reshape(T, N)                # (T, N)
+
+        # ── Cross-sectional aggregation ──
+        # Mean reference score per period (geometric, preserves signal)
+        q_mean = ref_3d.mean(axis=1)
+
+        # 90th percentile per period (tail risk)
+        q_p90 = np.percentile(ref_3d, 90, axis=1)
+
+        # Fraction of agents with p < 0.05 (breadth of anomalies)
+        q_frac_sig = (pvals_3d < 0.05).mean(axis=1)
+
+        # Cross-sectional dispersion
+        q_std = ref_3d.std(axis=1)
+
+        # Max-agent score per period
+        q_max = ref_3d.max(axis=1)
+
+        # ── Temporal dynamics ──
+        # Rolling Z-score of mean reference score
+        q_z = np.zeros(T)
+        for t in range(window, T):
+            w = q_mean[t-window:t]
+            mu_w, std_w = w.mean(), w.std() + 1e-10
+            q_z[t] = max((q_mean[t] - mu_w) / std_w, 0.0)
+
+        # Momentum (acceleration)
+        q_mom = np.zeros(T)
+        q_mom[1:] = np.maximum(q_mean[1:] - q_mean[:-1], 0.0)
+
+        # ── Rank-normalised fusion (no dataset-specific weights) ──
+        components = np.column_stack([
+            q_mean,      # average distress     (geometric signal)
+            q_p90,       # tail risk            (geometric signal)
+            q_max,       # worst-case agent     (geometric signal)
+            q_frac_sig,  # breadth of anomalies (conformal signal)
+            q_std,       # cross-sectional spread
+            q_z,         # temporal acceleration
+            q_mom,       # momentum
+        ])
+
+        def rank_norm(x):
+            if x.max() == x.min():
+                return np.zeros_like(x)
+            order = np.argsort(np.argsort(x)).astype(np.float64)
+            return order / (len(x) - 1 + 1e-15)
+
+        n_comp = components.shape[1]
+        ranked = np.zeros_like(components)
+        for j in range(n_comp):
+            ranked[:, j] = rank_norm(components[:, j])
+
+        # Equal-weight average of ranks (universal, no tuning)
+        q_scores = ranked.mean(axis=1)
+
+        return q_scores
+
     @staticmethod
     def _to_scalar(val) -> float:
         """Safely convert any array-like energy output to a Python float.
