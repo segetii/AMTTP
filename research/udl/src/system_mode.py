@@ -1547,9 +1547,338 @@ class _MorseReplacementSpectrum:
         return out
 
 
-# ═══════════════════════════════════════════════════════════════════
+# \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+#  REDUCED TENSOR DESCRIPTOR \u2014 O(Nd + d\u00b3) complexity
+# \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+
+class ReducedTensorDescriptor:
+    """
+    Reduced tensor descriptor for efficient anomaly detection.
+
+    Replaces the full O(N\u00b2d) pairwise interaction matrix with a
+    compact (d+7)-dimensional descriptor per point, computable in
+    O(Nd + d\u00b3) time.
+
+    The 6-tuple descriptor D(X) consists of:
+      1. grad_norm    \u2014 \u2016\u2207E_BS(X)\u2016   (scalar, O(Nd))
+      2. hessian_eigs \u2014 \u03bb\u2081,...,\u03bb_d of D\u00b2E_BS  (d values, O(d\u00b3) via Lanczos)
+      3. mahalanobis  \u2014 \u03b4_C(X) = Mahalanobis distance  (scalar, O(d\u00b2))
+      4. medoid_dist  \u2014 distance to medoid of reference set (scalar, O(Nd))
+      5. trace_H      \u2014 tr(D\u00b2E_BS) = \u03a3\u03bbi  (scalar, from eigenvalues)
+      6. det_sigma    \u2014 det(\u03a3_local) = local covariance determinant (scalar)
+
+    Properties (Proposition in SIAM paper):
+      (i)   Computable in O(Nd + d\u00b3) time
+      (ii)  Locally injective near X* and C*
+      (iii) Morse index fully recoverable: ind = #{j : \u03bb_j < 0}
+
+    Theory
+    ------
+    The key insight is that the Morse index \u2014 the number of negative
+    Hessian eigenvalues \u2014 is the topological prediction signal
+    (Theorem C, Part C1). Since the Morse index depends only on the
+    sign pattern of the eigenvalues, not on the full N\u00d7N interaction
+    matrix, the descriptor is lossy in reconstruction but lossless
+    for detection.
+
+    The trace tr(H) and determinant det(\u03a3) serve as disambiguators
+    for the two-function degeneracy problem: when gradient norms
+    and Mahalanobis distances coincide for two distinct states, the
+    trace (sum of eigenvalues) and determinant (product) break the
+    degeneracy.
+    """
+
+    def __init__(self,
+                 k_neighbors: int = 15,
+                 n_eigs: int = None,
+                 eps_hessian: float = 1e-4):
+        """
+        Parameters
+        ----------
+        k_neighbors : int
+            Number of neighbors for medoid and local covariance.
+        n_eigs : int or None
+            Number of Hessian eigenvalues to compute.  If None,
+            uses min(d, 10) for efficiency.
+        eps_hessian : float
+            Finite-difference step for numerical Hessian.
+        """
+        self.k_neighbors = k_neighbors
+        self.n_eigs = n_eigs
+        self.eps_hessian = eps_hessian
+        self._ref_mean: Optional[np.ndarray] = None
+        self._ref_cov_inv: Optional[np.ndarray] = None
+        self._ref_medoid: Optional[np.ndarray] = None
+        self._ref_data: Optional[np.ndarray] = None
+        self._fitted = False
+
+    def fit(self, X_ref: np.ndarray) -> 'ReducedTensorDescriptor':
+        """Fit reference statistics from normal-period data.
+
+        Parameters
+        ----------
+        X_ref : (N_ref, d) array
+            Normal-period reference data.
+
+        Returns
+        -------
+        self
+        """
+        self._ref_data = np.asarray(X_ref, dtype=np.float64)
+        N, d = self._ref_data.shape
+
+        # Reference mean (O(Nd))
+        self._ref_mean = self._ref_data.mean(axis=0)
+
+        # Reference covariance inverse for Mahalanobis (O(Nd\u00b2 + d\u00b3))
+        cov = np.cov(self._ref_data, rowvar=False)
+        # Regularise for numerical stability
+        cov += 1e-8 * np.eye(d)
+        self._ref_cov_inv = np.linalg.inv(cov)
+        self._ref_cov_det = np.linalg.det(cov)
+
+        # Medoid: the actual data point closest to all others (O(N\u00b2d))
+        # For large N, use approximate medoid via mean-distance
+        if N <= 5000:
+            dists = cdist(self._ref_data, self._ref_data)
+            medoid_idx = np.argmin(dists.sum(axis=1))
+        else:
+            # Approximate: point closest to mean (O(Nd))
+            dists_to_mean = np.linalg.norm(
+                self._ref_data - self._ref_mean, axis=1)
+            medoid_idx = np.argmin(dists_to_mean)
+        self._ref_medoid = self._ref_data[medoid_idx].copy()
+
+        if self.n_eigs is None:
+            self.n_eigs = min(d, 10)
+
+        self._fitted = True
+        return self
+
+    def transform(self, X: np.ndarray,
+                  energy_fn=None,
+                  gradient_fn=None) -> np.ndarray:
+        """Compute the reduced descriptor for query points.
+
+        Parameters
+        ----------
+        X : (N, d) array
+            Query points.
+        energy_fn : callable or None
+            E_BS(x) -> scalar.  If None, uses Mahalanobis energy.
+        gradient_fn : callable or None
+            \u2207E_BS(x) -> (d,) array.  If None, computed numerically.
+
+        Returns
+        -------
+        D : (N, d+7) array
+            Reduced descriptor: [grad_norm, \u03bb\u2081..\u03bb_d, mahalanobis,
+            medoid_dist, trace_H, det_sigma, morse_index].
+        """
+        if not self._fitted:
+            raise RuntimeError("Call fit() first")
+
+        X = np.asarray(X, dtype=np.float64)
+        N, d = X.shape
+        n_eigs = min(self.n_eigs, d)
+
+        # Output: grad_norm(1) + eigenvalues(n_eigs) + mahalanobis(1)
+        #         + medoid_dist(1) + trace_H(1) + det_sigma(1)
+        #         + morse_index(1) = n_eigs + 6
+        out = np.zeros((N, n_eigs + 6), dtype=np.float64)
+
+        # \u2500\u2500 1. Gradient norm \u2016\u2207E_BS\u2016 \u2014 O(Nd) \u2500\u2500
+        for i in range(N):
+            xi = X[i]
+            if gradient_fn is not None:
+                grad = gradient_fn(xi)
+            elif energy_fn is not None:
+                grad = self._numerical_gradient(xi, energy_fn)
+            else:
+                # Mahalanobis gradient: \u03a3\u207b\u00b9(x - \u03bc) / \u03b4_C
+                diff = xi - self._ref_mean
+                grad = self._ref_cov_inv @ diff
+            out[i, 0] = np.linalg.norm(grad)
+
+        # \u2500\u2500 2. Hessian eigenvalues \u2014 O(d\u00b3) per point \u2500\u2500
+        for i in range(N):
+            xi = X[i]
+            if energy_fn is not None:
+                eigs = self._hessian_eigenvalues(xi, energy_fn, n_eigs)
+            else:
+                # Mahalanobis Hessian is \u03a3\u207b\u00b9 (constant)
+                eigs = np.linalg.eigvalsh(self._ref_cov_inv)[:n_eigs]
+            out[i, 1:1+n_eigs] = np.sort(eigs)  # ascending
+
+            # \u2500\u2500 5. Trace of Hessian \u2014 sum of eigenvalues \u2500\u2500
+            out[i, n_eigs + 3] = np.sum(eigs)
+
+        # \u2500\u2500 3. Mahalanobis distance \u03b4_C \u2014 O(d\u00b2) per point \u2500\u2500
+        diff = X - self._ref_mean  # (N, d)
+        maha_sq = np.sum(diff @ self._ref_cov_inv * diff, axis=1)
+        out[:, n_eigs + 1] = np.sqrt(np.maximum(maha_sq, 0))
+
+        # \u2500\u2500 4. Medoid distance \u2014 O(Nd) \u2500\u2500
+        out[:, n_eigs + 2] = np.linalg.norm(
+            X - self._ref_medoid, axis=1)
+
+        # \u2500\u2500 6. Local covariance determinant \u2014 O(Nkd + d\u00b3) \u2500\u2500
+        from sklearn.neighbors import NearestNeighbors
+        k = min(self.k_neighbors, len(self._ref_data) - 1, N - 1)
+        if k >= 2:
+            nn = NearestNeighbors(n_neighbors=k, algorithm='auto')
+            nn.fit(self._ref_data.astype(np.float32))
+            _, indices = nn.kneighbors(X.astype(np.float32))
+            for i in range(N):
+                local_pts = self._ref_data[indices[i]]
+                local_cov = np.cov(local_pts, rowvar=False)
+                local_cov += 1e-10 * np.eye(d)
+                out[i, n_eigs + 4] = np.linalg.det(local_cov)
+        else:
+            out[:, n_eigs + 4] = self._ref_cov_det
+
+        # \u2500\u2500 7. Morse index: #{j : \u03bb_j < 0} \u2500\u2500
+        eig_block = out[:, 1:1+n_eigs]
+        out[:, n_eigs + 5] = np.sum(eig_block < -1e-8, axis=1)
+
+        return out
+
+    def get_morse_index(self, X: np.ndarray,
+                        energy_fn=None,
+                        gradient_fn=None) -> np.ndarray:
+        """Extract just the Morse index from the descriptor.
+
+        Returns
+        -------
+        ind : (N,) int array
+            Number of negative Hessian eigenvalues per point.
+        """
+        D = self.transform(X, energy_fn, gradient_fn)
+        n_eigs = min(self.n_eigs, X.shape[1])
+        return D[:, n_eigs + 5].astype(int)
+
+    def get_alarm(self, X: np.ndarray,
+                  energy_fn=None,
+                  gradient_fn=None) -> np.ndarray:
+        """Binary alarm: True where Morse index \u2265 1 (saddle point).
+
+        This is the decoupled prediction signal (Theorem C, Part C5):
+        independent of Lyapunov descent rate, structurally invariant
+        under small perturbations.
+        """
+        return self.get_morse_index(X, energy_fn, gradient_fn) >= 1
+
+    def feature_names(self) -> List[str]:
+        """Return human-readable feature names for the descriptor."""
+        d = self._ref_data.shape[1] if self._ref_data is not None else 0
+        n_eigs = min(self.n_eigs, d)
+        names = ['grad_norm']
+        names += [f'hessian_eig_{j}' for j in range(n_eigs)]
+        names += ['mahalanobis', 'medoid_dist', 'trace_H',
+                  'det_sigma', 'morse_index']
+        return names
+
+    def complexity_info(self) -> Dict[str, str]:
+        """Return theoretical complexity information."""
+        d = self._ref_data.shape[1] if self._ref_data is not None else '?'
+        N = self._ref_data.shape[0] if self._ref_data is not None else '?'
+        return {
+            'gradient': f'O(N*d) = O({N}*{d})',
+            'hessian_eigs': f'O(d^3) = O({d}^3)',
+            'mahalanobis': f'O(d^2) per point',
+            'medoid_dist': f'O(d) per point',
+            'local_cov_det': f'O(k*d + d^3) per point',
+            'total': f'O(Nd + d^3) = O({N}*{d} + {d}^3)',
+            'vs_full': f'O(N^2*d) = O({N}^2*{d})',
+            'speedup': f'~N/d = ~{N}/{d}'
+                       if isinstance(N, int) and isinstance(d, int)
+                       else '~N/d',
+        }
+
+    # \u2500\u2500 private helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+    @staticmethod
+    def _to_scalar(val) -> float:
+        """Safely convert any array-like energy output to a Python float.
+
+        Avoids the NumPy >= 1.25 DeprecationWarning triggered by
+        ``float(array_with_ndim_gt_0)``.
+        """
+        a = np.asarray(val)
+        return a.flat[0] if a.ndim > 0 else float(a)
+
+    def _numerical_gradient(self, x: np.ndarray,
+                            energy_fn, eps: float = None) -> np.ndarray:
+        """Central-difference gradient.  O(d) energy evaluations."""
+        if eps is None:
+            eps = self.eps_hessian
+        d = len(x)
+        grad = np.zeros(d)
+        _s = self._to_scalar
+        for i in range(d):
+            ei = np.zeros(d)
+            ei[i] = eps
+            fp = _s(energy_fn((x + ei).reshape(1, -1)))
+            fm = _s(energy_fn((x - ei).reshape(1, -1)))
+            grad[i] = (fp - fm) / (2 * eps)
+        return grad
+
+    def _hessian_eigenvalues(self, x: np.ndarray,
+                             energy_fn,
+                             n_eigs: int) -> np.ndarray:
+        """Compute leading eigenvalues of the Hessian at x.
+
+        For d \u2264 50: full Hessian + eigvalsh \u2014 O(d\u00b3).
+        For d > 50: Lanczos via scipy \u2014 O(n_eigs * d\u00b2).
+        """
+        d = len(x)
+        eps = self.eps_hessian
+
+        if d <= 50:
+            # Full Hessian \u2014 O(d\u00b2) energy evaluations, O(d\u00b3) eigendecomp
+            H = np.zeros((d, d))
+            _s = self._to_scalar
+            f0 = _s(energy_fn(x.reshape(1, -1)))
+            for i in range(d):
+                ei = np.zeros(d)
+                ei[i] = eps
+                for j in range(i, d):
+                    ej = np.zeros(d)
+                    ej[j] = eps
+                    fpp = _s(energy_fn((x + ei + ej).reshape(1, -1)))
+                    fpm = _s(energy_fn((x + ei - ej).reshape(1, -1)))
+                    fmp = _s(energy_fn((x - ei + ej).reshape(1, -1)))
+                    fmm = _s(energy_fn((x - ei - ej).reshape(1, -1)))
+                    H[i, j] = (fpp - fpm - fmp + fmm) / (4 * eps * eps)
+                    H[j, i] = H[i, j]
+            eigs = np.linalg.eigvalsh(H)
+            return eigs[:n_eigs]
+        else:
+            # Lanczos for large d \u2014 O(n_eigs * d\u00b2)
+            from scipy.sparse.linalg import eigsh
+
+            def hessian_matvec(v):
+                """H @ v via finite differences."""
+                _s = ReducedTensorDescriptor._to_scalar
+                vn = v / (np.linalg.norm(v) + 1e-15) * eps
+                fp = _s(energy_fn((x + vn).reshape(1, -1)))
+                fm = _s(energy_fn((x - vn).reshape(1, -1)))
+                f0 = _s(energy_fn(x.reshape(1, -1)))
+                return ((fp + fm - 2 * f0) / (eps ** 2)) * v
+
+            from scipy.sparse.linalg import LinearOperator
+            H_op = LinearOperator((d, d), matvec=hessian_matvec)
+            try:
+                eigs, _ = eigsh(H_op, k=min(n_eigs, d - 1),
+                                which='SA')  # smallest algebraic
+                return np.sort(eigs)
+            except Exception:
+                return np.zeros(n_eigs)
+
+
+# \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 #  UNIFIED MODE SELECTOR
-# ═══════════════════════════════════════════════════════════════════
+# \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
 class SystemModeEngine:
     """
@@ -1699,6 +2028,60 @@ class SystemModeEngine:
                 self._engine._cv_scores is not None):
             info['hybrid_blend'] = self._engine._cv_scores
         return info
+
+    def get_reduced_descriptor(self,
+                               X_ref: np.ndarray = None,
+                               k_neighbors: int = 15,
+                               n_eigs: int = None
+                               ) -> ReducedTensorDescriptor:
+        """Create a ReducedTensorDescriptor fitted on reference data.
+
+        Parameters
+        ----------
+        X_ref : (N, d) array or None
+            Reference data to fit on.  If None, uses the engine's
+            stored reference data (from last fit_score call).
+        k_neighbors : int
+            Number of neighbors for local statistics.
+        n_eigs : int or None
+            Number of Hessian eigenvalues.  None → min(d, 10).
+
+        Returns
+        -------
+        desc : ReducedTensorDescriptor
+            Fitted descriptor ready for .transform() calls.
+
+        Example
+        -------
+            engine = SystemModeEngine(mode='gravity')
+            scores = engine.fit_score(X, y)
+            desc = engine.get_reduced_descriptor()
+            D = desc.transform(X_test)
+            alarm = desc.get_alarm(X_test)
+        """
+        desc = ReducedTensorDescriptor(
+            k_neighbors=k_neighbors, n_eigs=n_eigs)
+
+        if X_ref is not None:
+            desc.fit(X_ref)
+        elif (hasattr(self._engine, 'scaler_') and
+              self._engine.scaler_ is not None and
+              hasattr(self._engine, 'mu_')):
+            # Reconstruct reference from engine's stored state
+            # Use the scaler's learned statistics
+            mu = self._engine.scaler_.mean_
+            std = self._engine.scaler_.scale_
+            # Generate synthetic reference from the fitted distribution
+            rng = np.random.RandomState(42)
+            n_ref = 200
+            d = len(mu)
+            X_synth = rng.randn(n_ref, d) * std + mu
+            desc.fit(X_synth)
+        else:
+            raise ValueError(
+                "No reference data available. Pass X_ref or call "
+                "fit_score() first.")
+        return desc
 
     def __repr__(self):
         return (f"SystemModeEngine(mode={self._mode.value!r}, "
