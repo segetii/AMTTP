@@ -835,6 +835,33 @@ class BSDTChannels:
         # Feature-level stats for δ_G
         self.feat_std_ = np.std(X_ref, axis=0) + self.eps
 
+        # ── Fisher VR channel weights for weighted energy/damping ──
+        C = np.column_stack([
+            self.channels(X_ref)['delta_C'],
+            self.channels(X_ref)['delta_G'],
+            self.channels(X_ref)['delta_A'],
+            self.channels(X_ref)['delta_T'],
+        ])  # (n_ref, 4)
+        total_mag = C.sum(axis=1)
+        p80 = np.percentile(total_mag, 80)
+        p50 = np.percentile(total_mag, 50)
+        high_mask = total_mag >= p80
+        low_mask = total_mag <= p50
+        K = 4
+        if high_mask.sum() >= 2 and low_mask.sum() >= 2:
+            fr = np.zeros(K)
+            for kk in range(K):
+                mu_h = C[high_mask, kk].mean()
+                mu_l = C[low_mask, kk].mean()
+                var_h = C[high_mask, kk].var()
+                var_l = C[low_mask, kk].var()
+                fr[kk] = (mu_h - mu_l) ** 2 / max(var_h + var_l, self.eps)
+            total_fr = fr.sum()
+            self.fisher_w_ = fr / total_fr if total_fr > self.eps \
+                else np.ones(K) / K
+        else:
+            self.fisher_w_ = np.ones(K) / K  # fallback equal
+
         self._fitted = True
         return self
 
@@ -878,25 +905,29 @@ class BSDTChannels:
                 'delta_A': delta_A, 'delta_T': delta_T}
 
     def energy(self, X: np.ndarray) -> np.ndarray:
-        r"""E_BS = Σ_i δ_i(x)² — blind-spot energy per point."""
+        r"""E_BS = Σ w_k δ_k(x)² — Fisher-weighted blind-spot energy."""
         ch = self.channels(X)
-        return (ch['delta_C'] ** 2 + ch['delta_G'] ** 2 +
-                ch['delta_A'] ** 2 + ch['delta_T'] ** 2)
+        w = self.fisher_w_  # (4,)
+        return (w[0] * ch['delta_C'] ** 2 +
+                w[1] * ch['delta_G'] ** 2 +
+                w[2] * ch['delta_A'] ** 2 +
+                w[3] * ch['delta_T'] ** 2)
 
     def _gradient_vectors(self, X: np.ndarray) -> np.ndarray:
-        r"""∇E_BS — gradient vectors of blind-spot energy.
+        r"""∇E_BS — Fisher-weighted gradient vectors of blind-spot energy.
 
         Returns (N, d) gradient vectors for adaptive damping
         (Theorem C, eq:bsdamped):
             Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
 
-        Uses analytical gradients through δ_C (Euclidean) and
-        δ_A (Mahalanobis), which dominate the gradient landscape.
-        δ_G and δ_T have discontinuous / kNN-based gradients and
-        contribute negligibly to ∇E_BS.
+        Uses Fisher VR channel weights so the damping force is
+        proportional to each channel's discriminative power.
+        Gradients through δ_C (Euclidean) and δ_A (Mahalanobis)
+        only — δ_G and δ_T have discontinuous / kNN-based gradients.
         """
         ch = self.channels(X)
         diff = X - self.mu_
+        w = self.fisher_w_  # (4,) Fisher VR weights
 
         # ── Gradient through δ_A (Mahalanobis, dominant) ──
         mahal = self._mahalanobis(X)
@@ -904,7 +935,7 @@ class BSDTChannels:
         grad_mahal = (diff @ self.cov_inv_) / mahal_safe[:, None]
 
         sig_deriv = ch['delta_A'] * (1.0 - ch['delta_A'])
-        scale_A = (2.0 * ch['delta_A'] * sig_deriv /
+        scale_A = (2.0 * w[2] * ch['delta_A'] * sig_deriv /
                    max(self.mahal_ref_median_, self.eps))
         grad_E_A = scale_A[:, None] * grad_mahal
 
@@ -913,7 +944,7 @@ class BSDTChannels:
         dist_safe = np.maximum(dist, self.eps)
         unit = diff / dist_safe
         active = (dist.squeeze() < self.d_max_).astype(np.float64)
-        scale_C = -2.0 * ch['delta_C'] * active / self.d_max_
+        scale_C = -2.0 * w[0] * ch['delta_C'] * active / self.d_max_
         grad_E_C = scale_C[:, None] * unit
 
         return grad_E_A + grad_E_C
