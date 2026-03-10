@@ -1637,6 +1637,10 @@ class MolecularEngine:
         # θ = median E_BS on reference — damping is ~50% at normal
         e_ref = bsdt_damper.energy(X_ref_init)
         theta_bs = float(np.median(e_ref)) + 1e-10
+        # MFLS scale factor: match gradient-norm scale to energy scale
+        mfls_ref = bsdt_damper.mfls(X_ref_init)
+        mfls_med = float(np.median(mfls_ref)) + 1e-10
+        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
 
         # ── Euler integration with Lyapunov v2 stability control ──
         self.stabiliser.reset()
@@ -1649,10 +1653,14 @@ class MolecularEngine:
             F_lj = self._lennard_jones_forces(X_work)
             F_radial = -self.alpha_radial * (X_work - self.mu_)
 
-            # BSDT adaptive damping force (prevents collapse)
+            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
+            # E_combined = E_BS + β·MFLS catches transitional states
+            # where gradients are steep but energy hasn't peaked.
             e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
-            gamma_bs = e_bs / (e_bs + theta_bs)     # adaptive coeff
             grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
+            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
+            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
+            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
             F_damp = -gamma_bs[:, None] * grad_bs    # damping force
 
             F_total = F_lj + F_radial + F_damp
@@ -2042,6 +2050,10 @@ class GravityModeEngine:
         bsdt_damper.fit(X_ref_init)
         e_ref = bsdt_damper.energy(X_ref_init)
         theta_bs = float(np.median(e_ref)) + 1e-10
+        # MFLS scale factor: match gradient-norm scale to energy scale
+        mfls_ref = bsdt_damper.mfls(X_ref_init)
+        mfls_med = float(np.median(mfls_ref)) + 1e-10
+        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
 
         # ── Euler integration with Lyapunov v2 + ISS tracking ──
         self.stabiliser.reset()
@@ -2052,10 +2064,12 @@ class GravityModeEngine:
             F_pair = self._pairwise_forces(X_work)
             F_radial = -self.alpha * (X_work - self.mu_)
 
-            # BSDT adaptive damping force (prevents collapse)
+            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
             e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
-            gamma_bs = e_bs / (e_bs + theta_bs)     # adaptive coeff
             grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
+            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
+            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
+            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
             F_damp = -gamma_bs[:, None] * grad_bs    # damping force
 
             F_total = F_pair + F_radial + F_damp
