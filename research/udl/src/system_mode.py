@@ -1656,6 +1656,9 @@ class MolecularEngine:
         # ── Phase 2: Morse-index alarm (Algorithm 1) ─────────
         # Compute Hessian eigenvalues of E_BS at final state.
         # ind ≥ 1 ⇒ saddle ⇒ phase transition detected.
+        # This is a system-level diagnostic flag for the regulator,
+        # NOT a score modifier.  Per-point Morse-topology features
+        # already contribute to scoring via FusedSystemScorer.
         self._morse_alarm = bsdt_damper.morse_alarm(X_work)
 
         # ── PREDICTION: calibrate on FINAL normal positions ──
@@ -2057,6 +2060,8 @@ class GravityModeEngine:
         self._convergence_report = self.stabiliser.report()
 
         # ── Phase 2: Morse-index alarm (Algorithm 1) ─────────
+        # System-level diagnostic; per-point Morse features are
+        # already in FusedSystemScorer.
         self._morse_alarm = bsdt_damper.morse_alarm(X_work)
 
         # Calibrate on FINAL normal positions
