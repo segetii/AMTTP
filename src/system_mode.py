@@ -360,20 +360,56 @@ class MorseTopologyAlarm:
         self.k = k
         self.hessian_eps = hessian_eps
         self.persistence_threshold = persistence_threshold
-        self.weights = weights if weights is not None else np.array([0.35, 0.30, 0.20, 0.15])
+        # Weights are computed from data via Fisher VR during fit().
+        # Only used as fallback if fit() fails or is not called.
+        self._default_weights = weights
+        self.weights = weights if weights is not None else np.ones(4) / 4
         self._ref_stats = None
 
     def fit(self, X_ref: np.ndarray, energy_fn=None):
-        """Calibrate on reference (normal) data."""
+        """Calibrate on reference (normal) data.
+
+        Computes Fisher Variance Ratio weights from the reference
+        features — no hardcoded weights.  The data determines which
+        of the 4 topological signals is most discriminative.
+        """
         features = self._compute_features(X_ref, X_ref, energy_fn)
         self._ref_mean = features.mean(axis=0)
         self._ref_std = features.std(axis=0) + 1e-10
         self._X_ref = X_ref.copy()
         self._energy_fn = energy_fn
+
+        # ── Fisher VR weights from reference features ──
+        if self._default_weights is not None:
+            self.weights = self._default_weights
+        else:
+            z = (features - self._ref_mean) / self._ref_std
+            z_pos = np.maximum(z, 0)
+            total = z_pos.sum(axis=1)
+            p80 = np.percentile(total, 80)
+            p50 = np.percentile(total, 50)
+            hi = total >= p80
+            lo = total <= p50
+            K = features.shape[1]
+            if hi.sum() >= 2 and lo.sum() >= 2:
+                fr = np.zeros(K)
+                for k in range(K):
+                    mu_h = z_pos[hi, k].mean()
+                    mu_l = z_pos[lo, k].mean()
+                    var_h = z_pos[hi, k].var()
+                    var_l = z_pos[lo, k].var()
+                    fr[k] = (mu_h - mu_l) ** 2 / max(var_h + var_l, 1e-10)
+                total_fr = fr.sum()
+                self.weights = fr / total_fr if total_fr > 1e-10 else np.ones(K) / K
+            else:
+                self.weights = np.ones(K) / K
         return self
 
     def score(self, X: np.ndarray) -> np.ndarray:
-        """Compute topological anomaly scores (noise-immune)."""
+        """Compute topological anomaly scores (noise-immune).
+
+        Uses Fisher VR weights computed during fit() — zero heuristics.
+        """
         features = self._compute_features(X, self._X_ref, self._energy_fn)
         # Z-score relative to reference
         z = (features - self._ref_mean) / self._ref_std
@@ -847,9 +883,12 @@ class BSDTChannels:
         return (ch['delta_C'] ** 2 + ch['delta_G'] ** 2 +
                 ch['delta_A'] ** 2 + ch['delta_T'] ** 2)
 
-    def mfls(self, X: np.ndarray) -> np.ndarray:
-        r"""
-        MFLS = ‖∇E_BS‖_F — gradient norm of blind-spot energy.
+    def _gradient_vectors(self, X: np.ndarray) -> np.ndarray:
+        r"""∇E_BS — gradient vectors of blind-spot energy.
+
+        Returns (N, d) gradient vectors for adaptive damping
+        (Theorem C, eq:bsdamped):
+            Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
 
         Uses analytical gradients through δ_C (Euclidean) and
         δ_A (Mahalanobis), which dominate the gradient landscape.
@@ -877,9 +916,65 @@ class BSDTChannels:
         scale_C = -2.0 * ch['delta_C'] * active / self.d_max_
         grad_E_C = scale_C[:, None] * unit
 
-        # Total gradient
-        grad_E = grad_E_A + grad_E_C
-        return np.linalg.norm(grad_E, axis=1)
+        return grad_E_A + grad_E_C
+
+    def morse_alarm(self, X: np.ndarray) -> dict:
+        r"""Phase 2 Morse-index prediction (Algorithm 1, SIAM paper).
+
+        Computes the d×d marginal Hessian of E_BS (averaged over
+        agents) via finite differences on ∇E_BS, then checks the
+        eigenvalue sign pattern:
+            ind = #{j : λ_j < 0}
+        If ind ≥ 1 the system is at a saddle ⇒ phase transition.
+
+        Returns
+        -------
+        dict with keys:
+            'eigenvalues'  : (d,) array of Hessian eigenvalues
+            'morse_index'  : int, number of negative eigenvalues
+            'alarm'        : bool, True if ind ≥ 1
+            'trace'        : float, tr(H) — overall curvature
+            'det_cov'      : float, det(Σ) — local covariance volume
+        """
+        d = X.shape[1]
+        eps_fd = 1e-5
+
+        # Marginal Hessian via central finite differences on
+        # mean gradient: H_jk ≈ (∂/∂e_k)(mean ∇E_BS)_j
+        grad0 = self._gradient_vectors(X).mean(axis=0)  # (d,)
+        H = np.zeros((d, d))
+        for k in range(d):
+            e_k = np.zeros(d)
+            e_k[k] = eps_fd
+            grad_plus = self._gradient_vectors(X + e_k).mean(axis=0)
+            grad_minus = self._gradient_vectors(X - e_k).mean(axis=0)
+            H[:, k] = (grad_plus - grad_minus) / (2 * eps_fd)
+
+        # Symmetrise (remove numerical asymmetry)
+        H = 0.5 * (H + H.T)
+        eigenvalues = np.linalg.eigvalsh(H)
+
+        morse_index = int(np.sum(eigenvalues < 0))
+
+        # Reduced descriptor: det(local covariance)
+        try:
+            det_cov = float(np.linalg.det(np.cov(X.T)))
+        except Exception:
+            det_cov = 0.0
+
+        return {
+            'eigenvalues': eigenvalues,
+            'morse_index': morse_index,
+            'alarm': morse_index >= 1,
+            'trace': float(np.trace(H)),
+            'det_cov': det_cov,
+        }
+
+    def mfls(self, X: np.ndarray) -> np.ndarray:
+        r"""
+        MFLS = ‖∇E_BS‖_F — gradient norm of blind-spot energy.
+        """
+        return np.linalg.norm(self._gradient_vectors(X), axis=1)
 
     def score(self, X: np.ndarray) -> np.ndarray:
         """
@@ -1210,10 +1305,11 @@ class FusedSystemScorer:
 
     def score(self, X: np.ndarray) -> np.ndarray:
         """
-        Score with auto-interpolation for large datasets.
+        Score with Fisher VR weighted fusion of all views.
 
-        For simulation-size inputs → direct multi-view scoring.
-        For larger inputs → Morse (direct) + kNN-interpolated enriched.
+        For simulation-size inputs → direct Fisher-weighted scoring.
+        For larger inputs → direct views (Morse, Betti, BSDT) scored
+        directly, UDL kNN-interpolated, then Fisher VR fused.
         """
         N = len(X)
 
@@ -1222,49 +1318,105 @@ class FusedSystemScorer:
                 and np.array_equal(X, self._X_sim)):
             return self._sim_enriched
 
-        # Morse scores all points (fast kNN-based)
-        morse_s = self._minmax(self.morse.score(X))
-
-        # If we have simulation-enriched scores, interpolate
+        # If we have simulation-enriched scores, interpolate UDL only
         if self._X_sim is not None and self._sim_enriched is not None:
-            from sklearn.neighbors import KNeighborsRegressor
-            k_interp = min(5, len(self._X_sim))
-            knn = KNeighborsRegressor(n_neighbors=k_interp,
-                                      weights='distance')
-            knn.fit(self._X_sim, self._sim_enriched)
-            enriched_s = self._minmax(knn.predict(X))
-            return 0.4 * morse_s + 0.6 * enriched_s
+            # Direct views (scale to any N via kNN)
+            views = self._collect_views(X)
+            # Replace UDL with interpolated version if available
+            if len(views) >= 3 and self.udl is not None and self.udl._fitted:
+                from sklearn.neighbors import KNeighborsRegressor
+                k_interp = min(5, len(self._X_sim))
+                knn_reg = KNeighborsRegressor(n_neighbors=k_interp,
+                                              weights='distance')
+                # Interpolate the full pre-computed enriched score as a view
+                knn_reg.fit(self._X_sim, self._sim_enriched)
+                views.append(self._robust_norm(knn_reg.predict(X)))
+            return self._fisher_fuse(views)
         else:
-            # Direct scoring (small dataset)
             return self._enrich_score(X)
 
-    def _enrich_score(self, X: np.ndarray) -> np.ndarray:
-        """Full multi-view scoring (≤ simulation-size inputs).
-
-        Fuses four signal families:
-          Morse (topology) + Betti (persistence) + UDL (operators)
-          + BSDT (blind-spot channels: δ_C, δ_G, δ_A, δ_T, E_BS, MFLS).
-        """
-        components = [self.morse.score(X)]
+    def _collect_views(self, X: np.ndarray) -> list:
+        """Collect individual view scores (each already z-scored internally)."""
+        views = [self._robust_norm(self.morse.score(X))]
 
         if self.betti is not None:
             try:
-                components.append(self.betti.score(X))
-            except Exception:
-                pass
-        if self.udl is not None and self.udl._fitted:
-            try:
-                components.append(self.udl.score(X))
-            except Exception:
-                pass
-        if self.bsdt is not None and self.bsdt._fitted:
-            try:
-                components.append(self.bsdt.score(X))
+                views.append(self._robust_norm(self.betti.score(X)))
             except Exception:
                 pass
 
-        normed = [self._minmax(s) for s in components]
-        return np.mean(normed, axis=0)
+        if self.bsdt is not None and self.bsdt._fitted:
+            try:
+                views.append(self._robust_norm(self.bsdt.score(X)))
+            except Exception:
+                pass
+
+        return views
+
+    def _enrich_score(self, X: np.ndarray) -> np.ndarray:
+        """Full multi-view scoring with Fisher VR fusion.
+
+        Fuses four signal families via data-determined weights:
+          Morse (topology) + Betti (persistence) + UDL (operators)
+          + BSDT (blind-spot channels: δ_C, δ_G, δ_A, δ_T, E_BS, MFLS).
+
+        View weights from Fisher Variance Ratio — zero heuristics.
+        """
+        views = self._collect_views(X)
+
+        if self.udl is not None and self.udl._fitted:
+            try:
+                views.append(self._robust_norm(self.udl.score(X)))
+            except Exception:
+                pass
+
+        return self._fisher_fuse(views)
+
+    def _fisher_fuse(self, views: list) -> np.ndarray:
+        """Fuse view scores using Fisher Variance Ratio weights.
+
+        FR_v = (μ_high_v − μ_low_v)² / (var_high_v + var_low_v)
+        w_v  = FR_v / Σ FR_j
+
+        No hardcoded weights — data determines everything.
+        """
+        if not views:
+            return np.zeros(0)
+        if len(views) == 1:
+            return views[0]
+
+        V = np.column_stack(views)
+        n_views = V.shape[1]
+
+        total = V.sum(axis=1)
+        p80 = np.percentile(total, 80)
+        p50 = np.percentile(total, 50)
+        hi = total >= p80
+        lo = total <= p50
+
+        if hi.sum() >= 2 and lo.sum() >= 2:
+            fr = np.zeros(n_views)
+            for v in range(n_views):
+                mu_h = V[hi, v].mean()
+                mu_l = V[lo, v].mean()
+                var_h = V[hi, v].var()
+                var_l = V[lo, v].var()
+                fr[v] = (mu_h - mu_l) ** 2 / max(var_h + var_l, 1e-10)
+            total_fr = fr.sum()
+            w = fr / total_fr if total_fr > 1e-10 else np.ones(n_views) / n_views
+        else:
+            w = np.ones(n_views) / n_views
+
+        return (V * w).sum(axis=1)
+
+    @staticmethod
+    def _robust_norm(s: np.ndarray) -> np.ndarray:
+        """Percentile-based normalization (robust to outliers)."""
+        q1, q99 = np.percentile(s, [1, 99])
+        if q99 - q1 > 1e-15:
+            sn = (s - q1) / (q99 - q1)
+            return np.clip(sn, 0.0, 1.0)
+        return np.zeros_like(s)
 
     @staticmethod
     def _minmax(s: np.ndarray) -> np.ndarray:
@@ -1440,6 +1592,21 @@ class MolecularEngine:
 
         self.mu_ = X_work.mean(axis=0)
 
+        # ── BSDT adaptive damping (Theorem C, eq:bsdamped) ──────
+        # Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
+        # γ(E) = E / (E + θ)   — adaptive friction coefficient
+        # BSDT provides the damping that prevents collapse above
+        # the critical manifold C*.  Lyapunov ISS handles step-size
+        # control only.
+        bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
+                                         len(X_work) - 1))
+        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+            else X_work
+        bsdt_damper.fit(X_ref_init)
+        # θ = median E_BS on reference — damping is ~50% at normal
+        e_ref = bsdt_damper.energy(X_ref_init)
+        theta_bs = float(np.median(e_ref)) + 1e-10
+
         # ── Euler integration with Lyapunov v2 stability control ──
         self.stabiliser.reset()
         eta = self.eta
@@ -1447,10 +1614,17 @@ class MolecularEngine:
         # Reduce iterations for large subsamples
         iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
         for step in range(iters):
-            # Compute forces
+            # Compute physics forces
             F_lj = self._lennard_jones_forces(X_work)
             F_radial = -self.alpha_radial * (X_work - self.mu_)
-            F_total = F_lj + F_radial
+
+            # BSDT adaptive damping force (prevents collapse)
+            e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
+            gamma_bs = e_bs / (e_bs + theta_bs)     # adaptive coeff
+            grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
+            F_damp = -gamma_bs[:, None] * grad_bs    # damping force
+
+            F_total = F_lj + F_radial + F_damp
 
             # Barrier-augmented force clamping (solver stability only)
             F_total = self.stabiliser.clamp_forces(F_total)
@@ -1478,6 +1652,11 @@ class MolecularEngine:
 
         self.X_final_ = X_work
         self._convergence_report = self.stabiliser.report()
+
+        # ── Phase 2: Morse-index alarm (Algorithm 1) ─────────
+        # Compute Hessian eigenvalues of E_BS at final state.
+        # ind ≥ 1 ⇒ saddle ⇒ phase transition detected.
+        self._morse_alarm = bsdt_damper.morse_alarm(X_work)
 
         # ── PREDICTION: calibrate on FINAL normal positions ──
         X_ref_final = X_work[normal_mask]
@@ -1816,6 +1995,20 @@ class GravityModeEngine:
         # Store initial positions for displacement scoring
         X_initial = X_work.copy()
 
+        # ── BSDT adaptive damping (Theorem C, eq:bsdamped) ──────
+        # Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
+        # γ(E) = E / (E + θ)   — adaptive friction coefficient
+        # BSDT provides the damping that prevents collapse above
+        # the critical manifold C*.  Lyapunov ISS handles step-size
+        # control only.
+        bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
+                                         len(X_work) - 1))
+        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+            else X_work
+        bsdt_damper.fit(X_ref_init)
+        e_ref = bsdt_damper.energy(X_ref_init)
+        theta_bs = float(np.median(e_ref)) + 1e-10
+
         # ── Euler integration with Lyapunov v2 + ISS tracking ──
         self.stabiliser.reset()
         eta = self.eta
@@ -1824,7 +2017,14 @@ class GravityModeEngine:
         for step in range(iters):
             F_pair = self._pairwise_forces(X_work)
             F_radial = -self.alpha * (X_work - self.mu_)
-            F_total = F_pair + F_radial
+
+            # BSDT adaptive damping force (prevents collapse)
+            e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
+            gamma_bs = e_bs / (e_bs + theta_bs)     # adaptive coeff
+            grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
+            F_damp = -gamma_bs[:, None] * grad_bs    # damping force
+
+            F_total = F_pair + F_radial + F_damp
 
             # Barrier-augmented force clamping
             F_total = self.stabiliser.clamp_forces(F_total)
@@ -1855,6 +2055,9 @@ class GravityModeEngine:
 
         self.X_final_ = X_work
         self._convergence_report = self.stabiliser.report()
+
+        # ── Phase 2: Morse-index alarm (Algorithm 1) ─────────
+        self._morse_alarm = bsdt_damper.morse_alarm(X_work)
 
         # Calibrate on FINAL normal positions
         X_ref_final = X_work[normal_mask]
@@ -2813,8 +3016,8 @@ class ReducedTensorDescriptor:
               gradient_fn=None) -> np.ndarray:
         """Combined anomaly score from the descriptor.
 
-        Uses robust percentile normalisation (instead of min-max)
-        and learned weights that emphasise Morse index + Mahalanobis.
+        Uses z-score normalisation against fit-time reference statistics
+        and Fisher VR weights (data-determined, no heuristics).
 
         Returns
         -------
@@ -2826,20 +3029,61 @@ class ReducedTensorDescriptor:
         grad_norm = D[:, 0]
         mahalanobis = D[:, n_eigs + 1]
         medoid_dist = D[:, n_eigs + 2]
-        trace_h = D[:, n_eigs + 3]
-        morse_idx = D[:, n_eigs + 5]
+        trace_h = np.abs(D[:, n_eigs + 3])
+        morse_idx = D[:, n_eigs + 5].astype(np.float64)
 
         def robust_norm(x):
             q1, q99 = np.percentile(x, [1, 99])
             xn = (x - q1) / (q99 - q1 + 1e-15)
             return np.clip(xn, 0.0, 1.0)
 
-        s = (0.25 * robust_norm(grad_norm) +
-             0.30 * robust_norm(mahalanobis) +
-             0.15 * robust_norm(medoid_dist) +
-             0.10 * robust_norm(np.abs(trace_h)) +
-             0.20 * robust_norm(morse_idx.astype(np.float64)))
-        return s
+        # Z-score each component against reference distribution
+        if self._ref_data is not None:
+            D_ref = self.transform(self._ref_data, energy_fn, gradient_fn)
+            def zpos(vals, ref_col):
+                mu = ref_col.mean(); sigma = ref_col.std() + 1e-10
+                return np.maximum((vals - mu) / sigma, 0.0)
+            z_grad = zpos(grad_norm, D_ref[:, 0])
+            z_maha = zpos(mahalanobis, D_ref[:, n_eigs + 1])
+            z_med  = zpos(medoid_dist, D_ref[:, n_eigs + 2])
+            z_tr   = zpos(trace_h, np.abs(D_ref[:, n_eigs + 3]))
+            z_morse = zpos(morse_idx, D_ref[:, n_eigs + 5].astype(np.float64))
+        else:
+            z_grad  = robust_norm(grad_norm)
+            z_maha  = robust_norm(mahalanobis)
+            z_med   = robust_norm(medoid_dist)
+            z_tr    = robust_norm(trace_h)
+            z_morse = robust_norm(morse_idx)
+
+        # Stack z-scored features and determine Fisher VR weights
+        feats = np.column_stack([
+            robust_norm(z_grad),
+            robust_norm(z_maha),
+            robust_norm(z_med),
+            robust_norm(z_tr),
+            robust_norm(z_morse),
+        ])
+        total = feats.sum(axis=1)
+        p80 = np.percentile(total, 80)
+        p50 = np.percentile(total, 50)
+        hi = total >= p80
+        lo = total <= p50
+        nf = feats.shape[1]
+
+        if hi.sum() >= 2 and lo.sum() >= 2:
+            fr = np.zeros(nf)
+            for k in range(nf):
+                mu_h = feats[hi, k].mean()
+                mu_l = feats[lo, k].mean()
+                var_h = feats[hi, k].var()
+                var_l = feats[lo, k].var()
+                fr[k] = (mu_h - mu_l) ** 2 / max(var_h + var_l, 1e-10)
+            total_fr = fr.sum()
+            w = fr / total_fr if total_fr > 1e-10 else np.ones(nf) / nf
+        else:
+            w = np.ones(nf) / nf
+
+        return (feats * w).sum(axis=1)
 
     # ═══════════════════════════════════════════════════════════════
     #  PRODUCTION SCORING — real-world-ready methods
@@ -2974,39 +3218,65 @@ class ReducedTensorDescriptor:
             (raw_knn_mean - ref_raw_mean_d.mean()) /
             (ref_raw_mean_d.std() + 1e-10), 0.0)
 
-        # 5. Adaptive fusion — multi-view weighted combination
+        # 5. Adaptive fusion — Fisher VR weighted combination
+        #
+        # No heuristic weights.  The data determines the view weights
+        # via Fisher Variance Ratio (same technique as BSDTChannels):
+        #   FR_v = (μ_high_v − μ_low_v)² / (var_high_v + var_low_v)
+        #   w_v  = FR_v / Σ FR_j
+        #
+        # Views: A (raw-space), B (descriptor-kNN), C (topology z-scores),
+        #        D (BSDT channels), E (Betti barcode z-scores).
+
         def robust_norm(x):
             q1, q99 = np.percentile(x, [1, 99])
             xn = (x - q1) / (q99 - q1 + 1e-15)
             return np.clip(xn, 0.0, 1.0)
 
-        # View A: Raw-space scoring (captures simple separability)
-        v_raw = (0.50 * robust_norm(z_raw_knn) +
-                 0.50 * robust_norm(raw_knn_mean))
+        # View A: Raw-space z-scored kNN deviation
+        v_raw = robust_norm(z_raw_knn)
 
-        # View B: Descriptor-space kNN (captures topology-transformed distances)
-        v_knn = (0.35 * robust_norm(z_knn) +
-                 0.30 * robust_norm(knn_d1) +
-                 0.20 * robust_norm(knn_persist) +
-                 0.15 * robust_norm(knn_mean))
+        # View B: Descriptor-space z-scored kNN deviation
+        v_knn = robust_norm(z_knn)
 
-        # View C: Descriptor-native (Z-scored topology features)
-        v_desc = (0.25 * robust_norm(z_grad) +
-                  0.30 * robust_norm(z_maha) +
-                  0.15 * robust_norm(z_med) +
-                  0.10 * robust_norm(z_trace) +
-                  0.20 * robust_norm(z_morse))
+        # View C: Descriptor-native z-scored topology features
+        #   Equal-weight average of z-scored descriptor components
+        z_stack = np.column_stack([z_grad, z_maha, z_med, z_trace, z_morse])
+        v_desc = robust_norm(z_stack.mean(axis=1))
 
         # View D: BSDT channels (blind-spot detection, Section 2.2)
-        #   Fits BSDTChannels on reference data and scores all points
-        #   via E_BS (energy) + MFLS (gradient norm) composite.
         bsdt = BSDTChannels(k=min(10, max(2, len(X_ref) - 1)))
         bsdt.fit(X_ref)
         v_bsdt = robust_norm(bsdt.score(X))
 
-        # Fuse: 35% raw + 25% descriptor-kNN + 25% topology + 15% BSDT
-        scores = (0.35 * v_raw + 0.25 * v_knn +
-                  0.25 * v_desc + 0.15 * v_bsdt)
+        # View E: Betti barcode suite (β₀, β₁, Conley, Euler)
+        betti = BettiBarcodeSuite(k=min(self.k_neighbors + 5, 25))
+        betti.fit(X_ref)
+        v_betti = robust_norm(betti.score(X))
+
+        # ── Fisher VR view weighting (zero heuristics) ──
+        views = np.column_stack([v_raw, v_knn, v_desc, v_bsdt, v_betti])
+        total_signal = views.sum(axis=1)
+        p80 = np.percentile(total_signal, 80)
+        p50 = np.percentile(total_signal, 50)
+        hi = total_signal >= p80
+        lo = total_signal <= p50
+
+        n_views = views.shape[1]
+        if hi.sum() >= 2 and lo.sum() >= 2:
+            fr = np.zeros(n_views)
+            for v in range(n_views):
+                mu_h = views[hi, v].mean()
+                mu_l = views[lo, v].mean()
+                var_h = views[hi, v].var()
+                var_l = views[lo, v].var()
+                fr[v] = (mu_h - mu_l) ** 2 / max(var_h + var_l, 1e-10)
+            total_fr = fr.sum()
+            w = fr / total_fr if total_fr > 1e-10 else np.ones(n_views) / n_views
+        else:
+            w = np.ones(n_views) / n_views
+
+        scores = (views * w).sum(axis=1)
         return scores
 
     def score_variants(self, X: np.ndarray, y: np.ndarray,

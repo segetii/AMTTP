@@ -1,0 +1,15 @@
+﻿2ef8f05 fix: FullBSDT uses transductive Fisher VR weights from data properties
+f215e8b fix: zero label leakage - all BSDT variants closed-form from data properties
+827a163 fix: QuadSurf and ExpoGate are post-hoc formulas, only SignedLR is supervised
+7a408bf feat: add QuadSurf, SignedLR, ExpoGate MFLS scoring variants
+687e074 feat: integrate BSDT channels into ReducedTensorDescriptor scoring
+879ae7b feat: implement BSDT channels (delta_C/G/A/T, E_BS, MFLS) in system_mode.py
+7a0fb0a feat: conformal scoring on all physics engines (Gravity, Molecular, Hybrid)
+9d6833b feat: universal conformal scoring ÔÇö dataset-agnostic ReducedTensorDescriptor
+38d8be1 feat: production-grade ReducedTensorDescriptor ÔÇö BEATS full engines on bank data
+11c5d23 feat: GMM energy for ReducedTensorDescriptor ÔÇö fixes Morse index degeneracy
+2925190 feat: ReducedTensorDescriptor O(Nd+d^3) with _to_scalar deprecation fix
+7673d1c feat: FARTargetCalibrator ÔÇö isotonic+quantile calibration for sector compliance
+86e1238 feat: LyapunovStabiliser v2 ÔÇö Energy-Based Hamiltonian controller
+65ffa1e feat: Fused scoring ÔÇö Betti/Euler/Conley + Phase/Topo/KernelRKHS/Rank operators
+5767e39 feat: System Mode Engine ÔÇö Molecular/Gravity/Hybrid toggle with Morse topology alarm
