@@ -1,0 +1,40 @@
+﻿308816f UDL IEEE paper: remove AF/NS refs, simplify G-SIB to Hybrid-only, tease companion paper for Gravity/Molecular engines
+2ef8f05 fix: FullBSDT uses transductive Fisher VR weights from data properties
+f215e8b fix: zero label leakage - all BSDT variants closed-form from data properties
+827a163 fix: QuadSurf and ExpoGate are post-hoc formulas, only SignedLR is supervised
+7a408bf feat: add QuadSurf, SignedLR, ExpoGate MFLS scoring variants
+687e074 feat: integrate BSDT channels into ReducedTensorDescriptor scoring
+879ae7b feat: implement BSDT channels (delta_C/G/A/T, E_BS, MFLS) in system_mode.py
+74030d2 paper(SIAM): add universal conformal scoring section + benchmark table
+7a0fb0a feat: conformal scoring on all physics engines (Gravity, Molecular, Hybrid)
+9d6833b feat: universal conformal scoring ÔÇö dataset-agnostic ReducedTensorDescriptor
+38d8be1 feat: production-grade ReducedTensorDescriptor ÔÇö BEATS full engines on bank data
+11c5d23 feat: GMM energy for ReducedTensorDescriptor ÔÇö fixes Morse index degeneracy
+2925190 feat: ReducedTensorDescriptor O(Nd+d^3) with _to_scalar deprecation fix
+c4023ca Add NeurIPS paper updates, real-world benchmarks, FAR analysis, endorsement letter, Sabre VP endorsement letter
+bb43ff5 feat: prospective G-SIB bank-level crisis early warning ÔÇö no hindsight
+cb21004 feat: economy (FRED) + ERCOT grid failure benchmarks ÔÇö both FCA compliant
+7673d1c feat: FARTargetCalibrator ÔÇö isotonic+quantile calibration for sector compliance
+86e1238 feat: LyapunovStabiliser v2 ÔÇö Energy-Based Hamiltonian controller
+65ffa1e feat: Fused scoring ÔÇö Betti/Euler/Conley + Phase/Topo/KernelRKHS/Rank operators
+5ac5629 Merge branch 'sync/merge-2025-10-22' of https://github.com/segetii/AMTTP into sync/merge-2025-10-22
+5767e39 feat: System Mode Engine ÔÇö Molecular/Gravity/Hybrid toggle with Morse topology alarm
+32d0b17 Merge pull request #3 from segetii/copilot/add-theorem-entropy-structure
+f33de67 Add Theorem 3.10 (Entropy Structure of BSDT) to research/siam-paper/main.tex
+d4d3c2e Initial plan
+1e01e4d Merge pull request #2 from segetii/copilot/add-citations-to-bibliography
+815612a Initial plan
+44670f5 Merge branch 'sync/merge-2025-10-22' of https://github.com/segetii/AMTTP into sync/merge-2025-10-22
+6954ef1 SIAM paper: recompile PDF with corrected author name and ORCID
+08f7eba Merge pull request #1 from segetii/copilot/add-github-actions-workflow
+b3604cd Add GitHub Actions workflow to compile LaTeX paper
+ef5f93d Initial plan
+4e96344 Update main.tex
+0a9ceae SIAM paper: correct author name to Odeyemi Olusegun, ORCID 0009-0004-2309-6436
+96dacd3 Add standalone benchmark charts to UDL paper
+cad5822 Add patents, navier-stokes, adaptive-friction-gui, UDL updates, benchmark results, and research artifacts
+f1f95cc Remove XGB/LGB mixing from UDL pipeline: standalone benchmark + paper cleanup
+d719291 Add unified SIAM paper: Adaptive Friction + Navier-Stokes regularity
+467ca1a Add unified patent application (25 claims, all inventions)
+024823d feat(bsdt): add Navier-Stokes cross-domain transfer findings
+c1e8227 feat(ns): add partial N=64 results (Re 314/628/1257), update paper tables

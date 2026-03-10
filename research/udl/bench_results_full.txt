@@ -1,0 +1,329 @@
+
+================================================================================
+  FULL PAPER PIPELINE BENCHMARK
+  Raw X → ReducedTensor → D → Engines + BSDT + MFLS + Morse
+  Molecular | Gravity | Hybrid × 5 BSDT variants
+  + ReducedTensorDescriptor integrated pipeline
+  All closed-form Fisher VR. Zero label leakage.
+================================================================================
+
+  Loading ERCOT...
+  Loaded: (15665, 5), T=241, N=65
+
+================================================================================
+  ERCOT Grid
+  Shape: (15665, 5),  crisis: 5915/15665 (37.8%)
+================================================================================
+
+  ━━ STEP 1: Compute Reduced Tensor Descriptor D ━━
+    X: (15665, 5) → D: (15665, 11)  (10.5s)
+    Features: ['grad_norm', 'hessian_eig_0', 'hessian_eig_1', 'hessian_eig_2', 'hessian_eig_3', 'hessian_eig_4', 'mahalanobis', 'medoid_dist', 'trace_H', 'det_sigma', 'morse_index']
+    Complexity: O(Nd + d^3) = O(9750*5 + 5^3)  (vs O(N^2*d) = O(9750^2*5))
+    Speedup: ~~N/d = ~9750/5
+
+  ━━ STEP 2: Engines on D + BSDT variants + MFLS + Morse ━━
+
+  ── Molecular on Reduced Tensor D ──
+    Molecular engine score                                  AUC=0.9752  FAR=0.112  F1=0.898  34.7s
+    -- BSDT variants on D (via Molecular) --
+    Molecular E_BS                                          AUC=0.7473  FAR=0.798  F1=0.612
+    Molecular MFLS                                          AUC=0.2983  FAR=1.000  F1=0.284
+    Molecular Baseline                                      AUC=0.5766  FAR=0.807  F1=0.510
+    Molecular FullBSDT                                      AUC=0.7037  FAR=0.778  F1=0.552
+      Fisher VR weights: [0.0021, 0.0053, 0.1459, 0.8468]
+    Molecular QuadSurf                                      AUC=0.6255  FAR=1.000  F1=0.548
+    Molecular SignedFisher                                  AUC=0.7107  FAR=0.766  F1=0.563
+    Molecular ExpoGate                                      AUC=0.6255  FAR=1.000  F1=0.548
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9050   0.9105   1.01x
+      delta_G        0.2022   0.2558   1.26x
+      delta_A        0.5109   0.7884   1.54x
+      delta_T        0.5730   0.6755   1.18x
+    -- Morse alarm on D --
+    Molecular Morse alarm                                   AUC=0.5019  30.2s
+      Morse index — normal: 1.05  crisis: 1.05
+      Alarm rate  — normal: 0.996  crisis: 1.000
+    -- Conformal scoring --
+    Molecular Conformal                                     AUC=0.6945  FAR=0.958  F1=0.686  24.8s
+
+  ── Gravity on Reduced Tensor D ──
+    Gravity engine score                                    AUC=0.9718  FAR=0.146  F1=0.881  10.2s
+    -- BSDT variants on D (via Gravity) --
+    Gravity E_BS                                            AUC=0.7473  FAR=0.798  F1=0.612
+    Gravity MFLS                                            AUC=0.2983  FAR=1.000  F1=0.284
+    Gravity Baseline                                        AUC=0.5766  FAR=0.807  F1=0.510
+    Gravity FullBSDT                                        AUC=0.7037  FAR=0.778  F1=0.552
+      Fisher VR weights: [0.0021, 0.0053, 0.1459, 0.8468]
+    Gravity QuadSurf                                        AUC=0.6255  FAR=1.000  F1=0.548
+    Gravity SignedFisher                                    AUC=0.7107  FAR=0.766  F1=0.563
+    Gravity ExpoGate                                        AUC=0.6255  FAR=1.000  F1=0.548
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9050   0.9105   1.01x
+      delta_G        0.2022   0.2558   1.26x
+      delta_A        0.5109   0.7884   1.54x
+      delta_T        0.5730   0.6755   1.18x
+    -- Morse alarm on D --
+    Gravity Morse alarm                                     AUC=0.5019  37.5s
+      Morse index — normal: 1.05  crisis: 1.05
+      Alarm rate  — normal: 0.996  crisis: 1.000
+    -- Conformal scoring --
+    Gravity Conformal                                       AUC=0.8489  FAR=0.786  F1=0.745  12.3s
+
+  ── Hybrid on Reduced Tensor D ──
+    Hybrid engine score                                     AUC=0.9823  FAR=0.091  F1=0.909  47.4s
+    -- BSDT variants on D (via Hybrid) --
+    Hybrid E_BS                                             AUC=0.7473  FAR=0.798  F1=0.612
+    Hybrid MFLS                                             AUC=0.2983  FAR=1.000  F1=0.284
+    Hybrid Baseline                                         AUC=0.5766  FAR=0.807  F1=0.510
+    Hybrid FullBSDT                                         AUC=0.7037  FAR=0.778  F1=0.552
+      Fisher VR weights: [0.0021, 0.0053, 0.1459, 0.8468]
+    Hybrid QuadSurf                                         AUC=0.6255  FAR=1.000  F1=0.548
+    Hybrid SignedFisher                                     AUC=0.7107  FAR=0.766  F1=0.563
+    Hybrid ExpoGate                                         AUC=0.6255  FAR=1.000  F1=0.548
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9050   0.9105   1.01x
+      delta_G        0.2022   0.2558   1.26x
+      delta_A        0.5109   0.7884   1.54x
+      delta_T        0.5730   0.6755   1.18x
+    -- Morse alarm on D --
+    Hybrid Morse alarm                                      AUC=0.5019  31.0s
+      Morse index — normal: 1.05  crisis: 1.05
+      Alarm rate  — normal: 0.996  crisis: 1.000
+    -- Conformal scoring --
+    Hybrid Conformal                                        AUC=0.8064  FAR=0.932  F1=0.732  41.9s
+
+  ━━ STEP 3: ReducedTensorDescriptor Integrated Pipeline ━━
+    RTD fit_score (4-view fusion)                           AUC=0.8936  FAR=0.621  F1=0.790  9.4s
+    RTD desc.score (topology)                               AUC=0.8413  FAR=0.884  F1=0.721  3.1s
+
+  -- RTD score_variants (BSDT on raw X, Fisher VR) --
+    RTD baseline           AUC=0.6820  FAR=0.659  F1=0.603
+    RTD full_bsdt          AUC=0.9880  FAR=0.062  F1=0.949  w=[0.2398,0.0512,0.2552,0.4538]
+    RTD quadsurf           AUC=0.9033  FAR=0.494  F1=0.802  w=[0.0181,0.9176,0.0165,0.0478]
+    RTD signed_lr          AUC=0.9671  FAR=0.161  F1=0.883  w=[0.7652,-0.4015,0.0857,0.4273,0.7597]
+    RTD expo_gate          AUC=0.9033  FAR=0.494  F1=0.802
+
+  -- Morse Topology (raw X) --
+    RTD Morse alarm                                         AUC=0.4158
+    Index — normal: 0.19  crisis: 0.02
+    Alarm — normal: 0.186  crisis: 0.018
+
+  -- Conformal Scoring (distribution-free) --
+    α=0.05  detected= 1526  TP=1526  FP=   0  prec=1.000  rec=0.258  F1=0.410
+    α=0.10  detected= 2006  TP=2002  FP=   4  prec=0.998  rec=0.338  F1=0.505
+    α=0.20  detected= 2936  TP=2870  FP=  66  prec=0.978  rec=0.485  F1=0.649
+    RTD Conformal (1 - p)                                   AUC=0.8909  FAR=0.640  F1=0.788  9.2s
+
+  ━━ STEP 4: Panel Scoring (cross-sectional + temporal) ━━
+    score_panel (quarter-level)                             AUC=0.8884  F1=0.782  (T=241)  11.0s
+    Crisis periods: 91/241  detected (>90th pctl): 64/91
+
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  SUMMARY: ERCOT Grid                                               ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Method                                                 AUC     FAR     F1 ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  RTD full_bsdt                                       0.9880   0.062  0.949 ║
+  ║  Hybrid engine score                                 0.9823   0.091  0.909 ║
+  ║  Molecular engine score                              0.9752   0.112  0.898 ║
+  ║  Gravity engine score                                0.9718   0.146  0.881 ║
+  ║  RTD signed_lr                                       0.9671   0.161  0.883 ║
+  ║  RTD expo_gate                                       0.9033   0.494  0.802 ║
+  ║  RTD quadsurf                                        0.9033   0.494  0.802 ║
+  ║  RTD fit_score (4-view fusion)                       0.8936   0.621  0.790 ║
+  ║  RTD Conformal (1 - p)                               0.8909   0.640  0.788 ║
+  ║  RTD Panel                                           0.8884     -    0.782 ║
+  ║  Gravity Conformal                                   0.8489   0.786  0.745 ║
+  ║  RTD desc.score (topology)                           0.8413   0.884  0.721 ║
+  ║  Hybrid Conformal                                    0.8064   0.932  0.732 ║
+  ║  Molecular E_BS                                      0.7473   0.798  0.612 ║
+  ║  Gravity E_BS                                        0.7473   0.798  0.612 ║
+  ║  Hybrid E_BS                                         0.7473   0.798  0.612 ║
+  ║  Molecular SignedFisher                              0.7107   0.766  0.563 ║
+  ║  Gravity SignedFisher                                0.7107   0.766  0.563 ║
+  ║  Hybrid SignedFisher                                 0.7107   0.766  0.563 ║
+  ║  Molecular FullBSDT                                  0.7037   0.778  0.552 ║
+  ║  Gravity FullBSDT                                    0.7037   0.778  0.552 ║
+  ║  Hybrid FullBSDT                                     0.7037   0.778  0.552 ║
+  ║  Molecular Conformal                                 0.6945   0.958  0.686 ║
+  ║  RTD baseline                                        0.6820   0.659  0.603 ║
+  ║  Molecular QuadSurf                                  0.6255   1.000  0.548 ║
+  ║  Molecular ExpoGate                                  0.6255   1.000  0.548 ║
+  ║  Gravity QuadSurf                                    0.6255   1.000  0.548 ║
+  ║  Gravity ExpoGate                                    0.6255   1.000  0.548 ║
+  ║  Hybrid QuadSurf                                     0.6255   1.000  0.548 ║
+  ║  Hybrid ExpoGate                                     0.6255   1.000  0.548 ║
+  ║  Molecular Baseline                                  0.5766   0.807  0.510 ║
+  ║  Gravity Baseline                                    0.5766   0.807  0.510 ║
+  ║  Hybrid Baseline                                     0.5766   0.807  0.510 ║
+  ║  Molecular Morse                                     0.5019     -      -   ║
+  ║  Gravity Morse                                       0.5019     -      -   ║
+  ║  Hybrid Morse                                        0.5019     -      -   ║
+  ║  RTD Morse alarm                                     0.4158     -      -   ║
+  ║  Molecular MFLS                                      0.2983   1.000  0.284 ║
+  ║  Gravity MFLS                                        0.2983   1.000  0.284 ║
+  ║  Hybrid MFLS                                         0.2983   1.000  0.284 ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+
+
+  Loading Economy...
+  Loaded: (948, 6), T=79, N=12
+
+================================================================================
+  U.S. Banking Economy (FRED)
+  Shape: (948, 6),  crisis: 108/948 (11.4%)
+================================================================================
+
+  ━━ STEP 1: Compute Reduced Tensor Descriptor D ━━
+    X: (948, 6) → D: (948, 12)  (0.8s)
+    Features: ['grad_norm', 'hessian_eig_0', 'hessian_eig_1', 'hessian_eig_2', 'hessian_eig_3', 'hessian_eig_4', 'hessian_eig_5', 'mahalanobis', 'medoid_dist', 'trace_H', 'det_sigma', 'morse_index']
+    Complexity: O(Nd + d^3) = O(840*6 + 6^3)  (vs O(N^2*d) = O(840^2*6))
+    Speedup: ~~N/d = ~840/6
+
+  ━━ STEP 2: Engines on D + BSDT variants + MFLS + Morse ━━
+
+  ── Molecular on Reduced Tensor D ──
+    Molecular engine score                                  AUC=0.9910  FAR=0.026  F1=0.879  7.6s
+    -- BSDT variants on D (via Molecular) --
+    Molecular E_BS                                          AUC=0.8062  FAR=0.860  F1=0.516
+    Molecular MFLS                                          AUC=0.5295  FAR=0.998  F1=0.345
+    Molecular Baseline                                      AUC=0.8495  FAR=0.825  F1=0.590
+    Molecular FullBSDT                                      AUC=0.7515  FAR=0.810  F1=0.394
+      Fisher VR weights: [0.0010, 0.0233, 0.1227, 0.8530]
+    Molecular QuadSurf                                      AUC=0.7329  FAR=1.000  F1=0.402
+    Molecular SignedFisher                                  AUC=0.7611  FAR=0.740  F1=0.394
+    Molecular ExpoGate                                      AUC=0.7329  FAR=1.000  F1=0.402
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9737   0.9799   1.01x
+      delta_G        0.2871   0.2346   0.82x
+      delta_A        0.5309   0.7854   1.48x
+      delta_T        0.4841   0.6796   1.40x
+    -- Morse alarm on D --
+    Molecular Morse alarm                                   AUC=0.4251  2.4s
+      Morse index — normal: 0.40  crisis: 0.23
+      Alarm rate  — normal: 0.354  crisis: 0.204
+    -- Conformal scoring --
+    Molecular Conformal                                     AUC=0.5877  FAR=0.961  F1=0.374  9.5s
+
+  ── Gravity on Reduced Tensor D ──
+    Gravity engine score                                    AUC=0.9520  FAR=0.196  F1=0.709  2.8s
+    -- BSDT variants on D (via Gravity) --
+    Gravity E_BS                                            AUC=0.8062  FAR=0.860  F1=0.516
+    Gravity MFLS                                            AUC=0.5295  FAR=0.998  F1=0.345
+    Gravity Baseline                                        AUC=0.8495  FAR=0.825  F1=0.590
+    Gravity FullBSDT                                        AUC=0.7515  FAR=0.810  F1=0.394
+      Fisher VR weights: [0.0010, 0.0233, 0.1227, 0.8530]
+    Gravity QuadSurf                                        AUC=0.7329  FAR=1.000  F1=0.402
+    Gravity SignedFisher                                    AUC=0.7611  FAR=0.740  F1=0.394
+    Gravity ExpoGate                                        AUC=0.7329  FAR=1.000  F1=0.402
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9737   0.9799   1.01x
+      delta_G        0.2871   0.2346   0.82x
+      delta_A        0.5309   0.7854   1.48x
+      delta_T        0.4841   0.6796   1.40x
+    -- Morse alarm on D --
+    Gravity Morse alarm                                     AUC=0.4251  1.5s
+      Morse index — normal: 0.40  crisis: 0.23
+      Alarm rate  — normal: 0.354  crisis: 0.204
+    -- Conformal scoring --
+    Gravity Conformal                                       AUC=0.7428  FAR=0.752  F1=0.453  2.1s
+
+  ── Hybrid on Reduced Tensor D ──
+    Hybrid engine score                                     AUC=0.9921  FAR=0.029  F1=0.880  10.3s
+    -- BSDT variants on D (via Hybrid) --
+    Hybrid E_BS                                             AUC=0.8062  FAR=0.860  F1=0.516
+    Hybrid MFLS                                             AUC=0.5295  FAR=0.998  F1=0.345
+    Hybrid Baseline                                         AUC=0.8495  FAR=0.825  F1=0.590
+    Hybrid FullBSDT                                         AUC=0.7515  FAR=0.810  F1=0.394
+      Fisher VR weights: [0.0010, 0.0233, 0.1227, 0.8530]
+    Hybrid QuadSurf                                         AUC=0.7329  FAR=1.000  F1=0.402
+    Hybrid SignedFisher                                     AUC=0.7611  FAR=0.740  F1=0.394
+    Hybrid ExpoGate                                         AUC=0.7329  FAR=1.000  F1=0.402
+      Channel        Normal   Crisis   Ratio
+      delta_C        0.9737   0.9799   1.01x
+      delta_G        0.2871   0.2346   0.82x
+      delta_A        0.5309   0.7854   1.48x
+      delta_T        0.4841   0.6796   1.40x
+    -- Morse alarm on D --
+    Hybrid Morse alarm                                      AUC=0.4251  1.4s
+      Morse index — normal: 0.40  crisis: 0.23
+      Alarm rate  — normal: 0.354  crisis: 0.204
+    -- Conformal scoring --
+    Hybrid Conformal                                        AUC=0.6913  FAR=0.858  F1=0.440  9.3s
+
+  ━━ STEP 3: ReducedTensorDescriptor Integrated Pipeline ━━
+    RTD fit_score (4-view fusion)                           AUC=0.9176  FAR=0.593  F1=0.770  1.0s
+    RTD desc.score (topology)                               AUC=0.8875  FAR=0.545  F1=0.629  0.4s
+
+  -- RTD score_variants (BSDT on raw X, Fisher VR) --
+    RTD baseline           AUC=0.7047  FAR=0.658  F1=0.315
+    RTD full_bsdt          AUC=0.8964  FAR=0.548  F1=0.640  w=[0.0657,0.3682,0.3323,0.2337]
+    RTD quadsurf           AUC=0.8217  FAR=1.000  F1=0.581  w=[0.0053,0.7842,0.1176,0.0928]
+    RTD signed_lr          AUC=0.8987  FAR=0.544  F1=0.658  w=[0.3460,-0.1438,0.8058,0.7272,0.5114]
+    RTD expo_gate          AUC=0.8217  FAR=1.000  F1=0.581
+
+  -- Morse Topology (raw X) --
+    RTD Morse alarm                                         AUC=0.4941
+    Index — normal: 0.32  crisis: 0.31
+    Alarm — normal: 0.299  crisis: 0.287
+
+  -- Conformal Scoring (distribution-free) --
+    α=0.05  detected=   26  TP=  26  FP=   0  prec=1.000  rec=0.241  F1=0.388
+    α=0.10  detected=   48  TP=  44  FP=   4  prec=0.917  rec=0.407  F1=0.564
+    α=0.20  detected=   84  TP=  61  FP=  23  prec=0.726  rec=0.565  F1=0.635
+    RTD Conformal (1 - p)                                   AUC=0.9145  FAR=0.506  F1=0.673  1.0s
+
+  ━━ STEP 4: Panel Scoring (cross-sectional + temporal) ━━
+    score_panel (quarter-level)                             AUC=0.8857  F1=0.800  (T=79)  1.0s
+    Crisis periods: 9/79  detected (>90th pctl): 7/9
+
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  SUMMARY: U.S. Banking Economy (FRED)                              ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Method                                                 AUC     FAR     F1 ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Hybrid engine score                                 0.9921   0.029  0.880 ║
+  ║  Molecular engine score                              0.9910   0.026  0.879 ║
+  ║  Gravity engine score                                0.9520   0.196  0.709 ║
+  ║  RTD fit_score (4-view fusion)                       0.9176   0.593  0.770 ║
+  ║  RTD Conformal (1 - p)                               0.9145   0.506  0.673 ║
+  ║  RTD signed_lr                                       0.8987   0.544  0.658 ║
+  ║  RTD full_bsdt                                       0.8964   0.548  0.640 ║
+  ║  RTD desc.score (topology)                           0.8875   0.545  0.629 ║
+  ║  RTD Panel                                           0.8857     -    0.800 ║
+  ║  Molecular Baseline                                  0.8495   0.825  0.590 ║
+  ║  Gravity Baseline                                    0.8495   0.825  0.590 ║
+  ║  Hybrid Baseline                                     0.8495   0.825  0.590 ║
+  ║  RTD expo_gate                                       0.8217   1.000  0.581 ║
+  ║  RTD quadsurf                                        0.8217   1.000  0.581 ║
+  ║  Molecular E_BS                                      0.8062   0.860  0.516 ║
+  ║  Gravity E_BS                                        0.8062   0.860  0.516 ║
+  ║  Hybrid E_BS                                         0.8062   0.860  0.516 ║
+  ║  Molecular SignedFisher                              0.7611   0.740  0.394 ║
+  ║  Gravity SignedFisher                                0.7611   0.740  0.394 ║
+  ║  Hybrid SignedFisher                                 0.7611   0.740  0.394 ║
+  ║  Molecular FullBSDT                                  0.7515   0.810  0.394 ║
+  ║  Gravity FullBSDT                                    0.7515   0.810  0.394 ║
+  ║  Hybrid FullBSDT                                     0.7515   0.810  0.394 ║
+  ║  Gravity Conformal                                   0.7428   0.752  0.453 ║
+  ║  Molecular QuadSurf                                  0.7329   1.000  0.402 ║
+  ║  Molecular ExpoGate                                  0.7329   1.000  0.402 ║
+  ║  Gravity QuadSurf                                    0.7329   1.000  0.402 ║
+  ║  Gravity ExpoGate                                    0.7329   1.000  0.402 ║
+  ║  Hybrid QuadSurf                                     0.7329   1.000  0.402 ║
+  ║  Hybrid ExpoGate                                     0.7329   1.000  0.402 ║
+  ║  RTD baseline                                        0.7047   0.658  0.315 ║
+  ║  Hybrid Conformal                                    0.6913   0.858  0.440 ║
+  ║  Molecular Conformal                                 0.5877   0.961  0.374 ║
+  ║  Molecular MFLS                                      0.5295   0.998  0.345 ║
+  ║  Gravity MFLS                                        0.5295   0.998  0.345 ║
+  ║  Hybrid MFLS                                         0.5295   0.998  0.345 ║
+  ║  RTD Morse alarm                                     0.4941     -      -   ║
+  ║  Molecular Morse                                     0.4251     -      -   ║
+  ║  Gravity Morse                                       0.4251     -      -   ║
+  ║  Hybrid Morse                                        0.4251     -      -   ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+
+================================================================================
+  DONE
+================================================================================
