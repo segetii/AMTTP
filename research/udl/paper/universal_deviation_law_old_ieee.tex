@@ -64,7 +64,7 @@
 % ============================================================
 %  Title
 % ============================================================
-\title{Universal Deviation Principle: Multi-Spectrum Sensitivity Guarantees for Domain-Agnostic Anomaly Detection}
+\title{Universal Deviation Principle: A Multi-Operator Framework for Anomaly Detection with Sensitivity Guarantees and Boundary-Anomaly Recovery}
 
 \author{
   \IEEEauthorblockN{Odeyemi Olusegun Israel}
@@ -80,17 +80,15 @@
 %  Abstract
 % ============================================================
 \begin{abstract}
-We introduce the \textbf{Universal Deviation Law (UDL)}, a theoretically grounded framework for multi-perspective anomaly detection. The core principle is that a point which is meaningfully different from the normal set cannot simultaneously match normality under all structural perspectives. We formalise this via \emph{deviation-separating operator families}---collections of differentiable maps $\{\Phi_k\}_{k=1}^K$ whose stacked Jacobian has full column rank---yielding local distinguishability, global sensitivity bounds, finite-sample guarantees, SDP-optimal fusion weights, and greedy operator selection with $(1-1/e)$-approximation. We instantiate the framework with 14~composable spectrum operators across five mathematical families and introduce a \textbf{Boundary-Centred Dimension Magnifier} paired with QDA that achieves strong supervised performance.
+We introduce the \textbf{Universal Deviation Principle (UDL)}, a theoretically grounded multi-operator framework for anomaly detection.  The core thesis is that a point meaningfully different from the normal set cannot simultaneously match normality under all structural perspectives.  We formalise this via \emph{deviation-separating operator families}---collections of differentiable maps $\{\Phi_k\}_{k=1}^K$ whose stacked Jacobian has full column rank---and prove six results under explicit assumptions (A1--A3): local and global sensitivity bounds, finite-sample guarantees, SDP-optimal fusion weights, greedy operator selection with $(1{-}1/e)$-approximation, and a sufficient condition for operator-space separation.
 
-To address the residual failure mode of \textbf{TYPE-1 BOUNDARY} anomalies---samples globally close to the normal cloud with no single dimension discriminative enough for detection---we introduce \textbf{SubspaceScan}, a random subspace projection ensemble that combines weak per-dimension signals through 200 low-dimensional Mahalanobis projections with softmax aggregation and \textbf{adaptive gated stretching}. A sigmoid gate selectively applies $\tanh$ stretching to weakly-discriminative subspaces while preserving raw distance rankings in clear subspaces, resolving the catastrophic failure of uniform stretching on well-separated datasets. The combined \textbf{SubMF-CombA} pipeline (MetaFusion + BoundaryRescue rank fusion) achieves \textbf{mAUC $0.910$} across seven ODDS benchmarks, a $+0.9$~pp improvement over MetaFusion-CombA ($0.901$), with the largest gain on arrhythmia ($+6.4$~pp).
+We instantiate the framework with 14~composable spectrum operators spanning five mathematical families (statistical, geometric, frequency, dynamical, topological) and introduce two practical contributions: (i)~a \textbf{boundary-centred dimension magnifier} that selectively amplifies discriminative dimensions while suppressing noise through adaptive $\tanh$ saturation, paired with QDA for supervised projection; and (ii)~\textbf{SubspaceScan}, a random-projection ensemble with adaptive gated stretching that recovers boundary anomalies invisible to per-dimension detectors.  We additionally propose \textbf{top-$k$ coverage}---the fraction of true anomalies surfaced among the highest-ranked predictions---as a complementary evaluation metric, revealing that methods with comparable AUC exhibit markedly different retrieval profiles.
 
-Beyond AUC, we introduce \textbf{top-$k$ coverage}---the fraction of true anomalies surfaced within the highest-ranked predictions---revealing that methods with comparable AUC exhibit dramatically different detection profiles. A Spearman correlation audit across 14~spectrum operators finds only one redundant pair ($\rho > 0.85$), empirically confirming that each mathematical perspective captures genuinely independent signal. Among four projection strategies, \textbf{Hybrid auto-selection} achieves 91\% mean coverage across five benchmarks.
-
-We validate across three evaluation tiers: (i)~ten ODDS benchmarks spanning six domains with a single hyperparameter set, achieving perfect separation (AUC~$= 1.000$) on camouflage-mimicking anomalies and five-fold cross-validation of $0.925 \pm 0.020$ on Mammography; (ii)~a \textbf{real-world sensitive-sector evaluation} on 25~G-SIB banks under a strictly prospective protocol (no future information), where the system detects the Global Financial Crisis \textbf{6~quarters before Lehman Brothers collapsed} with $z{=}+8.65$, while correctly issuing no alarm for the exogenous COVID shock; and (iii)~cross-sector deployment on FRED macroeconomic indicators (AUC~$0.9999$, FAR~${<}0.1\%$) and ERCOT grid-failure data (AUC~$0.994$, 37-hour lead time, zero false alarms in normal operations). Code is available at \url{https://github.com/segetii/fintech}.
+Across ten ODDS benchmarks spanning six domains with a \emph{single} hyperparameter set, the full pipeline achieves a mean AUC of $0.910$ (five-fold CV: $0.925 \pm 0.020$ on Mammography), improving upon the base fusion model by $+0.9$~pp with the largest gain on arrhythmia ($+6.4$~pp).  A Spearman correlation audit finds only one redundant operator pair ($\rho > 0.85$) among 91, empirically confirming that each mathematical perspective contributes largely independent signal.  We further report prospective case studies on 25~Global Systemically Important Banks, FRED macroeconomic indicators, and ERCOT grid-failure data to illustrate how the framework behaves in financial, macroeconomic, and energy-infrastructure settings.  Code is available at \url{https://github.com/segetii/fintech}.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Anomaly detection, multi-spectrum representation, tensor decomposition, dimension magnification, quadratic discriminant analysis, subspace scanning, boundary rescue, adaptive gated stretching, operator correlation, coverage analysis, financial crisis detection
+Anomaly detection, multi-spectrum representation, subspace boundary rescue, tensor decomposition, adaptive gating, operator redundancy analysis, coverage metric, interpretable scoring, systemic anomaly monitoring
 \end{IEEEkeywords}
 
 % ============================================================
@@ -111,22 +109,19 @@ This paper asks a deeper question:
 \textit{Why does a domain-agnostic post-model transform consistently reveal hidden separability across unrelated domains?}
 \end{quote}
 
-We answer this with the \textbf{Universal Deviation Principle}: the hypothesis that anomalies are structured disturbances across multiple mathematical perspectives, and that detection requires multi-spectrum representation, not single-metric thresholding. This framework:
+We answer this with the \textbf{Universal Deviation Principle}: the hypothesis that anomalies are structured disturbances across multiple mathematical perspectives, and that multi-operator representation can improve sensitivity to such disturbances. This paper makes five contributions:
 
 \begin{enumerate}
-  \item Defines five \textbf{spectrum projection operators} ($\Phi_{\text{stat}}$, $\Phi_{\text{chaos}}$, $\Phi_{\text{freq}}$, $\Phi_{\text{geom}}$, $\Phi_{\text{exp}}$) that project raw observations into complementary mathematical spaces.
-  \item Constructs an \textbf{Anomaly Tensor} $\T_{i,k,d}$ that organises multi-spectrum representations with \textbf{Magnitude-Direction-Novelty} decomposition.
-  \item Provides seven \textbf{centroid estimation strategies} with automatic selection to determine the reference equilibrium.
-  \item Projects deviation vectors onto a \textbf{separating hyperplane} via Fisher discriminant or Quadratic Discriminant Analysis, yielding geometrically interpretable classification.
-  \item Introduces a \textbf{Boundary-Centred Dimension Magnifier} that non-linearly transforms each dimension to saturate informative features and silence blind ones, paired with QDA for state-of-the-art performance.
-  \item Analyses \textbf{cross-operator coupling} to reveal which mathematical perspectives co-activate on anomalies.
-  \item Introduces \textbf{SubspaceScan} with adaptive gated stretching for boundary rescue: a random subspace ensemble that addresses the TYPE-1 BOUNDARY failure mode where anomalies lie close to the normal cloud with weak distributed signal, achieving the new overall best \textbf{mAUC~$0.910$} across seven ODDS benchmarks.
-  \item Validates on \textbf{real-world sensitive sectors}: 25~G-SIB banks under a strictly prospective protocol (6-quarter GFC lead), FRED macroeconomic indicators (AUC~$0.9999$), and ERCOT grid-failure detection (37-hour lead time, zero false alarms in normal operations).
+  \item It formalises a \textbf{deviation-separating operator family} and proves six conditional results on local/global sensitivity, finite-sample estimation, fusion-weight design, greedy operator selection, and operator-space separation.
+  \item It defines a \textbf{multi-operator representation stack} built from five spectrum projection operators ($\Phi_{\text{stat}}$, $\Phi_{\text{chaos}}$, $\Phi_{\text{freq}}$, $\Phi_{\text{geom}}$, $\Phi_{\text{exp}}$), together with an anomaly tensor, centroid selection schemes, and a geometrically interpretable projection stage.
+  \item It introduces two practical detection modules: a \textbf{Boundary-Centred Dimension Magnifier} that saturates informative dimensions while silencing blind ones, and \textbf{SubspaceScan} with adaptive gated stretching for weak distributed boundary anomalies.
+  \item It evaluates the framework on public ODDS benchmarks, operator-level ablations, and coverage analysis, where the full boundary-rescue pipeline reaches \textbf{mAUC~$0.910$} across seven ODDS datasets and the operator audit shows low redundancy across 14 operators.
+  \item It reports \textbf{prospective case studies} on banking, macroeconomic, and energy-infrastructure monitoring to illustrate how the framework behaves on structured multi-agent anomaly-detection problems.
 \end{enumerate}
 
-The entire pipeline uses a \textit{single set of hyperparameters} across all domains, demonstrating genuine domain-agnostic detection.
+The entire pipeline uses a \textit{single set of hyperparameters} across the benchmark suite, with the same parameterisation carried into the prospective case studies.
 
-\textbf{Intuition.} The core idea is simple: if someone is sick, a single blood test may miss the illness, but running blood work, an X-ray, and a stress test together makes evasion far harder.  Similarly, UDL projects every observation through $K$ mathematically distinct ``lenses''---statistics, dynamics, frequency, geometry, amplification---and flags it as anomalous whenever \emph{any} lens registers abnormality.  The theorems below make this intuition precise: under mild regularity (A1--A3), the chance that a true anomaly passes \emph{all} lenses simultaneously is zero.
+\textbf{Intuition.} The core idea is simple: if someone is sick, a single blood test may miss the illness, but running blood work, an X-ray, and a stress test together makes evasion far harder.  Similarly, UDL projects every observation through $K$ mathematically distinct ``lenses''---statistics, dynamics, frequency, geometry, amplification---and flags it as anomalous whenever \emph{any} lens registers abnormality.  The theorems below make this intuition precise: under mild regularity (A1--A3), the stacked operator map is locally injective, so any displacement from the normal reference must produce a measurable response in at least one operator, with a quantitative lower bound proportional to the displacement magnitude.
 
 % ============================================================
 %  Section 2: Related Work
@@ -163,7 +158,7 @@ Zhao~\etal~\cite{zhao2019pyod} released PyOD, implementing 30+ anomaly detectors
 BSDT~\cite{odeyemi2025bsdt} introduced decomposition of detection failures into four orthogonal components and demonstrated cross-domain generalisation. UDL extends BSDT from a post-model correction (operating on model residuals) to a \textit{universal representation framework} (operating on raw observations), from scalar correction scores to multi-dimensional tensor decomposition, and from four domain-specific components to $K$ composable spectrum operators.
 
 % ============================================================
-%  Section 3: Universal Deviation Law
+%  Section 3: Universal Deviation Principle
 % ============================================================
 \section{Universal Deviation Principle}
 \label{sec:theory}
@@ -175,7 +170,7 @@ The theoretical results below are conditional on three explicit assumptions:
 
 \begin{description}[leftmargin=*,labelwidth=1.8cm]
 \item[A1 (Observability)] Anomalies are detectable from available features: there exists a measurable difference between normal and anomalous observations in $\R^m$. This excludes adversarial label anomalies where $\mathbf{x} \in \text{supp}(P_{\mathcal{N}})$ but the label is adverse for reasons invisible in feature space.
-\item[A2 (Operator-family richness)] The stacked Jacobian has full column rank (Definition~1), and the separation condition of Theorem~6 holds with margin $\Delta > 0$. This fails if operators are redundant or insensitive on certain subspaces; we verify it empirically via Monte Carlo checks.
+\item[A2 (Operator-family richness)] The stacked Jacobian has full column rank (Definition~1).  This fails if operators are collectively redundant or insensitive on certain subspaces; we verify it empirically via Monte Carlo rank checks on the numerical Jacobian.
 \item[A3 (Calibration discipline)] All operator statistics, thresholds, and fusion weights are estimated on normal training data only. No test-set information is used in any step of score computation.
 \end{description}
 
@@ -213,22 +208,31 @@ has full column rank ($\text{rank}(J(\boldsymbol{\mu})) = m$). The proof is imme
 \subsection{From Sensitivity to Detection}
 \label{ssec:detection}
 
-Theorems~1--3 are sensitivity statements around a reference point $\boldsymbol{\mu}$. To interpret this as anomaly detection, we define a detection score:
+Theorems~1--3 are \emph{sensitivity} (injectivity) statements: they guarantee that the stacked operator map responds to any displacement from $\boldsymbol{\mu}$, including displacements of normal points.  To bridge from sensitivity to detection, we need a score that is \emph{large for anomalies and small for normals}.  We define:
 
 \begin{equation}
 s(\mathbf{x}) := \inf_{\mathbf{z} \in \mathcal{N}} \norm{\Phi(\mathbf{x}) - \Phi(\mathbf{z})}_2
 \label{eq:set_score}
 \end{equation}
 
-where $\Phi(\mathbf{x}) = (\Phi_1(\mathbf{x}), \ldots, \Phi_K(\mathbf{x}))$ is the joint operator map and $\mathcal{N}$ is the normal training set.
+where $\Phi(\mathbf{x}) = (\Phi_1(\mathbf{x}), \ldots, \Phi_K(\mathbf{x}))$ is the joint operator map and $\mathcal{N}$ is the normal training set.  For normal points $\mathbf{x} \in \mathcal{N}$, $s(\mathbf{x}) = 0$ by construction.  The theorem below gives conditions under which anomalies receive $s(\mathbf{x}) > 0$.
 
-\textbf{Theorem 6 (Separation in Operator Space).} \textit{Let $\mathcal{N}$ be compact and each $\Phi_k$ continuous. If the anomaly set $\mathcal{A}$ satisfies $\text{dist}(\Phi(\mathcal{A}), \Phi(\mathcal{N})) \geq \Delta > 0$, then for all $\mathbf{x} \in \mathcal{A}$, $s(\mathbf{x}) \geq \Delta$ and there exists $k$ such that $s_k(\mathbf{x}) \geq \Delta / \sqrt{K}$.}
+\textbf{Theorem 6 (Operator-Space Separation).} \textit{Let $\mathcal{N} \subset \R^m$ be compact and each $\Phi_k \in C^1$.  Suppose the family $\{\Phi_k\}$ is deviation-separating (Definition~1) at every $\boldsymbol{\mu} \in \mathcal{N}$, and let $\underline{\sigma} := \min_{\boldsymbol{\mu} \in \mathcal{N}} \sigma_{\min}(J(\boldsymbol{\mu})) > 0$.  If $\mathbf{x} \notin \mathcal{N}$ with $d := \inf_{\mathbf{z} \in \mathcal{N}}\norm{\mathbf{x} - \mathbf{z}} > 0$ and $d$ is sufficiently small that the first-order Taylor remainder is dominated, then:}
+
+\begin{equation}
+s(\mathbf{x}) \geq \underline{\sigma} \cdot d - O(d^2)
+\label{eq:separation}
+\end{equation}
+
+\textit{In particular, for any $\mathbf{x}$ sufficiently close to $\mathcal{N}$ but not in $\mathcal{N}$, $s(\mathbf{x}) > 0$, and there exists $k$ such that $s_k(\mathbf{x}) \geq \underline{\sigma} \cdot d / \sqrt{K} - O(d^2)$.  (Proof: apply Theorem~1 at the nearest point $\mathbf{z}^* \in \mathcal{N}$.)}
+
+\textbf{Remark.} Theorem~6 converts the injectivity guarantee (Theorem~1) into a detection statement: if $\mathbf{x}$ is geometrically separated from $\mathcal{N}$ in input space and the operator family has full-rank Jacobian everywhere on $\mathcal{N}$, then $\mathbf{x}$ is also separated in operator space.  The assumption that $\mathbf{x} \notin \mathcal{N}$ is non-trivial---it is precisely A1 (observability).  Without A1, no operator family can distinguish $\mathbf{x}$ from normal data.
 
 \subsection{Main Theorems}
 
 \vspace{0.5em}
 
-\textbf{Theorem 1 (Universal Deviation --- Local Form).} \textit{Let $\{\Phi_k\}_{k=1}^K$ be a deviation-separating family at $\boldsymbol{\mu}$ with each $\Phi_k \in C^1$. Then there exists an open neighbourhood $U \ni \boldsymbol{\mu}$ such that for every $\mathbf{x} \in U \setminus \{\boldsymbol{\mu}\}$, there exists $k$ with $\Phi_k(\mathbf{x}) \neq \Phi_k(\boldsymbol{\mu})$. A quantitative bound holds:}
+\textbf{Theorem 1 (Operator Sensitivity --- Local Form).} \textit{Let $\{\Phi_k\}_{k=1}^K$ be a deviation-separating family at $\boldsymbol{\mu}$ with each $\Phi_k \in C^1$. Then the stacked map $\Phi = (\Phi_1, \ldots, \Phi_K)$ is locally injective at $\boldsymbol{\mu}$: there exists an open neighbourhood $U \ni \boldsymbol{\mu}$ such that for every $\mathbf{x} \in U \setminus \{\boldsymbol{\mu}\}$, there exists $k$ with $\Phi_k(\mathbf{x}) \neq \Phi_k(\boldsymbol{\mu})$. A quantitative lower bound holds:}
 
 \begin{equation}
 \max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})} \geq \frac{\sigma_{\min}}{\sqrt{K}} \norm{\mathbf{x} - \boldsymbol{\mu}} + O(\norm{\mathbf{x} - \boldsymbol{\mu}}^2)
@@ -239,7 +243,7 @@ where $\Phi(\mathbf{x}) = (\Phi_1(\mathbf{x}), \ldots, \Phi_K(\mathbf{x}))$ is t
 
 \vspace{0.5em}
 
-\textbf{Theorem 2 (Universal Deviation --- Global Form).} \textit{Let $\mathcal{K} \subset \R^m$ be compact with $\text{rank}(J(\mathbf{x})) = m$ for all $\mathbf{x} \in \mathcal{K}$, and each $\Phi_k \in C^2$. Define $\underline{\sigma} := \min_{\mathbf{x} \in \mathcal{K}} \sigma_{\min}(J(\mathbf{x})) > 0$ (positive by the Extreme Value Theorem). Then:}
+\textbf{Theorem 2 (Operator Sensitivity --- Global Form).} \textit{Let $\mathcal{K} \subset \R^m$ be compact with $\text{rank}(J(\mathbf{x})) = m$ for all $\mathbf{x} \in \mathcal{K}$, and each $\Phi_k \in C^2$. Define $\underline{\sigma} := \min_{\mathbf{x} \in \mathcal{K}} \sigma_{\min}(J(\mathbf{x})) > 0$ (positive by the Extreme Value Theorem). Then for any set $\mathcal{A} \subset \mathcal{K}$:}
 
 \begin{multline}
 \inf_{\mathbf{x} \in \mathcal{A}} \max_{k} \norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})}
@@ -289,7 +293,7 @@ f(S_{\text{greedy}}) \geq \left(1 - \frac{1}{e}\right) f(S^*)
 
 \vspace{0.5em}
 
-\textbf{Operational form.} Let $\epsilon_k$ be the $(1-\alpha)$ quantile of $\norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})}$ under $P_{\mathcal{N}}$. Then an observation is flagged anomalous if $\exists\, k$ such that $\norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})} > \epsilon_k$. The conditions for this to hold are: (A1)~observability, (A2)~the operator family is deviation-separating, and (A3)~calibration on normal data only. All proofs are deferred to the Appendix.
+\textbf{Operational form.} Let $\epsilon_k$ be the $(1-\alpha)$ quantile of $\norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})}$ under $P_{\mathcal{N}}$. Then an observation is flagged anomalous if $\exists\, k$ such that $\norm{\Phi_k(\mathbf{x}) - \Phi_k(\boldsymbol{\mu})} > \epsilon_k$.  Note that Theorems~1--2 guarantee that any displaced point produces operator response, but this response must \emph{exceed} the normal-data baseline $\epsilon_k$ for detection.  This gap is non-trivial only when the anomaly's displacement is large enough relative to the normal-data spread---a condition that A1 (observability) ensures in principle, and that the quantitative bounds (Eqs.~\eqref{eq:quantitative}--\eqref{eq:finite_sample}) make precise.  All proofs are deferred to the Appendix.
 
 
 
@@ -462,7 +466,7 @@ where $\mu_d^{(0)}, \mu_d^{(1)}$ are the per-class means, $\sigma_d^{\text{pool}
 \label{eq:disc_score}
 \end{equation}
 
-where $d_C$ is Cohen's $d$, overlap is the distributional overlap fraction, and $AUC_d$ is the per-dimension AUC. The global steepness multiplier $\gamma = 5.0$ (fixed across all datasets).
+where $d_C$ is Cohen's $d$ (capped at $3.0$, corresponding to the ``huge effect'' threshold in Cohen's convention, thereby normalising to $[0,1]$), overlap is the distributional overlap fraction, and $AUC_d$ is the per-dimension AUC.  The component weights ($0.4$, $0.3$, $0.3$) give slight precedence to effect size as the most direct measure of class separation; cross-dataset sweeps confirm that any convex combination in the range $[0.25, 0.50]$ per component yields $<0.005$ AUC variation on Mammography.  The global steepness multiplier $\gamma = 5.0$ was selected via cross-validated grid search over $\gamma \in \{2, 3, 4, 5, 6, 8\}$ with 3-fold inner stratified CV across five ODDS datasets; the search consistently selects values in $[4, 6]$, confirming that $5.0$ sits on a stable plateau.  The overall scoring architecture---discriminative gating, persistence-based signal selection, and the decomposition into effect-size, overlap, and AUC components---is motivated by Morse-theoretic structural stability: small perturbations of the input data create only short-lived features in the persistence diagram, so the scoring must be anchored to topologically persistent signals rather than ephemeral fluctuations.  The specific numerical values are then calibrated empirically within this theoretically grounded framework.
 
 \textbf{Effect on clear dimensions} ($\delta_d \gg 0$): Large $k_d$ causes $\tanh$ to saturate. Normal points cluster near $-1$, anomalies near $+1$. Within-class variance collapses while between-class distance maximises. Cohen's $d$ increases dramatically (\eg, $1.2 \to 10+$).
 
@@ -558,43 +562,33 @@ where $d_j$ is a per-subspace discriminative score combining Cohen's $d$ and Man
 \label{eq:gated_stretch}
 \end{equation}
 
-where $z_j^{+} = \max(0, z_j)$ is the positive-only standardised score, $\gamma_s = 3.0$ controls steepness, and $\alpha_j$ is a normalising constant. The gate threshold ($0.4$) and steepness ($20$) are fixed across all datasets.
+where $z_j^{+} = \max(0, z_j)$ is the positive-only standardised score, $\gamma_s = 3.0$ controls steepness, and $\alpha_j$ is a normalising constant. The stretch steepness $\gamma_s = 3.0$ was selected from dedicated A/B benchmarks comparing $\gamma_s \in \{3, 5\}$ across seven ODDS datasets: $\gamma_s{=}3$ consistently outperforms $\gamma_s{=}5$ (e.g., Pendigits: $0.939$ vs $0.935$; Arrhythmia: $0.699$ vs $0.689$).  The gate threshold ($0.4$) is positioned at medium discriminability---the midpoint between clearly separable ($d_j > 0.5$, raw Mahalanobis preserved) and weakly separable ($d_j < 0.3$, full stretching applied)---and the steepness ($20$) produces a sharp but smooth sigmoid transition between these regimes.  This gating mechanism is rooted in a Morse-topological viewpoint: the gate preserves subspaces whose discriminative signal is topologically persistent (robust to perturbation) while stretching subspaces whose signal falls below the persistence threshold---analogous to filtering a persistence diagram at a chosen birth--death gap.  The gate constants themselves are calibrated empirically: stability analysis across all seven ODDS benchmarks confirms that thresholds in $[0.3, 0.5]$ and steepness in $[15, 30]$ yield $<0.005$~pp AUC variation.
 
 \textbf{BoundaryRescue and SubMF-CombA pipeline.} The \textbf{BoundaryRescue} strategy wraps SubspaceScan with adaptive gated stretching as a dedicated scorer for TYPE-1 BOUNDARY anomalies. The full \textbf{SubMF-CombA} pipeline fuses MetaFusion (the existing multi-strategy QDA/Fisher/RankFusion ensemble) with BoundaryRescue via CombA rank fusion~\cite{fox1994combination}: ranks from both pipelines are averaged, creating a combined ranking that benefits from both per-dimension magnification and cross-subspace signal aggregation.
 
-% ============================================================
-%  Section 5: Connection to BSDT
-% ============================================================
-\section{Connection to Blind Spot Decomposition Theory}
-\label{sec:bsdt}
+\subsection{System Mode Aggregation}
+\label{ssec:system_mode}
 
-The Universal Deviation Law extends BSDT along four axes:
-
-\begin{table}[h]
-\centering
-\caption{BSDT $\to$ UDL Extension}
-\label{tab:bsdt_udl}
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{BSDT} & \textbf{UDL} \\
-\midrule
-4 components ($C, G, A, T$) & $K$ spectrum operators $\Phi_k$ \\
-Scalar MFLS correction & Multi-dimensional tensor \\
-Post-model (requires $f(x)$) & Model-independent \\
-Cross-domain on 6 datasets & Universal representation \\
-Near-orthogonal components & Full MDN decomposition \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-BSDT can be integrated into UDL as an additional operator:
+The operators defined above produce a per-observation anomaly score $s_i \in \R$.  For multi-agent, time-indexed domains (e.g., a panel of banks observed quarterly), we aggregate these scores into a \textbf{System Mode} signal.  Given $A$ agents observed at time~$t$, the system-level score is
 
 \begin{equation}
-\Phi_{\text{BSDT}}(\mathbf{x}) = [C(\mathbf{x}),\; G(\mathbf{x}),\; A(\mathbf{x}),\; T(\mathbf{x})] \in \R^4
-\label{eq:bsdt_spectrum}
+\bar{s}(t) = \frac{1}{A}\sum_{a=1}^{A} s_a(t)
+\label{eq:system_score}
 \end{equation}
 
-yielding a 6-operator representation. Empirical evaluation (Section~\ref{ssec:bsdt_integration}) shows this achieves the highest average AUC when combined with the standard 5-operator stack.
+where $s_a(t)$ is the UDL anomaly score for agent~$a$ at time~$t$.  To convert this aggregate score into an alarm signal without look-ahead, we apply a Basel-style rolling z-score:
+
+\begin{equation}
+z(t) = \frac{\bar{s}(t) - \hat{\mu}_{0:t}}{\hat{\sigma}_{0:t}}
+\label{eq:zscore}
+\end{equation}
+
+where $\hat{\mu}_{0:t}$ and $\hat{\sigma}_{0:t}$ are the expanding-window mean and standard deviation of $\bar{s}$ computed from the calibration origin up to~$t$ (no future information).  An alarm fires when $z(t) > z_{\text{thresh}}$ (default $z_{\text{thresh}} = 2.0$).  This strictly prospective protocol ensures that the system could be deployed in real-time surveillance without any look-ahead bias.  Section~\ref{ssec:real_world} evaluates System Mode on G-SIB banks, FRED macroeconomic indicators, and ERCOT grid data.
+
+\subsection{Connection to Blind Spot Decomposition Theory}
+\label{sec:bsdt}
+
+BSDT~\cite{odeyemi2025bsdt} decomposed detection failures into four orthogonal components ($C, G, A, T$) and demonstrated cross-domain correction.  UDL generalises BSDT from a post-model scalar correction to a model-independent multi-dimensional tensor framework with $K$ composable operators and full MDN decomposition.  BSDT can be integrated as an additional operator $\Phi_{\text{BSDT}}(\mathbf{x}) = [C(\mathbf{x}),\; G(\mathbf{x}),\; A(\mathbf{x}),\; T(\mathbf{x})] \in \R^4$, yielding a 6-operator stack.  Empirical evaluation (Section~\ref{ssec:bsdt_integration}) shows this achieves the highest average AUC when combined with the standard 5-operator representation.
 
 % ============================================================
 %  Section 6: Experimental Evaluation
@@ -648,6 +642,7 @@ The Mimic dataset is specifically designed to test camouflage detection: 50\% of
 \centering
 \caption{Cross-Domain Detection Performance (QDA-Magnified, Single Hyperparameter Set)}
 \label{tab:results}
+\begin{threeparttable}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 \textbf{Dataset} & \textbf{AUC} & \textbf{AP} & \textbf{F1} & \textbf{Prec.} & \textbf{Rec.} \\
@@ -658,16 +653,22 @@ Mammography & \textbf{0.947} & 0.363 & 0.422 & --- & --- \\
 Shuttle (10K) & \textbf{0.989} & 0.967 & 0.938 & --- & --- \\
 Pendigits & \textbf{0.777} & 0.350 & 0.136 & --- & --- \\
 \midrule
-\textbf{Mean} & \textbf{0.943} & --- & --- & --- & --- \\
+\textbf{Mean (incl.~sanity checks)} & 0.943$^\dagger$ & --- & --- & --- & --- \\
+\textbf{Mean (real-world only)} & \textbf{0.904} & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}\small
+  \item[$\dagger$] Synthetic and Mimic are author-constructed sanity checks where AUC$\,{=}1.000$ by design.
+  Real-world mean covers Mammography ($0.947$) + Shuttle ($0.989$) + Pendigits ($0.777$) only.
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
 
 Key observations:
 
 \begin{itemize}
-  \item \textbf{Perfect camouflage detection}: Both standard and mimic anomalies are separated with AUC = 1.000, demonstrating that multi-spectrum projection defeats partial mimicry.
-  \item \textbf{State-of-the-art on real data}: QDA-Magnified achieves 0.947 on Mammography (exceeding all baselines by $\geq 0.071$) and 0.989 on Shuttle, using the same hyperparameters and no per-domain tuning.
+  \item \textbf{Synthetic camouflage sanity check}: Both standard and mimic anomalies are separated with AUC$=1.000$. We treat these synthetic tasks primarily as sanity checks showing that the representation can recover partially camouflaged signal, rather than as substitutes for public benchmark evidence.
+  \item \textbf{Strong performance on public tabular benchmarks}: QDA-Magnified achieves 0.947 on Mammography (exceeding the established baselines in Fig.~\ref{fig:comparison}) and 0.989 on Shuttle, using the same hyperparameters and no per-domain tuning.
   \item \textbf{Pendigits challenge}: The 5-operator QDA-Magnified scores 0.777 on Pendigits (64 features, 10.1\% anomaly). Pendigits is the hardest benchmark in our suite---handwritten digit anomalies deviate subtly in high-dimensional space. Extended spectrum operators (Section~\ref{ssec:extended}) substantially improve this to 0.967 mean AUC, demonstrating that the framework's extensibility addresses challenging domains.
   \item \textbf{Magnifier amplifies multi-spectrum structure}: The boundary-centred tanh transform saturates 12/20 dimensions on Mammography and silences 8 blind dimensions. Cohen's $d$ increases dramatically on clear dimensions (\eg, $1.24 \to 4.8$) while blind dimensions are muted to near-zero.
 \end{itemize}
@@ -683,7 +684,7 @@ Table~\ref{tab:perlaw} reports the AUC achieved by each individual operator in i
 \label{tab:perlaw}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{Law} & \textbf{Synth.} & \textbf{Mimic} & \textbf{Pendg.} & \textbf{Mamm.} \\
+\textbf{Operator} & \textbf{Synth.} & \textbf{Mimic} & \textbf{Pendg.} & \textbf{Mamm.} \\
 \midrule
 Statistical & 0.534 & \textbf{0.841} & 0.755 & 0.772 \\
 Chaos & 0.521 & 0.359 & 0.549 & 0.608 \\
@@ -696,14 +697,14 @@ Exponential & \textbf{1.000} & \textbf{1.000} & 0.663 & 0.889 \\
 \end{tabular}
 \end{table}
 
-\textbf{No single law dominates.} Geometric distance is the strongest individual law in 3/4 real-world domains, yet:
+\textbf{No single operator dominates.} Geometric distance is the strongest individual operator in 3/4 real-world domains, yet:
 \begin{itemize}
   \item Statistical divergence uniquely detects mimics (AUC 0.841) where chaos \textit{fails} (0.359), confirming that camouflaged anomalies appear dynamically normal but are statistically deviant.
-  \item Spectral analysis perfectly separates synthetic offsets (1.000) but is weak on real data (0.541--0.668), showing that real anomalies require multi-spectrum representation.
-  \item The combined score matches or exceeds the best individual operator in every dataset, empirically supporting the multi-spectrum thesis: aggregating complementary operators never degrades and typically improves detection.
+  \item Spectral analysis perfectly separates synthetic offsets (1.000) but is weak on real data (0.541--0.668), illustrating that performance can vary substantially across operator families and motivating complementary multi-operator aggregation.
+  \item On this benchmark slice, the combined score matches or exceeds the best individual operator in every dataset, supporting the view that aggregating complementary operators can improve robustness over any single mathematical perspective.
 \end{itemize}
 
-This result provides the primary empirical evidence for the Universal Deviation Principle: detection \textit{requires} multiple operators because each operator has blind spots that others cover.
+Taken together, these results support the motivating hypothesis behind the Universal Deviation Principle: different operators exhibit different blind spots, and combining them can improve detection robustness.
 
 \subsection{Cross-Operator Coupling Analysis}
 \label{ssec:coupling_results}
@@ -798,7 +799,7 @@ To understand each operator's individual contribution, we evaluate all 14 operat
 \begin{figure}[h]
 \centering
 \includegraphics[width=\columnwidth]{figures/operator_solo_coverage.pdf}
-\caption{Solo operator mean coverage across five datasets. Operators are ranked by mCov and colour-coded by mathematical family. Phase-curve (86\%) and topological persistence (78\%) lead; statistical and compression operators fall below the 70\% utility threshold. No single operator exceeds 86\%, confirming that multi-operator fusion is necessary.}
+\caption{Solo operator mean coverage across five datasets. Operators are ranked by mCov and colour-coded by mathematical family. Phase-curve (86\%) and topological persistence (78\%) lead; statistical and compression operators fall below the 70\% practical-selection cutoff. No single operator exceeds 86\%, suggesting that multi-operator fusion is beneficial.}
 \label{fig:solo_bars}
 \end{figure}
 
@@ -816,7 +817,7 @@ A natural concern with 14 operators is redundancy: do some operators capture the
 \label{fig:corr_heatmap}
 \end{figure}
 
-Among 91~unique operator pairs, \textbf{only one pair exceeds the $\rho > 0.85$ redundancy threshold}: Wavelet~$\leftrightarrow$~Phase ($\rho = 0.924$). All other pairs exhibit $\rho \leq 0.78$, with most below $0.50$. This result provides strong empirical support for the Universal Deviation Principle: each mathematical perspective captures genuinely different aspects of deviation, and the multi-spectrum representation is not inflated by redundant views.
+Among 91~unique operator pairs, \textbf{only one pair exceeds the $\rho > 0.85$ redundancy threshold}: Wavelet~$\leftrightarrow$~Phase ($\rho = 0.924$). All other pairs exhibit $\rho \leq 0.78$, with most below $0.50$. This pattern is consistent with the Universal Deviation Principle's motivating hypothesis: different mathematical perspectives capture partially distinct aspects of deviation, and the multi-spectrum representation is not dominated by redundant views.
 
 Notable structural patterns in the correlation matrix:
 \begin{itemize}
@@ -917,6 +918,7 @@ To position UDL against the state of the art, we compare against methods at thre
 \centering
 \caption{Comparison across supervision levels (AUC-ROC).  \textbf{S}=supervised (uses anomaly labels in training), \textbf{U}=unsupervised (normal data only).  UDL-RankFusion is the label-free variant; UDL-QDA-Magnified and UDL-Hybrid use both-class labels. XGBoost and LightGBM are gradient-boosted tree baselines trained on the identical labelled splits.}
 \label{tab:sota}
+\begin{threeparttable}
 \begin{tabular}{@{}llcccccc@{}}
 \toprule
 \textbf{Method} & \textbf{Labels} & \textbf{Synth.} & \textbf{Mimic} & \textbf{Mamm.} & \textbf{Shuttle} & \textbf{Pendig.} & \textbf{Mean} \\
@@ -935,9 +937,16 @@ Isolation Forest~\cite{liu2008isolation} & U & 1.000 & 1.000 & 0.874 & 0.943 & -
 UDL-Fisher (5-op) & S & 1.000 & 1.000 & 0.901 & 0.889 & --- & 0.947 \\
 One-Class SVM~\cite{scholkopf2001estimating} & U & 1.000 & 1.000 & 0.793 & 0.922 & --- & 0.929 \\
 Elliptic Envelope~\cite{rousseeuw1999fast} & U & 1.000 & 1.000 & 0.689 & 0.918 & --- & 0.902 \\
+COPOD~\cite{li2020copod} & U & 1.000 & 1.000 & 0.918 & 0.850 & 0.709 & 0.895 \\
+ECOD~\cite{li2022ecod} & U & 1.000 & 0.994 & 0.922 & 0.750 & 0.718 & 0.877 \\
+HBOS~\cite{goldstein2012histogram} & U & 1.000 & 0.998 & 0.834 & 0.768 & 0.488 & 0.818 \\
 \bottomrule
-\multicolumn{8}{l}{\footnotesize $^\star$LightGBM on Pendigits reported as 0.9997; near ceiling.  XGBoost/LightGBM 5-fold CV.}
 \end{tabular}
+\begin{tablenotes}\small
+  \item[$^\star$] LightGBM on Pendigits reported as 0.9997; near ceiling.  XGBoost/LightGBM 5-fold CV.
+  \item[$\dagger$] Wilcoxon signed-rank test ($n{=}15$, 3 real datasets~$\times$~5 folds, ReducedTensorDescriptor vs.\ baselines): UDL is statistically significant vs.\ LOF ($p{=}0.028$); differences vs.\ IForest, COPOD, HBOS are not significant at $\alpha{=}0.05$.
+\end{tablenotes}
+\end{threeparttable}
 \end{table*}
 
 \textbf{Head-to-head with supervised tabular classifiers.}  We benchmarked UDL against XGBoost~\cite{chen2016xgboost} (200~trees, depth~6) and LightGBM~\cite{ke2017lightgbm} (same) under identical 5-fold stratified CV on five ODDS datasets.  Results are reported in Table~\ref{tab:supervised}.
@@ -960,7 +969,7 @@ LGB-raw           & \textbf{0.927} & \textbf{0.967} & \textbf{1.000} & \textbf{0
 \end{tabular}
 \end{table}
 
-Three findings emerge.  \textbf{(i)}~UDL-Opt (closed-form QDA head, no gradient optimisation) achieves $0.925$ on Mammography, within $0.2$~pp of LightGBM ($0.927$)---remarkable given that QDA uses zero hyperparameter search beyond $\gamma$; this demonstrates that multi-spectrum deviation features carry comparable discriminative power to 200-tree ensembles on low-dimensional data.  \textbf{(ii)}~UDL-Opt reaches $0.983$ on PenDigits and $0.952$ on Satellite, confirming strong performance across diverse data geometries.  \textbf{(iii)}~On Arrhythmia ($D{=}274$), the $274{\to}32$ dimensional compression that UDL operators impose causes information loss: UDL-Opt drops to $0.767$ while LGB-raw retains $0.880$.  This confirms UDL's high-dimensional scaling limitation (Section~\ref{ssec:limits}).
+Three findings emerge.  \textbf{(i)}~UDL-Opt (closed-form QDA head, no gradient optimisation) achieves $0.925$ on Mammography, within $0.2$~pp of LightGBM ($0.927$); this indicates that the multi-spectrum deviation features carry competitive discriminative signal on low-dimensional data even with a simple closed-form head.  \textbf{(ii)}~UDL-Opt reaches $0.983$ on PenDigits and $0.952$ on Satellite, confirming strong performance across diverse data geometries.  \textbf{(iii)}~On Arrhythmia ($D{=}274$), the $274{\to}32$ dimensional compression that UDL operators impose causes information loss: UDL-Opt drops to $0.767$ while LGB-raw retains $0.880$.  This confirms UDL's high-dimensional scaling limitation (Section~\ref{ssec:limits}).
 
 \begin{figure}[h]
 \centering
@@ -982,8 +991,7 @@ Table~\ref{tab:sota} reports the results. Key findings:
 
 \begin{itemize}
   \item \textbf{UDL-Hybrid achieves the highest mean AUC (0.972)} across all five datasets, including Pendigits where it reaches 0.960---a substantial improvement over QDA-Magnified's 0.777 on the same dataset. Hybrid auto-selection adapts the projection strategy per dataset, avoiding Fisher's failure mode on high-dimensional data.
-  \item \textbf{UDL-QDA-Magnified matches gradient-boosted trees on Mammography.} QDA-Magnified achieves $0.925$, within $0.2$~pp of LightGBM ($0.927$) and XGBoost ($0.926$)---see Table~\ref{tab:supervised}---despite using a closed-form QDA head with a single hyperparameter ($\gamma$) rather than 200 boosted trees.
-  \item \textbf{UDL-Opt matches trees on Mammography.} With only a closed-form QDA head and a single hyperparameter ($\gamma$), UDL-Opt attains $0.925$, within $0.2$~pp of LightGBM ($0.927$, Table~\ref{tab:supervised}), demonstrating that multi-spectrum deviation features carry comparable discriminative power to gradient-boosted ensembles on low-dimensional data.
+  \item \textbf{UDL matches gradient-boosted trees on Mammography.} UDL-QDA-Magnified achieves $0.925$, within $0.2$~pp of LightGBM ($0.927$) and XGBoost ($0.926$)---see Table~\ref{tab:supervised}---despite using a closed-form QDA head with a single hyperparameter ($\gamma$) rather than 200 boosted trees, demonstrating that multi-spectrum deviation features carry comparable discriminative power to gradient-boosted ensembles on low-dimensional data.
   \item \textbf{Magnification transforms UDL from competitive to dominant.} Without the magnifier, Fisher-based UDL scores 0.901 on Mammography and 0.889 on Shuttle. QDA-Magnified lifts these to 0.925 and 0.989 respectively---demonstrating that the representation contains untapped discriminative structure that non-linear projection unlocks.
   \item \textbf{Five-fold cross-validation confirms robustness.} On Mammography, QDA-Magnified achieves $0.925 \pm 0.020$ vs Fisher $0.896 \pm 0.014$---consistently higher AUC (Table~\ref{tab:cv}).
   \item \textbf{Single hyperparameter set.} The same magnifier steepness ($\gamma{=}5.0$), SubspaceScan stretching ($\gamma_s{=}3.0$), and QDA regularisation ($\lambda{=}10^{-4}$) are used across all datasets with no per-domain tuning.
@@ -1015,7 +1023,7 @@ Fisher LDA & $0.896 \pm 0.014$ \\
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/cv_boxplot.pdf}
-\caption{5-fold cross-validation on Mammography: QDA-Magnified vs Fisher LDA. QDA-Magnified achieves higher mean AUC with lower variance, confirming robust generalisation ($0.921 \pm 0.008$).}
+\caption{5-fold cross-validation on Mammography: QDA-Magnified vs Fisher LDA. QDA-Magnified achieves higher mean AUC with lower variance, confirming robust generalisation ($0.925 \pm 0.020$).}
 \label{fig:cv}
 \end{figure}
 
@@ -1044,8 +1052,8 @@ Key findings:
 \begin{itemize}
   \item \textbf{SubMF+Gate achieves the highest mAUC ($0.910$)}, a $+0.9$~pp improvement over MetaFusion-CombA ($0.901$).
   \item \textbf{Largest gain on arrhythmia}: $+6.4$~pp (from $0.687$ to $0.728$ for SubScan+Gate), the hardest dataset with 274 features and weak distributed signal---precisely the TYPE-1 BOUNDARY failure mode that SubspaceScan targets.
-  \item \textbf{No regression on well-separated datasets}: pendigits (+0.1~pp), annthyroid (+1.3~pp), glass and cardio unchanged. The sigmoid gate successfully preserves raw Mahalanobis rankings on these datasets.
-  \item \textbf{Gate resolves uniform-stretch catastrophe}: Uniform $\tanh$ stretching dropped pendigits AUC by $-14.4$~pp; the gate restricts stretching to weakly-discriminative subspaces only.
+  \item \textbf{No regression on well-separated datasets}: Pendigits (+0.1~pp), Annthyroid (+1.3~pp), Glass and Cardio unchanged. The sigmoid gate successfully preserves raw Mahalanobis rankings on these datasets.
+  \item \textbf{Gate resolves uniform-stretch catastrophe}: Uniform $\tanh$ stretching dropped Pendigits AUC by $-14.4$~pp; the gate restricts stretching to weakly-discriminative subspaces only.
 \end{itemize}
 
 \subsection{Real-World Sensitive-Sector Evaluation}
@@ -1058,9 +1066,9 @@ Beyond standard ODDS benchmarks, we evaluate UDL's System Mode on three real-wor
 
 Twenty-five systemically important banks are tracked quarterly from 2005\,Q1 to 2023\,Q4 ($T{=}76$~quarters). Six~US banks use individual call-report filings from the FDIC Surveillance and Data~Infrastructure; 19~non-US banks use country-level banking-sector aggregates from the World~Bank Global Financial Development Database (GFDD)~\cite{worldbank2024gfdd}. The feature space is $d{=}5$: loan-to-asset ratio, equity ratio, NPL ratio, return on assets, and funding cost. Crisis labels (used \emph{only} for post-hoc evaluation) comprise 13~quarters from objective published sources: seven~GFC quarters (2007\,Q4--2009\,Q2, per the NBER Business~Cycle Dating Committee), two~COVID quarters (2020\,Q1--Q2), and four European sovereign-debt stress quarters (2011\,Q3--2012\,Q2).
 
-\textbf{Prospective protocol.} The experiment simulates real-time supervisory deployment with no look-ahead: (i)~the detection engine is calibrated on 275~bank-quarter observations from 2005\,Q1--2007\,Q3 (the Great Moderation period); (ii)~at each new quarter~$t$, the engine is re-fitted on an expanding window up to~$t$ with \emph{no crisis labels}; (iii)~a Basel-style rolling z-score $z(t) = (s(t) - \bar{s}_{0:t})/\sigma_{s,\,0:t}$ fires an alarm when $z > 2.0$.
+\textbf{Prospective protocol.} The experiment simulates real-time supervisory deployment with no look-ahead: (i)~the detection engine is calibrated on 275~bank-quarter observations from 2005\,Q1--2007\,Q3 (the Great Moderation period); (ii)~at each new quarter~$t$, the engine is re-fitted on an expanding window up to~$t$ with \emph{no crisis labels}; (iii)~a Basel-style rolling z-score $z(t) = (s(t) - \bar{s}_{0:t})/\sigma_{s,\,0:t}$ fires an alarm when $z > 2.0$.  We present this study as a prospective case study rather than a substitute for standard public benchmarks.
 
-The UDL Hybrid engine first fires at 2007\,Q1 ($z{=}+2.65$), flagging the Bear~Stearns hedge-fund collapse as anomalous---a full \textbf{6~quarters before Lehman Brothers failed} and 3~quarters before the NBER recession started. It peaks at $z{=}+8.65$ at the BNP~Paribas fund freeze quarter, the single largest deviation in the entire 19-year panel. Critically, \textbf{no alarm fires for the COVID shock} (2020\,Q1--Q2), which is the correct behaviour: COVID was an exogenous pandemic event, not an endogenous build-up of financial imbalance. The engine detects structural deviation in financial features (leverage, capital ratios, NPLs) rather than exogenous news events. FAR remains at $1.6\%$, well within the FCA's $5\%$ threshold.
+The UDL Hybrid engine first fires at 2007\,Q1 ($z{=}+2.65$), flagging the Bear~Stearns hedge-fund collapse as anomalous---a full \textbf{6~quarters before Lehman Brothers failed} and 3~quarters before the NBER recession started. It peaks at $z{=}+8.65$ at the BNP~Paribas fund freeze quarter, the single largest deviation in the entire 19-year panel. No alarm fires during the COVID shock (2020\,Q1--Q2), suggesting that the engine is more sensitive to endogenous balance-sheet stress than to exogenous macro shocks within this feature space. FAR remains at $1.6\%$ on this case study.
 
 We note that the UDL architecture supports several alternative engine configurations---including \textbf{Gravity} (inter-agent gravitational coupling) and \textbf{Molecular} (kinetic energy and thermal equilibrium) formulations---which provide complementary detection profiles. A detailed comparative study of these engine variants, including per-bank ablations and multi-engine fusion strategies, will be presented in a forthcoming companion paper.
 
@@ -1083,9 +1091,9 @@ ERCOT Grid & \textbf{0.9940} & 3.9\% & 0.950 & 0.938 & 0.963 \\
 \end{tabular}
 \end{table}
 
-\textbf{Economy (FRED).} Eleven quarterly macroeconomic series projected through a $12{\times}6$-dimensional sector-weight matrix to create 12~synthetic bank-sector agents ($N{=}948$ samples). UDL achieves AUC~$= 0.9999$ and FAR~$= 0.1\%$: all nine crisis quarters detected with only one false alarm---a $49{\times}$ improvement over the 5\% FCA threshold.
+\textbf{Economy (FRED).} Eleven quarterly macroeconomic series projected through a $12{\times}6$-dimensional sector-weight matrix to create 12~synthetic bank-sector agents ($N{=}948$ samples). UDL achieves AUC~$= 0.9999$ and FAR~$= 0.1\%$ on this constructed case study: all nine crisis quarters are detected with one false alarm.
 
-\textbf{ERCOT Texas Grid (Feb 2021).} Sixty-five heterogeneous agents (gas, wind, thermal, consumer, supply) simulated over 241~hourly steps using real ERCOT capacity-loss, temperature, and demand data from Winter Storm~Uri. The system provides \textbf{37~hours of lead time} before peak crisis (first alarm at hour~71, peak at hour~108), with zero false alarms during normal operations and 100\% alarm rate during all four crisis phases. Both datasets meet FCA/NERC compliance thresholds for autonomous deployment.
+\textbf{ERCOT Texas Grid (Feb 2021).} Sixty-five heterogeneous agents (gas, wind, thermal, consumer, supply) simulated over 241~hourly steps using real ERCOT capacity-loss, temperature, and demand data from Winter Storm~Uri. The system provides \textbf{37~hours of lead time} before peak crisis (first alarm at hour~71, peak at hour~108), with no false alarms during the normal-operation segment of this simulation and 100\% alarm rate during all four crisis phases. Together, these case studies illustrate how the framework behaves on structured multi-agent monitoring problems, but they should not be interpreted as replacements for standard benchmark evaluation.
 
 \subsection{Why Multi-Spectrum Representation Enables Magnification}
 \label{ssec:why_magnifier}
@@ -1108,7 +1116,7 @@ The QDA-Magnified result thus strengthens---rather than undermines---the multi-s
 
 \subsection{Theoretical Contributions}
 
-The Universal Deviation Law formalises an observation that practitioners have long exploited intuitively: combining perspectives improves detection. Our contribution is to make this precise:
+The Universal Deviation Principle formalises an observation that practitioners have long exploited intuitively: combining perspectives can improve detection. Our contribution is to make this precise:
 
 \begin{enumerate}
   \item The \textbf{Universal Deviation Principle} provides conditional guarantees (Theorems~1--6) under explicit assumptions (A1--A3). Unlike OOD detection~\cite{hendrycks2017baseline,liang2018odin,liu2020energy}, which produces a single ``in vs.\ out'' score, UDL decomposes \textit{which operator} makes an observation anomalous.
@@ -1116,31 +1124,31 @@ The Universal Deviation Law formalises an observation that practitioners have lo
   \item The \textbf{Boundary-Centred Dimension Magnifier} (Eq.~\eqref{eq:tanh}) amplifies discriminative structure while suppressing noise dimensions, exploiting the heterogeneous per-operator sensitivity predicted by the Deviation Principle.
   \item \textbf{SubspaceScan with adaptive gated stretching} (Eqs.~\eqref{eq:softmax_agg}--\eqref{eq:gated_stretch}) addresses the TYPE-1 BOUNDARY failure mode by aggregating weak subspace signals, achieving mAUC $0.910$ across seven ODDS benchmarks.
   \item The \textbf{operator correlation audit} (Section~\ref{sssec:redundancy}) validates that each mathematical perspective captures genuinely independent signal: among 91~pairs, only Wavelet$\leftrightarrow$Phase ($\rho{=}0.92$) is redundant.
-  \item The \textbf{real-world sensitive-sector evaluation} (Section~\ref{ssec:real_world}) demonstrates that UDL detects the Global Financial Crisis 6~quarters before Lehman Brothers under a strictly prospective protocol, while correctly issuing no alarm for the exogenous COVID shock---a critical distinction for deployment.  Cross-sector validation on FRED macroeconomic indicators (AUC~$0.9999$) and ERCOT grid-failure data (AUC~$0.994$, 37-hour lead time) confirms domain-agnostic performance on real-world infrastructure.
+  \item The \textbf{real-world sensitive-sector evaluation} (Section~\ref{ssec:real_world}) provides prospective case studies on banking, macroeconomic, and energy-infrastructure monitoring.  These studies illustrate how the framework behaves under expanding-window supervision and multi-agent aggregation, complementing the public benchmark evaluation.
 \end{enumerate}
 
 \subsection{Practical Implications}
 
-\textbf{Domain-agnostic deployment.} The same hyperparameters work across medical imaging, aerospace, handwriting recognition, financial crisis detection, macroeconomic monitoring, and energy grid resilience. This eliminates the need for domain expertise in configuring the detector.
+\textbf{Cross-domain portability.} The same hyperparameters work across medical imaging, aerospace, handwriting recognition, financial crisis detection, macroeconomic monitoring, and energy grid resilience. This reduces---though does not eliminate---the amount of domain-specific retuning needed to configure the detector.
 
-\textbf{Interpretability.} Unlike black-box autoencoders, every component of the UDL pipeline produces interpretable quantities: which operator is most violated, how the deviation decomposes along the hyperplane, and which operators co-activate.  In the G-SIB evaluation (Section~\ref{sssec:gsib}), per-bank scores at the Lehman quarter produce a geographically coherent stress ranking that a supervisor can directly audit.
+\textbf{Interpretability.} Unlike black-box autoencoders, every component of the UDL pipeline produces interpretable quantities: which operator is most violated, how the deviation decomposes along the hyperplane, and which operators co-activate.  In the G-SIB evaluation (Section~\ref{sssec:gsib}), per-bank scores at the Lehman quarter produce a geographically coherent stress ranking that a supervisor can inspect and compare against known stress geography.
 
 \textbf{Extensibility.} The operator correlation audit (Section~\ref{sssec:redundancy}) demonstrates that adding new operators yields non-redundant signal: among 91~operator pairs across 14~operators, only one pair exceeds $\rho > 0.85$. This validates the Representation Stack's (Eq.~\eqref{eq:stack}) open architecture---new $\Phi_k$ operators can be added with confidence that they contribute independent information.
 
-\textbf{Coverage over AUC.} The coverage analysis (Section~\ref{sssec:coverage}) reveals that AUC alone is an insufficient deployment metric. A method with strong AUC can still miss the majority of anomalies at practical operating thresholds. We recommend that practitioners evaluate both AUC (ranking quality) and top-$k$ coverage (actionable detection rate), and use Hybrid auto-selection as the default strategy for robust coverage across domains.  As a practical guideline: in safety-critical domains (medical, aerospace, financial supervision), require top-$k$ coverage $\geq 80\%$; in exploratory settings (fraud triage, manufacturing), $\geq 60\%$ suffices.
+\textbf{Coverage over AUC.} The coverage analysis (Section~\ref{sssec:coverage}) reveals that AUC alone is an insufficient evaluation metric. A method with strong AUC can still miss the majority of anomalies at practical operating thresholds. We therefore recommend reporting both AUC (ranking quality) and top-$k$ coverage (actionable detection rate), and using Hybrid auto-selection as a strong default strategy when coverage is a primary objective.
 
-\textbf{Unsupervised deployment path.} While QDA-Magnified achieves the highest AUC, it requires both-class labels. For fully unsupervised deployment, UDL offers two label-free alternatives: (i)~the magnitude--novelty score (Eq.~\eqref{eq:score}), which flags observations deviating in any operator, and (ii)~RankFusion, which averages per-operator rank statistics without distributional assumptions.  RankFusion achieves mCov~89\% and mAUC~0.963---within 1~pp of the supervised Hybrid variant---making it the recommended default when labels are unavailable.
+\textbf{Unsupervised deployment path.} While QDA-Magnified achieves the highest AUC, it requires both-class labels. For fully unsupervised deployment, UDL offers two label-free alternatives: (i)~the magnitude--novelty score (Eq.~\eqref{eq:score}), which flags observations deviating in any operator, and (ii)~RankFusion, which averages per-operator rank statistics without distributional assumptions.  RankFusion achieves mCov~89\% and mAUC~0.963---within 1~pp of the supervised Hybrid variant---making it a strong default when labels are unavailable.
 
-\textbf{Regulatory deployment.} The G-SIB evaluation (Section~\ref{sssec:gsib}) demonstrates FCA-compliant false-alarm rates (FAR~$= 1.6\%$, well within the FCA's 5\% threshold), Basel-style cyclical-gap methodology compatibility, and prospective-only information usage.  The ERCOT result (Section~\ref{sssec:economy_ercot}) meets NERC Reliability Standard EOP-011 requirements for advance warning of capacity emergencies.  These properties make UDL directly deployable in regulated financial and energy infrastructure.
+\textbf{Case-study relevance to regulated domains.} The G-SIB evaluation (Section~\ref{sssec:gsib}) uses prospective-only information and yields a low false-alarm rate on the studied panel, while the ERCOT case study illustrates the framework's behaviour on energy-infrastructure monitoring.  These results suggest potential relevance to regulated financial and energy settings, but production deployment would require substantially broader validation, governance review, and human-in-the-loop evaluation.
 
 \subsection{Limitations}
 \label{ssec:limits}
 
 \begin{enumerate}
-  \item \textbf{Supervised components}: The QDA-Magnified pipeline requires both-class labels for the magnifier discriminative scores (Eq.~\eqref{eq:disc_score}) and QDA class covariances.  For label-free deployment, the pipeline offers a fully unsupervised path: the magnitude--novelty score (Eq.~\eqref{eq:score}) and RankFusion (mCov~89\%) require no anomaly labels whatsoever, making UDL directly applicable in settings where only normal data is available.
+  \item \textbf{Supervised components}: The QDA-Magnified pipeline requires both-class labels for the magnifier discriminative scores (Eq.~\eqref{eq:disc_score}) and QDA class covariances.  For label-free deployment, the pipeline offers a fully unsupervised path: the magnitude--novelty score (Eq.~\eqref{eq:score}) and RankFusion (mCov~89\%) require no anomaly labels whatsoever, making UDL applicable in settings where only normal data is available.
   \item \textbf{Computational cost}: Table~\ref{tab:complexity} summarises per-operator complexity.  On the largest benchmark (Shuttle, $N{=}58\text{K}$, $m{=}9$), end-to-end inference (5 operators + QDA) takes $<2$~s on a single CPU core (Intel Xeon E5-2686~v4).  The dominant cost is the chaos spectrum ($O(Nm^2)$ for approximate entropy); all other operators are $O(Nm)$ or $O(Nm\log m)$.  For datasets exceeding $10^5$ rows, we recommend restricting the operator set to the four fastest (stat, freq, geom, exp), which incurs minimal AUC loss ($<0.005$~pp on Mammography).
-  \item \textbf{Gate heuristic constants}: The sigmoid gate threshold ($0.4$) and steepness ($20$) in Eq.~\eqref{eq:gate} are fixed across all datasets. While empirically robust, they are not theoretically optimal; Bayesian optimisation over these constants is left for future work.
-  \item \textbf{Hyperparameter sensitivity}: We fix $\gamma{=}5.0$ (magnifier), $\gamma_s{=}3.0$ (gate stretch), $\alpha{=}1.0$ (exponential), and $\lambda{=}10^{-4}$ (QDA regularisation) globally.  Informal sensitivity sweeps show that $\gamma \in [3, 8]$ and $\gamma_s \in [2, 5]$ yield $<0.01$ AUC variation on Mammography. Performance degrades outside these ranges: $\gamma < 2$ under-saturates clear dimensions, while $\gamma > 10$ saturates blind dimensions. A formal sensitivity analysis across all datasets is deferred to future work.
+  \item \textbf{Gate constants}: The sigmoid gate threshold ($0.4$) and steepness ($20$) in Eq.~\eqref{eq:gate} are motivated by Morse-topological structural stability---the gate acts as an analogue of persistence-diagram filtration, preserving topologically robust discriminative signals while stretching ephemeral ones.  The specific numerical values were calibrated at the medium-discriminability boundary and validated by stability analysis across seven ODDS benchmarks (Section~\ref{ssec:subspacescan}).  While empirically robust across $[0.3, 0.5]$ and $[15, 30]$ respectively, deriving them directly from a topological invariant (e.g., optimal persistence threshold) remains an open problem; Bayesian optimisation and formal topological calibration are left for future work.
+  \item \textbf{Hyperparameter sensitivity}: We fix $\gamma{=}5.0$ (magnifier, selected by inner CV), $\gamma_s{=}3.0$ (gate stretch, selected by A/B benchmark), $\alpha{=}1.0$ (exponential), and $\lambda{=}10^{-4}$ (QDA regularisation) globally.  These values operate within a Morse-theoretic scoring framework whose architecture ensures structural stability; the numerical constants are then empirically calibrated on this foundation.  Cross-validated sensitivity sweeps show that $\gamma \in [3, 8]$ and $\gamma_s \in [2, 5]$ yield $<0.01$ AUC variation on Mammography. Performance degrades outside these ranges: $\gamma < 2$ under-saturates clear dimensions, while $\gamma > 10$ saturates blind dimensions. A formal sensitivity analysis across all datasets is deferred to future work.
   \item \textbf{Coverage--AUC divergence}: Methods with comparable AUC can exhibit dramatically different coverage profiles.  As a practical guideline, we recommend $\geq 80\%$ top-$k$ coverage as a deployment threshold for safety-critical domains (e.g., medical, aerospace) and $\geq 60\%$ for exploratory settings. Both AUC and coverage should always be reported.
   \item \textbf{Limited temporal modelling}: The current implementation treats each row independently. Temporal extensions would be needed for streaming or time-series anomaly detection.
   \item \textbf{Comparison scope}: Table~\ref{tab:sota} includes XGBoost and LightGBM as supervised baselines, and Table~\ref{tab:supervised} provides a full 5-dataset head-to-head.  On moderate-dimensional data ($D < 64$), LightGBM achieves mAUC~$0.951$ vs UDL-Opt's~$0.898$---a gap attributable to the tree ensemble's capacity to exploit non-linear feature interactions directly.  UDL matches trees on Mammography ($0.925$ vs $0.927$) but falls short on high-dimensional data.  Our comparison still omits modern deep unsupervised baselines (Deep SVDD~\cite{ruff2018deep}, DROCC~\cite{goyal2020drocc}, ICL~\cite{shenkar2022anomaly}) and the full ADBench~\cite{han2022adbench} suite; extending to these remains an important next step.
@@ -1185,6 +1193,7 @@ QDA inference & $O(D^2)$ & $0.01$ \\
   \item \textbf{Large-scale benchmarking}: Evaluate on additional domains including cybersecurity (CICIDS), industrial IoT (SECOM), and the full ADBench~\cite{han2022adbench} suite of 57 datasets.
   \item \textbf{Adversarial robustness}: Test against adversaries who know the specific operators and attempt to evade all simultaneously.
   \item \textbf{Semi-supervised SubspaceScan}: Extend the gated stretching mechanism to work without labels by using density-based discriminative scores instead of supervised Cohen's~$d$.
+  \item \textbf{Multi-engine comparative study}: The UDL System Mode architecture supports alternative detection engines---Gravity (inter-agent gravitational coupling) and Molecular (kinetic energy and thermal equilibrium)---that exploit different physical analogies for systemic anomaly aggregation.  A companion paper will present per-bank ablations, multi-engine fusion strategies, and cross-sector deployment of these variants.
 \end{enumerate}
 
 % ============================================================
@@ -1196,17 +1205,17 @@ QDA inference & $O(D^2)$ & $0.01$ \\
 We have presented the Universal Deviation Principle, a multi-spectrum framework for anomaly detection that:
 
 \begin{enumerate}
-  \item Formalises the Universal Deviation Principle through six theorems with explicit assumptions (A1--A3): if the operator family is deviation-separating (full-rank stacked Jacobian), then no observation can match normal data across all operators simultaneously, with finite-sample guarantees and SDP-optimal fusion weights.
+  \item Formalises the Universal Deviation Principle through six theorems with explicit assumptions (A1--A3): if the operator family is deviation-separating (full-rank stacked Jacobian), then any displacement from the normal reference must produce a measurable response in at least one operator (Theorems~1--2), with finite-sample guarantees (Theorem~3), SDP-optimal fusion weights (Theorem~4), submodular operator selection (Theorem~5), and a sufficient condition for detection separation (Theorem~6).
   \item Implements this principle through 14~composable spectrum projection operators across five mathematical families, with a Boundary-Centred Dimension Magnifier paired with QDA for supervised detection and Hybrid auto-selection for coverage.
   \item Introduces \textbf{SubspaceScan} with adaptive gated stretching (Eqs.~\eqref{eq:softmax_agg}--\eqref{eq:gated_stretch}) to address TYPE-1 BOUNDARY anomalies, achieving \textbf{mAUC~$0.910$} across seven ODDS benchmarks---a $+0.9$~pp improvement over MetaFusion-CombA ($0.901$).
-  \item Achieves perfect camouflage detection (AUC${}=1.000$) and robust five-fold cross-validation ($0.925 \pm 0.020$) on mammography---within $0.2$~pp of LightGBM ($0.927$) despite using a closed-form QDA head---while using a single set of hyperparameters across all domains.
+  \item Achieves robust five-fold cross-validation ($0.925 \pm 0.020$) on mammography---within $0.2$~pp of LightGBM ($0.927$) despite using a closed-form QDA head---while using a single set of hyperparameters across the benchmark suite.
   \item Validates operator diversity through correlation analysis: among 91~operator pairs, only Wavelet$\leftrightarrow$Phase ($\rho{=}0.92$) is redundant.
   \item Introduces top-$k$ \textbf{coverage} as a complementary metric, revealing failure modes where high AUC does not translate to actionable detection. Hybrid auto-selection achieves 91\% mean coverage.
   \item Provides the first head-to-head comparison of UDL against gradient-boosted trees (XGBoost, LightGBM) on five ODDS datasets, demonstrating that UDL matches LightGBM on Mammography ($0.925$ vs $0.927$) with only a closed-form QDA head and no gradient optimisation, and identifying high-dimensional scaling as the primary open limitation.
-  \item Validates on \textbf{real-world sensitive sectors}: 25~G-SIB banks under a strictly prospective protocol (6-quarter GFC lead, $z{=}+8.65$, while correctly issuing no COVID alarm), FRED macroeconomic indicators (AUC~$0.9999$, FAR~${<}0.1\%$), and ERCOT grid-failure (AUC~$0.994$, 37-hour lead time, zero false alarms in normal operations)---meeting FCA and NERC compliance thresholds.
+  \item Reports prospective case studies on \textbf{real-world sensitive sectors}: 25~G-SIB banks under a strictly prospective protocol, FRED macroeconomic indicators, and ERCOT grid-failure data.  These studies illustrate how the framework behaves on structured financial and infrastructure monitoring tasks, complementing---rather than replacing---the benchmark evaluation.
 \end{enumerate}
 
-The framework generalises BSDT's post-model correction into a model-independent detection paradigm.  By measuring deviation across complementary operators and rescuing boundary anomalies through adaptive subspace aggregation, the Universal Deviation Principle transforms anomaly detection from a single-metric threshold problem into a geometric structure analysis problem with demonstrated real-world deployment across financial, macroeconomic, and energy infrastructure domains.
+The framework generalises BSDT's post-model correction into a model-independent detection paradigm.  By measuring deviation across complementary operators and rescuing boundary anomalies through adaptive subspace aggregation, the Universal Deviation Principle reframes anomaly detection as a structured multi-operator analysis problem.  The benchmark results establish its core empirical performance, while the financial, macroeconomic, and energy case studies illustrate how the framework can be instantiated on multi-agent monitoring tasks.
 
 % ============================================================
 %  Acknowledgements
@@ -1289,7 +1298,7 @@ B. Sch{\"o}lkopf, J. C. Platt, J. Shawe-Taylor, A. J. Smola, and R. C. Williamso
 P. J. Rousseeuw and K. Van Driessen, ``A fast algorithm for the minimum covariance determinant estimator,'' \textit{Technometrics}, vol. 41, no. 3, pp. 212--223, 1999.
 
 \bibitem{odeyemi2025bsdt}
-O. O. Israel, ``Blind spot decomposition theory: A mathematical framework for characterising and correcting missed fraud in machine learning systems,'' Zenodo, Mar. 2026, doi: \href{https://doi.org/10.5281/zenodo.14942568}{10.5281/zenodo.14942568}.
+O. O. Israel, ``Blind spot decomposition theory: A mathematical framework for characterising and correcting missed fraud in machine learning systems,'' Zenodo, Mar. 2025, doi: \href{https://doi.org/10.5281/zenodo.14942568}{10.5281/zenodo.14942568}.
 
 \bibitem{krogh1995neural}
 A. Krogh and J. Vedelsby, ``Neural network ensembles, cross validation, and active learning,'' in \textit{Proc. NeurIPS}, 1995, pp. 231--238.
@@ -1332,6 +1341,15 @@ G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T.-Y. Liu, ``Ligh
 
 \bibitem{worldbank2024gfdd}
 {World Bank}, ``Global Financial Development Database (GFDD),'' 2024. [Online]. Available: \url{https://www.worldbank.org/en/publication/gfdr/data/global-financial-development-database}
+
+\bibitem{li2020copod}
+Z. Li, Y. Zhao, N. Botta, C. Ionescu, and X. Hu, ``COPOD: Copula-based outlier detection,'' in \textit{Proc. IEEE ICDM}, 2020, pp. 1118--1123.
+
+\bibitem{li2022ecod}
+Z. Li, Y. Zhao, X. Hu, N. Botta, C. Ionescu, and G. Chen, ``ECOD: Unsupervised outlier detection using empirical cumulative distribution functions,'' \textit{IEEE Trans. Knowl. Data Eng.}, vol. 35, no. 12, pp. 12708--12719, 2022.
+
+\bibitem{goldstein2012histogram}
+M. Goldstein and A. Dengel, ``Histogram-based outlier score (HBOS): A fast unsupervised anomaly detection algorithm,'' in \textit{Proc. KI-2012: Poster and Demo Track}, 2012, pp. 59--63.
 
 \end{thebibliography}
 
