@@ -106,11 +106,23 @@ def build_methods():
     """Return dict of method_name -> constructor callable."""
     methods = {}
 
-    # UDL variants
+    # UDL variants — core 6 operators
     methods["UDL-LDA"] = lambda: UDLClassifier(head="lda")
     methods["UDL-QDA"] = lambda: UDLClassifier(head="qda")
     methods["UDL-Logistic"] = lambda: UDLClassifier(head="logistic")
     methods["UDL-RF"] = lambda: UDLClassifier(head="rf")
+
+    # UDL variants — extended 14 operators
+    methods["UDL-Ext-QDA"] = lambda: UDLClassifier(head="qda", extended_operators=True)
+    methods["UDL-Ext-RF"] = lambda: UDLClassifier(head="rf", extended_operators=True)
+
+    # UDL variants — core + SubspaceScan
+    methods["UDL-SS-QDA"] = lambda: UDLClassifier(head="qda", use_subspace_scan=True)
+    methods["UDL-SS-RF"] = lambda: UDLClassifier(head="rf", use_subspace_scan=True)
+
+    # UDL variants — extended + SubspaceScan (full pipeline)
+    methods["UDL-Full-QDA"] = lambda: UDLClassifier(head="qda", extended_operators=True, use_subspace_scan=True)
+    methods["UDL-Full-RF"] = lambda: UDLClassifier(head="rf", extended_operators=True, use_subspace_scan=True)
 
     # Baselines (raw features)
     methods["RF-200"] = lambda: RandomForestClassifier(
