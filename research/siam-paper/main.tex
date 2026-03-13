@@ -73,8 +73,10 @@ ORCID: 0009-0004-2309-6436.}}
 %%  Abstract
 %% ====================================================================
 \begin{abstract}
-We introduce a geometric framework for analysing instability in
-coupled dynamical systems.  $N$ interacting agents evolve under a
+We propose a geometric framework for detecting and controlling
+structural instability in coupled dynamical systems by recasting
+the problem in terms of energy-topology equivalence.
+$N$ interacting agents evolve under a
 potential $\Phi$ whose pairwise term encodes contagion; a
 \emph{Blind-Spot Decomposition Theory} (BSDT) energy functional
 $\Ebs$, calibrated on normal-period data, is shown to be
@@ -84,11 +86,14 @@ $\mathrm{ind}_{\Ebs}(X_c) = \mathrm{ind}_\Phi(X_c)$ at every
 critical point, with two-sided gradient bounds
 $c_1\norm{\grad\Phi}\le\norm{\grad\Ebs}\le c_2\norm{\grad\Phi}$
 and homotopy equivalence of sublevel sets).
-A \emph{critical manifold} $\Cman$, characterised by the
-Morse-index jump $\mathrm{ind}=0\to\mathrm{ind}\ge 1$, separates
-a stable from an unstable regime; adaptive friction
+This equivalence recasts the instability detection problem as a
+control problem: a \emph{critical manifold} $\Cman$, characterised
+by the Morse-index jump $\mathrm{ind}=0\to\mathrm{ind}\ge 1$,
+separates a stable from an unstable regime.  Adaptive friction
 $\gamma^*(X)=\alpha/\lmax(D^2\Phi_{\mathrm{pair}})$ achieves
-marginal stability where every fixed coupling fails.
+marginal stability where every fixed coupling fails
+(Theorem~\ref{thm:phase})---a formal characterisation of
+procyclicality in financial regulation.
 
 Two physics-based \emph{System Mode engines} operationalise the
 theory: a Lennard-Jones 6--12 \emph{Molecular Engine} and a
@@ -158,34 +163,41 @@ their interactions. Existing frameworks---CoVaR
 \cite{adrian2016covar}, SRISK \cite{brownlees2017srisk},
 network contagion models \cite{acemoglu2015systemic,
 elliott2014financial}---detect stress \emph{after} it
-propagates. This paper develops a framework that detects
-instability \emph{before} it manifests, by identifying the
-geometric precursors in the joint state space of interacting agents.
+propagates. This paper proposes a geometric framework for
+detecting and characterising structural instability in coupled
+systems, and derives adaptive stabilisation as a direct consequence
+of the underlying energy-topology structure.  The key insight is
+that a detection functional calibrated on normal-period data
+shares the same Morse-index landscape as the interaction
+energy---so detecting instability and controlling it become two
+views of the same geometric object.
 
-The core insight is an \emph{equivalence theorem} linking two
-seemingly unrelated objects: (i)~a \emph{detection} functional
-$\Ebs$ measuring deviation from historical normality, and (ii)~the
+Formally, an \emph{equivalence theorem} links two seemingly
+unrelated objects: (i)~a \emph{detection} functional $\Ebs$
+measuring deviation from historical normality, and (ii)~the
 \emph{interaction energy} $\Phi$ governing agent dynamics.
 Theorem~C establishes that $\Ebs$ and $\Phi$ share the same
 Morse-index structure at every critical point, that their sublevel
 sets are homotopy equivalent, and that gradient norms are equivalent
-up to computable constants. This identification transforms
-the detection problem into a control problem: damping the system
-using $\grad\Ebs$ stabilises it because $\grad\Ebs$ and $\grad\Phi$
-are geometrically aligned.  The Morse-index jump from $0$ to $\ge 1$
-provides a topological prediction signal that is decoupled from the
+up to computable constants.  This identification transforms
+the instability detection problem into a control problem: damping
+the system using $\grad\Ebs$ stabilises it because $\grad\Ebs$ and
+$\grad\Phi$ are geometrically aligned.  The Morse-index jump from
+$0$ to $\ge 1$ provides a topological instability signal that is
+structurally invariant under perturbation and decoupled from the
 Lyapunov descent certificate used to guarantee iteration
 convergence.
 
-A \emph{critical manifold} $\Cman$ separates two regimes. Below
-$\Cman$, any fixed coupling suffices for stability. Above $\Cman$,
-no constant friction stabilises all configurations
+A \emph{critical manifold} $\Cman$ separates two dynamical
+regimes. Below $\Cman$, any fixed coupling suffices for stability.
+Above $\Cman$, no constant friction stabilises all configurations
 (Theorem~\ref{thm:phase}). The system requires \emph{adaptive}
 friction $\gamma^*(X)$ that tracks the spectral radius of the
-pairwise Hessian in real time. This result is the formal content
-of procyclicality: time-invariant regulatory rules (such as Basel
-III's fixed countercyclical capital buffer) fail structurally, not
-merely in practice.
+pairwise Hessian in real time. This phase-transition structure
+provides a rigorous dynamical-systems characterisation of
+procyclicality: time-invariant regulatory rules (such as Basel
+III's fixed countercyclical capital buffer) fail
+\emph{structurally}, not merely in practice.
 
 \paragraph{Contributions.}
 This paper makes nine contributions:
@@ -193,8 +205,9 @@ This paper makes nine contributions:
 \item \textbf{Blind-Spot Decomposition Theory (BSDT).} Four
   deviation operators ($\delta_C$: camouflage, $\delta_G$: feature
   gap, $\delta_A$: activity anomaly, $\delta_T$: temporal novelty)
-  define $\Ebs$, a composite energy functional calibrated entirely
-  on normal-period data.
+  define $\Ebs$, a composite energy functional that decomposes
+  structural instability into geometrically interpretable channels,
+  calibrated entirely on normal-period data.
 
 \item \textbf{Equivalence Theorem (Theorem~C) and Entropy Structure
   (Theorem~\ref{thm:entropy}).} Morse-index equivalence
@@ -205,10 +218,15 @@ This paper makes nine contributions:
   (Proposition~\ref{prop:separation}); the system is a generalised
   Onsager gradient flow with non-negative entropy production
   $\sigma(X) = \gamma(\Ebs)\norm{\grad\Ebs}^2 \ge 0$.
+  This equivalence provides the mathematical basis for both
+  detecting instability (via the Morse-index jump) and controlling
+  it (via gradient-aligned damping).
 
 \item \textbf{Critical manifold and phase transition
   (Theorem~\ref{thm:phase}).} A spectral threshold determines
-  where constant friction fails and adaptive friction succeeds.
+  where constant friction fails and adaptive friction succeeds,
+  providing a rigorous dynamical-systems characterisation of why
+  constant-parameter regulation fails in complex networks.
 
 \item \textbf{System Mode engines
   (Section~\ref{sec:engines}).}  A Lennard-Jones Molecular Engine
@@ -243,9 +261,13 @@ This paper makes nine contributions:
   dataset, improving Gravity AUC on the G-SIB panel by
   $+4.0$\,pp with no additional hyperparameters.
 
-\item \textbf{Cross-domain universality.} The same framework,
-  without re-training, detects the Terra/Luna collapse ($r=0.996$)
-  and the Texas ERCOT grid failure ($+72$\,h lead).
+\item \textbf{Cross-domain universality.} The same geometric
+  framework, without re-training, characterises structural
+  instability in the Terra/Luna collapse ($r=0.996$),
+  the Texas ERCOT grid failure ($+72$\,h lead), and
+  Navier--Stokes turbulence---suggesting that the energy-topology
+  structure is a general feature of coupled dynamical systems,
+  not specific to any single domain.
 
 \item \textbf{Extension to Navier--Stokes.} The BSDT channel
   structure transfers to three-dimensional incompressible
@@ -2248,8 +2270,13 @@ open problem.
 
 \subsection{Summary of Findings}
 
-The paper establishes fifteen findings within a unified
-mathematical framework:
+This paper proposes that structural instability in coupled
+dynamical systems can be detected and controlled through
+energy-topology equivalence.  The central result---Morse-index
+equivalence between the detection functional $\Ebs$ and the
+interaction energy $\Phi$---recasts instability detection as a
+geometric problem and adaptive stabilisation as a gradient-flow
+control problem.  The framework yields fifteen specific findings:
 
 \begin{enumerate}
 \item The U.S.\ banking system spends 68.6\% of time above the
