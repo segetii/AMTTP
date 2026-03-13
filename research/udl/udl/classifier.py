@@ -39,6 +39,15 @@ The per-class stack calibration is critical: each class's operators are
 fitted on that class's distribution, so the MDN decomposition captures
 how a sample deviates from *that specific class's* learned patterns.
 
+Optional enhancements:
+  - extended_operators=True → 14 operators (6 core + 6 advanced + 2
+    experimental: graph, density, topology, copula, compressibility,
+    kernel-RKHS, phase-curve, Gram-eigenspectrum) → richer K in MDN
+  - use_subspace_scan=True → per-class SubspaceScan that scans random
+    low-dimensional projections of R_c and captures distributed
+    boundary signals invisible to scalar MDN magnitudes.  Adds C
+    extra features (one SubspaceScan score per class).
+
 The classifier follows the sklearn estimator interface:
   fit(X, y)  →  self
   predict(X) →  labels
@@ -160,6 +169,12 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
         C×(K+2) is already compact).
     standardize : bool
         Whether to Z-standardize raw input before operator projection.
+    use_subspace_scan : bool
+        If True, fit a per-class SubspaceScan and append its score
+        (one per class) to the MDN feature vector.  This captures
+        distributed boundary signals invisible to scalar magnitudes.
+    n_projections : int
+        Number of random subspace projections per class (default 100).
     """
 
     def __init__(
@@ -169,16 +184,21 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
         operators=None,
         pca_variance: Optional[float] = None,
         standardize: bool = True,
+        use_subspace_scan: bool = False,
+        n_projections: int = 100,
     ):
         self.head = head
         self.extended_operators = extended_operators
         self.operators = operators
         self.pca_variance = pca_variance
         self.standardize = standardize
+        self.use_subspace_scan = use_subspace_scan
+        self.n_projections = n_projections
 
     # internal state
         self._stacks: Dict[int, RepresentationStack] = {}
         self._tensors: Dict[int, AnomalyTensor] = {}
+        self._scanners: Dict[int, object] = {}  # per-class SubspaceScan
         self._scaler: Optional[StandardScaler] = None
         self._pca: Optional[PCA] = None
         self._pca_keep: int = 0
@@ -246,7 +266,30 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
             tensor_c.store_ref_law_stats(ref_result)
             self._tensors[c] = tensor_c
 
-        # 4. Build MDN feature matrix: C × (K+2)
+        # 3b. Per-class SubspaceScan (optional) — captures distributed
+        #     boundary signals across random subspace projections of R_c
+        self._scanners = {}
+        if self.use_subspace_scan:
+            from .subspace_scan import SubspaceScanScorer
+            for c in range(n_classes):
+                R_c_all = self._stacks[c].transform(X)
+                # Labels: class c → "normal" (0), all others → "anomaly" (1)
+                y_bin = np.ones(len(X), dtype=int)
+                y_bin[y_enc == c] = 0
+                scanner = SubspaceScanScorer(
+                    n_projections=self.n_projections,
+                    subspace_dim='auto',
+                    method='mixed',
+                    aggregation='softmax',
+                    adaptive_stretch=True,
+                    stretch_gamma=3.0,
+                    boundary_boost=False,
+                    seed=42 + c,
+                )
+                scanner.fit(R_c_all, y_bin)
+                self._scanners[c] = scanner
+
+        # 4. Build MDN feature matrix: C × (K+2) [+ C if SubspaceScan]
         F = self._build_mdn_features(X)
 
         # 5. Optional PCA
@@ -334,15 +377,18 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
 
     def _build_mdn_features(self, X: np.ndarray) -> np.ndarray:
         """
-        Build MDN-only feature matrix from per-class stacks and tensors.
+        Build MDN feature matrix from per-class stacks, tensors, and
+        optionally SubspaceScan.
 
         For each class c:
           - Transform x through class c's stack → R_c(x)
           - AnomalyTensor MDN decomposition → magnitude (1),
             per-law magnitudes (K), novelty (1) = K+2 features
-        Total: C × (K+2) features.
+          - (optional) SubspaceScan score → 1 feature
 
-        Returns (N, C*(K+2)) feature matrix.
+        Total: C × (K+2) features  [+ C if SubspaceScan]
+
+        Returns (N, C*(K+2) [+ C]) feature matrix.
         """
         blocks = []
         for c in sorted(self._stacks.keys()):
@@ -355,6 +401,14 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
                 tr.novelty[:, None],      # (N, 1) — directional novelty
             ])
             blocks.append(block)
+
+        # Optional: per-class SubspaceScan scores
+        if self._scanners:
+            for c in sorted(self._scanners.keys()):
+                R_c = self._stacks[c].transform(X)
+                ss_scores = self._scanners[c].score(R_c)
+                blocks.append(ss_scores[:, None])  # (N, 1)
+
         return np.hstack(blocks)
 
     def _transform(self, X: np.ndarray) -> np.ndarray:
@@ -410,8 +464,9 @@ class UDLClassifier(BaseEstimator, ClassifierMixin):
             first = next(iter(self._stacks.values()))
             n_ops = len(first.operators)
         n_cls = len(self._stacks) if self._stacks else "?"
+        ss = "+SubScan" if self._scanners else ""
         return (
             f"UDLClassifier(head={self.head!r}, "
             f"operators={n_ops}, classes={n_cls}, "
-            f"features=C×(K+2) MDN)"
+            f"features=C×(K+2) MDN{ss})"
         )
