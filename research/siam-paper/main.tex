@@ -1403,20 +1403,24 @@ G-SIB Panel   &  4200 & 6 & AUROC $\ge 0.80$ & Hybrid\\
 \end{tabular}
 \end{table}
 
-\subsection{Hindsight G-SIB Engine Comparison}\label{sec:hindsight}
+\subsection{Prospective G-SIB Engine Comparison}\label{sec:hindsight}
 
 To compare the three System Mode engines on a common benchmark,
-we run a hindsight analysis on 25~G-SIBs over 76~quarters
-(2005:Q1--2023:Q4), using labels from the FSB systemic-event
-register.  All engines use identical calibration (reference
-period 1994:Q1--2003:Q4) and the FARTargetCalibrator with target
-FAR $= 5\%$.
+we run a prospective expanding-window evaluation on 25~G-SIBs
+over 76~quarters (2005:Q1--2023:Q4).  All engines use $y = 0$
+(no crisis labels) during training and scoring; label
+information enters only for ex-post evaluation metrics.  The
+engines use identical calibration (reference period
+1994:Q1--2003:Q4) and the FARTargetCalibrator with target
+FAR $= 5\%$, calibrated on the pre-crisis reference window
+only.
 
 \begin{table}[htbp]
 \centering
-\caption{Hindsight G-SIB engine comparison ($n = 25$ banks,
-$T = 76$ quarters, 2005--2023). FAR computed on non-crisis
-quarters only.}
+\caption{Prospective G-SIB engine comparison ($n = 25$ banks,
+$T = 76$ quarters, 2005--2023).  No future data is used;
+crisis labels are used only for ex-post metric evaluation.
+FAR computed on non-crisis quarters only.}
 \label{tab:hindsight}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
@@ -1519,12 +1523,13 @@ adaptive calibration.
 
 \paragraph{Protocol.}
 N-body physics engines (Molecular, Gravity, Hybrid) embed the
-\emph{current} quarter into the particle simulation---this is the
-correct in-sample monitoring protocol, since the detection signal
-arises from the interaction between the new observation and the
-historical configuration.  Removing the current quarter (out-of-sample
-scoring) eliminates the physical detection mechanism.  The evaluation
-follows five rules:
+\emph{current} quarter into the particle simulation alongside
+all historical quarters.  No future data is ever used: the
+engines receive $y = \mathbf{0}$ (no crisis labels) and all
+scoring, BSDT weighting, and threshold decisions depend solely
+on past and present observations.  The detection signal arises
+from the interaction between the new observation and the
+historical configuration.  The evaluation follows five rules:
 \begin{enumerate}
 \item \textbf{Expanding-window training.}  For each quarter
   $t \in \{5, \ldots, T{-}1\}$, the engine is trained on quarters
@@ -2309,11 +2314,13 @@ mathematical framework:
   invariant under perturbation and decoupled from the
   Lyapunov descent rate used to certify iteration convergence.
 
-\item Hindsight G-SIB analysis on 25~banks over 76~quarters
+\item Prospective G-SIB evaluation on 25~banks over 76~quarters
   (2005--2023) shows the Gravity Engine achieves FAR $= 1.6\%$
   ($z = +4.65$) with 5-quarter GFC lead and zero COVID false alarm,
   confirming the phase-transition mechanism on a large,
   independently constructed panel (Table~\ref{tab:hindsight}).
+  No future data or crisis labels are used during engine
+  training or scoring.
 
 \item A reduced tensor descriptor---gradient norm, leading Hessian
   eigenvalues, Mahalanobis distance, medoid distance,
