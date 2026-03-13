@@ -123,6 +123,10 @@ benchmark the Hybrid Engine achieves AUC~$=0.9997$; on the G-SIB
 bank-level panel, quarter-level conformal fusion lifts the Gravity
 Engine from $0.766$ to $0.806$ ($+4.0$\,pp) while preserving zero
 COVID false alarms.
+All reported lead times are measured under a strictly causal
+expanding-window protocol: each score at quarter $t$ uses only
+information available up to $t$, with no future observations,
+no future labels, and no hindsight re-estimation.
 
 The extended framework is validated on FDIC banking data (6-quarter
 GFC lead, AUROC~$= 0.867$ with adaptive calibration, zero false
@@ -1436,11 +1440,15 @@ engines use identical calibration (reference period
 1994:Q1--2003:Q4) and the FARTargetCalibrator with target
 FAR $= 5\%$, calibrated on the pre-crisis reference window
 only.
+At every quarter $t$, scoring and threshold updates are computed
+from data available up to $t$ only; no forward-looking features,
+future labels, or hindsight parameter re-fitting are permitted.
 
 \begin{table}[htbp]
 \centering
 \caption{Prospective G-SIB engine comparison ($n = 25$ banks,
-$T = 76$ quarters, 2005--2023).  No future data is used;
+$T = 76$ quarters, 2005--2023).  Strictly causal protocol:
+no future data is used;
 crisis labels are used only for ex-post metric evaluation.
 FAR computed on non-crisis quarters only.}
 \label{tab:hindsight}
@@ -1641,7 +1649,7 @@ stale threshold---despite an excellent AUROC of $0.867$.  The
 adaptive rolling P99 threshold tracks the non-stationary score
 baseline, eliminating all false alarms while preserving recall at
 $38.5\%$.  This demonstrates that \emph{calibration discipline}
-(Assumption~A3 in \citet{UDL2025}) is not merely a theoretical
+(Assumption~A3 in \cite{UDL2025}) is not merely a theoretical
 requirement but has direct operational consequences.
 
 \begin{figure}[htbp]
@@ -2347,7 +2355,8 @@ control problem.  The framework yields fifteen specific findings:
   confirming the phase-transition mechanism on a large,
   independently constructed panel (Table~\ref{tab:hindsight}).
   No future data or crisis labels are used during engine
-  training or scoring.
+  training or scoring; all updates are causal in time with no
+  hindsight re-estimation.
 
 \item A reduced tensor descriptor---gradient norm, leading Hessian
   eigenvalues, Mahalanobis distance, medoid distance,
