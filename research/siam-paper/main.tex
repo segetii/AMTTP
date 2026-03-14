@@ -56,7 +56,7 @@
 %% ====================================================================
 \title{Blind-Spot Decomposition and the Geometry of System Collapse:
 Adaptive Stabilisation Across Finance, Power Grids, and
-Navier--Stokes\thanks{Submitted to the editors \today.}}
+Navier--Stokes\thanks{Submitted to the editors March 14, 2026.}}
 
 \author{Odeyemi Olusegun\thanks{Independent Researcher, London, UK.
 (\texttt{segettii@gmail.com}).
@@ -74,83 +74,31 @@ ORCID: 0009-0004-2309-6436.}}
 %% ====================================================================
 \begin{abstract}
 We propose a geometric framework for detecting and controlling
-structural instability in coupled dynamical systems by recasting
-the problem in terms of energy-topology equivalence.
-$N$ interacting agents evolve under a
-potential $\Phi$ whose pairwise term encodes contagion; a
-\emph{Blind-Spot Decomposition Theory} (BSDT) energy functional
-\cite{odeyemi2025bsdt}
-$\Ebs$, calibrated on normal-period data, is shown to be
-topologically equivalent to $\Phi$ via a \emph{Morse-index
-equivalence} (Theorem~C:
-$\mathrm{ind}_{\Ebs}(X_c) = \mathrm{ind}_\Phi(X_c)$ at every
-critical point, with two-sided gradient bounds
-$c_1\norm{\grad\Phi}\le\norm{\grad\Ebs}\le c_2\norm{\grad\Phi}$
-and homotopy equivalence of sublevel sets).
-This equivalence recasts the instability detection problem as a
-control problem: a \emph{critical manifold} $\Cman$, characterised
-by the Morse-index jump $\mathrm{ind}=0\to\mathrm{ind}\ge 1$,
-separates a stable from an unstable regime.  Adaptive friction
+structural instability in coupled dynamical systems via
+energy-topology equivalence.
+A \emph{Blind-Spot Decomposition Theory} (BSDT) energy functional
+\cite{odeyemi2025bsdt} $\Ebs$ is shown to be topologically
+equivalent to the system potential $\Phi$ through a Morse-index
+equivalence: $\mathrm{ind}_{\Ebs}(X_c) = \mathrm{ind}_\Phi(X_c)$
+at every critical point, with two-sided gradient bounds and homotopy
+equivalence of sublevel sets.
+This recasts instability detection as a control problem on a
+\emph{critical manifold} $\Cman$ where adaptive friction
 $\gamma^*(X)=\alpha/\lmax(D^2\Phi_{\mathrm{pair}})$ achieves
-marginal stability where every fixed coupling fails
-(Theorem~\ref{thm:phase})---a formal characterisation of
-procyclicality in financial regulation.
-
+marginal stability---formalising procyclicality in financial
+regulation.
 Two physics-based \emph{System Mode engines} operationalise the
-theory: a Lennard-Jones 6--12 \emph{Molecular Engine} and a
-Gaussian-attraction / Coulomb-repulsion \emph{Gravity Mode Engine},
-unified through a common Lyapunov~v2 stabiliser with Armijo
-backtracking ($c=10^{-4}$), Input-to-State Stability (ISS) margins,
-and La~Salle convergence certification ($\tau_{\mathrm{LS}}=10^{-5}$,
-patience~5).  Both engines share a \emph{Fused Topological Scoring}
-architecture: Morse critical-point alarm, Betti barcode persistence,
-and a four-operator UDL stack (Phase, Topological, KernelRKHS, Rank)
-fused at equal weight after min-max normalisation.  The BSDT
-channel weights are determined by a closed-form Fisher
-variance-ratio statistic (zero label leakage).  A
-\emph{SpectraFalseAlarmFilter} gates scores by topological
-persistence, and a \emph{FARTargetCalibrator} enforces a target
-false-alarm rate via piecewise-linear rescaling.
-
-A \emph{Universal Conformal Scoring} layer provides
-distribution-free anomaly detection: each engine's physics
-simulation produces raw scores that are calibrated via split
-conformal prediction, yielding valid $p$-values under exchangeability
-alone.  Panel-level aggregation (rolling mean, P90, max, standard
-deviation, momentum) fuses point-level scores into quarter-level
-summaries; rank-normalised fusion selects the better of point-level
-and panel-level views per dataset automatically.  On the ERCOT
-benchmark the Hybrid Engine achieves AUC~$=0.9997$; on the G-SIB
-bank-level panel, quarter-level conformal fusion lifts the Gravity
-Engine from $0.766$ to $0.806$ ($+4.0$\,pp) while preserving zero
-COVID false alarms.
-All reported lead times are measured under a strictly causal
-expanding-window protocol: each score at quarter $t$ uses only
-information available up to $t$, with no future observations,
-no future labels, and no hindsight re-estimation.
-
-The extended framework is validated on FDIC banking data (6-quarter
-GFC lead, AUROC~$= 0.867$ with adaptive calibration, zero false
-alarms at 38.5\% recall and 100\% precision), the Terra/Luna
-collapse ($r=0.996$, $+30$\,h lead), the Texas ERCOT grid
-($+72$\,h lead), and three new sensitive-sector benchmarks: FRED
-macroeconomic indicators (AUC $= 0.9999$), ERCOT energy-grid
-dispatch (AUC $= 0.9940$), and a prospective G-SIB bank-level
-panel where Mol+ExpoGate first alarms at 2007-Q4---two quarters
-before the Bear~Stearns collapse.
-The BSDT channels transfer to three-dimensional incompressible
-Navier--Stokes, where adaptive viscosity $\nu(E_\mathrm{BS})$
-suppresses peak enstrophy by $1.77\times$ at $\mathrm{Re}\approx
-1257$ on a mesh-converged $128^3$ pseudo-spectral grid (Taylor--Green
-vortex; resolution-convergent to within $<1\%$).  A
-15-point Reynolds sweep ($\mathrm{Re}=314$--$62832$) reveals a
-non-monotone profile: suppression peaks at $S_{\max}=1.43\times$
-in the transitional regime ($\mathrm{Re}\approx 628$) and decays
-as $S(\mathrm{Re})\approx 1.66\cdot\mathrm{Re}^{-0.047}$
-($\alpha=-0.047\pm 0.012$, $p=0.0016$, $R^2=0.55$).  All 15 runs
-complete without blow-up, the BKM integral is finite throughout,
-and $\gamma^*_{\max}=0.9959$ uniformly, confirming that the BSDT
-feedback is active across the full laminar-to-turbulent range.
+theory with Lyapunov-certified convergence, fused topological
+scoring, and distribution-free conformal calibration.
+The framework is validated across three domains:
+FDIC banking data (6-quarter GFC lead, AUROC $= 0.867$,
+zero false alarms), ERCOT power-grid dispatch ($+72$\,h lead,
+AUC $= 0.9997$), and three-dimensional incompressible
+Navier--Stokes on a converged $128^3$ grid, where adaptive
+viscosity suppresses peak enstrophy by $1.77\times$ at
+$\mathrm{Re}\approx 1257$ and a 15-point Reynolds sweep confirms
+BSDT feedback across the full laminar-to-turbulent range
+without blow-up.
 \end{abstract}
 
 \begin{keywords}
@@ -368,7 +316,10 @@ $\mathcal{N}$:
 \item \textbf{Camouflage} ($\delta_C$): Mahalanobis distance from
   $\mathcal{N}$. Detects states that appear individually normal but
   are collectively anomalous:
-  $\delta_C(X) = [(X{-}\mu_0)^\top\Sigma_0^{-1}(X{-}\mu_0)]^{1/2}$.
+  \[
+    \delta_C(X)
+    = \bigl[(X{-}\mu_0)^\top\Sigma_0^{-1}(X{-}\mu_0)\bigr]^{1/2}.
+  \]
 
 \item \textbf{Feature Gap} ($\delta_G$): PCA residual in
   low-variance directions. Detects motion into historically
@@ -530,16 +481,23 @@ $\nu\ge\max(\nu_C,\nu_G,\nu_A,\nu_T)$ at each~$X$.
 \end{proposition}
 
 \begin{proof}
-Part~(i): $\grad_X\delta_C=\Sigma_0^{-1}(X{-}\mu_0)/\delta_C(X)$;
+Part~(i):
+$\grad_X\delta_C=\Sigma_0^{-1}(X{-}\mu_0)/\delta_C(X)$;
 by the Rayleigh quotient,
-$\norm{\Sigma_0^{-1}v}^2\ge\lmax(\Sigma_0)^{-2}\norm{v}^2$, and
-$\delta_C(X)\le\sqrt{\lmax(\Sigma_0)}\norm{v}$. Combining with
-$\norm{\grad\Phi(X)}\le L_c\norm{X{-}\Xst}$ near $\Xst$ gives the
-bound. Part~(ii): $(I{-}P_k)$ is an orthogonal projector, so
-$\grad_X\norm{(I{-}P_k)X}$ is a unit vector. Parts~(iii)--(iv)
-follow from direct gradient computation using super-critical
-growth estimates (Theorem~\ref{thm:phase}) and score-function
-lower bounds.
+\[
+  \norm{\Sigma_0^{-1}v}^2
+  \ge \lmax(\Sigma_0)^{-2}\norm{v}^2
+  \quad\text{and}\quad
+  \delta_C(X)\le\sqrt{\lmax(\Sigma_0)}\,\norm{v}.
+\]
+Combining with
+$\norm{\grad\Phi(X)}\le L_c\norm{X{-}\Xst}$ near~$\Xst$
+gives the bound.
+Part~(ii): $(I{-}P_k)$ is an orthogonal projector, so
+$\grad_X\norm{(I{-}P_k)X}$ is a unit vector.
+Parts~(iii)--(iv) follow from direct gradient computation
+using super-critical growth estimates
+(Theorem~\ref{thm:phase}) and score-function lower bounds.
 \end{proof}
 
 \subsection{Gradient Alignment}\label{sec:gradient}
@@ -753,15 +711,18 @@ the damping term $\gamma\norm{\grad\Ebs}^2$ dominates; the
 non-negativity of $\sigma$ is a consequence of~(C5), not an
 independent assumption.)
 
-(E3) $\sigma(X)=0$ requires $\dot{W} = 0$. From (C5),
-$\dot{W} = \inner{\grad\Ebs}{F} - \gamma(\Ebs)\norm{\grad\Ebs}^2
-= 0$. At a non-equilibrium point $X \neq \Xst$,
+(E3) $\sigma(X)=0$ requires $\dot{W} = 0$. From~(C5),
+\[
+  \dot{W}
+  = \inner{\grad\Ebs}{F} - \gamma(\Ebs)\norm{\grad\Ebs}^2 = 0.
+\]
+At a non-equilibrium point $X \neq \Xst$,
 $\norm{\grad\Ebs} > 0$ by Lemma~\ref{lem:lower} and
-$\gamma(\Ebs) > 0$ (since $\Ebs(X) > \Ebs(\Xst)$ by (C4) and
+$\gamma(\Ebs) > 0$ (since $\Ebs(X) > \Ebs(\Xst)$ by~(C4) and
 $\gamma(E) > 0$ for $E > \Ebs(\Xst)$ by the strict positivity
 of $E/(E{+}\theta)$).  Hence $\sigma(X) > 0$ for all
-$X \neq \Xst$, and $\sigma(\Xst) = 0$ since $\grad\Ebs(\Xst) = 0$
-by (C3).
+$X \neq \Xst$, and $\sigma(\Xst) = 0$ since
+$\grad\Ebs(\Xst) = 0$ by~(C3).
 The Onsager structure is immediate from the form of~\eqref{eq:bsdamped}.
 \end{proof}
 
@@ -866,7 +827,7 @@ dominating once $\lmax<\alpha$.
 \end{proof}
 
 \begin{corollary}[Basel III Procyclicality]\label{cor:procyclical}
-A fixed regulatory capital buffer $\bar{\kappa}$ corresponds to
+A fixed regulatory capital buffer $\bar{\kappa}$ \cite{basel2010} corresponds to
 constant friction $\bar{\gamma}\propto\bar{\kappa}$. By
 Theorem~\ref{thm:phase}(ii), for sufficiently correlated
 portfolios (above $\Cman$), no fixed $\bar{\kappa}$ simultaneously
@@ -1042,7 +1003,7 @@ stack, differing only in the force law.
 \subsection{Molecular Engine (Lennard-Jones 6--12)}\label{sec:molecular}
 
 Replace the Gaussian/log potential in~\eqref{eq:potential} with the
-Lennard-Jones 6--12 pair potential:
+Lennard-Jones 6--12 pair potential \cite{jones1924lj}:
 \begin{equation}\label{eq:lj}
   \phi_{\mathrm{LJ}}(r) = 4\varepsilon\Bigl[
   \Bigl(\frac{\sigma}{r}\Bigr)^{\!12}
@@ -1412,7 +1373,7 @@ frequency, 1990--2024.  NBER recession quarters serve as ground
 truth.  The Hybrid Engine achieves AUC $= 0.9999$.
 
 \paragraph{ERCOT Energy-Grid Dispatch.}
-Hourly generation-by-fuel data for the Texas ERCOT interconnect,
+Hourly generation-by-fuel data \cite{ercot2023} for the Texas ERCOT interconnect,
 $d = 5$ features (wind, solar, gas, coal, nuclear capacity
 factors).  Anomaly labels from the February~2021 Winter Storm Uri
 blackout window.  The Hybrid Engine achieves AUC $= 0.9940$.
@@ -2418,7 +2379,7 @@ control problem.  The framework yields fifteen specific findings:
   A key insight: the Fisher VR weights computed from a
   \emph{reference} (normal-period) window assign 57\% to
   $\delta_G$ (feature gap)---the channel with highest
-  within-normal variability---yet $\delta_G$ is uniformative for
+  within-normal variability---yet $\delta_G$ is uninformative for
   crash detection.  Transductive Fisher VR, computed over the
   \emph{full} dataset, correctly identifies
   $\delta_T$ ($\beta = 0.833$) and $\delta_A$ ($\beta = 0.502$) as
@@ -2579,8 +2540,11 @@ with $\norm{\grad_X\delta_j}\ge\nu\norm{\grad\Phi}$.
 Since $\inner{\grad_X\delta_j}{v}\ge 0$ (monotonicity) and
 $\norm{\grad_X\delta_j}\ge\nu\norm{\grad\Phi}$, a directional
 lower bound follows from the identity
-$\inner{\grad_X\delta_j}{v} =
-\norm{\grad_X\delta_j}\cos\angle(\grad_X\delta_j,\grad\Phi)$
+\[
+  \inner{\grad_X\delta_j}{v}
+  = \norm{\grad_X\delta_j}
+    \cos\angle(\grad_X\delta_j,\,\grad\Phi)
+\]
 combined with Cauchy--Schwarz and the monotonicity-guaranteed
 non-negative cosine.  However, $\cos\angle$ may be arbitrarily
 close to~$0$ in general.  To close the argument, we note that
@@ -2594,10 +2558,13 @@ is shared between $\grad\Ebs$ and $-\grad\Phi$:
 \]
 Since $\grad\Phi = \alpha(X{-}\mu) + \grad\Phi_{\mathrm{pair}}$
 with $\grad\Phi_{\mathrm{pair}} = -F_{\mathrm{pair}}$:
-$\inner{-F_{\mathrm{pair}}}{v} = \norm{\grad\Phi}
-- \alpha\inner{X{-}\mu}{v}$.  Near $\Xst$,
+\[
+  \inner{-F_{\mathrm{pair}}}{v}
+  = \norm{\grad\Phi} - \alpha\inner{X{-}\mu}{v}.
+\]
+Near~$\Xst$,
 $\alpha\inner{X{-}\mu}{v} \le \alpha\norm{X{-}\Xst}
-\le (\alpha/\lmin(H^*)^{1/2})\norm{\grad\Phi}$, giving
+\le (\alpha/\lmin(H^*)^{1/2})\,\norm{\grad\Phi}$, giving
 \[
   \norm{\grad\Ebs}\ge\inner{\grad\Ebs}{v}
   \ge (1 - \alpha/\lmin(H^*)^{1/2})\norm{\grad\Phi}.
@@ -2784,10 +2751,14 @@ which trivially satisfies: (a)~convexity (linear), (b)~non-decreasing
 \begin{remark}[Empirical verification]
 We verify Assumption~\ref{ass:bsdt} numerically on the G-SIB panel:
 the maximal gradient norms across all 76 quarters are
-$\max_t\norm{\grad_X\delta_C} = 3.21$,
-$\max_t\norm{\grad_X\delta_G} = 0.98$,
-$\max_t\norm{\grad_X\delta_A} = 1.47$,
-$\max_t\norm{\grad_X\delta_T} = 2.83$.
+\[
+  \max_t\norm{\grad_X\delta_C} = 3.21,\qquad
+  \max_t\norm{\grad_X\delta_G} = 0.98,
+\]
+\[
+  \max_t\norm{\grad_X\delta_A} = 1.47,\qquad
+  \max_t\norm{\grad_X\delta_T} = 2.83.
+\]
 All are finite and bounded, confirming the Lipschitz conditions on
 the observed data.  The regularisation parameter
 $\epsilon = 10^{-8}$ affects fewer than $0.01\%$ of evaluations.
@@ -2933,9 +2904,9 @@ blow-up across the full laminar-to-turbulent range.
 \section{Data Sources}\label{app:data}
 
 All banking features are drawn from the FDIC SDI quarterly call
-reports via the public REST API at
+reports \cite{fdic2024sdi} via the public REST API at
 \texttt{https://banks.data.fdic.gov/api/financials}. Feature $f_5$
-(yield-curve slope) is the FRED T10Y2Y series. The normal reference
+(yield-curve slope) is the FRED T10Y2Y series \cite{fred2024}. The normal reference
 period (1994-Q1 to 2003-Q4) is chosen to be post-S\&L resolution,
 pre-housing boom, and long enough for stable covariance estimation
 ($T_{\mathrm{ref}}=40\gg d=6$). The full replication package is
@@ -2973,11 +2944,6 @@ J.~T.~Beale, T.~Kato, and A.~Majda,
 Euler equations},
 Comm.\ Math.\ Phys., 94 (1984), pp.~61--66.
 
-\bibitem{bertsekas2012dynamic}
-D.~P.~Bertsekas,
-\emph{Dynamic Programming and Optimal Control},
-4th ed., Athena Scientific, Belmont, MA, 2012.
-
 \bibitem{bg1980}
 H.~Brezis and T.~Gallouet,
 \emph{Nonlinear Schr\"odinger evolution equations},
@@ -3004,28 +2970,10 @@ C.~L.~Fefferman,
 \emph{Existence and smoothness of the Navier--Stokes equation},
 Clay Mathematics Institute Millennium Prize Problems, 2000.
 
-\bibitem{greenwald2020financial}
-D.~L.~Greenwald, \`O.~Jord\`a, M.~Schularick, and
-A.~M.~Taylor,
-\emph{Financial crisis recoveries},
-AEA Papers and Proc., 110 (2020), pp.~124--129.
-
 \bibitem{hazan2016oco}
 E.~Hazan,
 \emph{Introduction to Online Convex Optimization},
 Found.\ Trends Optim., 2 (2016), pp.~157--325.
-
-\bibitem{khalil2002nonlinear}
-H.~K.~Khalil,
-\emph{Nonlinear Systems},
-3rd ed., Prentice Hall, Upper Saddle River, NJ, 2002.
-
-\bibitem{km2006}
-C.~E.~Kenig and F.~Merle,
-\emph{Global well-posedness, scattering and blow-up for the
-energy-critical, focusing, non-linear Schr\"odinger equation in
-the radial case},
-Invent.\ Math., 166 (2006), pp.~645--675.
 
 \bibitem{lady1969}
 O.~A.~Ladyzhenskaya,
@@ -3059,19 +3007,6 @@ J.~W.~Milnor,
 Annals of Mathematics Studies, No.~51, Princeton University Press,
 Princeton, NJ, 1963.
 
-\bibitem{odeyemi2026amttp}
-O.~Odeyemi,
-\emph{{AMTTP}: A four-layer architecture for deterministic
-compliance enforcement in institutional {DeFi}},
-TechRxiv, 2026.
-
-\bibitem{odeyemi2026bsdt}
-O.~Odeyemi,
-\emph{Blind spot decomposition theory: A mathematical framework for
-characterising and correcting missed fraud in machine learning
-systems},
-Zenodo, 2026.
-
 \bibitem{shalev2012online}
 S.~Shalev-Shwartz,
 \emph{Online learning and online convex optimization},
@@ -3081,11 +3016,6 @@ Found.\ Trends Mach.\ Learn., 4 (2012), pp.~107--194.
 G.~I.~Taylor and A.~E.~Green,
 \emph{Mechanism of the production of small eddies from large ones},
 Proc.\ R.\ Soc.\ Lond.\ A, 158 (1937), pp.~499--521.
-
-\bibitem{trefethen1997numerical}
-L.~N.~Trefethen and D.~Bau,
-\emph{Numerical Linear Algebra},
-SIAM, Philadelphia, 1997.
 
 \bibitem{tsinober1992}
 A.~Tsinober, E.~Kit, and T.~Dracos,
@@ -3098,16 +3028,6 @@ Basel Committee on Banking Supervision,
 \emph{Basel III: A Global Regulatory Framework for More Resilient
 Banks and Banking Systems},
 Bank for International Settlements, 2010.
-
-\bibitem{tooze2018crashed}
-A.~Tooze,
-\emph{Crashed: How a Decade of Financial Crises Changed the World},
-Viking, New York, 2018.
-
-\bibitem{worldbank2023}
-World Bank,
-\emph{Global Financial Development Database},
-World Bank Open Data, 2023.
 
 \bibitem{fdic2024sdi}
 Federal Deposit Insurance Corporation,
