@@ -124,8 +124,8 @@ AMTTP:
     architecture of a production SaaS platform, not a monolithic
     proof-of-concept.
 
-  \item \textbf{Security infrastructure.}  RS256~JWT validation,
-    per-key rate limiting, Ed25519 oracle-signed responses with
+  \item \textbf{Security infrastructure.}  HS256~JWT validation,
+    per-key rate limiting, ECDSA oracle-signed responses with
     90-day key rotation, server-enforced nonce and TTL replay
     protection via Redis, and a UI Integrity Service that monitors
     DOM mutations with per-component hash verification.  In my
