@@ -115,8 +115,8 @@ that any single mathematical measure of ``deviation from normal'' is, by
 construction, blind to certain anomaly types.  He formalises this as a
 multi-spectrum tensor decomposition: each data point is mapped through
 14~composable law-domain operators---spanning five mathematical families
-(statistical, geometric, spectral, information-theoretic, and
-exponential)---and the resulting tensor is projected into a scalar anomaly
+(basis decomposition, geometric embedding, algebraic, topological, and
+information-theoretic)---and the resulting tensor is projected into a scalar anomaly
 score via Fisher LDA, Quadratic Discriminant Analysis, or a
 non-parametric rank-fusion strategy.
 
@@ -124,17 +124,17 @@ What I find theoretically significant is both the completeness argument
 and the formal guarantees.  Olusegun conducts a $14\times14$ Spearman
 rank-correlation audit across all operator pairs and demonstrates that
 out of 91~unique pairs, only \textit{one} exhibits redundancy
-($\rho > 0.9$, Wavelet$\leftrightarrow$Phase).  This is empirical
+($\rho > 0.85$, Wavelet$\leftrightarrow$Phase).  This is empirical
 evidence that the operator set captures genuinely diverse perspectives on
 deviation---it is not a bloated feature set where half the operators
 measure the same thing.
 
-He proves \textbf{five formal theorems}: (1)~local distinguishability
+He proves \textbf{six formal theorems}: (1)~local distinguishability
 via the Inverse Function Theorem, (2)~global sensitivity with a uniform
 bound $\underline\sigma > 0$, (3)~finite-sample concentration via
 Hoeffding, (4)~SDP-optimal fusion weights maximising worst-case
-directional sensitivity, and (5)~a $(1-1/e)$-approximation guarantee for
-greedy operator selection via monotone submodularity.  These are the kind
+directional sensitivity, (5)~a $(1-1/e)$-approximation guarantee for
+greedy operator selection via monotone submodularity, and (6)~operator-space separation converting injectivity into a detection guarantee.  These are the kind
 of theoretical results that give a practitioner confidence that the
 method will not behave erratically on unseen data.
 
@@ -146,11 +146,12 @@ elsewhere in the literature.
 
 The best configuration achieves a mean AUC of \textbf{0.972} and 91\%
 coverage across five benchmark datasets, with a single hyperparameter set
-and no per-dataset tuning.  For context, Isolation Forest achieves 0.788,
-LOF achieves 0.632, and the current state-of-the-art (ECOD) achieves
-0.921 on the same benchmarks.  The UDL result is not marginally
-better---it is categorically better, and it is achieved without any of
-the domain-specific engineering that competitors require.  The paper is
+and no per-dataset tuning.  For context, Isolation Forest achieves a mean
+AUC of~0.946, LOF achieves~0.962, and ECOD achieves~0.918 on
+the same benchmarks.  Critically, UDL-Hybrid achieves the highest
+mean AUC among all methods tested---including strong unsupervised
+baselines---while using a single hyperparameter set, no GPU, and
+closed-form projections.  The paper is
 formatted for \textbf{NeurIPS~2026}.
 
 %% ── ADAPTIVE FRICTION + NS ────────────────────────────────────────
@@ -182,11 +183,11 @@ conducted on real-world data:
     1990--2024): a 6-quarter early warning before the 2008 Global
     Financial Crisis, using a threshold trained exclusively on
     pre-2006 data.  AUROC = 0.805 at institution level for the 30
-    largest US banks.  A 24-institution global panel spanning US, UK,
+    largest US banks.  A 25-institution G-SIB panel spanning US, UK,
     EU, Asia, and Africa (using World Bank GFDD, ECB MIR, and BIS
-    bilateral exposure data) achieves AUROC = 0.811 with a 19-quarter
-    GFC lead.  Threshold Granger causality passes on the G-SIB panel
-    ($p = 0.043$).  The framework also calibrates countercyclical
+    bilateral exposure data) achieves AUROC~$= 0.806$ (Gravity Engine
+    with conformal panel aggregation) with a 5-quarter
+    GFC lead.  The framework also calibrates countercyclical
     capital buffers with quantified welfare loss estimates.
 
   \item \textbf{Algorithmic stablecoins} (Terra/Luna UST, May 2022):
@@ -206,7 +207,7 @@ conducted on real-world data:
     reinterpreting $\gamma^*$ as a state-dependent viscosity yields the
     P/D~halving principle---adaptive viscosity halves the enstrophy
     production-to-dissipation ratio at every Reynolds number tested
-    ($\mathrm{Re} \in [314, 6283]$), confirmed numerically on a
+    ($\mathrm{Re} \in [314, 62832]$), confirmed numerically on a
     pseudo-spectral solver for the Taylor-Green vortex.  This provides
     a new conditional regularity criterion connected to the Clay
     Millennium Prize Problem (with appropriate disclaimers).

@@ -80,8 +80,8 @@ together in real time:
     analysis, policy enforcement, sanctions screening, continuous
     monitoring, geographic risk, and an explainability module)
     coordinated through a central API gateway with NGINX TLS
-    termination, RS256~JWT validation, per-key rate limiting, and
-    Ed25519~oracle-signed responses with 90-day key rotation.
+    termination, HS256~JWT validation, per-key rate limiting, and
+    ECDSA~oracle-signed responses with 90-day key rotation.
   \item An \textbf{offline ML training pipeline} using a Composite
     Teacher architecture: XGBoost (weighted at 0.4), seven
     FATF-aligned AML pattern detectors (0.3), and graph structural
