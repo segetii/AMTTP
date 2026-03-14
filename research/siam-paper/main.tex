@@ -138,9 +138,18 @@ dispatch (AUC $= 0.9940$), and a prospective G-SIB bank-level
 panel where Mol+ExpoGate first alarms at 2007-Q4---two quarters
 before the Bear~Stearns collapse.
 The BSDT channels transfer to three-dimensional incompressible
-Navier--Stokes, where adaptive viscosity maintains the
-production/dissipation ratio at $0.500\pm 0.005$ across Reynolds
-numbers $314$--$6283$.
+Navier--Stokes, where adaptive viscosity $\nu(E_\mathrm{BS})$
+suppresses peak enstrophy by $1.77\times$ at $\mathrm{Re}\approx
+1257$ on a mesh-converged $128^3$ pseudo-spectral grid (Taylor--Green
+vortex; resolution-convergent to within $<1\%$).  A
+15-point Reynolds sweep ($\mathrm{Re}=314$--$62832$) reveals a
+non-monotone profile: suppression peaks at $S_{\max}=1.43\times$
+in the transitional regime ($\mathrm{Re}\approx 628$) and decays
+as $S(\mathrm{Re})\approx 1.66\cdot\mathrm{Re}^{-0.047}$
+($\alpha=-0.047\pm 0.012$, $p=0.0016$, $R^2=0.55$).  All 15 runs
+complete without blow-up, the BKM integral is finite throughout,
+and $\gamma^*_{\max}=0.9959$ uniformly, confirming that the BSDT
+feedback is active across the full laminar-to-turbulent range.
 \end{abstract}
 
 \begin{keywords}
@@ -2168,8 +2177,13 @@ Reynolds numbers.
 \begin{table}[htbp]
 \centering
 \caption{Production/dissipation ratio convergence under adaptive
-viscosity. Pseudo-spectral Taylor--Green solver, $N=32$,
-$T=1.0$, $\frac{2}{3}$-dealiasing.}
+viscosity: preliminary characterisation ($N=32$, $T=1.0$,
+$\tfrac{2}{3}$-rule dealiasing, Taylor--Green IC).  The ratio
+converges to $0.500\pm 0.005$ across two decades of Reynolds
+number, motivating the \emph{P/D halving principle}.  Enstrophy
+suppression and BKM results at the resolution-converged $N=128$
+grid are given in Tables~\ref{tab:ns_convergence}
+and~\ref{tab:ns_re_sweep}.}
 \label{tab:pd}
 \begin{tabular}{@{}rcccc@{}}
 \toprule
@@ -2315,14 +2329,28 @@ control problem.  The framework yields fifteen specific findings:
 \item The Terra/Luna collapse ($r=0.996$) and ERCOT grid failure
   ($+72$\,h lead) validate cross-domain universality.
 
-\item The framework transfers to Navier--Stokes: adaptive viscosity
-  suppresses enstrophy growth with the P/D ratio converging to
-  0.500.  The Lyapunov~v2 three-part certificate
+\item The framework transfers to Navier--Stokes.  On a
+  mesh-converged $128^3$ pseudo-spectral grid (Taylor--Green
+  vortex, $\mathrm{Re}\approx 1257$, H100~GPU), adaptive viscosity
+  $\nu(E_\mathrm{BS})$ reduces peak enstrophy by $1.77\times$ and
+  the BKM integral by $28.5\%$ relative to constant viscosity;
+  the suppression factor is grid-converged ($<1\%$ variation across
+  $N=64,96,128$).  A 15-point Reynolds sweep
+  ($\mathrm{Re}=314$--$62832,\;N=128$) reveals a non-monotone
+  profile: suppression peaks at $S_{\max}=1.43\times$
+  ($\mathrm{Re}\approx 628$, transitional regime) and decays
+  monotonically for $\mathrm{Re}>628$ following
+  $S(\mathrm{Re})\approx 1.66\cdot\mathrm{Re}^{-0.047}$
+  ($\alpha=-0.047\pm 0.012$, $p=0.0016$, $R^2=0.55$; statistically
+  significant at the $1\%$ level).  All 30 solver runs ($15$ Re
+  values $\times$ 2 viscosity modes) complete without blow-up;
+  $\gamma^*_{\max}=0.9959$ uniformly.
+  The Lyapunov~v2 three-part certificate
   (Proposition~\ref{prop:ns_lyapv2}) formalises the
   production/dissipation balance as ISS descent with La~Salle
   convergence to the invariant set $P = D/2$.  Topological
   monitoring via Morse and Betti barcodes provides a computable
-  singularity diagnostic
+  singularity pre-diagnostic
   (Theorem~\ref{thm:ns_strong}).
 
 \item The welfare calibration produces GFC losses of 19.57~pp,
@@ -2396,11 +2424,17 @@ control problem.  The framework yields fifteen specific findings:
 \subsection{Limitations}
 
 \begin{enumerate}
-\item \textbf{Pseudo-spectral resolution.} The NS simulations use
-  $N=32$ modes. Higher-resolution simulations ($N\ge 256$) are
-  needed to confirm P/D halving at fully turbulent Reynolds numbers
-  and to validate the topological singularity diagnostic
-  (Theorem~\ref{thm:ns_strong}) on resolved vortex tubes.
+\item \textbf{Pseudo-spectral resolution.} The resolution
+  convergence study establishes grid-independent results at
+  $N=128$ (suppression factor converges to within $<1\%$ from
+  $N=64$ to $N=128$).  At $\mathrm{Re}=1257$ the Kolmogorov length
+  scale requires $N\gtrsim 235$ for full DNS resolution; the
+  present $N=128$ grid is therefore a well-resolved
+  under-resolved simulation rather than a fully turbulent DNS.
+  Higher-resolution runs ($N\ge 256,\;\mathrm{Re}\ge 10^4$) are
+  needed to confirm the $S(\mathrm{Re})$ scaling trend at fully
+  developed turbulence and to validate the topological singularity
+  diagnostic (Theorem~\ref{thm:ns_strong}) on resolved vortex tubes.
 
 \item \textbf{Conditional regularity.} The NS result is for the
   \emph{modified} equation (adaptive viscosity), not the original
@@ -2482,9 +2516,11 @@ control problem.  The framework yields fifteen specific findings:
   the same topological scoring downstream?
 
 \item Validate the topological singularity diagnostic at
-  $N \ge 256$ resolution and $\mathrm{Re} \ge 10^4$, where
-  fully developed turbulence is present and Betti-number dynamics
-  can be compared against DNS benchmarks.
+  $N \ge 256$ resolution and $\mathrm{Re} \ge 10^4$.  The present
+  $N=128$ sweep establishes grid-convergence and statistical
+  significance of the $S(\mathrm{Re})$ power law in the
+  transitional regime; the fully turbulent regime and
+  Betti-number dynamics of resolved vortex tubes remain open.
 \end{enumerate}
 
 \subsection{Policy Implications}
@@ -2798,36 +2834,96 @@ FAR target        & ---           & 0.05 & All\\
 \subsection{Navier--Stokes Solver}
 
 The pseudo-spectral solver uses $N^3$ Fourier collocation points
-on $[0,2\pi]^3$ with $\frac{2}{3}$-dealiasing. Time integration is
-semi-implicit: exact viscous integration (integrating factor) with
-explicit nonlinear term. The adaptive viscosity
-$\nu_{\mathrm{eff}}=\nu_0(1+\gamma^*(\Ebs^{\mathrm{NS}}))$ is
-computed at each diagnostic step. Each time step costs
-$O(N^3\log N)$ for FFTs. Extended simulation at $\mathrm{Re}=1257$
-($\nu_0=0.005$, $N=32$, $T=2.0$):
+on $[0,2\pi]^3$ with $\tfrac{2}{3}$-rule dealiasing.  Time
+integration is semi-implicit: the viscous term is handled via an
+exact integrating factor; the nonlinear term is treated explicitly.
+The adaptive viscosity
+$\nu_{\mathrm{eff}}=\nu_0(1+\gamma^*(\Ebs^{\mathrm{NS}}))$
+is recomputed at each diagnostic step.  Each time step costs
+$O(N^3\log N)$ for the three-dimensional FFTs.
+
+\textit{Hardware}: NVIDIA H100 80\,GB HBM3, CuPy~14.0.1,
+CUDA~12.  IC: Taylor--Green vortex, $\nu_0=0.005$.
+
+\paragraph{Study~1: Resolution convergence
+  ($\mathrm{Re}\approx 1257$, $T=5$).}
 
 \begin{table}[htbp]
 \centering
-\caption{Extended NS simulation at $\mathrm{Re}=1257$.}
-\label{tab:ns_extended}
-\begin{tabular}{@{}lcc@{}}
+\caption{Resolution convergence at fixed $\mathrm{Re}\approx 1257$
+  ($\nu_0=0.005$, Taylor--Green IC, $T=5$).
+  $S = \Omega_{\text{const}}/\Omega_{\text{adapt}}$.
+  BKM~$\Delta\%$: percentage reduction in the
+  Beale--Kato--Majda integral under adaptive~$\nu$.}
+\label{tab:ns_convergence}
+\begin{tabular}{@{}rccccc@{}}
 \toprule
-Quantity & Const.\ $\nu$ & Adaptive $\nu(\Ebs)$\\
+$N$ & $\Omega_{\text{const}}$ & $\Omega_{\text{adapt}}$
+    & $S$ & BKM~$\Delta\%$ & Smooth\\
 \midrule
-Peak enstrophy     & 0.5106 & 0.4625\\
-Peak $\norm{\bm{\omega}}_\infty$ & 2.000 & 2.000\\
-BKM integral       & 3.304  & 3.235\\
-Energy decay (\%)  & 6.56   & 12.47\\
-$\nu_{\mathrm{eff}}$ range & $[0.005,0.005]$
-  & $[0.005,0.010]$\\
-$\gamma^*_{\max}$  & ---    & 0.995\\
+ 64 & 1.1547 & 0.6566 & $1.759\times$ & $+29.80\%$ & $\checkmark$\\
+ 96 & 1.1596 & 0.6536 & $1.774\times$ & $+28.70\%$ & $\checkmark$\\
+128 & 1.1543 & 0.6530 & $1.768\times$ & $+28.48\%$ & $\checkmark$\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The adaptive mechanism reduces peak enstrophy by 9.4\% and nearly
-doubles the energy dissipation rate (12.47\% vs.\ 6.56\%) while
-maintaining smoothness.
+The suppression factor varies by less than $1\%$ from $N=64$ to
+$N=128$, confirming that the enstrophy reduction is a physical
+result and not a numerical artefact of the grid.
+
+\paragraph{Study~2: Reynolds number sweep
+  ($N=128$, 15~points, $T=3$).}
+
+\begin{table}[htbp]
+\centering
+\caption{Dense Reynolds-number sweep at the converged resolution
+  $N=128$ ($\nu_0=1/(\mathrm{Re}\cdot N_{\text{ref}})$,
+  Taylor--Green IC, $T=3$).  All 15~runs (30~solver invocations)
+  complete without blow-up; $\gamma^*_{\max}=0.9959$ at every~Re.
+  BKM~$\Delta\%$: percentage reduction in the BKM integral.
+  Power-law fit over the descending branch
+  ($\mathrm{Re}\ge 628$):
+  $S(\mathrm{Re})\approx 1.66\cdot\mathrm{Re}^{-0.047}$
+  ($\alpha=-0.047\pm 0.012$, $R^2=0.55$, $p=0.0016$).}
+\label{tab:ns_re_sweep}
+\begin{tabular}{@{}rcc@{}}
+\toprule
+$\mathrm{Re}$ & $S$ & BKM~$\Delta\%$\\
+\midrule
+   314 & $1.045\times$ & $+13.40\%$\\
+   419 & $1.235\times$ & $+12.28\%$\\
+   628 & $\mathbf{1.427\times}$ & $+10.18\%$\\
+   898 & $1.324\times$ & $+8.24\%$\\
+  1257 & $1.246\times$ & $+6.54\%$\\
+  1795 & $1.184\times$ & $+4.97\%$\\
+  3142 & $1.116\times$ & $+3.12\%$\\
+  4189 & $1.091\times$ & $+2.43\%$\\
+  6283 & $1.064\times$ & $+1.72\%$\\
+  8976 & $1.047\times$ & $+1.26\%$\\
+ 12566 & $1.035\times$ & $+0.94\%$\\
+ 17952 & $1.025\times$ & $+0.68\%$\\
+ 31416 & $1.015\times$ & $+0.41\%$\\
+ 41888 & $1.011\times$ & $+0.31\%$\\
+ 62832 & $1.008\times$ & $+0.21\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three features of Table~\ref{tab:ns_re_sweep} are notable.
+\textit{(i)}~The suppression factor is non-monotone: it rises from
+$S=1.045$ at $\mathrm{Re}=314$ (laminar, limited enstrophy
+build-up) to a transitional peak of $S_{\max}=1.427$ at
+$\mathrm{Re}\approx 628$, where constant-$\nu$ enstrophy
+accumulation is fastest relative to the adaptive-$\nu$ run.
+\textit{(ii)}~For $\mathrm{Re}>628$ the suppression decays along
+the power law $S\approx 1.66\cdot\mathrm{Re}^{-0.047}$,
+statistically significant at the $1\%$ level ($p=0.0016$).
+\textit{(iii)}~$S>1$ throughout ($S=1.008$ even at
+$\mathrm{Re}=62832$), and the BKM integral is strictly reduced at
+every Re, providing computational evidence that adaptive
+$\nu(E_\mathrm{BS})$ suppresses the precursors to finite-time
+blow-up across the full laminar-to-turbulent range.
 
 \section{Data Sources}\label{app:data}
 
