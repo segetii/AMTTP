@@ -496,20 +496,43 @@ Taylor--Green IC:
 \toprule
 Quantity & $N=128$ & $N=256$ & Relative difference \\
 \midrule
-Peak $\norm{\bm{\omega}}_\infty$ & $11.15$ & $11.19$ & $0.4\%$ \\
-Peak time $t^*$ & $5.45$ & $\approx 5.45$ & $< 1\%$ \\
+Peak $\norm{\bm{\omega}}_\infty$ & $11.15$ & $11.19$ & $0.38\%$ \\
+Peak time $t^*$ & $5.45$ & $\approx 5.4$ & $< 1\%$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-The $0.4\%$ agreement in peak vorticity between $N=128$ and
+The $0.38\%$ agreement in peak vorticity between $N=128$ and
 $N=256$ confirms that the $N=128$ simulations are spatially
 converged at $\mathrm{Re}\approx 1257$.
 \end{theorem}
 
 \begin{proof}[\textbf{VERIFIED} computationally]
 Independent $N=256$ run on NVIDIA RTX PRO 6000 Blackwell,
-$T=8.0$, identical solver parameters.
+$T=8.0$, identical solver parameters (2687\,s wall time).
 \end{proof}
+
+\paragraph{Vortex stretching diagnostics ($N=256$, VERIFIED).}
+The $N=256$ run also computes vortex stretching quantities:
+\begin{center}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Quantity & Value & Interpretation \\
+\midrule
+Mean $|\cos\angle(\bm{\omega}, S\bm{\omega})|$ & $0.098$
+  & Near-orthogonal alignment \\
+Max $|\omega_i S_{ij} \omega_j|$ & $18.91$
+  & Finite; no stretching divergence \\
+\bottomrule
+\end{tabular}
+\end{center}
+The near-orthogonal vorticity-strain alignment ($\approx 0.1$)
+is the classical turbulence result \cite{ashurst1987}: vorticity
+preferentially aligns with the \emph{intermediate} eigenvector of
+the strain tensor, producing weak net stretching.  The finite
+maximum of the stretching term $\omega_i S_{ij}\omega_j$ confirms
+that the vortex stretching production~$P$ remains bounded
+throughout the simulation---consistent with the finite BKM
+integral (Theorem~\ref{thm:bkm_finite}).
 
 \begin{remark}
 The Kolmogorov length scale at $\mathrm{Re} = 1257$ is
@@ -657,7 +680,7 @@ Three systematic problems invalidate this framework:
   Time window & Fitted $c$ & Interpretation \\
   \midrule
   Growth only ($T=5$) & $-11.91$ & Captures growth \\
-  Growth + decay ($T=8$, $N=256$) & $+1.33$ & Avg of both \\
+  Growth + decay ($T=8$, $N=256$) & $+1.325$ & Avg of both \\
   Full lifecycle ($T=20$) & $+0.034$ ($R^2 \approx 0$) & Meaningless \\
   \bottomrule
   \end{tabular}
@@ -674,6 +697,18 @@ Three systematic problems invalidate this framework:
   \emph{different dynamical systems}---there is no
   continuous parameter path connecting them.
 \end{enumerate}
+
+\paragraph{Phase space confirms failure.}
+The $N=256$ simulation provides a definitive visual test.
+Plotting $d\norm{\bm{\omega}}_\infty/dt$ against
+$\norm{\bm{\omega}}_\infty^2$ reveals a \emph{closed loop}:
+the trajectory rises during growth ($t < 5.4$), turns over
+at the peak, and returns along a different path during decay
+($t > 5.4$).  The fitted quadratic bound
+$-c\nu\omega^2 + C^*$ is a \emph{single line} in this plane;
+it cannot capture the hysteresis loop that the actual dynamics
+trace.  The loop structure is the geometric reason the quadratic
+ansatz fails.
 
 \paragraph{The dense sweep confirms failure.}
 To test the quadratic framework exhaustively, 11~constant-viscosity
@@ -919,11 +954,14 @@ and what remains open.
   $\gamma^* = E/(E+\theta)$ or is universal across
   saturating feedback laws.
 
-\item \textbf{3D vortex stretching diagnostics.}  Compute
-  the vorticity-strain alignment channel $\delta_A$
-  (currently $\equiv 0$) and assess whether it provides
-  additional predictive power for singularity detection
-  beyond the three active channels.
+\item \textbf{3D vortex stretching diagnostics.}  The
+  $N=256$ run (Section~\ref{app:ns:resolution}) computes
+  mean alignment $|\cos\angle(\bm{\omega}, S\bm{\omega})|
+  = 0.098$ and max stretching $|\omega_i S_{ij}\omega_j|
+  = 18.91$---both finite and consistent with classical
+  turbulence.  Incorporating these into the $\delta_A$
+  channel (currently $\equiv 0$) and assessing additional
+  predictive power remains open.
 
 \item \textbf{Production-dissipation phase relationship.}
   Measure the cross-correlation
