@@ -77,7 +77,7 @@ def compute_PD_from_state(u_hat, grid, nu_eff):
             del dui_dxj, duj_dxi, S_ij, contrib
 
     vol = (2.0 * np.pi / N) ** 3
-    P = float((cp.sum(stretching) * vol).get())
+    P = float((cp.sum(stretching) * vol).get()) / (2.0 * np.pi)**3  # spatial avg, matches spectral D
 
     # Vorticity-strain alignment: |cos(ω, Sω)| for diagnostics
     # Compute Sω in physical space
