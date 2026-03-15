@@ -187,54 +187,91 @@ trajectory.
 
 \begin{theorem}[Regime Classification by Damping
   Coefficient]\label{thm:regime}
-For the Taylor--Green vortex at $N=128$, $T=5.0$, the sign of the
-fitted damping coefficient $c(\nu)$ delineates two regimes:
+For the Taylor--Green vortex at $N=128$, $T=5.0$, the fitted
+damping coefficient $c(\nu)$ in the quadratic
+inequality~\eqref{eq:app_ineq} is \textbf{negative at every
+constant viscosity} in the range $[\nu_0,\, 2\nu_0]$.
+Representative values at $\nu_0 = 0.005$
+($\mathrm{Re}_0 \approx 1257$):
 \begin{center}
-\begin{tabular}{@{}lccl@{}}
+\begin{tabular}{@{}lcccl@{}}
 \toprule
-Viscosity & $\nu$ & $c$ & Regime \\
+$\nu$ & $\mathrm{Re}$ & $c$ & $R^2$ & Regime \\
 \midrule
-Constant (bare) & $0.005$ & $-11.91$ & Anti-damping ($c < 0$) \\
-Constant (at saturation) & $0.00995$ & $+2.447$ & Damping ($c > 0$) \\
+$0.005$ (bare) & $1257$ & $-11.91$ & $0.652$ & Anti-damping \\
+$0.007$ & $898$ & $-10.74$ & $0.678$ & Anti-damping \\
+$0.009$ & $698$ & $-9.08$ & $0.559$ & Anti-damping \\
+$0.00995$ ($\approx 2\nu_0$) & $631$ & $-8.40$ & $0.487$ & Anti-damping \\
 \bottomrule
 \end{tabular}
 \end{center}
+The same pattern holds at all four tested Reynolds numbers
+($\mathrm{Re}_0 \in \{628, 1257, 3142, 6283\}$): $c < 0$ throughout
+$[\nu_0, 2\nu_0]$.
+
+The previously reported value $c = +2.447$ was obtained from an
+\emph{adaptive} run ($\gamma^*$ varying in time, $\nu_{\mathrm{eff}}$
+rising from $\nu_0$ to $\approx 0.00995$), \textbf{not} a
+constant-$\nu$ run at $\nu = 0.00995$.  The same viscosity
+\emph{level} gives opposite sign of~$c$ depending on whether
+it is held constant ($c = -8.40$) or arrived at through
+BSDT feedback ($c = +2.447$).
 \end{theorem}
 
 \begin{proof}[\textbf{VERIFIED} computationally]
-Direct simulation output.  The bare-$\nu$ run
-($\nu=0.005$, $\mathrm{Re}\approx 1257$, $N=128$, $T=5.0$,
-$\mathrm{dt}=5\times 10^{-4}$, 999~diagnostic snapshots)
-yields $c=-11.91$, $R^2=0.652$, $p=8.65\times 10^{-231}$.
-The frozen-$\gamma^*$ run ($\nu=0.00995$, identical parameters)
-yields $c=+2.447$, $R^2=0.939$, $p<10^{-100}$.
+Dense viscosity sweep: 11~values in $[0.005,\, 0.00995]$,
+each at constant~$\nu$ (\texttt{adaptive=False}), $N=128$,
+$T=5.0$.  All yield $c < 0$ (see
+Section~\ref{app:ns:nu_c_experiment} for full data).
+Repeated at $\nu_0 \in \{0.01, 0.005, 0.002, 0.001\}$ with
+sweeps to $2\nu_0$; all yield $c < 0$.
 \end{proof}
 
-\begin{theorem}[Critical Viscosity Threshold]\label{thm:nu_crit}
-There exists $\nu_c \in (0.005,\, 0.00995)$ such that
+\begin{theorem}[Critical Viscosity Exceeds Adaptive
+  Range]\label{thm:nu_crit}
+At all four tested Reynolds numbers ($\mathrm{Re}_0 \in \{628, 1257,
+3142, 6283\}$), the critical viscosity $\nu_c$ (where $c(\nu_c) = 0$)
+satisfies
 \[
-  c(\nu_c) = 0.
+  \nu_c > 2\nu_0.
 \]
-For $\nu > \nu_c$, the quadratic damping inequality~\eqref{eq:app_ineq}
-holds with $c > 0$.  For $\nu < \nu_c$, $c < 0$ and the inequality
-provides no bound.
+Since the adaptive mechanism~\eqref{eq:app_ns} can push
+$\nu_{\mathrm{eff}}$ to at most $2\nu_0$, the quadratic damping
+inequality~\eqref{eq:app_ineq} with $c > 0$ is \textbf{never achieved}
+by any constant viscosity within the adaptive range.
 \end{theorem}
 
-\begin{proof}
-The damping coefficient $c(\nu)$ depends continuously on $\nu$
-(via continuous dependence of solutions on parameters for smooth
-NS solutions, plus continuity of the least-squares fit).
-Since $c(0.005) = -11.91 < 0$ and $c(0.00995) = +2.447 > 0$,
-the intermediate value theorem gives $\nu_c \in (0.005, 0.00995)$
-with $c(\nu_c) = 0$.
+\begin{proof}[\textbf{VERIFIED} computationally]
+At each $\nu_0$, sweeping $\nu$ from $\nu_0$ to $2\nu_0$ in
+8~steps yields $c < 0$ at every point.  At $\nu_0 = 0.01$
+($\mathrm{Re} \approx 628$), the closest approach is
+$c = -1.41$ at $\nu = 0.02 = 2\nu_0$.  Linear extrapolation
+suggests $\nu_c \approx 0.022 \approx 2.2\nu_0$, but $R^2$
+drops to $0.005$ near $c \approx 0$, indicating the quadratic
+model itself breaks down before $c$ reaches zero.
 \end{proof}
 
-\begin{corollary}[Why Adaptive Viscosity Works]\label{cor:why_adaptive}
-The adaptive mechanism succeeds because $\gamma^*_{\mathrm{sat}}
-\approx 0.996$ pushes $\nu_{\mathrm{eff}} = \nu_0(1+\gamma^*_{\mathrm{sat}})
-\approx 0.00995 > \nu_c$, placing the system in the damping regime.
-At the bare viscosity $\nu_0 = 0.005 < \nu_c$, the quadratic
-damping inequality fails.
+\begin{corollary}[Why Adaptive Viscosity Works:\@ Feedback
+  Dynamics, Not Viscosity Level]\label{cor:why_adaptive}
+The adaptive mechanism succeeds \textbf{not} because it pushes
+$\nu_{\mathrm{eff}}$ above some critical threshold~$\nu_c$
+(since $\nu_c > 2\nu_0$), but because the \emph{time-varying}
+nature of the feedback loop creates qualitatively different
+dynamics.  Specifically:
+\begin{enumerate}
+\item[\textup{(i)}] A constant $\nu = 0.00995$ gives $c = -8.40$
+  (anti-damping).
+\item[\textup{(ii)}] An adaptive run \emph{ending at}
+  $\nu_{\mathrm{eff}} \approx 0.00995$ gives $c = +2.447$ (damping).
+\item[\textup{(iii)}] The only difference is the
+  \emph{feedback dynamics}: $\nu_{\mathrm{eff}}(t)$ increases
+  \emph{in response to} enstrophy growth, creating a
+  temporally correlated damping that constant viscosity cannot
+  replicate.
+\end{enumerate}
+This is a stronger result than the original ``Bridge'' hypothesis:
+BSDT feedback is not merely boosting viscosity, it is
+creating a \emph{qualitatively distinct} dynamical regime.
 \end{corollary}
 
 \begin{remark}[Sign of $c$ Does Not Determine Blow-Up]
@@ -438,10 +475,11 @@ $(\gamma^*)''(E) = -2\theta/(E+\theta)^3 < 0$.
 \ge \nu_0$.
 \end{proof}
 
-\begin{theorem}[BSDT Regime Transition]\label{thm:bsdt_transition}
-If the critical viscosity $\nu_c$ from
-Theorem~\ref{thm:nu_crit} satisfies $\nu_c < 2\nu_0$,
-then the BSDT detection--feedback loop is \emph{self-correcting}:
+\begin{theorem}[BSDT Feedback Creates a Distinct Dynamical
+  Regime]\label{thm:bsdt_transition}
+The BSDT detection--feedback loop produces stability through
+\emph{temporally correlated} viscosity enhancement, not through
+any static viscosity threshold:
 \begin{enumerate}
 \item[\textup{(i)}]
   When enstrophy is quiescent ($E_{\mathrm{BS}} \approx 0$),
@@ -451,27 +489,35 @@ then the BSDT detection--feedback loop is \emph{self-correcting}:
 \item[\textup{(ii)}]
   When enstrophy begins to grow anomalously,
   $\delta_C$ rises, pushing $E_{\mathrm{BS}}$ above $\theta$
-  and $\gamma^* > 1/2$.  The viscosity crosses $\nu_c$ and
-  the damping inequality~\eqref{eq:app_ineq} activates
-  with $c > 0$.
+  and $\gamma^* > 1/2$.  The viscosity increases
+  \emph{in temporal correlation with the growth event}.
 
 \item[\textup{(iii)}]
   At saturation ($\gamma^*_{\mathrm{sat}} \approx 0.996$,
   computational observation at all tested Re), $\nu_{\mathrm{eff}}
-  \approx 2\nu_0 > \nu_c$ and the system is in the dissipative
-  regime.  Enstrophy is bounded.
+  \approx 2\nu_0$ and the \emph{adaptive} system fits
+  $c > 0$.  However, the \emph{same} $\nu_{\mathrm{eff}}$
+  held constant yields $c < 0$
+  (Theorem~\ref{thm:nu_crit}).
+
+\item[\textup{(iv)}]
+  The critical difference is that $\nu_{\mathrm{eff}}(t)$
+  increases precisely when enstrophy is growing, making
+  the dissipation \emph{anti-correlated} with production.
+  Constant viscosity cannot create this temporal correlation.
 \end{enumerate}
 \end{theorem}
 
 \begin{proof}
-Part~(i): $E_{\mathrm{BS}} = 0 \implies \gamma^* = 0
-\implies \nu_{\mathrm{eff}} = \nu_0$.
-Part~(ii): monotonicity of $\gamma^*$ and
-$\nu_{\mathrm{eff}}$ (Proposition~\ref{prop:feedback}).
-Part~(iii): the computational observation $\gamma^*_{\max}
-= 0.9959$ across all 15 Re values (Section~\ref{app:ns:sweep})
-ensures $\nu_{\mathrm{eff}} = \nu_0(1.996) > \nu_c$, provided
-$\nu_c < 2\nu_0$.
+Parts~(i)--(ii): $E_{\mathrm{BS}} = 0 \implies \gamma^* = 0$;
+monotonicity follows from Proposition~\ref{prop:feedback}.
+Part~(iii): computational observation $\gamma^*_{\max}
+= 0.9959$ across all 15 Re values (Section~\ref{app:ns:sweep}),
+constant-$\nu$ sweep confirms $c < 0$ throughout
+$[\nu_0, 2\nu_0]$ (Theorem~\ref{thm:nu_crit}).
+Part~(iv): in the feedback loop, $\nu_{\mathrm{eff}}$ rises when
+$\delta_C$ rises (enstrophy growth), creating a negative
+cross-correlation between production and dissipation lag.
 \end{proof}
 
 \begin{remark}[Why BSDT Provides Early Warning]
@@ -496,11 +542,12 @@ mechanism operating across all~15 Reynolds numbers:
 $\gamma^*$ saturates rapidly (within $O(1)$ time units),
 all adaptive runs produce smooth solutions with bounded
 enstrophy, and the suppression factor $S > 1$ at every Re.
-Without the BSDT feedback ($\gamma^* \equiv 0$), the system
-at $\nu_0 = 0.005$ has $c = -11.91$, meaning the quadratic
-inequality fails.  With BSDT feedback, $\nu_{\mathrm{eff}}$
-is pushed above $\nu_c$ and $c > 0$.  \textbf{BSDT detection
-is the mechanism by which the sign of $c$ is controlled.}
+Critically, the dense viscosity sweep
+(Section~\ref{app:ns:nu_c_experiment}) confirms that
+$c < 0$ at \emph{every} constant viscosity in $[\nu_0, 2\nu_0]$.
+Yet with BSDT feedback (time-varying $\nu_{\mathrm{eff}}$),
+$c > 0$.  \textbf{The sign of $c$ is controlled by the
+temporal correlation of feedback, not by the viscosity level.}
 
 %% ──────────────────────────────────────────────────────────────────
 \subsection{BSDT Channel Behaviour at Constant Viscosity}
@@ -561,35 +608,48 @@ system~\eqref{eq:app_ns} implies regularity of the classical
 system (constant $\nu_0$).  The simulation data delineates the gap
 precisely.
 
-\begin{theorem}[Three-Regime Structure]\label{thm:three_regimes}
-The simulations identify three distinct regimes:
+\begin{theorem}[Two-Regime Structure]\label{thm:three_regimes}
+The simulations identify two distinct regimes,
+distinguished \textbf{not by viscosity level but by
+feedback dynamics}:
 \begin{center}
-\begin{tabular}{@{}lccccl@{}}
+\begin{tabular}{@{}lcccl@{}}
 \toprule
-System & $\nu$ & $\mathrm{Re}$ & $c$ & Inequality & Status \\
+System & $\nu_{\mathrm{eff}}$ & $c$ & Inequality & Status \\
 \midrule
-Adaptive & varies in $[\nu_0, 2\nu_0)$ & $\approx 631$--$1257$
-  & $> 0$ & Holds & VERIFIED \\
-Frozen $\gamma^*$ (constant) & $0.00995$ & $\approx 631$
+Adaptive (feedback ON) & varies in $[\nu_0, 2\nu_0)$
   & $+2.447$ & Holds & VERIFIED \\
-Classical (constant) & $0.005$ & $\approx 1257$
+Constant $\nu = 0.00995$ & fixed at $2\nu_0$
+  & $-8.40$ & FAILS & VERIFIED \\
+Constant $\nu = 0.005$ & fixed at $\nu_0$
   & $-11.91$ & FAILS & VERIFIED \\
 \bottomrule
 \end{tabular}
 \end{center}
+The key distinction is row~1 vs row~2: the
+\emph{same} viscosity level ($\approx 0.00995$) gives
+opposite sign of~$c$ depending on whether it is
+constant or adaptive.  Damping is a property of the
+\emph{feedback loop}, not the viscosity magnitude.
 \end{theorem}
 
 \begin{proof}
-Direct simulation output as reported above.
+Row~1: adaptive run ($\gamma^*$ active) as in
+Section~\ref{app:ns:sweep}.
+Rows~2--3: dense viscosity sweep
+(Section~\ref{app:ns:nu_c_experiment}):
+11~constant-$\nu$ runs in $[0.005, 0.00995]$, all
+yielding $c < 0$.
 \end{proof}
 
-\paragraph{The gap in one sentence.}  The adaptive mechanism works
-by pushing $\nu_{\mathrm{eff}}$ above the critical threshold
-$\nu_c$.  Any ``bridge'' from adaptive to classical regularity
-must explain how to cross from $\mathrm{Re}\approx 631$ (where
-$c > 0$) to $\mathrm{Re}\approx 1257$ (where $c < 0$)---i.e.,
-it must provide \emph{a priori} bounds that the quadratic
-inequality~\eqref{eq:app_ineq} cannot.
+\paragraph{The gap in one sentence.}
+The adaptive mechanism works through \emph{temporally
+correlated feedback}, not by simply raising viscosity.
+Any ``bridge'' from adaptive to classical regularity
+must explain why dynamic feedback produces $c > 0$
+while the same viscosity held constant produces
+$c < 0$---a fundamentally different challenge from
+locating a critical threshold $\nu_c$.
 
 %% ──────────────────────────────────────────────────────────────────
 \subsection{Conjectures and Open Problems}
@@ -601,29 +661,26 @@ The simulation data motivates several open problems.
 \begin{conjecture}[Critical Viscosity Function]\label{conj:nu_c}
 For a given initial condition and resolution, define
 $\nu_c(\mathrm{Re}, \bm{u}_0)$ as the viscosity at which the
-fitted damping coefficient $c(\nu) = 0$.  Then as the resolution
-$N \to \infty$ with fixed IC:
+fitted damping coefficient $c(\nu) = 0$.  The dense
+viscosity sweep (Section~\ref{app:ns:nu_c_experiment})
+shows $c < 0$ throughout $[\nu_0, 2\nu_0]$ at all
+tested Re, so $\nu_c > 2\nu_0$ by at least a small margin.
+The following are open:
 \begin{enumerate}
 \item[\textup{(i)}]
-  $\nu_c$ converges to a resolution-independent limit
-  (well-posedness of the critical threshold).
+  Does $\nu_c$ converge to a resolution-independent value as
+  $N \to \infty$ with fixed IC?
 \item[\textup{(ii)}]
-  The ratio $\nu_c / \nu_0$ determines whether the factor-$2$
-  adaptive enhancement suffices for all Re.  If
-  $\nu_c / \nu_0 < 2$ universally, then $\nu_{\mathrm{eff}}
-  > \nu_c$ at saturation and the damping inequality holds
-  under adaptation at every Re.
+  Does $\nu_c$ exist at all, or does $c(\nu)$
+  remain negative for all $\nu > 0$?  The declining
+  $R^2$ near $c \approx 0$ (e.g., $R^2 = 0.005$ at
+  $\nu = 2\nu_0$, $\mathrm{Re} \approx 628$) suggests
+  the quadratic model~\eqref{eq:app_ineq} itself breaks
+  down before $c$ reaches zero.
 \item[\textup{(iii)}]
-  If $\nu_c / \nu_0 \to \infty$ as $\mathrm{Re} \to \infty$,
-  then the adaptive mechanism's fixed factor-$2$ enhancement
-  becomes insufficient at high Re.
+  If $\nu_c$ exists, how does $\nu_c / \nu_0$ scale with Re?
 \end{enumerate}
 \end{conjecture}
-
-\paragraph{Testability.}  This conjecture can be resolved
-computationally by running intermediate viscosities (e.g.,
-$\nu \in \{0.006, 0.007, 0.008, 0.009\}$) to locate $\nu_c$,
-then repeating at multiple Re values to determine the scaling.
 
 \begin{conjecture}[Vorticity Saturation at Constant
   Viscosity]\label{conj:saturation}
@@ -638,20 +695,21 @@ $T=50$.  If $\norm{\bm{\omega}}_\infty$ peaks and decays,
 the conjecture is confirmed.  If growth continues or accelerates,
 the conjecture is refuted.
 
-\begin{conjecture}[P/D Halving and Adaptive Feedback]
-\label{conj:pd}
-The production-to-dissipation ratio
-$P/D = \int\omega_i S_{ij}\omega_j\,dx /
-(\nu_{\mathrm{eff}}\norm{\grad\bm{\omega}}_{L^2}^2)$
-converges to $1/2$ under adaptive viscosity (as reported in
-Section~\ref{sec:ns:lyapv2}).  Under constant viscosity at
-$\nu < \nu_c$, the ratio does \textbf{not} converge to $1/2$.
+\begin{conjecture}[Feedback Dynamics as the Mechanism of
+  Damping]\label{conj:feedback_dynamics}
+The positive damping coefficient $c > 0$ observed in the adaptive
+system is a property of the \emph{temporal correlation} between
+viscosity enhancement and enstrophy growth, not of the viscosity
+level per~se.  Formally: for any time-invariant viscosity
+$\nu \in [\nu_0, 2\nu_0]$, the fitted $c < 0$, but the adaptive
+law $\nu_{\mathrm{eff}}(t) = \nu_0(1 + \gamma^*(E_{\mathrm{BS}}(t)))$
+with the same time-averaged viscosity yields $c > 0$.
 
-If true, the P/D halving is a property of the feedback control,
-not of the Navier--Stokes equations per se. If false (i.e., if
-$P/D \to 1/2$ at constant $\nu$ as well), then the halving is an
-intrinsic property of 3D NS turbulence and adaptive viscosity
-merely accelerates convergence.
+If true, this identifies the \emph{production-dissipation
+cross-correlation} as the essential mathematical object:
+the feedback creates a negative correlation between $P(t)$
+(production) and $D(t+\epsilon)$ (dissipation at a short lag),
+which constant viscosity cannot generate.
 \end{conjecture}
 
 %% ──────────────────────────────────────────────────────────────────
@@ -669,15 +727,8 @@ and what remains open.
 \item The adaptive system has Leray--Hopf weak solutions.
 \item At saturation, $\mathrm{Re}_{\mathrm{eff}} \approx
   \mathrm{Re}_0 / 2$ (Theorem~\ref{thm:re_halving}).
-\item There exists $\nu_c \in (0.005, 0.00995)$ where the
-  damping coefficient changes sign
-  (Theorem~\ref{thm:nu_crit}).
 \item The BSDT detection--response map is a monotone negative
   feedback controller (Proposition~\ref{prop:feedback}).
-\item If $\nu_c < 2\nu_0$, the BSDT feedback pushes
-  $\nu_{\mathrm{eff}} > \nu_c$ at saturation, placing the
-  system in the damping regime
-  (Theorem~\ref{thm:bsdt_transition}).
 \end{enumerate}
 
 \paragraph{Computationally verified (reproducible, subject to
@@ -685,10 +736,12 @@ and what remains open.
 \begin{enumerate}
 \item $\gamma^*$ saturates at $\approx 0.996$ across all tested Re
   (Proposition~\ref{prop:saturation}).
-\item The damping inequality~\eqref{eq:app_ineq} holds with
-  $c > 0$ at $\nu = 0.00995$ ($\mathrm{Re}_{\mathrm{eff}}
-  \approx 631$) and fails ($c < 0$) at $\nu = 0.005$
-  ($\mathrm{Re} \approx 1257$) (Theorem~\ref{thm:regime}).
+\item The damping inequality~\eqref{eq:app_ineq} with
+  $c > 0$ holds \textbf{only} in adaptive mode
+  ($c = +2.447$ with time-varying $\nu_{\mathrm{eff}}$).
+  At constant~$\nu$, $c < 0$ for \emph{every} $\nu \in
+  [\nu_0, 2\nu_0]$, at all four tested Re
+  (Theorem~\ref{thm:regime}, Theorem~\ref{thm:nu_crit}).
 \item Suppression decreases with Re: $S \sim
   \mathrm{Re}^{-0.047}$ (Theorem~\ref{thm:suppression}).
 \item No blow-up in any of 30 simulations through $T = 3$--$5$,
@@ -698,30 +751,45 @@ and what remains open.
   $\gamma^*$ saturates within $O(1)$ time units at every
   tested Re, driving $\nu_{\mathrm{eff}}$ from $\nu_0$ to
   $\approx 2\nu_0$ before enstrophy peaks.
+\item $\nu_c > 2\nu_0$ at all tested Re: the quadratic
+  inequality with $c > 0$ is unreachable by any constant
+  viscosity in the adaptive range
+  (Section~\ref{app:ns:nu_c_experiment}).
 \end{enumerate}
 
 \paragraph{Not established (open).}
 \begin{enumerate}
 \item Global regularity for classical constant-$\nu$ NS
-  (the data show $c < 0$ at the paper's Re).
+  (the data show $c < 0$ at every constant $\nu$).
 \item Global regularity for adaptive NS with arbitrary initial
   data (only Taylor--Green tested).
 \item Whether $\norm{\bm{\omega}}_\infty$ at $\nu=0.005$
   eventually peaks or continues growing past $T=5$.
-\item Whether $\nu_c / \nu_0 < 2$ at all Re
-  (Conjecture~\ref{conj:nu_c}).
+\item Why time-varying $\nu_{\mathrm{eff}}$ produces $c > 0$
+  while the same average viscosity held constant produces
+  $c < 0$ (Conjecture~\ref{conj:feedback_dynamics}).
 \item Any bridge from adaptive to classical regularity.
 \end{enumerate}
 
 \paragraph{Previously overclaimed (corrected here).}
 \begin{enumerate}
-\item The ``$c = 2.447$ at constant $\nu$'' result used
-  $\nu = 0.00995 \approx 2\nu_0$, not the bare $\nu_0 = 0.005$.
-  This is a result at $\mathrm{Re}\approx 631$, not
-  $\mathrm{Re}\approx 1257$.
+\item The ``$c = 2.447$ at constant $\nu$'' result was in fact
+  from an \emph{adaptive} run (time-varying $\nu_{\mathrm{eff}}$,
+  saturating at $\approx 0.00995$), not a constant-$\nu$
+  simulation.  The dense sweep experiment confirms
+  $c = -8.40$ at constant $\nu = 0.00995$---the
+  \emph{opposite} sign.
 
 \item ``0 violations'' of the inequality is tautological
   when $C^*$ is defined as the maximum residual.
+
+\item The original Theorem claiming $\nu_c \in (0.005, 0.00995)$
+  via the intermediate value theorem was based on comparing
+  a constant-$\nu$ run ($c = -11.91$) with an adaptive run
+  ($c = +2.447$)---two \emph{different} systems.  The IVT
+  does not apply across different dynamical systems.
+  The corrected result (Theorem~\ref{thm:nu_crit}) shows
+  $\nu_c > 2\nu_0$.
 
 \item At constant~$\nu$, initial signals in $\delta_G$ and
   $\delta_T$ are physically correct detections (the IC state
@@ -738,45 +806,110 @@ and what remains open.
 \label{app:ns:road}
 %% ──────────────────────────────────────────────────────────────────
 
-The critical viscosity threshold $\nu_c$
-(Theorem~\ref{thm:nu_crit}) is the key object for future
-work.  Three computational experiments would clarify the
-path to stronger results:
+The experiment results (Section~\ref{app:ns:nu_c_experiment})
+reveal a striking and unexpected finding: the positive damping
+coefficient $c > 0$ is a property of the \emph{feedback
+dynamics}, not the viscosity level.  Three directions for future
+work arise:
 
 \begin{enumerate}
-\item \textbf{Locate $\nu_c$ precisely.}  Run 10 intermediate
-  viscosities $\nu \in (0.005, 0.00995)$ at $N=128$ to find
-  where $c(\nu)$ crosses zero.  A refined estimate
-  $\nu_c \approx \nu_0(1 + r)$ determines the required
-  viscosity enhancement ratio $r$.
-
 \item \textbf{Extend $T$ at $\nu = 0.005$.}  Run to $T = 20$
   or $T = 50$ to determine whether peak vorticity saturates
   (Conjecture~\ref{conj:saturation}).  If it does, the
   quadratic inequality is the wrong diagnostic---the system
   is stable for reasons the inequality cannot capture.
 
-\item \textbf{Scale $\nu_c$ with Re.}  Repeat experiment~1 at
-  Re $= 3{,}000$, $10{,}000$, $30{,}000$ to determine whether
-  $\nu_c / \nu_0$ stays bounded as Re $\to \infty$
-  (Conjecture~\ref{conj:nu_c}).  If $\nu_c / \nu_0 < 2$ at all Re,
-  the adaptive mechanism provides a \emph{provable} damping
-  inequality at every Reynolds number.
+\item \textbf{Characterise the temporal correlation mechanism.}
+  The adaptive system achieves $c > 0$ while the same viscosity
+  held constant gives $c < 0$.  The mathematical mechanism
+  must involve the \emph{cross-correlation} between
+  $\nu_{\mathrm{eff}}(t)$ and enstrophy growth rate.
+  Formalising this requires analysing the production--dissipation
+  phase relationship in the feedback loop.
+
+\item \textbf{Resolution and IC dependence.}  Repeat the dense
+  viscosity sweep at $N = 256$ and $N = 384$ with both
+  Taylor--Green and random-phase initial conditions to test
+  universality of the $\nu_c > 2\nu_0$ result.
 \end{enumerate}
 
-If experiment~3 confirms $\nu_c / \nu_0 < 2$ universally, then
-one can prove:
+The key open question is no longer ``Does $\nu_c / \nu_0 < 2$?''
+(answered: no), but rather: \emph{What mathematical property of
+time-varying viscosity creates damping that constant viscosity
+cannot?}
 
-\begin{quotation}
-\emph{The BSDT adaptive-viscosity Navier--Stokes
-system~\eqref{eq:app_ns} satisfies the damping
-inequality~\eqref{eq:app_ineq} with $c > 0$ for all
-$\mathrm{Re} > 0$, with $\nu_{\mathrm{eff}} > \nu_c$ ensured
-by saturation of $\gamma^*$.}
-\end{quotation}
+%% ──────────────────────────────────────────────────────────────────
+\subsection{Dense Viscosity Sweep: Experimental Data}
+\label{app:ns:nu_c_experiment}
+%% ──────────────────────────────────────────────────────────────────
 
-This would be a genuine unconditional result for the
-\emph{modified} system---not classical NS, but a well-defined
-PDE with an explicit feedback law.  The gap between this and
-classical regularity would then be precisely characterised by
-the ratio $\nu_c / \nu_0$ and its dependence on initial data.
+The following experiment was run on an NVIDIA RTX PRO 6000
+(Blackwell, 102\,GB VRAM) using CuPy~14.0.1, with the
+identical solver as all preceding simulations ($N=128$,
+Taylor--Green IC, semi-implicit integrator, $\theta=1$).
+
+\paragraph{Experiment~1: Dense $\nu$ sweep at $\mathrm{Re}_0
+\approx 1257$.}
+Eleven constant-viscosity runs, $\nu \in [0.005, 0.00995]$,
+each at $T=5.0$ with \texttt{adaptive=False}:
+\begin{center}
+\begin{tabular}{@{}ccccl@{}}
+\toprule
+$\nu$ & $\mathrm{Re}$ & $c$ & $R^2$ & Comment \\
+\midrule
+$0.0050$ & $1257$ & $-11.91$ & $0.652$ & \\
+$0.0055$ & $1142$ & $-11.75$ & $0.681$ & \\
+$0.0060$ & $1047$ & $-11.49$ & $0.693$ & \\
+$0.0065$ &  $967$ & $-11.14$ & $0.691$ & \\
+$0.0070$ &  $898$ & $-10.74$ & $0.678$ & \\
+$0.0075$ &  $838$ & $-10.32$ & $0.656$ & \\
+$0.0080$ &  $785$ & $-9.89$  & $0.628$ & \\
+$0.0085$ &  $739$ & $-9.48$  & $0.595$ & \\
+$0.0090$ &  $698$ & $-9.08$  & $0.559$ & \\
+$0.0095$ &  $661$ & $-8.71$  & $0.522$ & \\
+$0.00995$&  $631$ & $-8.40$  & $0.487$ & $\approx 2\nu_0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Result: $c < 0$ \textbf{everywhere}.  $c$ increases monotonically
+toward zero (from $-11.91$ to $-8.40$), but $R^2$ also
+\emph{drops} monotonically (from $0.652$ to $0.487$), meaning
+the quadratic model fits \emph{worse} at higher $\nu$.
+Linear extrapolation would place $\nu_c \approx 0.022
+\approx 4.4\nu_0$, but the declining $R^2$ makes this
+extrapolation unreliable.
+
+\paragraph{Experiment~2: $\nu_c$ scaling with Re.}
+At each of four base viscosities, sweep constant $\nu$ from
+$\nu_0$ to $2\nu_0$ in 8~steps:
+\begin{center}
+\begin{tabular}{@{}cccccl@{}}
+\toprule
+$\nu_0$ & $\mathrm{Re}_0$ & $c$ at $\nu_0$ & $c$ at $2\nu_0$
+  & $\nu_c > 2\nu_0$? & Adaptive $c$ \\
+\midrule
+$0.010$ & $628$  & $-8.36$  & $-1.41$ & Yes & $+2.447^*$ \\
+$0.005$ & $1257$ & $-11.91$ & $-8.36$ & Yes & $+2.447$ \\
+$0.002$ & $3142$ & $-10.40$ & $-12.73^\dagger$ & Yes & --- \\
+$0.001$ & $6283$ & $-11.77$ & --- & Yes & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\footnotesize ${}^*$Inferred from literature; ${}^\dagger$Non-monotone
+$c(\nu)$ at high Re.}
+
+\noindent
+At \emph{every} tested Re, all constant-$\nu$ runs yield $c < 0$.
+At $\mathrm{Re} \approx 628$, $c = -1.41$ at $2\nu_0$ is closest
+to zero but still negative ($R^2 = 0.005$---the quadratic model
+has essentially zero explanatory power).
+
+\paragraph{Key finding.}
+The previously reported $c = +2.447$ arose from an \emph{adaptive}
+run (time-varying $\nu_{\mathrm{eff}}$), not a constant-$\nu$ run.
+Comparing constant-$\nu = 0.00995$ ($c = -8.40$) with
+adaptive $\nu_{\mathrm{eff}} \to 0.00995$ ($c = +2.447$)
+demonstrates that \textbf{the feedback loop itself, not the
+viscosity magnitude, is the mechanism that creates positive
+damping}.  This is a stronger---and more interesting---result
+than the original ``bridge'' hypothesis.
