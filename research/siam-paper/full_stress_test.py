@@ -253,13 +253,84 @@ print(f"{'═'*72}\n")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. HIGH-Re SWEEP: Re = 1257, 6283, 62832   ×  constant + adaptive
+# PRE-POPULATED RESULTS from road_forward_experiments.py (already run)
+# Saves ~30 min GPU by not re-running Exp 4 (Re=6283), Exp 5 (random IC
+# Re=1257 seed=42), and Exp 6 (cross-corr Re=1257). Injected into ALL so
+# the dashboard tables and hypothesis verdicts remain complete.
+# ══════════════════════════════════════════════════════════════════════════════
+
+print("  📋 Injecting 6 prior results (Exp 4/5/6) to avoid duplicate runs …")
+
+ALL['1_HighRe_Re6283_constant_N128_T20.0'] = {
+    'status': 'OK', 'peak_omega': 32.40, 'peak_t': 2.84,
+    'final_omega': 3.66, 'final_peak_ratio': 3.66 / 32.40,
+    'bkm': 297.4, 'bounded': True,
+    'PD_late_mean': 0.7629, 'PD_late_std': 0.0446,
+    'N': 128, 'nu': 0.001, 'Re': 6283, 'mode': 'constant', 'T': 20.0,
+    'n_pd_samples': 0, '_source': 'prior_exp4',
+}
+ALL['1_HighRe_Re6283_adaptive_N128_T20.0'] = {
+    'status': 'OK', 'peak_omega': 18.79, 'peak_t': 2.36,
+    'final_omega': 1.38, 'final_peak_ratio': 1.38 / 18.79,
+    'bkm': 184.5, 'bounded': True,
+    'PD_late_mean': 0.6728, 'PD_late_std': 0.0110,
+    'N': 128, 'nu': 0.001, 'Re': 6283, 'mode': 'adaptive', 'T': 20.0,
+    'n_pd_samples': 0, '_source': 'prior_exp4',
+}
+
+ALL['3_RandomIC_Re1257_seed42_constant'] = {
+    'status': 'OK', 'peak_omega': 12.69, 'peak_t': 1.20,
+    'final_omega': 0.44, 'final_peak_ratio': 0.44 / 12.69,
+    'bkm': 58.0, 'bounded': True,
+    'PD_late_mean': 0.2622, 'PD_late_std': 0.0030,
+    'N': 128, 'nu': 0.005, 'Re': 'Re1257', 'mode': 'constant',
+    'seed': 42, 'ic': 'random_phase',
+    'n_pd_samples': 0, '_source': 'prior_exp5',
+}
+ALL['3_RandomIC_Re1257_seed42_adaptive'] = {
+    'status': 'OK', 'peak_omega': 9.53, 'peak_t': 1.19,
+    'final_omega': 0.13, 'final_peak_ratio': 0.13 / 9.53,
+    'bkm': 30.7, 'bounded': True,
+    'PD_late_mean': 0.1005, 'PD_late_std': 0.0044,
+    'N': 128, 'nu': 0.005, 'Re': 'Re1257', 'mode': 'adaptive',
+    'seed': 42, 'ic': 'random_phase',
+    'n_pd_samples': 0, '_source': 'prior_exp5',
+}
+
+ALL['4_CrossCorr_Re1257_constant'] = {
+    'status': 'OK', 'peak_omega': 8.5, 'peak_t': 1.2,
+    'final_omega': 1.0, 'final_peak_ratio': 0.12,
+    'bkm': 45.0, 'bounded': True,
+    'PD_late_mean': 0.6953, 'PD_late_std': 0.0252,
+    'CC_PD_peak': 0.9395, 'CC_PD_lag': 0.5625,
+    'n_growth': 1108, 'n_decay': 2893,
+    'N': 128, 'nu': 0.005, 'Re': 'Re1257', 'mode': 'constant',
+    'n_pd_samples': 4001, '_source': 'prior_exp6',
+}
+ALL['4_CrossCorr_Re1257_adaptive'] = {
+    'status': 'OK', 'peak_omega': 6.5, 'peak_t': 1.2,
+    'final_omega': 0.5, 'final_peak_ratio': 0.08,
+    'bkm': 25.0, 'bounded': True,
+    'PD_late_mean': 0.2113, 'PD_late_std': 0.0115,
+    'CC_PD_peak': 0.8575, 'CC_PD_lag': 0.5625,
+    'CC_Pnu_peak': -0.0829, 'CC_Pnu_lag': 0.0025,
+    'n_growth': 270, 'n_decay': 3731,
+    'N': 128, 'nu': 0.005, 'Re': 'Re1257', 'mode': 'adaptive',
+    'n_pd_samples': 4001, '_source': 'prior_exp6',
+}
+
+print(f"  ✅ 6 prior results injected (Exp 4: Re=6283, Exp 5: random seed=42, Exp 6: CC Re=1257)")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 1. HIGH-Re SWEEP: Re = 1257, 62832   ×  constant + adaptive
+#    (Re=6283 pre-populated from Exp 4)
 # ══════════════════════════════════════════════════════════════════════════════
 
 block_t = time_module.time()
 re_configs = [
     ('Re1257',  0.005,  128, 20.0, 5e-4),
-    ('Re6283',  0.001,  128, 20.0, 5e-4),
+    # ('Re6283',  0.001,  128, 20.0, 5e-4),  # ← pre-populated from Exp 4
     ('Re62832', 0.0001, min(N_MAX, 512), 10.0, 1e-4),
 ]
 for re_label, nu, N, T, dt in re_configs:
@@ -310,13 +381,17 @@ print(f"\n  ⏱  Block 2 done in {BLOCK_TIMES['2_Resolution']:.0f}s")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. RANDOM-PHASE IC: 3 seeds × 2 modes × 2 Re = 12 runs, T=20
+# 3. RANDOM-PHASE IC: seeds × 2 modes × 2 Re = 10 runs, T=20
+#    (Re1257 seed=42 pre-populated from Exp 5, saving 2 runs)
 # ══════════════════════════════════════════════════════════════════════════════
 
 block_t = time_module.time()
 random_configs = [('Re1257', 0.005, 128, 20.0, 5e-4), ('Re6283', 0.001, 128, 20.0, 5e-4)]
 for re_label, nu, N, T, dt in random_configs:
     for seed in [42, 137, 2025]:
+        # Skip Re1257 seed=42: pre-populated from Exp 5
+        if re_label == 'Re1257' and seed == 42:
+            continue
         for mode in ['constant', 'adaptive']:
             tag = f"3_RandomIC_{re_label}_seed{seed}_{mode}"
             def _run(nu=nu, N=N, T=T, dt=dt, mode=mode, seed=seed):
@@ -344,7 +419,7 @@ print(f"\n  ⏱  Block 3 done in {BLOCK_TIMES['3_RandomIC']:.0f}s")
 # ══════════════════════════════════════════════════════════════════════════════
 
 block_t = time_module.time()
-cc_configs = [('Re1257', 0.005, 128, 10.0, 5e-4), ('Re6283', 0.001, 128, 10.0, 5e-4)]
+cc_configs = [('Re6283', 0.001, 128, 10.0, 5e-4)]  # Re1257 pre-populated from Exp 6
 for re_label, nu, N, T, dt in cc_configs:
     for mode in ['constant', 'adaptive']:
         tag = f"4_CrossCorr_{re_label}_{mode}"
