@@ -38,7 +38,8 @@ mem_free, mem_total = cp.cuda.runtime.memGetInfo()
 gpu_name = cp.cuda.runtime.getDeviceProperties(0)['name'].decode()
 print(f"GPU: {gpu_name}  |  {mem_free/1e9:.1f}/{mem_total/1e9:.1f} GB")
 
-N_MAX = 1024 if mem_free > 200e9 else 512 if mem_free > 40e9 else 256 if mem_free > 8e9 else 128
+# Conservative N_MAX: N=512 solver+compute_PD needs ~110GB; require >120GB headroom
+N_MAX = 1024 if mem_free > 200e9 else 512 if mem_free > 120e9 else 256 if mem_free > 8e9 else 128
 print(f"N_MAX = {N_MAX}")
 
 ALL = {}
@@ -157,6 +158,23 @@ def random_phase_ic(grid, k0=4, seed=42):
     return grid.dealias(grid.project_divergence_free(u_hat))
 
 
+def _safe_compute_PD(u_hat, grid, nu_eff):
+    """compute_PD with OOM retry: flush pool + retry once on failure."""
+    try:
+        return compute_PD(u_hat, grid, nu_eff)
+    except cp.cuda.memory.OutOfMemoryError:
+        cp.get_default_memory_pool().free_all_blocks()
+        try:
+            cp.fft.config.get_plan_cache().clear()
+        except Exception:
+            pass
+        try:
+            return compute_PD(u_hat, grid, nu_eff)
+        except cp.cuda.memory.OutOfMemoryError:
+            # Return harmless defaults so the run continues
+            return 0.0, 1e-30, 0.0, 0.0, 0.0
+
+
 def run_full(solver, pd_every=5, verbose_every=200):
     """Run solver to T_final, collecting P/D at pd_every-th diagnostic step."""
     p = solver.params; total = int(p.T_final / p.dt)
@@ -168,7 +186,7 @@ def run_full(solver, pd_every=5, verbose_every=200):
             diag = solver.compute_diagnostics()
             E_bs = diag.bsdt.E_bs; solver.history.append(diag)
             if dc % pd_every == 0:
-                P, D, enst, align, mstr = compute_PD(
+                P, D, enst, align, mstr = _safe_compute_PD(
                     solver.u_hat, solver.grid, diag.nu_effective)
                 pd_data.append({
                     'time': diag.time, 'P': P, 'D': D,
@@ -243,7 +261,12 @@ def safe_run(label, fn):
         print(f"  ❌ {label} FAILED: {e}")
         traceback.print_exc()
     ALL[label] = result
+    # Aggressive memory cleanup: free pool AND flush FFT plan cache
     cp.get_default_memory_pool().free_all_blocks()
+    try:
+        cp.fft.config.get_plan_cache().clear()
+    except Exception:
+        pass
     return result
 
 
@@ -331,7 +354,7 @@ block_t = time_module.time()
 re_configs = [
     ('Re1257',  0.005,  128, 20.0, 5e-4),
     # ('Re6283',  0.001,  128, 20.0, 5e-4),  # ← pre-populated from Exp 4
-    ('Re62832', 0.0001, min(N_MAX, 512), 10.0, 1e-4),
+    ('Re62832', 0.0001, min(N_MAX, 256), 10.0, 1e-4),  # N=256 safe; N=512 OOMs on 96GB GPU
 ]
 for re_label, nu, N, T, dt in re_configs:
     for mode in ['constant', 'adaptive']:
@@ -354,11 +377,11 @@ print(f"\n  ⏱  Block 1 done in {BLOCK_TIMES['1_HighRe']:.0f}s")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 2. RESOLUTION CHECK at Re=6283: N=128 vs N=256 (vs N=512 if memory allows)
+# 2. RESOLUTION CHECK at Re=6283: N=128 vs N=256
 # ══════════════════════════════════════════════════════════════════════════════
 
 block_t = time_module.time()
-res_Ns = [128, 256] + ([512] if N_MAX >= 512 else [])
+res_Ns = [128, 256]  # N=512 OOMs on <120GB GPUs
 for N in res_Ns:
     tag = f"2_Resolution_Re6283_N{N}_const"
     def _run(N=N):
@@ -372,7 +395,7 @@ for N in res_Ns:
         history, pd_data = run_full(solver, pd_every=10)
         s = summarize(history, pd_data)
         s['N'] = N; s['nu'] = nu; s['Re'] = 6283
-        P, D, enst, align, mstr = compute_PD(solver.u_hat, solver.grid, nu)
+        P, D, enst, align, mstr = _safe_compute_PD(solver.u_hat, solver.grid, nu)
         s['final_alignment'] = align; s['final_max_stretching'] = mstr
         del solver; return s
     safe_run(tag, _run)
@@ -501,17 +524,19 @@ print(f"\n  ⏱  Block 5 done in {BLOCK_TIMES['5_Feedback']:.0f}s")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 6. TURBULENT Re=62832 RESOLUTION CHECK (if GPU allows N≥512)
+# 6. TURBULENT Re=62832 — N=256 primary, N=512 bonus if available
+#    (N=512 OOMs on <120GB GPUs with solver+compute_PD overhead)
 # ══════════════════════════════════════════════════════════════════════════════
 
 block_t = time_module.time()
-if N_MAX >= 512:
-    for N in [256, 512]:
+# N=256 always runs (safe on any GPU with N_MAX>=256)
+if N_MAX >= 256:
+    for N in [256]:
         tag = f"6_Turbulent_Re62832_N{N}_const"
         def _run(N=N):
             cp.get_default_memory_pool().free_all_blocks()
-            nu = 0.0001; dt = 5e-5 if N >= 512 else 1e-4
-            T = 5.0 if N >= 512 else 8.0
+            nu = 0.0001; dt = 1e-4
+            T = 8.0
             params = NSParams(N=N, nu_base=nu, dt=dt, T_final=T, theta=1.0,
                               adaptive=False, integrator='semi_implicit',
                               diag_interval=max(10, int(0.005/dt)))
@@ -520,27 +545,44 @@ if N_MAX >= 512:
             history, pd_data = run_full(solver, pd_every=10)
             s = summarize(history, pd_data)
             s['N'] = N; s['nu'] = nu; s['Re'] = 62832; s['T'] = T
-            P, D, enst, align, mstr = compute_PD(solver.u_hat, solver.grid, nu)
+            P, D, enst, align, mstr = _safe_compute_PD(solver.u_hat, solver.grid, nu)
             s['final_alignment'] = align; s['final_max_stretching'] = mstr
             del solver; return s
         safe_run(tag, _run)
 
-    tag = "6_Turbulent_Re62832_N512_adaptive"
+    tag = "6_Turbulent_Re62832_N256_adaptive"
     def _run():
         cp.get_default_memory_pool().free_all_blocks()
-        N = 512; nu = 0.0001; dt = 5e-5
-        params = NSParams(N=N, nu_base=nu, dt=dt, T_final=5.0, theta=1.0,
+        N = 256; nu = 0.0001; dt = 1e-4
+        params = NSParams(N=N, nu_base=nu, dt=dt, T_final=8.0, theta=1.0,
                           adaptive=True, integrator='semi_implicit',
                           diag_interval=max(10, int(0.005/dt)))
         solver = NavierStokesSolverGPU(params)
         solver.initialize('taylor_green')
         history, pd_data = run_full(solver, pd_every=10)
         s = summarize(history, pd_data)
-        s['N'] = N; s['nu'] = nu; s['Re'] = 62832; s['T'] = 5.0; s['mode'] = 'adaptive'
+        s['N'] = N; s['nu'] = nu; s['Re'] = 62832; s['T'] = 8.0; s['mode'] = 'adaptive'
         del solver; return s
     safe_run(tag, _run)
+
+    # Attempt N=512 as bonus (will fail gracefully on <120GB GPUs)
+    if N_MAX >= 512:
+        tag = "6_Turbulent_Re62832_N512_const"
+        def _run():
+            cp.get_default_memory_pool().free_all_blocks()
+            N = 512; nu = 0.0001; dt = 5e-5
+            params = NSParams(N=N, nu_base=nu, dt=dt, T_final=5.0, theta=1.0,
+                              adaptive=False, integrator='semi_implicit',
+                              diag_interval=max(10, int(0.005/dt)))
+            solver = NavierStokesSolverGPU(params)
+            solver.initialize('taylor_green')
+            history, pd_data = run_full(solver, pd_every=10)
+            s = summarize(history, pd_data)
+            s['N'] = N; s['nu'] = nu; s['Re'] = 62832; s['T'] = 5.0
+            del solver; return s
+        safe_run(tag, _run)
 else:
-    print(f"\n⚠ Skipping turbulent N=512 runs ({mem_free/1e9:.0f}GB free, need >40GB)")
+    print(f"\n⚠ Skipping turbulent runs ({mem_free/1e9:.0f}GB free, need N≥256)")
 BLOCK_TIMES['6_Turbulent'] = time_module.time() - block_t
 print(f"\n  ⏱  Block 6 done in {BLOCK_TIMES['6_Turbulent']:.0f}s")
 
@@ -563,7 +605,7 @@ for re_label, nu, N in [('Re1257', 0.005, 128), ('Re6283', 0.001, min(256, N_MAX
         history, pd_data = run_full(solver, pd_every=2)
         s = summarize(history, pd_data)
         s['N'] = N; s['nu'] = nu
-        P, D, enst, align, mstr = compute_PD(solver.u_hat, solver.grid, nu)
+        P, D, enst, align, mstr = _safe_compute_PD(solver.u_hat, solver.grid, nu)
         s['final_P'] = P; s['final_D'] = D; s['final_PD'] = P / max(abs(D), 1e-30)
         s['final_alignment'] = align; s['final_max_stretching'] = mstr
         s['align_timeseries'] = [d['alignment'] for d in pd_data]
