@@ -260,7 +260,21 @@ algorithms. Our framework complements these by providing feedback
 control with formal stability guarantees. For the Navier--Stokes
 connection, the Beale--Kato--Majda criterion \cite{bkm1984} and
 Ladyzhenskaya's classical estimates \cite{lady1969} provide the
-regularity backdrop.
+regularity backdrop.  On the computational side, high-resolution
+DNS studies by Kerr~\cite{kerr1993} and Hou \&
+Li~\cite{houli2006} investigated potential finite-time blow-up of
+the 3D Euler equations, finding strong vortex-sheet formation but
+no definitive singularity.  In the turbulence-modelling
+literature, Large Eddy Simulation (LES) with the dynamic
+Smagorinsky model~\cite{smagorinsky1963,germano1991} adapts an
+eddy viscosity based on the \emph{resolved strain rate};
+hyperviscosity~($\nu\nabla^{2p}$) and spectral vanishing
+viscosity~\cite{tadmor1989} add dissipation targeted at high
+wavenumbers.  Our adaptive viscosity differs from all of these:
+it responds to a \emph{topological energy functional}
+($E_{\mathrm{BS}}$), not to local strain rate or spectral
+content, and carries a Lyapunov certificate
+(Proposition~\ref{prop:ns_lyapv2}) that LES closures lack.
 
 \paragraph{Outline.}
 Section~\ref{sec:model} introduces the agent model and BSDT.
@@ -1767,6 +1781,34 @@ This section makes the most ambitious application: transferring
 the BSDT channel structure to the three-dimensional incompressible
 Navier--Stokes equations.
 
+\paragraph{Relation to existing turbulence models.}
+Conventional adaptive-viscosity approaches modify the dissipation
+operator based on \emph{local} flow quantities: the dynamic
+Smagorinsky model~\cite{smagorinsky1963,germano1991} uses the
+resolved strain-rate tensor $\bar{S}_{ij}$ and a test-filter
+identity to determine the sub-grid eddy viscosity;
+hyperviscosity replaces $\nu\Delta$ with $\nu(-1)^{p+1}\nabla^{2p}$
+to selectively damp high wavenumbers; and spectral vanishing
+viscosity~\cite{tadmor1989} activates dissipation only above a
+cutoff mode.  In contrast, the BSDT adaptive viscosity
+$\nu_{\mathrm{eff}} = \nu(1 + \gamma^*\,E_{\mathrm{BS}})$ is
+driven by a \emph{global topological functional}---the
+blind-spot energy $E_{\mathrm{BS}}$ defined on Fourier-mode
+interactions---and carries a three-part Lyapunov certificate
+(Armijo descent, ISS robustness, La~Salle convergence;
+Proposition~\ref{prop:ns_lyapv2}).  This structural guarantee
+is absent from LES closures, which lack formal stability
+proofs for the \emph{a priori} enstrophy bound.
+Computationally, prior DNS blow-up studies~\cite{kerr1993,houli2006}
+focused on the \emph{inviscid} (Euler) equations and diagnosed
+singularity via local vorticity growth.
+Our 34-run stress test (Appendix~\ref{app:ns:stress_test})
+complements these by studying the \emph{viscous} (Navier--Stokes)
+equations with adaptive feedback, providing the first systematic
+evidence of feedback-law independence (5~laws, spread $= 0.0004$)
+and IC-independence (12~random-phase runs) for the
+production/dissipation attractor.
+
 \subsection{BSDT Channels for Fluid Dynamics}\label{sec:ns:channels}
 
 Consider the 3D incompressible Navier--Stokes equations on
@@ -2538,6 +2580,20 @@ $\mathrm{Re}\approx 62{,}832$, IC-independent boundedness
 (spread $= 0.0004$ across 5 laws), and tight
 production-dissipation coupling ($\mathrm{Corr} \ge 0.85$
 at all Re)---provide concrete targets for analytical proof.
+To our knowledge, three findings are novel:
+\emph{(i)}~the cross-domain transfer of a single energy functional
+($E_{\mathrm{BS}}$) from financial networks to
+Navier--Stokes---prior DNS studies~\cite{kerr1993,houli2006}
+and turbulence models~\cite{smagorinsky1963,germano1991}
+operate exclusively within the fluid-dynamics domain;
+\emph{(ii)}~feedback universality, i.e., the insensitivity of
+the $P/D$ attractor to the specific form of the adaptive law
+(five laws, spread $= 0.0004$), which we have not found
+reported in the LES or hyperviscosity literature;
+and \emph{(iii)}~the Lyapunov~v2 three-part certificate
+(Proposition~\ref{prop:ns_lyapv2}), which provides
+Armijo--ISS--La~Salle convergence guarantees that standard
+LES closures lack.
 
 
 %% ====================================================================
@@ -3095,6 +3151,35 @@ Proc.\ R.\ Soc.\ Lond.\ A, 106 (1924), pp.~463--477.
 V.~Vovk, A.~Gammerman, and G.~Shafer,
 \emph{Algorithmic Learning in a Random World},
 Springer, New York, 2005.
+
+\bibitem{germano1991}
+M.~Germano, U.~Piomelli, P.~Moin, and W.~H.~Cabot,
+\emph{A dynamic subgrid-scale eddy viscosity model},
+Phys.\ Fluids A, 3 (1991), pp.~1760--1765.
+
+\bibitem{houli2006}
+T.~Y.~Hou and R.~Li,
+\emph{Dynamic depletion of vortex stretching and non-blowup of
+the 3-D incompressible Euler equations},
+J.\ Nonlinear Sci., 16 (2006), pp.~639--664.
+
+\bibitem{kerr1993}
+R.~M.~Kerr,
+\emph{Evidence for a singularity of the three-dimensional,
+incompressible Euler equations},
+Phys.\ Fluids A, 5 (1993), pp.~1725--1746.
+
+\bibitem{smagorinsky1963}
+J.~Smagorinsky,
+\emph{General circulation experiments with the primitive equations.
+I.~The basic experiment},
+Mon.\ Wea.\ Rev., 91 (1963), pp.~99--164.
+
+\bibitem{tadmor1989}
+E.~Tadmor,
+\emph{Convergence of spectral methods for nonlinear conservation
+laws},
+SIAM J.\ Numer.\ Anal., 26 (1989), pp.~30--44.
 
 \bibitem{UDL2025}
 O.~Odeyemi,
