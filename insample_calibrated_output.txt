@@ -1,0 +1,210 @@
+================================================================================
+  IN-SAMPLE MONITORING WITH ADAPTIVE CALIBRATION
+  Protocol: expanding window | y=zeros | in-sample | q_scores saved
+================================================================================
+Panel: T=76, N=25, d=5, Crisis: 13/76
+Calib: 11 Q  (2005-03-31 → 2007-09-30)
+
+
+======================================================================
+  [1/8] Molecular (Fused)
+======================================================================
+    t= 11  2007-12-31  score=0.1994 << CRISIS
+    t= 27  2011-12-31  score=0.1785 << CRISIS
+    t= 43  2015-12-31  score=0.1125
+    t= 59  2019-12-31  score=0.1562
+    t= 75  2023-12-31  score=0.4823
+  Time: 340s
+
+  Molecular (Fused):  AUROC=0.7216  GFC-AUC=0.7532  z(BNP)=+1.76
+    Fixed P99         FAR= 17.3%  Recall= 30.8%  Prec= 30.8%  GFC-1st=2008-09-30
+    Fixed mu+3sig     FAR= 13.5%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive z>3      FAR= 11.5%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive P99      FAR=  9.6%  Recall= 23.1%  Prec= 37.5%  GFC-1st=2008-09-30
+
+======================================================================
+  [2/8] Gravity
+======================================================================
+    t= 11  2007-12-31  score=0.1097 << CRISIS
+    t= 27  2011-12-31  score=0.1774 << CRISIS
+    t= 43  2015-12-31  score=0.1339
+    t= 59  2019-12-31  score=0.1721
+    t= 75  2023-12-31  score=0.2861
+  Time: 268s
+
+  Gravity:  AUROC=0.3309  GFC-AUC=0.2987  z(BNP)=+2.07
+    Fixed P99         FAR=  7.7%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Fixed mu+3sig     FAR=  1.9%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive z>3      FAR=  1.9%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive P99      FAR=  5.8%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+
+======================================================================
+  [3/8] Hybrid
+======================================================================
+    t= 11  2007-12-31  score=0.3057 << CRISIS
+    t= 27  2011-12-31  score=0.1315 << CRISIS
+    t= 43  2015-12-31  score=0.1039
+    t= 59  2019-12-31  score=0.1041
+    t= 75  2023-12-31  score=0.5021
+  Time: 648s
+
+  Hybrid:  AUROC=0.6068  GFC-AUC=0.7792  z(BNP)=+2.13
+    Fixed P99         FAR=  9.6%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Fixed mu+3sig     FAR=  9.6%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive z>3      FAR=  9.6%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive P99      FAR=  7.7%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+
+======================================================================
+  [4/8] Mol+Fisher
+======================================================================
+    t= 11  2007-12-31  score=0.4520 << CRISIS
+    t= 27  2011-12-31  score=0.4811 << CRISIS
+    t= 43  2015-12-31  score=0.3914
+    t= 59  2019-12-31  score=0.3246
+    t= 75  2023-12-31  score=0.4864
+  Time: 169s
+
+  Mol+Fisher:  AUROC=0.7253  GFC-AUC=0.7013  z(BNP)=+1.87
+    Fixed P99         FAR= 11.5%  Recall= 38.5%  Prec= 45.5%  GFC-1st=2008-03-31
+    Fixed mu+3sig     FAR=  5.8%  Recall=  7.7%  Prec= 25.0%  GFC-1st=2008-06-30
+    Adaptive z>3      FAR=  0.0%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive P99      FAR=  3.8%  Recall= 15.4%  Prec= 50.0%  GFC-1st=2008-03-31
+
+======================================================================
+  [5/8] Mol+QuadSurf
+======================================================================
+    t= 11  2007-12-31  score=0.1693 << CRISIS
+    t= 27  2011-12-31  score=0.3899 << CRISIS
+    t= 43  2015-12-31  score=0.1949
+    t= 59  2019-12-31  score=0.1914
+    t= 75  2023-12-31  score=0.1649
+  Time: 165s
+
+  Mol+QuadSurf:  AUROC=0.7521  GFC-AUC=0.5844  z(BNP)=+1.87
+    Fixed P99         FAR=  0.0%  Recall= 15.4%  Prec=100.0%  GFC-1st=2008-09-30
+    Fixed mu+3sig     FAR=  0.0%  Recall=  7.7%  Prec=100.0%  GFC-1st=2008-12-31
+    Adaptive z>3      FAR=  0.0%  Recall=  0.0%  Prec=  0.0%  GFC-1st=None
+    Adaptive P99      FAR=  0.0%  Recall= 15.4%  Prec=100.0%  GFC-1st=2008-09-30
+
+======================================================================
+  [6/8] Mol+ExpoGate
+======================================================================
+    t= 11  2007-12-31  score=0.6204 << CRISIS
+    t= 27  2011-12-31  score=0.7467 << CRISIS
+    t= 43  2015-12-31  score=0.6373
+    t= 59  2019-12-31  score=0.6364
+    t= 75  2023-12-31  score=0.6148
+  Time: 167s
+
+  Mol+ExpoGate:  AUROC=0.8669  GFC-AUC=0.9091  z(BNP)=+1.87
+    Fixed P99         FAR=100.0%  Recall=100.0%  Prec= 20.0%  GFC-1st=2007-12-31
+    Fixed mu+3sig     FAR=100.0%  Recall=100.0%  Prec= 20.0%  GFC-1st=2007-12-31
+    Adaptive z>3      FAR=  0.0%  Recall= 23.1%  Prec=100.0%  GFC-1st=2007-12-31
+    Adaptive P99      FAR=  0.0%  Recall= 38.5%  Prec=100.0%  GFC-1st=2007-12-31
+
+======================================================================
+  [7/8] RTD+Mol (Fused)
+======================================================================
+    RTD: d=5 -> d_rtd=11
+    t= 11  2007-12-31  score=0.4951 << CRISIS
+    t= 27  2011-12-31  score=0.3188 << CRISIS
+    t= 43  2015-12-31  score=0.2970
+    t= 59  2019-12-31  score=0.2933
+    t= 75  2023-12-31  score=0.3863
+  Time: 539s
+
+  RTD+Mol (Fused):  AUROC=0.7302  GFC-AUC=0.9481  z(BNP)=+1.00
+    Fixed P99         FAR=  5.8%  Recall= 23.1%  Prec= 50.0%  GFC-1st=2007-12-31
+    Fixed mu+3sig     FAR=  3.8%  Recall= 23.1%  Prec= 60.0%  GFC-1st=2007-12-31
+    Adaptive z>3      FAR=  1.9%  Recall=  7.7%  Prec= 50.0%  GFC-1st=2007-12-31
+    Adaptive P99      FAR=  1.9%  Recall= 15.4%  Prec= 66.7%  GFC-1st=2007-12-31
+
+======================================================================
+  [8/8] RTD+Fisher
+======================================================================
+    RTD: d=5 -> d_rtd=11
+    t= 11  2007-12-31  score=0.4953 << CRISIS
+    t= 27  2011-12-31  score=0.2995 << CRISIS
+    t= 43  2015-12-31  score=0.2623
+    t= 59  2019-12-31  score=0.2681
+    t= 75  2023-12-31  score=0.4818
+  Time: 353s
+
+  RTD+Fisher:  AUROC=0.7729  GFC-AUC=1.0000  z(BNP)=+1.49
+    Fixed P99         FAR= 25.0%  Recall= 53.8%  Prec= 35.0%  GFC-1st=2007-12-31
+    Fixed mu+3sig     FAR= 11.5%  Recall= 30.8%  Prec= 40.0%  GFC-1st=2007-12-31
+    Adaptive z>3      FAR=  1.9%  Recall=  7.7%  Prec= 50.0%  GFC-1st=2007-12-31
+    Adaptive P99      FAR=  1.9%  Recall= 23.1%  Prec= 75.0%  GFC-1st=2007-12-31
+
+
+===============================================================================================
+  FINAL COMPARISON: FIXED vs ADAPTIVE CALIBRATION
+  (correct in-sample protocol, all thresholds strictly causal)
+===============================================================================================
+
+  Threshold: Fixed P99
+  Method                 AUROC  GFC-AUC  FAR%  Recall%  Prec%   GFC-1st      z(BNP)
+  ---------------------- -----  -------  ----  -------  -----   ----------   ------
+  Molecular (Fused)      0.722  0.753    17.3%    30.8%  30.8%   2008-09-30   +1.76
+  Gravity                0.331  0.299     7.7%     0.0%   0.0%   None         +2.07
+  Hybrid                 0.607  0.779     9.6%     0.0%   0.0%   None         +2.13
+  Mol+Fisher             0.725  0.701    11.5%    38.5%  45.5%   2008-03-31   +1.87
+  Mol+QuadSurf           0.752  0.584     0.0%    15.4%  100.0%   2008-09-30   +1.87
+  Mol+ExpoGate           0.867  0.909    100.0%   100.0%  20.0%   2007-12-31   +1.87
+  RTD+Mol (Fused)        0.730  0.948     5.8%    23.1%  50.0%   2007-12-31   +1.00
+  RTD+Fisher             0.773  1.000    25.0%    53.8%  35.0%   2007-12-31   +1.49
+
+  Threshold: Fixed mu+3sig
+  Method                 AUROC  GFC-AUC  FAR%  Recall%  Prec%   GFC-1st      z(BNP)
+  ---------------------- -----  -------  ----  -------  -----   ----------   ------
+  Molecular (Fused)      0.722  0.753    13.5%     0.0%   0.0%   None         +1.76
+  Gravity                0.331  0.299     1.9%     0.0%   0.0%   None         +2.07
+  Hybrid                 0.607  0.779     9.6%     0.0%   0.0%   None         +2.13
+  Mol+Fisher             0.725  0.701     5.8%     7.7%  25.0%   2008-06-30   +1.87
+  Mol+QuadSurf           0.752  0.584     0.0%     7.7%  100.0%   2008-12-31   +1.87
+  Mol+ExpoGate           0.867  0.909    100.0%   100.0%  20.0%   2007-12-31   +1.87
+  RTD+Mol (Fused)        0.730  0.948     3.8%    23.1%  60.0%   2007-12-31   +1.00
+  RTD+Fisher             0.773  1.000    11.5%    30.8%  40.0%   2007-12-31   +1.49
+
+  Threshold: Adaptive z>3
+  Method                 AUROC  GFC-AUC  FAR%  Recall%  Prec%   GFC-1st      z(BNP)
+  ---------------------- -----  -------  ----  -------  -----   ----------   ------
+  Molecular (Fused)      0.722  0.753    11.5%     0.0%   0.0%   None         +1.76
+  Gravity                0.331  0.299     1.9%     0.0%   0.0%   None         +2.07
+  Hybrid                 0.607  0.779     9.6%     0.0%   0.0%   None         +2.13
+  Mol+Fisher             0.725  0.701     0.0%     0.0%   0.0%   None         +1.87
+  Mol+QuadSurf           0.752  0.584     0.0%     0.0%   0.0%   None         +1.87
+  Mol+ExpoGate           0.867  0.909     0.0%    23.1%  100.0%   2007-12-31   +1.87
+  RTD+Mol (Fused)        0.730  0.948     1.9%     7.7%  50.0%   2007-12-31   +1.00
+  RTD+Fisher             0.773  1.000     1.9%     7.7%  50.0%   2007-12-31   +1.49
+
+  Threshold: Adaptive P99
+  Method                 AUROC  GFC-AUC  FAR%  Recall%  Prec%   GFC-1st      z(BNP)
+  ---------------------- -----  -------  ----  -------  -----   ----------   ------
+  Molecular (Fused)      0.722  0.753     9.6%    23.1%  37.5%   2008-09-30   +1.76
+  Gravity                0.331  0.299     5.8%     0.0%   0.0%   None         +2.07
+  Hybrid                 0.607  0.779     7.7%     0.0%   0.0%   None         +2.13
+  Mol+Fisher             0.725  0.701     3.8%    15.4%  50.0%   2008-03-31   +1.87
+  Mol+QuadSurf           0.752  0.584     0.0%    15.4%  100.0%   2008-09-30   +1.87
+  Mol+ExpoGate           0.867  0.909     0.0%    38.5%  100.0%   2007-12-31   +1.87
+  RTD+Mol (Fused)        0.730  0.948     1.9%    15.4%  66.7%   2007-12-31   +1.00
+  RTD+Fisher             0.773  1.000     1.9%    23.1%  75.0%   2007-12-31   +1.49
+
+
+===============================================================================================
+  CALIBRATION IMPROVEMENT: Fixed mu+3sig → Adaptive z>3
+===============================================================================================
+  Method                     --- Fixed mu+3sig ---            --- Adaptive z>3 ---       AUROC
+                           FAR%  Recall%   Prec%     FAR%  Recall%   Prec%
+  ---------------------- ------ -------- -------   ------ -------- -------  -----
+  Molecular (Fused)       13.5%     0.0%    0.0%    11.5%     0.0%    0.0%  0.722
+  Gravity                  1.9%     0.0%    0.0%     1.9%     0.0%    0.0%  0.331
+  Hybrid                   9.6%     0.0%    0.0%     9.6%     0.0%    0.0%  0.607
+  Mol+Fisher               5.8%     7.7%   25.0%     0.0%     0.0%    0.0%  0.725
+  Mol+QuadSurf             0.0%     7.7%  100.0%     0.0%     0.0%    0.0%  0.752
+  Mol+ExpoGate           100.0%   100.0%   20.0%     0.0%    23.1%  100.0%  0.867
+  RTD+Mol (Fused)          3.8%    23.1%   60.0%     1.9%     7.7%   50.0%  0.730
+  RTD+Fisher              11.5%    30.8%   40.0%     1.9%     7.7%   50.0%  0.773
+
+Results saved to insample_calibrated_results.json
+Done.

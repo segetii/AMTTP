@@ -1,0 +1,52 @@
+{
+  "region": "Europe + UK",
+  "engine": "ReducedTensor",
+  "n_calib": 11,
+  "best_thresholds": {
+    "percentile": {
+      "auroc": 0.6874236874236874,
+      "auroc_gfc": 0.8594104308390023,
+      "far": 23.809523809523807,
+      "recall": 61.53846153846154,
+      "prec": 34.78260869565217,
+      "f1": 44.44444444444445,
+      "first_alarm": "2007-09-30",
+      "gfc_lead": "2007-09-30",
+      "pctl": 95,
+      "threshold": 0.3622737876255727
+    },
+    "z_score": {
+      "auroc": 0.6075619295958279,
+      "auroc_gfc": 0.7941888619854721,
+      "far": 22.033898305084744,
+      "recall": 38.46153846153847,
+      "prec": 27.77777777777778,
+      "f1": 32.25806451612903,
+      "first_alarm": "2006-09-30",
+      "gfc_lead": "2007-03-31",
+      "z_thresh": 1.0
+    },
+    "p_value": {
+      "auroc": 0.7045177045177047,
+      "auroc_gfc": 0.8843537414965986,
+      "far": 9.523809523809524,
+      "recall": 30.76923076923077,
+      "prec": 40.0,
+      "f1": 34.78260869565217,
+      "first_alarm": "2007-12-31",
+      "gfc_lead": null,
+      "p_thresh": 0.1
+    }
+  },
+  "time_seconds": 16.387782096862793,
+  "banks": [
+    "HSBC",
+    "BNP Paribas",
+    "Deutsche Bank",
+    "Barclays",
+    "Societe Generale",
+    "UniCredit",
+    "ING",
+    "Standard Chartered"
+  ]
+}

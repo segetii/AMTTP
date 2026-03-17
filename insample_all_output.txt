@@ -1,0 +1,383 @@
+============================================================================
+  UNIFIED IN-SAMPLE MONITORING BENCHMARK — ALL ALGORITHMS
+  Protocol: expanding window | y=zeros (unsupervised) | in-sample
+  Threshold: frozen from 2005Q1-2007Q3 calm period
+============================================================================
+Panel: T=76, N=25, d=5
+Crisis: 13/76 quarters
+Calib window: 2005-03-31 → 2007-09-30 (11 Q)
+
+
+======================================================================
+  [1/9] Molecular (FusedScorer)
+======================================================================
+    t= 11  2007-12-31  score=0.1994 << CRISIS
+    t= 19  2009-12-31  score=0.2404
+    t= 27  2011-12-31  score=0.1785 << CRISIS
+    t= 35  2013-12-31  score=0.1046
+    t= 43  2015-12-31  score=0.1125
+    t= 51  2017-12-31  score=0.1251
+    t= 59  2019-12-31  score=0.1562
+    t= 67  2021-12-31  score=0.1888
+    t= 75  2023-12-31  score=0.4823
+  Time: 323s
+
+  Molecular (FusedScorer):
+  AUROC:       0.7216
+  GFC-AUROC:   0.7532
+  --- P99 threshold=0.2536 ---
+  TP=4  FP=10  FN=9  TN=53
+  FAR:       15.9%
+  Recall:    30.8%
+  Precision: 28.6%
+  GFC 1st:   2007-09-30
+  z(BNP):    +1.76
+  --- mu+3sig threshold=0.3087 ---
+  TP=0  FP=7  FN=13  TN=56
+  FAR:       11.1%
+  Recall:    0.0%
+  Precision: 0.0%
+  GFC 1st:   None
+  z(BNP):    +1.76
+
+  Alarm timeline (mu+3sig):
+    2007-09-30  score=0.2552  FALSE ALARM
+    2007-12-31  score=0.1994  CRISIS (missed)
+    2008-03-31  score=0.1595  CRISIS (missed)
+    2008-06-30  score=0.2231  CRISIS (missed)
+    2008-09-30  score=0.2840  CRISIS + ALARM
+    2008-12-31  score=0.2890  CRISIS + ALARM
+    2009-03-31  score=0.2980  CRISIS + ALARM
+    2009-06-30  score=0.2660  CRISIS + ALARM
+    2009-09-30  score=0.2628  FALSE ALARM
+    2011-09-30  score=0.1940  CRISIS (missed)
+    2011-12-31  score=0.1785  CRISIS (missed)
+    2012-03-31  score=0.1649  CRISIS (missed)
+    2012-06-30  score=0.1597  CRISIS (missed)
+    2020-03-31  score=0.1290  CRISIS (missed)
+    2020-06-30  score=0.1277  CRISIS (missed)
+    2022-03-31  score=0.2752  FALSE ALARM
+    2022-06-30  score=0.3795  FALSE ALARM
+    2022-09-30  score=0.4445  FALSE ALARM
+    2022-12-31  score=0.5243  FALSE ALARM
+    2023-03-31  score=0.5783  FALSE ALARM
+    2023-06-30  score=0.5561  FALSE ALARM
+    2023-09-30  score=0.5389  FALSE ALARM
+    2023-12-31  score=0.4823  FALSE ALARM
+
+======================================================================
+  [2/9] Gravity (GravityModeEngine)
+======================================================================
+    t= 11  2007-12-31  score=0.1097 << CRISIS
+    t= 19  2009-12-31  score=0.2051
+    t= 27  2011-12-31  score=0.1774 << CRISIS
+    t= 35  2013-12-31  score=0.1664
+    t= 43  2015-12-31  score=0.1339
+    t= 51  2017-12-31  score=0.2127
+    t= 59  2019-12-31  score=0.1721
+    t= 67  2021-12-31  score=0.0903
+    t= 75  2023-12-31  score=0.2861
+  Time: 272s
+
+  Gravity:
+  AUROC:       0.3309
+  GFC-AUROC:   0.2987
+  --- P99 threshold=0.2708 ---
+  TP=0  FP=5  FN=13  TN=58
+  FAR:       7.9%
+  Recall:    0.0%
+  Precision: 0.0%
+  GFC 1st:   2007-06-30
+  z(BNP):    +2.07
+  --- mu+3sig threshold=0.3355 ---
+  TP=0  FP=1  FN=13  TN=62
+  FAR:       1.6%
+  Recall:    0.0%
+  Precision: 0.0%
+  GFC 1st:   None
+  z(BNP):    +2.07
+
+  Alarm timeline (mu+3sig):
+    2007-06-30  score=0.2741  FALSE ALARM
+    2007-12-31  score=0.1097  CRISIS (missed)
+    2008-03-31  score=0.1335  CRISIS (missed)
+    2008-06-30  score=0.1670  CRISIS (missed)
+    2008-09-30  score=0.1319  CRISIS (missed)
+    2008-12-31  score=0.1046  CRISIS (missed)
+    2009-03-31  score=0.1289  CRISIS (missed)
+    2009-06-30  score=0.1163  CRISIS (missed)
+    2010-12-31  score=0.2763  FALSE ALARM
+    2011-09-30  score=0.0747  CRISIS (missed)
+    2011-12-31  score=0.1774  CRISIS (missed)
+    2012-03-31  score=0.1724  CRISIS (missed)
+    2012-06-30  score=0.1997  CRISIS (missed)
+    2020-03-31  score=0.0868  CRISIS (missed)
+    2020-06-30  score=0.1301  CRISIS (missed)
+    2022-06-30  score=0.2839  FALSE ALARM
+    2023-06-30  score=0.3615  FALSE ALARM
+    2023-12-31  score=0.2861  FALSE ALARM
+
+======================================================================
+  [3/9] Hybrid (HybridGravityEngine)
+======================================================================
+    t= 11  2007-12-31  score=0.3057 << CRISIS
+    t= 19  2009-12-31  score=0.2233
+    t= 27  2011-12-31  score=0.1315 << CRISIS
+    t= 35  2013-12-31  score=0.1225
+    t= 43  2015-12-31  score=0.1039
+    t= 51  2017-12-31  score=0.0915
+    t= 59  2019-12-31  score=0.1041
+    t= 67  2021-12-31  score=0.1519
+    t= 75  2023-12-31  score=0.5021
+  Time: 738s
+
+  Hybrid:
+  AUROC:       0.6068
+  GFC-AUROC:   0.7792
+  --- P99 threshold=0.3101 ---
+  TP=0  FP=6  FN=13  TN=57
+  FAR:       9.5%
+  Recall:    0.0%
+  Precision: 0.0%
+  GFC 1st:   2007-06-30
+  z(BNP):    +2.13
+  --- mu+3sig threshold=0.3642 ---
+  TP=0  FP=5  FN=13  TN=58
+  FAR:       7.9%
+  Recall:    0.0%
+  Precision: 0.0%
+  GFC 1st:   None
+  z(BNP):    +2.13
+
+  Alarm timeline (mu+3sig):
+    2007-06-30  score=0.3109  FALSE ALARM
+    2007-12-31  score=0.3057  CRISIS (missed)
+    2008-03-31  score=0.2458  CRISIS (missed)
+    2008-06-30  score=0.2131  CRISIS (missed)
+    2008-09-30  score=0.2204  CRISIS (missed)
+    2008-12-31  score=0.2231  CRISIS (missed)
+    2009-03-31  score=0.2277  CRISIS (missed)
+    2009-06-30  score=0.2273  CRISIS (missed)
+    2011-09-30  score=0.1483  CRISIS (missed)
+    2011-12-31  score=0.1315  CRISIS (missed)
+    2012-03-31  score=0.1134  CRISIS (missed)
+    2012-06-30  score=0.1085  CRISIS (missed)
+    2020-03-31  score=0.0846  CRISIS (missed)
+    2020-06-30  score=0.0900  CRISIS (missed)
+    2022-12-31  score=0.4012  FALSE ALARM
+    2023-03-31  score=0.4214  FALSE ALARM
+    2023-06-30  score=0.4585  FALSE ALARM
+    2023-09-30  score=0.4158  FALSE ALARM
+    2023-12-31  score=0.5021  FALSE ALARM
+
+======================================================================
+  [4/9] Molecular + Fisher (posthoc)
+======================================================================
+    t= 11  2007-12-31  score=0.4520 << CRISIS
+    t= 19  2009-12-31  score=0.4626
+    t= 27  2011-12-31  score=0.4811 << CRISIS
+    t= 35  2013-12-31  score=0.4588
+    t= 43  2015-12-31  score=0.3914
+    t= 51  2017-12-31  score=0.3856
+    t= 59  2019-12-31  score=0.3246
+    t= 67  2021-12-31  score=0.3375
+    t= 75  2023-12-31  score=0.4864
+  Time: 205s
+
+  Molecular+Fisher:
+  AUROC:       0.7253
+  GFC-AUROC:   0.7013
+  --- P99 threshold=0.4659 ---
+  TP=5  FP=7  FN=8  TN=56
+  FAR:       11.1%
+  Recall:    38.5%
+  Precision: 41.7%
+  GFC 1st:   2007-06-30
+  z(BNP):    +1.87
+  --- mu+3sig threshold=0.4835 ---
+  TP=1  FP=3  FN=12  TN=60
+  FAR:       4.8%
+  Recall:    7.7%
+  Precision: 25.0%
+  GFC 1st:   2008-06-30
+  z(BNP):    +1.87
+
+  Alarm timeline (mu+3sig):
+    2007-06-30  score=0.4659  FALSE ALARM
+    2007-12-31  score=0.4520  CRISIS (missed)
+    2008-03-31  score=0.4750  CRISIS + ALARM
+    2008-06-30  score=0.4894  CRISIS + ALARM
+    2008-09-30  score=0.4661  CRISIS + ALARM
+    2008-12-31  score=0.4579  CRISIS (missed)
+    2009-03-31  score=0.4552  CRISIS (missed)
+    2009-06-30  score=0.4567  CRISIS (missed)
+    2010-03-31  score=0.4668  FALSE ALARM
+    2010-06-30  score=0.4704  FALSE ALARM
+    2010-09-30  score=0.4892  FALSE ALARM
+    2010-12-31  score=0.4929  FALSE ALARM
+    2011-06-30  score=0.4775  FALSE ALARM
+    2011-09-30  score=0.4802  CRISIS + ALARM
+    2011-12-31  score=0.4811  CRISIS + ALARM
+    2012-03-31  score=0.4648  CRISIS (missed)
+    2012-06-30  score=0.4623  CRISIS (missed)
+    2020-03-31  score=0.3040  CRISIS (missed)
+    2020-06-30  score=0.3093  CRISIS (missed)
+    2023-12-31  score=0.4864  FALSE ALARM
+
+======================================================================
+  [5/9] Molecular + QuadSurf (posthoc)
+======================================================================
+    t= 11  2007-12-31  score=0.1693 << CRISIS
+    t= 19  2009-12-31  score=0.3534
+    t= 27  2011-12-31  score=0.3899 << CRISIS
+    t= 35  2013-12-31  score=0.3054
+    t= 43  2015-12-31  score=0.1949
+    t= 51  2017-12-31  score=0.1880
+    t= 59  2019-12-31  score=0.1914
+    t= 67  2021-12-31  score=0.1746
+    t= 75  2023-12-31  score=0.1649
+  Time: 184s
+
+  Molecular+QuadSurf:
+  AUROC:       0.7521
+  GFC-AUROC:   0.5844
+  --- P99 threshold=0.4659 ---
+  TP=2  FP=1  FN=11  TN=62
+  FAR:       1.6%
+  Recall:    15.4%
+  Precision: 66.7%
+  GFC 1st:   2007-06-30
+  z(BNP):    +1.87
+  --- mu+3sig threshold=0.4835 ---
+  TP=1  FP=0  FN=12  TN=63
+  FAR:       0.0%
+  Recall:    7.7%
+  Precision: 100.0%
+  GFC 1st:   2008-12-31
+  z(BNP):    +1.87
+
+  Alarm timeline (mu+3sig):
+    2007-06-30  score=0.4659  FALSE ALARM
+    2007-12-31  score=0.1693  CRISIS (missed)
+    2008-03-31  score=0.2924  CRISIS (missed)
+    2008-06-30  score=0.4491  CRISIS (missed)
+    2008-09-30  score=0.4780  CRISIS + ALARM
+    2008-12-31  score=0.5074  CRISIS + ALARM
+    2009-03-31  score=0.4426  CRISIS (missed)
+    2009-06-30  score=0.4219  CRISIS (missed)
+    2011-09-30  score=0.3445  CRISIS (missed)
+    2011-12-31  score=0.3899  CRISIS (missed)
+    2012-03-31  score=0.4158  CRISIS (missed)
+    2012-06-30  score=0.4377  CRISIS (missed)
+    2020-03-31  score=0.2137  CRISIS (missed)
+    2020-06-30  score=0.2406  CRISIS (missed)
+
+======================================================================
+  [6/9] Molecular + ExpoGate (posthoc)
+======================================================================
+    t= 11  2007-12-31  score=0.6204 << CRISIS
+    t= 19  2009-12-31  score=0.7214
+    t= 27  2011-12-31  score=0.7467 << CRISIS
+    t= 35  2013-12-31  score=0.7040
+    t= 43  2015-12-31  score=0.6373
+    t= 51  2017-12-31  score=0.6342
+    t= 59  2019-12-31  score=0.6364
+    t= 67  2021-12-31  score=0.6242
+    t= 75  2023-12-31  score=0.6148
+  Time: 232s
+
+  Molecular+ExpoGate:
+  AUROC:       0.8669
+  GFC-AUROC:   0.9091
+  --- P99 threshold=0.4659 ---
+  TP=13  FP=53  FN=0  TN=10
+  FAR:       84.1%
+  Recall:    100.0%
+  Precision: 19.7%
+  GFC 1st:   2007-06-30
+  z(BNP):    +1.87
+  --- mu+3sig threshold=0.4835 ---
+  TP=13  FP=52  FN=0  TN=11
+  FAR:       82.5%
+  Recall:    100.0%
+  Precision: 20.0%
+  GFC 1st:   2007-12-31
+  z(BNP):    +1.87
+
+  Alarm timeline (mu+3sig):
+    2007-06-30  score=0.4659  FALSE ALARM
+    2007-12-31  score=0.6204  CRISIS + ALARM
+    2008-03-31  score=0.6864  CRISIS + ALARM
+    2008-06-30  score=0.7459  CRISIS + ALARM
+    2008-09-30  score=0.7567  CRISIS + ALARM
+    2008-12-31  score=0.7795  CRISIS + ALARM
+    2009-03-31  score=0.7580  CRISIS + ALARM
+    2009-06-30  score=0.7462  CRISIS + ALARM
+    2009-09-30  score=0.7444  FALSE ALARM
+    2009-12-31  score=0.7214  FALSE ALARM
+    2010-03-31  score=0.6991  FALSE ALARM
+    2010-06-30  score=0.6846  FALSE ALARM
+    2010-09-30  score=0.6976  FALSE ALARM
+    2010-12-31  score=0.6945  FALSE ALARM
+    2011-03-31  score=0.6763  FALSE ALARM
+    2011-06-30  score=0.6987  FALSE ALARM
+    2011-09-30  score=0.7247  CRISIS + ALARM
+    2011-12-31  score=0.7467  CRISIS + ALARM
+    2012-03-31  score=0.7570  CRISIS + ALARM
+    2012-06-30  score=0.7656  CRISIS + ALARM
+    2012-09-30  score=0.7471  FALSE ALARM
+    2012-12-31  score=0.7366  FALSE ALARM
+    2013-03-31  score=0.7247  FALSE ALARM
+    2013-06-30  score=0.7119  FALSE ALARM
+    2013-09-30  score=0.7012  FALSE ALARM
+    2013-12-31  score=0.7040  FALSE ALARM
+    2014-03-31  score=0.6974  FALSE ALARM
+    2014-06-30  score=0.6840  FALSE ALARM
+    2014-09-30  score=0.6784  FALSE ALARM
+    2014-12-31  score=0.6661  FALSE ALARM
+    2015-03-31  score=0.6573  FALSE ALARM
+    2015-06-30  score=0.6479  FALSE ALARM
+    2015-09-30  score=0.6410  FALSE ALARM
+    2015-12-31  score=0.6373  FALSE ALARM
+    2016-03-31  score=0.6646  FALSE ALARM
+    2016-06-30  score=0.6612  FALSE ALARM
+    2016-09-30  score=0.6549  FALSE ALARM
+    2016-12-31  score=0.6316  FALSE ALARM
+    2017-03-31  score=0.6256  FALSE ALARM
+    2017-06-30  score=0.6260  FALSE ALARM
+    2017-09-30  score=0.6268  FALSE ALARM
+    2017-12-31  score=0.6342  FALSE ALARM
+    2018-03-31  score=0.6232  FALSE ALARM
+    2018-06-30  score=0.6306  FALSE ALARM
+    2018-09-30  score=0.6307  FALSE ALARM
+    2018-12-31  score=0.6299  FALSE ALARM
+    2019-03-31  score=0.6241  FALSE ALARM
+    2019-06-30  score=0.6282  FALSE ALARM
+    2019-09-30  score=0.6275  FALSE ALARM
+    2019-12-31  score=0.6364  FALSE ALARM
+    2020-03-31  score=0.6503  CRISIS + ALARM
+    2020-06-30  score=0.6667  CRISIS + ALARM
+    2020-09-30  score=0.6599  FALSE ALARM
+    2020-12-31  score=0.6536  FALSE ALARM
+    2021-03-31  score=0.6428  FALSE ALARM
+    2021-06-30  score=0.6397  FALSE ALARM
+    2021-09-30  score=0.6283  FALSE ALARM
+    2021-12-31  score=0.6242  FALSE ALARM
+    2022-03-31  score=0.6252  FALSE ALARM
+    2022-06-30  score=0.6363  FALSE ALARM
+    2022-09-30  score=0.6345  FALSE ALARM
+    2022-12-31  score=0.6214  FALSE ALARM
+    2023-03-31  score=0.6115  FALSE ALARM
+    2023-06-30  score=0.5904  FALSE ALARM
+    2023-09-30  score=0.6071  FALSE ALARM
+    2023-12-31  score=0.6148  FALSE ALARM
+
+======================================================================
+  [7/9] RTD + Molecular (FusedScorer)
+======================================================================
+Traceback (most recent call last):
+  File "C:\amttp\test_insample_all.py", line 618, in <module>
+    q = prospective_score_rtd(X_3d, dates, 'base', rtd_base_kwargs, N_CALIB, N)
+  File "C:\amttp\test_insample_all.py", line 286, in prospective_score_rtd
+    rtd = ReducedTensorDescriptor(k=10, n_components=3)
+TypeError: ReducedTensorDescriptor.__init__() got an unexpected keyword argument 'k'

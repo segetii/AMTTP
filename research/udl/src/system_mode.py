@@ -1485,6 +1485,7 @@ class MolecularEngine:
                  normalize: bool = True,
                  max_samples: int = 3000,
                  use_fused: bool = True,
+                 use_bsdt_damping: bool = True,
                  calibrate: Optional[str] = None,
                  target_far: float = 0.05):
         self.epsilon = epsilon
@@ -1496,6 +1497,7 @@ class MolecularEngine:
         self.normalize = normalize
         self.max_samples = max_samples
         self.use_fused = use_fused
+        self.use_bsdt_damping = use_bsdt_damping
         self.calibrate = calibrate
         self.target_far = target_far
 
@@ -1507,6 +1509,52 @@ class MolecularEngine:
         self.scaler_: Optional[StandardScaler] = None
         self.mu_: Optional[np.ndarray] = None
         self.X_final_: Optional[np.ndarray] = None
+
+    def _pairwise_hessian_lambda_max(self, X: np.ndarray,
+                                    n_power_iters: int = 3,
+                                    fd_eps: float = 1e-4,
+                                    max_hessian_pts: int = 200) -> float:
+        """Estimate λ_max of D²Φ_pair via power iteration (Rayleigh quotient).
+
+        Uses matrix-free Hessian-vector products via finite differencing
+        of the pairwise force (negative gradient of pairwise potential).
+        Subsamples to max_hessian_pts for efficiency.
+
+        Returns
+        -------
+        lambda_max : float
+            Estimated largest eigenvalue of the pairwise Hessian.
+        """
+        n, d = X.shape
+        # Subsample for Hessian estimation if dataset is large
+        if n > max_hessian_pts:
+            rng_sub = np.random.RandomState(7)
+            idx = rng_sub.choice(n, max_hessian_pts, replace=False)
+            Xs = X[idx]
+        else:
+            Xs = X
+        ns = len(Xs)
+
+        rng = np.random.RandomState(42)
+        v = rng.randn(ns, d).astype(np.float64)
+        v /= (np.linalg.norm(v) + 1e-15)
+
+        lambda_est = 1.0
+        for _ in range(n_power_iters):
+            # H·v ≈ −(F(Xs + ε·v) − F(Xs − ε·v)) / (2ε)
+            F_plus = self._lennard_jones_forces(Xs + fd_eps * v)
+            F_minus = self._lennard_jones_forces(Xs - fd_eps * v)
+            Hv = -(F_plus - F_minus) / (2.0 * fd_eps)
+
+            # Rayleigh quotient
+            lambda_est = float(np.sum(v * Hv)) / (float(np.sum(v * v)) + 1e-15)
+
+            norm_Hv = np.linalg.norm(Hv)
+            if norm_Hv < 1e-15:
+                break
+            v = Hv / norm_Hv
+
+        return max(abs(lambda_est), 1e-10)
 
     def _lennard_jones_forces(self, X: np.ndarray,
                               eps: float = 1e-5) -> np.ndarray:
@@ -1623,52 +1671,76 @@ class MolecularEngine:
 
         self.mu_ = X_work.mean(axis=0)
 
-        # ── BSDT adaptive damping (Theorem C, eq:bsdamped) ──────
-        # Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
-        # γ(E) = E / (E + θ)   — adaptive friction coefficient
-        # BSDT provides the damping that prevents collapse above
-        # the critical manifold C*.  Lyapunov ISS handles step-size
-        # control only.
-        bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
-                                         len(X_work) - 1))
-        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
-            else X_work
-        bsdt_damper.fit(X_ref_init)
-        # θ = median E_BS on reference — damping is ~50% at normal
-        e_ref = bsdt_damper.energy(X_ref_init)
-        theta_bs = float(np.median(e_ref)) + 1e-10
-        # MFLS scale factor: match gradient-norm scale to energy scale
-        mfls_ref = bsdt_damper.mfls(X_ref_init)
-        mfls_med = float(np.median(mfls_ref)) + 1e-10
-        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
+        # ══════════════════════════════════════════════════════════
+        #  Algorithm 1: Adaptive GravityEngine (paper-correct)
+        #
+        #  Ẋ = −∇Φ(X) − γ(E_BS) · ∇E_BS(X)
+        #
+        #  Step 1: Compute normal forces ∇Φ (pairwise + radial)
+        #  Step 2: Power iteration on D²Φ_pair → λ_max
+        #  Step 3: Target γ* = α / λ_max  (marginal stability)
+        #  Step 4: Refine γ via projected OGD  (O(√T) regret)
+        #  Step 5: Damping force = −γ · ∇E_BS(X)
+        #  Step 6: Euler step + Armijo line search
+        # ══════════════════════════════════════════════════════════
 
-        # ── Euler integration with Lyapunov v2 stability control ──
+        # ── BSDT blind-spot energy for damping direction ──
+        bsdt_damper = None
+        if self.use_bsdt_damping:
+            bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
+                                             len(X_work) - 1))
+            X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+                else X_work
+            bsdt_damper.fit(X_ref_init)
+
+        # ── Euler integration with Lyapunov stability + Algorithm 1 damping ──
         self.stabiliser.reset()
         eta = self.eta
         n_sim = len(X_work)
-        # Reduce iterations for large subsamples
         iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
+
+        # OGD state: initialise γ at 0 (no damping initially)
+        gamma_ogd = 0.0
+        lambda_max = 1.0  # will be updated on first step
+
         for step in range(iters):
-            # Compute physics forces
+            # Step 1: Compute normal forces ∇Φ
             F_lj = self._lennard_jones_forces(X_work)
             F_radial = -self.alpha_radial * (X_work - self.mu_)
 
-            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
-            # E_combined = E_BS + β·MFLS catches transitional states
-            # where gradients are steep but energy hasn't peaked.
-            e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
-            grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
-            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
-            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
-            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
-            F_damp = -gamma_bs[:, None] * grad_bs    # damping force
+            if bsdt_damper is not None:
+                # Step 2: Power iteration on pairwise Hessian → λ_max
+                # Cached: recompute every 10 steps (smooth enough for OGD)
+                if step % 10 == 0:
+                    lambda_max = self._pairwise_hessian_lambda_max(
+                        X_work, n_power_iters=3)
 
-            F_total = F_lj + F_radial + F_damp
+                # Step 3: Target γ* = α / λ_max (marginal stability)
+                gamma_target = self.alpha_radial / (lambda_max + 1e-10)
+
+                # Step 4: Projected online gradient descent
+                # Learning rate η_ogd = 1/√(t+1) gives O(√T) regret.
+                # Loss: ℓ(γ) = (γ − γ*)² — track the spectral target.
+                # Projection: γ ∈ [0, 2·γ*] (prevent over-damping).
+                eta_ogd = 1.0 / np.sqrt(step + 1)
+                grad_ogd = 2.0 * (gamma_ogd - gamma_target)
+                gamma_ogd = gamma_ogd - eta_ogd * grad_ogd
+                gamma_ogd = float(np.clip(gamma_ogd, 0.0,
+                                         2.0 * gamma_target))
+
+                # Step 5: Damping force = −γ · ∇E_BS(X)
+                # Direction from blind-spot energy gradient;
+                # magnitude from spectral-radius adaptive coefficient.
+                grad_bs = bsdt_damper._gradient_vectors(X_work)
+                F_damp = -gamma_ogd * grad_bs
+                F_total = F_lj + F_radial + F_damp
+            else:
+                F_total = F_lj + F_radial
 
             # Barrier-augmented force clamping (solver stability only)
             F_total = self.stabiliser.clamp_forces(F_total)
 
-            # Armijo backtracking with descent certificate
+            # Step 6: Armijo backtracking with descent certificate
             E_old = self._lj_energy(X_work)
             grad_norm_sq = float(np.sum(F_total ** 2))
             X_candidate = X_work + eta * F_total
@@ -1684,7 +1756,7 @@ class MolecularEngine:
                 # Reduced step
                 X_work = X_work + eta * F_total
 
-            # La Salle convergence check (∇E → 0) with displacement fallback
+            # La Salle convergence check
             displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
             if self.stabiliser.check_convergence(grad_norm_sq, displacement):
                 break
@@ -1698,7 +1770,10 @@ class MolecularEngine:
         # This is a system-level diagnostic flag for the regulator,
         # NOT a score modifier.  Per-point Morse-topology features
         # already contribute to scoring via FusedSystemScorer.
-        self._morse_alarm = bsdt_damper.morse_alarm(X_work)
+        if bsdt_damper is not None:
+            self._morse_alarm = bsdt_damper.morse_alarm(X_work)
+        else:
+            self._morse_alarm = None
 
         # ── PREDICTION: calibrate on FINAL normal positions ──
         X_ref_final = X_work[normal_mask]
@@ -2315,9 +2390,1288 @@ class GravityModeEngine:
 
 
 
+
+
 # ═══════════════════════════════════════════════════════════════════
-#  HYBRID ENGINE (Molecular + Gravity blend)
+#  MODE-4 GRAVITY ENGINE  (paper-era, no BSDT damping — FAR=1.6%)
+#  Frozen snapshot from commit bb43ff5 (2026-03-08).
+#  Pure N-body gravity + Lyapunov ISS + Morse/Fused scoring.
+#  No blind-spot tensor channels, no adaptive friction.
 # ═══════════════════════════════════════════════════════════════════
+
+
+class _Mode4FusedScorer:
+    """bb43ff5-era FusedSystemScorer: Morse + Betti + UDL, hardcoded blend.
+
+    Key differences from current FusedSystemScorer:
+    - 3 sub-scorers (no BSDT)
+    - score(): 0.4 * morse + 0.6 * kNN-interpolated enriched
+    - _enrich_score(): equal-weight average of minmax-normalised components
+    - _minmax normalisation (not _robust_norm)
+    """
+
+    def __init__(self, k: int = 15, use_betti: bool = True,
+                 use_udl: bool = True):
+        self.k = k
+        self.morse = MorseTopologyAlarm(
+            k=k, weights=np.array([0.35, 0.30, 0.20, 0.15]))
+        self.betti = BettiBarcodeSuite(k=min(k + 5, 25)) if use_betti else None
+        self.udl = UDLPostSimScorer(k=k) if use_udl else None
+        self._X_sim = None
+        self._sim_enriched = None
+
+    def fit(self, X_ref: np.ndarray,
+            X_sim: np.ndarray = None) -> '_Mode4FusedScorer':
+        self.morse.fit(X_ref)
+        if self.betti is not None:
+            try:
+                self.betti.fit(X_ref)
+            except Exception:
+                self.betti = None
+        if self.udl is not None:
+            try:
+                self.udl.fit(X_ref)
+            except Exception:
+                self.udl = None
+        if X_sim is not None:
+            self._X_sim = X_sim.copy()
+            self._sim_enriched = self._enrich_score(X_sim)
+        return self
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        N = len(X)
+        if (self._X_sim is not None and N == len(self._X_sim)
+                and np.array_equal(X, self._X_sim)):
+            return self._sim_enriched
+        morse_s = self._minmax(self.morse.score(X))
+        if self._X_sim is not None and self._sim_enriched is not None:
+            from sklearn.neighbors import KNeighborsRegressor
+            k_interp = min(5, len(self._X_sim))
+            knn = KNeighborsRegressor(n_neighbors=k_interp,
+                                      weights='distance')
+            knn.fit(self._X_sim, self._sim_enriched)
+            enriched_s = self._minmax(knn.predict(X))
+            return 0.4 * morse_s + 0.6 * enriched_s
+        else:
+            return self._enrich_score(X)
+
+    def _enrich_score(self, X: np.ndarray) -> np.ndarray:
+        components = [self.morse.score(X)]
+        if self.betti is not None:
+            try:
+                components.append(self.betti.score(X))
+            except Exception:
+                pass
+        if self.udl is not None and self.udl._fitted:
+            try:
+                components.append(self.udl.score(X))
+            except Exception:
+                pass
+        normed = [self._minmax(s) for s in components]
+        return np.mean(normed, axis=0)
+
+    @staticmethod
+    def _minmax(s: np.ndarray) -> np.ndarray:
+        s_min, s_max = s.min(), s.max()
+        if s_max - s_min > 1e-15:
+            return (s - s_min) / (s_max - s_min)
+        return np.zeros_like(s)
+
+
+class Mode4GravityEngine:
+    """Paper-era Gravity engine without BSDT adaptive damping.
+
+    Identical physics to ``GravityModeEngine`` at commit bb43ff5
+    (2026-03-08), which produced the published FAR = 1.6% result on
+    the G-SIB prospective benchmark.
+
+    Use this when you need the exact paper-reproducible behaviour:
+    no ``BSDTChannels`` damping in the iteration loop, no MFLS
+    gradient blending — just Lyapunov-stabilised N-body gravity
+    with Morse-topology / fused scoring.
+    """
+
+    def __init__(self,
+                 alpha: float = 0.1,
+                 gamma: float = 0.5,
+                 sigma: float = 1.0,
+                 lambda_rep: float = 0.05,
+                 eta: float = 0.05,
+                 iterations: int = 60,
+                 k_neighbors: int = 15,
+                 normalize: bool = True,
+                 max_samples: int = 3000,
+                 use_fused: bool = True,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.sigma = sigma
+        self.lambda_rep = lambda_rep
+        self.eta = eta
+        self.iterations = iterations
+        self.k_neighbors = k_neighbors
+        self.normalize = normalize
+        self.max_samples = max_samples
+        self.use_fused = use_fused
+        self.calibrate = calibrate
+        self.target_far = target_far
+
+        self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
+        self.alarm = MorseTopologyAlarm(k=k_neighbors, weights=np.array([0.35, 0.30, 0.20, 0.15]))
+        self.fused_scorer = _Mode4FusedScorer(k=k_neighbors) if use_fused else None
+        self._far_calibrator = None
+
+        self.scaler_: Optional[StandardScaler] = None
+        self.mu_: Optional[np.ndarray] = None
+        self.X_final_: Optional[np.ndarray] = None
+
+    # ── forces / energy (identical to GravityModeEngine) ─────────
+
+    def _pairwise_forces(self, X: np.ndarray,
+                         eps: float = 1e-5) -> np.ndarray:
+        """Gravitational attraction + short-range repulsion (kNN-limited)."""
+        n, d = X.shape
+        gamma = self.gamma
+        sigma = self.sigma
+        lambda_rep = self.lambda_rep
+
+        from sklearn.neighbors import NearestNeighbors
+        k = min(self.k_neighbors, n - 1)
+        nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+        nn.fit(X.astype(np.float32))
+        _, indices = nn.kneighbors(X.astype(np.float32))
+        nbr_idx = indices[:, 1:]
+
+        X_nbrs = X[nbr_idx]
+        diff = X[:, None, :] - X_nbrs
+        r_sq = np.sum(diff ** 2, axis=2, keepdims=True) + eps
+        r = np.sqrt(r_sq)
+
+        attraction = np.exp(-r_sq / (sigma ** 2))
+        repulsion = lambda_rep / r
+        magnitude = -gamma * (attraction - repulsion)
+
+        unit = diff / r
+        forces = np.sum(magnitude * unit, axis=1)
+        return forces
+
+    def _gravity_energy(self, X: np.ndarray, eps: float = 1e-5) -> float:
+        """Radial-only Lyapunov candidate energy."""
+        diff_mu = X - self.mu_[None, :]
+        E_radial = 0.5 * self.alpha * np.sum(diff_mu ** 2)
+        return float(E_radial)
+
+    # ── core fit_score (NO BSDT damping) ─────────────────────────
+
+    def fit_score(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                  ) -> np.ndarray:
+        """Run gravity simulation and return noise-immune scores.
+
+        This is the paper-era implementation: pure Lyapunov ISS
+        integration with NO blind-spot tensor damping.
+        """
+        if self.normalize:
+            self.scaler_ = StandardScaler()
+            X_all = self.scaler_.fit_transform(X).astype(np.float64)
+        else:
+            X_all = X.astype(np.float64).copy()
+
+        n = len(X_all)
+        normal_mask_all = (y == 0) if y is not None else np.ones(n, dtype=bool)
+
+        # Subsample for simulation if dataset is large
+        if n > self.max_samples:
+            rng = np.random.RandomState(42)
+            anom_idx = np.where(y == 1)[0] if y is not None else np.array([], dtype=int)
+            other_idx = np.where(y != 1)[0] if y is not None else np.arange(n)
+
+            if len(anom_idx) >= self.max_samples:
+                n_anom = min(len(anom_idx), self.max_samples // 2)
+                n_other = self.max_samples - n_anom
+                anom_sample = rng.choice(anom_idx, n_anom, replace=False)
+                other_sample = rng.choice(other_idx, min(n_other, len(other_idx)), replace=False)
+                sim_idx = np.sort(np.concatenate([anom_sample, other_sample]))
+            else:
+                n_other = max(0, self.max_samples - len(anom_idx))
+                if len(other_idx) > n_other:
+                    other_sample = rng.choice(other_idx, n_other, replace=False)
+                else:
+                    other_sample = other_idx
+                sim_idx = np.sort(np.concatenate([anom_idx, other_sample]))
+
+            X_work = X_all[sim_idx].copy()
+            normal_mask = normal_mask_all[sim_idx]
+            subsampled = True
+        else:
+            X_work = X_all.copy()
+            normal_mask = normal_mask_all
+            subsampled = False
+
+        self.mu_ = X_work.mean(axis=0)
+        X_initial = X_work.copy()
+
+        # ── Euler integration with Lyapunov v2 + ISS tracking ──
+        # NO BSDT damping — pure radial + pairwise forces only
+        self.stabiliser.reset()
+        eta = self.eta
+        n_sim = len(X_work)
+        iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
+        for step in range(iters):
+            F_pair = self._pairwise_forces(X_work)
+            F_radial = -self.alpha * (X_work - self.mu_)
+            F_total = F_pair + F_radial
+
+            # Barrier-augmented force clamping
+            F_total = self.stabiliser.clamp_forces(F_total)
+
+            # Armijo on radial energy with ISS margin for pairwise force
+            E_old = self._gravity_energy(X_work)
+            grad_norm_sq = float(np.sum(F_total ** 2))
+            perturbation_norm = float(np.sqrt(np.sum(F_pair ** 2)))
+
+            X_candidate = X_work + eta * F_total
+            E_new = self._gravity_energy(X_candidate)
+
+            accept, eta = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, eta,
+                perturbation_norm=perturbation_norm
+            )
+
+            if accept:
+                X_work = X_candidate
+            else:
+                X_work = X_work + eta * F_total
+
+            displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
+                break
+
+        self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
+
+        # Calibrate on FINAL normal positions
+        X_ref_final = X_work[normal_mask]
+        if len(X_ref_final) > 1:
+            if self.fused_scorer is not None:
+                self.fused_scorer.fit(X_ref_final, X_sim=X_work)
+                if subsampled:
+                    scores = self.fused_scorer.score(X_all)
+                else:
+                    scores = self.fused_scorer.score(X_work)
+            else:
+                self.alarm.fit(X_ref_final)
+                if subsampled:
+                    scores = self.alarm.score(X_all)
+                else:
+                    scores = self.alarm.score(X_work)
+        else:
+            if subsampled:
+                scores = np.linalg.norm(X_all - X_all.mean(axis=0), axis=1)
+            else:
+                scores = np.linalg.norm(X_work - X_initial, axis=1)
+
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
+        return scores
+
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  MODE-5 GRAVITY ENGINE  (bb43ff5 scoring + BSDT adaptive damping)
+#  = Mode4 + blind-spot tensor damping in the iteration loop.
+#  Uses _Mode4FusedScorer (hardcoded 0.4/0.6 blend, _minmax, no BSDT
+#  in scorer) but adds BSDT damping to the Euler integration.
+# ═══════════════════════════════════════════════════════════════════
+
+class Mode5GravityEngine:
+    """Mode4 scoring + BSDT adaptive damping in the iteration loop.
+
+    Combines the paper-era ``_Mode4FusedScorer`` (hardcoded Morse
+    weights ``[0.35, 0.30, 0.20, 0.15]``, 0.4/0.6 blend, ``_minmax``
+    normalisation) with the BSDT adaptive friction from the current
+    ``GravityModeEngine``.
+
+    Iteration force:
+        ``F_total = F_pair + F_radial + F_damp``
+    where ``F_damp = -γ(E_BS) · ∇E_BS(X)`` is the blind-spot tensor
+    damping (Theorem C, eq:bsdamped).
+
+    Scoring: ``_Mode4FusedScorer`` (identical to ``Mode4GravityEngine``).
+    """
+
+    def __init__(self,
+                 alpha: float = 0.1,
+                 gamma: float = 0.5,
+                 sigma: float = 1.0,
+                 lambda_rep: float = 0.05,
+                 eta: float = 0.05,
+                 iterations: int = 60,
+                 k_neighbors: int = 15,
+                 normalize: bool = True,
+                 max_samples: int = 3000,
+                 use_fused: bool = True,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.sigma = sigma
+        self.lambda_rep = lambda_rep
+        self.eta = eta
+        self.iterations = iterations
+        self.k_neighbors = k_neighbors
+        self.normalize = normalize
+        self.max_samples = max_samples
+        self.use_fused = use_fused
+        self.calibrate = calibrate
+        self.target_far = target_far
+
+        self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
+        self.alarm = MorseTopologyAlarm(
+            k=k_neighbors,
+            weights=np.array([0.35, 0.30, 0.20, 0.15]))
+        self.fused_scorer = _Mode4FusedScorer(k=k_neighbors) if use_fused else None
+        self._far_calibrator = None
+
+        self.scaler_: Optional[StandardScaler] = None
+        self.mu_: Optional[np.ndarray] = None
+        self.X_final_: Optional[np.ndarray] = None
+
+    # ── forces / energy (identical to Mode4 / GravityModeEngine) ──
+
+    def _pairwise_forces(self, X: np.ndarray,
+                         eps: float = 1e-5) -> np.ndarray:
+        """Gravitational attraction + short-range repulsion (kNN-limited)."""
+        n, d = X.shape
+        gamma = self.gamma
+        sigma = self.sigma
+        lambda_rep = self.lambda_rep
+
+        from sklearn.neighbors import NearestNeighbors
+        k = min(self.k_neighbors, n - 1)
+        nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+        nn.fit(X.astype(np.float32))
+        _, indices = nn.kneighbors(X.astype(np.float32))
+        nbr_idx = indices[:, 1:]
+
+        X_nbrs = X[nbr_idx]
+        diff = X[:, None, :] - X_nbrs
+        r_sq = np.sum(diff ** 2, axis=2, keepdims=True) + eps
+        r = np.sqrt(r_sq)
+
+        attraction = np.exp(-r_sq / (sigma ** 2))
+        repulsion = lambda_rep / r
+        magnitude = -gamma * (attraction - repulsion)
+
+        unit = diff / r
+        forces = np.sum(magnitude * unit, axis=1)
+        return forces
+
+    def _gravity_energy(self, X: np.ndarray, eps: float = 1e-5) -> float:
+        """Radial-only Lyapunov candidate energy."""
+        diff_mu = X - self.mu_[None, :]
+        E_radial = 0.5 * self.alpha * np.sum(diff_mu ** 2)
+        return float(E_radial)
+
+    # ── core fit_score (WITH BSDT damping, bb43ff5 scoring) ──
+
+    def fit_score(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                  ) -> np.ndarray:
+        """Run gravity simulation with BSDT damping, score with bb43ff5 scorer.
+
+        Iteration loop: ``F_total = F_pair + F_radial + F_damp``
+        Scoring: ``_Mode4FusedScorer`` (paper-era hardcoded blend).
+        """
+        if self.normalize:
+            self.scaler_ = StandardScaler()
+            X_all = self.scaler_.fit_transform(X).astype(np.float64)
+        else:
+            X_all = X.astype(np.float64).copy()
+
+        n = len(X_all)
+        normal_mask_all = (y == 0) if y is not None else np.ones(n, dtype=bool)
+
+        # Subsample for simulation if dataset is large
+        if n > self.max_samples:
+            rng = np.random.RandomState(42)
+            anom_idx = np.where(y == 1)[0] if y is not None else np.array([], dtype=int)
+            other_idx = np.where(y != 1)[0] if y is not None else np.arange(n)
+
+            if len(anom_idx) >= self.max_samples:
+                n_anom = min(len(anom_idx), self.max_samples // 2)
+                n_other = self.max_samples - n_anom
+                anom_sample = rng.choice(anom_idx, n_anom, replace=False)
+                other_sample = rng.choice(other_idx, min(n_other, len(other_idx)), replace=False)
+                sim_idx = np.sort(np.concatenate([anom_sample, other_sample]))
+            else:
+                n_other = max(0, self.max_samples - len(anom_idx))
+                if len(other_idx) > n_other:
+                    other_sample = rng.choice(other_idx, n_other, replace=False)
+                else:
+                    other_sample = other_idx
+                sim_idx = np.sort(np.concatenate([anom_idx, other_sample]))
+
+            X_work = X_all[sim_idx].copy()
+            normal_mask = normal_mask_all[sim_idx]
+            subsampled = True
+        else:
+            X_work = X_all.copy()
+            normal_mask = normal_mask_all
+            subsampled = False
+
+        self.mu_ = X_work.mean(axis=0)
+        X_initial = X_work.copy()
+
+        # ── BSDT adaptive damping (Theorem C, eq:bsdamped) ──
+        # Ẋ = F(X) − γ(E_BS) · ∇E_BS(X)
+        # γ(E) = E / (E + θ)   — adaptive friction coefficient
+        bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
+                                         len(X_work) - 1))
+        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+            else X_work
+        bsdt_damper.fit(X_ref_init)
+        e_ref = bsdt_damper.energy(X_ref_init)
+        theta_bs = float(np.median(e_ref)) + 1e-10
+        # MFLS scale factor: match gradient-norm scale to energy scale
+        mfls_ref = bsdt_damper.mfls(X_ref_init)
+        mfls_med = float(np.median(mfls_ref)) + 1e-10
+        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
+
+        # ── Euler integration with Lyapunov v2 + ISS + BSDT ──
+        self.stabiliser.reset()
+        eta = self.eta
+        n_sim = len(X_work)
+        iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
+        for step in range(iters):
+            F_pair = self._pairwise_forces(X_work)
+            F_radial = -self.alpha * (X_work - self.mu_)
+
+            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
+            e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
+            grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
+            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
+            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
+            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
+            F_damp = -gamma_bs[:, None] * grad_bs    # damping force
+
+            F_total = F_pair + F_radial + F_damp
+
+            # Barrier-augmented force clamping
+            F_total = self.stabiliser.clamp_forces(F_total)
+
+            # Armijo on radial energy with ISS margin
+            E_old = self._gravity_energy(X_work)
+            grad_norm_sq = float(np.sum(F_total ** 2))
+            perturbation_norm = float(np.sqrt(np.sum(F_pair ** 2)))
+
+            X_candidate = X_work + eta * F_total
+            E_new = self._gravity_energy(X_candidate)
+
+            accept, eta = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, eta,
+                perturbation_norm=perturbation_norm
+            )
+
+            if accept:
+                X_work = X_candidate
+            else:
+                X_work = X_work + eta * F_total
+
+            displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
+                break
+
+        self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
+
+        # Calibrate on FINAL normal positions (bb43ff5 scoring)
+        X_ref_final = X_work[normal_mask]
+        if len(X_ref_final) > 1:
+            if self.fused_scorer is not None:
+                self.fused_scorer.fit(X_ref_final, X_sim=X_work)
+                if subsampled:
+                    scores = self.fused_scorer.score(X_all)
+                else:
+                    scores = self.fused_scorer.score(X_work)
+            else:
+                self.alarm.fit(X_ref_final)
+                if subsampled:
+                    scores = self.alarm.score(X_all)
+                else:
+                    scores = self.alarm.score(X_work)
+        else:
+            if subsampled:
+                scores = np.linalg.norm(X_all - X_all.mean(axis=0), axis=1)
+            else:
+                scores = np.linalg.norm(X_work - X_initial, axis=1)
+
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
+        return scores
+
+# ═══════════════════════════════════════════════════════════════════
+#  MFLS STACKED LAYERS  (from mfls_variants.py / scoring.py)
+#  Supervised polynomial ridge and gated variants for post-hoc
+#  correction on BSDT channel output.  Zero heuristics.
+# ═══════════════════════════════════════════════════════════════════
+
+class _MFLSQuadSurf:
+    """Degree-2 polynomial ridge regression on BSDT channels.
+
+    Input:  (T, K) channel matrix — the 4 BSDT operator outputs
+            (delta_C, delta_G, delta_A, delta_T).
+    Output: (T,) anomaly score per row.
+
+    Fit uses ridge regression against crisis labels:
+        beta = (Phi^T Phi + alpha I)^{-1} Phi^T y
+
+    Reference: Odeyemi O.I., "Blind Spot Decomposition Theory", 2025.
+    """
+
+    def __init__(self, ridge_alpha: float = 1.0):
+        self.ridge_alpha = ridge_alpha
+        self.beta_ = None
+        self.channel_means_ = None
+        self.channel_stds_ = None
+
+    @staticmethod
+    def _poly_features(C: np.ndarray) -> np.ndarray:
+        """Expand (T, K) channels to degree-2 polynomial features.
+
+        For K=4: [1, c1..c4, c1^2, c1*c2, ..., c4^2] -> 15 features.
+        """
+        T, K = C.shape
+        feats = [np.ones((T, 1)), C]
+        for i in range(K):
+            for j in range(i, K):
+                feats.append((C[:, i] * C[:, j]).reshape(-1, 1))
+        return np.hstack(feats)
+
+    def fit(self, channels: np.ndarray, y: np.ndarray) -> '_MFLSQuadSurf':
+        """Fit polynomial ridge on channel matrix.
+
+        Parameters
+        ----------
+        channels : (T, K) array — BSDT channel scores.
+        y : (T,) array — binary crisis labels (0 = normal, 1 = crisis).
+        """
+        self.channel_means_ = channels.mean(axis=0)
+        self.channel_stds_ = channels.std(axis=0) + 1e-10
+        C = (channels - self.channel_means_) / self.channel_stds_
+        Phi = self._poly_features(C)
+        n_feat = Phi.shape[1]
+        I_reg = np.eye(n_feat)
+        I_reg[0, 0] = 0.0  # don't regularise bias
+        self.beta_ = np.linalg.solve(
+            Phi.T @ Phi + self.ridge_alpha * I_reg,
+            Phi.T @ y.astype(float),
+        )
+        return self
+
+    def score(self, channels: np.ndarray) -> np.ndarray:
+        """Score: max(0, Phi @ beta)."""
+        C = (channels - self.channel_means_) / self.channel_stds_
+        raw = self._poly_features(C) @ self.beta_
+        return np.maximum(raw, 0.0)
+
+
+class _MFLSExpoGate:
+    """QuadSurf output capped by tanh saturation + sigmoid gating.
+
+    raw  = QuadSurf polynomial output
+    sat  = tanh(raw / sigma)         — saturation
+    gate = sigmoid(scale * sat)      — probability calibration
+
+    Reference: Odeyemi O.I., "Blind Spot Decomposition Theory", 2025.
+    """
+
+    def __init__(self, ridge_alpha: float = 1.0,
+                 smooth_sigma: float = 1.0,
+                 gate_scale: float = 3.0):
+        self.smooth_sigma = smooth_sigma
+        self.gate_scale = gate_scale
+        self._quad = _MFLSQuadSurf(ridge_alpha=ridge_alpha)
+
+    def fit(self, channels: np.ndarray, y: np.ndarray) -> '_MFLSExpoGate':
+        """Fit polynomial ridge (delegated to internal QuadSurf)."""
+        self._quad.fit(channels, y)
+        return self
+
+    def score(self, channels: np.ndarray) -> np.ndarray:
+        """Saturated + gated score: sigmoid(scale * tanh(Q/sigma))."""
+        raw = self._quad.score(channels)
+        sat = np.tanh(raw / (self.smooth_sigma + 1e-10))
+        return 1.0 / (1.0 + np.exp(-self.gate_scale * sat))
+
+
+
+class _MFLSFisherBSDT:
+    """BSDT baseline with Fisher VR dynamic channel weighting.
+
+    Unsupervised correction layer: determines channel weights from
+    data regime splits (80th / 50th percentile of total channel
+    magnitude).  No polynomial features, no labels.
+
+    Score = Σ_k  w_k · c̃_k
+
+    where  c̃_k  is min-max normalised channel k, and
+    w_k = Fisher variance-ratio of channel k between high-regime
+    and low-regime samples (data-driven, zero heuristics).
+
+    Reference: Odeyemi O.I., "Blind Spot Decomposition Theory", 2025.
+    """
+
+    def __init__(self, eps: float = 1e-10):
+        self.eps = eps
+        self.w_ = None
+        self.lo_ = None
+        self.hi_ = None
+
+    def fit(self, channels, y=None):
+        """Compute Fisher VR weights from channel regime splits.
+
+        Parameters
+        ----------
+        channels : (T, K) array — raw BSDT channel scores.
+        y : ignored (unsupervised).  Accepts for API compat.
+        """
+        T, K = channels.shape
+
+        # Min-max normalise each channel
+        self.lo_ = channels.min(axis=0)
+        self.hi_ = channels.max(axis=0)
+        span = self.hi_ - self.lo_
+        span = np.where(span < self.eps, 1.0, span)
+        C_n = (channels - self.lo_) / span
+
+        # Regime split on total normalised magnitude
+        total = C_n.sum(axis=1)
+        p80 = np.percentile(total, 80)
+        p50 = np.percentile(total, 50)
+        hi_mask = total >= p80
+        lo_mask = total <= p50
+
+        if hi_mask.sum() >= 2 and lo_mask.sum() >= 2:
+            fr = np.zeros(K)
+            for k in range(K):
+                mu_h = C_n[hi_mask, k].mean()
+                mu_l = C_n[lo_mask, k].mean()
+                var_h = C_n[hi_mask, k].var()
+                var_l = C_n[lo_mask, k].var()
+                fr[k] = (mu_h - mu_l) ** 2 / max(var_h + var_l, self.eps)
+            total_fr = fr.sum()
+            self.w_ = fr / total_fr if total_fr > self.eps else np.ones(K) / K
+        else:
+            self.w_ = np.ones(K) / K
+
+        return self
+
+    def score(self, channels):
+        """Fisher-weighted normalised channel sum."""
+        span = self.hi_ - self.lo_
+        span = np.where(span < self.eps, 1.0, span)
+        C_n = np.clip((channels - self.lo_) / span, 0.0, 1.0)
+        return (C_n * self.w_).sum(axis=1)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  MODE-6 GRAVITY ENGINE  (BSDT damping + MFLS stacked post-hoc)
+#  The BSDT channels from the simulation pass through a supervised
+#  MFLSQuadSurf / ExpoGate stacked layer — no heuristic blending.
+# ═══════════════════════════════════════════════════════════════════
+
+class Mode6GravityEngine:
+    """BSDT-damped gravity with stacked post-hoc correction layer.
+
+    Architecture (3-layer stack):
+        Layer 1 — BSDT adaptive damping in the gravity iteration loop.
+                  Uses gradient descent + Lyapunov ISS for iterating.
+                  BSDT is for iteration, NOT for scoring.
+        Layer 2 — BSDT channel extraction on final positions.
+                  Produces (N, 4) channel matrix:
+                  [delta_C, delta_G, delta_A, delta_T]
+        Layer 3 — Stacked correction layer on channels.
+                  This IS the final score — no blending.
+
+    Correction layers (``posthoc`` parameter):
+
+    ``'fisher'`` — BSDT baseline with Fisher VR dynamic weights.
+        Unsupervised.  score = Σ w_k · c̃_k  where weights come
+        from Fisher variance-ratio regime splits on the channels.
+
+    ``'quadsurf'`` — degree-2 polynomial features + ridge regression.
+        Supervised (needs crisis labels).
+        score = max(0, Φ·β)  where β = (ΦᵀΦ + αI)⁻¹Φᵀy
+
+    ``'expogate'`` — QuadSurf → tanh saturation → sigmoid gating.
+        Supervised (needs crisis labels).
+        score = sigmoid(scale · tanh(QuadSurf / σ))
+
+    Parameters
+    ----------
+    posthoc : str
+        Stacked layer: ``'fisher'``, ``'quadsurf'``, or ``'expogate'``.
+    ridge_alpha : float
+        Ridge penalty for polynomial regression (default 1.0).
+    smooth_sigma : float
+        Tanh saturation scale for ExpoGate (default 1.0).
+    gate_scale : float
+        Sigmoid gate steepness for ExpoGate (default 3.0).
+    """
+
+    def __init__(self,
+                 alpha: float = 0.1,
+                 gamma: float = 0.5,
+                 sigma: float = 1.0,
+                 lambda_rep: float = 0.05,
+                 eta: float = 0.05,
+                 iterations: int = 60,
+                 k_neighbors: int = 15,
+                 normalize: bool = True,
+                 max_samples: int = 3000,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05,
+                 posthoc: str = 'quadsurf',
+                 ridge_alpha: float = 1.0,
+                 smooth_sigma: float = 1.0,
+                 gate_scale: float = 3.0):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.sigma = sigma
+        self.lambda_rep = lambda_rep
+        self.eta = eta
+        self.iterations = iterations
+        self.k_neighbors = k_neighbors
+        self.normalize = normalize
+        self.max_samples = max_samples
+        self.calibrate = calibrate
+        self.target_far = target_far
+        self.posthoc = posthoc
+        self.ridge_alpha = ridge_alpha
+        self.smooth_sigma = smooth_sigma
+        self.gate_scale = gate_scale
+
+        self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
+        self.alarm = MorseTopologyAlarm(
+            k=k_neighbors,
+            weights=np.array([0.35, 0.30, 0.20, 0.15]))
+        self._far_calibrator = None
+
+        self.scaler_: Optional[StandardScaler] = None
+        self.mu_: Optional[np.ndarray] = None
+        self.X_final_: Optional[np.ndarray] = None
+
+    # ── forces / energy (same physics as Mode5) ──
+
+    def _pairwise_forces(self, X: np.ndarray,
+                         eps: float = 1e-5) -> np.ndarray:
+        """Gravitational attraction + short-range repulsion (kNN-limited)."""
+        n, d = X.shape
+        gamma = self.gamma
+        sigma = self.sigma
+        lambda_rep = self.lambda_rep
+
+        from sklearn.neighbors import NearestNeighbors
+        k = min(self.k_neighbors, n - 1)
+        nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+        nn.fit(X.astype(np.float32))
+        _, indices = nn.kneighbors(X.astype(np.float32))
+        nbr_idx = indices[:, 1:]
+
+        X_nbrs = X[nbr_idx]
+        diff = X[:, None, :] - X_nbrs
+        r_sq = np.sum(diff ** 2, axis=2, keepdims=True) + eps
+        r = np.sqrt(r_sq)
+
+        attraction = np.exp(-r_sq / (sigma ** 2))
+        repulsion = lambda_rep / r
+        magnitude = -gamma * (attraction - repulsion)
+
+        unit = diff / r
+        forces = np.sum(magnitude * unit, axis=1)
+        return forces
+
+    def _gravity_energy(self, X: np.ndarray, eps: float = 1e-5) -> float:
+        """Radial-only Lyapunov candidate energy."""
+        diff_mu = X - self.mu_[None, :]
+        E_radial = 0.5 * self.alpha * np.sum(diff_mu ** 2)
+        return float(E_radial)
+
+    # ── core fit_score ──
+
+    def fit_score(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                  ) -> np.ndarray:
+        """BSDT-damped gravity -> BSDT channels -> MFLS stacked layer.
+
+        Phase 1: BSDT adaptive damping in Euler integration
+                 (gradient descent + Lyapunov ISS — same as Mode5).
+        Phase 2: Extract BSDT channels on final positions.
+        Phase 3: MFLSQuadSurf / ExpoGate stacked on channels
+                 (supervised ridge, no heuristic blending).
+        """
+        if self.normalize:
+            self.scaler_ = StandardScaler()
+            X_all = self.scaler_.fit_transform(X).astype(np.float64)
+        else:
+            X_all = X.astype(np.float64).copy()
+
+        n = len(X_all)
+        normal_mask_all = (y == 0) if y is not None else np.ones(n, dtype=bool)
+
+        # Subsample for simulation if dataset is large
+        if n > self.max_samples:
+            rng = np.random.RandomState(42)
+            anom_idx = np.where(y == 1)[0] if y is not None else np.array([], dtype=int)
+            other_idx = np.where(y != 1)[0] if y is not None else np.arange(n)
+
+            if len(anom_idx) >= self.max_samples:
+                n_anom = min(len(anom_idx), self.max_samples // 2)
+                n_other = self.max_samples - n_anom
+                anom_sample = rng.choice(anom_idx, n_anom, replace=False)
+                other_sample = rng.choice(other_idx, min(n_other, len(other_idx)), replace=False)
+                sim_idx = np.sort(np.concatenate([anom_sample, other_sample]))
+            else:
+                n_other = max(0, self.max_samples - len(anom_idx))
+                if len(other_idx) > n_other:
+                    other_sample = rng.choice(other_idx, n_other, replace=False)
+                else:
+                    other_sample = other_idx
+                sim_idx = np.sort(np.concatenate([anom_idx, other_sample]))
+
+            X_work = X_all[sim_idx].copy()
+            normal_mask = normal_mask_all[sim_idx]
+            subsampled = True
+        else:
+            X_work = X_all.copy()
+            normal_mask = normal_mask_all
+            subsampled = False
+
+        self.mu_ = X_work.mean(axis=0)
+        X_initial = X_work.copy()
+
+        # ══════════════════════════════════════════════════════════
+        #  Phase 1: BSDT adaptive damping (gradient descent / ISS)
+        # ══════════════════════════════════════════════════════════
+        bsdt_damper = BSDTChannels(k=min(self.k_neighbors,
+                                         len(X_work) - 1))
+        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+            else X_work
+        bsdt_damper.fit(X_ref_init)
+        e_ref = bsdt_damper.energy(X_ref_init)
+        theta_bs = float(np.median(e_ref)) + 1e-10
+        mfls_ref = bsdt_damper.mfls(X_ref_init)
+        mfls_med = float(np.median(mfls_ref)) + 1e-10
+        beta_mfls = theta_bs / mfls_med
+
+        # Euler integration with BSDT adaptive damping
+        self.stabiliser.reset()
+        eta = self.eta
+        n_sim = len(X_work)
+        iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
+        for step in range(iters):
+            F_pair = self._pairwise_forces(X_work)
+            F_radial = -self.alpha * (X_work - self.mu_)
+
+            e_bs = bsdt_damper.energy(X_work)
+            grad_bs = bsdt_damper._gradient_vectors(X_work)
+            mfls_bs = np.linalg.norm(grad_bs, axis=1)
+            e_combined = e_bs + beta_mfls * mfls_bs
+            gamma_bs = e_combined / (e_combined + theta_bs)
+            F_damp = -gamma_bs[:, None] * grad_bs
+
+            F_total = F_pair + F_radial + F_damp
+
+            F_total = self.stabiliser.clamp_forces(F_total)
+
+            E_old = self._gravity_energy(X_work)
+            grad_norm_sq = float(np.sum(F_total ** 2))
+            perturbation_norm = float(np.sqrt(np.sum(F_pair ** 2)))
+
+            X_candidate = X_work + eta * F_total
+            E_new = self._gravity_energy(X_candidate)
+
+            accept, eta = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, eta,
+                perturbation_norm=perturbation_norm
+            )
+
+            if accept:
+                X_work = X_candidate
+            else:
+                X_work = X_work + eta * F_total
+
+            displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
+                break
+
+        self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
+
+        # ══════════════════════════════════════════════════════════
+        #  Phase 2: BSDT channel extraction on final positions
+        # ══════════════════════════════════════════════════════════
+        X_ref_final = X_work[normal_mask]
+        if len(X_ref_final) < 2:
+            X_ref_final = X_work
+
+        bsdt_scorer = BSDTChannels(k=min(self.k_neighbors,
+                                         max(len(X_ref_final) - 1, 1)))
+        bsdt_scorer.fit(X_ref_final)
+
+        X_scored = X_all if subsampled else X_work
+        ch = bsdt_scorer.channels(X_scored)
+        C = np.column_stack([ch['delta_C'], ch['delta_G'],
+                             ch['delta_A'], ch['delta_T']])
+
+        # ══════════════════════════════════════════════════════════
+        #  Phase 3: MFLS stacked layer on BSDT channels
+        #
+        #  Supervised (y has crisis labels) → MFLSQuadSurf / ExpoGate
+        #  with polynomial ridge regression on channels.
+        #
+        #  Unsupervised (y=0 or None) → BSDTChannels score_quadsurf /
+        #  score_expogate (Fisher VR weights, no labels needed).
+        #
+        #  In both cases: the stacked layer IS the final score.
+        #  No blending with a separate base scorer.
+        # ══════════════════════════════════════════════════════════
+        has_labels = y is not None and y.sum() > 0
+
+        if self.posthoc == 'fisher':
+            # ── BSDT baseline: Fisher VR dynamic weights (unsupervised) ──
+            layer = _MFLSFisherBSDT()
+            layer.fit(C)   # no labels needed
+            scores = layer.score(C)
+
+        elif has_labels:
+            # ── Supervised stacking: MFLSQuadSurf / ExpoGate ──
+            # Crisis labels → ridge regression on polynomial channel features
+            y_scored = y.astype(float)
+            if self.posthoc == 'expogate':
+                layer = _MFLSExpoGate(
+                    ridge_alpha=self.ridge_alpha,
+                    smooth_sigma=self.smooth_sigma,
+                    gate_scale=self.gate_scale,
+                )
+            else:
+                layer = _MFLSQuadSurf(ridge_alpha=self.ridge_alpha)
+
+            layer.fit(C, y_scored)
+            scores = layer.score(C)
+        else:
+            # ── Unsupervised stacking: Fisher VR on channels ──
+            # Same polynomial structure, weights from data regime splits
+            if self.posthoc == 'expogate':
+                bsdt_scorer.fit_expogate(X_ref_final)
+                scores = bsdt_scorer.score_expogate(X_scored)
+            else:
+                bsdt_scorer.fit_quadsurf(X_ref_final)
+                scores = bsdt_scorer.score_quadsurf(X_scored)
+
+        # ── FAR-targeted calibration (optional) ──
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
+        return scores
+
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  MODE-7 GRAVITY ENGINE  (NO damping + stacked BSDT correction)
+#  Pure gravity physics (Lyapunov ISS step control only, no friction)
+#  + BSDT channel extraction + Fisher / QuadSurf / ExpoGate layer.
+# ═══════════════════════════════════════════════════════════════════
+
+class Mode7GravityEngine:
+    """Pure-physics gravity engine with stacked BSDT correction layer.
+
+    Architecture (3-layer stack):
+        Layer 1 - Gravity iteration with NO damping.
+                  F_total = F_pair + F_radial
+                  Lyapunov ISS controls step size only -
+                  it does NOT contribute to prediction.
+        Layer 2 - BSDT channel extraction on final positions.
+                  (delta_C, delta_G, delta_A, delta_T)
+        Layer 3 - Stacked correction layer on channels.
+                  This IS the final score - no blending.
+
+    No friction/damping force in the iteration loop.  The physics
+    is purely conservative: gravitational attraction + short-range
+    repulsion + radial centering.  This lets you test whether the
+    stacked correction layer can recover anomaly discrimination
+    without adaptive friction (useful for cases like TerraLuna,
+    World Bank, ERCOT where you want to isolate what the friction
+    control contributes vs what the correction layer contributes).
+
+    Correction layers (``posthoc`` parameter):
+        ``'fisher'``   - Fisher VR dynamic channel weights (unsupervised)
+        ``'quadsurf'`` - degree-2 polynomial ridge (supervised)
+        ``'expogate'`` - QuadSurf + tanh + sigmoid (supervised)
+
+    Parameters
+    ----------
+    posthoc : str
+        Stacked layer: ``'fisher'``, ``'quadsurf'``, or ``'expogate'``.
+    ridge_alpha : float
+        Ridge penalty for polynomial regression (default 1.0).
+    smooth_sigma : float
+        Tanh saturation scale for ExpoGate (default 1.0).
+    gate_scale : float
+        Sigmoid gate steepness for ExpoGate (default 3.0).
+    """
+
+    def __init__(self,
+                 alpha: float = 0.1,
+                 gamma: float = 0.5,
+                 sigma: float = 1.0,
+                 lambda_rep: float = 0.05,
+                 eta: float = 0.05,
+                 iterations: int = 60,
+                 k_neighbors: int = 15,
+                 normalize: bool = True,
+                 max_samples: int = 3000,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05,
+                 posthoc: str = 'fisher',
+                 ridge_alpha: float = 1.0,
+                 smooth_sigma: float = 1.0,
+                 gate_scale: float = 3.0):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.sigma = sigma
+        self.lambda_rep = lambda_rep
+        self.eta = eta
+        self.iterations = iterations
+        self.k_neighbors = k_neighbors
+        self.normalize = normalize
+        self.max_samples = max_samples
+        self.calibrate = calibrate
+        self.target_far = target_far
+        self.posthoc = posthoc
+        self.ridge_alpha = ridge_alpha
+        self.smooth_sigma = smooth_sigma
+        self.gate_scale = gate_scale
+
+        self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
+        self._far_calibrator = None
+
+        self.scaler_: Optional[StandardScaler] = None
+        self.mu_: Optional[np.ndarray] = None
+        self.X_final_: Optional[np.ndarray] = None
+
+    # -- forces / energy (pure physics, no damping) --
+
+    def _pairwise_forces(self, X: np.ndarray,
+                         eps: float = 1e-5) -> np.ndarray:
+        """Gravitational attraction + short-range repulsion (kNN-limited)."""
+        n, d = X.shape
+        gam = self.gamma
+        sig = self.sigma
+        lrep = self.lambda_rep
+
+        from sklearn.neighbors import NearestNeighbors
+        k = min(self.k_neighbors, n - 1)
+        nn = NearestNeighbors(n_neighbors=k + 1, algorithm='auto')
+        nn.fit(X.astype(np.float32))
+        _, indices = nn.kneighbors(X.astype(np.float32))
+        nbr_idx = indices[:, 1:]
+
+        X_nbrs = X[nbr_idx]
+        diff = X[:, None, :] - X_nbrs
+        r_sq = np.sum(diff ** 2, axis=2, keepdims=True) + eps
+        r = np.sqrt(r_sq)
+
+        attraction = np.exp(-r_sq / (sig ** 2))
+        repulsion = lrep / r
+        magnitude = -gam * (attraction - repulsion)
+
+        unit = diff / r
+        forces = np.sum(magnitude * unit, axis=1)
+        return forces
+
+    def _gravity_energy(self, X: np.ndarray, eps: float = 1e-5) -> float:
+        """Radial-only Lyapunov candidate energy."""
+        diff_mu = X - self.mu_[None, :]
+        E_radial = 0.5 * self.alpha * np.sum(diff_mu ** 2)
+        return float(E_radial)
+
+    # -- core fit_score --
+
+    def fit_score(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                  ) -> np.ndarray:
+        """Pure gravity iteration -> BSDT channels -> stacked correction.
+
+        Phase 1: Euler integration with NO damping.
+                 F_total = F_pair + F_radial
+                 Lyapunov ISS controls step size only.
+        Phase 2: Extract BSDT channels on final positions.
+        Phase 3: Stacked correction layer (Fisher / QuadSurf / ExpoGate).
+        """
+        if self.normalize:
+            self.scaler_ = StandardScaler()
+            X_all = self.scaler_.fit_transform(X).astype(np.float64)
+        else:
+            X_all = X.astype(np.float64).copy()
+
+        n = len(X_all)
+        normal_mask_all = (y == 0) if y is not None else np.ones(n, dtype=bool)
+
+        # Subsample for simulation if dataset is large
+        if n > self.max_samples:
+            rng = np.random.RandomState(42)
+            anom_idx = np.where(y == 1)[0] if y is not None else np.array([], dtype=int)
+            other_idx = np.where(y != 1)[0] if y is not None else np.arange(n)
+
+            if len(anom_idx) >= self.max_samples:
+                n_anom = min(len(anom_idx), self.max_samples // 2)
+                n_other = self.max_samples - n_anom
+                anom_sample = rng.choice(anom_idx, n_anom, replace=False)
+                other_sample = rng.choice(other_idx, min(n_other, len(other_idx)), replace=False)
+                sim_idx = np.sort(np.concatenate([anom_sample, other_sample]))
+            else:
+                n_other = max(0, self.max_samples - len(anom_idx))
+                if len(other_idx) > n_other:
+                    other_sample = rng.choice(other_idx, n_other, replace=False)
+                else:
+                    other_sample = other_idx
+                sim_idx = np.sort(np.concatenate([anom_idx, other_sample]))
+
+            X_work = X_all[sim_idx].copy()
+            normal_mask = normal_mask_all[sim_idx]
+            subsampled = True
+        else:
+            X_work = X_all.copy()
+            normal_mask = normal_mask_all
+            subsampled = False
+
+        self.mu_ = X_work.mean(axis=0)
+
+        # ==========================================================
+        #  Phase 1: Pure gravity iteration -- NO damping
+        #  Lyapunov ISS controls step size only (Armijo, clamping).
+        # ==========================================================
+        self.stabiliser.reset()
+        eta = self.eta
+        n_sim = len(X_work)
+        iters = self.iterations if n_sim <= 1000 else max(20, self.iterations // 2)
+        for step in range(iters):
+            F_pair = self._pairwise_forces(X_work)
+            F_radial = -self.alpha * (X_work - self.mu_)
+            F_total = F_pair + F_radial
+
+            F_total = self.stabiliser.clamp_forces(F_total)
+
+            E_old = self._gravity_energy(X_work)
+            grad_norm_sq = float(np.sum(F_total ** 2))
+            perturbation_norm = float(np.sqrt(np.sum(F_pair ** 2)))
+
+            X_candidate = X_work + eta * F_total
+            E_new = self._gravity_energy(X_candidate)
+
+            accept, eta = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, eta,
+                perturbation_norm=perturbation_norm
+            )
+
+            if accept:
+                X_work = X_candidate
+            else:
+                X_work = X_work + eta * F_total
+
+            displacement = eta * np.max(np.linalg.norm(F_total, axis=1))
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
+                break
+
+        self.X_final_ = X_work
+        self._convergence_report = self.stabiliser.report()
+
+        # ==========================================================
+        #  Phase 2: BSDT channel extraction on final positions
+        # ==========================================================
+        X_ref_final = X_work[normal_mask]
+        if len(X_ref_final) < 2:
+            X_ref_final = X_work
+
+        bsdt_scorer = BSDTChannels(k=min(self.k_neighbors,
+                                         max(len(X_ref_final) - 1, 1)))
+        bsdt_scorer.fit(X_ref_final)
+
+        X_scored = X_all if subsampled else X_work
+        ch = bsdt_scorer.channels(X_scored)
+        C = np.column_stack([ch['delta_C'], ch['delta_G'],
+                             ch['delta_A'], ch['delta_T']])
+
+        # ==========================================================
+        #  Phase 3: Stacked correction layer on BSDT channels
+        # ==========================================================
+        has_labels = y is not None and y.sum() > 0
+
+        if self.posthoc == 'fisher':
+            # -- BSDT baseline: Fisher VR dynamic weights (unsupervised) --
+            layer = _MFLSFisherBSDT()
+            layer.fit(C)
+            scores = layer.score(C)
+
+        elif has_labels:
+            # -- Supervised stacking: MFLSQuadSurf / ExpoGate --
+            y_scored = y.astype(float)
+            if self.posthoc == 'expogate':
+                layer = _MFLSExpoGate(
+                    ridge_alpha=self.ridge_alpha,
+                    smooth_sigma=self.smooth_sigma,
+                    gate_scale=self.gate_scale,
+                )
+            else:
+                layer = _MFLSQuadSurf(ridge_alpha=self.ridge_alpha)
+
+            layer.fit(C, y_scored)
+            scores = layer.score(C)
+        else:
+            # -- Unsupervised fallback: BSDTChannels built-in --
+            if self.posthoc == 'expogate':
+                bsdt_scorer.fit_expogate(X_ref_final)
+                scores = bsdt_scorer.score_expogate(X_scored)
+            else:
+                bsdt_scorer.fit_quadsurf(X_ref_final)
+                scores = bsdt_scorer.score_quadsurf(X_scored)
+
+        # -- FAR-targeted calibration (optional) --
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
+        return scores
 
 class HybridGravityEngine:
     """
