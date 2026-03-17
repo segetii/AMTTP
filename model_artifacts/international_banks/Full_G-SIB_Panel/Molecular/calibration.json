@@ -1,0 +1,64 @@
+{
+  "region": "Full G-SIB Panel",
+  "engine": "Molecular",
+  "n_calib": 11,
+  "best_thresholds": {
+    "percentile": {
+      "auroc": 0.7106227106227107,
+      "auroc_gfc": 0.8480725623582767,
+      "far": 31.746031746031743,
+      "recall": 76.92307692307693,
+      "prec": 33.33333333333333,
+      "f1": 46.51162790697674,
+      "first_alarm": "2007-09-30",
+      "gfc_lead": "2007-09-30",
+      "pctl": 95,
+      "threshold": 0.26004923120255763
+    },
+    "z_score": {
+      "auroc": 0.6636245110821382,
+      "auroc_gfc": 0.8087167070217918,
+      "far": 20.33898305084746,
+      "recall": 38.46153846153847,
+      "prec": 29.411764705882355,
+      "f1": 33.33333333333333,
+      "first_alarm": "2007-03-31",
+      "gfc_lead": "2007-03-31",
+      "z_thresh": 1.25
+    },
+    "p_value": {
+      "auroc": 0.7094017094017094,
+      "auroc_gfc": 0.8526077097505669,
+      "far": 23.809523809523807,
+      "recall": 46.15384615384615,
+      "prec": 28.57142857142857,
+      "f1": 35.294117647058826,
+      "first_alarm": "2007-12-31",
+      "gfc_lead": null,
+      "p_thresh": 0.1
+    }
+  },
+  "time_seconds": 309.7522780895233,
+  "banks": [
+    "JPMorgan Chase",
+    "Bank of America",
+    "Citibank NA",
+    "Wells Fargo",
+    "Goldman Sachs Bank USA",
+    "BNY Mellon",
+    "HSBC",
+    "BNP Paribas",
+    "Deutsche Bank",
+    "Barclays",
+    "Societe Generale",
+    "UniCredit",
+    "ING",
+    "Mitsubishi UFJ",
+    "Mizuho",
+    "Sumitomo Mitsui",
+    "Bank of China",
+    "ICBC",
+    "China Construction Bank",
+    "Standard Chartered"
+  ]
+}

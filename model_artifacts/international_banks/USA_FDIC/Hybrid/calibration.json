@@ -1,0 +1,50 @@
+{
+  "region": "USA (FDIC)",
+  "engine": "Hybrid",
+  "n_calib": 11,
+  "best_thresholds": {
+    "percentile": {
+      "auroc": 0.7350427350427351,
+      "auroc_gfc": 0.9546485260770974,
+      "far": 11.11111111111111,
+      "recall": 53.84615384615385,
+      "prec": 50.0,
+      "f1": 51.851851851851855,
+      "first_alarm": "2006-12-31",
+      "gfc_lead": null,
+      "pctl": 90,
+      "threshold": 0.35544556225938323
+    },
+    "z_score": {
+      "auroc": 0.6936114732724903,
+      "auroc_gfc": 0.9709443099273607,
+      "far": 5.084745762711865,
+      "recall": 46.15384615384615,
+      "prec": 66.66666666666666,
+      "f1": 54.54545454545453,
+      "first_alarm": "2006-12-31",
+      "gfc_lead": null,
+      "z_thresh": 1.0
+    },
+    "p_value": {
+      "auroc": 0.7496947496947497,
+      "auroc_gfc": 0.9523809523809523,
+      "far": 11.11111111111111,
+      "recall": 53.84615384615385,
+      "prec": 50.0,
+      "f1": 51.851851851851855,
+      "first_alarm": "2006-12-31",
+      "gfc_lead": null,
+      "p_thresh": 0.2
+    }
+  },
+  "time_seconds": 149.96595287322998,
+  "banks": [
+    "JPMorgan Chase",
+    "Bank of America",
+    "Citibank NA",
+    "Wells Fargo",
+    "Goldman Sachs Bank USA",
+    "BNY Mellon"
+  ]
+}

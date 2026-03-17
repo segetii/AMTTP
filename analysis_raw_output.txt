@@ -1,0 +1,61 @@
+﻿==========================================================================================
+SIMULATION 1: COMPREHENSIVE OPERATIONAL SWEEP (bench_operational.py)
+  41 configs ├ù 5 regions = 205 runs
+==========================================================================================
+
+  Full G-SIB Panel: 41 configs tested, 0 operational
+
+  USA (FDIC): 41 configs tested, 0 operational
+
+  Europe + UK: 41 configs tested, 0 operational
+
+  Asia (JP + CN): 41 configs tested, 0 operational
+
+  Nigeria (WB-GFDD): 41 configs tested, 0 operational
+
+==========================================================================================
+SIMULATION 2: INTERNATIONAL BANKS EXTENDED (bench_international_banks.py)
+  ReducedTensor, MDN_Tensor, QuadSurf ├ù 5 regions
+==========================================================================================
+
+  Full G-SIB Panel: 3 configs tested, 0 operational
+
+  USA (FDIC): 3 configs tested, 0 operational
+
+  Europe + UK: 3 configs tested, 0 operational
+
+  Asia (JP + CN): 3 configs tested, 0 operational
+
+  Nigeria (WB-GFDD): 3 configs tested, 0 operational
+
+  --- Original engines (Molecular, Gravity, Hybrid) ---
+
+  Full G-SIB Panel: 3 configs tested, 0 operational
+
+  USA (FDIC): 3 configs tested, 0 operational
+
+  Europe + UK: 3 configs tested, 0 operational
+
+  Asia (JP + CN): 3 configs tested, 0 operational
+
+  Nigeria (WB-GFDD): 3 configs tested, 0 operational
+
+==========================================================================================
+SIMULATION 3: BETTI+MORSE FOUNDATION (bench_betti_morse_foundation.py)
+  25 configs ├ù 5 regions = 125 runs
+==========================================================================================
+
+  Full G-SIB Panel: 25 configs tested, 8 operational
+C:/Users/Administrator/AppData/Local/Programs/Python/Python313/python.exe : 
+Traceback (most recent call last):
+At line:1 char:32
++ ... NG='utf-8'; C:/Users/Administrator/AppData/Local/Programs/Python/Pyth ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last) 
+   ::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\amttp\gather_analysis_data.py", line 133, in <module>
+    f"R={o['recall']:5.1f}%  P={o['precision']:5.1f}%  "
+                                ~^^^^^^^^^^^^^
+KeyError: 'precision'

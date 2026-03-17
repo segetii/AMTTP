@@ -1,0 +1,116 @@
+======================================================================
+  RTD CONTINUATION — In-Sample Monitoring (algorithms 7-9)
+======================================================================
+Panel: T=76, N=25, d=5
+Crisis: 13/76 quarters
+Calib: 11 Q
+
+
+======================================================================
+  [7/9] RTD + Molecular (FusedScorer)
+======================================================================
+    RTD: d_raw=5 -> d_rtd=11
+    t= 11  2007-12-31  score=0.4951 << CRISIS
+    t= 19  2009-12-31  score=0.2558
+    t= 27  2011-12-31  score=0.3188 << CRISIS
+    t= 35  2013-12-31  score=0.2942
+    t= 43  2015-12-31  score=0.2970
+    t= 51  2017-12-31  score=0.3090
+    t= 59  2019-12-31  score=0.2933
+    t= 67  2021-12-31  score=0.3915
+    t= 75  2023-12-31  score=0.3863
+  Time: 1313s
+
+  RTD+Molecular:
+  AUROC:       0.6953
+  GFC-AUROC:   1.0000
+  --- P99 threshold=0.4035 ---
+  TP=3  FP=3  FN=10  TN=49
+  FAR:       5.8%
+  Recall:    23.1%
+  Precision: 50.0%
+  GFC 1st:   2007-12-31
+  z(BNP):    +2.72
+  --- mu+3sig threshold=0.4304 ---
+  TP=3  FP=2  FN=10  TN=50
+  FAR:       3.8%
+  Recall:    23.1%
+  Precision: 60.0%
+  GFC 1st:   2007-12-31
+  z(BNP):    +2.72
+
+  Alarm timeline (mu+3sig):
+    2007-12-31  score=0.4951  CRISIS + ALARM
+    2008-03-31  score=0.5127  CRISIS + ALARM
+    2008-06-30  score=0.4835  CRISIS + ALARM
+    2008-09-30  score=0.3886  CRISIS (missed)
+    2008-12-31  score=0.3669  CRISIS (missed)
+    2009-03-31  score=0.3531  CRISIS (missed)
+    2009-06-30  score=0.3422  CRISIS (missed)
+    2011-09-30  score=0.3031  CRISIS (missed)
+    2011-12-31  score=0.3188  CRISIS (missed)
+    2012-03-31  score=0.3097  CRISIS (missed)
+    2012-06-30  score=0.2932  CRISIS (missed)
+    2020-03-31  score=0.2921  CRISIS (missed)
+    2020-06-30  score=0.2969  CRISIS (missed)
+    2022-09-30  score=0.4428  FALSE ALARM
+    2022-12-31  score=0.5369  FALSE ALARM
+
+======================================================================
+  [8/9] RTD + Molecular + Fisher
+======================================================================
+    RTD: d_raw=5 -> d_rtd=11
+    t= 11  2007-12-31  score=0.4953 << CRISIS
+    t= 19  2009-12-31  score=0.2702
+    t= 27  2011-12-31  score=0.2995 << CRISIS
+    t= 35  2013-12-31  score=0.2375
+    t= 43  2015-12-31  score=0.2623
+    t= 51  2017-12-31  score=0.2678
+    t= 59  2019-12-31  score=0.2681
+    t= 67  2021-12-31  score=0.4069
+    t= 75  2023-12-31  score=0.4818
+  Time: 771s
+
+  RTD+Fisher:
+  AUROC:       0.7485
+  GFC-AUROC:   1.0000
+  --- P99 threshold=0.3593 ---
+  TP=7  FP=13  FN=6  TN=39
+  FAR:       25.0%
+  Recall:    53.8%
+  Precision: 35.0%
+  GFC 1st:   2007-12-31
+  z(BNP):    +0.93
+  --- mu+3sig threshold=0.4340 ---
+  TP=4  FP=6  FN=9  TN=46
+  FAR:       11.5%
+  Recall:    30.8%
+  Precision: 40.0%
+  GFC 1st:   2007-12-31
+  z(BNP):    +0.93
+
+  Alarm timeline (mu+3sig):
+    2007-12-31  score=0.4953  CRISIS + ALARM
+    2008-03-31  score=0.4828  CRISIS + ALARM
+    2008-06-30  score=0.5014  CRISIS + ALARM
+    2008-09-30  score=0.4426  CRISIS + ALARM
+    2008-12-31  score=0.4070  CRISIS (missed)
+    2009-03-31  score=0.4224  CRISIS (missed)
+    2009-06-30  score=0.3862  CRISIS (missed)
+    2011-09-30  score=0.2940  CRISIS (missed)
+    2011-12-31  score=0.2995  CRISIS (missed)
+    2012-03-31  score=0.2875  CRISIS (missed)
+    2012-06-30  score=0.2704  CRISIS (missed)
+    2020-03-31  score=0.2718  CRISIS (missed)
+    2020-06-30  score=0.2803  CRISIS (missed)
+    2022-09-30  score=0.4470  FALSE ALARM
+    2022-12-31  score=0.6057  FALSE ALARM
+    2023-03-31  score=0.4860  FALSE ALARM
+    2023-06-30  score=0.4539  FALSE ALARM
+    2023-09-30  score=0.4698  FALSE ALARM
+    2023-12-31  score=0.4818  FALSE ALARM
+
+======================================================================
+  [9/9] RTD + Molecular + QuadSurf
+======================================================================
+    RTD: d_raw=5 -> d_rtd=11
