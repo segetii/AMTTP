@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 \usepackage{setspace}
 \usepackage{parskip}
+\usepackage{enumitem}
 
 \hypersetup{
   colorlinks=true,
@@ -13,6 +14,9 @@
 }
 
 \onehalfspacing
+
+% Push closing/signature block to the right margin
+\longindentation=0.65\textwidth
 
 \signature{Dr.\ {[FULL NAME]}, PhD\\
 Vice President, Sales\\
@@ -105,7 +109,7 @@ former.  Olusegun has built the latter.
 Specific indicators of enterprise readiness that I have observed in
 AMTTP:
 
-\begin{itemize}
+\begin{itemize}[nosep,leftmargin=*]
   \item \textbf{Client SDK maturity.}  The TypeScript SDK exposes 19+
     service endpoints covering the full compliance lifecycle---risk
     scoring, KYC, sanctions, dispute management, reputation, MEV
@@ -156,7 +160,7 @@ AMTTP:
 From a commercial perspective, AMTTP's competitive advantages are
 defensible:
 
-\begin{enumerate}
+\begin{enumerate}[nosep,leftmargin=*]
   \item \textbf{First-mover in pre-settlement compliance.}  There is
     no direct competitor offering protocol-level AML enforcement
     before transaction finality.  The incumbents (Chainalysis, Elliptic,
@@ -205,7 +209,7 @@ natively, not as an afterthought.
 From direct experience selling enterprise technology in financial
 services, I can identify three immediate customer segments for AMTTP:
 
-\begin{itemize}
+\begin{itemize}[nosep,leftmargin=*]
   \item \textbf{FCA-regulated crypto exchanges and custodians} (e.g.,
     Revolut, Coinbase UK, Archax) that need protocol-level compliance
     to maintain their FCA registration.
@@ -226,35 +230,41 @@ What I find commercially significant about Olusegun's research papers
 is that they are not academic exercises disconnected from the product.
 Each paper produces technology that extends AMTTP's capabilities:
 
-\begin{itemize}
-  \item \textbf{BSDT} (Blind Spot Decomposition Theory) provides the
-    diagnostic framework that identifies \textit{why} the ML model
-    misses specific fraud patterns, enabling targeted correction
-    without retraining---reducing operational cost and model governance
-    risk.
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{\textit{Blind Spot Decomposition Theory: A Mathematical
+    Framework for Characterising and Correcting Missed Fraud in Machine
+    Learning Systems}} (BSDT) provides the diagnostic framework that
+    identifies \textit{why} the ML model misses specific fraud
+    patterns, enabling targeted correction without retraining---reducing
+    operational cost and model governance risk.
     (DOI:\,\href{https://doi.org/10.5281/zenodo.18870589}{10.5281/zenodo.18870589}.)
 
-  \item \textbf{UDL} (Universal Deviation Law) provides the detection
-    backbone: 14~composable operators achieving AUC~0.972 with a single
-    hyperparameter set.  In enterprise ML, eliminating per-client
-    tuning is the difference between a product that scales and one
-    that requires a professional services team for every deployment.
+  \item \textbf{\textit{Universal Deviation Law: A Multi-Spectrum Tensor
+    Framework for Domain-Agnostic Anomaly Detection}} (UDL) provides
+    the detection backbone: 14~composable operators achieving
+    AUC~0.972 with a single hyperparameter set.  In enterprise ML,
+    eliminating per-client tuning is the difference between a product
+    that scales and one that requires a professional services team for
+    every deployment.
     (DOI:\,\href{https://doi.org/10.5281/zenodo.19037687}{10.5281/zenodo.19037687}.)
 
-  \item \textbf{Adaptive Friction} provides real-time systemic risk
-    monitoring.  The validated 6-quarter early warning before the GFC,
-    the Terra/Luna detection at hour~23, and the ERCOT grid prediction
-    72~hours in advance are not merely academic results---they are
-    product features.  An institutional client deploying AMTTP would
-    receive not only transaction-level compliance but also portfolio-level
-    and system-level early warning.  That is a dramatically more
-    compelling commercial proposition than transaction screening alone.
+  \item \textbf{\textit{Blind-Spot Decomposition and the Geometry of
+    System Collapse}} provides real-time systemic risk monitoring
+    through adaptive friction.  The validated 6-quarter early warning
+    before the GFC (AUROC~0.867, zero false alarms), the Terra/Luna
+    detection at hour~23 ($r = 0.996$ correlation), and the ERCOT
+    grid prediction 72~hours in advance (AUC~0.9997) are not merely
+    academic results---they are product features.  An institutional
+    client deploying AMTTP would receive not only transaction-level
+    compliance but also portfolio-level and system-level early
+    warning.  That is a dramatically more compelling commercial
+    proposition than transaction screening alone.
     (DOI:\,\href{https://doi.org/10.5281/zenodo.19038783}{10.5281/zenodo.19038783}.)
 \end{itemize}
 
 The cross-domain validation---demonstrating that the same mathematical
-framework works in banking, cryptocurrency, and energy
-infrastructure---is commercially powerful because it proves the
+framework works in banking, cryptocurrency, energy infrastructure, and
+fluid dynamics---is commercially powerful because it proves the
 technology is not brittle.  Enterprise buyers are risk-averse; they want
 evidence that a product will work in conditions the vendor has not
 specifically optimised for.  Olusegun's four-domain validation provides
@@ -273,7 +283,7 @@ They build technology that is impressive but commercially irrelevant.
 Olusegun does not have this problem.  Every design decision I have
 observed in AMTTP reflects awareness of commercial constraints:
 
-\begin{itemize}
+\begin{itemize}[nosep,leftmargin=*]
   \item The 12-second block confirmation window is treated as a hard
     engineering constraint, not an aspirational target.
   \item The batch processing capability (10,000~transactions per call)
@@ -300,7 +310,7 @@ technical founder.
 I want to address the specific question of why Olusegun's presence in
 the UK would generate economic value:
 
-\begin{enumerate}
+\begin{enumerate}[nosep,leftmargin=*]
   \item \textbf{Regulatory alignment.}  The UK's FCA is actively
     developing its crypto-asset regulatory framework.  AMTTP is built
     for exactly this regulatory environment.  Having the inventor of
@@ -363,6 +373,8 @@ programme that feeds directly into product differentiation.
 
 The UK technology sector would gain significantly from his presence.  I
 recommend him for the Global Talent Visa without reservation.
+
+\vspace{1.5\baselineskip}
 
 \closing{Yours faithfully,}
 
