@@ -1,0 +1,30 @@
+
+==========================================================================================
+  SUPPLY CHAIN BSDT UNIVERSALITY — SUMMARY TABLE
+==========================================================================================
+  Scenario                       Mode          Cascade   Health  Recovery  Warning  Above C*
+------------------------------------------------------------------------------------------
+  COVID-19 Semiconductor Short   none             12.0    0.420       DNR        0     1.000
+                                 constant         12.0    0.452       DNR        2     1.000
+                                 adaptive          0.0    0.834         0        2     1.000
+------------------------------------------------------------------------------------------
+  Suez Canal Blockage (Ever Gi   none              7.0    0.549       DNR        0     0.600
+                                 constant          6.0    0.599       DNR        0     0.000
+                                 adaptive          0.0    0.833         0        0     0.714
+------------------------------------------------------------------------------------------
+  Texas Winter Storm (Uri) / E   none             11.0    0.387       DNR        0     1.000
+                                 constant         11.0    0.433       DNR        8     1.000
+                                 adaptive          0.0    0.840         0        0     1.000
+------------------------------------------------------------------------------------------
+  Fukushima / Renesas Semicond   none             11.0    0.462       DNR        6     1.000
+                                 constant         10.0    0.501         0        3     0.926
+                                 adaptive          0.0    0.860         0        0     1.000
+------------------------------------------------------------------------------------------
+  Thailand Floods — HDD Supply   none             10.0    0.300       DNR        2     1.000
+                                 constant         10.0    0.354         0        3     0.955
+                                 adaptive          0.0    0.832         0        1     1.000
+------------------------------------------------------------------------------------------
+
+  DNR = Did Not Recover within simulation horizon
+  Cascade = peak number of nodes with health < 50%
+  Warning = MFLS early warning (steps before disruption onset)
