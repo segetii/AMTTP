@@ -16,10 +16,10 @@
 
 \signature{Professor Ayo Ogunjuyigbe\\
 Professor of Electrical \& Electronic Engineering\\
-Former Director, Management Information Systems (MIS)\\
+Provost, Postgraduate School\\
 University of Ibadan, Nigeria}
 
-\address{Department of Electrical \& Electronic Engineering\\
+\address{Postgraduate School\\
 University of Ibadan\\
 Ibadan, Oyo State\\
 Nigeria}
@@ -34,60 +34,102 @@ United Kingdom}
 
 \opening{To Whom It May Concern,}
 
-I write to provide my personal endorsement of Odeyemi Olusegun Israel in support of his application for the UK Global Talent Visa under the Digital Technology route. While my colleague Professor {[CS Professor Name]} is better placed to comment on the theoretical merits of Olusegun's research papers, my endorsement focuses on what I consider equally important: his \textbf{engineering capability, systems thinking, and the real-world impact of the products he has built}.
+I write to endorse Odeyemi Olusegun Israel for the UK Global Talent Visa
+under the Digital Technology route.  I am a Professor of Electrical and
+Electronic Engineering at the University of Ibadan, where I currently
+serve as Provost of the Postgraduate School.  My research spans power
+systems, computational intelligence, and applied machine learning.  I
+have mentored Olusegun for over 10~years and have reviewed his technical
+work in detail.
 
-By way of background, I am a Professor of Electrical and Electronic Engineering at the University of Ibadan and have previously served as Director of Management Information Systems (MIS) at the same institution. In the MIS role, I was responsible for overseeing the university's entire digital infrastructure---enterprise systems, data management, and operational technology. My research spans power systems, computational intelligence, and applied machine learning in engineering contexts. This combination of institutional systems management and technical research gives me a particular perspective on what it takes to build complex, production-grade systems that actually work.
+%% ── AMTTP ──────────────────────────────────────────────────────────
 
-\textbf{AMTTP: a product, not a prototype.}
+\textbf{AMTTP: a production compliance platform built by one person.}
 
-Olusegun has designed and built a system called the Anti-Money Laundering Transaction Trust Protocol (AMTTP). I want to be clear about what this is, because in my experience, most solo developers who claim to have built ``platforms'' have really built proof-of-concept demos. AMTTP is not that.
+Olusegun has designed and built the Anti-Money Laundering Transaction
+Trust Protocol (AMTTP)---a four-layer system comprising client SDKs
+(TypeScript and Python, both open-sourced), a compliance orchestration
+engine of 7~parallel microservices, an ML training pipeline processing
+2.64~million Ethereum transactions (production ROC-AUC of~0.9879), and
+18~Solidity smart contracts on Ethereum Sepolia.  The whole stack runs
+across 17~containerised microservices.
 
-The system comprises four architectural layers that must function together in real time:
+AMTTP solves a problem the blockchain compliance industry has not yet
+solved: \textit{pre-settlement} AML enforcement.  Every major tool on
+the market---Chainalysis, Elliptic, TRM~Labs---operates after a
+transaction has settled.  AMTTP intervenes before settlement, completing
+ML inference, graph analysis, sanctions screening, and policy evaluation
+within Ethereum's 12-second block window.  That is genuine real-time
+systems engineering.
 
-\begin{enumerate}
-  \item A \textbf{client SDK layer} (TypeScript and Python, both open-sourced on GitHub) that financial institutions integrate into their transaction pipelines.
-  \item A \textbf{compliance orchestration engine} that combines ML risk scoring, graph-based relationship analysis, sanctions list screening, and configurable policy rules into a single deterministic pass/fail decision.
-  \item An \textbf{offline ML training pipeline} using a Composite Teacher architecture: Autoencoder-Enhanced XGBoost (weighted at 0.4), seven FATF-aligned AML pattern detectors (0.3), and graph structural properties (0.3) to generate pseudo-labels across 2.64 million transactions. A Student model distils this into a deployable classifier.
-  \item A \textbf{blockchain smart contract layer} with 18 contracts deployed on Ethereum Sepolia, handling on-chain risk attestation, threshold-based transaction gating, and compliance audit trails.
-\end{enumerate}
+He also built zkNAF, a zero-knowledge proof framework (Groth16
+ZK-SNARKs on BN254) that lets institutions prove compliance
+facts---KYC validity, risk-score range, sanctions
+non-membership---without revealing personal data, resolving the
+GDPR-versus-AML conflict at the cryptographic level.
 
-The whole thing runs across 17 containerised microservices coordinated through a central API gateway. I know, from my time managing the University of Ibadan's IT systems, how difficult it is to keep even five or six services reliably communicating. Seventeen is a fundamentally harder problem, and Olusegun has solved it alone.
+In a university, a project of this scope would require a PI, several
+postdocs, and a team of PhD students.  Olusegun built it alone.  I have
+reviewed the GitHub repository: there is no evidence of collaborators or
+outsourced components.
 
-\textbf{Why the architecture matters.}
+%% ── SIAM PAPER / ERCOT ────────────────────────────────────────────
 
-The core insight behind AMTTP addresses a problem that the entire blockchain compliance industry has, to date, failed to solve. In traditional banking, a suspicious transaction can be frozen mid-flight. On a blockchain, once a transaction reaches finality, it is irreversible. Every major compliance tool currently on the market---Chainalysis, Elliptic, TRM Labs---operates \textit{after} settlement. They generate alerts; they do not prevent illicit transactions from completing. AMTTP intervenes \textit{before} settlement, at the protocol level.
+\textbf{Blind-Spot Decomposition and the Geometry of System Collapse: a
+contribution I can assess directly.}
 
-This is not simply a matter of calling an API earlier in the pipeline. It requires solving a hard real-time systems problem: the ML inference, graph analysis, sanctions screening, and policy evaluation must all complete within the block confirmation window (approximately 12 seconds on Ethereum). Olusegun has engineered the system to meet these timing constraints while maintaining deterministic compliance guarantees. That is genuine systems engineering, not application development.
+Olusegun's research papers on Blind Spot Decomposition Theory (BSDT) and
+the Universal Detection Principle (UDP) are solid contributions to
+anomaly detection.  But it is his third paper, \textit{Blind-Spot
+Decomposition and the Geometry of System Collapse}, that I endorse most
+directly, because it contains results in power systems that fall
+squarely within my area of expertise.
 
-\textbf{Zero-knowledge cryptography for regulatory compliance.}
-
-One component of AMTTP that I think deserves particular attention is zkNAF---Olusegun's zero-knowledge proof framework for privacy-preserving compliance verification. It allows institutions to prove facts about a customer (KYC validity, risk score within acceptable range, absence from sanctions lists) without revealing the underlying personal data.
-
-From a regulatory perspective, this is significant. Financial institutions currently face a genuine conflict between GDPR's data minimisation requirements and AML regulations' transparency demands. Olusegun's solution does not merely acknowledge this tension---it resolves it architecturally. He has also implemented multi-oracle threshold signatures and replay protection, which are the kind of infrastructure-level security measures that separate production systems from academic exercises.
-
-\textbf{Interdisciplinary range and engineering maturity.}
-
-What distinguishes Olusegun, in my observation, is not just depth in any one area but the ability to work across domains at a high level simultaneously. AMTTP requires competence in:
+In February~2021, Winter Storm Uri caused cascading blackouts across the
+Texas ERCOT grid.  The public narrative blamed frozen wind turbines.
+Olusegun's adaptive friction framework, applied to ERCOT dispatch data,
+achieves:
 
 \begin{itemize}
-  \item \textbf{Machine learning engineering}: training pipelines, model deployment, feature engineering at scale.
-  \item \textbf{Blockchain development}: Solidity smart contracts, gas optimisation, on-chain/off-chain coordination.
-  \item \textbf{Distributed systems}: microservice orchestration, containerisation, API gateway design.
-  \item \textbf{Cryptographic engineering}: zero-knowledge proofs, threshold signatures, secure key management.
-  \item \textbf{Regulatory knowledge}: FATF Travel Rule, FCA requirements, GDPR data handling obligations.
+  \item \textbf{Detection 72~hours before rolling blackouts began}
+    (AUC~=~0.9997).
+  \item \textbf{Adaptive friction reduces peak capacity loss by 71\%.}
+  \item Per-agent BSDT decomposition identifies \textbf{gas supply
+    chain disruption}---not frozen wind turbines---as the structural
+    vulnerability driving the cascade.
 \end{itemize}
 
-In the university context, a project of this scope would typically require a principal investigator, two or three postdoctoral researchers, and a team of PhD students, with institutional support for infrastructure and compute. Olusegun has done it as a single engineer. I can confirm this because I have reviewed the GitHub repository and the deployment configuration---there is no evidence of collaborators, outsourced components, or wrapper libraries pretending to be original work. It is all his.
+The gas supply finding is exactly what the subsequent FERC/NERC joint
+investigation confirmed---but Olusegun's framework identifies it
+\textit{mathematically, 72~hours in advance, from dispatch data alone}.
+As a power systems researcher, I can say that a 72-hour predictive lead
+on a grid cascade event, with correctly identified root cause, is an
+exceptional result.  I am not aware of any other framework in the
+literature that achieves this.
 
-The decision to open-source the client SDKs while keeping the orchestration core proprietary also reflects good product judgment. It lowers the integration barrier for potential adopters while protecting the core intellectual property. This is the kind of strategic decision that separates engineers who can build things from engineers who can build \textit{products}.
+The same paper validates on FDIC banking data (6-quarter lead on the
+2008~GFC, zero false alarms), the Terra/Luna collapse ($r = 0.996$
+correlation), and 3D Navier-Stokes fluid dynamics.  That the same
+mathematical framework diagnoses blockchain fraud, predicts banking
+crises, and identifies power grid cascade origins is remarkable.
 
-\textbf{Relevance to the UK digital economy.}
+%% ── ASSESSMENT ─────────────────────────────────────────────────────
 
-The UK is actively positioning itself as a global leader in responsible fintech regulation. The FCA's forthcoming framework for crypto-asset regulation, expected by late 2027, will create substantial demand for compliance infrastructure that can operate at the protocol level. AMTTP is, as far as I am aware, the only system in existence that provides pre-settlement AML enforcement on blockchain transactions. The individual who built it would be a direct asset to the UK's regulatory technology sector.
+\textbf{Relevance to the UK and my assessment.}
 
-Beyond AMTTP, Olusegun has also produced a body of research work (Blind Spot Decomposition Theory and the Universal Detection Principle) that has theoretical merit---but I defer to my colleague's letter for detailed comment on that aspect. What I will say is that the fact Olusegun can move fluently between building production systems and producing original mathematical theory is itself unusual and valuable.
+The FCA's forthcoming crypto-asset regulatory framework will create
+demand for protocol-level compliance infrastructure.  AMTTP is, as far
+as I am aware, the only system providing pre-settlement AML enforcement
+on blockchain transactions.  The ERCOT and Navier-Stokes work also
+aligns with UK priorities in infrastructure resilience (Ofgem, National
+Grid ESO) and applied mathematics (EPSRC).
 
-\textbf{My assessment.} In my years at the University of Ibadan, both as a professor and as the director responsible for institutional IT infrastructure, I have mentored hundreds of engineering students and professionals. I can say without hesitation that Olusegun's engineering capability and systems-level thinking place him in the top tier of talent I have encountered. He does not simply use technologies; he designs and builds complex systems from first principles that solve problems no one else has solved yet.
+In my years at the University of Ibadan, I have mentored hundreds of
+engineers.  Olusegun's engineering capability and systems-level thinking
+place him in the top tier of talent I have encountered.  He designs and
+builds complex systems from first principles---across ML, blockchain,
+cryptography, and mathematical research---entirely without institutional
+support.
 
 I recommend him for the Global Talent Visa without reservation.
 
