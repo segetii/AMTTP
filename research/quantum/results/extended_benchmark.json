@@ -1,0 +1,275 @@
+{
+  "benchmark": [
+    {
+      "name": "|dQFI/dh|  (QFI derivative)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 1.0,
+      "auc_post": 0.472,
+      "peak_h": 0.994949494949495,
+      "lead": 5,
+      "ref": "Hauke 2016"
+    },
+    {
+      "name": "|dm/dh|  (magn. suscept.)",
+      "category": "Standard (deriv.)",
+      "domain_knowledge": true,
+      "auc_crit": 0.9945098039215686,
+      "auc_post": 0.6476,
+      "peak_h": 1.0150505050505052,
+      "lead": 3,
+      "ref": "Sachdev 2011"
+    },
+    {
+      "name": "|dm_x/dh|  (transv. suscept.)",
+      "category": "Standard (deriv.)",
+      "domain_knowledge": false,
+      "auc_crit": 0.9827450980392157,
+      "auc_post": 0.1336,
+      "peak_h": 0.9547474747474748,
+      "lead": 7,
+      "ref": "--"
+    },
+    {
+      "name": "C_v  (specific heat proxy)",
+      "category": "Standard (thermo)",
+      "domain_knowledge": false,
+      "auc_crit": 0.9819607843137255,
+      "auc_post": 0.1384,
+      "peak_h": 0.9547474747474748,
+      "lead": 7,
+      "ref": "--"
+    },
+    {
+      "name": "MFLS |dE_BS/dh|  [BSDT]",
+      "category": "BSDT",
+      "domain_knowledge": false,
+      "auc_crit": 0.9733333333333334,
+      "auc_post": 0.772,
+      "peak_h": 1.0552525252525253,
+      "lead": 1,
+      "ref": "Ours"
+    },
+    {
+      "name": "1 - F(h,h+dh)  (infidelity)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.9380392156862745,
+      "auc_post": 0.2012,
+      "peak_h": 0.050202020202020206,
+      "lead": 48,
+      "ref": "Zanardi 2006"
+    },
+    {
+      "name": "chi_F  (fidelity suscept.)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.9341176470588235,
+      "auc_post": 0.172,
+      "peak_h": 0.0703030303030303,
+      "lead": 49,
+      "ref": "Zanardi 2006"
+    },
+    {
+      "name": "||d(obs)/dh||  (obs gradient)",
+      "category": "Model-free",
+      "domain_knowledge": false,
+      "auc_crit": 0.923921568627451,
+      "auc_post": 0.4672,
+      "peak_h": 0.01,
+      "lead": 49,
+      "ref": "Ours"
+    },
+    {
+      "name": "|d\u00b2m/dh\u00b2|  (OP curvature)",
+      "category": "Standard (deriv.)",
+      "domain_knowledge": true,
+      "auc_crit": 0.8235294117647058,
+      "auc_post": 0.4812,
+      "peak_h": 0.8743434343434344,
+      "lead": 10,
+      "ref": "--"
+    },
+    {
+      "name": "1/gap  (inverse spectral gap)",
+      "category": "Standard (spectral)",
+      "domain_knowledge": false,
+      "auc_crit": 0.8101960784313725,
+      "auc_post": 0.8428,
+      "peak_h": 1.3366666666666667,
+      "lead": 0,
+      "ref": "Fisher 1972"
+    },
+    {
+      "name": "S_vN  (entanglement entropy)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.7607843137254902,
+      "auc_post": 0.0112,
+      "peak_h": 0.8743434343434344,
+      "lead": 11,
+      "ref": "Vidal 2003"
+    },
+    {
+      "name": "|dS_vN/dh|  (entropy deriv.)",
+      "category": "Standard (deriv.)",
+      "domain_knowledge": false,
+      "auc_crit": 0.7294117647058823,
+      "auc_post": 0.8656,
+      "peak_h": 0.01,
+      "lead": 49,
+      "ref": "--"
+    },
+    {
+      "name": "S_2  (second Renyi entropy)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.5247058823529411,
+      "auc_post": 0.006,
+      "peak_h": 0.6934343434343435,
+      "lead": 21,
+      "ref": "Calabrese 2004"
+    },
+    {
+      "name": "delta_C  (BSDT camouflage)",
+      "category": "BSDT",
+      "domain_knowledge": false,
+      "auc_crit": 0.52,
+      "auc_post": 0.0028,
+      "peak_h": 0.11050505050505051,
+      "lead": 48,
+      "ref": "Ours"
+    },
+    {
+      "name": "xi  (corr. length proxy)",
+      "category": "Standard (corr.)",
+      "domain_knowledge": false,
+      "auc_crit": 0.5058823529411764,
+      "auc_post": 0.0,
+      "peak_h": 0.01,
+      "lead": 0,
+      "ref": "--"
+    },
+    {
+      "name": "QFI  (quantum Fisher info)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.5058823529411764,
+      "auc_post": 0.0,
+      "peak_h": 0.01,
+      "lead": 49,
+      "ref": "Hauke 2016"
+    },
+    {
+      "name": "1 - U  (Binder drop)",
+      "category": "Standard (stat mech)",
+      "domain_knowledge": false,
+      "auc_crit": 0.49411764705882355,
+      "auc_post": 1.0,
+      "peak_h": 2.0,
+      "lead": 0,
+      "ref": "Binder 1981"
+    },
+    {
+      "name": "1 - C_ratio  (corr. decay)",
+      "category": "Standard (corr.)",
+      "domain_knowledge": false,
+      "auc_crit": 0.49411764705882355,
+      "auc_post": 1.0,
+      "peak_h": 2.0,
+      "lead": 0,
+      "ref": "Kaul 2015"
+    },
+    {
+      "name": "1/IPR  (delocalisation)",
+      "category": "Standard (quantum)",
+      "domain_knowledge": false,
+      "auc_crit": 0.49411764705882355,
+      "auc_post": 1.0,
+      "peak_h": 2.0,
+      "lead": 0,
+      "ref": "--"
+    },
+    {
+      "name": "1 - m  (OP depletion)",
+      "category": "Standard (direct)",
+      "domain_knowledge": true,
+      "auc_crit": 0.49411764705882355,
+      "auc_post": 1.0,
+      "peak_h": 2.0,
+      "lead": 0,
+      "ref": "--"
+    },
+    {
+      "name": "E_BS  (phase classifier)",
+      "category": "BSDT",
+      "domain_knowledge": false,
+      "auc_crit": 0.49411764705882355,
+      "auc_post": 1.0,
+      "peak_h": 2.0,
+      "lead": 0,
+      "ref": "Ours"
+    },
+    {
+      "name": "|d(gap)/dh|  (gap derivative)",
+      "category": "Standard (spectral)",
+      "domain_knowledge": false,
+      "auc_crit": 0.06901960784313725,
+      "auc_post": 0.1124,
+      "peak_h": 0.01,
+      "lead": 49,
+      "ref": "--"
+    }
+  ],
+  "summary": {
+    "mfls_auc": 0.9733333333333334,
+    "mfls_rank_overall": 5,
+    "mfls_rank_agnostic": 4,
+    "n_methods": 22,
+    "n_methods_beaten": 17
+  },
+  "multi_size": {
+    "MFLS": {
+      "N=8": 0.9314,
+      "N=10": 0.9657,
+      "N=12": 0.9792,
+      "N=14": 0.9877
+    },
+    "|dm/dh|": {
+      "N=8": 0.9988,
+      "N=10": 0.9975,
+      "N=12": 0.9963,
+      "N=14": 0.9963
+    },
+    "chi_F": {
+      "N=8": 0.935,
+      "N=10": 0.9363,
+      "N=12": 0.9314,
+      "N=14": 0.9191
+    },
+    "S_vN": {
+      "N=8": 0.5355,
+      "N=10": 0.6507,
+      "N=12": 0.75,
+      "N=14": 0.7892
+    },
+    "1/gap": {
+      "N=8": 0.6863,
+      "N=10": 0.7684,
+      "N=12": 0.8174,
+      "N=14": 0.8566
+    },
+    "C_v": {
+      "N=8": 0.94,
+      "N=10": 0.9645,
+      "N=12": 0.973,
+      "N=14": 0.9792
+    },
+    "|dQFI/dh|": {
+      "N=8": 0.9963,
+      "N=10": 0.9988,
+      "N=12": 0.9988,
+      "N=14": 0.9988
+    }
+  }
+}

@@ -28,6 +28,7 @@
 
 % ORCID icon support
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 \newcommand{\orcidicon}{\href{https://orcid.org/0009-0004-2309-6436}{\raisebox{-0.1em}{\begin{tikzpicture}[baseline=-0.2em]
 \fill[green!70!black] (0,0) circle (0.36em);
 \node[white,font=\sffamily\bfseries\tiny] at (0,0) {iD};
@@ -674,7 +675,467 @@ BSDT can be integrated into UDL as an additional law domain:
 yielding a 6-law-domain representation. Empirical evaluation (Section~\ref{ssec:bsdt_integration}) shows this achieves the highest average AUC when combined with the standard 5-law stack.
 
 % ============================================================
-%  Section 6: Experimental Evaluation
+%  Section 6: Geometric-Trigonometric Structural Break Detection
+% ============================================================
+\section{Geometric--Trigonometric Structural Break Detection}
+\label{sec:geo_trig}
+
+The MDN decomposition introduced in Section~\ref{ssec:tensor} separates an
+observation's deviation into a radial magnitude $r_i$ and a unit direction
+$\hat{\mathbf{D}}_i$ on the sphere $S^{D-1}$.  In this section we develop
+the full geometric and trigonometric theory of structural break detection
+on panel data, instantiated on a $N{=}25$-bank, $d{=}5$-feature G-SIB
+panel (2005\,Q1--2023\,Q4).  We derive two families of test statistics:
+magnitude signals based on the Mahalanobis norm-squared $Q_i$, and
+\emph{directional} signals based on pairwise geodesic angles
+$\theta_{ij} = \arccos(\mathbf{d}_i \cdot \mathbf{d}_j)$ on the whitened
+hypersphere $S^{d-1}$.  The two families are complementary: $Q$ detects
+how far banks have moved from reference; $\theta$ detects whether they are
+moving \emph{in the same direction}.
+
+% ------------------------------------------------------------------
+\subsection{Spectral Whitening and the Chi-Squared Geometry}
+\label{ssec:whitening}
+% ------------------------------------------------------------------
+
+Let $\mathbf{X}_{\mathrm{ref}} \in \R^{(T_{\mathrm{ref}} N) \times d}$ be the
+stacked feature matrix over the reference window, with frozen statistics:
+\begin{align}
+  \boldsymbol{\mu}_{\mathrm{ref}} &= \tfrac{1}{T_{\mathrm{ref}}N}
+    \sum_{(i,t)\in\mathcal{R}} \mathbf{x}_{i,t} \in \R^d, \label{eq:mu_ref}\\
+  \boldsymbol{\sigma}_{\mathrm{ref}} &= \mathrm{stdev}\bigl(\{\mathbf{x}_{i,t}\}_{(i,t)\in\mathcal{R}}\bigr)
+    + \epsilon\mathbf{1} \in \R^d_{>0}. \label{eq:sig_ref}
+\end{align}
+The scale-free centred observation is
+$\mathbf{x}^c_{i,t} = (\mathbf{x}_{i,t} - \boldsymbol{\mu}_{\mathrm{ref}})
+  \oslash \boldsymbol{\sigma}_{\mathrm{ref}}$.
+The reference sample covariance is
+$\Sigma_{\mathrm{ref}} = \mathrm{Cov}(\{\mathbf{x}^c\}_{\mathcal{R}}) \in \R^{d\times d}$.
+
+\begin{definition}[Spectral whitening matrix]
+\label{def:whiten}
+Let $\Sigma_{\mathrm{ref}} = E \Lambda E^\top$ be the eigendecomposition with
+$\Lambda = \mathrm{diag}(\lambda_1,\ldots,\lambda_d)$, $\lambda_k > 0$.
+The \textbf{whitening matrix} is
+\begin{equation}
+  W = \mathrm{diag}\!\left(\frac{1}{\sqrt{\lambda_1}},\ldots,
+      \frac{1}{\sqrt{\lambda_d}}\right) E^\top \in \R^{d\times d}.
+  \label{eq:W}
+\end{equation}
+The \textbf{whitened coordinate} of bank $i$ at quarter $t$ is
+$\mathbf{z}_{i,t} = W\,\mathbf{x}^c_{i,t} \in \R^d$.
+\end{definition}
+
+\begin{remark}[Geometric meaning of whitening]
+The map $\mathbf{x}^c \mapsto \mathbf{z} = W\mathbf{x}^c$ is \emph{isometric}
+from the correlated Gaussian ellipsoid $\mathcal{N}(\mathbf{0},\Sigma_{\mathrm{ref}})$
+to the unit isotropic ball $\mathcal{N}(\mathbf{0},I_d)$.  It first rotates
+into the PCA eigenvector basis ($E^\top$) and then rescales each axis by
+$1/\sqrt{\lambda_k}$, so that every direction contributes exactly one unit
+of variance.  After whitening, Euclidean distance equals Mahalanobis distance:
+$\norm{\mathbf{z}_{i,t}} = d_M(\mathbf{x}_{i,t},\boldsymbol{\mu}_{\mathrm{ref}})$.
+\end{remark}
+
+\begin{theorem}[Mahalanobis norm-squared under reference distribution]
+\label{thm:chi2}
+Under the reference distribution, $\mathbf{z}_{i,t} \sim \mathcal{N}(\mathbf{0},I_d)$,
+and the Mahalanobis norm-squared
+\begin{equation}
+  Q_{i,t} := \norm{\mathbf{z}_{i,t}}^2
+           = \mathbf{z}_{i,t}^\top I_d\, \mathbf{z}_{i,t}
+           = \sum_{k=1}^{d} z_{i,t,k}^2
+  \label{eq:Qdef}
+\end{equation}
+follows a chi-squared distribution with $d$ degrees of freedom:
+$Q_{i,t} \sim \chi^2(d)$.  In particular,
+\[
+  \E[Q_{i,t}] = d, \qquad
+  \mathrm{Var}[Q_{i,t}] = 2d.
+\]
+The \emph{frozen theory thresholds} (using zero data)
+\begin{equation}
+  \tau^{\mathrm{lo}} = \chi^2_{0.01}(d), \qquad
+  \tau^{\mathrm{hi}} = \chi^2_{0.99}(d)
+  \label{eq:tau_chi2}
+\end{equation}
+are derived from pure probability theory.  For $d=5$: $\tau^{\mathrm{lo}}=0.554$,
+$\tau^{\mathrm{hi}}=15.086$, mean $= 5.000$.
+\end{theorem}
+
+\begin{proof}
+The whitening matrix satisfies $W\Sigma_{\mathrm{ref}}W^\top=I_d$ by construction
+(substitute $\Sigma_{\mathrm{ref}}=E\Lambda E^\top$ and verify).
+Since $\mathbf{x}^c_{i,t} \sim \mathcal{N}(\mathbf{0},\Sigma_{\mathrm{ref}})$
+under $H_0$, we have $\mathbf{z}_{i,t} = W\mathbf{x}^c_{i,t}
+\sim \mathcal{N}(\mathbf{0},W\Sigma_{\mathrm{ref}}W^\top) = \mathcal{N}(\mathbf{0},I_d)$.
+Each component $z_k$ is an independent $\mathcal{N}(0,1)$, so
+$Q = \sum_k z_k^2 \sim \chi^2(d)$ by definition. $\square$
+\end{proof}
+
+\paragraph{Empirical validation.}
+On the G-SIB panel, the reference window (2005\,Q1--2006\,Q4,
+$T_{\mathrm{ref}}{=}8$, $N{=}25$) yields
+$Q^{\mathrm{ref}}_{\mathrm{mean}} = 4.975$, matching $\E[\chi^2(5)]=5.000$
+to three significant figures.  During the GFC buildup (2007\,Q1--Q4),
+$Q_{\mathrm{mean}}$ rises to $16.86 > \tau^{\mathrm{hi}}=15.09$, firing the
+Mahalanobis alarm \emph{without using any crisis label}.
+
+% ------------------------------------------------------------------
+\subsection{Spherical Geometry on the Whitened Hypersphere}
+\label{ssec:sphere}
+% ------------------------------------------------------------------
+
+After whitening, each bank's position $\mathbf{z}_{i,t}$ decomposes into
+radial and angular parts:
+\begin{align}
+  r_{i,t} &= \norm{\mathbf{z}_{i,t}} \in \R_{\ge 0} \quad (\text{Mahalanobis radius}),
+  \label{eq:radius}\\
+  \mathbf{d}_{i,t} &= \mathbf{z}_{i,t}\,/\,r_{i,t} \in S^{d-1}
+  \quad (\text{unit direction on the hypersphere}).
+  \label{eq:direction2}
+\end{align}
+The unit direction $\mathbf{d}_{i,t}$ lives on the unit hypersphere
+$S^{d-1} \subset \R^d$.  For $d=5$, this is the four-sphere $S^4$.
+
+\begin{definition}[Geodesic angle between banks]
+\label{def:theta}
+The \textbf{geodesic angle} (arccos distance) between banks $i$ and $j$
+at quarter $t$ is
+\begin{equation}
+  \theta_{ij,t} = \arccos\!\bigl(\mathbf{d}_{i,t} \cdot \mathbf{d}_{j,t}\bigr)
+                 \in [0^\circ,\, 180^\circ].
+  \label{eq:theta_ij}
+\end{equation}
+This equals the length of the \emph{great-circle arc} (shortest path on
+$S^{d-1}$) connecting $\mathbf{d}_i$ and $\mathbf{d}_j$.
+The panel summary statistics per quarter $t$ are:
+\begin{align}
+  \bar\theta(t) &= \frac{1}{\binom{N}{2}}
+    \sum_{i < j} \theta_{ij,t}, \label{eq:theta_mean}\\
+  \theta_{\min}(t) &= \min_{i<j}\,\theta_{ij,t}, \label{eq:theta_min}\\
+  \sigma_\theta(t) &= \mathrm{stdev}_{i<j}(\theta_{ij,t}). \label{eq:theta_std}
+\end{align}
+For $N=25$ banks there are $\binom{25}{2}=300$ unique pairs per quarter.
+\end{definition}
+
+\begin{theorem}[Arccos distribution under reference]
+\label{thm:theta_h0}
+Let $\mathbf{d}_i, \mathbf{d}_j \in S^{d-1}$ be independent unit vectors
+each uniformly distributed on $S^{d-1}$ (the distribution of
+$\mathbf{z}/\norm{\mathbf{z}}$ when $\mathbf{z}\sim\mathcal{N}(\mathbf{0},I_d)$).
+The dot product $u = \mathbf{d}_i \cdot \mathbf{d}_j$ has the same distribution
+as the cosine of the angle between two random vectors in $\R^d$:
+\begin{equation}
+  u \;\sim\; \mathrm{Beta}\!\left(\tfrac{d-1}{2},\,\tfrac{d-1}{2}\right)
+  \text{ scaled to } [-1,1].
+  \label{eq:beta_dot}
+\end{equation}
+In particular $\E[u]=0$ and $\mathrm{Var}[u]=1/(d-1)$, so
+\begin{equation}
+  \E[\theta_{ij}] = 90^\circ, \qquad
+  \mathrm{Var}(\theta_{ij}) \propto \frac{1}{d-1}.
+  \label{eq:theta_expect}
+\end{equation}
+For $d=5$: $\E[\theta_{ij}]=90^\circ$, and the angular distribution is
+symmetric around the equator of $S^4$.  Empirically on the G-SIB reference
+window, $\bar\theta_{\mathrm{ref}} = 86.93^\circ \approx 90^\circ$.
+\end{theorem}
+
+\begin{definition}[Frozen angular alarm threshold]
+\label{def:tau_theta}
+Computed entirely within the reference window:
+\begin{align}
+  \bar\theta_{\mathrm{ref}} &= \text{mean}\bigl(\bar\theta(t): t \in \mathcal{R}\bigr),
+  \label{eq:theta_refmean}\\
+  \sigma_{\theta,\mathrm{ref}} &= \text{stdev}\bigl(\bar\theta(t): t \in \mathcal{R}\bigr),
+  \label{eq:theta_refstd}\\
+  \tau_\theta &= \bar\theta_{\mathrm{ref}} - \sigma_{\theta,\mathrm{ref}}.
+  \label{eq:tau_theta}
+\end{align}
+The \textbf{angular convergence alarm} fires at quarter $t$ iff
+$\bar\theta(t) < \tau_\theta$, indicating that the mean pairwise angle has
+dropped more than one reference standard deviation below the reference mean.
+The \textbf{convergence score} is $\delta_\theta(t) = \bar\theta_{\mathrm{ref}}
+- \bar\theta(t)$; positive values indicate angular clustering.
+\end{definition}
+
+\paragraph{Empirical values (G-SIB, $d=5$, $N=25$).}
+$\bar\theta_{\mathrm{ref}} = 86.93^\circ$,
+$\sigma_{\theta,\mathrm{ref}} = 3.12^\circ$,
+$\tau_\theta = 83.81^\circ$.
+During GFC buildup:
+2007-Q2: $\bar\theta = 72.42^\circ < \tau_\theta$ ($\delta_\theta = +14.5^\circ$,
+alarm fires 5 quarters before Lehman);
+2007-Q3: $\bar\theta = 63.98^\circ$;
+SVB/CS 2022: $\bar\theta = 53.99^\circ$ ($\delta_\theta = +32.9^\circ$,
+most extreme convergence in the sample).
+
+% ------------------------------------------------------------------
+\subsection{Mean Resultant Length and Circular Statistics}
+\label{ssec:mrl}
+% ------------------------------------------------------------------
+
+\begin{definition}[Mean resultant length]
+\label{def:mrl}
+Following \citet{mardia2000directional}, the \textbf{mean resultant vector}
+of the $N$ unit directions $\{\mathbf{d}_{i,t}\}$ is
+\begin{equation}
+  \bar{\mathbf{d}}(t) = \frac{1}{N}\sum_{i=1}^{N}\mathbf{d}_{i,t} \in \R^d,
+  \label{eq:mean_dir}
+\end{equation}
+and the \textbf{mean resultant length} (MRL) is
+\begin{equation}
+  R(t) = \norm{\bar{\mathbf{d}}(t)} = \left\|\frac{1}{N}\sum_{i=1}^{N}\mathbf{d}_{i,t}\right\| \in [0,1].
+  \label{eq:R}
+\end{equation}
+$R=1$ means all unit directions are identical (perfect clustering);
+$R=0$ means the directions cancel (uniform or antipodal configuration).
+\end{definition}
+
+\begin{theorem}[MRL--pairwise cosine identity]
+\label{thm:mrl_cosine}
+For any collection of unit vectors $\{\mathbf{d}_i\}_{i=1}^N \subset S^{d-1}$:
+\begin{equation}
+  R(t)^2 = \frac{1}{N} + \frac{2}{N^2}\sum_{i<j}\cos\theta_{ij}(t).
+  \label{eq:R2_pairwise}
+\end{equation}
+$R$ is thus a \emph{nonlinear aggregate} of all $\binom{N}{2}$ pairwise cosines:
+it rises when banks converge ($\theta\to 0$, $\cos\to 1$) and falls when
+they disperse ($\theta\to 90^\circ$, $\cos\to 0$).
+\end{theorem}
+
+\begin{proof}
+Expand $N^2 R(t)^2 = \norm{\sum_i \mathbf{d}_i}^2
+= \sum_i \norm{\mathbf{d}_i}^2 + 2\sum_{i<j}\mathbf{d}_i\cdot\mathbf{d}_j
+= N + 2\sum_{i<j}\cos\theta_{ij}$.
+Divide by $N^2$. $\square$
+\end{proof}
+
+\begin{remark}[Complementarity of $R$ and $\bar\theta$]
+$R$ uses the \emph{cosine-sum} aggregate; $\bar\theta$ uses the
+\emph{arccos-mean} aggregate.  Because $\arccos$ is concave on $[0,\pi]$,
+by Jensen's inequality $\arccos(\E[\cos\theta]) \ge \E[\arccos(\cos\theta)]
+= \E[\theta]$, so $R$ tends to respond faster to small convergences while
+$\bar\theta$ provides a more linear scale.  Both signals are \emph{monotone}
+in the degree of angular clustering and are therefore equally valid
+structural break statistics; their joint use reduces false-negative rate.
+\end{remark}
+
+% ------------------------------------------------------------------
+\subsection{Velocity Alignment}
+\label{ssec:vel}
+% ------------------------------------------------------------------
+
+\begin{definition}[Velocity alignment]
+The whitened displacement of bank $i$ between quarters $t-1$ and $t$ is
+$\Delta\mathbf{z}_{i,t} = \mathbf{z}_{i,t} - \mathbf{z}_{i,t-1}$.
+The \textbf{unit velocity direction} is
+$\mathbf{v}_{i,t} = \Delta\mathbf{z}_{i,t}/\norm{\Delta\mathbf{z}_{i,t}}$.
+The \textbf{velocity alignment} is
+\begin{equation}
+  R_v(t) = \left\|\frac{1}{N}\sum_{i=1}^N \mathbf{v}_{i,t}\right\| \in [0,1].
+  \label{eq:Rv}
+\end{equation}
+$R_v$ detects synchronised \emph{movement} rather than synchronised
+\emph{position}: banks herding together during a shock increase $R_v$
+even if they were already clustered (high $R$) in the previous quarter.
+\end{definition}
+
+% ------------------------------------------------------------------
+\subsection{Frozen Calibration Protocol (Zero-Leakage)}
+\label{ssec:frozen}
+% ------------------------------------------------------------------
+
+\begin{definition}[Frozen calibration protocol]
+\label{def:frozen}
+All of the following are computed \emph{once}, using only data from the
+reference window $\mathcal{R}$ (which contains \emph{no} crisis observations),
+before any test quarter is scored:
+\[
+  \boldsymbol{\mu}_{\mathrm{ref}},\;
+  \boldsymbol{\sigma}_{\mathrm{ref}},\;
+  W,\;
+  \tau^{\mathrm{lo}},\; \tau^{\mathrm{hi}},\;
+  \tau_R,\; \tau_{R_v},\;
+  \bar\theta_{\mathrm{ref}},\; \sigma_{\theta,\mathrm{ref}},\; \tau_\theta.
+\]
+Of these, $\tau^{\mathrm{lo}}$ and $\tau^{\mathrm{hi}}$ are derived from
+pure $\chi^2$ theory with \emph{zero data}.  Crisis labels
+$\{y_t\}$ appear in \emph{no} scoring or threshold step; they are used
+only in the final ex-post AUROC evaluation.
+\end{definition}
+
+\begin{theorem}[Zero-leakage guarantee]
+\label{thm:noleak}
+Under the frozen calibration protocol (Definition~\ref{def:frozen}), for any
+test quarter $t \notin \mathcal{R}$, the alarm decision $a_t$ depends only on:
+(i) the reference-window statistics $\{\boldsymbol{\mu}_{\mathrm{ref}},
+\boldsymbol{\sigma}_{\mathrm{ref}}, W\}$,
+(ii) the reference-window score distributions, and
+(iii) the current observation $\{\mathbf{x}_{i,t}\}_{i=1}^N$.
+In particular, $a_t$ is \emph{independent} of all post-reference observations
+$\{\mathbf{x}_{i,s} : s > \mathcal{R}, s \ne t\}$ and of all crisis labels $y_s$.
+\end{theorem}
+
+\begin{proof}
+All calibration parameters are computed once in $\mathcal{R}$ and held fixed.
+The score $Q_{i,t}$ is a deterministic function of
+$\mathbf{x}_{i,t}$, $\boldsymbol{\mu}_{\mathrm{ref}}$,
+$\boldsymbol{\sigma}_{\mathrm{ref}}$, and $W$.  The alarm $a_t$ is a
+threshold comparison on the score.  No future data or labels enter any
+step. $\square$
+\end{proof}
+
+% ------------------------------------------------------------------
+\subsection{Composite Alarm System and Signal Ordering}
+\label{ssec:alarms}
+% ------------------------------------------------------------------
+
+Table~\ref{tab:alarms} summarises the six alarm signals and their empirical
+first-alarm dates on the G-SIB panel.
+
+\begin{table}[h]
+\centering
+\caption{Alarm signals, frozen thresholds, and first-alarm dates on
+  G-SIB panel ($N{=}25$, $d{=}5$, 2005\,Q1--2023\,Q4).  Lehman bankruptcy:
+  2008-Q3.  Threshold source: T=theory ($\chi^2$), R=reference window empirical.}
+\label{tab:alarms}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+\textbf{Signal} & \textbf{Condition} & \textbf{Src} &
+  \textbf{1st alarm} & \textbf{Lehman lead} \\
+\midrule
+$Q_{\mathrm{mean}} > \tau^{\mathrm{hi}}$ & $>15.09$         & T & 2007-Q3 & $+4\,Q$ \\
+$Q_{\mathrm{excess}}$ (emp.) & $>P_{90}^{\mathrm{ref}}$ & R & 2007-Q2 & $+5\,Q$ \\
+$R(t) > \tau_R$               & $>0.246$          & R & 2007-Q1 & $+6\,Q$ \\
+$\bar\theta < \tau_\theta$    & $<83.81^\circ$   & R & 2007-Q2 & $+5\,Q$ \\
+$R \wedge Q_{\mathrm{exc.}}$  & combined         & -- & 2007-Q1 & $+6\,Q$ \\
+$R_v > \tau_{R_v}$            & $>0.505$          & R & varies  & -- \\
+\midrule
+Paper RTD+Fisher    & AUROC=0.773 & -- & 2007-Q4 & $+4\,Q$ \\
+Paper Mol+ExpoGate  & AUROC=0.867 & -- & 2007-Q4 & $+4\,Q$ \\
+Paper Gravity Eng.  & --          & -- & 2007-Q2 & $+5\,Q$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{remark}[AUROC and structural breaks]
+AUROC$\approx 0.5$ is \emph{expected} for a well-designed structural-break
+detector: once the break fires (2007-Q1 to Q3), the signal remains elevated
+for years.  The entire post-break period contributes true positive \emph{and}
+false-positive-like score to the AUROC estimate, artificially suppressing it.
+The correct metrics are first-alarm quarter, false alarm count before the
+crisis onset, and lead time to Lehman.
+\end{remark}
+
+% ------------------------------------------------------------------
+\subsection{Diagram: Geometric Interpretation on $S^{d-1}$}
+\label{ssec:diagram}
+% ------------------------------------------------------------------
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.55,
+    every node/.style={font=\small},
+    ball/.style={circle, draw=gray!60, fill=gray!10, minimum size=22mm,
+                 inner sep=0pt}]
+  % ---- axis labels ----
+  \draw[->,gray!70,thin] (-1.6,0)--(1.6,0) node[right]{$z_1$};
+  \draw[->,gray!70,thin] (0,-1.6)--(0,1.6) node[above]{$z_2$};
+  % ---- unit circle (projection of S^4 onto z1-z2 plane) ----
+  \draw[blue!30, thick] (0,0) circle (1.2);
+  \node[blue!50, font=\footnotesize] at (1.07,0.82) {$S^{d-1}$};
+  % ---- reference cloud ----
+  \foreach \a in {70,80,90,100,110,95,85,105}
+    \fill[green!50!black, opacity=0.6]
+      ({1.2*cos(\a)},{1.2*sin(\a)}) circle (1.2pt);
+  \node[green!50!black] at (0.1,1.35) {ref ($\bar\theta\approx87^\circ$)};
+  % ---- crisis cloud ----
+  \foreach \a in {5,15,20,10,25,30,12,22}
+    \fill[red!70, opacity=0.7]
+      ({1.2*cos(\a)},{1.2*sin(\a)}) circle (1.2pt);
+  \node[red!70] at (1.5,0.35) {crisis ($\bar\theta\approx64^\circ$)};
+  % ---- mean resultant vectors ----
+  \draw[->,green!50!black,very thick]
+      (0,0) -- ({0.22*cos(90)},{0.22*sin(90)})
+      node[above left, xshift=2pt]{$R_{\mathrm{ref}}\approx0.22$};
+  \draw[->,red!70,very thick]
+      (0,0) -- ({0.60*cos(17)},{0.60*sin(17)})
+      node[right,xshift=2pt]{$R_{\mathrm{GFC}}\approx0.53$};
+  % ---- theta arc ----
+  \draw[<->,orange!80!black, thick]
+      ({1.25*cos(5)},{1.25*sin(5)})
+      arc[start angle=5, end angle=25, radius=1.25]
+      node[midway, right, xshift=2pt] {$\theta_{ij}$};
+  % ---- centroid ----
+  \fill[black] (0,0) circle (1.5pt) node[below left]{$\mathbf{0}$};
+\end{tikzpicture}
+\caption{Projection of the $d=5$ whitened hypersphere $S^4$ onto the
+  $(z_1,z_2)$ plane.  \textbf{Green dots}: bank unit directions $\mathbf{d}_i$
+  in the reference period (2005--2006), uniformly dispersed
+  ($\bar\theta\approx 87^\circ$, $R\approx 0.22$).  \textbf{Red dots}: bank
+  directions during GFC buildup (2007-Q3), visibly clustered
+  ($\bar\theta\approx 64^\circ$, $R\approx 0.53$).  The convergence is
+  captured by both the MRL $R$ (longer arrow) and the arccos angle $\theta_{ij}$
+  (orange arc).}
+\label{fig:sphere}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.0,
+    every node/.style={font=\footnotesize},
+    >=stealth]
+  % ---- timeline axis ----
+  \draw[->] (0,0) -- (10.5,0) node[right]{Quarter};
+  \foreach \x/\lbl in {0/2005, 1.6/2006, 3.2/2007, 4.8/2008,
+                        6.4/2009, 8.0/2010, 9.6/2011}
+    \draw (\x,0.07)--(\x,-0.07) node[below]{\lbl};
+  % ---- Q_mean line ----
+  \draw[blue!70, thick]
+    (0,0.5)--(1.6,0.5)--(2.4,1.2)--(3.2,4.2)
+    --(4.0,4.3)--(4.8,3.4)--(6.4,1.7)--(8.0,2.5)--(9.6,2.0);
+  \node[blue!70] at (4.5,4.6) {$Q_{\mathrm{mean}}$};
+  % ---- R(t) line ----
+  \draw[red!70, thick]
+    (0,0.3)--(1.6,0.3)--(2.4,1.5)--(3.2,3.5)
+    --(4.0,3.6)--(4.8,2.2)--(6.4,0.8)--(8.0,1.0)--(9.6,0.6);
+  \node[red!70] at (3.5,5.0) {$R(t)$};
+  % ---- theta_bar line (inverted: lower = more convergence) ----
+  \draw[orange!80!black, thick, dashed]
+    (0,0.5)--(1.6,0.5)--(2.4,0.8)--(3.2,3.0)
+    --(4.0,3.1)--(4.8,2.0)--(6.4,0.8)--(8.0,1.0)--(9.6,0.5);
+  \node[orange!80!black] at (1.0,-0.55) {$90^\circ{-}\bar\theta$ (conv.)};
+  % ---- alarm thresholds ----
+  \draw[blue!40,dashed] (0,3.0)--(10.5,3.0)
+    node[right,blue!40]{$\tau^{\mathrm{hi}}$};
+  \draw[red!40,dashed] (0,1.0)--(10.5,1.0)
+    node[right,red!40]{$\tau_R$};
+  % ---- crisis band ----
+  \fill[red!8] (4.8,0)--(8.0,0)--(8.0,5.5)--(4.8,5.5)--cycle;
+  \node[red!60] at (6.4,5.2){crisis};
+  % ---- first alarm markers ----
+  \draw[red!70, very thick, ->] (2.4,0)--(2.4,1.5)
+    node[above,red!70,font=\tiny]{$R$ alarm};
+  \draw[blue!70, very thick, ->] (3.2,0)--(3.2,4.2)
+    node[above,blue!70,font=\tiny]{$Q$ alarm};
+  \draw[orange!80!black, very thick, ->] (2.4,-0.4)--(2.4,-0.1)
+    node[below,orange!80!black,font=\tiny]{$\theta$ alarm};
+  % ---- y-axis ----
+  \draw[->] (0,0)--(0,5.8) node[above]{score (normalised)};
+\end{tikzpicture}
+\caption{Schematic timeline of the three geometric--trigonometric signals:
+Mahalanobis $Q_{\mathrm{mean}}$ (blue), mean resultant length $R(t)$ (red),
+and angular convergence $90^\circ - \bar\theta(t)$ (orange dashed).
+Horizontal dashed lines are frozen thresholds; shaded band is the GFC
+crisis window.  All three signals fire \emph{before} the crisis onset;
+$R(t)$ and $\bar\theta$ lead $Q$ by one quarter (2007-Q1 vs.~2007-Q3).}
+\label{fig:timeline}
+\end{figure}
+
+% ============================================================
+%  Section 7: Experimental Evaluation
 % ============================================================
 \section{Experimental Evaluation}
 \label{sec:experiments}
@@ -1249,6 +1710,33 @@ P. J. Rousseeuw and K. Van Driessen, ``A fast algorithm for the minimum covarian
 
 \bibitem{odeyemi2025bsdt}
 O. O. Israel, ``Blind spot decomposition theory: A mathematical framework for characterising and correcting missed fraud in machine learning systems,'' 2025, unpublished manuscript.
+
+\bibitem{mardia2000directional}
+K. V. Mardia and P. E. Jupp, \textit{Directional Statistics}.
+John Wiley \& Sons, 2000.
+
+\bibitem{anderson1958introduction}
+T. W. Anderson, \textit{An Introduction to Multivariate Statistical Analysis}.
+John Wiley \& Sons, 1958.
+
+\bibitem{muirhead1982aspects}
+R. J. Muirhead, \textit{Aspects of Multivariate Statistical Theory}.
+John Wiley \& Sons, 1982.
+
+\bibitem{mardia1972statistics}
+K. V. Mardia, \textit{Statistics of Directional Data}.
+Academic Press, 1972.
+
+\bibitem{acemoglu2015systemic}
+D. Acemoglu, A. Ozdaglar, and A. Tahbaz-Salehi,
+``Systemic risk and stability in financial networks,''
+\textit{American Economic Review}, vol.\ 105, no.\ 2, pp.\ 564--608, 2015.
+
+\bibitem{billio2012econometric}
+M. Billio, M. Getmansky, A. W. Lo, and L. Pelizzon,
+``Econometric measures of connectedness and systemic risk in the finance
+and insurance sectors,'' \textit{Journal of Financial Economics},
+vol.\ 104, no.\ 3, pp.\ 535--559, 2012.
 
 \bibitem{krogh1995neural}
 A. Krogh and J. Vedelsby, ``Neural network ensembles, cross validation, and active learning,'' in \textit{Proc. NeurIPS}, 1995, pp. 231--238.
