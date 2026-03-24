@@ -1,0 +1,166 @@
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!70!black
+}
+
+\onehalfspacing
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Personal Statement}\\[4pt]
+{\large Odeyemi Olusegun Israel}\\[2pt]
+{\normalsize UK Global Talent Visa --- Digital Technology (Exceptional Promise)}
+\end{center}
+
+\bigskip
+
+I am an independent researcher and systems engineer based in Derby, United Kingdom. With a formal educational background in Computer Science and Engineering, my core specialisations lie at the intersection of Scientific Computing, Computational AI, and Cyber Security. Over the past three years---without institutional affiliation, funding, or supervision---I have designed and built a production-grade blockchain compliance system, developed original machine learning frameworks, and published research spanning financial systems, energy infrastructure, and applied mathematics.
+
+My work focuses on a fundamental challenge: detecting and preventing failure in complex systems before it occurs. I am applying under the Exceptional Promise route as my work demonstrates both advanced technical capability and clear potential to contribute to the UK's fintech and scientific ecosystem.
+
+\textbf{1.\enspace AMTTP: Pre-Settlement Compliance Infrastructure}
+
+My core project is the Anti-Money Laundering Transaction Trust Protocol (AMTTP).
+
+Existing compliance systems---both in traditional finance and blockchain---operate after transactions are executed, limiting their ability to prevent risk. AMTTP introduces a pre-settlement model, where compliance decisions are enforced before transaction finality within the Ethereum block window ($\sim$12 seconds).
+
+The system performs:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Machine learning risk scoring
+  \item Graph-based relationship analysis
+  \item Sanctions screening
+  \item Policy enforcement
+\end{itemize}
+before allowing transactions to proceed.
+
+\textit{Architecture Overview}
+
+AMTTP is implemented as a four-layer system:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item \textbf{Client Layer:} Open-source SDKs (TypeScript and Python) with 17--19 service modules (risk, KYC, transactions, disputes, sanctions, monitoring).
+  \item \textbf{Compliance Layer:} 7 parallel microservices (ML engine, graph analysis, policy engine, sanctions, monitoring, geographic risk, explainability).
+  \item \textbf{ML Pipeline:} Trained on 2.64 million Ethereum transactions, achieving ROC-AUC 0.9879.
+  \item \textbf{Blockchain Layer:} 18 Solidity smart contracts enforcing decisions (Approve, Review, Escrow, Block).
+\end{itemize}
+
+The system runs across 17 containerised microservices, with API gateway security, cryptographic signing, rate limiting, and monitoring.
+
+I also developed:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item A cross-platform Flutter application (6 platforms)
+  \item A Next.js compliance dashboard (``War Room'')
+  \item Wallet integrations for real-time user interaction
+\end{itemize}
+
+\textbf{2.\enspace Privacy-Preserving Compliance (zkNAF)}
+
+To address the conflict between regulatory transparency and user privacy, I developed zkNAF, a zero-knowledge compliance framework.
+
+It enables:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Sanctions verification without revealing identities
+  \item Risk validation without exposing scores
+  \item KYC confirmation without disclosing personal data
+\end{itemize}
+
+This allows compliance enforcement while maintaining alignment with GDPR data minimisation principles.
+
+\textbf{3.\enspace Research: Blind Spot Decomposition Theory (BSDT)}
+
+Alongside the engineering work, I developed Blind Spot Decomposition Theory (BSDT).
+
+BSDT addresses a key limitation in machine learning systems: the inability to detect risks arising from hidden or unobserved factors. It provides a structured framework for identifying these ``blind spots'' and improving detection performance without retraining models.
+
+This work has been validated across multiple datasets and domains, forming the analytical foundation of the AMTTP risk engine.
+
+\textbf{4.\enspace Cross-Domain System Stability}
+
+Building on BSDT, I extended the framework into a broader approach for analysing system instability across domains.
+
+The same underlying principles can be applied to:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Financial system risk detection
+  \item Blockchain transaction analysis
+  \item Infrastructure instability (e.g. energy systems)
+  \item Complex dynamic systems
+\end{itemize}
+
+This demonstrates a unified approach to failure detection, with potential applications beyond fintech.
+
+\textbf{5.\enspace Intellectual Property and Open Source}
+
+I have filed a UK patent application (filed 4 March 2026, comprising 25 claims) covering my work across:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Machine learning risk modelling
+  \item Blockchain-based compliance systems
+  \item Cross-domain stability analysis
+\end{itemize}
+
+I have also open-sourced key components of my work, including:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item TypeScript and Python SDKs
+  \item Machine learning pipelines
+  \item Smart contract implementations
+  \item Systemic risk modelling tools
+\end{itemize}
+
+\textbf{6.\enspace Commercial Strategy \& Market Potential}
+
+The commercial gap AMTTP fills is significant. Current on-chain compliance providers (e.g., Chainalysis, Elliptic, TRM Labs) operate almost exclusively post-settlement, which exposes institutions to irreversible operational risk once funds have moved. AMTTP provides the missing infrastructure for pre-trade compliance---an absolute requirement for regulated financial institutions and Virtual Asset Service Providers (VASPs) entering decentralised finance (DeFi).
+
+From a scalability and commercial readiness perspective:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item The system architecture successfully supports batch-scoring up to 10,000 transactions simultaneously.
+  \item The smart contract layer is actively deployed and validated on the Ethereum Sepolia testnet.
+  \item The design explicitly caters to FCA and FATF Travel Rule obligations, enabling fluid compliance without compromising GDPR principles.
+\end{itemize}
+
+By providing a ``Compliance-as-a-Service'' (CaaS) API that computes verdicts within the $\sim$12-second block confirmation window, AMTTP holds clear commercialisation potential within the B2B enterprise fintech sector. My UK patent establishes the defensive moat necessary to commercialise this product.
+
+\textbf{7.\enspace Why the UK}
+
+The UK is a global leader in financial regulation, fintech innovation, and applied mathematics.
+
+My work aligns directly with national priorities:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item \textbf{FCA:} regulatory compliance for digital assets
+  \item \textbf{Bank of England / PRA:} systemic risk and financial stability
+  \item \textbf{Research ecosystem:} machine learning and applied mathematics
+\end{itemize}
+
+My immediate plans are to:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Publish my research in peer-reviewed venues
+  \item Develop AMTTP into a compliance platform for regulated institutions
+  \item Build a UK-based company at the intersection of machine learning, fintech, and system stability
+\end{itemize}
+
+\textbf{8.\enspace Closing Statement}
+
+Working independently over the past three years, I have:
+\begin{itemize}[nosep, leftmargin=2em]
+  \item Built a full compliance protocol with 17 microservices and 18 smart contracts
+  \item Trained ML systems on 2.64 million blockchain transactions
+  \item Developed original research spanning multiple domains
+  \item Filed a UK patent application
+  \item Open-sourced the system
+\end{itemize}
+
+What distinguishes my work is the ability to connect deep analytical thinking with production-grade systems, and to apply these ideas across different domains.
+
+I believe I have the potential to contribute meaningfully to the UK's digital economy and research landscape, and I am seeking the opportunity to continue this work as a computer scientist in the United Kingdom.
+
+\end{document}
