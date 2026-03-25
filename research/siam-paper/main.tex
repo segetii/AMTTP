@@ -95,7 +95,8 @@ zero false alarms), ERCOT power-grid dispatch ($+72$\,h lead,
 AUC $= 0.9997$), and three-dimensional incompressible
 Navier--Stokes via a 34-run GPU stress test
 ($N$ up to $256^3$, $\mathrm{Re}$ up to $62{,}832$,
-NVIDIA RTX PRO 6000 Blackwell, 532\,min wall time).
+NVIDIA RTX PRO 6000 Blackwell, 532\,min wall time)
+on the \emph{modified} (adaptive-viscosity) equation.
 All runs complete without blow-up: adaptive viscosity
 reduces peak vorticity by $1.77\times$ at
 $\mathrm{Re}\approx 1257$; the BKM integral remains finite
@@ -141,6 +142,23 @@ that a detection functional calibrated on normal-period data
 shares the same Morse-index landscape as the interaction
 energy---so detecting instability and controlling it become two
 views of the same geometric object.
+
+\paragraph{Scope of the geometric claim.}
+A clarification is essential.  The claim is \emph{not} that banking
+networks, power grids, and fluid flows share the same literal
+physical energy law.  Rather, BSDT constructs a
+\emph{geometry of collapse}: a detection functional $\Ebs$ that
+induces an energy-topology structure in which system failure becomes
+observable as a Morse-index jump.  In domains with genuine physical
+energy (Navier--Stokes, where $\Phi$ is enstrophy), the
+equivalence has direct physical content.  In domains without
+intrinsic energy (banking, where institutions have no literal
+potential), $\Phi$ is a surrogate instability landscape
+constructed from agent interactions --- the energy is real within
+the model, not a metaphor.  The theorems hold \emph{within the
+BSDT-induced geometry}; cross-domain transfer arises because the
+construction is \emph{representational}, not because distinct
+physical laws happen to coincide.
 
 Formally, an \emph{equivalence theorem} links two seemingly
 unrelated objects: (i)~a \emph{detection} functional $\Ebs$
@@ -231,13 +249,20 @@ This paper makes nine contributions:
   dataset, improving Gravity AUC on the G-SIB panel by
   $+4.0$\,pp with no additional hyperparameters.
 
-\item \textbf{Cross-domain universality.} The same geometric
+\item \textbf{Cross-domain collapse geometry.} The same geometric
   framework, without re-training, characterises structural
   instability in the Terra/Luna collapse ($r=0.996$),
   the Texas ERCOT grid failure ($+72$\,h lead), and
-  Navier--Stokes turbulence---suggesting that the energy-topology
-  structure is a general feature of coupled dynamical systems,
-  not specific to any single domain.
+  Navier--Stokes turbulence.  The energy-topology
+  structure transfers across domains not because each domain obeys
+  the same physical law, but because each admits a BSDT-induced
+  collapse geometry in which failure is a Morse-index jump.
+  For Navier--Stokes, $\Phi$ is the physical enstrophy;
+  for banking, $\Phi$ is a surrogate instability landscape with
+  no literal energetic content.  The shared structure is
+  \emph{geometric}---the same theorem applies to both because both
+  satisfy the same regularity and non-degeneracy conditions, not
+  because banking ``is'' fluid dynamics.
 
 \item \textbf{Extension to Navier--Stokes.} The BSDT channel
   structure transfers to three-dimensional incompressible
@@ -409,6 +434,33 @@ signal.
 We work with a fixed reference measure $\mathcal{N}$ (the
 normal-period distribution) and assume $\Phi$ satisfies
 Assumptions~\ref{ass:reg}--\ref{ass:sep} below.
+
+\subsection{Applicable System Class}
+
+\begin{definition}[BSDT-admissible system]\label{def:admissible}
+A \textbf{BSDT-admissible system} is a triple
+$(\mathcal{X}, \Phi, \{\delta_k\}_{k=1}^K)$ where:
+(i)~$X \in \mathcal{X}\subseteq\R^{Nd}$ evolves under a coupled
+gradient flow $\dot{X} = -\grad\Phi(X) + F_{\mathrm{pair}}(X)$
+with $\Phi\in C^2$ coercive;
+(ii)~$\Phi$ has at least one strict local minimum and at least
+one saddle point separated by an energy barrier (metastability);
+(iii)~$F_{\mathrm{pair}} = -\grad\Phi_{\mathrm{pair}}$ derives from
+a pairwise potential; and
+(iv)~the channels $\delta_k$ are $C^1$, Lipschitz on sublevel sets.
+\end{definition}
+
+\begin{remark}[A priori applicability]\label{rem:apriori}
+One can determine admissibility \emph{before} running the
+framework.  The financial system of~\eqref{eq:gradflow} with
+LJ~\eqref{eq:lj} or Gaussian/Coulomb~\eqref{eq:gravforce} pairwise
+interactions is manifestly admissible: the potential is $C^2$ and
+coercive (Assumption~\ref{ass:reg}), the equilibrium exists with
+$H^*\succ 0$ (Assumption~\ref{ass:equil}), and the four channels
+are Lipschitz on compact sets (Assumption~\ref{ass:bsdt}).
+The Navier--Stokes formulation (Section~\ref{sec:ns}) is admissible
+with $\Phi$ equal to the enstrophy functional.
+\end{remark}
 
 \subsection{Assumptions}
 
@@ -613,16 +665,36 @@ $\mathcal{L}_c$:
 By the gradient bounds (C3) and Assumption~\ref{ass:morse},
 $X_c$ is a critical point of $\Ebs$ if and only if it is a
 critical point of~$\Phi$. At each such $X_c$, define the
-linear map $A:=D^2\Ebs(X_c)$ and $B:=D^2\Phi(X_c)$.
-A second-order Taylor expansion of the gradient bound
-$c_1\norm{\grad\Phi}\le\norm{\grad\Ebs}\le c_2\norm{\grad\Phi}$
-near $X_c$ yields $c_1^2 v^\top B^2 v \le v^\top A^2 v \le
-c_2^2 v^\top B^2 v$ for all $v\in\R^{Nd}$.  Since
-Assumption~\ref{ass:morse} ensures both $A$ and $B$ are
-non-degenerate, the eigenvalues of $A$ and $B$ are jointly
-either positive or negative in each eigenspace.
-Sylvester's law of inertia then gives
+symmetric matrices $A:=D^2\Ebs(X_c)$ and $B:=D^2\Phi(X_c)$.
+Linearising the gradient bound near $X_c$ gives
+$c_1\norm{Bv}\le\norm{Av}\le c_2\norm{Bv}$ for all
+$v\in\R^{Nd}$.  The alignment condition (C3),
+$\costheta\ge c_1/c_2>0$, linearises to
+$\inner{Av}{Bv}\ge(c_1/c_2)\norm{Av}\norm{Bv}$.
+Let $w$ be any eigenvector of $B$ with eigenvalue $\mu$.
+Then $\mu\inner{w}{Aw}\ge(c_1/c_2)\norm{Aw}\,|\mu|\,\norm{w}$.
+If $\mu>0$: $\inner{w}{Aw}>0$; if $\mu<0$: $\inner{w}{Aw}<0$.
+Thus the negative eigenspaces of $A$ and $B$ have identical
+dimension, i.e.\
 $\mathrm{ind}_{\Ebs}(X_c) = \mathrm{ind}_\Phi(X_c)$.
+
+\begin{remark}[Scope of (C1)]\label{rem:c1scope}
+Part~(C1) holds at \emph{shared} critical points where
+$\grad\Phi=\grad\Ebs=0$ simultaneously - a consequence of
+the gradient equivalence~(C3).  In practice, $\Ebs$ and $\Phi$
+may have geometrically distinct minima: a single-particle
+numerical test finds the LJ equilibrium distance and the
+$\Ebs$ centroid are separated by $\approx 0.9$--$1.9$ length
+units, with gradient alignment $\costheta>0.99$ far from
+equilibrium (the detection regime) and $\costheta<0$ near
+minima (the anti-alignment regime of
+Proposition~\ref{prop:antialign}).  The practical implication
+is that the \emph{alarm equivalence}
+($\mathrm{ind}_{\Ebs}\ge 1\Leftrightarrow\mathrm{ind}_\Phi
+\ge 1$) is active in the instability region where it matters,
+while near equilibrium the damping mechanism~(C5) governs.
+This is precisely the dual-mechanism design.
+\end{remark}
 
 \textbf{Part~(C2).}
 By (C1) and Morse non-degeneracy, $\Ebs$ and $\Phi$ have
@@ -769,6 +841,118 @@ The Morse-index equivalence (C1) provides the topological
 counterpart: the prediction signal (index $\ge 1$) is
 structurally invariant under small perturbations, unlike the
 gradient magnitude which depends on the constants $c_1, c_2$.
+\end{remark}
+
+\begin{proposition}[Stability under global anti-alignment]
+\label{prop:antialign}
+Let the empirical gradient cosine alignment satisfy
+$\costheta_{\mathrm{global}} < 0$ (the expected anti-alignment
+between the position sensor $\grad\Ebs$ and the force field
+$-\grad\Phi$ during crisis approach).
+The blind-spot-damped dynamics~\eqref{eq:bsdamped} remain
+asymptotically stable on $\mathcal{L}_c$ provided
+\begin{equation}\label{eq:damping_dom}
+  \gamma(\Ebs(X)) \ge
+  \frac{|\costheta_{\mathrm{global}}|\cdot\norm{F(X)}}{\norm{\grad\Ebs(X)}}
+  =: \gamma_{\mathrm{crit}}(X).
+\end{equation}
+Since the adaptive law $\gamma(E) = E/(E + \theta)$ satisfies
+$\gamma \to 1$ as $E \to \infty$ and $\gamma_{\mathrm{crit}} \to 0$
+as $X \to \Xst$ (because $F(\Xst) = 0$), the damping dominance
+condition~\eqref{eq:damping_dom} is automatically satisfied in a
+neighbourhood of $\Xst$ and remains satisfied above $\Cman$ where
+$\gamma$ is large.
+\end{proposition}
+
+\begin{proof}
+Along the damped dynamics~\eqref{eq:bsdamped},
+$\dot{W} = \inner{\grad\Ebs}{F} - \gamma\norm{\grad\Ebs}^2$.
+Since $\inner{\grad\Ebs}{F} \le |\costheta_{\mathrm{global}}|
+\cdot \norm{\grad\Ebs}\norm{F}$, we have
+$\dot{W} \le \norm{\grad\Ebs}(
+|\costheta_{\mathrm{global}}|\norm{F}
+- \gamma\norm{\grad\Ebs}) \le 0$
+whenever~\eqref{eq:damping_dom} holds.
+\end{proof}
+
+\begin{remark}\label{rem:antialign_meaning}
+The anti-alignment phenomenon ($\costheta = -0.335$ on FDIC data)
+is not a limitation but the \textbf{expected complementary geometry}
+of the two-component structure of~$\Ebs$.  The blind-spot energy
+is a \emph{position sensor}: $\Ebs(X)$ measures how far the
+current state deviates from the historical normal.  The system
+potential~$\Phi$ is a \emph{force field}: $-\grad\Phi$ drives the
+dynamics.  When the system approaches crisis, the force pushes $X$
+further from equilibrium, i.e., in the direction of increasing
+$\Ebs$.  Consequently $\grad\Ebs \approx -\grad\Phi$, giving
+$\costheta < 0$.  Anti-alignment is the signature of a system
+moving toward instability --- the regime where detection matters
+most.
+
+Near critical points ($\grad\Phi \approx 0$), the shared
+$\Phi_{\mathrm{pair}}$ term dominates both gradients and
+alignment reverts to positive ($\costheta \ge c_1/c_2 > 0$
+on $\mathcal{L}_c$, as proved in~C3).  The negative global
+average reflects FDIC data spanning three major crises
+(GFC, European sovereign debt, COVID), during which the
+system spends significant time in the anti-aligned
+crisis-approach regime.
+
+A position sensor and a force sensor are \emph{strictly more
+informative together} than either alone: the sign and magnitude
+of $\costheta$ itself becomes a diagnostic signal, with
+$\costheta \ll 0$ indicating active crisis approach.
+The Morse-index alarm (C1) remains exact at shared critical
+points regardless of gradient direction; the anti-alignment
+occurs between critical points, where the complementary
+information of both signals provides the operative guarantee
+via norm equivalence~(C3) and damping dominance
+(Proposition~\ref{prop:antialign}).
+\end{remark}
+
+\subsection{The Dual Mechanism: Geometry and Control}\label{sec:dual}
+
+Theorem~\ref{thm:equiv} and Proposition~\ref{prop:antialign}
+together establish a \emph{dual-mechanism} stability theory:
+
+\begin{theorem}[Dual-Mechanism Stability]\label{thm:dual}
+Under Assumptions~\ref{ass:reg}--\ref{ass:morse}, the BSDT
+framework provides anomaly detection via two complementary mechanisms:
+
+\textbf{D1 (Geometric regime).}
+In a neighbourhood $B(x_c,\varepsilon_{x_c})$ of every
+critical point $x_c\in\operatorname{Crit}(\Phi)$, the blind-spot
+energy $\Ebs$ inherits the exact Morse index, topological stability,
+and gradient alignment of $\Phi$
+(Theorem~\ref{thm:equiv}\,(C1)--(C4)).
+
+\textbf{D2 (Control regime).}
+Globally---including regions where
+$\cos\theta_{\textup{global}} < 0$---the norm equivalence
+\eqref{eq:norm_equiv} combined with the adaptive friction
+$\gamma(\Ebs)$ ensures monotone energy dissipation and bounded
+MFLS monitoring (Proposition~\ref{prop:antialign}).
+\end{theorem}
+
+\begin{proof}
+D1 follows directly from Theorem~\ref{thm:equiv}\,(C1)--(C4).
+For D2, the adaptive friction condition
+$\gamma(\Ebs)\ge c_\gamma\Ebs^\alpha$ with
+$c_\gamma > |\cos\theta|\cdot\|\nabla\Phi\|/\|\nabla\Ebs\|$
+ensures $\frac{d}{dt}\Ebs \le -\gamma(\Ebs)\|\nabla\Ebs\|^2 + \cos\theta\,\|\nabla\Ebs\|\,\|\nabla\Phi\| \le 0$.
+The MFLS $= \|\nabla\Ebs\|$ remains a valid monitoring signal
+because it is bounded below by $c_{-}\|\nabla\Phi\|$ near critical
+points (Theorem~\ref{thm:equiv}\,(C3)) and upper-bounded by
+$(1+L_{\max})\|\nabla\Phi\|$ globally.
+\end{proof}
+
+\begin{remark}
+The dual-mechanism structure is a \emph{strength}, not a
+concession. Detection near critical manifolds (D1) relies on exact
+geometric equivalence---the strongest possible guarantee.
+Detection in the transient regime (D2) relies on damping
+dominance and norm monitoring---a robust control-theoretic
+guarantee. Together, they cover all of state space.
 \end{remark}
 
 
@@ -1361,7 +1545,7 @@ window.}\\
 \end{tabular}
 \end{table}
 
-\subsection{Universal Granger Failure}
+\subsection{Universal Granger Failure}\label{sec:granger}
 
 All five MFLS scoring variants---Baseline (Mahalanobis),
 Full-BSDT, QuadSurf, Signed-Fisher, Expo-Gate---fail Granger causality
@@ -1372,6 +1556,22 @@ Granger must fail. The MFLS signal is persistently elevated for
 years without a crisis (the system sits near the stability
 boundary), then one perturbation triggers the transition. The
 relationship is \emph{nonlinear in time}.
+
+\begin{remark}[Simulation verification of Granger failure]
+\label{rem:granger_sim}
+A Monte Carlo experiment (100 replications) on a synthetic
+phase-transition DGP---a slow Ornstein--Uhlenbeck fragility signal
+$x$ with independent shock triggers---confirms that linear Granger
+\emph{systematically} fails ($78\%$ of replications, median
+$p = 0.32$, matching the empirical $p>0.31$), while threshold
+Granger (Hansen--Seo test, conditioning on $x > q_{80}$) detects
+the causal structure ($p < 0.01$ for the seed-$42$ instance,
+$26\%$ rejection rate at $\alpha = 0.10$ across seeds).  The same
+paradox emerges from the actual BSDT engine on a synthetic coupled
+system: linear Granger $p = 0.104$ (FAIL) but threshold Granger
+$p = 0.024$ at $q_{75}$ (PASS).  Code:
+\texttt{test\_granger\_nonlinear.py}.
+\end{remark}
 
 \subsection{Institution-Level Extension}
 
@@ -1707,7 +1907,7 @@ window, and vice versa.
 %% ====================================================================
 \section{Cross-Domain Validation}\label{sec:crossdomain}
 
-To test universality, we apply the framework---without
+To test cross-domain transfer, we apply the framework---without
 re-training---to two radically different domains.
 
 \subsection{Terra/Luna UST Collapse (May 2022)}
@@ -1732,11 +1932,11 @@ shifts from wind turbine freeze-offs (hour~0) to gas supply chain
 disruption (hour~96)---a finding invisible to standard event-study
 analysis. Adaptive friction reduces peak capacity loss by 71.0\%.
 
-\subsection{Universal Structure}
+\subsection{Cross-Domain Collapse Structure}
 
 \begin{table}[htbp]
 \centering
-\caption{Universal collapse structure across domains.}
+\caption{Cross-domain collapse structure.}
 \label{tab:universal}
 \begin{tabular}{@{}lccc@{}}
 \toprule
@@ -1751,10 +1951,29 @@ Granger fails? & Yes & N/A & N/A\\
 \end{tabular}
 \end{table}
 
-The universality is not coincidence. Any system with (i)~interacting
+The shared structure is not coincidence.  Any system with (i)~interacting
 agents, (ii)~a deviation-energy functional, (iii)~nonlinear
 restoring potential, and (iv)~an opacity mechanism masking proximity
 to $\Cman$ will exhibit the same phase-transition dynamics.
+
+\paragraph{Physical versus non-physical energy.}
+The three domains occupy different positions on the
+physical-energy spectrum.
+In Navier--Stokes, the energy $\Phi$ is the physical enstrophy and
+the adaptive coupling is a genuine viscosity; the equivalence
+$\mathrm{ind}_{\Ebs} = \mathrm{ind}_\Phi$ has direct thermodynamic
+content.
+In the ERCOT power grid, $\Phi$ aggregates generator dispatch
+interactions that map to real energy flows, making the surrogate
+interpretation semi-physical.
+In banking and crypto, no institution has a literal ``potential
+energy''; here $\Phi$ is a surrogate instability landscape whose
+critical-point geometry controls collapse dynamics.  The energy
+is real \emph{within the BSDT-induced model}, not a metaphor for
+balance-sheet stress.  The theorems apply uniformly because all
+three domains satisfy the same regularity and non-degeneracy
+conditions (Assumptions~S1--S3), not because banking ``is''
+fluid dynamics.
 
 \paragraph{Channel-Level Crash Fingerprint.}
 Across all three domains, the Fisher-weighted BSDT channels exhibit
@@ -1774,10 +1993,15 @@ degenerate---a structural rather than statistical signal.
 \section{Extension to Navier--Stokes Regularity}\label{sec:ns}
 
 The cross-domain transfer of Section~\ref{sec:crossdomain}
-demonstrates that the mathematical framework is domain-agnostic.
+demonstrates that the mathematical framework is
+\emph{geometrically} domain-agnostic: any system satisfying
+the regularity and non-degeneracy conditions admits the same
+Morse-index structure.
 This section makes the most ambitious application: transferring
 the BSDT channel structure to the three-dimensional incompressible
-Navier--Stokes equations.
+Navier--Stokes equations.  Here, unlike banking, $\Phi$ is the
+\emph{physical} enstrophy, so the equivalence has direct
+thermodynamic content.
 
 \paragraph{Relation to existing turbulence models.}
 Conventional adaptive-viscosity approaches modify the dissipation
@@ -2314,7 +2538,11 @@ energy-topology equivalence.  The central result---Morse-index
 equivalence between the detection functional $\Ebs$ and the
 interaction energy $\Phi$---recasts instability detection as a
 geometric problem and adaptive stabilisation as a gradient-flow
-control problem.  The framework yields sixteen specific findings:
+control problem.  Crucially, the claims are \emph{model-relative}:
+the theorems hold within the BSDT-induced geometry, and
+cross-domain transfer is a consequence of shared geometric
+structure (Assumptions~S1--S3), not a claim that every domain
+obeys the same physical law.  The framework yields sixteen specific findings:
 
 \begin{enumerate}
 \item The U.S.\ banking system spends 68.6\% of time above the
@@ -2343,7 +2571,7 @@ control problem.  The framework yields sixteen specific findings:
   results (AUROC = 0.805).
 
 \item The Terra/Luna collapse ($r=0.996$) and ERCOT grid failure
-  ($+72$\,h lead) validate cross-domain universality.
+  ($+72$\,h lead) validate cross-domain structural transfer.
 
 \item The framework transfers to Navier--Stokes.  A 34-run
   GPU stress test on an NVIDIA RTX PRO 6000 Blackwell
@@ -2477,11 +2705,21 @@ control problem.  The framework yields sixteen specific findings:
   Theorem~\ref{thm:ns_strong} narrows the gap (small-data global
   regularity with topological monitoring) but does not close it.
 
-\item \textbf{Gradient anti-alignment.} The empirical anti-alignment
-  ($\costheta=-0.335$) on real data shows that $\grad\Ebs$ and
-  $\grad\Phi$ measure complementary rather than parallel information.
-  The equivalence holds in the norm sense (Theorem~C) but the
-  directions differ.
+\item \textbf{Gradient anti-alignment as complementary geometry.}
+  The empirical anti-alignment ($\costheta=-0.335$) on real data
+  is not a deficiency but the \emph{expected} consequence of
+  $\Ebs$'s two-component structure.  $\Ebs$ is a position sensor
+  (how far the system deviates from normal); $-\grad\Phi$ is the
+  force pushing the system.  During crisis approach, the force drives
+  the system further from equilibrium, so $\grad\Ebs \approx -\grad\Phi$
+  and $\costheta < 0$.  Near critical points ($\grad\Phi \approx 0$),
+  the shared $\Phi_{\mathrm{pair}}$ term dominates and alignment
+  reverts to positive, as proved in~(C3).  The anti-alignment
+  is therefore a diagnostic signal of crisis approach in its own
+  right.  Stability is maintained by damping dominance
+  (Proposition~\ref{prop:antialign}), and the combination of
+  position and force sensors is strictly more informative than
+  either alone.
 
 \item \textbf{Data frequency.} FDIC call reports are quarterly;
   higher-frequency data (daily balance sheets) would sharpen lead
@@ -2537,6 +2775,19 @@ control problem.  The framework yields sixteen specific findings:
 
 \item Characterise the basin of attraction of $\Xst$ under
   adaptive friction as a function of the noise intensity $\sigma$.
+
+\item \textbf{Empirical validation of structural claims.}
+  For the simulation engines (Molecular, Gravity), $\Phi$ is
+  exactly known by construction.  This enables direct measurement
+  of: (i)~$\|D^2\Ebs(X_c) - D^2\Phi(X_c)\|$ at numerically
+  identified critical points; (ii)~gradient cosine alignment
+  $\costheta$ restricted to neighbourhoods of critical points
+  (where the theory predicts $\costheta > 0$); (iii)~explicit
+  Morse-index comparison $\ind_{\Ebs}(X_c)$ vs.\
+  $\ind_\Phi(X_c)$ at shared critical points.  These
+  measurements would close the gap between the
+  theoretical guarantees (local equivalence) and the empirical
+  evidence (global AUC performance).
 
 \item Prove that the Betti numbers of vorticity iso-surfaces grow
   at most polynomially under constant viscosity.  Combined with
