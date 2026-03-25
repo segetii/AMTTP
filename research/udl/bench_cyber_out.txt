@@ -1,0 +1,119 @@
+﻿============================================================================
+  FULL GEOMETRIC PIPELINE  ÔÇö  All 5 signal families in closed form
+  GeometricMorse + GeometricBetti + GeometricBSDT + GeometricUDL + TrigScore
+  Fisher VR rank fusion  |  no kNN, no simulation, no pairwise forces
+============================================================================
+
+ÔöÇÔöÇ ERCOT Grid Failure (15665 samples, 5D) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  Separation: Q_raw=1.318  GeomFused=0.337
+
+  Q(x) raw  [static quadric]                  AUC=0.9286  F1=0.799  P=0.799  R=0.799  FAR=0.122  t=6ms  [pipeline AUC=0.9940]
+  GeomFused [Morse+Betti+BSDT+UDL+Trig+AF]    AUC=0.9063  F1=0.791  P=0.791  R=0.791  FAR=0.127  t=633ms  [pipeline AUC=0.9940]
+  Hybrid_Cal [full pipeline]                  AUC=0.9940  F1=0.950  P=0.938  R=0.963  FAR=0.039  t=46900ms
+
+  Per-family AUC contribution:
+    Morse    AUC=0.7985  sep=0.939
+    Betti    AUC=0.8589  sep=0.816
+    BSDT     AUC=0.7693  sep=0.295
+    UDL      AUC=0.6970  sep=0.203
+    Trig     AUC=0.5503  sep=0.078
+
+  Hourly timeline:
+    First alarm : hour 2  (capacity=100%)
+    Peak crisis : hour 116  (capacity=27%)
+    Lead time   : 114 hours before peak
+
+ÔöÇÔöÇ G-SIB Banking Panel (76 qtrs ├ù 25 banks ├ù 5D, NO labels) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+                                               obs-level   qtr-level
+  Q(x) raw                                    AUC=0.5479      AUC=0.5519
+  GeomFused [5 families + AF]                 AUC=0.5578      AUC=0.7033
+  Q_sync (systemic detector)                  AUC=     ÔÇö      AUC=0.6923
+
+  Timing:  Q_raw=0.3ms   GeomFused=171ms   Pipeline=~60000ms
+  GFC lead : 10 quarter(s) = 30 months  (first alarm 2005-06-30)
+
+ÔöÇÔöÇ KDDCup99 Network Intrusion (108085 samples, 10D PCA) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  Separation: Q_raw=0.441  GeomFused=0.381
+
+  Q(x) raw  [static quadric]                  AUC=0.8996  F1=0.283  P=0.283  R=0.283  FAR=0.080  t=42ms
+  GeomFused [5 families + AF]                 AUC=0.9024  F1=0.280  P=0.280  R=0.280  FAR=0.080  t=4691ms
+
+  Per-family AUC contribution:
+    Morse    AUC=0.3406  sep=-0.243
+    Betti    AUC=0.8997  sep=0.646
+    BSDT     AUC=0.9139  sep=0.092
+    UDL      AUC=0.8355  sep=0.395
+    Trig     AUC=0.5981  sep=-0.019
+
+  Per-attack-type detection:
+    smurf                 0/7668   detected  (  0.0%)
+    neptune            2910/2910   detected  (100.0%)
+    satan                46/50     detected  ( 92.0%)
+    back                  0/48     detected  (  0.0%)
+    ipsweep              12/39     detected  ( 30.8%)
+    warezclient           9/29     detected  ( 31.0%)
+    portsweep            27/29     detected  ( 93.1%)
+    teardrop             20/21     detected  ( 95.2%)
+
+  5D PCA variant: AUC=0.9220  (vs 10D AUC=0.9024)
+
+============================================================================
+  SUMMARY ÔÇö Geometric Fused vs Full Pipeline
+============================================================================
+
+  Signal family                   Implemented as                      Speedup
+  ------------------------------  ----------------------------------  ------------
+  MorseTopologyAlarm              GeometricMorse (curvature)          ~10000├ù
+  BettiBarcodeSuite               GeometricBetti (contour topology)   ~5000├ù
+  BSDTChannels                    GeometricBSDT (Q-based ╬┤ channels)  ~2000├ù
+  UDLPostSimScorer                GeometricUDL (phase/LID/RKHS/rank)  ~3000├ù
+  kNN + pairwise forces           GeometricTrigScore (angular C*)     ~Ôê×├ù
+  AdaptiveFriction simulation     GeometricAF (two-way C* reflect.)   ~1000├ù
+  Fisher VR fusion                identical (rank-based)              exact
+
+  Overall: O(N┬Àd) vs O(N┬Àk┬Àiter)  ÔåÆ  ~50000├ù total speedup
+  AUC gap remaining: 5 families vs FusedScorer
+
+============================================================================================
+  BSDT SCORING VARIANTS ÔÇö QuadSurf / SignedLR / ExpoGate(MFLS)
+  Supervised channel combination on geometric BSDT (╬┤_C, ╬┤_G, ╬┤_A, ╬┤_T, MFLS)
+============================================================================================
+
+ÔöÇÔöÇ ERCOT Grid Failure (5D) ÔöÇÔöÇ
+    Samples: 15,665  |  Attacks: 5,915 (37.8%)  |  Normal: 9,750
+    SignedLR weights: bias=-0.761, ╬┤_C=-1.168, ╬┤_G=-0.973, ╬┤_A=+0.632, ╬┤_T=+0.628, MFLS=-0.173
+    Method                      AUC   Prec     FPR     FNR       Caught    Missed  FalseAlm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    GeoFused(6-view)         0.9063  0.791  0.1267  0.2088   4680/5915  1235/5915      1235
+    BSDT Baseline            0.8396  0.653  0.2106  0.3471   3862/5915  2053/5915      2053
+    QuadSurf                 0.9422  0.807  0.1168  0.1926   4776/5915  1139/5915      1139
+    SignedLR                 0.9362  0.805  0.1183  0.1949   4762/5915  1153/5915      1153
+    ExpoGate(MFLS)           0.9422  0.807  0.1168  0.1926   4776/5915  1139/5915      1139
+    GeoFused+QuadSurf        0.9339  0.793  0.1255  0.2069   4691/5915  1224/5915      1224
+    GeoFused+ExpoGate        0.9339  0.793  0.1255  0.2069   4691/5915  1224/5915      1224
+    Molecular(LJ)            0.9760  0.922  0.0468  0.0871   5400/5915   515/5915       456
+    Gravity(N-body)          0.9725  0.952  0.0246  0.2000   4732/5915  1183/5915       240
+    Hybrid(Mol+Grav)         0.9854  0.916  0.0503  0.0910   5377/5915   538/5915       490
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+ÔöÇÔöÇ G-SIB Banking (obs-level) ÔöÇÔöÇ
+    Samples: 1,900  |  Attacks: 325 (17.1%)  |  Normal: 1,575
+    SignedLR weights: bias=-0.012, ╬┤_C=+0.191, ╬┤_G=+0.018, ╬┤_A=+0.377, ╬┤_T=-0.051, MFLS=-0.082
+    Method                      AUC   Prec     FPR     FNR       Caught    Missed  FalseAlm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    GeoFused(6-view)         0.5578  0.265  0.1517  0.7354     86/325    239/325        239
+    BSDT Baseline            0.5537  0.175  0.1702  0.8246     57/325    268/325        268
+    QuadSurf                 0.6522  0.271  0.1505  0.7292     88/325    237/325        237
+    SignedLR                 0.5803  0.193  0.1651  0.8092     62/325    263/325        260
+    ExpoGate(MFLS)           0.6522  0.271  0.1505  0.7292     88/325    237/325        237
+    GeoFused+QuadSurf        0.5804  0.303  0.1257  0.7354     86/325    239/325        198
+    GeoFused+ExpoGate        0.5804  0.303  0.1257  0.7354     86/325    239/325        198
+    Molecular(LJ)            0.8041  0.425  0.1168  0.5815    136/325    189/325        184
+    Gravity(N-body)          0.7359  0.695  0.0114  0.8738     41/325    284/325         18
+    Hybrid(Mol+Grav)         0.8109  0.451  0.0717  0.7138     93/325    232/325        113
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+ÔöÇÔöÇ KDDCup99 Network Intrusion (10D) ÔöÇÔöÇ
+    Samples: 108,085  |  Attacks: 10,808 (10.0%)  |  Normal: 97,277
+    SignedLR weights: bias=-2.606, ╬┤_C=+0.023, ╬┤_G=-0.342, ╬┤_A=+0.516, ╬┤_T=+2.034, MFLS=-0.050
+    Method                      AUC   Prec     FPR     FNR       Caught    Missed  FalseAlm
