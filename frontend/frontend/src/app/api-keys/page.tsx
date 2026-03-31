@@ -6,6 +6,20 @@ import AppLayout, { useProfile } from '@/components/AppLayout';
 function ApiKeysContent() {
   const { profile } = useProfile();
   const [showSecret, setShowSecret] = useState<string | null>(null);
+  const [keys, setKeys] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  React.useEffect(() => {
+    if (!profile || !['INSTITUTIONAL', 'VASP'].includes(profile.entity_type)) {
+      setLoading(false);
+      return;
+    }
+    fetch('http://127.0.0.1:8007/api-keys')
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
+      .then(data => setKeys(Array.isArray(data) ? data : []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [profile]);
 
   if (!profile || !['INSTITUTIONAL', 'VASP'].includes(profile.entity_type)) {
     return (
@@ -15,17 +29,6 @@ function ApiKeysContent() {
       </div>
     );
   }
-
-    const [keys, setKeys] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    React.useEffect(() => {
-      fetch('http://127.0.0.1:8007/api-keys')
-        .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
-        .then(data => setKeys(Array.isArray(data) ? data : []))
-        .catch(e => setError(e.message))
-        .finally(() => setLoading(false));
-    }, []);
 
   return (
     <div>

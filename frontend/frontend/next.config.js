@@ -1,19 +1,18 @@
 /** @type {import('next').NextConfig} */
 
 // Backend service URLs - use Docker service names when in container, localhost for local dev
-const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://orchestrator:8007';
-const SANCTIONS_URL = process.env.SANCTIONS_URL || 'http://sanctions:8004';
-const MONITORING_URL = process.env.MONITORING_URL || 'http://monitoring:8005';
-const GEO_RISK_URL = process.env.GEO_RISK_URL || 'http://geo-risk:8006';
-const EXPLAINABILITY_URL = process.env.EXPLAINABILITY_URL || 'http://explainability:8009';
+const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:8007';
+const SANCTIONS_URL = process.env.SANCTIONS_URL || 'http://localhost:8004';
+const MONITORING_URL = process.env.MONITORING_URL || 'http://localhost:8005';
+const GEO_RISK_URL = process.env.GEO_RISK_URL || 'http://localhost:8006';
+const EXPLAINABILITY_URL = process.env.EXPLAINABILITY_URL || 'http://localhost:8009';
 
 const nextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
 
-  // Base path for unified gateway — all Next.js routes are served under /app
-  // This ensures internal links, static assets, and router all use the /app prefix.
-  basePath: '/app',
+  // Base path — empty for monolith deployment where nginx proxies routes directly
+  // basePath: '/app',
 
   // Disable telemetry in production
   experimental: {

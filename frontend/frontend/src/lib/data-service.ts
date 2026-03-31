@@ -261,9 +261,7 @@ function transformGraphData(raw: unknown): GraphData {
 // ============================================================================
 
 // Use a dedicated internal API namespace to avoid collisions with backend rewrites.
-// Must include basePath ('/app') so browser requests reach the Next.js /app/ location
-// through the gateway nginx.
-const API_BASE = '/app/app-api/data';
+const API_BASE = '/app-api/data';
 
 async function fetchData<T>(endpoint: string, transform?: (raw: unknown) => T): Promise<T> {
   const response = await fetch(`${API_BASE}/${endpoint}`, {

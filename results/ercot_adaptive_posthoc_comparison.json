@@ -1,0 +1,231 @@
+{
+  "adaptive_baseline": {
+    "Gravity": {
+      "auc": 0.7079,
+      "far": 20.9,
+      "events": {
+        "SummerPeak2019": "6w",
+        "COVID_Collapse": "19w",
+        "WinterStormUri": "18w",
+        "WinterStormElliott": "conc"
+      }
+    },
+    "Molecular": {
+      "auc": 0.5553,
+      "far": 27.6,
+      "events": {
+        "SummerPeak2019": "\u2014",
+        "COVID_Collapse": "19w",
+        "WinterStormUri": "20w",
+        "WinterStormElliott": "conc"
+      }
+    },
+    "Hybrid": {
+      "auc": 0.7513,
+      "far": 3.1,
+      "events": {
+        "SummerPeak2019": "\u2014",
+        "COVID_Collapse": "14w",
+        "WinterStormUri": "9w",
+        "WinterStormElliott": "conc"
+      }
+    }
+  },
+  "posthoc_variants": {
+    "BSDT-Fisher": {
+      "auc": 0.5725490196078431,
+      "thresholds": {
+        "Fixed P99": {
+          "far": 9.4,
+          "recall": 25.0,
+          "events": {
+            "SummerPeak2019": "2w",
+            "COVID_Collapse": "\u2014",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Fixed P95": {
+          "far": 41.2,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "6w",
+            "COVID_Collapse": "\u2014",
+            "WinterStormUri": "5w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Adaptive P99": {
+          "far": 9.4,
+          "recall": 25.0,
+          "events": {
+            "SummerPeak2019": "\u2014",
+            "COVID_Collapse": "7w",
+            "WinterStormUri": "5w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>2": {
+          "far": 2.9,
+          "recall": 0.0,
+          "events": {
+            "SummerPeak2019": "6w",
+            "COVID_Collapse": "\u2014",
+            "WinterStormUri": "\u2014",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>1.5": {
+          "far": 8.2,
+          "recall": 41.7,
+          "events": {
+            "SummerPeak2019": "6w",
+            "COVID_Collapse": "\u2014",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "P99 \u222a z>2": {
+          "far": 10.6,
+          "recall": 25.0,
+          "events": {
+            "SummerPeak2019": "6w",
+            "COVID_Collapse": "\u2014",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        }
+      }
+    },
+    "MFLS-QuadSurf": {
+      "auc": 0.8205882352941177,
+      "thresholds": {
+        "Fixed P99": {
+          "far": 6.5,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Fixed P95": {
+          "far": 20.0,
+          "recall": 66.7,
+          "events": {
+            "SummerPeak2019": "2w",
+            "COVID_Collapse": "7w",
+            "WinterStormUri": "20w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Adaptive P99": {
+          "far": 5.9,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "2w",
+            "COVID_Collapse": "7w",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>2": {
+          "far": 3.5,
+          "recall": 41.7,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>1.5": {
+          "far": 5.9,
+          "recall": 58.3,
+          "events": {
+            "SummerPeak2019": "1w",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "P99 \u222a z>2": {
+          "far": 6.5,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        }
+      }
+    },
+    "MFLS-ExpoGate": {
+      "auc": 0.8205882352941177,
+      "thresholds": {
+        "Fixed P99": {
+          "far": 6.5,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Fixed P95": {
+          "far": 20.0,
+          "recall": 66.7,
+          "events": {
+            "SummerPeak2019": "2w",
+            "COVID_Collapse": "7w",
+            "WinterStormUri": "20w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Adaptive P99": {
+          "far": 5.9,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "2w",
+            "COVID_Collapse": "7w",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>2": {
+          "far": 4.1,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "Rolling z>1.5": {
+          "far": 6.5,
+          "recall": 58.3,
+          "events": {
+            "SummerPeak2019": "1w",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        },
+        "P99 \u222a z>2": {
+          "far": 6.5,
+          "recall": 50.0,
+          "events": {
+            "SummerPeak2019": "conc",
+            "COVID_Collapse": "conc",
+            "WinterStormUri": "1w",
+            "WinterStormElliott": "\u2014"
+          }
+        }
+      }
+    }
+  }
+}

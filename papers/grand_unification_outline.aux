@@ -200,9 +200,20 @@
 \@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Geometric prediction outputs. Each is a closed-form function of the observation $\boldsymbol  {\delta }$ and the ellipsoid parameters.}}{34}{table.caption.26}\protected@file@percent }
 \newlabel{tab:geo_predict}{{10}{34}{Geometric prediction outputs. Each is a closed-form function of the observation $\boldsymbol {\delta }$ and the ellipsoid parameters}{table.caption.26}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {11.10}Summary of Geometric Significance}{34}{subsection.11.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {12}Cross-Domain Transfer and Hyperparameter Stability}{34}{section.12}\protected@file@percent }
-\newlabel{sec:transfer}{{12}{34}{Cross-Domain Transfer and Hyperparameter Stability}{section.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}Shared Hyperparameters}{34}{subsection.12.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.11}Scalable Replacement of the Pairwise Tensor}{34}{subsection.11.11}\protected@file@percent }
+\newlabel{ssec:pairwise_replacement}{{11.11}{34}{Scalable Replacement of the Pairwise Tensor}{subsection.11.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Algebraic summary of $\mathcal  {C}^*$.}{34}{section*.27}\protected@file@percent }
+\newlabel{eq:Cstar_ellipsoid}{{22}{34}{Algebraic summary of $\Cman $}{equation.22}{}}
+\newlabel{eq:K_pairwise}{{23}{35}{Algebraic summary of $\Cman $}{equation.23}{}}
+\@writefile{toc}{\contentsline {paragraph}{Trigonometric layer.}{35}{section*.28}\protected@file@percent }
+\newlabel{eq:R2_pairwise}{{24}{35}{Trigonometric layer}{equation.24}{}}
+\newlabel{eq:Delta_sigma}{{25}{35}{Trigonometric layer}{equation.25}{}}
+\newlabel{eq:kappa_phi}{{26}{35}{Trigonometric layer}{equation.26}{}}
+\@writefile{toc}{\contentsline {paragraph}{Gravity Engine --- mean-field (long-range smoothing).}{35}{section*.29}\protected@file@percent }
+\newlabel{eq:Phi_gravity_eff}{{27}{35}{Gravity Engine --- mean-field (long-range smoothing)}{equation.27}{}}
+\@writefile{toc}{\contentsline {paragraph}{Molecular Engine --- $k$-NN correction (short-range smoothing).}{35}{section*.30}\protected@file@percent }
+\newlabel{eq:Phi_molecular_eff}{{28}{35}{Molecular Engine --- $k$-NN correction (short-range smoothing)}{equation.28}{}}
+\newlabel{eq:kNN_density}{{29}{35}{Molecular Engine --- $k$-NN correction (short-range smoothing)}{equation.29}{}}
 \citation{pascanu2013}
 \citation{ioffe2015}
 \citation{kingma2015}
@@ -219,32 +230,41 @@
 \citation{zipkin2000}
 \citation{ivanov2017}
 \citation{ivanov2020supply}
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}Transfer Experiments}{35}{subsection.12.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {13}Related Work}{35}{section.13}\protected@file@percent }
-\newlabel{sec:related}{{13}{35}{Related Work}{section.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {13.1}Domain-Specific Stability Methods}{35}{subsection.13.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {13.2}Cross-Domain Frameworks (Claimed)}{35}{subsection.13.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {13.3}Positioning}{35}{subsection.13.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {14}Discussion}{35}{section.14}\protected@file@percent }
-\newlabel{sec:discussion}{{14}{35}{Discussion}{section.14}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {14.1}Why Does the Geometric Structure Transfer?}{35}{subsection.14.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {14.2}Limitations}{35}{subsection.14.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {14.3}Addressing Potential Overclaim Concerns}{35}{subsection.14.3}\protected@file@percent }
-\newlabel{sec:overclaim}{{14.3}{35}{Addressing Potential Overclaim Concerns}{subsection.14.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{Concern 1: ``The equivalence to the true system energy is not justified.''}{36}{section*.27}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Concern 2: ``Morse index is only stable under small perturbations.''}{36}{section*.28}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Concern 3: ``The four-channel structure is imposed, not emergent.''}{36}{section*.29}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Concern 4: ``Cross-domain success proves empirical transferability, not theoretical universality.''}{36}{section*.30}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Concern 5: ``Empirical results do not test gradient alignment or Hessian similarity.''}{36}{section*.31}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {14.4}Future Directions}{36}{subsection.14.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {15}Conclusion}{37}{section.15}\protected@file@percent }
-\newlabel{sec:conclusion}{{15}{37}{Conclusion}{section.15}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Proofs}{37}{appendix.A}\protected@file@percent }
-\newlabel{app:proofs}{{A}{37}{Proofs}{appendix.A}{}}
+\@writefile{toc}{\contentsline {paragraph}{Hybrid Engine.}{36}{section*.31}\protected@file@percent }
+\newlabel{eq:Phi_hybrid_eff}{{30}{36}{Hybrid Engine}{equation.30}{}}
+\@writefile{toc}{\contentsline {paragraph}{Blind-Spot energy and adaptive friction.}{36}{section*.32}\protected@file@percent }
+\newlabel{eq:Ebs_eff}{{31}{36}{Blind-Spot energy and adaptive friction}{equation.31}{}}
+\newlabel{eq:friction_eff}{{32}{36}{Blind-Spot energy and adaptive friction}{equation.32}{}}
+\newlabel{prop:pairwise_equiv}{{29}{36}{Geometric equivalence of the effective potential}{theorem.29}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Cross-Domain Transfer and Hyperparameter Stability}{36}{section.12}\protected@file@percent }
+\newlabel{sec:transfer}{{12}{36}{Cross-Domain Transfer and Hyperparameter Stability}{section.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}Shared Hyperparameters}{36}{subsection.12.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}Transfer Experiments}{36}{subsection.12.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Related Work}{36}{section.13}\protected@file@percent }
+\newlabel{sec:related}{{13}{36}{Related Work}{section.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {13.1}Domain-Specific Stability Methods}{36}{subsection.13.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {13.2}Cross-Domain Frameworks (Claimed)}{37}{subsection.13.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {13.3}Positioning}{37}{subsection.13.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {14}Discussion}{37}{section.14}\protected@file@percent }
+\newlabel{sec:discussion}{{14}{37}{Discussion}{section.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.1}Why Does the Geometric Structure Transfer?}{37}{subsection.14.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.2}Limitations}{37}{subsection.14.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.3}Addressing Potential Overclaim Concerns}{37}{subsection.14.3}\protected@file@percent }
+\newlabel{sec:overclaim}{{14.3}{37}{Addressing Potential Overclaim Concerns}{subsection.14.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Concern 1: ``The equivalence to the true system energy is not justified.''}{37}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concern 2: ``Morse index is only stable under small perturbations.''}{37}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concern 3: ``The four-channel structure is imposed, not emergent.''}{38}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concern 4: ``Cross-domain success proves empirical transferability, not theoretical universality.''}{38}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concern 5: ``Empirical results do not test gradient alignment or Hessian similarity.''}{38}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.4}Future Directions}{38}{subsection.14.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {15}Conclusion}{38}{section.15}\protected@file@percent }
+\newlabel{sec:conclusion}{{15}{38}{Conclusion}{section.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Proofs}{39}{appendix.A}\protected@file@percent }
+\newlabel{app:proofs}{{A}{39}{Proofs}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Extended Results Tables}{39}{appendix.B}\protected@file@percent }
+\newlabel{app:tables}{{B}{39}{Extended Results Tables}{appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Reproducibility}{39}{appendix.C}\protected@file@percent }
+\newlabel{app:code}{{C}{39}{Reproducibility}{appendix.C}{}}
 \bibstyle{plain}
 \bibdata{references}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Extended Results Tables}{38}{appendix.B}\protected@file@percent }
-\newlabel{app:tables}{{B}{38}{Extended Results Tables}{appendix.B}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {C}Reproducibility}{38}{appendix.C}\protected@file@percent }
-\newlabel{app:code}{{C}{38}{Reproducibility}{appendix.C}{}}
-\gdef \@abspage@last{38}
+\gdef \@abspage@last{40}

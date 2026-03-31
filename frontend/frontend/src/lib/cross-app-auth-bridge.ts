@@ -66,11 +66,15 @@ async function hmacSign(data: string): Promise<string> {
 
 async function hmacVerify(data: string, signature: string): Promise<boolean> {
   const expected = await hmacSign(data);
+  // Normalise: strip base64url padding so Dart (keeps =) and JS (strips =) match
+  const norm = (s: string) => s.replace(/=+$/, '');
+  const a = norm(expected);
+  const b = norm(signature);
   // Constant-time comparison
-  if (expected.length !== signature.length) return false;
+  if (a.length !== b.length) return false;
   let result = 0;
-  for (let i = 0; i < expected.length; i++) {
-    result |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return result === 0;
 }
@@ -128,7 +132,7 @@ export async function createBridgeToken(payload: Omit<BridgeTokenPayload, 'iat' 
   };
 
   const enc = new TextEncoder();
-  const payloadB64 = base64UrlEncode(enc.encode(JSON.stringify(full)));
+  const payloadB64 = base64UrlEncode(enc.encode(JSON.stringify(full)).buffer as ArrayBuffer);
   const sig = await hmacSign(payloadB64);
   return `${payloadB64}.${sig}`;
 }

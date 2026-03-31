@@ -129,7 +129,39 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
                           _buildLoginCard(authState),
                           const SizedBox(height: 32),
 
-                          // Demo accounts removed. Only real backend login is available.
+                          // Demo quick-access accounts
+                          _buildDemoAccounts([
+                            {
+                              'role': 'R1',
+                              'email': 'user@amttp.io',
+                              'password': 'user123'
+                            },
+                            {
+                              'role': 'R2',
+                              'email': 'pep@amttp.io',
+                              'password': 'pep123'
+                            },
+                            {
+                              'role': 'R3',
+                              'email': 'ops@amttp.io',
+                              'password': 'ops123'
+                            },
+                            {
+                              'role': 'R4',
+                              'email': 'compliance@amttp.io',
+                              'password': 'comply123'
+                            },
+                            {
+                              'role': 'R5',
+                              'email': 'admin@amttp.io',
+                              'password': 'admin123'
+                            },
+                            {
+                              'role': 'R6',
+                              'email': 'super@amttp.io',
+                              'password': 'super123'
+                            },
+                          ]),
                         ],
                       ),
                     ),

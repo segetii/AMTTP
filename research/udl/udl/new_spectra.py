@@ -19,6 +19,7 @@ from scipy.spatial.distance import cdist
 # ═══════════════════════════════════════════════════════════════════
 # 1. GRAPH / NEIGHBORHOOD SPECTRUM
 # ═══════════════════════════════════════════════════════════════════
+import numba
 
 class GraphNeighborhoodSpectrum:
     """
@@ -27,9 +28,11 @@ class GraphNeighborhoodSpectrum:
     Computes per-point:
       1. Mean kNN distance (how isolated)
       2. Local reachability density ratio (LOF-like)
+        @numba.njit(cache=True, nogil=True, fastmath=True)
       3. kNN distance variance (uniformity of neighborhood)
       4. Relative rank of distance to global median
       5. Shared-neighbor fraction (connectivity)
+        @numba.njit(cache=True, nogil=True, fastmath=True)
 
     This captures the *local density structure* that Geometric
     (global Mahalanobis) and Phase (pairwise interactions) miss.
@@ -110,6 +113,7 @@ class GraphNeighborhoodSpectrum:
 
 class DensityRatioSpectrum:
     """
+        @numba.njit(cache=True, nogil=True, fastmath=True)
     KDE-based log-likelihood deviation from training distribution.
 
     Computes per-point:

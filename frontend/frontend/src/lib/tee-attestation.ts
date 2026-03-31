@@ -53,7 +53,7 @@ function base64urlDecode(str: string): Uint8Array {
   return bytes;
 }
 
-function randomChallenge(size = 32): Uint8Array {
+function randomChallenge(size = 32): Uint8Array<ArrayBuffer> {
   return crypto.getRandomValues(new Uint8Array(size));
 }
 
@@ -172,7 +172,7 @@ export async function performWebAuthnAttestation(
     allowCredentials: [
       {
         type: 'public-key',
-        id: base64urlDecode(credentialId),
+        id: base64urlDecode(credentialId) as BufferSource,
         transports: ['internal'],
       },
     ],
@@ -201,7 +201,7 @@ export async function performWebAuthnAttestation(
       method: 'webauthn',
       credentialId,
       signature: base64url(response.signature),
-      challenge: base64url(boundChallenge),
+      challenge: base64url(boundChallenge.buffer as ArrayBuffer),
       timestamp: Date.now(),
     };
   } catch (err: unknown) {
@@ -301,7 +301,7 @@ export async function signWithSecureKey(
     const sig = await crypto.subtle.sign(
       { name: 'ECDSA', hash: 'SHA-256' },
       stored.privateKey,
-      data,
+      data as BufferSource,
     );
 
     return base64url(sig);
@@ -334,8 +334,8 @@ export async function verifyWithSecureKey(
     return crypto.subtle.verify(
       { name: 'ECDSA', hash: 'SHA-256' },
       stored.publicKey,
-      sig,
-      data,
+      sig as BufferSource,
+      data as BufferSource,
     );
   } catch (err) {
     console.error('[TEE] Verification failed:', err);
@@ -400,7 +400,7 @@ export async function gateCriticalAction(
       return {
         success: true,
         method: 'secure-key',
-        challenge: base64url(challenge),
+        challenge: base64url(challenge.buffer as ArrayBuffer),
         signature: sig,
         timestamp,
       };

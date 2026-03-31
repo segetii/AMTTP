@@ -26,8 +26,8 @@ logger = logging.getLogger("storage")
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# MongoDB (Docker default: admin:changeme)
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://admin:changeme@localhost:27017")
+# MongoDB (local: no auth, Docker: set MONGODB_URL=mongodb://admin:changeme@...)
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
 MONGODB_DB = os.getenv("MONGODB_DB", "amttp")
 
 # Redis

@@ -18,10 +18,10 @@
 % Push closing/signature block to the right margin
 \longindentation=0.65\textwidth
 
-\signature{Dr.\ {[FULL NAME]}, PhD\\
-Vice President, Sales\\
-Sabre Corporation --- West Africa\\
-PhD in Computer Engineering, {[University]}}
+\signature{Dr.\ Dare Olayiwola, PhD, FNSE, FNIEE, COREN\\
+Vice President, Sales, Strategy \& Growth\\
+Sabre Central \& West Africa\\
+PhD in Computer Engineering, Ladoke Akintola University of Technology}
 
 \address{Sabre Corporation\\
 West Africa Regional Office\\
@@ -38,111 +38,115 @@ United Kingdom}
 \opening{Dear Sir/Madam,}
 
 I endorse Odeyemi Olusegun Israel for the UK Global Talent Visa under
-the Digital Technology route.  My endorsement focuses on \textbf{the
-commercial viability of his technology, its competitive differentiation,
-and his capacity to create significant economic value in the UK}.
+the Exceptional Promise category in Digital Technology.  My endorsement
+focuses on \textbf{the commercial viability of his technology, its
+competitive differentiation, and his capacity to create meaningful
+economic value in the UK}.
 
-I hold a PhD in Computer Engineering and serve as Vice President of
-Sales for Sabre Corporation's West Africa operations.  Sabre processes
-over US\$260~billion in annual travel spend and serves 400,000+ travel
-agencies worldwide.  I am responsible for enterprise technology sales
-cycles at financial institutions, airlines, and government agencies.  My
-PhD gives me the technical foundation to evaluate what Olusegun has
-built; my commercial role gives me the lens to assess whether it solves
-problems that paying customers actually have.  I have known Olusegun for
+I hold a PhD in Computer Engineering and serve as Vice President,
+Sales, Strategy \& Growth for Sabre Central \& West Africa.  Sabre is a
+global technology company serving airlines, travel agencies, and other
+enterprise customers at scale.  My work involves enterprise technology
+engagements with regulated institutions, large commercial organisations,
+and public-sector stakeholders.  This combination of technical and
+commercial experience enables me to assess both the engineering depth and
+market relevance of Olusegun's work.  I have known him for over
 10+~years.
 
 %% ── MARKET GAP ─────────────────────────────────────────────────────
 
-\textbf{AMTTP solves a real, unsolved market problem.}
+\textbf{A clear solution to a real market gap.}
 
 The blockchain compliance market has a structural deficiency:
 \textit{every existing solution operates after settlement}.
-Chainalysis, Elliptic, and TRM~Labs---collectively valued at over
-US\$10~billion---provide post-settlement forensics.  They flag; they do
-not prevent.  For FCA- or FinCEN-regulated institutions, discovering
-\textit{after the fact} that they processed an illicit transaction
-creates regulatory liability no amount of alerting can eliminate.
+Platforms such as Chainalysis, Elliptic, and TRM~Labs provide valuable
+forensic and monitoring capabilities, but they primarily identify risk
+after transactions have already been processed.  For regulated
+institutions, this creates unavoidable exposure because detection alone
+does not prevent liability.
 
-Olusegun's Anti-Money Laundering Transaction Trust Protocol (AMTTP) is,
-to the best of my knowledge, the only system that provides
-\textbf{pre-settlement compliance enforcement} on blockchain
-transactions.  It scores, classifies (Approve / Review / Escrow /
-Block), and gates transactions at the protocol level within Ethereum's
-12-second block window.  This is not incremental---it is a categorically
-different value proposition.
+Olusegun's Anti-Money Laundering Transaction Trust Protocol (AMTTP)
+addresses this gap through a \textbf{pre-settlement compliance model}.
+The system evaluates and classifies transactions (Approve, Review,
+Escrow, or Block) within the transaction lifecycle itself, including
+within Ethereum's confirmation window.  This represents a meaningful
+shift from reactive monitoring to proactive enforcement and has strong
+relevance for institutions operating in regulated environments.
 
 %% ── PRODUCT READINESS ──────────────────────────────────────────────
 
-\textbf{Enterprise-grade technology, not a prototype.}
+\textbf{Engineering depth and system maturity.}
 
-In my role I distinguish quickly between ``demo-ready'' and
-``deployment-ready'' technology.  AMTTP is the latter:
+From a commercial and technical standpoint, what distinguishes AMTTP is
+that it demonstrates characteristics of a system designed with real-world
+deployment in mind.
 
 \begin{itemize}[nosep,leftmargin=*]
-  \item \textbf{SDK maturity}: TypeScript SDK with 19+ endpoints
-    (risk, KYC, sanctions, disputes, bulk ops up to 10k~txns),
-    EIP-712 signing, HMAC-SHA256 webhooks.  Python SDK mirrors it.
-    Both open-sourced.
-  \item \textbf{Architecture}: 17~containerised microservices with
-    health checks, circuit breakers, and Prometheus/Grafana monitoring.
-  \item \textbf{Security}: JWT validation, per-key rate limiting,
-    ECDSA oracle signing with 90-day rotation, nonce+TTL replay
-    protection, UI Integrity Service (DOM mutation monitoring).
-  \item \textbf{ML pipeline}: ROC-AUC~0.9879, 21~features, zero
-    training-serving skew.
-  \item \textbf{Smart contracts}: 18~Solidity contracts on Sepolia
-    (risk attestation, LayerZero cross-chain, Kleros disputes, UUPS
-    proxy upgradeability).
+  \item a structured API and SDK layer supporting risk assessment,
+    compliance checks, and transaction workflows;
+  \item a microservices-based architecture with observability,
+    monitoring, and fault-tolerance mechanisms;
+  \item security controls aligned with enterprise expectations,
+    including authentication, rate limiting, replay protection, and
+    cryptographic validation;
+  \item a machine-learning pipeline designed to support risk
+    classification within operational constraints, including reported
+    production ROC-AUC of 0.9879; and
+  \item smart contract components enabling on-chain enforcement,
+    attestation, and dispute-resolution workflows.
 \end{itemize}
 
-Security and ML pipeline maturity at this depth is typically the product
-of a dedicated team, not a solo developer.
+While many early-stage solutions remain conceptual, AMTTP reflects a
+level of integration and completeness more consistent with
+production-oriented systems.
 
 %% ── COMPETITIVE + IP ───────────────────────────────────────────────
 
-\textbf{Competitive positioning and IP.}
+\textbf{Innovation and competitive positioning.}
 
-\begin{enumerate}[nosep,leftmargin=*]
-  \item \textbf{First-mover in pre-settlement compliance}---incumbents
-    would need to re-architect their entire products.
-  \item \textbf{Zero-knowledge compliance (zkNAF)}---Groth16 ZK-SNARKs
-    resolving GDPR-vs-AML at the cryptographic level, with verifiers
-    deployed on-chain.
-  \item \textbf{UK patent filed} (4~March~2026): 25~claims across
-    13~invention groups covering AMTTP, zkNAF, ML detection, adaptive
-    friction, and Navier-Stokes viscosity.
-  \item \textbf{Open-source SDKs / proprietary core}---the
-    Stripe/Twilio playbook for adoption.
-\end{enumerate}
+Olusegun's work also demonstrates originality in its approach to
+compliance and privacy.  In particular, the integration of
+privacy-preserving mechanisms alongside regulatory enforcement---such as
+zero-knowledge-based compliance workflows---addresses a well-known
+tension between data protection and compliance requirements.
+
+Additionally, the filing of UK-based intellectual property strengthens
+the commercial positioning of the technology and aligns its future
+development with the UK ecosystem.  His approach to combining open
+developer tooling with proprietary core infrastructure reflects a
+credible model for adoption and scale.
 
 %% ── RESEARCH AS PRODUCT ────────────────────────────────────────────
 
-\textbf{Research that feeds a product pipeline.}
+\textbf{Research-driven product development.}
 
-Each research paper produces technology that extends AMTTP:
+One of the more compelling aspects of Olusegun's work is the direct
+relationship between his research and product development.  His work on
+frameworks such as Blind Spot Decomposition Theory (BSDT) and related
+detection methods contributes to improving how risk is identified and
+managed within complex systems.
 
 \begin{itemize}[nosep,leftmargin=*]
   \item \textbf{BSDT}\footnote{\url{https://doi.org/10.5281/zenodo.18870589}}:
-    diagnoses \textit{why} the ML model misses fraud, enabling targeted
-    correction without retraining.
+    a framework for diagnosing why models miss fraud and enabling more
+    targeted correction.
   \item \textbf{UDP}\footnote{\url{https://doi.org/10.5281/zenodo.19037687}}:
-    14~composable operators, AUC~0.972 with a single hyperparameter
-    set---eliminating per-client tuning.
+    a multi-operator detection framework with strong benchmark
+    performance and reduced tuning burden.
   \item \textbf{Blind-Spot Decomposition and the Geometry of System
     Collapse}\footnote{\url{https://doi.org/10.5281/zenodo.19038783}}:
-    6-quarter GFC early warning (zero false alarms), Terra/Luna
-    detection at hour~23 ($r = 0.996$), ERCOT grid prediction 72~hours
-    early (AUC~0.9997).  These are product features, not just academic
-    results.
+    a broader framework showing cross-domain applicability in financial
+    instability, crypto collapse, and critical infrastructure.
 \end{itemize}
 
-The cross-domain validation proves the technology is not brittle---the
-exact evidence enterprise buyers need.
+Importantly, these research outputs are not isolated academic work.
+They feed directly into system capability and product evolution.  This
+ability to translate research into deployable technology is uncommon and
+highly valuable in commercial environments.
 
 %% ── UK VALUE + ASSESSMENT ──────────────────────────────────────────
 
-\textbf{Value to the UK and my assessment.}
+\textbf{Potential contribution to the UK.}
 
 The FCA's crypto-asset framework will create jurisdiction-level demand
 for protocol-level compliance.  AMTTP serves this demand natively.
@@ -151,13 +155,14 @@ Coinbase~UK), institutional DeFi participants, and CBDC infrastructure
 providers.  The UK patent anchors IP in the UK; commercialisation would
 create UK-based jobs in sales, engineering, and compliance.
 
-In 10+~years in enterprise technology, I have not encountered another
-individual who combines this level of technical depth with this degree
-of commercial readiness.  Olusegun is a technically exceptional founder
-with a viable product, defensible IP, and a research programme that feeds
-directly into product differentiation.
+In over a decade of working across enterprise technology and commercial
+systems, Olusegun stands out as a rare combination of deep technical
+capability and strong product orientation.  He demonstrates the ability
+not only to design complex systems, but to align them with real market
+needs and commercial realities.
 
-I recommend him for the Global Talent Visa without reservation.
+I recommend him for the UK Global Talent Visa under the Digital
+Technology route without reservation.
 
 \vspace{1.5\baselineskip}
 

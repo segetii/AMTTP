@@ -1,21 +1,24 @@
 """
 geo_full_pipeline.py
 ====================
-Full geometric counterpart of FusedSystemScorer — all four signal families
-expressed entirely through C* ellipsoid geometry:
+Complete Geometric-Trigonometric anomaly detection system.
 
+PRIMARY CLASS:
+  FrozenWindowScorer  — THE complete system.
+    Geometry (radial Q on C*) + Trigonometry (angular d̃ on S^{d-1})
+    = full representation.  Frozen Calibration Protocol (Algorithm 2):
+    freeze reference stats → whiten → score via (Q, θ, AM, Q×θ, K×θ).
+    All parameters frozen on reference window — no re-estimation.
+
+COMPONENT FAMILIES (used internally or for legacy comparison):
   Family 1 — GeometricMorse    : curvature-based Morse/persistence features
   Family 2 — GeometricBetti    : multi-scale Mahalanobis contour topology
-  Family 3 — GeometricBSDT     : blind-spot channels derived from Q / C* geometry
-  Family 4 — GeometricUDL      : Phase, Topological, RKHS, Rank operators on C*
+  Family 3 — GeometricBSDT     : blind-spot channels + effective potentials
+  Family 4 — GeometricUDL      : Phase, Topological, RKHS, Rank operators
+  Family 5 — GeometricTrigScore: angular C*-algebra geometry
+  FUSED    — GeometricFusedScorer: 6-view Fisher VR rank fusion
 
-Plus GeometricAF (two-way adaptive friction) as a pre-processing step.
-
-Each family directly mirrors its FusedSystemScorer counterpart while
-eliminating all pairwise kNN searches and particle simulation.
-Fisher VR fusion is identical to FusedSystemScorer._fisher_fuse().
-
-Cost: O(N·d) vs O(N·k·iter) for the full pipeline.
+ALL operations are O(N·d) — no kNN trees, no pairwise distances.
 
 Author: Odeyemi Olusegun Israel
 """
@@ -244,41 +247,157 @@ class GeometricBetti:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class GeometricBSDT:
+    r"""
+    Geometric BSDT — FULLY CLOSED-FORM pairwise-tensor & kNN replacement.
+
+    Every channel and effective potential is expressed through the C*
+    ellipsoid quadric Q(x) = Σ_j x_j² / a_j² and its spectral
+    properties.  NO kNN trees, NO pairwise distance matrices, NO
+    sklearn dependency.  Cost: **O(N · d)** for all operations.
+
+    ═══════════════════════════════════════════════════════════════════
+    KEY INSIGHT (Section 9.10 of the Grand Unification paper):
+
+    If ρ(y) ∼ N(0, Σ_ref) is the reference Gaussian fitted to the
+    training ellipsoid with Σ_ref = diag(a²), then:
+
+    • The mean-field gravity integral
+        Φ_gravity_eff(x) = ∫ ρ(y) φ_G(‖x−y‖) dy
+      evaluates in closed form because convolution of two Gaussians
+      is another Gaussian:
+        Attraction: Φ_att(x) = C · exp(−½ x^T (Σ + σ²I)^{-1} x)
+                             = C · exp(−½ Σ_j x_j² / (a_j² + σ²))
+        Repulsion:  Φ_rep(x) ≈ −λ · ½ · log(‖x‖² + trace(Σ)/d)
+      Total:  Φ_gravity(x) = γ · [Φ_att(x) − λ · Φ_rep(x)]
+
+    • The molecular kNN potential uses the EXPECTED k-th NN distance
+      at density ρ(x), avoiding any actual neighbour search:
+        r̂_k(x) = (k / (n · ρ(x)))^{1/d}
+      where ρ(x) ∝ exp(−Q(x)/2).  Then φ_LJ(r̂_k) gives the effective
+      molecular energy at x, plus the density corrector:
+        ρ̂(x) = (k/n) · Γ(d/2+1) / (π^{d/2} · r̂_k^d)
+        Φ_molecular(x) = k · φ_LJ(r̂_k(x)) + μ · (1 − ρ̂(x))
+
+    • δ_T uses the same Q-based density proxy:
+        δ_T(x) = sigmoid(0.5 · (r̂_k(x) / r̂_k_median − 2))
+
+    • Adaptive friction has ANALYTIC Hessian:
+        D²Φ_gravity(x) = −γ · diag(1/(a² + σ²)) · Φ_att(x)
+      so  γ*(x) = α / max_j |Φ_att(x) / (a_j² + σ²)|.
+
+    ═══════════════════════════════════════════════════════════════════
+
+    Channels:
+      δ_C  camouflage      →  1 − Q(x)/Q_max_ref
+      δ_G  feature gap      →  fraction of near-zero features
+      δ_A  activity anomaly  →  sigmoid((Q − Q_med) / Q_med)
+      δ_T  temporal novelty  →  sigmoid of expected kNN distance ratio
+
+    Potentials:
+      Φ_gravity    →  closed-form Gaussian convolution + log repulsion
+      Φ_molecular  →  LJ(r̂_k(x)) + density corrector  (r̂_k from Q)
+      Φ_hybrid     →  λ · Gravity + (1−λ) · Molecular
+      γ*(x)        →  analytic Hessian of Φ_gravity
+
+    Cost: O(N · d)  for every operation.
     """
-    Mirrors BSDTChannels using C* geometry — no kNN for δ_C and δ_A.
 
-    BSDTChannels channel             →  Geometric counterpart
-    ──────────────────────────────────────────────────────────
-    δ_C  camouflage (centroid prox.) →  1 − Q(x)/Q_max_ref  (proximity to origin)
-    δ_G  feature gap (sparsity)      →  identical  (direct, no kNN)
-    δ_A  activity (Mahalanobis)      →  sigmoid((Q(x) − Q_median_ref)/Q_median_ref)
-    δ_T  temporal novelty (kNN)      →  sigmoid(0.5·(Q(x)/Q_median_ref − 2))
-
-    δ_T is approximated from Q rather than kNN distances, eliminating
-    the only O(N·k) cost in BSDTChannels.  This is valid because
-    Q(x) is monotone in the Mahalanobis distance (they are equivalent
-    for the fitted covariance C*).
-    """
-
-    def __init__(self):
+    def __init__(self, k: int = 15, epsilon_lj: float = 1.0,
+                 sigma_lj: float = 1.0, sigma_gravity: float = 1.0,
+                 lambda_rep: float = 0.05, gamma_gravity: float = 0.5,
+                 mu_well: float = 1.0, hybrid_lambda: float = 0.5):
         self._Q_max_ref    = None
         self._Q_median_ref = None
         self._feat_std     = None
         self._ell          = None
+        # Potential parameters (backward-compatible defaults)
+        self.k             = k
+        self.epsilon_lj    = epsilon_lj      # LJ well depth
+        self.sigma_lj      = sigma_lj        # LJ equilibrium distance
+        self.sigma_gravity = sigma_gravity    # Gaussian attraction width
+        self.lambda_rep    = lambda_rep       # repulsion strength
+        self.gamma_gravity = gamma_gravity    # gravity coupling
+        self.mu_well       = mu_well          # double-well depth
+        self.hybrid_lambda = hybrid_lambda    # Gravity/Molecular blend
+        # Fitted state (all closed-form, no kNN tree)
+        self._a2           = None            # semi_axes² from C*
+        self._n_ref        = 0
+        self._d            = 0
+        self._Q_ref_median = None            # median Q of reference
+        self._rhat_k_median = None           # median expected k-th NN dist
+        self._log_norm_const = 0.0           # log normalisation of ρ
+        self._trace_Sigma  = 0.0             # trace(Σ) for repulsion
 
     def fit(self, X_ref: np.ndarray, ell: EllipsoidGeometry) -> 'GeometricBSDT':
         self._ell    = ell
-        a2           = ell.semi_axes ** 2
-        Q_ref        = np.sum(X_ref ** 2 / a2, axis=1)
+        self._n_ref  = X_ref.shape[0]
+        self._d      = X_ref.shape[1]
+        d            = self._d
+
+        # ── Ellipsoid quadric calibration ──
+        self._a2           = ell.semi_axes ** 2        # (d,)
+        Q_ref              = np.sum(X_ref ** 2 / self._a2, axis=1)  # (N,)
         self._Q_max_ref    = float(np.max(Q_ref)) + 1e-12
         self._Q_median_ref = float(np.median(Q_ref)) + 1e-12
         self._feat_std     = np.std(X_ref, axis=0) + 1e-8
+
+        # ── Closed-form density: ρ(x) ∝ exp(−Q(x)/2) ──
+        # log-normalisation constant: (d/2)·log(2π) + ½·Σ log(a_j²)
+        self._log_norm_const = (d / 2.0) * np.log(2 * np.pi) + \
+                               0.5 * np.sum(np.log(self._a2 + 1e-30))
+        self._trace_Sigma = float(np.sum(self._a2))
+
+        # ── Expected k-th NN distance at each reference point ──
+        # r̂_k(x) = (k / (n · ρ(x)))^{1/d}
+        # ρ(x) = exp(−Q/2 − log_norm)
+        # → log r̂_k = (1/d) · [log(k) − log(n) + Q/2 + log_norm]
+        log_rhat_ref = (1.0 / d) * (
+            np.log(self.k + 1e-30)
+            - np.log(self._n_ref)
+            + Q_ref / 2.0
+            + self._log_norm_const
+        )
+        rhat_ref = np.exp(np.clip(log_rhat_ref, -30, 30))
+        self._rhat_k_median = float(np.median(rhat_ref)) + 1e-12
+
         return self
+
+    # ──────────────────────────────────────────────────────────────
+    #  CLOSED-FORM DENSITY  (via Q on C*)
+    # ──────────────────────────────────────────────────────────────
+
+    def _Q(self, X: np.ndarray) -> np.ndarray:
+        """Quadric Q(x) = Σ_j x_j² / a_j².  O(N·d)."""
+        return np.sum(X ** 2 / self._a2, axis=1)
+
+    def _log_density(self, Q: np.ndarray) -> np.ndarray:
+        """log ρ(x) = −Q(x)/2 − log_norm.  O(N)."""
+        return -Q / 2.0 - self._log_norm_const
+
+    def _expected_rk(self, Q: np.ndarray) -> np.ndarray:
+        r"""Expected k-th NN distance from Q-based density.
+
+        r̂_k(x) = (k / (n · ρ(x)))^{1/d}
+                = exp( (1/d) · [log(k) − log(n) + Q/2 + log_norm] )
+
+        Pure closed-form.  O(N).
+        """
+        d = self._d
+        log_rhat = (1.0 / d) * (
+            np.log(self.k + 1e-30)
+            - np.log(self._n_ref)
+            + Q / 2.0
+            + self._log_norm_const
+        )
+        return np.exp(np.clip(log_rhat, -30, 30))
+
+    # ──────────────────────────────────────────────────────────────
+    #  CHANNELS  (all O(N·d), no kNN)
+    # ──────────────────────────────────────────────────────────────
 
     def channels(self, X: np.ndarray,
                  base_scores: np.ndarray = None) -> dict:
-        a2 = self._ell.semi_axes ** 2
-        Q  = np.sum(X ** 2 / a2, axis=1)
+        Q = self._Q(X)
 
         # δ_C: camouflage — proximity to origin (normal centroid)
         geo_proximity = 1.0 - np.clip(Q / self._Q_max_ref, 0.0, 1.0)
@@ -290,7 +409,7 @@ class GeometricBSDT:
         else:
             delta_C = geo_proximity
 
-        # δ_G: feature gap — fraction of near-zero features (unchanged)
+        # δ_G: feature gap — fraction of near-zero features
         X_normed = np.abs(X) / self._feat_std
         delta_G  = np.mean(X_normed < 0.1, axis=1).astype(np.float64)
 
@@ -298,23 +417,184 @@ class GeometricBSDT:
         z_a     = (Q - self._Q_median_ref) / self._Q_median_ref
         delta_A = 1.0 / (1.0 + np.exp(-np.clip(z_a, -30, 30)))
 
-        # δ_T: temporal novelty — sigmoid of relative Q (kNN-free)
-        ratio   = Q / self._Q_median_ref
-        delta_T = 1.0 / (1.0 + np.exp(-np.clip(0.5*(ratio - 2.0), -30, 30)))
+        # δ_T: temporal novelty — CLOSED-FORM via expected kNN distance
+        # r̂_k(x) derived from Q-based density, no actual kNN search
+        rhat_k  = self._expected_rk(Q)
+        delta_T = 1.0 / (1.0 + np.exp(-np.clip(
+            0.5 * (rhat_k / self._rhat_k_median - 2.0), -30, 30)))
 
         return {'delta_C': delta_C, 'delta_G': delta_G,
                 'delta_A': delta_A, 'delta_T': delta_T}
 
+    # ──────────────────────────────────────────────────────────────
+    #  EFFECTIVE POTENTIALS  (closed-form, O(N·d))
+    # ──────────────────────────────────────────────────────────────
+
+    def gravity_potential(self, X: np.ndarray) -> np.ndarray:
+        r"""Closed-form mean-field gravity potential.
+
+        The convolution of the Gaussian reference density ρ(y)∼N(0,Σ)
+        with the Gaussian attraction kernel exp(−‖x−y‖²/σ²) yields:
+
+          Φ_att(x) = exp(−½ Σ_j x_j² / (a_j² + σ²))
+
+        (up to a constant that cancels in normalised scoring).
+
+        The log-repulsion integrates to:
+          Φ_rep(x) ≈ ½ · log(‖x‖² + trace(Σ)/d)
+
+        Total: Φ_gravity(x) = γ · [Φ_att(x) − λ · Φ_rep(x)]
+
+        Cost: O(N · d).
+        """
+        sigma2 = self.sigma_gravity ** 2
+        a2_plus_sigma2 = self._a2 + sigma2       # (d,)
+
+        # Attraction: Gaussian convolution
+        Q_conv = np.sum(X ** 2 / a2_plus_sigma2, axis=1)  # (N,)
+        phi_att = np.exp(-0.5 * Q_conv)
+
+        # Repulsion: log of effective distance
+        r_sq_eff = np.sum(X ** 2, axis=1) + self._trace_Sigma / self._d
+        phi_rep = 0.5 * np.log(r_sq_eff + 1e-12)
+
+        return self.gamma_gravity * (phi_att - self.lambda_rep * phi_rep)
+
+    def molecular_potential(self, X: np.ndarray) -> np.ndarray:
+        r"""Closed-form molecular LJ potential via expected kNN distance.
+
+        Instead of computing actual k nearest neighbours, we use the
+        Q-based expected k-th NN distance:
+
+          r̂_k(x) = (k / (n · ρ(x)))^{1/d}
+
+        Then apply the LJ 6-12 potential at that expected distance:
+          φ_LJ(r) = 4ε · [(σ/r)^12 − (σ/r)^6]
+
+        Plus the density corrector:
+          ρ̂(x) = exp(log_density(Q(x)))
+          correction = μ · (1 − ρ̂(x))
+
+        Total: Φ_molecular(x) = k · φ_LJ(r̂_k(x)) + μ · (1 − ρ̂(x))
+
+        Cost: O(N · d).
+        """
+        Q = self._Q(X)
+        rhat = self._expected_rk(Q)            # expected k-th NN distance
+        rhat = np.maximum(rhat, 1e-12)
+
+        # LJ 6-12 at expected distance (times k neighbours)
+        sr6  = (self.sigma_lj / rhat) ** 6
+        sr12 = sr6 ** 2
+        phi_lj = self.k * 4.0 * self.epsilon_lj * (sr12 - sr6)
+
+        # Density corrector
+        log_rho = self._log_density(Q)
+        rho_hat = np.exp(np.clip(log_rho, -50, 50))
+        density_correction = self.mu_well * (1.0 - np.clip(rho_hat, 0, 10))
+
+        return phi_lj + density_correction
+
+    def hybrid_potential(self, X: np.ndarray) -> np.ndarray:
+        r"""Hybrid: λ · Φ_gravity + (1−λ) · Φ_molecular.  O(N·d)."""
+        lam = self.hybrid_lambda
+        return (lam * self.gravity_potential(X) +
+                (1 - lam) * self.molecular_potential(X))
+
+    # ──────────────────────────────────────────────────────────────
+    #  ADAPTIVE FRICTION  (analytic Hessian, O(N·d))
+    # ──────────────────────────────────────────────────────────────
+
+    def adaptive_friction(self, X: np.ndarray,
+                          alpha: float = 0.30,
+                          potential: str = 'hybrid') -> np.ndarray:
+        r"""Analytic adaptive friction coefficient per point.
+
+        For the gravity potential:
+          D²Φ_att(x) = −diag(1/(a² + σ²)) · Φ_att(x)
+          λ_max = |Φ_att(x)| · max_j(1/(a_j² + σ²))
+                = |Φ_att(x)| / min_j(a_j² + σ²)
+
+        For the molecular potential:
+          D²Φ_mol(x) ≈ diag(1/a²) · Φ_mol''(r̂_k) · (∂r̂_k/∂Q)²
+          which factors through the LJ curvature at r̂_k.
+
+        Hybrid: weighted sum of both λ_max estimates.
+
+        γ*(x) = α / λ_max(D²Φ^eff(x))
+
+        Cost: O(N · d).
+        """
+        sigma2 = self.sigma_gravity ** 2
+
+        if potential in ('gravity', 'hybrid'):
+            a2_plus_sigma2 = self._a2 + sigma2
+            Q_conv = np.sum(X ** 2 / a2_plus_sigma2, axis=1)
+            phi_att = np.exp(-0.5 * Q_conv)
+            # λ_max of gravity Hessian = |Φ_att| / min(a² + σ²)
+            min_a2s = float(np.min(a2_plus_sigma2))
+            lam_grav = np.abs(phi_att) / (min_a2s + 1e-12)
+
+        if potential in ('molecular', 'hybrid'):
+            # Molecular Hessian dominated by LJ curvature
+            Q = self._Q(X)
+            rhat = np.maximum(self._expected_rk(Q), 1e-12)
+            # φ''_LJ(r) = 4ε · [156 σ^12/r^14 − 42 σ^6/r^8]
+            sr6  = (self.sigma_lj / rhat) ** 6
+            sr12 = sr6 ** 2
+            lj_curv = 4.0 * self.epsilon_lj * (156.0 * sr12 / (rhat**2 + 1e-12)
+                                                - 42.0 * sr6 / (rhat**2 + 1e-12))
+            # Scale by (∂r̂_k/∂x_j)² ∝ 1/(d² a_j²) — take max over j
+            max_inv_a2 = float(np.max(1.0 / (self._a2 + 1e-12)))
+            lam_mol = self.k * np.abs(lj_curv) * max_inv_a2 / (self._d ** 2)
+
+        if potential == 'gravity':
+            lam_max = lam_grav
+        elif potential == 'molecular':
+            lam_max = lam_mol
+        else:  # hybrid
+            lam = self.hybrid_lambda
+            lam_max = lam * lam_grav + (1 - lam) * lam_mol
+
+        return alpha / (lam_max + 1e-12)
+
+    # ──────────────────────────────────────────────────────────────
+    #  SCORING  (E_BS + Φ^eff + MFLS)
+    # ──────────────────────────────────────────────────────────────
+
     def score(self, X: np.ndarray,
-              base_scores: np.ndarray = None) -> np.ndarray:
+              base_scores: np.ndarray = None,
+              potential: str = None) -> np.ndarray:
+        """Full geometric score: E_BS channels + effective potential + MFLS.
+
+        Parameters
+        ----------
+        X : (N, d) observation array
+        base_scores : optional base model scores for δ_C modulation
+        potential : 'gravity', 'molecular', 'hybrid', or None
+            When None, uses channel-only scoring (backward compatible).
+            When set, adds the effective potential to produce the full
+            E_BS(X) = Σ w_k ψ_k(δ_k) + Φ^eff(X) energy functional.
+        """
         ch = self.channels(X, base_scores=base_scores)
         E  = (ch['delta_C']**2 + ch['delta_G']**2 +
               ch['delta_A']**2 + ch['delta_T']**2) / 4.0
+
         # MFLS proxy: gradient of E_BS ≈ Q * (1-Q/Q_max) (analytic)
-        a2  = self._ell.semi_axes ** 2
-        Q   = np.sum(X ** 2 / a2, axis=1)
+        Q   = self._Q(X)
         mfls = Q * np.abs(1.0 - Q / self._Q_max_ref)
-        # Normalise and blend, same as BSDTChannels.score()
+
+        # Add effective potential if requested
+        if potential is not None:
+            pot_func = {'gravity': self.gravity_potential,
+                        'molecular': self.molecular_potential,
+                        'hybrid': self.hybrid_potential}[potential]
+            phi_eff = pot_func(X)
+            phi_n = np.abs(phi_eff)
+            phi_n = phi_n / (phi_n.max() + 1e-12)
+            E = E + phi_n
+
+        # Normalise and blend
         E_n    = E    / (E.max()    + 1e-12)
         m_n    = mfls / (mfls.max() + 1e-12)
         return 0.5 * E_n + 0.5 * m_n
@@ -768,6 +1048,495 @@ class GeometricFusedScorer:
         else:
             w = np.ones(nv) / nv
         return (R * w).sum(axis=1)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  FROZEN WINDOW SCORER — The Complete System
+#  Geometry (radial Q) + Trigonometry (angular d̃) = full representation
+# ═══════════════════════════════════════════════════════════════════════════
+
+class FrozenWindowScorer:
+    r"""
+    Complete Geometric–Trigonometric Frozen Window anomaly scorer.
+
+    ╔═══════════════════════════════════════════════════════════════════╗
+    ║  THIS IS THE WHOLE SYSTEM.                                      ║
+    ║  Geometry + Trigonometry = complete representation on C*.        ║
+    ║  No separate families needed.                                   ║
+    ╚═══════════════════════════════════════════════════════════════════╝
+
+    Every observation x decomposes on the C* quadric into:
+
+      RADIAL:   Q(x) = Σ x_j²/a_j²             (Geometry)
+      ANGULAR:  d̃(x) = (x/a²)/‖x/a²‖           (Trigonometry on S^{d-1})
+
+    This radial + angular decomposition captures ALL anomaly information.
+    The separate families (Morse, Betti, UDL) are partial projections
+    of the same (Q, d̃) representation — redundant when you have both.
+
+    ═══════════════════════════════════════════════════════════════════
+    Frozen Calibration Protocol (Algorithm 2 of the paper):
+
+      Step 1:  Freeze reference statistics (μ, σ, Σ) from normal window.
+      Step 2:  Eigendecomposition → C* ellipsoid (a² = eigenvalues).
+      Step 3:  Compute radial Q and angular d̃ for all observations.
+      Step 4:  Feature vector (Q, θ, AM, Q×θ, K×θ) — complete
+               representation combining geometry and trigonometry.
+      Step 5:  Frozen thresholds: χ²(d) for Q (pure theory, zero data),
+               reference-window percentiles for angular channels.
+      Step 6:  Score = Fisher VR weighted positive z-scores against
+               frozen reference.  No re-estimation.
+
+    Supervised variants (ExpoGate, SignedLR, QuadSurf) operate on the
+    SAME frozen feature representation — the geometry is never re-estimated.
+    ═══════════════════════════════════════════════════════════════════
+
+    Features (5-dimensional, all O(N·d)):
+      f0: Q           — radial Mahalanobis distance (Geometry)
+                        Q ~ χ²(d) under H₀ → theory threshold
+      f1: θ           — angular isolation from frozen reference
+                        centroid direction (Trigonometry)
+      f2: AM          — angular Mahalanobis on S^{d-1} (Trigonometry)
+      f3: Q_excess×θ  — radial-angular cross-interaction
+                        (Geometry × Trigonometry)
+      f4: K×θ         — curvature-weighted angular deviation
+                        (Geometry × Trigonometry)
+
+    Complexity: O(N·d) scoring + O(d³) one-time eigendecomposition.
+
+    Author: Odeyemi Olusegun Israel
+    """
+
+    FEATURE_NAMES = ['Q', 'theta', 'AngMahal', 'Qxtheta', 'Kxtheta']
+
+    def __init__(self):
+        # Frozen standardisation
+        self._mu    = None       # reference mean     (d,)
+        self._sigma = None       # reference std      (d,)
+        # C* ellipsoid (from eigendecomposition)
+        self._a2    = None       # semi-axes²         (d,)
+        self._R     = None       # rotation matrix    (d,d)
+        self._c     = None       # centre (std space) (d,)
+        self._d     = 0          # dimensionality
+        # Angular frozen stats
+        self._d_bar      = None  # mean direction     (d,)
+        self._Sigma_d_inv = None # angular cov⁻¹      (d,d)
+        # Feature frozen stats
+        self._feat_mu    = None  # reference feat mean (5,)
+        self._feat_sigma = None  # reference feat std  (5,)
+        self._w          = None  # Fisher VR weights   (5,)
+        # Theory threshold
+        self._tau_Q  = 0.0       # χ²_{0.99}(d)
+        self._K_p99  = 1.0       # curvature 99th pct normaliser
+
+    # ──────────────────────────────────────────────────────────────
+    #  Internal transforms (frozen from reference window)
+    # ──────────────────────────────────────────────────────────────
+
+    def _std(self, X):
+        """Frozen standardisation: (X - μ_ref) / σ_ref."""
+        return (X - self._mu) / self._sigma
+
+    def _body(self, X_std):
+        """Rotate to body coordinates of the C* ellipsoid."""
+        return (X_std - self._c) @ self._R.T
+
+    def _Q(self, Xb):
+        """Quadric Q = Σ x_j²/a_j² in body coordinates.  O(N·d)."""
+        return np.sum(Xb ** 2 / self._a2, axis=1)
+
+    def _dir(self, Xb):
+        r"""Quadric gradient direction d̃ = (x/a²)/‖x/a²‖.  O(N·d).
+
+        This IS the trigonometric link: the surface normal of the
+        quadric contour at x, whose direction depends on the angular
+        position on C*.  It lives on S^{d-1}.
+        """
+        g = Xb / self._a2
+        return g / (np.linalg.norm(g, axis=1, keepdims=True) + 1e-12)
+
+    # ──────────────────────────────────────────────────────────────
+    #  Feature extraction (Geometry + Trigonometry = complete)
+    # ──────────────────────────────────────────────────────────────
+
+    def _feats_body(self, Xb):
+        """Complete (Radial + Angular) features from body coordinates.
+
+        Returns (N, 5) matrix:
+          f0  Q           radial Mahalanobis          (Geometry)
+          f1  θ           angular isolation            (Trig)
+          f2  AM          angular Mahalanobis          (Trig)
+          f3  Q_excess×θ  radial-angular cross         (Geo×Trig)
+          f4  K×θ         curvature-angular cross      (Geo×Trig)
+        """
+        a2 = self._a2
+        Q  = self._Q(Xb)
+        d  = self._dir(Xb)
+
+        # f0: Q — radial Mahalanobis  (χ²(d) under H₀)
+        f0 = Q
+
+        # f1: θ = arccos(d̃ · d̄_ref) — angular isolation
+        cos_t = np.clip(d @ self._d_bar, -1.0, 1.0)
+        theta = np.arccos(cos_t)
+        f1 = theta
+
+        # f2: Angular Mahalanobis — (d̃−d̄)ᵀ Σ_d⁻¹ (d̃−d̄)
+        dd = d - self._d_bar
+        f2 = np.sqrt(np.maximum(
+            np.sum((dd @ self._Sigma_d_inv) * dd, axis=1), 0.0))
+
+        # f3: Q_excess × θ — cross (geometry × trigonometry)
+        f3 = np.maximum(Q - self._tau_Q, 0.0) * theta
+
+        # f4: Gaussian curvature × θ — curvature-weighted angular
+        g   = Xb / a2
+        p2  = np.sum(g ** 2, axis=1)
+        K   = 1.0 / (float(np.prod(a2)) * p2 ** 2 + 1e-300)
+        f4  = np.minimum(K / self._K_p99, 5.0) * theta
+
+        return np.column_stack([f0, f1, f2, f3, f4])
+
+    def features(self, X):
+        """Complete feature vector from raw data.  O(N·d).
+
+        Applies frozen standardisation → body rotation → (Q, θ, AM,
+        Q×θ, K×θ) extraction.  Returns (N, 5) array.
+        """
+        return self._feats_body(self._body(self._std(X)))
+
+    # ──────────────────────────────────────────────────────────────
+    #  FIT — freeze everything from the normal reference window
+    # ──────────────────────────────────────────────────────────────
+
+    def fit(self, X_ref):
+        """Freeze all reference statistics from normal window.
+
+        Parameters
+        ----------
+        X_ref : (N, d) raw reference (normal) observations.
+            ALL parameters are frozen from this window and never
+            re-estimated.  Guarantees no look-ahead bias.
+
+        Returns
+        -------
+        self
+        """
+        N, d = X_ref.shape
+        self._d = d
+
+        # ── Step 1: Freeze standardisation ──
+        self._mu    = X_ref.mean(axis=0)
+        self._sigma = X_ref.std(axis=0) + 1e-10
+        Xs = self._std(X_ref)
+        self._c = Xs.mean(axis=0)
+
+        # ── Step 2: Eigendecomposition → C* ellipsoid ──
+        cov = np.cov(Xs.T)
+        vals, vecs = np.linalg.eigh(cov)
+        vals = np.maximum(vals, 1e-10)
+        ix = np.argsort(-vals)          # largest eigenvalue first
+        self._a2 = vals[ix]             # semi-axes² = eigenvalues
+        self._R  = vecs[:, ix].T        # rows = principal directions
+
+        # ── Step 3: χ² theory threshold (Wilson-Hilferty approx.) ──
+        z99 = 2.3263
+        h = 2.0 / (9.0 * d)
+        self._tau_Q = d * (1.0 - h + z99 * np.sqrt(h)) ** 3
+
+        # ── Step 4: Body coordinates of reference ──
+        Xb = self._body(Xs)
+
+        # ── Step 5: Freeze angular statistics ──
+        dirs = self._dir(Xb)
+        dm = dirs.mean(axis=0)
+        self._d_bar = dm / (np.linalg.norm(dm) + 1e-12)
+
+        dd = dirs - self._d_bar
+        Cd = (dd.T @ dd) / N + np.eye(d) * 1e-6
+        self._Sigma_d_inv = np.linalg.inv(Cd)
+
+        # Curvature 99th-percentile normaliser
+        g  = Xb / self._a2
+        p2 = np.sum(g ** 2, axis=1)
+        K  = 1.0 / (float(np.prod(self._a2)) * p2 ** 2 + 1e-300)
+        self._K_p99 = float(np.percentile(K, 99)) + 1e-12
+
+        # ── Step 6: Freeze feature statistics + Fisher VR weights ──
+        F = self._feats_body(Xb)
+        self._feat_mu    = F.mean(axis=0)
+        self._feat_sigma = F.std(axis=0) + 1e-10
+
+        z_ref = (F - self._feat_mu) / self._feat_sigma
+        zp = np.maximum(z_ref, 0)
+        tot = zp.sum(axis=1)
+        p80, p50 = np.percentile(tot, 80), np.percentile(tot, 50)
+        hi, lo = tot >= p80, tot <= p50
+        nf = F.shape[1]
+        if hi.sum() >= 2 and lo.sum() >= 2:
+            fr = np.zeros(nf)
+            for k in range(nf):
+                mh, ml = zp[hi, k].mean(), zp[lo, k].mean()
+                vh, vl = zp[hi, k].var(),  zp[lo, k].var()
+                fr[k] = (mh - ml) ** 2 / max(vh + vl, 1e-10)
+            s = fr.sum()
+            self._w = fr / s if s > 1e-10 else np.ones(nf) / nf
+        else:
+            self._w = np.ones(nf) / nf
+
+        return self
+
+    # ──────────────────────────────────────────────────────────────
+    #  SCORE — unsupervised (frozen z-scores, no labels used)
+    # ──────────────────────────────────────────────────────────────
+
+    def score(self, X):
+        """Unsupervised anomaly score via frozen window.  O(N·d).
+
+        Score = Σ_k w_k · max(z_k, 0)  where z_k = (f_k − μ_k) / σ_k
+        are z-scores against frozen reference, and w_k are Fisher VR
+        weights computed once on the reference window.
+        """
+        F = self.features(X)
+        z = (F - self._feat_mu) / self._feat_sigma
+        return np.maximum(z, 0) @ self._w
+
+    # ──────────────────────────────────────────────────────────────
+    #  ADAPTIVE FRICTION (boundary reflection in frozen geometry)
+    # ──────────────────────────────────────────────────────────────
+
+    def score_with_friction(self, X, k_steps=10, eta=0.25, theta=1.0):
+        r"""Score after adaptive friction pre-processing.
+
+        Applies two-way C* boundary reflection in the frozen body
+        coordinates, then scores the modified positions:
+
+          x_{t+1} = x_t + sign(Q−θ)·|θ−Q|/(Q+θ)·η·d̃(x_t)
+
+        Normals (Q < 1) converge inward, anomalies (Q > 1) diverge
+        outward.  The push direction d̃ IS the frozen trigonometric
+        link — the same surface normal used in scoring.
+
+        O(k_steps · N · d).
+        """
+        Xs = self._std(X)
+        Xb = self._body(Xs).copy()
+        a2 = self._a2
+        for _ in range(k_steps):
+            Q   = np.sum(Xb ** 2 / a2, axis=1)
+            mag = np.abs(theta - Q) / (Q + theta)
+            sgn = np.where(Q > theta, 1.0, -1.0)
+            g   = Xb / a2
+            gn  = np.linalg.norm(g, axis=1, keepdims=True) + 1e-12
+            Xb  = Xb + eta * (sgn * mag)[:, None] * g / gn
+        # Score in the modified body coordinates
+        F = self._feats_body(Xb)
+        z = (F - self._feat_mu) / self._feat_sigma
+        return np.maximum(z, 0) @ self._w
+
+    # ──────────────────────────────────────────────────────────────
+    #  SUPERVISED VARIANTS (frozen features, labels for weighting)
+    # ──────────────────────────────────────────────────────────────
+
+    def _sup_feats(self, X):
+        """Feature matrix with MFLS for supervised scoring.
+
+        Appends MFLS = Q · |1 − Q/Q_max| as a 6th feature.
+        MFLS captures the gradient landscape: it peaks where small
+        feature changes cause the largest Q shift.
+        """
+        F = self.features(X)
+        Q = F[:, 0]
+        Q_max = self._feat_mu[0] + 4.0 * self._feat_sigma[0]
+        mfls = Q * np.abs(1.0 - Q / (Q_max + 1e-12))
+        return np.column_stack([F, mfls])
+
+    @staticmethod
+    def _poly(C):
+        """(N, K) → (N, 1 + K + K·(K+1)/2) bias + linear + quadratic."""
+        N, K = C.shape
+        out = [np.ones((N, 1)), C]
+        for k in range(K):
+            for j in range(k, K):
+                out.append((C[:, k] * C[:, j])[:, None])
+        return np.hstack(out)
+
+    # ──────────────────────────────────────────────────────────────
+    #  FRICTION-AWARE FEATURE EXTRACTION
+    # ──────────────────────────────────────────────────────────────
+
+    def features_with_friction(self, X, k_steps=10, eta=0.25, theta=1.0):
+        r"""Apply adaptive friction then return (Q, θ, AM, Q×θ, K×θ).
+
+        Two-way C* reflection is applied in frozen body coordinates
+        before feature extraction:
+          x_{t+1} = x_t + sign(Q−θ)·|θ−Q|/(Q+θ)·η·d̃(x_t)
+
+        This amplifies anomaly separation WITHIN the frozen geometry —
+        normals contract toward Q=1, anomalies expand away — before
+        the angular and cross-product features are computed.
+
+        Returns (N, 5) friction-processed feature matrix.
+        """
+        Xs = self._std(X)
+        Xb = self._body(Xs).copy()
+        a2 = self._a2
+        for _ in range(k_steps):
+            Q   = np.sum(Xb ** 2 / a2, axis=1)
+            mag = np.abs(theta - Q) / (Q + theta)
+            sgn = np.where(Q > theta, 1.0, -1.0)
+            g   = Xb / a2
+            gn  = np.linalg.norm(g, axis=1, keepdims=True) + 1e-12
+            Xb  = Xb + eta * (sgn * mag)[:, None] * g / gn
+        return self._feats_body(Xb)
+
+    def _sup_feats_friction(self, X, k_steps=10, eta=0.25, theta=1.0):
+        """MFLS-augmented features with friction pre-processing."""
+        F = self.features_with_friction(X, k_steps, eta, theta)
+        Q = F[:, 0]
+        Q_max = self._feat_mu[0] + 4.0 * self._feat_sigma[0]
+        mfls = Q * np.abs(1.0 - Q / (Q_max + 1e-12))
+        return np.column_stack([F, mfls])
+
+    def fit_signed_lr_friction(self, X_train, y_train,
+                               lr=0.1, n_iter=500, reg=0.01,
+                               k_steps=10, eta=0.25, theta=1.0):
+        """SignedLR trained on friction-processed frozen features.
+
+        Friction is applied to training data before feature extraction
+        so the logistic head learns weights for the friction-amplified
+        geometric representation.
+        """
+        C = self._sup_feats_friction(X_train, k_steps, eta, theta)
+        self._lrf_m, self._lrf_s = C.mean(0), C.std(0) + 1e-12
+        Cs = (C - self._lrf_m) / self._lrf_s
+        T, K = Cs.shape
+        Xb = np.hstack([np.ones((T, 1)), Cs])
+        beta = np.zeros(K + 1)
+        y_f = y_train.astype(float)
+        npos = max(y_f.sum(), 1)
+        nneg = max(len(y_f) - npos, 1)
+        wt = np.where(y_f == 1, nneg / npos, 1.0)
+        for _ in range(n_iter):
+            p = 1.0 / (1.0 + np.exp(-np.clip(Xb @ beta, -500, 500)))
+            g = Xb.T @ (wt * (p - y_f)) / T + reg * beta
+            g[0] -= reg * beta[0]
+            beta -= lr * g
+        self._lrf_beta = beta
+        self._lrf_k_steps, self._lrf_eta, self._lrf_theta = k_steps, eta, theta
+        return self
+
+    def score_signed_lr_friction(self, X):
+        """Score using SignedLR on friction-processed features."""
+        k, e, t = self._lrf_k_steps, self._lrf_eta, self._lrf_theta
+        C = self._sup_feats_friction(X, k, e, t)
+        Cs = (C - self._lrf_m) / self._lrf_s
+        Xb = np.hstack([np.ones((len(Cs), 1)), Cs])
+        return 1.0 / (1.0 + np.exp(-np.clip(Xb @ self._lrf_beta, -500, 500)))
+
+    def fit_expogate_friction(self, X_train, y_train,
+                              ridge=1.0, sigma=1.0, scale=3.0,
+                              k_steps=10, eta=0.25, theta=1.0):
+        """ExpoGate trained on friction-processed frozen features."""
+        C = self._sup_feats_friction(X_train, k_steps, eta, theta)
+        self._egf_m, self._egf_s = C.mean(0), C.std(0) + 1e-12
+        Cs = (C - self._egf_m) / self._egf_s
+        P = self._poly(Cs)
+        I = np.eye(P.shape[1]); I[0, 0] = 0.0
+        self._egf_b = np.linalg.solve(
+            P.T @ P + ridge * I, P.T @ y_train.astype(float))
+        self._egf_sigma, self._egf_scale = sigma, scale
+        self._egf_k_steps, self._egf_eta, self._egf_theta = k_steps, eta, theta
+        return self
+
+    def score_expogate_friction(self, X):
+        """ExpoGate score on friction-processed features."""
+        k, e, t = self._egf_k_steps, self._egf_eta, self._egf_theta
+        C = self._sup_feats_friction(X, k, e, t)
+        Cs = (C - self._egf_m) / self._egf_s
+        raw = np.maximum(self._poly(Cs) @ self._egf_b, 0.0)
+        sat = np.tanh(raw / (self._egf_sigma + 1e-12))
+        return 1.0 / (1.0 + np.exp(-self._egf_scale * sat))
+
+    def fit_expogate(self, X_train, y_train,
+                     ridge=1.0, sigma=1.0, scale=3.0):
+        """ExpoGate: QuadSurf → tanh saturation → sigmoid gating.
+
+        Operates on frozen (Q, θ, AM, Q×θ, K×θ, MFLS) features.
+        No re-estimation of geometry — only the polynomial surface
+        and gating parameters use labels.
+        """
+        C = self._sup_feats(X_train)
+        self._eg_m, self._eg_s = C.mean(0), C.std(0) + 1e-12
+        Cs = (C - self._eg_m) / self._eg_s
+        P = self._poly(Cs)
+        I = np.eye(P.shape[1]); I[0, 0] = 0.0
+        self._eg_b = np.linalg.solve(
+            P.T @ P + ridge * I, P.T @ y_train.astype(float))
+        self._eg_sigma, self._eg_scale = sigma, scale
+        return self
+
+    def score_expogate(self, X):
+        """ExpoGate score on frozen features."""
+        C = self._sup_feats(X)
+        Cs = (C - self._eg_m) / self._eg_s
+        raw = np.maximum(self._poly(Cs) @ self._eg_b, 0.0)
+        sat = np.tanh(raw / (self._eg_sigma + 1e-12))
+        return 1.0 / (1.0 + np.exp(-self._eg_scale * sat))
+
+    def fit_signed_lr(self, X_train, y_train,
+                      lr=0.1, n_iter=500, reg=0.01):
+        """SignedLR: logistic regression on frozen features.
+
+        Discovers which channels drive detection; negative weights
+        reveal herding / inversion effects.  Features:
+        [Q, θ, AM, Q×θ, K×θ, MFLS].
+        """
+        C = self._sup_feats(X_train)
+        self._lr_m, self._lr_s = C.mean(0), C.std(0) + 1e-12
+        Cs = (C - self._lr_m) / self._lr_s
+        T, K = Cs.shape
+        Xb = np.hstack([np.ones((T, 1)), Cs])
+        beta = np.zeros(K + 1)
+        y_f = y_train.astype(float)
+        npos = max(y_f.sum(), 1)
+        nneg = max(len(y_f) - npos, 1)
+        wt = np.where(y_f == 1, nneg / npos, 1.0)
+        for _ in range(n_iter):
+            p = 1.0 / (1.0 + np.exp(-np.clip(Xb @ beta, -500, 500)))
+            g = Xb.T @ (wt * (p - y_f)) / T + reg * beta
+            g[0] -= reg * beta[0]
+            beta -= lr * g
+        self._lr_beta = beta
+        return self
+
+    def score_signed_lr(self, X):
+        """SignedLR score on frozen features."""
+        C = self._sup_feats(X)
+        Cs = (C - self._lr_m) / self._lr_s
+        Xb = np.hstack([np.ones((len(Cs), 1)), Cs])
+        return 1.0 / (1.0 + np.exp(-np.clip(Xb @ self._lr_beta, -500, 500)))
+
+    def lr_weights(self):
+        """SignedLR weights: [bias, Q, θ, AM, Q×θ, K×θ, MFLS]."""
+        return self._lr_beta.copy()
+
+    def fit_quadsurf(self, X_train, y_train, ridge=1.0):
+        """QuadSurf: polynomial ridge regression on frozen features."""
+        C = self._sup_feats(X_train)
+        self._qs_m, self._qs_s = C.mean(0), C.std(0) + 1e-12
+        Cs = (C - self._qs_m) / self._qs_s
+        P = self._poly(Cs)
+        I = np.eye(P.shape[1]); I[0, 0] = 0.0
+        self._qs_b = np.linalg.solve(
+            P.T @ P + ridge * I, P.T @ y_train.astype(float))
+        return self
+
+    def score_quadsurf(self, X):
+        """QuadSurf score on frozen features."""
+        C = self._sup_feats(X)
+        Cs = (C - self._qs_m) / self._qs_s
+        return np.maximum(self._poly(Cs) @ self._qs_b, 0.0)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

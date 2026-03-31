@@ -4,9 +4,14 @@ Flutter Web Server with proper CSP headers for development.
 import http.server
 import socketserver
 import os
+import mimetypes
 
 PORT = 3010
 DIRECTORY = r"c:\amttp\frontend\amttp_app\build\web"
+
+# Register WASM MIME type
+mimetypes.add_type('application/wasm', '.wasm')
+mimetypes.add_type('application/javascript', '.mjs')
 
 class FlutterHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -43,9 +48,13 @@ class FlutterHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     os.chdir(DIRECTORY)
     
-    with socketserver.TCPServer(("", PORT), FlutterHandler) as httpd:
+    # Use ThreadingTCPServer for concurrent requests (Flutter loads assets in parallel)
+    class ThreadedServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        allow_reuse_address = True
+    
+    with ThreadedServer(("", PORT), FlutterHandler) as httpd:
         print(f"=" * 50)
-        print(f"  Flutter Web Server")
+        print(f"  Flutter Web Server (threaded)")
         print(f"  Serving: {DIRECTORY}")
         print(f"  URL: http://localhost:{PORT}")
         print(f"=" * 50)

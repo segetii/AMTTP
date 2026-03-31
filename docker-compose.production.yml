@@ -33,9 +33,10 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: amttp-cloudflared
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel --config /etc/cloudflared/config.yml --no-autoupdate run
+    volumes:
+      - ./docker/cloudflared-config.yml:/etc/cloudflared/config.yml:ro
+      - ${CLOUDFLARED_CREDENTIALS:-C:/Users/Administrator/.cloudflared/ffc8edf6-0dd3-4bea-b7bb-99774355eed6.json}:/etc/cloudflared/credentials.json:ro
     depends_on:
       - nginx-gateway
     networks:

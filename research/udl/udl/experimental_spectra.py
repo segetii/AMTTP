@@ -51,27 +51,18 @@ class FourierBasisSpectrum:
         N, m = X_ref.shape
         k = min(self.n_coeffs, m // 2 + 1)
         self.n_coeffs = k
-
-        coeffs = np.zeros((N, k))
-        for i in range(N):
-            fft_vals = rfft(X_ref[i])
-            coeffs[i] = np.abs(fft_vals[:k])
-
+        # Vectorized FFT
+        fft_vals = rfft(X_ref, axis=1)
+        coeffs = np.abs(fft_vals[:, :k])
         self.ref_coeffs = coeffs.mean(axis=0) + self.eps
         self.ref_std = coeffs.std(axis=0) + self.eps
         return self
 
     def transform(self, X):
-        N, m = X.shape
         k = self.n_coeffs
-        out = np.zeros((N, k), dtype=np.float64)
-
-        for i in range(N):
-            fft_vals = rfft(X[i])
-            magnitudes = np.abs(fft_vals[:k])
-            # Z-score relative to reference distribution
-            out[i] = (magnitudes - self.ref_coeffs) / self.ref_std
-
+        fft_vals = rfft(X, axis=1)
+        magnitudes = np.abs(fft_vals[:, :k])
+        out = (magnitudes - self.ref_coeffs) / self.ref_std
         return out
 
 
@@ -126,31 +117,20 @@ class BSplineBasisSpectrum:
     def fit(self, X_ref):
         N, m = X_ref.shape
         B = self._build_basis_matrix(m)
-
-        # Least-squares coefficients for each row
-        # c = (B^T B)^{-1} B^T y
         BtB_inv_Bt = np.linalg.pinv(B)  # (n_basis, m)
-
-        coeffs = np.zeros((N, self.n_basis))
-        for i in range(N):
-            coeffs[i] = BtB_inv_Bt @ X_ref[i]
-
+        # Vectorized: coeffs = X_ref @ BtB_inv_Bt.T
+        coeffs = X_ref @ BtB_inv_Bt.T
         self.ref_coeffs = coeffs.mean(axis=0)
         self.ref_std = coeffs.std(axis=0) + self.eps
         return self
 
     def transform(self, X):
-        N, m = X.shape
+        m = X.shape[1]
         if self._basis_matrix is None or self._basis_matrix.shape[0] != m:
             self._build_basis_matrix(m)
-
         BtB_inv_Bt = np.linalg.pinv(self._basis_matrix)
-        out = np.zeros((N, self.n_basis), dtype=np.float64)
-
-        for i in range(N):
-            coeffs = BtB_inv_Bt @ X[i]
-            out[i] = (coeffs - self.ref_coeffs) / self.ref_std
-
+        coeffs = X @ BtB_inv_Bt.T
+        out = (coeffs - self.ref_coeffs) / self.ref_std
         return out
 
 
@@ -196,32 +176,18 @@ class WaveletBasisSpectrum:
     def fit(self, X_ref):
         N, m = X_ref.shape
         levels = min(self.max_levels, int(np.log2(max(m, 2))))
-
-        # Probe output dimension
         probe = self._haar_decompose(X_ref[0], levels)
         self._out_dim = len(probe)
-
-        all_coeffs = np.zeros((N, self._out_dim))
-        for i in range(N):
-            c = self._haar_decompose(X_ref[i], levels)
-            all_coeffs[i, :len(c)] = c[:self._out_dim]
-
+        # Vectorized: use list comprehension and stack
+        all_coeffs = np.stack([self._haar_decompose(row, levels) for row in X_ref], axis=0)
         self.ref_coeffs = all_coeffs.mean(axis=0)
         self.ref_std = all_coeffs.std(axis=0) + self.eps
         return self
 
     def transform(self, X):
-        N, m = X.shape
-        levels = min(self.max_levels, int(np.log2(max(m, 2))))
-        out = np.zeros((N, self._out_dim), dtype=np.float64)
-
-        for i in range(N):
-            c = self._haar_decompose(X[i], levels)
-            length = min(len(c), self._out_dim)
-            raw = np.zeros(self._out_dim)
-            raw[:length] = c[:length]
-            out[i] = (raw - self.ref_coeffs) / self.ref_std
-
+        levels = min(self.max_levels, int(np.log2(max(X.shape[1], 2))))
+        coeffs = np.stack([self._haar_decompose(row, levels) for row in X], axis=0)
+        out = (coeffs - self.ref_coeffs) / self.ref_std
         return out
 
 
@@ -264,32 +230,20 @@ class LegendreBasisSpectrum:
         N, m = X_ref.shape
         P = self._build_legendre_matrix(m)
         n = self.n_degree + 1
-
-        # Least-squares projection: c = (P^T P)^{-1} P^T y
         PtP_inv_Pt = np.linalg.pinv(P)  # (n, m)
-
-        coeffs = np.zeros((N, n))
-        for i in range(N):
-            coeffs[i] = PtP_inv_Pt @ X_ref[i]
-
+        coeffs = X_ref @ PtP_inv_Pt.T
         self.ref_coeffs = coeffs.mean(axis=0)
         self.ref_std = coeffs.std(axis=0) + self.eps
         return self
 
     def transform(self, X):
-        N, m = X.shape
+        m = X.shape[1]
         n = self.n_degree + 1
-
         if self._basis_matrix is None or self._basis_matrix.shape[0] != m:
             self._build_legendre_matrix(m)
-
         PtP_inv_Pt = np.linalg.pinv(self._basis_matrix)
-        out = np.zeros((N, n), dtype=np.float64)
-
-        for i in range(N):
-            coeffs = PtP_inv_Pt @ X[i]
-            out[i] = (coeffs - self.ref_coeffs) / self.ref_std
-
+        coeffs = X @ PtP_inv_Pt.T
+        out = (coeffs - self.ref_coeffs) / self.ref_std
         return out
 
 
@@ -522,25 +476,20 @@ class PhaseCurveSpectrum:
         self._pca_mean = None
         self._out_dim = None
 
-    def _to_phase_coords(self, X):
-        """Convert rows to phase-space coordinates: (x_j, x_{j+1})."""
-        N, m = X.shape
-        # Each row gives m-1 2D points
-        px = X[:, :-1]  # (N, m-1)
-        py = X[:, 1:]   # (N, m-1)
-        # Interleave: [px_0, py_0, px_1, py_1, ...]
-        return np.column_stack([px, py])  # (N, 2*(m-1))
+    @staticmethod
+    def _to_phase_coords(X):
+        """Vectorized: Convert rows to phase-space coordinates: (x_j, x_{j+1})."""
+        # X: (N, m)
+        px = X[:, :-1]
+        py = X[:, 1:]
+        return np.hstack((px, py))  # (N, 2*(m-1))
 
     def fit(self, X_ref):
-        N, m = X_ref.shape
         phase = self._to_phase_coords(X_ref)
-
         self.ref_phase_points = phase.mean(axis=0)
         self.ref_phase_std = phase.std(axis=0) + self.eps
-
-        # Build full z-scored representation
+        # Z-score
         full = (phase - self.ref_phase_points) / self.ref_phase_std
-
         if full.shape[1] > self.max_dim:
             self._pca_mean = full.mean(axis=0)
             centered = full - self._pca_mean

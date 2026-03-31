@@ -341,7 +341,7 @@ export default function RiskScoringPage() {
                 <div className="mt-4 pt-4 border-t border-borderSubtle">
                   <p className="text-mutedText text-xs uppercase mb-2">Risk Factors</p>
                   <div className="flex flex-wrap gap-2">
-                    {assessment.riskFactors.map((factor, idx) => (
+                    {assessment.riskFactors.map((factor: string, idx: number) => (
                       <span 
                         key={idx}
                         className="px-2 py-1 rounded bg-red-900/30 text-red-400 text-xs border border-red-800"

@@ -138,7 +138,7 @@ export default function UserManagementPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-semibold">
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {user.name.split(' ').map((n: string) => n[0]).join('')}
                       </div>
                       <div>
                         <div className="font-medium">{user.name}</div>

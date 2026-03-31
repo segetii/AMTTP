@@ -516,6 +516,7 @@ class _ContextCard extends StatelessWidget {
   const _ContextCard({
     required this.title,
     required this.icon,
+    this.iconColor,
     required this.children,
   });
 

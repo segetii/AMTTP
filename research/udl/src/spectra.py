@@ -11,9 +11,11 @@ Design:
   - Operators are domain-agnostic by design
 """
 
+
 import numpy as np
 from scipy.fft import rfft, rfftfreq
 from scipy.stats import entropy as sp_entropy
+import numba
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -35,6 +37,7 @@ class StatisticalSpectrum:
         self.eps = eps
         self.ref_dist = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute reference distribution from normal data."""
         # Normalise each row to probability vector
@@ -45,6 +48,7 @@ class StatisticalSpectrum:
         self.ref_dist = self.ref_dist / (self.ref_dist.sum() + self.eps)
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Project each row into statistical deviation coordinates (vectorised)."""
         N, m = X.shape
@@ -96,11 +100,13 @@ class ChaosSpectrum:
         self.eps = eps
         self.ref_signal = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute reference signal (mean waveform of normal data)."""
         self.ref_signal = X_ref.mean(axis=0)
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Project each row into chaos deviation coordinates."""
         N, m = X.shape
@@ -133,6 +139,7 @@ class ChaosSpectrum:
 
         return out
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def _approx_entropy(self, signal, m_order=2, r=0.2):
         """Simplified approximate entropy."""
         N = len(signal)
@@ -178,6 +185,7 @@ class SpectralSpectrum:
         self.ref_psd = None
         self.ref_centroid = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute reference spectral profile."""
         N, m = X_ref.shape
@@ -194,6 +202,7 @@ class SpectralSpectrum:
         self.ref_centroid = np.sum(freqs * self.ref_psd)
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Project each row into spectral deviation coordinates (vectorised)."""
         N, m = X.shape
@@ -248,6 +257,7 @@ class GeometricSpectrum:
         self.cov_inv = None
         self.ref_norm = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute reference geometry (centroid + covariance)."""
         self.mu = X_ref.mean(axis=0)
@@ -259,6 +269,7 @@ class GeometricSpectrum:
         self.ref_norm = np.linalg.norm(self.mu) + self.eps
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Project each row into geometric deviation coordinates (vectorised)."""
         N, m = X.shape
@@ -313,6 +324,7 @@ class ExponentialSpectrum:
         self._pca_components = None
         self._pca_mean = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute reference mean and scale."""
         self.mu = X_ref.mean(axis=0)
@@ -326,6 +338,7 @@ class ExponentialSpectrum:
             self._pca_components = Vt[:self.max_dim]
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def _raw_transform(self, X):
         mu = self.mu if self.mu is not None else np.zeros(X.shape[1])
         sigma = self.sigma if self.sigma is not None else np.ones(X.shape[1])
@@ -333,6 +346,7 @@ class ExponentialSpectrum:
         z = np.clip(z, -10, 10)
         return np.exp(self.alpha * z)
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Apply controlled exponential amplification (with PCA compression)."""
         exp_out = self._raw_transform(X)
@@ -377,6 +391,7 @@ class ReconstructionSpectrum:
         self._Vr = None       # right singular vectors (top-r)
         self._rank = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Compute the normal-data subspace via truncated SVD."""
         N, m = X_ref.shape
@@ -395,6 +410,7 @@ class ReconstructionSpectrum:
         self._rank = r
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Project each row, reconstruct, and extract residual features (vectorised)."""
         N, m = X.shape
@@ -462,6 +478,7 @@ class RankOrderSpectrum:
         self._sorted_ref = None  # (m,) arrays of sorted reference values per feature
         self._N_ref = None
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def fit(self, X_ref):
         """Sort each feature column of reference data for percentile lookup."""
         self._N_ref = X_ref.shape[0]
@@ -469,6 +486,7 @@ class RankOrderSpectrum:
         self._sorted_ref = np.sort(X_ref, axis=0)  # (N_ref, m)
         return self
 
+    @numba.njit(cache=True, nogil=True, fastmath=True)
     def transform(self, X):
         """Compute rank-order features for each observation (vectorised)."""
         N, m = X.shape

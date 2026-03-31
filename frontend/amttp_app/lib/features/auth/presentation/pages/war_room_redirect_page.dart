@@ -21,8 +21,19 @@ class _WarRoomRedirectPageState extends State<WarRoomRedirectPage> {
     // browser-level redirect. This avoids conflicts with GoRouter's
     // history API manipulation.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Now that cross-app auth bridge cookie is set, no need for ?embed=true
-      html.window.location.replace('/war-room');
+      // Determine the correct Next.js War Room URL based on environment:
+      // - Dev mode (Flutter on port 3010): redirect to localhost:3006/war-room
+      // - Production/Docker (nginx): use relative /war-room path
+      final currentPort = html.window.location.port;
+      final String warRoomUrl;
+      if (currentPort == '3010') {
+        // Local dev: Next.js runs on port 3006
+        warRoomUrl = 'http://localhost:3006/war-room';
+      } else {
+        // Production/Docker: nginx proxies /war-room to Next.js
+        warRoomUrl = '/war-room';
+      }
+      html.window.location.replace(warRoomUrl);
     });
   }
 

@@ -1,0 +1,7614 @@
+{
+  "comparison": {
+    "supply/Molecular": {
+      "auc": 0.31911764705882356,
+      "best_fartarget_cal": "FARTarget_1%",
+      "best_fartarget_far": 0.0,
+      "best_fartarget_events": 3
+    },
+    "supply/Gravity": {
+      "auc": 0.528921568627451,
+      "best_fartarget_cal": "FARTarget_1%",
+      "best_fartarget_far": 3.5,
+      "best_fartarget_events": 3
+    },
+    "supply/Hybrid": {
+      "auc": 0.46372549019607845,
+      "best_fartarget_cal": "FARTarget_1%",
+      "best_fartarget_far": 0.0,
+      "best_fartarget_events": 3
+    },
+    "demand/Molecular": {
+      "auc": 0.55,
+      "best_fartarget_cal": "FARTarget_5%",
+      "best_fartarget_far": 0.6,
+      "best_fartarget_events": 3
+    },
+    "demand/Gravity": {
+      "auc": 0.6544117647058824,
+      "best_fartarget_cal": "FARTarget_1%",
+      "best_fartarget_far": 4.1,
+      "best_fartarget_events": 3
+    },
+    "demand/Hybrid": {
+      "auc": 0.6348039215686274,
+      "best_fartarget_cal": "FARTarget_1%",
+      "best_fartarget_far": 6.5,
+      "best_fartarget_events": 3
+    },
+    "combined/Molecular": {
+      "auc": 0.636764705882353,
+      "best_fartarget_cal": "FARTarget_5%_R80",
+      "best_fartarget_far": 5.9,
+      "best_fartarget_events": 3
+    },
+    "combined/Gravity": {
+      "auc": 0.657843137254902,
+      "best_fartarget_cal": "FARTarget_5%_R80",
+      "best_fartarget_far": 12.9,
+      "best_fartarget_events": 3
+    },
+    "combined/Hybrid": {
+      "auc": 0.6563725490196078,
+      "best_fartarget_cal": "FARTarget_5%_R80",
+      "best_fartarget_far": 9.4,
+      "best_fartarget_events": 3
+    }
+  },
+  "all_results": {
+    "supply": {
+      "Molecular/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.31911764705882356,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.31911764705882356,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.31911764705882356,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.31911764705882356,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.31911764705882356,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.31911764705882356,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.31911764705882356,
+          "far": 40.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "14"
+        }
+      },
+      "Molecular/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.5147058823529412,
+          "far": 12.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "38"
+        },
+        "Fixed P99": {
+          "auc": 0.5147058823529412,
+          "far": 17.1,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 16,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "25"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.5147058823529412,
+          "far": 19.4,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 16,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "25"
+        },
+        "Adaptive z>3": {
+          "auc": 0.5147058823529412,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.5147058823529412,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Adaptive P99": {
+          "auc": 0.5147058823529412,
+          "far": 5.3,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 37
+          },
+          "n_ev": 3,
+          "lead": "70"
+        },
+        "Isotonic": {
+          "auc": 0.5147058823529412,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.5147058823529412,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Conformal": {
+          "auc": 0.5147058823529412,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_2%": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_5%": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_10%": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.5147058823529412,
+          "far": 21.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.5147058823529412,
+          "far": 44.1,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "10"
+        }
+      },
+      "Molecular/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.6730392156862745,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6730392156862745,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6730392156862745,
+          "far": 3.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6730392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6730392156862745,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6730392156862745,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Isotonic": {
+          "auc": 0.6730392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6730392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6730392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6730392156862745,
+          "far": 21.2,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6730392156862745,
+          "far": 25.9,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6730392156862745,
+          "far": 25.9,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6730392156862745,
+          "far": 14.7,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6730392156862745,
+          "far": 25.9,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6730392156862745,
+          "far": 25.9,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6730392156862745,
+          "far": 45.3,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        }
+      },
+      "Molecular/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.8274509803921569,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 30,
+            "WinterStormUri": 77
+          },
+          "n_ev": 2,
+          "lead": "107"
+        },
+        "Conformal": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8274509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8274509803921569,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        }
+      },
+      "Molecular/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.8441176470588235,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8441176470588235,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.8441176470588235,
+          "far": 2.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8441176470588235,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8441176470588235,
+          "far": 22.4,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 30,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "31"
+        }
+      },
+      "Gravity/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.528921568627451,
+          "far": 24.7,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Fixed P99": {
+          "auc": 0.528921568627451,
+          "far": 37.6,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "6"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.528921568627451,
+          "far": 35.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "6"
+        },
+        "Adaptive z>3": {
+          "auc": 0.528921568627451,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 11,
+            "WinterStormUri": 58
+          },
+          "n_ev": 2,
+          "lead": "69"
+        },
+        "Adaptive z>2": {
+          "auc": 0.528921568627451,
+          "far": 9.4,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 6,
+            "WinterStormUri": 4
+          },
+          "n_ev": 2,
+          "lead": "10"
+        },
+        "Adaptive P99": {
+          "auc": 0.528921568627451,
+          "far": 6.5,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 9,
+            "WinterStormUri": 8
+          },
+          "n_ev": 2,
+          "lead": "17"
+        },
+        "Isotonic": {
+          "auc": 0.528921568627451,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.528921568627451,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.528921568627451,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.528921568627451,
+          "far": 3.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 11,
+            "WinterStormUri": 58
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "FARTarget_2%": {
+          "auc": 0.528921568627451,
+          "far": 4.1,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 10,
+            "WinterStormUri": 57
+          },
+          "n_ev": 3,
+          "lead": "67"
+        },
+        "FARTarget_5%": {
+          "auc": 0.528921568627451,
+          "far": 4.7,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.528921568627451,
+          "far": 4.7,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_10%": {
+          "auc": 0.528921568627451,
+          "far": 8.8,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "48"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.528921568627451,
+          "far": 4.7,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.528921568627451,
+          "far": 57.6,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "3"
+        }
+      },
+      "Gravity/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.401470588235294,
+          "far": 34.7,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 6
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Fixed P99": {
+          "auc": 0.401470588235294,
+          "far": 37.6,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 6
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.401470588235294,
+          "far": 41.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 6
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Adaptive z>3": {
+          "auc": 0.401470588235294,
+          "far": 2.4,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 5,
+            "WinterStormUri": 52
+          },
+          "n_ev": 3,
+          "lead": "63"
+        },
+        "Adaptive z>2": {
+          "auc": 0.401470588235294,
+          "far": 6.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 5,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "18"
+        },
+        "Adaptive P99": {
+          "auc": 0.401470588235294,
+          "far": 4.1,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 5,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "58"
+        },
+        "Isotonic": {
+          "auc": 0.401470588235294,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 35,
+            "WinterStormUri": 82
+          },
+          "n_ev": 3,
+          "lead": "120"
+        },
+        "Platt": {
+          "auc": 0.401470588235294,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 59
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Conformal": {
+          "auc": 0.401470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_2%": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_5%": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_10%": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.401470588235294,
+          "far": 8.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 10
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.401470588235294,
+          "far": 46.5,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 6
+          },
+          "n_ev": 3,
+          "lead": "7"
+        }
+      },
+      "Gravity/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.7299019607843138,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.7299019607843138,
+          "far": 8.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.7299019607843138,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "47"
+        },
+        "Adaptive z>3": {
+          "auc": 0.7299019607843138,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.7299019607843138,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "47"
+        },
+        "Adaptive P99": {
+          "auc": 0.7299019607843138,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "51"
+        },
+        "Isotonic": {
+          "auc": 0.7299019607843138,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 8,
+            "WinterStormUri": 55
+          },
+          "n_ev": 2,
+          "lead": "63"
+        },
+        "Platt": {
+          "auc": 0.7299019607843138,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.7299019607843138,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.7299019607843138,
+          "far": 15.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_2%": {
+          "auc": 0.7299019607843138,
+          "far": 15.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_5%": {
+          "auc": 0.7299019607843138,
+          "far": 15.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.7299019607843138,
+          "far": 11.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_10%": {
+          "auc": 0.7299019607843138,
+          "far": 17.1,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.7299019607843138,
+          "far": 15.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.7299019607843138,
+          "far": 49.4,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Gravity/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.8446078431372549,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 30,
+            "WinterStormUri": 77
+          },
+          "n_ev": 2,
+          "lead": "107"
+        },
+        "Conformal": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8446078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8446078431372549,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        }
+      },
+      "Gravity/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8598039215686275,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8598039215686275,
+          "far": 18.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 30,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "31"
+        }
+      },
+      "Hybrid/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.46372549019607845,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Fixed P99": {
+          "auc": 0.46372549019607845,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.46372549019607845,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Adaptive z>3": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.46372549019607845,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Adaptive P99": {
+          "auc": 0.46372549019607845,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 8
+          },
+          "n_ev": 1,
+          "lead": "8"
+        },
+        "Isotonic": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.46372549019607845,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.46372549019607845,
+          "far": 41.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 3,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "5"
+        }
+      },
+      "Hybrid/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.530392156862745,
+          "far": 5.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.530392156862745,
+          "far": 9.4,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 64
+          },
+          "n_ev": 3,
+          "lead": "81"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.530392156862745,
+          "far": 6.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.530392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.530392156862745,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.530392156862745,
+          "far": 5.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 64
+          },
+          "n_ev": 3,
+          "lead": "81"
+        },
+        "Isotonic": {
+          "auc": 0.530392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.530392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.530392156862745,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.530392156862745,
+          "far": 21.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "38"
+        },
+        "FARTarget_2%": {
+          "auc": 0.530392156862745,
+          "far": 21.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "38"
+        },
+        "FARTarget_5%": {
+          "auc": 0.530392156862745,
+          "far": 22.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.530392156862745,
+          "far": 22.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_10%": {
+          "auc": 0.530392156862745,
+          "far": 22.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.530392156862745,
+          "far": 22.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 17,
+            "WinterStormUri": 7
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.530392156862745,
+          "far": 38.8,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 16,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "17"
+        }
+      },
+      "Hybrid/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.5544117647058824,
+          "far": 14.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "14"
+        },
+        "Fixed P99": {
+          "auc": 0.5544117647058824,
+          "far": 21.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 5,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.5544117647058824,
+          "far": 44.7,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "6"
+        },
+        "Adaptive z>3": {
+          "auc": 0.5544117647058824,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.5544117647058824,
+          "far": 5.3,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "Adaptive P99": {
+          "auc": 0.5544117647058824,
+          "far": 5.3,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "14"
+        },
+        "Isotonic": {
+          "auc": 0.5544117647058824,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "115"
+        },
+        "Platt": {
+          "auc": 0.5544117647058824,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 38,
+            "WinterStormUri": 85
+          },
+          "n_ev": 3,
+          "lead": "129"
+        },
+        "Conformal": {
+          "auc": 0.5544117647058824,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.5544117647058824,
+          "far": 33.5,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_2%": {
+          "auc": 0.5544117647058824,
+          "far": 39.4,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_5%": {
+          "auc": 0.5544117647058824,
+          "far": 39.4,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.5544117647058824,
+          "far": 13.5,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "14"
+        },
+        "FARTarget_10%": {
+          "auc": 0.5544117647058824,
+          "far": 40.0,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.5544117647058824,
+          "far": 39.4,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 6,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.5544117647058824,
+          "far": 62.4,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "3"
+        }
+      },
+      "Hybrid/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8240196078431372,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 35,
+            "WinterStormUri": 82
+          },
+          "n_ev": 3,
+          "lead": "120"
+        },
+        "Adaptive z>3": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8240196078431372,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 38,
+            "WinterStormUri": 85
+          },
+          "n_ev": 3,
+          "lead": "129"
+        },
+        "Adaptive P99": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.8240196078431372,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 38,
+            "WinterStormUri": 85
+          },
+          "n_ev": 3,
+          "lead": "129"
+        },
+        "Platt": {
+          "auc": 0.8240196078431372,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 30,
+            "WinterStormUri": 77
+          },
+          "n_ev": 3,
+          "lead": "113"
+        },
+        "Conformal": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8240196078431372,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8240196078431372,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        }
+      },
+      "Hybrid/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.8465686274509804,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "67"
+        },
+        "Fixed P99": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.8465686274509804,
+          "far": 18.2,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 29,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "31"
+        },
+        "Adaptive z>3": {
+          "auc": 0.8465686274509804,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.8465686274509804,
+          "far": 1.8,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "72"
+        },
+        "Adaptive P99": {
+          "auc": 0.8465686274509804,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "67"
+        },
+        "Isotonic": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 38,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "79"
+        },
+        "Platt": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 6,
+            "COVID_Collapse": 38,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "79"
+        },
+        "Conformal": {
+          "auc": 0.8465686274509804,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "FARTarget_2%": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "FARTarget_5%": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "FARTarget_10%": {
+          "auc": 0.8465686274509804,
+          "far": 7.1,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "67"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.8465686274509804,
+          "far": 1.2,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 35
+          },
+          "n_ev": 3,
+          "lead": "66"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.8465686274509804,
+          "far": 66.5,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      }
+    },
+    "demand": {
+      "Molecular/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.55,
+          "far": 24.1,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "Fixed P99": {
+          "auc": 0.55,
+          "far": 37.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 3,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.55,
+          "far": 32.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 3,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.55,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 12,
+            "WinterStormUri": 59
+          },
+          "n_ev": 2,
+          "lead": "71"
+        },
+        "Adaptive z>2": {
+          "auc": 0.55,
+          "far": 8.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Adaptive P99": {
+          "auc": 0.55,
+          "far": 4.1,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 12,
+            "WinterStormUri": 11
+          },
+          "n_ev": 2,
+          "lead": "23"
+        },
+        "Isotonic": {
+          "auc": 0.55,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.55,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.55,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.55,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.55,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.55,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 46
+          },
+          "n_ev": 3,
+          "lead": "46"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.55,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 46
+          },
+          "n_ev": 3,
+          "lead": "46"
+        },
+        "FARTarget_10%": {
+          "auc": 0.55,
+          "far": 10.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 8
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.55,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 46
+          },
+          "n_ev": 3,
+          "lead": "46"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.55,
+          "far": 48.2,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Molecular/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.6509803921568628,
+          "far": 2.9,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 31,
+            "WinterStormUri": 11
+          },
+          "n_ev": 2,
+          "lead": "42"
+        },
+        "Fixed P99": {
+          "auc": 0.6509803921568628,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 14
+          },
+          "n_ev": 1,
+          "lead": "14"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6509803921568628,
+          "far": 23.5,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6509803921568628,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 31,
+            "WinterStormUri": 14
+          },
+          "n_ev": 2,
+          "lead": "45"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6509803921568628,
+          "far": 4.1,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 14,
+            "WinterStormUri": 11
+          },
+          "n_ev": 2,
+          "lead": "25"
+        },
+        "Adaptive P99": {
+          "auc": 0.6509803921568628,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 14
+          },
+          "n_ev": 1,
+          "lead": "14"
+        },
+        "Isotonic": {
+          "auc": 0.6509803921568628,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6509803921568628,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6509803921568628,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6509803921568628,
+          "far": 2.4,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6509803921568628,
+          "far": 7.1,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 15
+          },
+          "n_ev": 1,
+          "lead": "15"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6509803921568628,
+          "far": 17.6,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 17,
+            "WinterStormUri": 2
+          },
+          "n_ev": 2,
+          "lead": "19"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6509803921568628,
+          "far": 4.1,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 17,
+            "WinterStormUri": 64
+          },
+          "n_ev": 2,
+          "lead": "81"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6509803921568628,
+          "far": 25.3,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6509803921568628,
+          "far": 17.6,
+          "recall": 0.0,
+          "events_detected": {
+            "COVID_Collapse": 17,
+            "WinterStormUri": 2
+          },
+          "n_ev": 2,
+          "lead": "19"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6509803921568628,
+          "far": 42.4,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Molecular/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.27794117647058825,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.27794117647058825,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 35
+          },
+          "n_ev": 1,
+          "lead": "35"
+        },
+        "Isotonic": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.27794117647058825,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.27794117647058825,
+          "far": 44.7,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        }
+      },
+      "Molecular/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6455882352941177,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 30,
+            "WinterStormUri": 77
+          },
+          "n_ev": 3,
+          "lead": "107"
+        },
+        "Conformal": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Molecular/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6455882352941177,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6455882352941177,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "40"
+        }
+      },
+      "Gravity/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "35"
+        },
+        "Fixed P99": {
+          "auc": 0.6544117647058824,
+          "far": 10.0,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "21"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6544117647058824,
+          "far": 10.0,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "21"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6544117647058824,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 80
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "35"
+        },
+        "Adaptive P99": {
+          "auc": 0.6544117647058824,
+          "far": 1.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "35"
+        },
+        "Isotonic": {
+          "auc": 0.6544117647058824,
+          "far": 2.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "35"
+        },
+        "Platt": {
+          "auc": 0.6544117647058824,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 80
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Conformal": {
+          "auc": 0.6544117647058824,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6544117647058824,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 19,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "20"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6544117647058824,
+          "far": 50.0,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "5"
+        }
+      },
+      "Gravity/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.5607843137254902,
+          "far": 81.2,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Fixed P99": {
+          "auc": 0.5607843137254902,
+          "far": 83.5,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.5607843137254902,
+          "far": 85.3,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.5607843137254902,
+          "far": 2.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 13,
+            "WinterStormUri": 60
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Adaptive z>2": {
+          "auc": 0.5607843137254902,
+          "far": 5.3,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 13,
+            "WinterStormUri": 60
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Adaptive P99": {
+          "auc": 0.5607843137254902,
+          "far": 2.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 13,
+            "WinterStormUri": 60
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Isotonic": {
+          "auc": 0.5607843137254902,
+          "far": 2.4,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "110"
+        },
+        "Platt": {
+          "auc": 0.5607843137254902,
+          "far": 2.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 13,
+            "WinterStormUri": 60
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Conformal": {
+          "auc": 0.5607843137254902,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.5607843137254902,
+          "far": 21.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 13,
+            "WinterStormUri": 60
+          },
+          "n_ev": 3,
+          "lead": "73"
+        },
+        "FARTarget_2%": {
+          "auc": 0.5607843137254902,
+          "far": 21.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 7,
+            "WinterStormUri": 47
+          },
+          "n_ev": 3,
+          "lead": "54"
+        },
+        "FARTarget_5%": {
+          "auc": 0.5607843137254902,
+          "far": 23.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 7,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.5607843137254902,
+          "far": 20.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 7,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_10%": {
+          "auc": 0.5607843137254902,
+          "far": 23.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 7,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.5607843137254902,
+          "far": 23.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 7,
+            "WinterStormUri": 4
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.5607843137254902,
+          "far": 62.9,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "3"
+        }
+      },
+      "Gravity/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.7786764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.7786764705882353,
+          "far": 12.4,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 15
+          },
+          "n_ev": 3,
+          "lead": "16"
+        }
+      },
+      "Gravity/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6200980392156863,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "109"
+        },
+        "Conformal": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6200980392156863,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Gravity/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.621078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Hybrid/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.6348039215686274,
+          "far": 2.9,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "Fixed P99": {
+          "auc": 0.6348039215686274,
+          "far": 24.1,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "6"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6348039215686274,
+          "far": 9.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6348039215686274,
+          "far": 0.0,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6348039215686274,
+          "far": 4.7,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "16"
+        },
+        "Adaptive P99": {
+          "auc": 0.6348039215686274,
+          "far": 2.9,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 15,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "17"
+        },
+        "Isotonic": {
+          "auc": 0.6348039215686274,
+          "far": 0.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 24,
+            "WinterStormUri": 71
+          },
+          "n_ev": 3,
+          "lead": "96"
+        },
+        "Platt": {
+          "auc": 0.6348039215686274,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 33,
+            "WinterStormUri": 80
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Conformal": {
+          "auc": 0.6348039215686274,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6348039215686274,
+          "far": 6.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "65"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6348039215686274,
+          "far": 45.3,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 4,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "5"
+        }
+      },
+      "Hybrid/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.6710784313725491,
+          "far": 5.9,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 11
+          },
+          "n_ev": 3,
+          "lead": "12"
+        },
+        "Fixed P99": {
+          "auc": 0.6710784313725491,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 14
+          },
+          "n_ev": 1,
+          "lead": "14"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6710784313725491,
+          "far": 33.5,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6710784313725491,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6710784313725491,
+          "far": 3.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 14
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "Adaptive P99": {
+          "auc": 0.6710784313725491,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 14
+          },
+          "n_ev": 1,
+          "lead": "14"
+        },
+        "Isotonic": {
+          "auc": 0.6710784313725491,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6710784313725491,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6710784313725491,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6710784313725491,
+          "far": 5.3,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 2
+          },
+          "n_ev": 1,
+          "lead": "2"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6710784313725491,
+          "far": 5.3,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 2
+          },
+          "n_ev": 1,
+          "lead": "2"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6710784313725491,
+          "far": 6.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6710784313725491,
+          "far": 5.3,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 2
+          },
+          "n_ev": 1,
+          "lead": "2"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6710784313725491,
+          "far": 17.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6710784313725491,
+          "far": 6.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 2
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6710784313725491,
+          "far": 42.9,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Hybrid/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.28872549019607846,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 35
+          },
+          "n_ev": 1,
+          "lead": "35"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.28872549019607846,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 35
+          },
+          "n_ev": 1,
+          "lead": "35"
+        },
+        "Isotonic": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_10%": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.28872549019607846,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.28872549019607846,
+          "far": 45.3,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        }
+      },
+      "Hybrid/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6441176470588236,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 30,
+            "WinterStormUri": 77
+          },
+          "n_ev": 3,
+          "lead": "107"
+        },
+        "Conformal": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Hybrid/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive P99": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Isotonic": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6441176470588236,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6441176470588236,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "40"
+        }
+      }
+    },
+    "combined": {
+      "Molecular/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.636764705882353,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.636764705882353,
+          "far": 2.9,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 21,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "26"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.636764705882353,
+          "far": 2.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "Adaptive z>3": {
+          "auc": 0.636764705882353,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.636764705882353,
+          "far": 3.5,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 21,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "26"
+        },
+        "Adaptive P99": {
+          "auc": 0.636764705882353,
+          "far": 2.4,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 21,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "26"
+        },
+        "Isotonic": {
+          "auc": 0.636764705882353,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.636764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.636764705882353,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.636764705882353,
+          "far": 8.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_2%": {
+          "auc": 0.636764705882353,
+          "far": 8.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_5%": {
+          "auc": 0.636764705882353,
+          "far": 10.0,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.636764705882353,
+          "far": 5.9,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_10%": {
+          "auc": 0.636764705882353,
+          "far": 10.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.636764705882353,
+          "far": 10.0,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 5
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.636764705882353,
+          "far": 32.9,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Molecular/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.7220588235294118,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Fixed P99": {
+          "auc": 0.7220588235294118,
+          "far": 12.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.7220588235294118,
+          "far": 5.3,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>3": {
+          "auc": 0.7220588235294118,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>2": {
+          "auc": 0.7220588235294118,
+          "far": 7.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Adaptive P99": {
+          "auc": 0.7220588235294118,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Isotonic": {
+          "auc": 0.7220588235294118,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.7220588235294118,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Conformal": {
+          "auc": 0.7220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.7220588235294118,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "FARTarget_2%": {
+          "auc": 0.7220588235294118,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "30"
+        },
+        "FARTarget_5%": {
+          "auc": 0.7220588235294118,
+          "far": 12.4,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 23
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.7220588235294118,
+          "far": 10.0,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 27
+          },
+          "n_ev": 3,
+          "lead": "28"
+        },
+        "FARTarget_10%": {
+          "auc": 0.7220588235294118,
+          "far": 22.4,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.7220588235294118,
+          "far": 12.4,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 23
+          },
+          "n_ev": 3,
+          "lead": "24"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.7220588235294118,
+          "far": 48.8,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Molecular/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.6715686274509804,
+          "far": 10.6,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Fixed P99": {
+          "auc": 0.6715686274509804,
+          "far": 38.2,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6715686274509804,
+          "far": 17.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6715686274509804,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6715686274509804,
+          "far": 4.1,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Adaptive P99": {
+          "auc": 0.6715686274509804,
+          "far": 7.1,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Isotonic": {
+          "auc": 0.6715686274509804,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 33
+          },
+          "n_ev": 3,
+          "lead": "75"
+        },
+        "Platt": {
+          "auc": 0.6715686274509804,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 33
+          },
+          "n_ev": 3,
+          "lead": "75"
+        },
+        "Conformal": {
+          "auc": 0.6715686274509804,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6715686274509804,
+          "far": 20.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6715686274509804,
+          "far": 20.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6715686274509804,
+          "far": 32.4,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6715686274509804,
+          "far": 12.4,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 25
+          },
+          "n_ev": 3,
+          "lead": "39"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6715686274509804,
+          "far": 36.5,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6715686274509804,
+          "far": 32.4,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6715686274509804,
+          "far": 62.9,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Molecular/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6627450980392158,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 34,
+            "WinterStormUri": 81
+          },
+          "n_ev": 3,
+          "lead": "117"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>3": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6627450980392158,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Adaptive P99": {
+          "auc": 0.6627450980392158,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Isotonic": {
+          "auc": 0.6627450980392158,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.6627450980392158,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Conformal": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6627450980392158,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6627450980392158,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Molecular/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.692156862745098,
+          "far": 95.3,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed P99": {
+          "auc": 0.692156862745098,
+          "far": 98.2,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.692156862745098,
+          "far": 97.1,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Adaptive z>3": {
+          "auc": 0.692156862745098,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.692156862745098,
+          "far": 2.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 29,
+            "WinterStormUri": 76
+          },
+          "n_ev": 3,
+          "lead": "106"
+        },
+        "Adaptive P99": {
+          "auc": 0.692156862745098,
+          "far": 1.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 41
+          },
+          "n_ev": 3,
+          "lead": "73"
+        },
+        "Isotonic": {
+          "auc": 0.692156862745098,
+          "far": 4.1,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 37
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "Platt": {
+          "auc": 0.692156862745098,
+          "far": 2.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "72"
+        },
+        "Conformal": {
+          "auc": 0.692156862745098,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.692156862745098,
+          "far": 2.4,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "71"
+        },
+        "FARTarget_2%": {
+          "auc": 0.692156862745098,
+          "far": 8.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%": {
+          "auc": 0.692156862745098,
+          "far": 8.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.692156862745098,
+          "far": 8.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_10%": {
+          "auc": 0.692156862745098,
+          "far": 8.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.692156862745098,
+          "far": 8.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.692156862745098,
+          "far": 67.6,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Gravity/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.657843137254902,
+          "far": 4.7,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.657843137254902,
+          "far": 14.1,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.657843137254902,
+          "far": 24.1,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "Adaptive z>3": {
+          "auc": 0.657843137254902,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.657843137254902,
+          "far": 3.5,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 11,
+            "WinterStormUri": 58
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "Adaptive P99": {
+          "auc": 0.657843137254902,
+          "far": 5.3,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Isotonic": {
+          "auc": 0.657843137254902,
+          "far": 1.8,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.657843137254902,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.657843137254902,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.657843137254902,
+          "far": 20.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 21,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "22"
+        },
+        "FARTarget_2%": {
+          "auc": 0.657843137254902,
+          "far": 33.5,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 21,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "22"
+        },
+        "FARTarget_5%": {
+          "auc": 0.657843137254902,
+          "far": 38.2,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.657843137254902,
+          "far": 12.9,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 59
+          },
+          "n_ev": 3,
+          "lead": "71"
+        },
+        "FARTarget_10%": {
+          "auc": 0.657843137254902,
+          "far": 47.6,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.657843137254902,
+          "far": 38.2,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.657843137254902,
+          "far": 59.4,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Gravity/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.47745098039215683,
+          "far": 95.9,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "Fixed P99": {
+          "auc": 0.47745098039215683,
+          "far": 95.9,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 3,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "5"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.47745098039215683,
+          "far": 95.9,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Adaptive z>3": {
+          "auc": 0.47745098039215683,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 61
+          },
+          "n_ev": 3,
+          "lead": "80"
+        },
+        "Adaptive z>2": {
+          "auc": 0.47745098039215683,
+          "far": 5.3,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 56
+          },
+          "n_ev": 3,
+          "lead": "70"
+        },
+        "Adaptive P99": {
+          "auc": 0.47745098039215683,
+          "far": 2.4,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 11,
+            "WinterStormUri": 58
+          },
+          "n_ev": 3,
+          "lead": "74"
+        },
+        "Isotonic": {
+          "auc": 0.47745098039215683,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.47745098039215683,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Conformal": {
+          "auc": 0.47745098039215683,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.47745098039215683,
+          "far": 28.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 3
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_2%": {
+          "auc": 0.47745098039215683,
+          "far": 28.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 3
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_5%": {
+          "auc": 0.47745098039215683,
+          "far": 28.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 3
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.47745098039215683,
+          "far": 18.2,
+          "recall": 0.0,
+          "events_detected": {
+            "WinterStormUri": 3
+          },
+          "n_ev": 1,
+          "lead": "3"
+        },
+        "FARTarget_10%": {
+          "auc": 0.47745098039215683,
+          "far": 28.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 3
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.47745098039215683,
+          "far": 28.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 3
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.47745098039215683,
+          "far": 84.7,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Gravity/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.6894607843137255,
+          "far": 17.1,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "Fixed P99": {
+          "auc": 0.6894607843137255,
+          "far": 28.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6894607843137255,
+          "far": 50.6,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6894607843137255,
+          "far": 1.8,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 10,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6894607843137255,
+          "far": 10.6,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Adaptive P99": {
+          "auc": 0.6894607843137255,
+          "far": 4.7,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Isotonic": {
+          "auc": 0.6894607843137255,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.6894607843137255,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Conformal": {
+          "auc": 0.6894607843137255,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6894607843137255,
+          "far": 17.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6894607843137255,
+          "far": 17.6,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6894607843137255,
+          "far": 20.0,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 10,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6894607843137255,
+          "far": 18.8,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 10,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6894607843137255,
+          "far": 28.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 8,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "9"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6894607843137255,
+          "far": 20.0,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 10,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "11"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6894607843137255,
+          "far": 63.5,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Gravity/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6220588235294118,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6220588235294118,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 34,
+            "WinterStormUri": 81
+          },
+          "n_ev": 3,
+          "lead": "117"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6220588235294118,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Adaptive P99": {
+          "auc": 0.6220588235294118,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Isotonic": {
+          "auc": 0.6220588235294118,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.6220588235294118,
+          "far": 1.2,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Conformal": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6220588235294118,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Gravity/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.6524509803921569,
+          "far": 97.1,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed P99": {
+          "auc": 0.6524509803921569,
+          "far": 97.6,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6524509803921569,
+          "far": 98.2,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6524509803921569,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "111"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6524509803921569,
+          "far": 2.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 29,
+            "WinterStormUri": 76
+          },
+          "n_ev": 3,
+          "lead": "106"
+        },
+        "Adaptive P99": {
+          "auc": 0.6524509803921569,
+          "far": 1.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 41
+          },
+          "n_ev": 3,
+          "lead": "73"
+        },
+        "Isotonic": {
+          "auc": 0.6524509803921569,
+          "far": 4.1,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 37
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "Platt": {
+          "auc": 0.6524509803921569,
+          "far": 2.9,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 39
+          },
+          "n_ev": 3,
+          "lead": "71"
+        },
+        "Conformal": {
+          "auc": 0.6524509803921569,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6524509803921569,
+          "far": 1.8,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "71"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6524509803921569,
+          "far": 2.9,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 38
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6524509803921569,
+          "far": 7.6,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 30
+          },
+          "n_ev": 3,
+          "lead": "61"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6524509803921569,
+          "far": 3.5,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 37
+          },
+          "n_ev": 3,
+          "lead": "68"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6524509803921569,
+          "far": 7.6,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 30
+          },
+          "n_ev": 3,
+          "lead": "61"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6524509803921569,
+          "far": 7.6,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 30
+          },
+          "n_ev": 3,
+          "lead": "61"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6524509803921569,
+          "far": 74.7,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Hybrid/fused": {
+        "Fixed mu+3sig": {
+          "auc": 0.6563725490196078,
+          "far": 7.6,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 11,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "12"
+        },
+        "Fixed P99": {
+          "auc": 0.6563725490196078,
+          "far": 18.8,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6563725490196078,
+          "far": 29.4,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6563725490196078,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6563725490196078,
+          "far": 5.9,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Adaptive P99": {
+          "auc": 0.6563725490196078,
+          "far": 4.1,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 9,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "10"
+        },
+        "Isotonic": {
+          "auc": 0.6563725490196078,
+          "far": 1.8,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 0
+          },
+          "n_ev": 3,
+          "lead": 0
+        },
+        "Platt": {
+          "auc": 0.6563725490196078,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Conformal": {
+          "auc": 0.6563725490196078,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6563725490196078,
+          "far": 14.7,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6563725490196078,
+          "far": 14.7,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6563725490196078,
+          "far": 32.9,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6563725490196078,
+          "far": 9.4,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6563725490196078,
+          "far": 32.9,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6563725490196078,
+          "far": 32.9,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6563725490196078,
+          "far": 61.2,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Hybrid/bsdt_e": {
+        "Fixed mu+3sig": {
+          "auc": 0.7205882352941176,
+          "far": 11.8,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "Fixed P99": {
+          "auc": 0.7205882352941176,
+          "far": 15.9,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.7205882352941176,
+          "far": 21.2,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.7205882352941176,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Adaptive z>2": {
+          "auc": 0.7205882352941176,
+          "far": 8.2,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Adaptive P99": {
+          "auc": 0.7205882352941176,
+          "far": 2.9,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 2,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "8"
+        },
+        "Isotonic": {
+          "auc": 0.7205882352941176,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.7205882352941176,
+          "far": 0.6,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "43"
+        },
+        "Conformal": {
+          "auc": 0.7205882352941176,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.7205882352941176,
+          "far": 13.5,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_2%": {
+          "auc": 0.7205882352941176,
+          "far": 13.5,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_5%": {
+          "auc": 0.7205882352941176,
+          "far": 13.5,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.7205882352941176,
+          "far": 10.6,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_10%": {
+          "auc": 0.7205882352941176,
+          "far": 20.0,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.7205882352941176,
+          "far": 13.5,
+          "recall": 33.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "33"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.7205882352941176,
+          "far": 55.3,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Hybrid/fisher": {
+        "Fixed mu+3sig": {
+          "auc": 0.6823529411764706,
+          "far": 18.2,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        },
+        "Fixed P99": {
+          "auc": 0.6823529411764706,
+          "far": 41.8,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6823529411764706,
+          "far": 50.6,
+          "recall": 75.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "4"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6823529411764706,
+          "far": 0.0,
+          "recall": 8.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 0,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "1"
+        },
+        "Adaptive z>2": {
+          "auc": 0.6823529411764706,
+          "far": 4.7,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Adaptive P99": {
+          "auc": 0.6823529411764706,
+          "far": 6.5,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "7"
+        },
+        "Isotonic": {
+          "auc": 0.6823529411764706,
+          "far": 1.8,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 33
+          },
+          "n_ev": 3,
+          "lead": "75"
+        },
+        "Platt": {
+          "auc": 0.6823529411764706,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Conformal": {
+          "auc": 0.6823529411764706,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6823529411764706,
+          "far": 21.2,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "FARTarget_2%": {
+          "auc": 0.6823529411764706,
+          "far": 27.1,
+          "recall": 50.0,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 14,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "15"
+        },
+        "FARTarget_5%": {
+          "auc": 0.6823529411764706,
+          "far": 34.7,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6823529411764706,
+          "far": 12.9,
+          "recall": 41.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 25
+          },
+          "n_ev": 3,
+          "lead": "37"
+        },
+        "FARTarget_10%": {
+          "auc": 0.6823529411764706,
+          "far": 37.1,
+          "recall": 66.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6823529411764706,
+          "far": 34.7,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 12,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "13"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6823529411764706,
+          "far": 64.1,
+          "recall": 91.7,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      },
+      "Hybrid/quadsurf": {
+        "Fixed mu+3sig": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Fixed P99": {
+          "auc": 0.6676470588235294,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 34,
+            "WinterStormUri": 81
+          },
+          "n_ev": 3,
+          "lead": "117"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.6676470588235294,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 2,
+            "COVID_Collapse": 34,
+            "WinterStormUri": 81
+          },
+          "n_ev": 3,
+          "lead": "117"
+        },
+        "Adaptive z>3": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "Adaptive z>2": {
+          "auc": 0.6676470588235294,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Adaptive P99": {
+          "auc": 0.6676470588235294,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Isotonic": {
+          "auc": 0.6676470588235294,
+          "far": 0.6,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 37,
+            "WinterStormUri": 84
+          },
+          "n_ev": 3,
+          "lead": "126"
+        },
+        "Platt": {
+          "auc": 0.6676470588235294,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {
+            "SummerPeak2019": 5,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 78
+          },
+          "n_ev": 3,
+          "lead": "114"
+        },
+        "Conformal": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_2%": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_10%": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.6676470588235294,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.6676470588235294,
+          "far": 1.2,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        }
+      },
+      "Hybrid/expogate": {
+        "Fixed mu+3sig": {
+          "auc": 0.696078431372549,
+          "far": 97.1,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed P99": {
+          "auc": 0.696078431372549,
+          "far": 98.2,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Fixed med+3MAD": {
+          "auc": 0.696078431372549,
+          "far": 98.2,
+          "recall": 100.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "3"
+        },
+        "Adaptive z>3": {
+          "auc": 0.696078431372549,
+          "far": 0.0,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 32,
+            "WinterStormUri": 79
+          },
+          "n_ev": 3,
+          "lead": "112"
+        },
+        "Adaptive z>2": {
+          "auc": 0.696078431372549,
+          "far": 2.4,
+          "recall": 16.7,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 29,
+            "WinterStormUri": 76
+          },
+          "n_ev": 3,
+          "lead": "106"
+        },
+        "Adaptive P99": {
+          "auc": 0.696078431372549,
+          "far": 1.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 41
+          },
+          "n_ev": 3,
+          "lead": "73"
+        },
+        "Isotonic": {
+          "auc": 0.696078431372549,
+          "far": 4.1,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 37
+          },
+          "n_ev": 3,
+          "lead": "69"
+        },
+        "Platt": {
+          "auc": 0.696078431372549,
+          "far": 2.4,
+          "recall": 25.0,
+          "events_detected": {
+            "SummerPeak2019": 1,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "72"
+        },
+        "Conformal": {
+          "auc": 0.696078431372549,
+          "far": 0.0,
+          "recall": 0.0,
+          "events_detected": {},
+          "n_ev": 0,
+          "lead": 0
+        },
+        "FARTarget_1%": {
+          "auc": 0.696078431372549,
+          "far": 1.8,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 40
+          },
+          "n_ev": 3,
+          "lead": "71"
+        },
+        "FARTarget_2%": {
+          "auc": 0.696078431372549,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%": {
+          "auc": 0.696078431372549,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_R80": {
+          "auc": 0.696078431372549,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_10%": {
+          "auc": 0.696078431372549,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_iso": {
+          "auc": 0.696078431372549,
+          "far": 8.2,
+          "recall": 58.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 31,
+            "WinterStormUri": 29
+          },
+          "n_ev": 3,
+          "lead": "60"
+        },
+        "FARTarget_5%_q": {
+          "auc": 0.696078431372549,
+          "far": 67.1,
+          "recall": 83.3,
+          "events_detected": {
+            "SummerPeak2019": 0,
+            "COVID_Collapse": 1,
+            "WinterStormUri": 1
+          },
+          "n_ev": 3,
+          "lead": "2"
+        }
+      }
+    }
+  }
+}

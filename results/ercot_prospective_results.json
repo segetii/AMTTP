@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "protocol": "Expanding-window prospective (bench_bank_level_prospective.py mirror)",
+    "refit": "weekly (168h blocks)",
+    "threshold": "P99 of calibration weeks + z>2 Basel-style",
+    "calibration": "2019-Jan to 2019-Jun (~26 weeks)",
+    "data": "EIA hourly demand + Open-Meteo temp, d=5",
+    "run_date": "2026-03-29 02:09"
+  },
+  "engines": {
+    "Gravity": {
+      "auc": 0.7079081632653061,
+      "far": 0.20918367346938777,
+      "recall": 0.4166666666666667,
+      "precision": 0.10869565217391304,
+      "tp": 5,
+      "fp": 41,
+      "fn": 7,
+      "tn": 155,
+      "threshold": 0.521232,
+      "far_combined": 0.2092,
+      "recall_combined": 0.4167,
+      "elapsed": 3208.1,
+      "events": {
+        "SummerPeak2019": {
+          "onset": "2019-08-13",
+          "status": "alarm",
+          "lead_weeks": 6,
+          "lead_days": 42,
+          "lead_hours": 1008,
+          "first_alarm": "2019-07-02"
+        },
+        "COVID_Collapse": {
+          "onset": "2020-03-24",
+          "status": "alarm",
+          "lead_weeks": 19,
+          "lead_days": 133,
+          "lead_hours": 3192,
+          "first_alarm": "2019-11-12"
+        },
+        "WinterStormUri": {
+          "onset": "2021-02-16",
+          "status": "alarm",
+          "lead_weeks": 18,
+          "lead_days": 126,
+          "lead_hours": 3024,
+          "first_alarm": "2020-10-13"
+        }
+      }
+    },
+    "Molecular": {
+      "auc": 0.5552721088435375,
+      "far": 0.2755102040816326,
+      "recall": 0.3333333333333333,
+      "precision": 0.06896551724137931,
+      "tp": 4,
+      "fp": 54,
+      "fn": 8,
+      "tn": 142,
+      "threshold": 0.448458,
+      "far_combined": 0.2755,
+      "recall_combined": 0.3333,
+      "elapsed": 3501.2,
+      "events": {
+        "SummerPeak2019": {
+          "onset": "2019-08-13",
+          "status": "no_alarm"
+        },
+        "COVID_Collapse": {
+          "onset": "2020-03-24",
+          "status": "alarm",
+          "lead_weeks": 19,
+          "lead_days": 133,
+          "lead_hours": 3192,
+          "first_alarm": "2019-11-12"
+        },
+        "WinterStormUri": {
+          "onset": "2021-02-16",
+          "status": "alarm",
+          "lead_weeks": 20,
+          "lead_days": 140,
+          "lead_hours": 3360,
+          "first_alarm": "2020-09-29"
+        }
+      }
+    },
+    "Hybrid": {
+      "auc": 0.7512755102040816,
+      "far": 0.030612244897959183,
+      "recall": 0.25,
+      "precision": 0.3333333333333333,
+      "tp": 3,
+      "fp": 6,
+      "fn": 9,
+      "tn": 190,
+      "threshold": 0.513618,
+      "far_combined": 0.0306,
+      "recall_combined": 0.25,
+      "elapsed": 6112.6,
+      "events": {
+        "SummerPeak2019": {
+          "onset": "2019-08-13",
+          "status": "no_alarm"
+        },
+        "COVID_Collapse": {
+          "onset": "2020-03-24",
+          "status": "alarm",
+          "lead_weeks": 14,
+          "lead_days": 98,
+          "lead_hours": 2352,
+          "first_alarm": "2019-12-17"
+        },
+        "WinterStormUri": {
+          "onset": "2021-02-16",
+          "status": "alarm",
+          "lead_weeks": 9,
+          "lead_days": 63,
+          "lead_hours": 1512,
+          "first_alarm": "2020-12-15"
+        }
+      }
+    }
+  }
+}

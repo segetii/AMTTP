@@ -5,6 +5,9 @@ import AppLayout, { useProfile } from '@/components/AppLayout';
 
 function TeamContent() {
   const { profile } = useProfile();
+  const [team] = useState<{ name: string; email: string; role: string; status: string }[]>([]);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>('No team management API configured');
 
   if (!profile || !['INSTITUTIONAL', 'VASP'].includes(profile.entity_type)) {
     return (
@@ -14,10 +17,6 @@ function TeamContent() {
       </div>
     );
   }
-
-  const [team] = useState<{ name: string; email: string; role: string; status: string }[]>([]);
-  const [loading] = useState(false);
-  const [error] = useState<string | null>('No team management API configured');
 
   return (
     <div>

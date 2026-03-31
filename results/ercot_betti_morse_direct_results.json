@@ -1,0 +1,887 @@
+{
+  "morse_only": {
+    "Fixed P99": {
+      "auc": 0.2872549019607843,
+      "far": 86.5,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.2872549019607843,
+      "far": 85.9,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.2872549019607843,
+      "far": 22.4,
+      "recall": 25.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 6,
+        "WinterStormUri": 2
+      },
+      "n_ev": 3,
+      "lead": "9"
+    },
+    "Adaptive z>3": {
+      "auc": 0.2872549019607843,
+      "far": 7.1,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 2
+      },
+      "n_ev": 3,
+      "lead": "12"
+    },
+    "Adaptive P99": {
+      "auc": 0.2872549019607843,
+      "far": 12.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 2
+      },
+      "n_ev": 3,
+      "lead": "12"
+    },
+    "FARTarget_5%": {
+      "auc": 0.2872549019607843,
+      "far": 5.3,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 11,
+        "WinterStormUri": 3
+      },
+      "n_ev": 3,
+      "lead": "14"
+    },
+    "FARTarget_2%": {
+      "auc": 0.2872549019607843,
+      "far": 5.3,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 11,
+        "WinterStormUri": 3
+      },
+      "n_ev": 3,
+      "lead": "14"
+    }
+  },
+  "betti_only": {
+    "Fixed P99": {
+      "auc": 0.43137254901960786,
+      "far": 91.2,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.43137254901960786,
+      "far": 90.6,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.43137254901960786,
+      "far": 13.5,
+      "recall": 41.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 29
+      },
+      "n_ev": 3,
+      "lead": "32"
+    },
+    "Adaptive z>3": {
+      "auc": 0.43137254901960786,
+      "far": 2.9,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 6,
+        "WinterStormUri": 53
+      },
+      "n_ev": 3,
+      "lead": "60"
+    },
+    "Adaptive P99": {
+      "auc": 0.43137254901960786,
+      "far": 9.4,
+      "recall": 25.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 6,
+        "WinterStormUri": 29
+      },
+      "n_ev": 3,
+      "lead": "36"
+    },
+    "FARTarget_5%": {
+      "auc": 0.43137254901960786,
+      "far": 8.2,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 33
+      },
+      "n_ev": 3,
+      "lead": "43"
+    },
+    "FARTarget_2%": {
+      "auc": 0.43137254901960786,
+      "far": 8.2,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 33
+      },
+      "n_ev": 3,
+      "lead": "43"
+    }
+  },
+  "morse_betti_fused": {
+    "Fixed P99": {
+      "auc": 0.4818627450980392,
+      "far": 82.4,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.4818627450980392,
+      "far": 71.8,
+      "recall": 83.3,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.4818627450980392,
+      "far": 4.1,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 49
+      },
+      "n_ev": 3,
+      "lead": "52"
+    },
+    "Adaptive z>3": {
+      "auc": 0.4818627450980392,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 56
+      },
+      "n_ev": 3,
+      "lead": "66"
+    },
+    "Adaptive P99": {
+      "auc": 0.4818627450980392,
+      "far": 2.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 56
+      },
+      "n_ev": 3,
+      "lead": "66"
+    },
+    "FARTarget_5%": {
+      "auc": 0.4818627450980392,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    },
+    "FARTarget_2%": {
+      "auc": 0.4818627450980392,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    }
+  },
+  "foundation_bsdt": {
+    "Fixed P99": {
+      "auc": 0.48137254901960785,
+      "far": 82.9,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.48137254901960785,
+      "far": 77.6,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.48137254901960785,
+      "far": 4.7,
+      "recall": 25.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 47
+      },
+      "n_ev": 3,
+      "lead": "50"
+    },
+    "Adaptive z>3": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 8,
+        "WinterStormUri": 55
+      },
+      "n_ev": 3,
+      "lead": "64"
+    },
+    "Adaptive P99": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 29
+      },
+      "n_ev": 3,
+      "lead": "39"
+    },
+    "FARTarget_5%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    },
+    "FARTarget_2%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    }
+  },
+  "foundation_expogate": {
+    "Fixed P99": {
+      "auc": 0.48137254901960785,
+      "far": 82.9,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.48137254901960785,
+      "far": 77.6,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.48137254901960785,
+      "far": 4.7,
+      "recall": 25.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 47
+      },
+      "n_ev": 3,
+      "lead": "50"
+    },
+    "Adaptive z>3": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 8,
+        "WinterStormUri": 55
+      },
+      "n_ev": 3,
+      "lead": "64"
+    },
+    "Adaptive P99": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 29
+      },
+      "n_ev": 3,
+      "lead": "39"
+    },
+    "FARTarget_5%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    },
+    "FARTarget_2%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    }
+  },
+  "foundation_fisher": {
+    "Fixed P99": {
+      "auc": 0.31470588235294117,
+      "far": 70.0,
+      "recall": 41.7,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 2
+      },
+      "n_ev": 3,
+      "lead": "4"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.31470588235294117,
+      "far": 42.4,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 2,
+        "WinterStormUri": 20
+      },
+      "n_ev": 2,
+      "lead": "22"
+    },
+    "Adaptive z>2": {
+      "auc": 0.31470588235294117,
+      "far": 5.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 2,
+        "WinterStormUri": 34
+      },
+      "n_ev": 2,
+      "lead": "36"
+    },
+    "Adaptive z>3": {
+      "auc": 0.31470588235294117,
+      "far": 1.2,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 9,
+        "WinterStormUri": 56
+      },
+      "n_ev": 2,
+      "lead": "65"
+    },
+    "Adaptive P99": {
+      "auc": 0.31470588235294117,
+      "far": 5.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 2,
+        "WinterStormUri": 34
+      },
+      "n_ev": 2,
+      "lead": "36"
+    },
+    "FARTarget_5%": {
+      "auc": 0.31470588235294117,
+      "far": 0.0,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 32,
+        "WinterStormUri": 79
+      },
+      "n_ev": 3,
+      "lead": "111"
+    },
+    "FARTarget_2%": {
+      "auc": 0.31470588235294117,
+      "far": 0.0,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 32,
+        "WinterStormUri": 79
+      },
+      "n_ev": 3,
+      "lead": "111"
+    }
+  },
+  "foundation_quadsurf": {
+    "Fixed P99": {
+      "auc": 0.48137254901960785,
+      "far": 82.9,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.48137254901960785,
+      "far": 77.6,
+      "recall": 100.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "3"
+    },
+    "Adaptive z>2": {
+      "auc": 0.48137254901960785,
+      "far": 4.7,
+      "recall": 25.0,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 47
+      },
+      "n_ev": 3,
+      "lead": "50"
+    },
+    "Adaptive z>3": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 8,
+        "WinterStormUri": 55
+      },
+      "n_ev": 3,
+      "lead": "64"
+    },
+    "Adaptive P99": {
+      "auc": 0.48137254901960785,
+      "far": 2.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 1,
+        "COVID_Collapse": 9,
+        "WinterStormUri": 29
+      },
+      "n_ev": 3,
+      "lead": "39"
+    },
+    "FARTarget_5%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    },
+    "FARTarget_2%": {
+      "auc": 0.48137254901960785,
+      "far": 1.8,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 10,
+        "WinterStormUri": 57
+      },
+      "n_ev": 3,
+      "lead": "67"
+    }
+  },
+  "bsdt_only": {
+    "Fixed P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive z>2": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Adaptive z>3": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "FARTarget_5%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "FARTarget_2%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    }
+  },
+  "expogate_only": {
+    "Fixed P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive z>2": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Adaptive z>3": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "FARTarget_5%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "FARTarget_2%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    }
+  },
+  "fisher_only": {
+    "Fixed P99": {
+      "auc": 0.2769607843137255,
+      "far": 95.9,
+      "recall": 91.7,
+      "events_detected": {
+        "SummerPeak2019": 2,
+        "COVID_Collapse": 1,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "4"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.2769607843137255,
+      "far": 91.8,
+      "recall": 83.3,
+      "events_detected": {
+        "SummerPeak2019": 2,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 1
+      },
+      "n_ev": 3,
+      "lead": "5"
+    },
+    "Adaptive z>2": {
+      "auc": 0.2769607843137255,
+      "far": 12.4,
+      "recall": 16.7,
+      "events_detected": {
+        "SummerPeak2019": 2,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 19
+      },
+      "n_ev": 3,
+      "lead": "23"
+    },
+    "Adaptive z>3": {
+      "auc": 0.2769607843137255,
+      "far": 1.8,
+      "recall": 0.0,
+      "events_detected": {
+        "SummerPeak2019": 2,
+        "COVID_Collapse": 31,
+        "WinterStormUri": 78
+      },
+      "n_ev": 3,
+      "lead": "111"
+    },
+    "Adaptive P99": {
+      "auc": 0.2769607843137255,
+      "far": 10.0,
+      "recall": 8.3,
+      "events_detected": {
+        "SummerPeak2019": 2,
+        "COVID_Collapse": 7,
+        "WinterStormUri": 19
+      },
+      "n_ev": 3,
+      "lead": "28"
+    },
+    "FARTarget_5%": {
+      "auc": 0.2769607843137255,
+      "far": 30.0,
+      "recall": 41.7,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 11
+      },
+      "n_ev": 3,
+      "lead": "13"
+    },
+    "FARTarget_2%": {
+      "auc": 0.2769607843137255,
+      "far": 25.3,
+      "recall": 33.3,
+      "events_detected": {
+        "SummerPeak2019": 0,
+        "COVID_Collapse": 2,
+        "WinterStormUri": 19
+      },
+      "n_ev": 3,
+      "lead": "21"
+    }
+  },
+  "quadsurf_only": {
+    "Fixed P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Fixed mu+3sig": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive z>2": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "Adaptive z>3": {
+      "auc": 0.3367647058823529,
+      "far": 0.6,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "Adaptive P99": {
+      "auc": 0.3367647058823529,
+      "far": 2.9,
+      "recall": 0.0,
+      "events_detected": {
+        "COVID_Collapse": 27,
+        "WinterStormUri": 74
+      },
+      "n_ev": 2,
+      "lead": "101"
+    },
+    "FARTarget_5%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    },
+    "FARTarget_2%": {
+      "auc": 0.3367647058823529,
+      "far": 0.0,
+      "recall": 0.0,
+      "events_detected": {},
+      "n_ev": 0,
+      "lead": 0
+    }
+  }
+}

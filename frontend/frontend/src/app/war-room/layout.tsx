@@ -17,13 +17,19 @@ import WarRoomShell from '@/components/shells/WarRoomShell';
 
 function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { mode, isAuthenticated, isLoading } = useAuth();
   const [bridgeChecked, setBridgeChecked] = React.useState(false);
-  const [bridgeSession, setBridgeSession] = React.useState(null);
+  const [bridgeSession, setBridgeSession] = React.useState<any>(null);
+
+  // Embed mode: when loaded inside Flutter iframe (?embed=true),
+  // bypass the normal auth guard. Flutter already authenticated the user
+  // and passed role context via query params.
+  const isEmbed = searchParams.get('embed') === 'true';
 
   React.useEffect(() => {
     // If not authenticated, try to restore from cross-app auth bridge token
-    if (!isLoading && !isAuthenticated && !bridgeChecked) {
+    if (!isLoading && !isAuthenticated && !bridgeChecked && !isEmbed) {
       import('@/lib/cross-app-auth-bridge').then(async (bridge) => {
         const session = await bridge.getBridgeSession();
         if (session && session.role && session.mode) {
@@ -47,7 +53,12 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
         }
       });
     }
-  }, [isLoading, isAuthenticated, bridgeChecked]);
+  }, [isLoading, isAuthenticated, bridgeChecked, isEmbed]);
+
+  // Embed mode — render content directly (auth handled by Flutter parent)
+  if (isEmbed) {
+    return <WarRoomShell>{children}</WarRoomShell>;
+  }
 
   // Show loading while checking auth or bridge
   if (isLoading || (!isAuthenticated && !bridgeChecked)) {
@@ -66,9 +77,28 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Don't render if not authorized for War Room
+  // Not authenticated after all checks — auto-create a demo session so
+  // the War Room is usable without a separate login flow.  This mirrors
+  // the Flutter demo-user approach (R3 Ops Analyst).
   if (!isAuthenticated || mode !== AppMode.WAR_ROOM) {
-    return null;
+    // Auto-provision demo session on the client side
+    const demoSession = {
+      userId: 'demo_r3_nextjs',
+      address: 'ops@amttp.io',
+      displayName: 'Ops Analyst (R3)',
+      role: 'R3_INSTITUTION_OPS',
+      mode: 'WAR_ROOM' as const,
+      capabilities: {},
+      institutionId: 'inst_demo',
+      institutionName: 'AMTTP Demo Institution',
+    };
+    localStorage.setItem('amttp_session', JSON.stringify(demoSession));
+    window.location.reload();
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-mutedText">Entering War Room...</p>
+      </div>
+    );
   }
 
   return <WarRoomShell>{children}</WarRoomShell>;

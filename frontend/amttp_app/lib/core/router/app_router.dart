@@ -132,6 +132,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       // All routes now require proper authentication and RBAC checks
       // ═══════════════════════════════════════════════════════════════════════
 
+      // While auth is still initialising, let the current route render
+      // (prevents premature redirect to /sign-in on full-page reloads)
+      if (authState.status == AuthStatus.initial ||
+          authState.status == AuthStatus.loading) {
+        return null;
+      }
+
       // If not authenticated and not on auth route, redirect to sign-in
       if (!isAuthenticated && !isAuthRoute) {
         return '/sign-in';
@@ -146,7 +153,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isAuthenticated && isAuthRoute) {
         final user = authState.user;
         if (user != null) {
-          // R3+ users → trampoline page that does a full browser redirect
+          // R3+ users → full browser redirect to standalone Next.js War Room
           if (user.role.level >= 3) {
             return '/war-room-redirect';
           }

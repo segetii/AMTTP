@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "run_date": "2026-03-28",
+    "scorer": "FrozenWindowScorer (research.udl.geo_full_pipeline)",
+    "method": "Frozen Calibration Protocol \u2014 Algorithm 2, \"The Geometry of System Collapse\" (SIAM paper)",
+    "friction": {
+      "k_steps": 10,
+      "eta": 0.25,
+      "theta": 1.0
+    },
+    "threshold": "tau_Q = chi2_0.99(d) Wilson-Hilferty approx \u2014 pure theory, zero calibration data. Alarm when Q(x) > tau_Q (state escapes C*).",
+    "alarm_logic": "last-quiet-window -> first-re-alarm: find most-recent n_quiet consecutive steps score<tau BEFORE onset, then first step >= tau after that window. Prevents GFC alarm carry-over.",
+    "n_quiet_ercot_days": 14,
+    "n_quiet_bank_quarters": 3
+  },
+  "ERCOT": {
+    "unit": "days/hours",
+    "results": {
+      "WinterStorm_Uri": {
+        "onset": "2021-02-10",
+        "first_alarm": null,
+        "lead_days": null,
+        "lead_hours": null,
+        "tau_Q": 16.8429,
+        "status": "no_alarm"
+      },
+      "COVID_Demand_Crash": {
+        "onset": "2020-03-15",
+        "first_alarm": null,
+        "lead_days": null,
+        "lead_hours": null,
+        "tau_Q": 16.8429,
+        "status": "no_alarm"
+      },
+      "WinterStorm_Elliott": {
+        "onset": "2022-12-22",
+        "first_alarm": "2022-12-18",
+        "lead_days": 4,
+        "lead_hours": 96,
+        "tau_Q": 16.8429,
+        "status": "alarm"
+      }
+    }
+  },
+  "Bank": {
+    "unit": "quarters/months/hours",
+    "results": {
+      "GFC": {
+        "onset": "2007-03-31",
+        "first_alarm": null,
+        "lead_quarters": null,
+        "lead_months": null,
+        "lead_hours": null,
+        "tau_Q": 16.8429,
+        "status": "no_alarm"
+      },
+      "COVID": {
+        "onset": "2020-03-31",
+        "first_alarm": null,
+        "lead_quarters": null,
+        "lead_months": null,
+        "lead_hours": null,
+        "tau_Q": 16.8429,
+        "status": "persistent_from_prior"
+      },
+      "RateShock": {
+        "onset": "2022-03-31",
+        "first_alarm": null,
+        "lead_quarters": null,
+        "lead_months": null,
+        "lead_hours": null,
+        "tau_Q": 16.8429,
+        "status": "persistent_from_prior"
+      }
+    }
+  }
+}

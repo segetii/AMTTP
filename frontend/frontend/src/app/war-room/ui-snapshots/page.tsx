@@ -132,7 +132,7 @@ export default function UISnapshotsPage() {
               <p className="text-sm text-mutedText mb-3 line-clamp-2">{snapshot.description}</p>
               
               <div className="flex flex-wrap gap-1 mb-3">
-                {snapshot.tags.map(tag => (
+                {snapshot.tags.map((tag: string) => (
                   <span key={tag} className="px-2 py-0.5 bg-slate-700 rounded text-xs text-mutedText">
                     {tag}
                   </span>
