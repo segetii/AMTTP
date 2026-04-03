@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Safe Management Page - Covers AMTTPSafeModule.sol functionality
 /// Functions covered:
@@ -39,37 +40,37 @@ class _SafeManagementPageState extends ConsumerState<SafeManagementPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Safe Management'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Register', icon: Icon(Icons.add_circle)),
-            Tab(text: 'Queued TXs', icon: Icon(Icons.pending_actions)),
-            Tab(text: 'Whitelist', icon: Icon(Icons.check_circle)),
-            Tab(text: 'Blacklist', icon: Icon(Icons.block)),
-            Tab(text: 'Audit Log', icon: Icon(Icons.history)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _RegisterSafeTab(),
-            _QueuedTransactionsTab(),
-            _WhitelistTab(),
-            _BlacklistTab(),
-            _AuditLogTab(),
+            const ShellPageHeader(title: 'Safe Management'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Register', icon: Icon(Icons.add_circle)),
+                Tab(text: 'Queued TXs', icon: Icon(Icons.pending_actions)),
+                Tab(text: 'Whitelist', icon: Icon(Icons.check_circle)),
+                Tab(text: 'Blacklist', icon: Icon(Icons.block)),
+                Tab(text: 'Audit Log', icon: Icon(Icons.history)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _RegisterSafeTab(),
+                  _QueuedTransactionsTab(),
+                  _WhitelistTab(),
+                  _BlacklistTab(),
+                  _AuditLogTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

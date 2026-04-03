@@ -238,8 +238,10 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
         context.go(route);
       },
       itemBuilder: (context) => [
-        _buildPopupItem(Icons.rocket_launch_rounded, 'Advanced', '/advanced',
-            'NFT, Cross-Chain, Safe'),
+        _buildPopupItem(Icons.swap_horiz_rounded, 'NFT Swap', '/nft-swap',
+            'Swap NFTs with escrow'),
+        _buildPopupItem(Icons.device_hub_rounded, 'Cross-Chain', '/cross-chain',
+            'Bridge assets across chains'),
         _buildPopupItem(Icons.verified_user_rounded, 'Trust Check',
             '/trust-check', 'Verify addresses'),
         _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes',

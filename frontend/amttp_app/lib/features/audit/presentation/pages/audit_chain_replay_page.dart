@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/security/ui_integrity_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Snapshot for audit replay
 class AuditSnapshot {
@@ -208,85 +209,92 @@ class _AuditChainReplayToolState extends ConsumerState<AuditChainReplayTool>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Audit Chain Replay'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          if (_verificationResult != null)
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: _verificationResult!.isValid
-                    ? AppTheme.neonGreen.withOpacity(0.2)
-                    : Colors.red.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _verificationResult!.isValid ? Icons.verified : Icons.error,
-                    size: 16,
-                    color: _verificationResult!.isValid ? AppTheme.neonGreen : Colors.red,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _verificationResult!.isValid ? 'Verified' : 'Invalid',
-                    style: TextStyle(
-                      color: _verificationResult!.isValid ? AppTheme.neonGreen : Colors.red,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
+          children: [
+            ShellPageHeader(
+              title: 'Audit Chain Replay',
+              actions: [
+                if (_verificationResult != null)
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _verificationResult!.isValid
+                          ? AppTheme.neonGreen.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _verificationResult!.isValid ? Icons.verified : Icons.error,
+                          size: 16,
+                          color: _verificationResult!.isValid ? AppTheme.neonGreen : Colors.red,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _verificationResult!.isValid ? 'Verified' : 'Invalid',
+                          style: TextStyle(
+                            color: _verificationResult!.isValid ? AppTheme.neonGreen : Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                IconButton(
+                  icon: const Icon(Icons.download, color: Colors.white70),
+                  onPressed: () => _exportChain(),
+                  tooltip: 'Export Chain (JSON)',
+                ),
+                IconButton(
+                  icon: _isVerifying
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppTheme.cleanWhite,
+                          ),
+                        )
+                      : const Icon(Icons.verified_user, color: Colors.white70),
+                  onPressed: _isVerifying ? null : _verifyChain,
+                  tooltip: 'Verify Chain Integrity',
+                ),
+              ],
             ),
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () => _exportChain(),
-            tooltip: 'Export Chain (JSON)',
-          ),
-          IconButton(
-            icon: _isVerifying
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppTheme.cleanWhite,
-                    ),
-                  )
-                : const Icon(Icons.verified_user),
-            onPressed: _isVerifying ? null : _verifyChain,
-            tooltip: 'Verify Chain Integrity',
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Timeline', icon: Icon(Icons.timeline, size: 18)),
-            Tab(text: 'Snapshot', icon: Icon(Icons.camera, size: 18)),
-            Tab(text: 'Verification', icon: Icon(Icons.check_circle, size: 18)),
+            TabBar(
+              controller: _tabController,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Timeline', icon: Icon(Icons.timeline, size: 18)),
+                Tab(text: 'Snapshot', icon: Icon(Icons.camera, size: 18)),
+                Tab(text: 'Verification', icon: Icon(Icons.check_circle, size: 18)),
+              ],
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? _buildErrorState()
+                      : TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildTimelineTab(),
+                            _buildSnapshotTab(),
+                            _buildVerificationTab(),
+                          ],
+                        ),
+            ),
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? _buildErrorState()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTimelineTab(),
-                    _buildSnapshotTab(),
-                    _buildVerificationTab(),
-                  ],
-                ),
     );
   }
 

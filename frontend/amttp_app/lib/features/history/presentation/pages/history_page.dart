@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/web3/wallet_provider.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 // Transaction history provider
 final transactionHistoryProvider = FutureProvider.family<List<TransactionHistoryItem>, String>((ref, address) async {
@@ -83,41 +84,39 @@ class HistoryPage extends ConsumerWidget {
     final transactionsAsync = ref.watch(transactionHistoryProvider(address));
 
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Transaction History'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterSheet(context),
-            tooltip: 'Filter',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(transactionHistoryProvider(address)),
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: SafeArea(
-          child: !walletState.isConnected
-              ? _buildConnectPrompt(context, ref)
-              : transactionsAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppTheme.primaryPurple),
-                  ),
-                  error: (error, stack) => _buildErrorState(error.toString()),
-                  data: (transactions) => transactions.isEmpty
-                      ? _buildEmptyState()
-                      : _buildTransactionList(context, transactions, address),
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
+          children: [
+            ShellPageHeader(
+              title: 'Transaction History',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list, color: Colors.white70),
+                  onPressed: () => _showFilterSheet(context),
+                  tooltip: 'Filter',
                 ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white70),
+                  onPressed: () => ref.refresh(transactionHistoryProvider(address)),
+                  tooltip: 'Refresh',
+                ),
+              ],
+            ),
+            Expanded(
+              child: !walletState.isConnected
+                  ? _buildConnectPrompt(context, ref)
+                  : transactionsAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(color: AppTheme.primaryPurple),
+                      ),
+                      error: (error, stack) => _buildErrorState(error.toString()),
+                      data: (transactions) => transactions.isEmpty
+                          ? _buildEmptyState()
+                          : _buildTransactionList(context, transactions, address),
+                    ),
+            ),
+          ],
         ),
       ),
     );

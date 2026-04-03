@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/risk_level_indicator.dart';
 import '../../../../services/swap_service.dart';
 import '../../../../services/web3_service.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// NFT Swap Page - Covers AMTTPNFT.sol functionality
 /// Functions covered:
@@ -40,35 +41,35 @@ class _NFTSwapPageState extends ConsumerState<NFTSwapPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('NFT Swap'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'NFT → ETH', icon: Icon(Icons.swap_horiz)),
-            Tab(text: 'NFT → NFT', icon: Icon(Icons.compare_arrows)),
-            Tab(text: 'Active Swaps', icon: Icon(Icons.pending_actions)),
-            Tab(text: 'History', icon: Icon(Icons.history)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _NFTToETHSwapTab(),
-            _NFTToNFTSwapTab(),
-            _ActiveSwapsTab(),
-            _SwapHistoryTab(),
+            const ShellPageHeader(title: 'NFT Swap'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'NFT → ETH', icon: Icon(Icons.swap_horiz)),
+                Tab(text: 'NFT → NFT', icon: Icon(Icons.compare_arrows)),
+                Tab(text: 'Active Swaps', icon: Icon(Icons.pending_actions)),
+                Tab(text: 'History', icon: Icon(Icons.history)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _NFTToETHSwapTab(),
+                  _NFTToNFTSwapTab(),
+                  _ActiveSwapsTab(),
+                  _SwapHistoryTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

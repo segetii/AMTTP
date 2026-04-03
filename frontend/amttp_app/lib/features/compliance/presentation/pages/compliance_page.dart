@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Compliance Tools Page - Covers AMTTPPolicyEngine.sol functionality
 /// Functions covered:
@@ -72,37 +73,41 @@ class _ComplianceToolsPageState extends ConsumerState<ComplianceToolsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Compliance Tools'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.download), tooltip: 'Export Report'),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications), tooltip: 'Alerts'),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Freeze/Unfreeze', icon: Icon(Icons.ac_unit)),
-            Tab(text: 'Trusted Users', icon: Icon(Icons.verified_user)),
-            Tab(text: 'PEP/Sanctions', icon: Icon(Icons.search)),
-            Tab(text: 'EDD Queue', icon: Icon(Icons.fact_check)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _FreezeManagementTab(),
-            _TrustedUsersTab(),
-            _PEPSanctionsTab(),
-            _EDDQueueTab(),
+            ShellPageHeader(
+              title: 'Compliance Tools',
+              actions: [
+                IconButton(onPressed: () {}, icon: const Icon(Icons.download, color: Colors.white70), tooltip: 'Export Report'),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.notifications, color: Colors.white70), tooltip: 'Alerts'),
+              ],
+            ),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Freeze/Unfreeze', icon: Icon(Icons.ac_unit)),
+                Tab(text: 'Trusted Users', icon: Icon(Icons.verified_user)),
+                Tab(text: 'PEP/Sanctions', icon: Icon(Icons.search)),
+                Tab(text: 'EDD Queue', icon: Icon(Icons.fact_check)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _FreezeManagementTab(),
+                  _TrustedUsersTab(),
+                  _PEPSanctionsTab(),
+                  _EDDQueueTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

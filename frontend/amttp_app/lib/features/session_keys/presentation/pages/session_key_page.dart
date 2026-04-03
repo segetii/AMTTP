@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Session Key Management Page - Covers AMTTPBiconomyModule.sol functionality
 /// Functions covered:
@@ -34,35 +35,35 @@ class _SessionKeyPageState extends ConsumerState<SessionKeyPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Session Keys'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Register', icon: Icon(Icons.app_registration)),
-            Tab(text: 'Create Key', icon: Icon(Icons.key)),
-            Tab(text: 'Active Keys', icon: Icon(Icons.vpn_key)),
-            Tab(text: 'History', icon: Icon(Icons.history)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _RegisterAccountTab(),
-            _CreateSessionKeyTab(),
-            _ActiveKeysTab(),
-            _KeyHistoryTab(),
+            const ShellPageHeader(title: 'Session Keys'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Register', icon: Icon(Icons.app_registration)),
+                Tab(text: 'Create Key', icon: Icon(Icons.key)),
+                Tab(text: 'Active Keys', icon: Icon(Icons.vpn_key)),
+                Tab(text: 'History', icon: Icon(Icons.history)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _RegisterAccountTab(),
+                  _CreateSessionKeyTab(),
+                  _ActiveKeysTab(),
+                  _KeyHistoryTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

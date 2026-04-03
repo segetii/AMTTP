@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Cross-Chain Transfer Page - Covers AMTTPCrossChain.sol functionality
 /// Functions covered:
@@ -35,35 +36,35 @@ class _CrossChainPageState extends ConsumerState<CrossChainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Cross-Chain Transfer'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Transfer', icon: Icon(Icons.send)),
-            Tab(text: 'Chain Status', icon: Icon(Icons.hub)),
-            Tab(text: 'Pending', icon: Icon(Icons.pending)),
-            Tab(text: 'History', icon: Icon(Icons.history)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _CrossChainTransferTab(),
-            _ChainStatusTab(),
-            _PendingTransfersTab(),
-            _TransferHistoryTab(),
+            const ShellPageHeader(title: 'Cross-Chain Transfer'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Transfer', icon: Icon(Icons.send)),
+                Tab(text: 'Chain Status', icon: Icon(Icons.hub)),
+                Tab(text: 'Pending', icon: Icon(Icons.pending)),
+                Tab(text: 'History', icon: Icon(Icons.history)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _CrossChainTransferTab(),
+                  _ChainStatusTab(),
+                  _PendingTransfersTab(),
+                  _TransferHistoryTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

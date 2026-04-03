@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/providers/admin_providers.dart';
 import '../../../../shared/widgets/risk_level_indicator.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 class AdminPage extends ConsumerStatefulWidget {
   const AdminPage({super.key});
@@ -32,27 +33,37 @@ class _AdminPageState extends ConsumerState<AdminPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AMTTP Admin Dashboard'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: const [
-            Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
-            Tab(text: 'DQN Analytics', icon: Icon(Icons.psychology)),
-            Tab(text: 'Transactions', icon: Icon(Icons.list)),
-            Tab(text: 'Policies', icon: Icon(Icons.admin_panel_settings)),
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
+          children: [
+            const ShellPageHeader(title: 'AMTTP Admin Dashboard'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
+                Tab(text: 'DQN Analytics', icon: Icon(Icons.psychology)),
+                Tab(text: 'Transactions', icon: Icon(Icons.list)),
+                Tab(text: 'Policies', icon: Icon(Icons.admin_panel_settings)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOverviewTab(),
+                  _buildDQNAnalyticsTab(),
+                  _buildTransactionsTab(),
+                  _buildPoliciesTab(),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildDQNAnalyticsTab(),
-          _buildTransactionsTab(),
-          _buildPoliciesTab(),
-        ],
       ),
     );
   }

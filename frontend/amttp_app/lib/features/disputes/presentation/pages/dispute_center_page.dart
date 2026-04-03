@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 // Web-specific imports for file selection
 import 'dart:html' as html if (dart.library.io) 'dart:io';
 import 'dart:async';
@@ -39,35 +40,35 @@ class _DisputeCenterPageState extends ConsumerState<DisputeCenterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Dispute Center'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Create Dispute', icon: Icon(Icons.add_circle)),
-            Tab(text: 'Active Disputes', icon: Icon(Icons.pending)),
-            Tab(text: 'Submit Evidence', icon: Icon(Icons.attach_file)),
-            Tab(text: 'History', icon: Icon(Icons.history)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _CreateDisputeTab(),
-            _ActiveDisputesTab(),
-            _SubmitEvidenceTab(),
-            _DisputeHistoryTab(),
+            const ShellPageHeader(title: 'Dispute Center'),
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Create Dispute', icon: Icon(Icons.add_circle)),
+                Tab(text: 'Active Disputes', icon: Icon(Icons.pending)),
+                Tab(text: 'Submit Evidence', icon: Icon(Icons.attach_file)),
+                Tab(text: 'History', icon: Icon(Icons.history)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _CreateDisputeTab(),
+                  _ActiveDisputesTab(),
+                  _SubmitEvidenceTab(),
+                  _DisputeHistoryTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

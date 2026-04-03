@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// zkNAF Proof Status Model
 enum ZkProofType {
@@ -265,48 +266,53 @@ class _ZkNAFPageState extends ConsumerState<ZkNAFPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('zkNAF Privacy Proofs'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showInfoDialog(context),
-          ),
-        ],
-      ),
-      body: zkNAFState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () => ref.read(zkNAFProvider.notifier).loadProofs(
-                    zkNAFState.walletAddress ?? '',
-                  ),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Compliance Status Card
-                    _buildComplianceStatusCard(zkNAFState, theme),
-                    const SizedBox(height: 24),
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
+          children: [
+            ShellPageHeader(
+              title: 'zkNAF Privacy Proofs',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.info_outline, color: Colors.white70),
+                  onPressed: () => _showInfoDialog(context),
+                ),
+              ],
+            ),
+            Expanded(
+              child: zkNAFState.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: () => ref.read(zkNAFProvider.notifier).loadProofs(
+                            zkNAFState.walletAddress ?? '',
+                          ),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Compliance Status Card
+                            _buildComplianceStatusCard(zkNAFState, theme),
+                            const SizedBox(height: 24),
 
-                    // FCA Compliance Notice
-                    _buildFCANotice(theme),
-                    const SizedBox(height: 24),
+                            // FCA Compliance Notice
+                            _buildFCANotice(theme),
+                            const SizedBox(height: 24),
 
-                    // Proof Cards
-                    Text(
-                      'Your Privacy Proofs',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                            // Proof Cards
+                            Text(
+                              'Your Privacy Proofs',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
 
-                    ...zkNAFState.proofs.map((proof) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildProofCard(proof, theme),
-                        )),
+                            ...zkNAFState.proofs.map((proof) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _buildProofCard(proof, theme),
+                                )),
 
                     const SizedBox(height: 24),
 
@@ -332,6 +338,10 @@ class _ZkNAFPageState extends ConsumerState<ZkNAFPage> {
                 ),
               ),
             ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Dispute Detail Page - Detailed view for a single dispute
 /// Functions covered:
@@ -140,25 +141,17 @@ class _DisputeDetailPageState extends ConsumerState<DisputeDetailPage> {
     final statusLabel = _getStatusLabel(status);
     final statusColor = _getStatusColor(status);
 
-    return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: Text('Dispute ${widget.disputeId}'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.share), tooltip: 'Share'),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert), tooltip: 'More'),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return PremiumCenteredPage(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ShellPageHeader(
+            title: 'Dispute ${widget.disputeId}',
+            actions: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.share, color: Colors.white70), tooltip: 'Share'),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert, color: Colors.white70), tooltip: 'More'),
+            ],
+          ),
               // Status Header
               Container(
                 padding: const EdgeInsets.all(20),
@@ -442,11 +435,9 @@ class _DisputeDetailPageState extends ConsumerState<DisputeDetailPage> {
                 ],
               ),
               const SizedBox(height: 32),
-            ],
-          ),
+          ],
         ),
-      ),
-    );
+      );
   }
 
   String _getStatusLabel(String status) {

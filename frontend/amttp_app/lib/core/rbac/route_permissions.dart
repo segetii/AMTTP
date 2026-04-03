@@ -131,6 +131,7 @@ class RoutePermissions {
     label: 'NFT Swap',
     icon: Icons.swap_horiz_rounded,
     allowedRoles: [
+      UserRole.R1_END_USER,
       UserRole.R2_POWER_USER,
       UserRole.R3_INSTITUTION_OPS,
       UserRole.R4_INSTITUTION_COMPLIANCE,
@@ -145,6 +146,7 @@ class RoutePermissions {
     label: 'Cross-Chain',
     icon: Icons.link_rounded,
     allowedRoles: [
+      UserRole.R1_END_USER,
       UserRole.R2_POWER_USER,
       UserRole.R3_INSTITUTION_OPS,
       UserRole.R4_INSTITUTION_COMPLIANCE,

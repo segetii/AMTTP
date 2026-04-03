@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/layout/premium_centered_page.dart';
 
 /// Approver Portal Page - Covers AMTTPCore.sol approval workflow
 /// Functions covered:
@@ -33,44 +34,46 @@ class _ApproverPortalPageState extends ConsumerState<ApproverPortalPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      appBar: AppBar(
-        title: const Text('Approver Portal'),
-        backgroundColor: AppTheme.darkCard,
-        foregroundColor: AppTheme.cleanWhite,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter',
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primaryBlue,
-          tabs: const [
-            Tab(text: 'Pending', icon: Icon(Icons.pending_actions)),
-            Tab(text: 'Approved', icon: Icon(Icons.check_circle)),
-            Tab(text: 'Rejected', icon: Icon(Icons.cancel)),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.darkGradient,
-        ),
-        child: TabBarView(
-          controller: _tabController,
+      backgroundColor: Colors.transparent,
+      body: PremiumPageContainer(
+        child: Column(
           children: [
-            _PendingSwapsTab(),
-            _ApprovedSwapsTab(),
-            _RejectedSwapsTab(),
+            ShellPageHeader(
+              title: 'Approver Portal',
+              actions: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.filter_list, color: Colors.white70),
+                  tooltip: 'Filter',
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.refresh, color: Colors.white70),
+                  tooltip: 'Refresh',
+                ),
+              ],
+            ),
+            TabBar(
+              controller: _tabController,
+              indicatorColor: AppTheme.primaryBlue,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white54,
+              tabs: const [
+                Tab(text: 'Pending', icon: Icon(Icons.pending_actions)),
+                Tab(text: 'Approved', icon: Icon(Icons.check_circle)),
+                Tab(text: 'Rejected', icon: Icon(Icons.cancel)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _PendingSwapsTab(),
+                  _ApprovedSwapsTab(),
+                  _RejectedSwapsTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

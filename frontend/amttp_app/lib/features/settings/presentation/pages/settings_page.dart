@@ -15,7 +15,7 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: PremiumCenteredPage(
+      body: PremiumPageContainer(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
