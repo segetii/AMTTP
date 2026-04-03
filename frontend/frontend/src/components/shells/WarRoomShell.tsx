@@ -242,26 +242,26 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Compliance Hub',
     items: [
       { 
-        label: 'Unified Dashboard', 
-        href: '/compliance', 
+        label: 'Compliance Reports', 
+        href: '/war-room/compliance', 
         icon: <ShieldIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
       { 
-        label: 'FATF Rules', 
-        href: '/compliance/fatf-rules', 
+        label: 'FATF Enforcement', 
+        href: '/war-room/enforcement', 
         icon: <GlobeIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
       { 
         label: 'Sanctions Check', 
-        href: '/compliance/sanctions', 
+        href: '/war-room/flagged-queue', 
         icon: <BanIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
       { 
         label: 'Compliance Alerts', 
-        href: '/compliance/alerts', 
+        href: '/war-room/alerts', 
         icon: <BellAlertIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
@@ -272,7 +272,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { 
         label: 'Policy Engine', 
-        href: '/policies', 
+        href: '/war-room/policy-engine', 
         icon: <PolicyIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
@@ -300,8 +300,8 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { label: 'Audit Trail', href: '/war-room/audit', icon: <ShieldIcon /> },
       { 
-        label: 'Compliance Reports', 
-        href: '/war-room/compliance', 
+        label: 'Reports Export', 
+        href: '/war-room/reports', 
         icon: <PolicyIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
@@ -376,7 +376,7 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
       {/* ─────────────────────────────────────────────────────────────────────── */}
       <aside 
         className={`
-          fixed lg:static inset-y-0 left-0 z-50
+          fixed lg:relative inset-y-0 left-0 z-50
           w-64 bg-surface border-r border-borderSubtle
           transform transition-transform lg:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -466,18 +466,23 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-white truncate">
-                {session?.address?.slice(0, 6)}...{session?.address?.slice(-4) || 'Not connected'}
+                {session?.displayName || session?.address || 'Not connected'}
               </div>
               <div className="text-xs text-slate-400">
                 {roleLabel || 'Unknown Role'}
               </div>
+              {session?.address && session.address.includes('@') && (
+                <div className="text-xs text-slate-500 truncate">
+                  {session.address}
+                </div>
+              )}
             </div>
             <button
               onClick={logout}
-              className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white"
-              title="Logout"
+              className="p-2 hover:bg-slate-700 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-900/30"
+              title="Sign Out"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>

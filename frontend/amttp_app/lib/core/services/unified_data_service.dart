@@ -5,6 +5,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 
@@ -243,7 +244,19 @@ class UnifiedDataService {
   factory UnifiedDataService() => _instance;
   UnifiedDataService._internal();
 
-  final String _baseUrl = AppConstants.nextJsUrl;
+  /// Compute API base URL at runtime:
+  /// - Dev (Flutter on port 3010): call Next.js directly on port 3006
+  /// - Production (behind nginx): use relative URLs
+  String get _baseUrl {
+    try {
+      final port = html.window.location.port;
+      if (port == '3010') {
+        return 'http://localhost:3006';
+      }
+    } catch (_) {}
+    return AppConstants.nextJsUrl;
+  }
+
   final http.Client _client = http.Client();
 
   /// Fetch dashboard statistics

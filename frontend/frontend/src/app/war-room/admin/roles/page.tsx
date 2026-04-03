@@ -18,7 +18,6 @@ import {
   getAssignableRoles,
   getRoleDisplayInfo,
 } from '@/types/role-management';
-import WarRoomShell from '@/components/shells/WarRoomShell';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // USER TABLE COMPONENT
@@ -546,9 +545,5 @@ function RoleManagementContent() {
 }
 
 export default function RoleManagementPage() {
-  return (
-    <WarRoomShell>
-      <RoleManagementContent />
-    </WarRoomShell>
-  );
+  return <RoleManagementContent />;
 }

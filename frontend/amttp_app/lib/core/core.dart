@@ -19,8 +19,6 @@ export 'theme/spacing.dart';
 
 // Router & Navigation
 export 'router/app_router.dart';
-export 'router/consumer_app_router.dart';
-export 'router/route_names.dart';
 
 // Constants & Configuration
 export 'constants/app_constants.dart';

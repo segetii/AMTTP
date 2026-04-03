@@ -41,6 +41,7 @@ import '../../shared/shells/premium_fintech_shell.dart';
 import '../../features/ml_models/presentation/pages/ml_models_page.dart';
 // Authentication pages
 import '../../features/auth/presentation/pages/premium_sign_in_page.dart';
+import '../../features/auth/presentation/pages/sign_out_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/unauthorized_page.dart';
 import '../auth/auth_provider.dart';
@@ -144,6 +145,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/sign-in';
       }
 
+      // Allow sign-out trampoline — clears session then redirects to sign-in
+      if (state.matchedLocation == '/sign-out') {
+        return null;
+      }
+
       // Allow the war-room-redirect trampoline page without further checks
       if (state.matchedLocation == '/war-room-redirect') {
         return null;
@@ -194,6 +200,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/sign-in',
         name: 'sign-in',
         builder: (context, state) => const PremiumSignInPage(),
+      ),
+      // Trampoline: signs out and redirects to sign-in (used by landing page)
+      GoRoute(
+        path: '/sign-out',
+        name: 'sign-out',
+        builder: (context, state) => const SignOutPage(),
       ),
       // Trampoline: shows spinner then does full browser redirect to Next.js War Room
       GoRoute(

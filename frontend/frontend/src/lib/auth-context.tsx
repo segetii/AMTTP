@@ -84,12 +84,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Check for existing session on mount
   useEffect(() => {
+    const SESSION_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
     const checkSession = async () => {
       try {
         // Check localStorage for existing session
         const storedSession = localStorage.getItem('amttp_session');
         if (storedSession) {
           const session = JSON.parse(storedSession) as UserSession;
+
+          // Reject sessions without createdAt (stale) or older than TTL
+          const raw = JSON.parse(storedSession);
+          if (!raw.createdAt || Date.now() - raw.createdAt > SESSION_TTL_MS) {
+            localStorage.removeItem('amttp_session');
+            setState(prev => ({ ...prev, isLoading: false }));
+            return;
+          }
+
           setState({
             isAuthenticated: true,
             isLoading: false,
@@ -191,8 +201,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         institutionName,
       };
       
-      // Store session
-      localStorage.setItem('amttp_session', JSON.stringify(session));
+      // Store session with creation timestamp for expiry checking
+      localStorage.setItem('amttp_session', JSON.stringify({ ...session, createdAt: Date.now() }));
       
       setState({
         isAuthenticated: true,
@@ -214,17 +224,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Logout
-  const logout = useCallback(async () => {
-    try {
-      // 1. Invalidate server-side session
-      const token = localStorage.getItem('amttp_session_token');
-      if (token) {
-        await fetch(`${ORCHESTRATOR_API}/auth/logout`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).catch(() => {}); // Best-effort server call
-      }
-    } catch (_) {}
+  const logout = useCallback(() => {
+    // 1. Read token BEFORE clearing storage
+    let token: string | null = null;
+    try { token = localStorage.getItem('amttp_session_token'); } catch {}
 
     // 2. Clear all localStorage auth keys
     logoutUser();
@@ -233,16 +236,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // 3. Clear cross-app auth bridge cookie
     clearBridgeSession();
 
-    // 4. Reset context state
-    setState({
-      isAuthenticated: false,
-      isLoading: false,
-      session: null,
-      error: null,
-    });
+    // 4. Fire-and-forget server session invalidation
+    if (token) {
+      fetch(`${ORCHESTRATOR_API}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      }).catch(() => {});
+    }
 
-    // 5. Redirect to sign-in
-    window.location.href = '/sign-in';
+    // 5. Hard-redirect to Flutter sign-out IMMEDIATELY.
+    //    Do NOT call setState — it triggers React re-renders that race with navigation.
+    //    In dev: Flutter is on port 3010, in prod: relative / (nginx routes to Flutter)
+    const isDevMode = typeof window !== 'undefined' && window.location.port === '3006';
+    window.location.replace(isDevMode ? 'http://localhost:3010/#/sign-out' : '/#/sign-out');
   }, []);
 
   // Demo role switching (development only - disabled in production)

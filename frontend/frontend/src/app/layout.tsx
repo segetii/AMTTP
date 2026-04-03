@@ -25,6 +25,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Polyfill Performance API methods that Next.js expects
+              // Prevents "mgt.clearMarks is not a function" in embedded/iframe contexts
+              (function(){
+                var p = window.performance || {};
+                if (!p.clearMarks) p.clearMarks = function(){};
+                if (!p.clearMeasures) p.clearMeasures = function(){};
+                if (!p.mark) p.mark = function(){};
+                if (!p.measure) p.measure = function(){};
+                if (!p.getEntriesByName) p.getEntriesByName = function(){ return []; };
+                if (!p.getEntriesByType) p.getEntriesByType = function(){ return []; };
+                window.performance = p;
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950`}
         suppressHydrationWarning

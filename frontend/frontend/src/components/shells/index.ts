@@ -1,8 +1,7 @@
 /**
  * AMTTP UI Shells
  * 
- * Mode-specific shell components providing RBAC-locked UI separation
+ * War Room shell for R3-R6 institutional users
  */
 
-export { default as FocusModeShell } from './FocusModeShell';
 export { default as WarRoomShell } from './WarRoomShell';

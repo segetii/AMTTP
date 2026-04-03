@@ -24,6 +24,28 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8007',
   },
 
+  // CORS headers — allow Flutter dev (port 3010) to call data APIs
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Accept' },
+        ],
+      },
+      {
+        source: '/app-api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Accept' },
+        ],
+      },
+    ];
+  },
+
   // API rewrites to proxy backend services
   async rewrites() {
     return [

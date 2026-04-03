@@ -28,7 +28,9 @@ class AppConstants {
   static const String integrityServiceUrl = '';  // via gateway (/integrity/*)
   
   // Next.js Frontend (for embedded visualizations)
-  static const String nextJsUrl = '/warroom';  // via gateway
+  // In production (nginx), relative URLs work. In dev (port 3010), need full URL.
+  // Actual URL is computed at runtime by UnifiedDataService.
+  static const String nextJsUrl = '';  // overridden at runtime
   
   // API Paths (relative - nginx will proxy these)
   static const String riskScoringEndpoint = '/risk/score';

@@ -141,42 +141,6 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
     );
   }
 
-  Widget _buildBottomNav() {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: AppTheme.tokenBackground.withOpacity(0.85),
-            border: Border(
-              top: BorderSide(
-                color: AppTheme.tokenBorderSubtle,
-                width: 1,
-              ),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.home_rounded, 'Home', '/'),
-                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet',
-                    '/wallet'),
-                _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
-                _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
-                _buildMoreNavItem(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildNavItem(int index, IconData icon, String label, String route) {
     final isSelected = _currentNavIndex == index;
 

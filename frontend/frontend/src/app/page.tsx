@@ -1,5 +1,6 @@
-﻿import { redirect } from 'next/navigation';
+﻿import Link from 'next/link';
+import { LandingPage } from '@/components/landing/LandingPage';
 
 export default function Home() {
-  redirect('/login');
+  return <LandingPage />;
 }

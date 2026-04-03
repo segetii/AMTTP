@@ -19,15 +19,6 @@ export 'transaction_components.dart';
 // Wallet components (AppWalletCard, AppWalletSelector, etc.)
 export 'wallet_components.dart';
 
-// =============================================================================
-// LEGACY WIDGETS (To be migrated to standard components)
-// =============================================================================
-
-// Transfer widgets
-export 'secure_transfer_widget.dart';
-export 'secure_transfer_protected_widget.dart';
-export 'secure_transfer_improved.dart';
-
 // Trust & Risk widgets
 export 'trust_check_interstitial.dart';
 export 'risk_level_indicator.dart';

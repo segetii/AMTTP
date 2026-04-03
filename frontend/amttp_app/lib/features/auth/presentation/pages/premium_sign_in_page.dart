@@ -90,10 +90,14 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     }
   }
 
-  void _quickLogin(String email, String password) {
+  Future<void> _quickLogin(String email, String password) async {
+    // Sign out the current user first so the GoRouter redirect guard
+    // doesn't fire with the stale session before the new signIn completes.
+    await ref.read(authProvider.notifier).signOut();
+
     _emailController.text = email;
     _passwordController.text = password;
-    _signIn();
+    await _signIn();
   }
 
   @override
