@@ -124,6 +124,8 @@ const r1EndUserConfig = RoleNavigationConfig(
     '/nft-swap',
     '/cross-chain',
     '/wallet-connect',
+    '/safe',
+    '/session-keys',
     '/settings',
     '/profile',
     '/more',

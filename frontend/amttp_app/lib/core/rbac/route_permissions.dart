@@ -175,6 +175,7 @@ class RoutePermissions {
     label: 'Session Keys',
     icon: Icons.key_rounded,
     allowedRoles: [
+      UserRole.R1_END_USER,
       UserRole.R2_POWER_USER,
       UserRole.R3_INSTITUTION_OPS,
       UserRole.R4_INSTITUTION_COMPLIANCE,
@@ -189,6 +190,7 @@ class RoutePermissions {
     label: 'Safe',
     icon: Icons.security_rounded,
     allowedRoles: [
+      UserRole.R1_END_USER,
       UserRole.R2_POWER_USER,
       UserRole.R3_INSTITUTION_OPS,
       UserRole.R4_INSTITUTION_COMPLIANCE,

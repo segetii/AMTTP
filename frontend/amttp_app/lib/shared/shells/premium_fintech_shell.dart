@@ -246,6 +246,10 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             '/trust-check', 'Verify addresses'),
         _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes',
             'Raise & track disputes'),
+        _buildPopupItem(Icons.security_rounded, 'Safe Management', '/safe',
+            'Gnosis Safe multi-sig'),
+        _buildPopupItem(Icons.key_rounded, 'Session Keys', '/session-keys',
+            'ERC-4337 session keys'),
         const PopupMenuDivider(),
         _buildPopupItem(
             Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),

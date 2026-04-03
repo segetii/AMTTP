@@ -67,29 +67,38 @@ def sa(lst, length=76):
 # ── Collect ALL signals ──────────────────────────────────────────
 S = {}
 
-# Flat LGBM
-if "variants" in R_flat:
-    for v, vd in R_flat["variants"].items():
-        if "scores" in vd: S[f"Flat/{v}"] = sa(vd["scores"])
+# Flat LGBM — scores stored under R_flat['scores'][variant_name] = [76 values]
+if "scores" in R_flat:
+    for v, sc in R_flat["scores"].items():
+        S[f"Flat/{v}"] = sa(sc)
 
 # Engine LGBM
 for layer_key, prefix in [("layer1_scores","EngL1"), ("layer2_scores","EngL2"), ("layer3_scores","EngL3")]:
     if layer_key in R_engine:
         for v, sc in R_engine[layer_key].items():
             S[f"{prefix}/{v}"] = sa(sc)
-if "morse_early_warning" in R_engine and "scores" in R_engine["morse_early_warning"]:
-    S["Eng/MorseEW"] = sa(R_engine["morse_early_warning"]["scores"])
+if "morse_early_warning" in R_engine:
+    mew = R_engine["morse_early_warning"]
+    if isinstance(mew, dict) and "scores" in mew:
+        S["Eng/MorseEW"] = sa(mew["scores"])
+    elif isinstance(mew, list):
+        S["Eng/MorseEW"] = sa(mew)
 
-# Damped LGBM
+# Damped LGBM — scores stored under R_damped['variants'][name]['scores'] = [76 values]
 if "variants" in R_damped:
     for v, vd in R_damped["variants"].items():
-        if "scores" in vd: S[f"Damp/{v}"] = sa(vd["scores"])
+        if isinstance(vd, dict) and "scores" in vd:
+            S[f"Damp/{v}"] = sa(vd["scores"])
 for layer_key, prefix in [("layer2_scores","DampL2"), ("layer3_scores","DampL3")]:
     if layer_key in R_damped:
         for v, sc in R_damped[layer_key].items():
             S[f"{prefix}/{v}"] = sa(sc)
-if "morse_early_warning" in R_damped and "scores" in R_damped["morse_early_warning"]:
-    S["Damp/MorseEW"] = sa(R_damped["morse_early_warning"]["scores"])
+if "morse_early_warning" in R_damped:
+    mew = R_damped["morse_early_warning"]
+    if isinstance(mew, dict) and "scores" in mew:
+        S["Damp/MorseEW"] = sa(mew["scores"])
+    elif isinstance(mew, list):
+        S["Damp/MorseEW"] = sa(mew)
 
 # ── Metrics ──────────────────────────────────────────────────────
 def metrics(scores):
@@ -377,37 +386,53 @@ l2_best    = max([(n,m) for n,m in R if "L2/" in n and not np.isnan(m["auc"])],
 l3_best    = max([(n,m) for n,m in R if "L3/" in n and not np.isnan(m["auc"])],
                  key=lambda x: x[1]["auc"], default=None)
 
-if flat_best: print(f"  Flat LGBM best:     {flat_best[0]:<35} AUC={flat_best[1]['auc']:.4f} FAR={flat_best[1]['far']:.1f}%")
-if damp_best: print(f"  BSDT-damped best:   {damp_best[0]:<35} AUC={damp_best[1]['auc']:.4f} FAR={damp_best[1]['far']:.1f}%")
-if eng_best:  print(f"  Engine best:        {eng_best[0]:<35} AUC={eng_best[1]['auc']:.4f} FAR={eng_best[1]['far']:.1f}%")
-if l2_best:   print(f"  BSDT alarm best:    {l2_best[0]:<35} AUC={l2_best[1]['auc']:.4f} FAR={l2_best[1]['far']:.1f}%")
-if l3_best:   print(f"  Morse/Betti best:   {l3_best[0]:<35} AUC={l3_best[1]['auc']:.4f} FAR={l3_best[1]['far']:.1f}%")
+def ga(x, k):
+    """Safely get metric from best tuple."""
+    if x is None: return "N/A"
+    return f"{x[1][k]:.4f}" if not np.isnan(x[1][k]) else "N/A"
+
+def gn(x):
+    """Safely get name from best tuple."""
+    return x[0] if x else "N/A"
+
+for label, best in [("Flat LGBM best:", flat_best), ("BSDT-damped best:", damp_best),
+                     ("Engine best:", eng_best), ("BSDT alarm best:", l2_best),
+                     ("Morse/Betti best:", l3_best)]:
+    if best:
+        print(f"  {label:<22} {best[0]:<40} AUC={ga(best,'auc')} FAR={ga(best,'far')}%")
+
+# Safe values for conclusions
+fa = float(flat_best[1]['auc']) if flat_best else 0
+da = float(damp_best[1]['auc']) if damp_best else 0
+ea = float(eng_best[1]['auc']) if eng_best else 0
+ff = float(flat_best[1]['far']) if flat_best else 0
+df = float(damp_best[1]['far']) if damp_best else 0
+la = float(l2_best[1]['auc']) if l2_best else 0
 
 print(f"""
   KEY FINDINGS:
-  ─────────────────────────────────────────────────────────────────────────────
+  {'─'*80}
   1. LGBM IS ALREADY ITERATIVE — its boosting rounds ARE the iteration.
      Adding an outer physics loop (Engine) is redundant and harmful (AUC drops).
   
-  2. BSDT AS FEATURES (Flat LGBM) > BSDT AS DAMPING (Damped LGBM) > BSDT AS OUTER DAMPING (Engine):
-     Flat AUC={flat_best[1]['auc']:.4f} > Damped AUC={damp_best[1]['auc']:.4f} > Engine AUC={eng_best[1]['auc']:.4f}
+  2. BSDT AS FEATURES (Flat) > BSDT AS DAMPING (Damped) > BSDT AS OUTER DAMPING (Engine):
+     Flat AUC={fa:.4f} > Damped AUC={da:.4f} > Engine AUC={ea:.4f}
   
-  3. BSDT damping inside LGBM DOES reduce FAR ({flat_best[1]['far']:.1f}% -> {damp_best[1]['far']:.1f}%)
-     but at a cost of AUC ({flat_best[1]['auc']:.4f} -> {damp_best[1]['auc']:.4f}).
-     This is the BSDT tradeoff: more conservative = fewer false alarms, lower sensitivity.
+  3. BSDT damping inside LGBM DOES reduce FAR ({ff:.1f}% -> {df:.1f}%)
+     but at a cost of AUC ({fa:.4f} -> {da:.4f}).
+     The BSDT tradeoff: more conservative = fewer false alarms, lower sensitivity.
   
   4. EARLY WARNING: Morse/Betti topology detects GFC ~11 months before onset.
      This is UNSUPERVISED structural detection — independent of LGBM.
   
   5. BSDT's ROLE changes fundamentally between engines and LGBM:
      - In gravity/molecular engine: BSDT = ADAPTIVE DAMPING (prevents collapse)
-     - In LGBM: BSDT = FEATURE PROVIDER (E_BS, MFLS, 4 channels feed as inputs)
-     - The gravity engine NEEDS BSDT damping because LJ forces have no self-regulation
-     - LGBM DOESN'T NEED BSDT damping because boosting has its own regularisation
-       (learning_rate, max_depth, min_child_samples, early_stopping)
+     - In LGBM: BSDT = FEATURE PROVIDER (E_BS, MFLS, 4 channels as inputs)
+     - Gravity engine NEEDS BSDT damping (LJ forces have no self-regulation)
+     - LGBM DOESN'T NEED BSDT damping (boosting has its own regularisation)
   
   6. OPTIMAL ARCHITECTURE for banking early warning:
-     Layer 1 (risk quantification): Flat LGBM on RT+BSDT features (AUC {flat_best[1]['auc']:.4f})
+     Layer 1 (risk quantification): Flat LGBM on RT+BSDT features (AUC {fa:.4f})
      Layer 2 (early warning alarm):  Morse topology (unsupervised, 11-month GFC lead)
-     Layer 3 (operational control):  BSDT MFLS standalone (AUC {l2_best[1]['auc']:.4f}, 0% FAR)
+     Layer 3 (operational control):  BSDT MFLS standalone (AUC {la:.4f}, 0% FAR)
 """)
