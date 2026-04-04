@@ -255,7 +255,7 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { 
         label: 'Sanctions Check', 
-        href: '/war-room/flagged-queue', 
+        href: '/war-room/sanctions', 
         icon: <BanIcon />,
         requiresRole: [Role.R4_INSTITUTION_COMPLIANCE, Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },

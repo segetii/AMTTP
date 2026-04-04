@@ -80,44 +80,61 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
   const isDev = typeof window !== 'undefined' &&
     (window.location.port === '3006' || window.location.port === '3000');
 
+  // Track if we already processed query-param login to avoid re-processing on re-render
+  const processedRef = React.useRef(false);
+
   // ── Single auth effect: runs once after auth context finishes loading ──
   useEffect(() => {
     if (isEmbed) { setPhase('done'); return; }
     if (isLoading) return; // wait for AuthProvider to finish
 
-    // Already authenticated
+    // Already authenticated with correct mode — done
     if (isAuthenticated && mode === AppMode.WAR_ROOM) {
+      setPhase('done');
+      return;
+    }
+
+    // Prevent double-processing of query params
+    if (processedRef.current) {
       setPhase('done');
       return;
     }
 
     setPhase('checking');
 
-    // Step 0: Clear stale sessions
+    // Step 0: Clear stale sessions (but do NOT reload — AuthProvider handles it)
     try {
       const raw = localStorage.getItem('amttp_session');
       if (raw) {
         const s = JSON.parse(raw);
         if (!s.createdAt || Date.now() - s.createdAt > SESSION_TTL_MS) {
           localStorage.removeItem('amttp_session');
-        } else {
-          // Session exists but auth context didn't pick it up yet — reload
-          window.location.reload();
-          return;
         }
       }
     } catch { localStorage.removeItem('amttp_session'); }
 
-    // Step 1: Flutter query-param redirect with nonce verification
-    if (roleParam && nonceParam) {
-      const cookies = document.cookie.split(';');
-      let cookieNonce = '';
-      for (const c of cookies) {
-        const [k, ...v] = c.trim().split('=');
-        if (k === 'amttp_redirect_nonce') cookieNonce = v.join('=');
+    // Step 1: Flutter query-param redirect
+    const validRoles = ['R3_INSTITUTION_OPS', 'R4_INSTITUTION_COMPLIANCE', 'R5_PLATFORM_ADMIN', 'R6_SUPER_ADMIN'];
+    if (roleParam && validRoles.includes(roleParam)) {
+      let accepted = false;
+
+      if (isDev) {
+        accepted = true;
+      } else if (nonceParam) {
+        const cookies = document.cookie.split(';');
+        let cookieNonce = '';
+        for (const c of cookies) {
+          const [k, ...v] = c.trim().split('=');
+          if (k === 'amttp_redirect_nonce') cookieNonce = v.join('=');
+        }
+        if (cookieNonce && nonceParam === cookieNonce) {
+          document.cookie = 'amttp_redirect_nonce=; Path=/; max-age=0';
+          accepted = true;
+        }
       }
-      if (nonceParam && cookieNonce && nonceParam === cookieNonce) {
-        document.cookie = 'amttp_redirect_nonce=; Path=/; max-age=0';
+
+      if (accepted) {
+        processedRef.current = true;
         const roleNames: Record<string, string> = {
           R3_INSTITUTION_OPS: 'Emma Wilson',
           R4_INSTITUTION_COMPLIANCE: 'Michael Rodriguez',
@@ -141,15 +158,24 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
         window.location.replace(window.location.pathname);
         return;
       }
-      // Nonce mismatch — strip stale params, fall through
-      console.warn('[WarRoom] Nonce mismatch — falling through to login');
+
+      console.warn('[WarRoom] Role param present but verification failed — showing login');
     }
 
-    // Step 2: Try cross-app auth bridge cookie
+    // Step 2: In dev mode, skip bridge check and go straight to DevLogin
+    processedRef.current = true;
+    if (isDev) {
+      setPhase('done');
+      return;
+    }
+
+    // Production: try cross-app auth bridge cookie (with short timeout)
+    const bridgeTimeout = setTimeout(() => setPhase('done'), 1500);
     import('@/lib/cross-app-auth-bridge').then(async (bridge) => {
       try {
         const session = await bridge.getBridgeSession();
         if (session && session.role && session.mode) {
+          clearTimeout(bridgeTimeout);
           localStorage.setItem('amttp_session', JSON.stringify({
             userId: session.sub,
             address: session.email,
@@ -161,23 +187,24 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
             institutionName: '',
             createdAt: Date.now(),
           }));
-          window.location.reload();
+          window.location.replace(window.location.pathname);
           return;
         }
       } catch (e) {
         console.warn('[WarRoom] Bridge check failed:', e);
       }
+      clearTimeout(bridgeTimeout);
       setPhase('done');
-    }).catch(() => setPhase('done'));
+    }).catch(() => { clearTimeout(bridgeTimeout); setPhase('done'); });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isAuthenticated, mode, isEmbed]);
 
-  // Safety timeout: never stay in loading state longer than 4 seconds
+  // Safety timeout: never stay in loading state longer than 2 seconds
   useEffect(() => {
     const t = setTimeout(() => {
       setPhase(prev => prev !== 'done' ? 'done' : prev);
-    }, 4000);
+    }, 2000);
     return () => clearTimeout(t);
   }, []);
 

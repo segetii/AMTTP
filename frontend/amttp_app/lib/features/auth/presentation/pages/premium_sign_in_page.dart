@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../core/rbac/roles.dart';
+import '../../../../core/web3/wallet_provider.dart';
 
 /// Premium Fintech Sign In Page - Metamask/Revolut Style
 ///
@@ -98,6 +99,45 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     _emailController.text = email;
     _passwordController.text = password;
     await _signIn();
+  }
+
+  Future<void> _connectMetaMask() async {
+    try {
+      await ref.read(walletProvider.notifier).connectWallet();
+      final walletState = ref.read(walletProvider);
+      if (walletState.isConnected && walletState.address != null && mounted) {
+        // Wallet connected — sign in as R1 End User (demo auth)
+        // The wallet address is stored in the walletProvider for transactions
+        final success = await ref.read(authProvider.notifier).signIn(
+              email: 'user@amttp.io',
+              password: 'user123',
+            );
+        if (success && mounted) {
+          final user = ref.read(authProvider).user;
+          if (user != null) {
+            _routeToAppropriateDestination(user.role);
+          } else {
+            context.go('/');
+          }
+        }
+      } else if (walletState.hasError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(walletState.error ?? 'Failed to connect wallet'),
+            backgroundColor: AppTheme.tokenDanger,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$e'),
+            backgroundColor: AppTheme.tokenDanger,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -391,7 +431,8 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
               children: [
                 Expanded(
                     child: _buildSocialButton('Connect Wallet',
-                        Icons.account_balance_wallet_outlined)),
+                        Icons.account_balance_wallet_outlined,
+                        onTap: _connectMetaMask)),
                 const SizedBox(width: 12),
                 Expanded(
                     child: _buildSocialButton(
@@ -521,29 +562,32 @@ class _PremiumSignInPageState extends ConsumerState<PremiumSignInPage>
     );
   }
 
-  Widget _buildSocialButton(String text, IconData icon) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppTheme.tokenBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.tokenBorderSubtle),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: AppTheme.slate500, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              text,
-              style: const TextStyle(
-                color: AppTheme.slate400,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+  Widget _buildSocialButton(String text, IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppTheme.tokenBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.tokenBorderSubtle),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: AppTheme.slate500, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: AppTheme.slate400,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

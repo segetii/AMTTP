@@ -45,6 +45,7 @@ function ReportTypeIcon({ type }: { type: ReportType }) {
     [ReportType.AUDIT]: '📋',
     [ReportType.TRANSACTION]: '💸',
     [ReportType.COMPLIANCE]: '✅',
+    [ReportType.SAR]: '🚨',
     [ReportType.CUSTOM]: '📝',
   };
   

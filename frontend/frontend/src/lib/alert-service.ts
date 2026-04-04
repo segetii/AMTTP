@@ -26,9 +26,9 @@ import {
 // MOCK DATA
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const MOCK_ALERTS: Alert[] = []; // MOCKS REMOVED — real data from backend
+const MOCK_ALERTS: Alert[] = []; // Seed from backend on first load
 
-const MOCK_RULES: AlertRule[] = []; // MOCKS REMOVED
+const MOCK_RULES: AlertRule[] = []; // Seed from backend on first load
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERVICE STATE
@@ -37,6 +37,62 @@ const MOCK_RULES: AlertRule[] = []; // MOCKS REMOVED
 let alerts: Alert[] = [...MOCK_ALERTS];
 let rules: AlertRule[] = [...MOCK_RULES];
 let listeners: Array<(alert: Alert) => void> = [];
+let _hasFetched = false;
+
+// Convert MongoDB flagged_transactions to Alert objects
+function mongoDocToAlert(doc: Record<string, unknown>, idx: number): Alert {
+  const riskScore = (doc.riskScore as number) ?? 0;
+  const riskLevel = (doc.riskLevel as string) || 'MEDIUM';
+  const priority =
+    riskLevel === 'CRITICAL' ? AlertPriority.CRITICAL :
+    riskLevel === 'HIGH' ? AlertPriority.HIGH :
+    riskLevel === 'MEDIUM' ? AlertPriority.MEDIUM : AlertPriority.LOW;
+  const category =
+    ((doc.reason as string) || '').toLowerCase().includes('sanction') ? AlertCategory.SANCTIONS :
+    ((doc.reason as string) || '').toLowerCase().includes('mixer') ? AlertCategory.AML :
+    AlertCategory.COMPLIANCE;
+
+  return {
+    id: (doc.id as string) || (doc._id as string) || `alert-${idx}`,
+    priority,
+    category,
+    status: (doc.status as string) === 'resolved' ? AlertStatus.RESOLVED
+      : (doc.status as string) === 'reviewing' ? AlertStatus.ACKNOWLEDGED
+      : (doc.status as string) === 'escalated' ? AlertStatus.ESCALATED
+      : AlertStatus.NEW,
+    title: `${riskLevel} Risk Transaction Flagged`,
+    message: (doc.reason as string) || 'Suspicious activity detected',
+    details: `Risk Score: ${riskScore.toFixed(1)} • Address: ${(doc.address as string) || 'Unknown'}`,
+    source: { type: 'SYSTEM', id: 'ml-engine', name: 'ML Risk Engine' },
+    resourceType: 'transaction',
+    resourceId: (doc.hash as string) || (doc.id as string) || '',
+    metadata: { riskScore, riskLevel, address: doc.address, from: doc.from, to: doc.to, value: doc.value },
+    tags: Array.isArray(doc.flags) ? (doc.flags as string[]) : [(doc.reason as string) || 'flagged'],
+    createdAt: doc.timestamp ? new Date(doc.timestamp as string).getTime() : Date.now() - idx * 60000,
+    actions: [
+      { id: 'ack', label: 'Acknowledge', type: 'primary', actionType: ActionType.ACKNOWLEDGE },
+      { id: 'esc', label: 'Escalate', type: 'secondary', actionType: ActionType.ESCALATE },
+      { id: 'dis', label: 'Dismiss', type: 'danger', actionType: ActionType.DISMISS },
+    ],
+    deliveryChannels: [DeliveryChannel.UI],
+    deliveryStatus: [{ channel: DeliveryChannel.UI, status: 'DELIVERED' as const, deliveredAt: Date.now() }],
+  };
+}
+
+async function fetchAlertsFromBackend(): Promise<void> {
+  if (_hasFetched) return;
+  _hasFetched = true;
+  try {
+    const resp = await fetch('/app-api/data/alerts', { credentials: 'same-origin', signal: AbortSignal.timeout(8000) });
+    if (!resp.ok) throw new Error(`${resp.status}`);
+    const data = await resp.json();
+    if (Array.isArray(data) && data.length > 0) {
+      alerts = data.map((d: Record<string, unknown>, i: number) => mongoDocToAlert(d, i));
+    }
+  } catch (e) {
+    console.warn('[alert-service] Backend fetch failed, using empty state:', e);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ALERT HOOK
@@ -47,6 +103,14 @@ export function useAlerts() {
   const [rulesState, setRulesState] = useState<AlertRule[]>(rules);
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch alerts from MongoDB on first mount
+  useEffect(() => {
+    setIsLoading(true);
+    fetchAlertsFromBackend()
+      .then(() => setAlertsState([...alerts]))
+      .finally(() => setIsLoading(false));
+  }, []);
   
   // Calculate unread count
   useEffect(() => {

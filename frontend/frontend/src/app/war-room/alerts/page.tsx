@@ -336,6 +336,8 @@ export default function AlertsPage() {
             onAcknowledge={handleAcknowledge}
             onResolve={handleResolve}
             onEscalate={handleEscalate}
+            onSelect={setSelectedAlert}
+            selectedAlertId={selectedAlert?.id}
           />
         )}
         
@@ -386,109 +388,226 @@ export default function AlertsPage() {
         )}
       </div>
       
-      {/* Alert Detail Modal */}
+      {/* Alert Detail Panel */}
       {selectedAlert && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl border border-borderSubtle p-6 w-full max-w-lg">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-text">{selectedAlert.title}</h3>
-                <div className="flex gap-2 mt-1">
-                  <span className={`px-2 py-0.5 rounded text-xs ${
-                    selectedAlert.priority === AlertPriority.CRITICAL ? 'bg-red-900/50 text-red-300' :
-                    selectedAlert.priority === AlertPriority.HIGH ? 'bg-orange-900/50 text-orange-300' :
-                    'bg-slate-700 text-slate-300'
-                  }`}>
-                    {selectedAlert.priority}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-xs bg-slate-700 text-slate-300">
-                    {selectedAlert.category}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-xs bg-slate-700 text-slate-300">
-                    {selectedAlert.status}
-                  </span>
+        <AlertDetailModal
+          alert={selectedAlert}
+          onClose={() => setSelectedAlert(null)}
+          onAcknowledge={() => { handleAcknowledge(selectedAlert.id); setSelectedAlert(null); }}
+          onResolve={() => { handleResolve(selectedAlert.id); setSelectedAlert(null); }}
+          onEscalate={() => { handleEscalate(selectedAlert.id); setSelectedAlert(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ALERT DETAIL MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function AlertDetailModal({
+  alert,
+  onClose,
+  onAcknowledge,
+  onResolve,
+  onEscalate,
+}: {
+  alert: Alert;
+  onClose: () => void;
+  onAcknowledge: () => void;
+  onResolve: () => void;
+  onEscalate: () => void;
+}) {
+  const m = alert.metadata || {};
+  const riskScore = (m.riskScore as number) ?? 0;
+  const riskLevel = (m.riskLevel as string) || '';
+  const from = (m.from as string) || '';
+  const to = (m.to as string) || '';
+  const address = (m.address as string) || from || '';
+  const value = m.value != null ? String(m.value) : '';
+  const txHash = alert.resourceId || '';
+
+  const riskColor =
+    riskScore >= 80 ? { bar: 'bg-red-500', text: 'text-red-400', ring: 'ring-red-500/20', bg: 'bg-red-500/10' } :
+    riskScore >= 60 ? { bar: 'bg-orange-500', text: 'text-orange-400', ring: 'ring-orange-500/20', bg: 'bg-orange-500/10' } :
+    riskScore >= 40 ? { bar: 'bg-amber-500', text: 'text-amber-400', ring: 'ring-amber-500/20', bg: 'bg-amber-500/10' } :
+                      { bar: 'bg-emerald-500', text: 'text-emerald-400', ring: 'ring-emerald-500/20', bg: 'bg-emerald-500/10' };
+
+  const priorityDot: Record<string, string> = {
+    CRITICAL: 'bg-red-500',
+    HIGH:     'bg-orange-400',
+    MEDIUM:   'bg-amber-400',
+    LOW:      'bg-sky-400',
+  };
+
+  const MonoField = ({ label, val, full }: { label: string; val: string; full?: boolean }) => (
+    <div className={full ? '' : ''}>
+      <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-1">{label}</div>
+      <div className="font-mono text-[13px] text-slate-300 bg-slate-800/60 rounded-lg px-3 py-2 truncate select-all" title={val}>{val}</div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+
+      {/* Panel */}
+      <div
+        className="relative w-full max-w-xl mx-4 bg-[#0f1219] rounded-2xl border border-slate-800
+                   shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] max-h-[88vh] flex flex-col
+                   animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ─── Header ─── */}
+        <div className="flex items-start gap-4 px-6 pt-6 pb-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${priorityDot[alert.priority] || 'bg-slate-500'}`} />
+              <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{alert.priority} • {alert.category}</span>
+            </div>
+            <h2 className="text-lg font-semibold text-white leading-snug">{alert.title}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 -mt-1 -mr-1 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* ─── Scrollable body ─── */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 scrollbar-thin">
+
+          {/* Message */}
+          <p className="text-[13px] text-slate-400 leading-relaxed">{alert.message}</p>
+
+          {/* Risk score — compact inline bar */}
+          {riskScore > 0 && (
+            <div className={`flex items-center gap-4 px-4 py-3 rounded-xl ${riskColor.bg} ring-1 ${riskColor.ring}`}>
+              <div className="flex-1">
+                <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-1.5">Risk Score</div>
+                <div className="w-full h-1.5 bg-slate-700/60 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${riskColor.bar} transition-all duration-500`} style={{ width: `${Math.min(riskScore, 100)}%` }} />
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedAlert(null)}
-                className="text-mutedText hover:text-text"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="text-right flex-shrink-0">
+                <span className={`text-2xl font-bold tabular-nums ${riskColor.text}`}>{riskScore.toFixed(0)}</span>
+                {riskLevel && <div className={`text-[11px] font-medium ${riskColor.text}`}>{riskLevel}</div>}
+              </div>
             </div>
-            
-            <p className="text-slate-300 mb-4">{selectedAlert.message}</p>
-            
-            {selectedAlert.metadata && Object.keys(selectedAlert.metadata).length > 0 && (
-              <div className="bg-surface rounded-lg p-3 mb-4">
-                <h4 className="text-sm font-medium text-mutedText mb-2">Details</h4>
-                <div className="space-y-1 text-sm">
-                  {Object.entries(selectedAlert.metadata).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-mutedText">{key}:</span>
-                      <span className="text-text font-mono">{String(value)}</span>
+          )}
+
+          {/* Transaction details — clean grid */}
+          {(txHash || from || to || value) && (
+            <div className="space-y-3">
+              <div className="text-[11px] uppercase tracking-wider text-slate-500">Transaction</div>
+              {txHash && <MonoField label="Hash" val={txHash} full />}
+              <div className="grid grid-cols-2 gap-3">
+                {from && <MonoField label="From" val={from} />}
+                {to && <MonoField label="To" val={to} />}
+              </div>
+              {(value || (address && address !== from)) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {value && (
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-1">Amount</div>
+                      <div className="text-lg font-semibold text-white tabular-nums">{value} <span className="text-sm font-normal text-slate-500">ETH</span></div>
                     </div>
-                  ))}
+                  )}
+                  {address && address !== from && <MonoField label="Flagged Address" val={address} />}
                 </div>
-              </div>
-            )}
-            
-            <div className="text-xs text-mutedText mb-4">
-              Created: {selectedAlert.createdAt.toLocaleString()}
-              {selectedAlert.acknowledgedAt && (
-                <> • Acknowledged: {new Date(selectedAlert.acknowledgedAt).toLocaleString()}</>
-              )}
-              {selectedAlert.resolvedAt && (
-                <> • Resolved: {new Date(selectedAlert.resolvedAt).toLocaleString()}</>
               )}
             </div>
-            
-            <div className="flex gap-2">
-              {selectedAlert.status === AlertStatus.NEW && (
-                <>
-                  <button
-                    onClick={() => {
-                      handleAcknowledge(selectedAlert.id);
-                      setSelectedAlert(null);
-                    }}
-                    className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-text rounded-lg"
-                  >
-                    Acknowledge
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleResolve(selectedAlert.id);
-                      setSelectedAlert(null);
-                    }}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-text rounded-lg"
-                  >
-                    Resolve
-                  </button>
-                </>
-              )}
-              {selectedAlert.status === AlertStatus.ACKNOWLEDGED && (
-                <button
-                  onClick={() => {
-                    handleResolve(selectedAlert.id);
-                    setSelectedAlert(null);
-                  }}
-                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-text rounded-lg"
-                >
-                  Resolve
-                </button>
-              )}
-              <button
-                onClick={() => setSelectedAlert(null)}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-text rounded-lg"
-              >
-                Close
-              </button>
+          )}
+
+          {/* Tags — minimal pills */}
+          {alert.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {alert.tags.map((tag) => (
+                <span key={tag} className="px-2.5 py-0.5 rounded-full bg-slate-800 text-[11px] text-slate-500 ring-1 ring-slate-700/60">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Timeline — thin & compact */}
+          <div className="pt-1">
+            <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-3">Activity</div>
+            <div className="space-y-0 relative ml-1.5">
+              <div className="absolute left-[3px] top-1 bottom-1 w-px bg-slate-800" />
+              {[
+                { time: alert.createdAt, label: 'Created', color: 'bg-slate-500' },
+                ...(alert.acknowledgedAt ? [{ time: alert.acknowledgedAt, label: `Acknowledged${alert.acknowledgedBy ? ` by ${alert.acknowledgedBy}` : ''}`, color: 'bg-amber-400' }] : []),
+                ...(alert.resolvedAt ? [{ time: alert.resolvedAt, label: `Resolved${alert.resolvedBy ? ` by ${alert.resolvedBy}` : ''}`, color: 'bg-emerald-400' }] : []),
+              ].map((ev, i) => (
+                <div key={i} className="flex items-center gap-3 py-1.5 relative">
+                  <div className={`w-[7px] h-[7px] rounded-full ${ev.color} flex-shrink-0 z-10 ring-2 ring-[#0f1219]`} />
+                  <span className="text-[12px] text-slate-400">{ev.label}</span>
+                  <span className="text-[11px] text-slate-600 tabular-nums ml-auto">{new Date(ev.time).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+
+        {/* ─── Actions bar ─── */}
+        <div className="px-6 py-4 border-t border-slate-800/80 flex items-center gap-2">
+          {alert.status === AlertStatus.NEW && (
+            <>
+              <button onClick={onAcknowledge}
+                className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                           bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20
+                           hover:bg-amber-500/20 transition-colors">
+                Acknowledge
+              </button>
+              <button onClick={onEscalate}
+                className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                           bg-red-500/10 text-red-400 ring-1 ring-red-500/20
+                           hover:bg-red-500/20 transition-colors">
+                Escalate
+              </button>
+              <button onClick={onResolve}
+                className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                           bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20
+                           hover:bg-emerald-500/20 transition-colors">
+                Resolve
+              </button>
+            </>
+          )}
+          {alert.status === AlertStatus.ACKNOWLEDGED && (
+            <>
+              <button onClick={onEscalate}
+                className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                           bg-red-500/10 text-red-400 ring-1 ring-red-500/20
+                           hover:bg-red-500/20 transition-colors">
+                Escalate
+              </button>
+              <button onClick={onResolve}
+                className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                           bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20
+                           hover:bg-emerald-500/20 transition-colors">
+                Resolve
+              </button>
+            </>
+          )}
+          {alert.status === AlertStatus.ESCALATED && (
+            <button onClick={onResolve}
+              className="flex-1 px-3 py-2 rounded-lg text-[13px] font-medium
+                         bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20
+                         hover:bg-emerald-500/20 transition-colors">
+              Resolve
+            </button>
+          )}
+          <button onClick={onClose}
+            className="px-4 py-2 rounded-lg text-[13px] text-slate-500 hover:text-slate-300
+                       hover:bg-slate-800 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -147,6 +147,7 @@ export enum ReportType {
   AUDIT = 'AUDIT',
   TRANSACTION = 'TRANSACTION',
   COMPLIANCE = 'COMPLIANCE',
+  SAR = 'SAR',
   CUSTOM = 'CUSTOM',
 }
 
@@ -361,6 +362,7 @@ export function getReportTypeLabel(type: ReportType): string {
     [ReportType.AUDIT]: 'Audit Report',
     [ReportType.TRANSACTION]: 'Transaction Report',
     [ReportType.COMPLIANCE]: 'Compliance Report',
+    [ReportType.SAR]: 'Suspicious Activity Report',
     [ReportType.CUSTOM]: 'Custom Report',
   };
   return labels[type];
