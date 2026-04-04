@@ -11,6 +11,12 @@
  * Reference: https://eips.ethereum.org/EIPS/eip-712
  */
 
+declare global {
+  interface Window {
+    ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+  }
+}
+
 import { TransferIntent, EIP712TypedData } from './secure-bridge';
 
 // ═══════════════════════════════════════════════════════════════════════════════

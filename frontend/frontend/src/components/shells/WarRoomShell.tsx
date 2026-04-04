@@ -230,10 +230,10 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { label: 'Graph Analysis', href: '/war-room/detection/graph', icon: <GraphIcon /> },
       { 
-        label: 'ML Models', 
+        label: 'Models & Rules', 
         href: '/war-room/detection/models', 
         icon: <DashboardIcon />,
-        requiresRole: [Role.R6_SUPER_ADMIN],
+        requiresRole: [Role.R5_PLATFORM_ADMIN, Role.R6_SUPER_ADMIN],
       },
       { label: 'Risk Scoring', href: '/war-room/detection/risk', icon: <AlertIcon /> },
     ],
