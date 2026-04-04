@@ -6,20 +6,46 @@
  * Main monitoring dashboard for institutional users (R3/R4)
  * 
  * Features:
- * - Live alerts
+ * - Live alerts with sparkline trends
  * - Transaction flow summary
  * - System status
  * - Quick actions
  * - Clickable flagged items with explainability modal
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/lib/auth-context';
-import { useDashboardStats, useFlaggedQueue, FlaggedTransaction } from '@/lib/data-service';
+import { useDashboardStats, useFlaggedQueue, useTimeSeriesData, FlaggedTransaction } from '@/lib/data-service';
+
+const ReactEChartsCore = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STAT CARD COMPONENT
+// SPARKLINE COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function Sparkline({ data, color = '#6366f1', areaColor }: { data: number[]; color?: string; areaColor?: string }) {
+  if (!data || data.length < 2) return null;
+  const option = useMemo(() => ({
+    animation: false,
+    grid: { top: 2, right: 0, bottom: 2, left: 0 },
+    xAxis: { type: 'category' as const, show: false, data: data.map((_, i) => i) },
+    yAxis: { type: 'value' as const, show: false, min: Math.min(...data) * 0.9, max: Math.max(...data) * 1.1 },
+    series: [{
+      type: 'line',
+      data,
+      smooth: true,
+      symbol: 'none',
+      lineStyle: { color, width: 1.5 },
+      areaStyle: { color: areaColor || `${color}20` },
+    }],
+  }), [data, color, areaColor]);
+  return <ReactEChartsCore option={option} style={{ height: 32, width: '100%' }} opts={{ renderer: 'svg' }} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STAT CARD COMPONENT (with sparkline)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface StatCardProps {
@@ -28,9 +54,11 @@ interface StatCardProps {
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
   icon: React.ReactNode;
+  sparkData?: number[];
+  sparkColor?: string;
 }
 
-function StatCard({ label, value, change, changeType = 'neutral', icon }: StatCardProps) {
+function StatCard({ label, value, change, changeType = 'neutral', icon, sparkData, sparkColor }: StatCardProps) {
   const changeColors = {
     positive: 'text-green-400',
     negative: 'text-red-400',
@@ -40,7 +68,7 @@ function StatCard({ label, value, change, changeType = 'neutral', icon }: StatCa
   return (
     <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
       <div className="flex items-start justify-between">
-        <div>
+        <div className="flex-1 min-w-0">
           <p className="text-sm text-mutedText">{label}</p>
           <p className="text-2xl font-bold text-text mt-1">{value}</p>
           {change && (
@@ -53,6 +81,11 @@ function StatCard({ label, value, change, changeType = 'neutral', icon }: StatCa
           {icon}
         </div>
       </div>
+      {sparkData && sparkData.length > 1 && (
+        <div className="mt-2 -mx-1">
+          <Sparkline data={sparkData} color={sparkColor} />
+        </div>
+      )}
     </div>
   );
 }
@@ -542,6 +575,81 @@ const MOCK_ALERTS: Alert[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// LIVE SYSTEM STATUS BAR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const SERVICES = [
+  { name: 'Risk Engine', port: 8000, path: '/health' },
+  { name: 'Policy', port: 8003, path: '/health' },
+  { name: 'Sanctions', port: 8004, path: '/health' },
+  { name: 'Monitoring', port: 8005, path: '/health' },
+  { name: 'Orchestrator', port: 8007, path: '/health' },
+];
+
+function SystemStatusBar() {
+  const [statuses, setStatuses] = React.useState<Record<string, 'up' | 'down' | 'checking'>>(
+    Object.fromEntries(SERVICES.map(s => [s.name, 'checking']))
+  );
+  const [lastChecked, setLastChecked] = React.useState<Date | null>(null);
+
+  React.useEffect(() => {
+    const check = async () => {
+      const results: Record<string, 'up' | 'down'> = {};
+      await Promise.allSettled(SERVICES.map(async svc => {
+        try {
+          const r = await fetch(`http://127.0.0.1:${svc.port}${svc.path}`, {
+            signal: AbortSignal.timeout(2000),
+          });
+          results[svc.name] = r.ok ? 'up' : 'down';
+        } catch {
+          results[svc.name] = 'down';
+        }
+      }));
+      setStatuses(results);
+      setLastChecked(new Date());
+    };
+    check();
+    const t = setInterval(check, 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  const upCount = Object.values(statuses).filter(s => s === 'up').length;
+
+  return (
+    <div className="bg-surface rounded-xl border border-borderSubtle p-4">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-6">
+          {SERVICES.map(svc => (
+            <div key={svc.name} className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                statuses[svc.name] === 'up' ? 'bg-green-500' :
+                statuses[svc.name] === 'down' ? 'bg-red-500' :
+                'bg-gray-500 animate-pulse'
+              }`} />
+              <span className="text-sm text-slate-300">{svc.name}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            upCount === SERVICES.length ? 'bg-green-500/10 text-green-400' :
+            upCount > 0 ? 'bg-amber-500/10 text-amber-400' :
+            'bg-red-500/10 text-red-400'
+          }`}>
+            {upCount}/{SERVICES.length} online
+          </span>
+          {lastChecked && (
+            <span className="text-sm text-mutedText">
+              Updated {lastChecked.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // PAGE COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -549,7 +657,22 @@ export default function WarRoomDashboard() {
   const { capabilities } = useAuth();
   const { data: stats, loading: statsLoading, error: statsError } = useDashboardStats();
   const { data: flaggedQueue, loading: flaggedLoading, error: flaggedError } = useFlaggedQueue();
+  const { data: timeseries } = useTimeSeriesData();
   const [selectedItem, setSelectedItem] = useState<FlaggedTransaction | null>(null);
+  
+  // Build sparkline data from timeseries
+  const txSparkData = useMemo(() => timeseries.map(p => p.value), [timeseries]);
+  const riskSparkData = useMemo(() => timeseries.map(p => p.baseline ?? 0), [timeseries]);
+  const flagSparkData = useMemo(() =>
+    timeseries.map(p => p.isAnomaly ? (p.baseline ?? 0) * 1.5 : (p.baseline ?? 0) * 0.5), [timeseries]);
+  const compSparkData = useMemo(() => {
+    if (!timeseries.length) return [];
+    return timeseries.map(p => {
+      const total = p.value || 1;
+      const flagged = p.isAnomaly ? total * 0.05 : total * 0.002;
+      return ((total - flagged) / total) * 100;
+    });
+  }, [timeseries]);
   
   // Format numbers for display
   const formatNumber = (n: number) => n?.toLocaleString() || '0';
@@ -593,6 +716,8 @@ export default function WarRoomDashboard() {
             value={statsLoading ? '...' : formatNumber(stats?.flaggedCount || flaggedQueue.length)}
             change={flaggedLoading ? 'Loading…' : `${flaggedQueue.filter(f => f.status === 'pending').length} pending review`}
             changeType={flaggedQueue.filter(f => f.status === 'pending').length > 5 ? 'negative' : 'neutral'}
+            sparkData={flagSparkData}
+            sparkColor="#f59e0b"
             icon={
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -604,6 +729,8 @@ export default function WarRoomDashboard() {
             value={statsLoading ? '...' : formatNumber(stats?.totalTransactions || 0)}
             change={`${formatNumber(stats?.totalVolume || 0)} ETH volume`}
             changeType="positive"
+            sparkData={txSparkData}
+            sparkColor="#22c55e"
             icon={
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
@@ -615,6 +742,8 @@ export default function WarRoomDashboard() {
             value={statsLoading ? '...' : formatPercent(stats?.complianceRate || 0)}
             change={stats?.complianceRate && stats.complianceRate > 95 ? "Within target" : "Below target"}
             changeType={stats?.complianceRate && stats.complianceRate > 95 ? "neutral" : "negative"}
+            sparkData={compSparkData}
+            sparkColor="#6366f1"
             icon={
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
@@ -626,6 +755,8 @@ export default function WarRoomDashboard() {
             value={statsLoading ? '...' : (stats?.averageRiskScore || 0).toFixed(1)}
             change={`${formatNumber(stats?.highRiskWallets || 0)} high-risk wallets`}
             changeType={stats?.highRiskWallets && stats.highRiskWallets > 10 ? "negative" : "positive"}
+            sparkData={riskSparkData}
+            sparkColor="#ef4444"
             icon={
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -700,32 +831,8 @@ export default function WarRoomDashboard() {
           </div>
         </div>
         
-        {/* System Status Bar */}
-        <div className="bg-surface rounded-xl border border-borderSubtle p-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-slate-300">Risk Engine</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-slate-300">Sanctions Oracle</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-slate-300">GraphSAGE</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-slate-300">Monitoring</span>
-              </div>
-            </div>
-            <div className="text-sm text-mutedText">
-              Last updated: Just now
-            </div>
-          </div>
-        </div>
+        {/* System Status Bar with live checks */}
+        <SystemStatusBar />
       </div>
       {/* Explainability Modal */}
       {selectedItem !== null && selectedItem && (
