@@ -280,6 +280,8 @@ export default function SankeyAuditor({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             subLabel={(d: any) => TYPE_LABELS[nodeMap.get(d.id)?.type || ''] || ''}
             labelBackground={true}
+            nodePadding={16}
+            labelMaxWidth={120}
           />
         </VisSingleContainer>
       </div>

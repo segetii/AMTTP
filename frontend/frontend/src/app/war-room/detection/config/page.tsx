@@ -33,9 +33,9 @@ import {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const ML_API  = 'http://127.0.0.1:8000';
-const MON_API = 'http://127.0.0.1:8005';
-const ORC_API = 'http://127.0.0.1:8007';
+const ML_API  = '/risk';
+const MON_API = '/monitoring';
+const ORC_API = '/api';
 
 type Tab = 'models' | 'rules' | 'thresholds';
 
@@ -92,7 +92,7 @@ interface MonitoringStats {
 
 // Which model the user wants active
 interface ModelSelection {
-  activeModel: 'ensemble' | 'xgboost' | 'lightgbm' | 'heuristic';
+  activeModel: 'ensemble' | 'xgboost' | 'lightgbm' | 'teacher' | 'heuristic';
   ensembleWeights: { xgboost: number; lightgbm: number; meta: number };
   threshold: number;
 }
@@ -165,8 +165,21 @@ export default function DetectionConfigPage() {
         const data = await r.json();
         setModelInfo(data);
         status.ml = true;
-        // Sync selection from server
-        if (data.optimal_threshold) {
+        // Sync selection from server active config
+        if (data.active_config) {
+          setSelection(prev => ({
+            ...prev,
+            activeModel: data.active_config.active_model || prev.activeModel,
+            threshold: data.active_config.threshold ?? prev.threshold,
+            ensembleWeights: data.active_config.ensemble_weights
+              ? {
+                  xgboost: data.active_config.ensemble_weights.xgboost ?? prev.ensembleWeights.xgboost,
+                  lightgbm: data.active_config.ensemble_weights.lightgbm ?? prev.ensembleWeights.lightgbm,
+                  meta: data.active_config.ensemble_weights.meta ?? prev.ensembleWeights.meta,
+                }
+              : prev.ensembleWeights,
+          }));
+        } else if (data.optimal_threshold) {
           setSelection(prev => ({ ...prev, threshold: data.optimal_threshold }));
         }
       }
@@ -234,9 +247,24 @@ export default function DetectionConfigPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Persist configuration to monitoring service thresholds endpoint
-      // In production this would POST to a config endpoint
-      setToast('Configuration saved successfully');
+      // POST model selection config to ML Risk Engine
+      const configPayload = {
+        active_model: selection.activeModel,
+        ensemble_weights: selection.ensembleWeights,
+        threshold: selection.threshold,
+      };
+      const r = await fetch(`${ML_API}/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(configPayload),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: r.statusText }));
+        throw new Error(err.detail || 'Failed to save config');
+      }
+      const result = await r.json();
+      setToast(result.message || 'Configuration saved successfully');
       setDirty(false);
       setTimeout(() => setToast(null), 3000);
     } catch (e: any) {
@@ -342,7 +370,7 @@ export default function DetectionConfigPage() {
             subtitle="Choose which ML model processes incoming transactions"
             icon={<CpuChipIcon className="w-5 h-5" />}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
               {([
                 {
                   id: 'ensemble' as const,
@@ -367,6 +395,14 @@ export default function DetectionConfigPage() {
                   icon: <BoltIcon className="w-6 h-6" />,
                   metrics: { f1: '0.941', precision: '0.938', recall: '0.945' },
                   color: 'purple',
+                },
+                {
+                  id: 'teacher' as const,
+                  name: 'Teacher (Hope_machine)',
+                  desc: 'Original teacher XGB + sigmoid calibration. 171 address-level features.',
+                  icon: <CpuChipIcon className="w-6 h-6" />,
+                  metrics: { f1: '0.872', precision: '0.890', recall: '0.854' },
+                  color: 'rose',
                 },
                 {
                   id: 'heuristic' as const,

@@ -99,8 +99,6 @@ services:
     container_name: oracle-service
     env_file:
       - ./backend/oracle-service/.env
-    dns:
-      - 8.8.8.8
     ports: ['3001:3000']
     depends_on:
       - hardhat
@@ -133,13 +131,18 @@ services:
     container_name: risk-engine
     environment:
       - PYTHONPATH=/app
+      - EXPLAINABILITY_URL=http://explainability:8009
+      - MEMGRAPH_URI=bolt://memgraph:7687
     ports: ['8000:8000']
     volumes:
       - ./ml/Automation/risk_engine:/app
-      - ./ml/Automation/ml_pipeline/models/trained:/app/models
+      - ./ml/Automation/amttp_models_20260213_213346:/app/models
+      - ./ml/Automation/ml_pipeline/models:/app/teacher_models
       - ./processed:/app/processed
     depends_on:
       - mongo
+      - memgraph
+      - explainability
     restart: unless-stopped
 
   # ═══════════════════════════════════════════════════════════════════════════

@@ -128,10 +128,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.home_rounded, 'Home', '/'),
-                _buildNavItem(1, Icons.account_balance_wallet_rounded, 'Wallet',
-                    '/wallet'),
-                _buildNavItem(2, Icons.swap_horiz_rounded, 'Send', '/transfer'),
-                _buildNavItem(3, Icons.history_rounded, 'Activity', '/history'),
+                _buildNavItem(1, Icons.swap_horiz_rounded, 'Send', '/transfer'),
+                _buildNavItem(2, Icons.history_rounded, 'Activity', '/history'),
                 _buildMoreNavItem(),
               ],
             ),
@@ -223,7 +221,7 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
 
   /// More menu with Advanced features, Settings, etc.
   Widget _buildMoreNavItem() {
-    final isSelected = _currentNavIndex == 4;
+    final isSelected = _currentNavIndex == 3;
 
     return PopupMenuButton<String>(
       offset: const Offset(0, -200),
@@ -234,7 +232,7 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
           _handleSignOut();
           return;
         }
-        setState(() => _currentNavIndex = 4);
+        setState(() => _currentNavIndex = 3);
         context.go(route);
       },
       itemBuilder: (context) => [
@@ -242,8 +240,6 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
             'Swap NFTs with escrow'),
         _buildPopupItem(Icons.device_hub_rounded, 'Cross-Chain', '/cross-chain',
             'Bridge assets across chains'),
-        _buildPopupItem(Icons.verified_user_rounded, 'Trust Check',
-            '/trust-check', 'Verify addresses'),
         _buildPopupItem(Icons.gavel_rounded, 'Disputes', '/disputes',
             'Raise & track disputes'),
         _buildPopupItem(Icons.security_rounded, 'Safe Management', '/safe',
@@ -253,8 +249,6 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
         const PopupMenuDivider(),
         _buildPopupItem(
             Icons.settings_rounded, 'Settings', '/settings', 'App preferences'),
-        _buildPopupItem(Icons.link_rounded, 'Connect Wallet', '/wallet-connect',
-            'Web3 connection'),
         const PopupMenuDivider(),
         _buildPopupItem(Icons.logout_rounded, 'Sign Out', '__sign_out__',
             'Sign out of your account'),
@@ -1657,109 +1651,107 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(ctx).size.height * 0.7,
+        ),
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
           color: AppTheme.tokenSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppTheme.gray700,
-                borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.gray700,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Receive',
-              style: TextStyle(
-                  color: AppTheme.tokenText,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.tokenText,
-                borderRadius: BorderRadius.circular(16),
+              const SizedBox(height: 16),
+              const Text(
+                'Receive',
+                style: TextStyle(
+                    color: AppTheme.tokenText,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
-              child: Column(
-                children: [
-                  // QR Code placeholder - shows address
-                  Container(
-                    width: 180,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      color: AppTheme.tokenText,
-                      border: Border.all(color: AppTheme.tokenBorderSubtle),
-                    ),
-                    child: address.isNotEmpty
-                        ? const Center(
-                            child: Icon(Icons.qr_code_rounded,
-                                size: 160, color: AppTheme.tokenBackground),
-                          )
-                        : const Center(
-                            child: Text('Connect wallet first',
-                                style: TextStyle(color: Colors.grey)),
-                          ),
-                  ),
-                ],
+              const SizedBox(height: 20),
+              // QR Code
+              Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.tokenBorderSubtle),
+                ),
+                child: address.isNotEmpty
+                    ? const Center(
+                        child: Icon(Icons.qr_code_rounded,
+                            size: 140, color: Color(0xFF1a1a2e)),
+                      )
+                    : const Center(
+                        child: Text('Connect wallet first',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.tokenCardElevated,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      address.isNotEmpty
-                          ? formattedAddress
-                          : 'No wallet connected',
-                      style: const TextStyle(
-                          color: AppTheme.tokenText,
-                          fontSize: 16,
-                          fontFamily: 'JetBrains Mono'),
-                    ),
-                  ),
-                  if (address.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: address));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Address copied!'),
-                              backgroundColor: AppTheme.tokenSuccess),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppTheme.tokenPrimary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text('Copy',
-                            style: TextStyle(
-                                color: AppTheme.tokenText,
-                                fontWeight: FontWeight.w600)),
+              const SizedBox(height: 16),
+              // Address display + copy
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppTheme.tokenCardElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.tokenBorderSubtle),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        address.isNotEmpty
+                            ? formattedAddress
+                            : 'No wallet connected',
+                        style: const TextStyle(
+                            color: AppTheme.tokenText,
+                            fontSize: 15,
+                            fontFamily: 'JetBrains Mono'),
                       ),
                     ),
-                ],
+                    if (address.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: address));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Address copied!'),
+                                backgroundColor: AppTheme.tokenSuccess),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.tokenPrimary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text('Copy',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -1974,7 +1966,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
           ),
         ),
         SizedBox(
-          height: 180,
+          height: 210,
           child: Listener(
             onPointerDown: (_) {
               // Treat any pointer interaction as user activity to pause auto-scroll
@@ -2118,6 +2110,7 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               width: 48,
@@ -2148,7 +2141,6 @@ class _FintechHomePageState extends ConsumerState<FintechHomePage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
             Row(
               children: [
                 Text(

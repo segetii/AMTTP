@@ -51,7 +51,7 @@ const HOURS = Array.from({ length: 24 }, (_, i) =>
 export default function VelocityHeatmap({
   data = [],
   title = 'Transaction Velocity',
-  showAnomalies = true,
+  showAnomalies = false,
   onCellClick,
   baselineThreshold = 0.8,
   height = 400,
@@ -61,21 +61,16 @@ export default function VelocityHeatmap({
   // Guard against empty or invalid data
   const safeData = Array.isArray(data) ? data : [];
   
-  // Transform data for ECharts
+  // Transform data for ECharts - use sqrt for visual value to spread skewed data across colors
+  // Format: [hour, day, sqrtVelocity, anomalyScore, rawVelocity]
   const chartData = useMemo(() => {
-    return safeData.map(d => [d.hour, d.day, d.velocity, d.anomalyScore ?? 0]);
+    return safeData.map(d => [d.hour, d.day, Math.sqrt(d.velocity), d.anomalyScore ?? 0, d.velocity]);
   }, [safeData]);
   
-  // Calculate max velocity for scaling
+  // Calculate max velocity for scaling (use sqrt scale to match data transform)
   const maxVelocity = useMemo(() => {
     if (safeData.length === 0) return 1;
-    return Math.max(...safeData.map(d => d.velocity), 1);
-  }, [safeData]);
-
-  // Calculate min velocity for better contrast
-  const minVelocity = useMemo(() => {
-    if (safeData.length === 0) return 0;
-    return Math.min(...safeData.map(d => d.velocity), 0);
+    return Math.sqrt(Math.max(...safeData.map(d => d.velocity), 1));
   }, [safeData]);
   
   // Detect anomalies (above baseline)
@@ -109,14 +104,39 @@ export default function VelocityHeatmap({
     tooltip: {
       position: 'top',
       formatter: (params: any) => {
-        // Guard against invalid data format
-        if (!params || !params.data || !Array.isArray(params.data) || params.data.length < 3) {
+        if (!params || !params.data) return 'No data available';
+
+        // markPoint items have { coord, value } instead of array
+        if (params.componentType === 'markPoint' || params.data.coord) {
+          const coord = params.data.coord || [0, 0];
+          const hour = coord[0] ?? 0;
+          const day = coord[1] ?? 0;
+          const velocity = params.data.value ?? 0;
+          const dayName = DAYS[day] || 'Unknown';
+          const hourName = HOURS[hour] || 'Unknown';
+          return `
+            <div style="padding: 8px;">
+              <div style="font-weight: 600; margin-bottom: 4px;">
+                ${dayName} ${hourName}
+              </div>
+              <div style="color: #ef4444;">
+                Velocity: ${Number(velocity).toFixed(0)} tx/hr
+              </div>
+              <div style="color: #ef4444; margin-top: 4px; font-size: 12px;">
+                ⚠️ Anomalous activity detected
+              </div>
+            </div>
+          `;
+        }
+
+        // Heatmap cells: [hour, day, sqrtVelocity, anomalyScore, rawVelocity]
+        if (!Array.isArray(params.data) || params.data.length < 5) {
           return 'No data available';
         }
         const hour = params.data[0] ?? 0;
         const day = params.data[1] ?? 0;
-        const velocity = params.data[2] ?? 0;
         const anomaly = params.data[3] ?? 0;
+        const velocity = params.data[4] ?? 0;
         const dayName = DAYS[day] || 'Unknown';
         const hourName = HOURS[hour] || 'Unknown';
         const isAnomaly = anomaly > baselineThreshold;
@@ -127,7 +147,7 @@ export default function VelocityHeatmap({
               ${dayName} ${hourName}
             </div>
             <div style="color: ${isAnomaly ? '#ef4444' : '#10b981'};">
-              Velocity: ${Number(velocity).toFixed(1)} tx/hr
+              Velocity: ${Number(velocity).toFixed(0)} tx/hr
             </div>
             ${isAnomaly ? `
               <div style="color: #ef4444; margin-top: 4px; font-size: 12px;">
@@ -144,17 +164,17 @@ export default function VelocityHeatmap({
       },
     },
     grid: {
-      top: 60,
-      bottom: 100,
+      top: 50,
+      bottom: 30,
       left: 60,
-      right: 40,
+      right: 120,
     },
     xAxis: {
       type: 'category',
       data: HOURS,
       name: 'Hour of Day',
       nameLocation: 'center',
-      nameGap: 30,
+      nameGap: 25,
       nameTextStyle: {
         color: darkMode ? '#94a3b8' : '#64748b',
         fontSize: 11,
@@ -164,7 +184,7 @@ export default function VelocityHeatmap({
         color: darkMode ? '#94a3b8' : '#64748b',
         fontSize: 10,
         interval: 2,
-        rotate: 45,
+        rotate: 0,
       },
       axisLine: {
         lineStyle: { color: darkMode ? '#334155' : '#e2e8f0' },
@@ -188,19 +208,26 @@ export default function VelocityHeatmap({
       },
     },
     visualMap: {
-      min: minVelocity,
+      type: 'continuous',
+      min: 0,
       max: maxVelocity,
-      calculable: true,
-      orient: 'horizontal',
-      left: 'center',
-      bottom: 55,
+      dimension: 2,
+      calculable: false,
+      orient: 'vertical',
+      right: 10,
+      top: 50,
+      bottom: 30,
+      itemWidth: 14,
+      itemHeight: undefined,
+      text: ['Anomalous', 'Quiet'],
       inRange: {
-        color: darkMode 
-          ? ['#0c4a6e', '#0369a1', '#0ea5e9', '#f59e0b', '#ef4444']
-          : ['#e0f2fe', '#7dd3fc', '#38bdf8', '#fbbf24', '#f87171'],
+        color: darkMode
+          ? ['#1e3a5f', '#0d9488', '#10b981', '#84cc16', '#eab308', '#f97316', '#ef4444']
+          : ['#ecfdf5', '#99f6e4', '#6ee7b7', '#bef264', '#fde047', '#fdba74', '#fca5a5'],
       },
       textStyle: {
-        color: darkMode ? '#94a3b8' : '#64748b',
+        color: darkMode ? '#e2e8f0' : '#1e293b',
+        fontSize: 11,
       },
     },
     series: [
@@ -236,34 +263,15 @@ export default function VelocityHeatmap({
         } : undefined,
       },
     ],
-    dataZoom: [
-      {
-        type: 'slider',
-        xAxisIndex: 0,
-        start: 0,
-        end: 100,
-        bottom: 10,
-        height: 15,
-        borderColor: darkMode ? '#334155' : '#e2e8f0',
-        backgroundColor: darkMode ? '#1e293b' : '#f8fafc',
-        fillerColor: darkMode ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)',
-        handleStyle: {
-          color: '#3b82f6',
-        },
-        textStyle: {
-          color: darkMode ? '#94a3b8' : '#64748b',
-        },
-      },
-    ],
-  }), [chartData, minVelocity, maxVelocity, title, showAnomalies, anomalyMarkers, baselineThreshold, darkMode]);
+  }), [chartData, maxVelocity, title, showAnomalies, anomalyMarkers, baselineThreshold, darkMode]);
   
   // Handle click events
   const onEvents = useMemo(() => ({
     click: (params: any) => {
-      if (onCellClick && params?.data && Array.isArray(params.data) && params.data.length >= 3) {
+      if (onCellClick && params?.data && Array.isArray(params.data) && params.data.length >= 5) {
         const hour = params.data[0] ?? 0;
         const day = params.data[1] ?? 0;
-        const velocity = params.data[2] ?? 0;
+        const velocity = params.data[4] ?? 0;
         onCellClick(hour, day, velocity);
       }
     },
@@ -276,7 +284,8 @@ export default function VelocityHeatmap({
         style={{ height }}
         opts={{ renderer: 'canvas' }}
         onEvents={onEvents}
-        notMerge={true}
+        notMerge={false}
+        lazyUpdate={true}
       />
     </div>
   );

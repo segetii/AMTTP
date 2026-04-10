@@ -263,7 +263,7 @@ class UnifiedDataService {
   Future<DashboardStats> getDashboardStats() async {
     try {
       final response = await _client.get(
-        Uri.parse('$_baseUrl/api/data/stats'),
+        Uri.parse('$_baseUrl/app-api/data/stats'),
         headers: {'Accept': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
@@ -281,7 +281,7 @@ class UnifiedDataService {
   Future<List<FlaggedTransaction>> getFlaggedQueue() async {
     try {
       final response = await _client.get(
-        Uri.parse('$_baseUrl/api/data/flagged'),
+        Uri.parse('$_baseUrl/app-api/data/flagged'),
         headers: {'Accept': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
@@ -301,7 +301,7 @@ class UnifiedDataService {
   Future<SankeyData> getSankeyData() async {
     try {
       final response = await _client.get(
-        Uri.parse('$_baseUrl/api/data/sankey'),
+        Uri.parse('$_baseUrl/app-api/data/sankey'),
         headers: {'Accept': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
@@ -319,7 +319,7 @@ class UnifiedDataService {
   Future<GraphData> getGraphData() async {
     try {
       final response = await _client.get(
-        Uri.parse('$_baseUrl/api/data/graph'),
+        Uri.parse('$_baseUrl/app-api/data/graph'),
         headers: {'Accept': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 

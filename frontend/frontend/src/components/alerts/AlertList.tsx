@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   AlertPriority,
-  AlertCategory,
   AlertStatus,
   getCategoryIcon,
   formatAlertTime,
@@ -48,12 +47,12 @@ const priorityDot: Record<AlertPriority, string> = {
 };
 
 const statusLabel: Record<string, { text: string; cls: string }> = {
-  NEW:          { text: 'New',          cls: 'text-cyan-400' },
+  NEW:          { text: 'New',          cls: 'text-yellow-400' },
   ACKNOWLEDGED: { text: 'Ack\'d',      cls: 'text-amber-400' },
   IN_PROGRESS:  { text: 'In Progress', cls: 'text-blue-400' },
   RESOLVED:     { text: 'Resolved',    cls: 'text-emerald-400' },
   DISMISSED:    { text: 'Dismissed',    cls: 'text-slate-500' },
-  ESCALATED:    { text: 'Escalated',   cls: 'text-red-400' },
+  ESCALATED:    { text: 'Escalated',   cls: 'text-purple-400' },
 };
 
 function AlertRow({
@@ -98,7 +97,7 @@ function AlertRow({
           <h3 className="text-[13px] font-medium text-slate-200 truncate">{alert.title}</h3>
           {riskScore > 0 && (
             <span className={`text-[11px] font-semibold tabular-nums flex-shrink-0 ${
-              riskScore >= 80 ? 'text-red-400' : riskScore >= 60 ? 'text-orange-400' : 'text-amber-400'
+              riskScore >= 85 ? 'text-red-400' : riskScore >= 70 ? 'text-orange-400' : riskScore >= 50 ? 'text-yellow-400' : 'text-green-400'
             }`}>{riskScore.toFixed(0)}</span>
           )}
         </div>
@@ -115,8 +114,8 @@ function AlertRow({
           <button
             onClick={(e) => { e.stopPropagation(); onAcknowledge(); }}
             className="opacity-0 group-hover:opacity-100 text-[11px] px-2 py-0.5 rounded
-                       bg-slate-700/80 text-slate-300 hover:bg-slate-600 hover:text-white
-                       transition-all duration-150"
+                       bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20
+                       hover:bg-amber-500/20 transition-all duration-150"
           >
             Ack
           </button>
@@ -146,13 +145,11 @@ export default function AlertList({
   showFilters = true,
 }: AlertListProps) {
   const [filter, setFilter] = useState({
-    priority: '' as string,
     status: '' as string,
     search: '',
   });
 
   let filtered = [...alerts];
-  if (filter.priority) filtered = filtered.filter(a => a.priority === filter.priority);
   if (filter.status) filtered = filtered.filter(a => a.status === filter.status);
   if (filter.search) {
     const q = filter.search.toLowerCase();
@@ -167,49 +164,55 @@ export default function AlertList({
     return p !== 0 ? p : b.createdAt - a.createdAt;
   });
 
+  // Status filter tabs matching Flagged Queue design
+  const statusFilters = [
+    { key: '', label: 'All' },
+    { key: AlertStatus.NEW, label: 'New' },
+    { key: AlertStatus.ACKNOWLEDGED, label: 'Acknowledged' },
+    { key: AlertStatus.ESCALATED, label: 'Escalated' },
+    { key: AlertStatus.RESOLVED, label: 'Resolved' },
+  ];
+
   return (
     <div className="space-y-0">
-      {/* Toolbar */}
+      {/* Status filter tabs */}
       {showFilters && (
-        <div className="flex items-center gap-2 px-1 pb-4">
-          <div className="relative flex-1 max-w-xs">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={filter.search}
-              onChange={(e) => setFilter(p => ({ ...p, search: e.target.value }))}
-              placeholder="Search..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-800/60 border border-slate-700/60 rounded-lg
-                         text-sm text-slate-300 placeholder-slate-600
-                         focus:outline-none focus:border-slate-600 focus:bg-slate-800 transition-colors"
-            />
+        <>
+          <div className="flex gap-4 mb-4 border-b border-slate-800">
+            {statusFilters.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(p => ({ ...p, status: f.key }))}
+                className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  filter.status === f.key
+                    ? 'text-cyan-400 border-cyan-400'
+                    : 'text-mutedText border-transparent hover:text-text'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
-          <select
-            value={filter.priority}
-            onChange={(e) => setFilter(p => ({ ...p, priority: e.target.value }))}
-            className="px-2.5 py-1.5 bg-slate-800/60 border border-slate-700/60 rounded-lg text-xs text-slate-400
-                       focus:outline-none focus:border-slate-600 transition-colors"
-          >
-            <option value="">Priority</option>
-            {Object.values(AlertPriority).map((p) => (
-              <option key={p} value={p}>{p[0] + p.slice(1).toLowerCase()}</option>
-            ))}
-          </select>
-          <select
-            value={filter.status}
-            onChange={(e) => setFilter(p => ({ ...p, status: e.target.value }))}
-            className="px-2.5 py-1.5 bg-slate-800/60 border border-slate-700/60 rounded-lg text-xs text-slate-400
-                       focus:outline-none focus:border-slate-600 transition-colors"
-          >
-            <option value="">Status</option>
-            {Object.values(AlertStatus).map((s) => (
-              <option key={s} value={s}>{s[0] + s.slice(1).toLowerCase().replace('_', ' ')}</option>
-            ))}
-          </select>
-          <span className="text-[11px] text-slate-600 ml-auto tabular-nums">{filtered.length} / {alerts.length}</span>
-        </div>
+
+          {/* Search + count toolbar */}
+          <div className="flex items-center gap-2 px-1 pb-4">
+            <div className="relative flex-1 max-w-xs">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={filter.search}
+                onChange={(e) => setFilter(p => ({ ...p, search: e.target.value }))}
+                placeholder="Search alerts..."
+                className="w-full pl-9 pr-3 py-1.5 bg-slate-800/60 border border-slate-700/60 rounded-lg
+                           text-sm text-slate-300 placeholder-slate-600
+                           focus:outline-none focus:border-slate-600 focus:bg-slate-800 transition-colors"
+              />
+            </div>
+            <span className="text-[11px] text-slate-600 ml-auto tabular-nums">{filtered.length} / {alerts.length}</span>
+          </div>
+        </>
       )}
 
       {/* List */}

@@ -1,0 +1,116 @@
+{
+  "version": "20260405_151233",
+  "training_date": "2026-04-05T15:12:33.497477",
+  "dataset": "c:\\amttp\\processed\\eth_transactions_full_labeled.parquet",
+  "n_train": 1338595,
+  "n_test": 334649,
+  "fraud_rate": 0.3695008020348497,
+  "features": {
+    "tx_raw": [
+      "value_eth",
+      "gas_price_gwei",
+      "gas_used",
+      "gas_limit",
+      "nonce",
+      "transaction_type"
+    ],
+    "derived": [
+      "gas_efficiency",
+      "value_log",
+      "gas_price_log",
+      "is_round_amount",
+      "value_gas_ratio",
+      "is_zero_value",
+      "is_high_nonce"
+    ],
+    "sender": [
+      "sender_total_transactions",
+      "sender_total_sent",
+      "sender_total_received",
+      "sender_balance",
+      "sender_avg_sent",
+      "sender_unique_receivers",
+      "sender_in_out_ratio",
+      "sender_active_duration_mins"
+    ],
+    "all": [
+      "value_eth",
+      "gas_price_gwei",
+      "gas_used",
+      "gas_limit",
+      "nonce",
+      "transaction_type",
+      "gas_efficiency",
+      "value_log",
+      "gas_price_log",
+      "is_round_amount",
+      "value_gas_ratio",
+      "is_zero_value",
+      "is_high_nonce",
+      "sender_total_transactions",
+      "sender_total_sent",
+      "sender_total_received",
+      "sender_balance",
+      "sender_avg_sent",
+      "sender_unique_receivers",
+      "sender_in_out_ratio",
+      "sender_active_duration_mins"
+    ],
+    "total_count": 21
+  },
+  "meta_learner": {
+    "type": "sklearn.LogisticRegression",
+    "coef": [
+      7.5553118219743745,
+      1.9325423426869153
+    ],
+    "intercept": -5.339796360639105,
+    "features": [
+      "xgb_prob",
+      "lgb_prob"
+    ]
+  },
+  "xgb": {
+    "n_estimators": 499,
+    "train_time_s": 208.6
+  },
+  "lgb": {
+    "n_estimators": 500,
+    "train_time_s": 162.6
+  },
+  "optimal_threshold": 0.5666826951011142,
+  "performance": {
+    "Teacher Stack (\u26a0 circular)": {
+      "roc_auc": 0.7644,
+      "pr_auc": 0.7619,
+      "f1": 0.6934,
+      "precision": 0.9998,
+      "recall": 0.5308,
+      "threshold": 0.4479
+    },
+    "TX-Level XGB": {
+      "roc_auc": 0.9897,
+      "pr_auc": 0.9847,
+      "f1": 0.9301,
+      "precision": 0.9369,
+      "recall": 0.9235,
+      "threshold": 0.5952
+    },
+    "TX-Level LGB": {
+      "roc_auc": 0.9895,
+      "pr_auc": 0.9844,
+      "f1": 0.9284,
+      "precision": 0.9319,
+      "recall": 0.9249,
+      "threshold": 0.5891
+    },
+    "TX-Level Ensemble": {
+      "roc_auc": 0.9897,
+      "pr_auc": 0.9848,
+      "f1": 0.9302,
+      "precision": 0.9354,
+      "recall": 0.9251,
+      "threshold": 0.5667
+    }
+  }
+}

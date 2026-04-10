@@ -1,0 +1,105 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\begin{document}
+\noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\\
+\noindent\textbf{Criteria:} Mandatory Criteria (Innovation) \& Optional Criteria 3 (Entrepreneurial Contributions)\\
+\noindent\textbf{Applicant:} Odeyemi Olusegun Israel\\
+\rule{\textwidth}{0.4pt}
+
+\vspace{0.5cm}
+\begin{center}
+    \textbf{\huge Evidence 10: Cross-Chain Interoperability \& SDK Distribution}
+\end{center}
+\vspace{0.5cm}
+
+\section*{1. Beyond a Single Chain: Cross-Chain Compliance}
+A critical limitation of existing Web3 compliance tools is that they operate on a single blockchain. I designed AMTTP to be \textbf{chain-agnostic} from inception, with cross-chain bridging capabilities that allow the compliance engine to monitor and enforce policy across Ethereum, Polygon, Arbitrum, and other EVM-compatible networks simultaneously.
+
+This architectural decision positions AMTTP as an infrastructure-layer protocol rather than a single-chain application, dramatically expanding its addressable market from one blockchain ecosystem to the entire multi-chain DeFi landscape.
+
+\vspace{0.3cm}
+\noindent\textbf{Solidity LayerZero Integration} (from \texttt{contracts/AMTTPCrossChain.sol}):
+
+\vspace{0.2cm}
+\noindent\fbox{\begin{minipage}{0.95\textwidth}
+\small
+\texttt{contract AMTTPCrossChain is Initializable, OwnableUpgradeable,}\\
+\texttt{~~~~UUPSUpgradeable, ILayerZeroReceiver \{}\\[4pt]
+\texttt{~~~~mapping(address => mapping(uint16 => uint256))}\\\texttt{~~~~~~~~public crossChainRiskScores;}\\
+\texttt{~~~~mapping(address => bool) public globallyBlocked;}\\
+\texttt{~~~~ILayerZeroEndpoint public lzEndpoint;}\\[4pt]
+\texttt{~~~~function sendRiskScore(}\\
+\texttt{~~~~~~~~uint16 \_dstChainId, address \_targetAddress,}\\
+\texttt{~~~~~~~~uint256 \_riskScore, bytes calldata \_adapterParams}\\
+\texttt{~~~~) external payable whenNotPaused nonReentrant \{}\\
+\texttt{~~~~~~~~require(\_riskScore <= 1000, "Invalid risk score");}\\
+\texttt{~~~~~~~~bytes memory payload = abi.encode(}\\
+\texttt{~~~~~~~~~~~~MSG\_RISK\_SCORE, \_targetAddress, \_riskScore);}\\
+\texttt{~~~~~~~~lzEndpoint.send\{value: msg.value\}(}\\
+\texttt{~~~~~~~~~~~~\_dstChainId, trustedRemotes[\_dstChainId],}\\
+\texttt{~~~~~~~~~~~~payload, payable(msg.sender), address(0),}\\
+\texttt{~~~~~~~~~~~~\_adapterParams);}\\
+\texttt{~~~~\}}\\
+\texttt{\}}
+\end{minipage}}
+\vspace{0.2cm}
+
+\noindent\textit{Figure 1: Production Solidity code for cross-chain risk score propagation via LayerZero V1, supporting 7 EVM chains (Ethereum, Polygon, Arbitrum, Optimism, Base, BSC, Avalanche) with nonce-based replay protection and per-chain rate limiting.}
+
+\section*{2. Developer SDKs: TypeScript \& Python}
+To accelerate third-party adoption, I engineered and published two developer SDKs that abstract the complexity of the AMTTP protocol into simple, importable libraries:
+\begin{itemize}
+    \item \textbf{TypeScript SDK} (\texttt{@amttp/client-sdk}): Provides ML-powered risk scoring, smart contract integration (Policy Engine \& Manager), KYC compliance checking, real-time inference, atomic swap creation, and multi-chain support (Ethereum, Polygon, Arbitrum).
+    \item \textbf{Python SDK} (\texttt{amttp}): Mirrors the TypeScript SDK capabilities for data science teams and backend integrators --- transaction risk scoring, policy management, and programmatic access to the compliance engine.
+\end{itemize}
+
+\vspace{0.3cm}
+\noindent\textbf{TypeScript SDK --- Quick Start (from \texttt{packages/client-sdk/README.md}):}
+
+\vspace{0.2cm}
+\noindent\fbox{\begin{minipage}{0.95\textwidth}
+\small
+\texttt{import \{ MLService, PolicyAction, utils \} from '@amttp/client-sdk';}\\[4pt]
+\texttt{const mlService = new MLService('http://localhost:8000');}\\[4pt]
+\texttt{const risk = await mlService.scoreTransaction('tx\_001', \{}\\
+\texttt{~~amount: 1.5,~~~~~~~~~// ETH}\\
+\texttt{~~velocity\_24h: 3,}\\
+\texttt{~~account\_age\_days: 90,}\\
+\texttt{\});}\\[4pt]
+\texttt{console.log(`Risk: \$\{utils.formatRiskScore(risk.riskScore)\}`);~~// "97.2\%"}\\
+\texttt{console.log(`Action: \$\{PolicyAction[risk.action]\}`);~~~~~~~~~~~~// "ESCROW"}
+\end{minipage}}
+
+\vspace{0.3cm}
+\noindent\textbf{Python SDK --- Quick Start (from \texttt{packages/python-sdk/README.md}):}
+
+\vspace{0.2cm}
+\noindent\fbox{\begin{minipage}{0.95\textwidth}
+\small
+\texttt{from amttp import AMTTPClient, AMTTPConfig}\\[4pt]
+\texttt{config = AMTTPConfig(}\\
+\texttt{~~rpc\_url="https://mainnet.infura.io/v3/YOUR\_KEY",}\\
+\texttt{~~oracle\_url="https://oracle.amttp.io",}\\
+\texttt{~~ml\_api\_url="https://ml.amttp.io",}\\
+\texttt{)}\\[4pt]
+\texttt{client = AMTTPClient(config)}\\
+\texttt{risk = client.score\_transaction(}\\
+\texttt{~~to="0x742d35Cc...", value=1\_000\_000\_000\_000\_000\_000,}\\
+\texttt{~~features=\{"velocity\_24h": 5, "account\_age\_days": 30\}}\\
+\texttt{)}\\[4pt]
+\texttt{print(f"Risk Score: \{risk.risk\_score:.2\%\}")~~~~\# "Risk Score: 94.12\%"}\\
+\texttt{print(f"Action: \{risk.action.name\}")~~~~~~~~~~~~\# "Action: ESCROW"}
+\end{minipage}}
+\vspace{0.2cm}
+
+\noindent\textit{Figure 2: Dual-language SDK distribution enabling enterprise integration by third-party developers in under 10 lines of code.}
+
+\section*{3. Commercial Scalability}
+The combination of chain-agnostic architecture and ready-made developer SDKs transforms AMTTP from a personal research project into a commercially licensable B2B infrastructure product. Financial institutions, DeFi protocols, and RegTech companies can integrate AMTTP's compliance capabilities into their existing systems within hours rather than months, using either the TypeScript or Python SDK.
+
+\end{document}

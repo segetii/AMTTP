@@ -123,7 +123,7 @@ function StepCard({
 
 export function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
-  const [flutterUrl, setFlutterUrl] = useState('http://localhost:3010/#/sign-out');
+  const [flutterUrl, setFlutterUrl] = useState('/app/#/sign-out');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -135,8 +135,8 @@ export function LandingPage() {
       // Dev mode — Flutter on separate port
       setFlutterUrl('http://localhost:3010/#/sign-out');
     } else {
-      // Production (nginx) — Flutter at root on same origin
-      setFlutterUrl('/#/sign-out');
+      // Production (nginx) — Flutter at /app on same origin
+      setFlutterUrl('/app/#/sign-out');
     }
     return () => window.removeEventListener('scroll', onScroll);
   }, []);

@@ -12,9 +12,9 @@ import type { Policy, PolicyFormData } from '@/types/policy';
 const USE_MOCKS = false;
 
 // API Base URLs
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
-const RISK_ENGINE_URL = process.env.NEXT_PUBLIC_RISK_ENGINE_URL || 'http://127.0.0.1:8002';
-const POLICY_API = process.env.NEXT_PUBLIC_POLICY_API_URL || 'http://127.0.0.1:8003';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+const RISK_ENGINE_URL = process.env.NEXT_PUBLIC_RISK_ENGINE_URL || '/risk';
+const POLICY_API = process.env.NEXT_PUBLIC_POLICY_API_URL || '/policy';
 
 // =============================================================================
 // Error Types

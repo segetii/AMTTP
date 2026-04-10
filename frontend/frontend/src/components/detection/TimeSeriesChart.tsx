@@ -47,7 +47,7 @@ export default function TimeSeriesChart({
   yAxisLabel = 'Value',
   showBaseline = true,
   showBounds = true,
-  showAnomalies = true,
+  showAnomalies = false,
   height = 400,
   darkMode = true,
   onBrushSelect,
@@ -115,13 +115,13 @@ export default function TimeSeriesChart({
         showBounds && 'Upper Bound',
         showBounds && 'Lower Bound',
       ].filter(Boolean) as string[],
-      top: 30,
+      top: 35,
       textStyle: {
         color: darkMode ? '#94a3b8' : '#64748b',
       },
     },
     grid: {
-      top: 80,
+      top: 90,
       bottom: 90,
       left: 60,
       right: 40,
@@ -203,8 +203,8 @@ export default function TimeSeriesChart({
       iconStyle: {
         borderColor: darkMode ? '#94a3b8' : '#64748b',
       },
-      right: 20,
-      top: 0,
+      right: 10,
+      top: 55,
     },
     brush: onBrushSelect ? {
       toolbox: ['lineX', 'clear'],
@@ -311,7 +311,8 @@ export default function TimeSeriesChart({
         style={{ height }}
         opts={{ renderer: 'canvas' }}
         onEvents={onEvents}
-        notMerge={true}
+        notMerge={false}
+        lazyUpdate={true}
       />
     </div>
   );

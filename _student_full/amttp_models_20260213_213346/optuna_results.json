@@ -1,0 +1,41 @@
+{
+  "lgb_best_params": {
+    "num_leaves": 118,
+    "max_depth": 9,
+    "learning_rate": 0.05445191819342769,
+    "min_child_samples": 33,
+    "subsample": 0.759341382487854,
+    "colsample_bytree": 0.8616604598691997,
+    "reg_alpha": 0.14417333697438717,
+    "reg_lambda": 0.12530308158784811,
+    "objective": "binary",
+    "metric": "auc",
+    "device": "cpu",
+    "boosting_type": "gbdt",
+    "is_unbalance": true,
+    "n_estimators": 2000,
+    "verbose": -1
+  },
+  "lgb_best_value": 0.9999487549606053,
+  "lgb_n_trials": 50,
+  "xgb_best_params": {
+    "max_depth": 10,
+    "learning_rate": 0.012909993953425097,
+    "min_child_weight": 2,
+    "gamma": 0.22268326599916843,
+    "subsample": 0.9148595881179127,
+    "colsample_bytree": 0.7656959715396598,
+    "reg_alpha": 4.84250472969463,
+    "reg_lambda": 0.3899311142678685,
+    "objective": "binary:logistic",
+    "tree_method": "hist",
+    "eval_metric": "aucpr",
+    "device": "cuda",
+    "scale_pos_weight": 2.9920340349448846,
+    "n_estimators": 2000,
+    "early_stopping_rounds": 50,
+    "n_jobs": -1
+  },
+  "xgb_best_value": 0.9998569683768208,
+  "xgb_n_trials": 50
+}

@@ -137,7 +137,7 @@ async function testIntegrityHashVerification() {
     };
     
     // Try to verify with server
-    const response = await fetch("http://localhost:8008/verify-integrity", {
+    const response = await fetch("/integrity/verify-integrity", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(tamperedReport)
@@ -196,7 +196,7 @@ async function testIntentHashTampering() {
     const tamperedIntent = { ...intent, valueWei: "100000000000000000000" };
     
     // Submit with original hash (mismatch)
-    const response = await fetch("http://localhost:8008/submit-payment", {
+    const response = await fetch("/integrity/submit-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -282,7 +282,7 @@ type Violation = {
 
 async function fetchViolations(adminKey = "dev-key"): Promise<Violation[]> {
   try {
-    const response = await fetch(`http://localhost:8008/violations?limit=50&admin_key=${adminKey}`);
+    const response = await fetch(`/integrity/violations?limit=50&admin_key=${adminKey}`);
     if (!response.ok) {
       console.error("Failed to fetch violations");
       return [];

@@ -18,7 +18,12 @@ RUN pip install --no-cache-dir \
     scikit-learn==1.4.0 \
     xgboost==2.0.3 \
     lightgbm==4.3.0 \
-    joblib==1.3.2
+    joblib==1.3.2 \
+    httpx==0.27.0 \
+    neo4j==5.17.0
+
+# PyTorch CPU-only for β-VAE inference
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 
 # Copy source code
 COPY . /app/

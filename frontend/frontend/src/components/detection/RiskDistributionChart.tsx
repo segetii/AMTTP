@@ -58,16 +58,26 @@ export default function RiskDistributionChart({
   // Calculate total for percentages
   const total = useMemo(() => data.reduce((sum, d) => sum + d.count, 0), [data]);
   
+  // Auto-detect data scale (0-1 vs 0-100) and adjust thresholds accordingly
+  const adjustedThresholds = useMemo(() => {
+    const maxRange = Math.max(...data.map(d => d.rangeEnd), 0);
+    if (maxRange > 1) {
+      // Data is on 0-100 scale, scale thresholds up
+      return thresholds.map(t => ({ ...t, value: t.value * 100 }));
+    }
+    return thresholds;
+  }, [data, thresholds]);
+  
   // Determine bar color based on risk range
   const getBarColor = (rangeStart: number, rangeEnd: number) => {
     const midpoint = (rangeStart + rangeEnd) / 2;
     
-    for (let i = 0; i < thresholds.length; i++) {
-      if (midpoint <= thresholds[i].value) {
-        return thresholds[i].color;
+    for (let i = 0; i < adjustedThresholds.length; i++) {
+      if (midpoint <= adjustedThresholds[i].value) {
+        return adjustedThresholds[i].color;
       }
     }
-    return thresholds[thresholds.length - 1].color;
+    return adjustedThresholds[adjustedThresholds.length - 1].color;
   };
   
   // ECharts options
@@ -96,7 +106,7 @@ export default function RiskDistributionChart({
         const bucket = data[p.dataIndex];
         const pct = total > 0 ? ((bucket.count / total) * 100).toFixed(1) : 0;
         const midpoint = (bucket.rangeStart + bucket.rangeEnd) / 2;
-        const riskLevel = thresholds.find(t => midpoint <= t.value)?.label || thresholds[thresholds.length - 1]?.label || '';
+        const riskLevel = adjustedThresholds.find(t => midpoint <= t.value)?.label || adjustedThresholds[adjustedThresholds.length - 1]?.label || '';
         return `
           <div style="padding: 4px;">
             <div style="font-weight: 600;">${bucket.range}</div>
@@ -168,28 +178,32 @@ export default function RiskDistributionChart({
             shadowColor: 'rgba(0, 0, 0, 0.3)',
           },
         },
-        markLine: thresholds.length > 0 ? {
+        markLine: adjustedThresholds.length > 0 ? {
           silent: true,
           symbol: 'none',
-          data: thresholds.slice(0, -1).map((t, idx) => ({
-            xAxis: Math.round(t.value * (data.length)) - 0.5,
-            lineStyle: {
-              color: t.color,
-              type: 'dashed',
-              width: 2,
-            },
-            label: {
-              show: true,
-              formatter: t.label,
-              color: t.color,
-              position: 'end',
-              fontSize: 11,
-            },
-          })),
+          data: adjustedThresholds.slice(0, -1).map((t, idx) => {
+            const maxEnd = Math.max(...data.map(d => d.rangeEnd), 1);
+            return {
+              xAxis: Math.round((t.value / maxEnd) * data.length) - 0.5,
+              lineStyle: {
+                color: t.color,
+                type: 'dashed',
+                width: 2,
+              },
+              label: {
+                show: true,
+                formatter: t.label,
+                color: t.color,
+                position: 'insideEndTop',
+                fontSize: 10,
+                padding: [0, 0, 0, 4],
+              },
+            };
+          }),
         } : undefined,
       },
     ],
-  }), [data, title, xAxisLabel, showPercentage, thresholds, total, darkMode]);
+  }), [data, title, xAxisLabel, showPercentage, adjustedThresholds, total, darkMode]);
   
   // Handle click events
   const onEvents = useMemo(() => ({

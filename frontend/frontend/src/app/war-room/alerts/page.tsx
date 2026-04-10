@@ -12,6 +12,7 @@
  */
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAlerts, useNotificationToast } from '@/lib/alert-service';
 import {
   Alert,
@@ -24,6 +25,7 @@ import AlertList from '@/components/alerts/AlertList';
 import AlertToastContainer from '@/components/alerts/AlertToast';
 import AlertRuleEditor from '@/components/alerts/AlertRuleEditor';
 import AlertChannelConfig from '@/components/alerts/AlertChannelConfig';
+import ExplainabilityModal, { getRiskLevel, getRiskColor as getSharedRiskColor } from '@/components/shared/ExplainabilityModal';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -228,6 +230,7 @@ export default function AlertsPage() {
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [showRuleEditor, setShowRuleEditor] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [explainAlert, setExplainAlert] = useState<Alert | null>(null);
   
   // Mock channel data for UI
   const [channels, setChannels] = useState<UIChannel[]>([
@@ -299,6 +302,11 @@ export default function AlertsPage() {
       
       {/* Header */}
       <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <Link href="/war-room" className="text-mutedText hover:text-text text-sm">
+            ← War Room
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold text-text">Alert Center</h1>
         <p className="text-mutedText">Monitor and manage system alerts in real-time</p>
       </div>
@@ -309,20 +317,19 @@ export default function AlertsPage() {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-slate-800">
         {[
-          { id: 'alerts' as TabType, label: 'Active Alerts', icon: '🔔' },
-          { id: 'rules' as TabType, label: 'Alert Rules', icon: '⚙️' },
-          { id: 'channels' as TabType, label: 'Channels', icon: '📡' },
+          { id: 'alerts' as TabType, label: 'Alerts' },
+          { id: 'rules' as TabType, label: 'Rules' },
+          { id: 'channels' as TabType, label: 'Channels' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px capitalize ${
               activeTab === tab.id
                 ? 'text-cyan-400 border-cyan-400'
                 : 'text-mutedText border-transparent hover:text-text'
             }`}
           >
-            <span className="mr-2">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -396,6 +403,26 @@ export default function AlertsPage() {
           onAcknowledge={() => { handleAcknowledge(selectedAlert.id); setSelectedAlert(null); }}
           onResolve={() => { handleResolve(selectedAlert.id); setSelectedAlert(null); }}
           onEscalate={() => { handleEscalate(selectedAlert.id); setSelectedAlert(null); }}
+          onExplain={() => { setExplainAlert(selectedAlert); setSelectedAlert(null); }}
+        />
+      )}
+
+      {/* Explainability Modal */}
+      {explainAlert && (
+        <ExplainabilityModal
+          item={{
+            id: explainAlert.id,
+            address: (explainAlert.metadata?.address as string) || (explainAlert.metadata?.from as string) || '',
+            riskScore: (explainAlert.metadata?.riskScore as number) || 0,
+            riskLevel: (explainAlert.metadata?.riskLevel as string) || '',
+            reason: explainAlert.message,
+          }}
+          onClose={() => setExplainAlert(null)}
+          onInvestigate={() => {
+            const addr = (explainAlert.metadata?.address as string) || (explainAlert.metadata?.from as string) || '';
+            setExplainAlert(null);
+            window.open(`/war-room/detection/graph?address=${addr}`, '_blank');
+          }}
         />
       )}
     </div>
@@ -412,27 +439,26 @@ function AlertDetailModal({
   onAcknowledge,
   onResolve,
   onEscalate,
+  onExplain,
 }: {
   alert: Alert;
   onClose: () => void;
   onAcknowledge: () => void;
   onResolve: () => void;
   onEscalate: () => void;
+  onExplain: () => void;
 }) {
   const m = alert.metadata || {};
   const riskScore = (m.riskScore as number) ?? 0;
-  const riskLevel = (m.riskLevel as string) || '';
+  const riskLevel = (m.riskLevel as string) || getRiskLevel(riskScore);
   const from = (m.from as string) || '';
   const to = (m.to as string) || '';
   const address = (m.address as string) || from || '';
   const value = m.value != null ? String(m.value) : '';
   const txHash = alert.resourceId || '';
 
-  const riskColor =
-    riskScore >= 80 ? { bar: 'bg-red-500', text: 'text-red-400', ring: 'ring-red-500/20', bg: 'bg-red-500/10' } :
-    riskScore >= 60 ? { bar: 'bg-orange-500', text: 'text-orange-400', ring: 'ring-orange-500/20', bg: 'bg-orange-500/10' } :
-    riskScore >= 40 ? { bar: 'bg-amber-500', text: 'text-amber-400', ring: 'ring-amber-500/20', bg: 'bg-amber-500/10' } :
-                      { bar: 'bg-emerald-500', text: 'text-emerald-400', ring: 'ring-emerald-500/20', bg: 'bg-emerald-500/10' };
+  const rc = getSharedRiskColor(riskLevel);
+  const riskColor = { bar: rc.bg, text: rc.text, ring: rc.ring, bg: rc.bgSoft };
 
   const priorityDot: Record<string, string> = {
     CRITICAL: 'bg-red-500',
@@ -605,6 +631,15 @@ function AlertDetailModal({
             className="px-4 py-2 rounded-lg text-[13px] text-slate-500 hover:text-slate-300
                        hover:bg-slate-800 transition-colors">
             Close
+          </button>
+          <button onClick={onExplain}
+            className="px-4 py-2 rounded-lg text-[13px] font-medium
+                       bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20
+                       hover:bg-indigo-500/20 transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Explainability
           </button>
         </div>
       </div>

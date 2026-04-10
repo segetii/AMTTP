@@ -36,7 +36,7 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
-    fetch('http://127.0.0.1:8007/decisions')
+    fetch('/api/decisions')
       .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
       .then(data => setTransactions(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))

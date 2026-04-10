@@ -22,7 +22,7 @@ import {
 import { logoutUser } from '@/lib/auth-service';
 import { clearBridgeSession } from '@/lib/cross-app-auth-bridge';
 
-const ORCHESTRATOR_API = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
+const ORCHESTRATOR_API = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES

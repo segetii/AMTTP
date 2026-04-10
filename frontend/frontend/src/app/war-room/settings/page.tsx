@@ -48,9 +48,39 @@ export default function SettingsPage() {
   const [apiVersion, setApiVersion] = useState('v2');
 
   const handleSave = () => {
+    // Persist settings to localStorage for session durability
+    const settings = {
+      systemName, maintenanceMode, debugMode,
+      mfaRequired, sessionTimeout, ipWhitelist,
+      emailAlerts, slackAlerts, alertThreshold,
+      rateLimitEnabled, rateLimit, apiVersion,
+    };
+    localStorage.setItem('amttp_settings', JSON.stringify(settings));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+
+  // Load saved settings on mount
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('amttp_settings');
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.systemName !== undefined) setSystemName(s.systemName);
+        if (s.maintenanceMode !== undefined) setMaintenanceMode(s.maintenanceMode);
+        if (s.debugMode !== undefined) setDebugMode(s.debugMode);
+        if (s.mfaRequired !== undefined) setMfaRequired(s.mfaRequired);
+        if (s.sessionTimeout !== undefined) setSessionTimeout(s.sessionTimeout);
+        if (s.ipWhitelist !== undefined) setIpWhitelist(s.ipWhitelist);
+        if (s.emailAlerts !== undefined) setEmailAlerts(s.emailAlerts);
+        if (s.slackAlerts !== undefined) setSlackAlerts(s.slackAlerts);
+        if (s.alertThreshold !== undefined) setAlertThreshold(s.alertThreshold);
+        if (s.rateLimitEnabled !== undefined) setRateLimitEnabled(s.rateLimitEnabled);
+        if (s.rateLimit !== undefined) setRateLimit(s.rateLimit);
+        if (s.apiVersion !== undefined) setApiVersion(s.apiVersion);
+      }
+    } catch { /* ignore corrupt data */ }
+  }, []);
 
   const tabs = [
     { id: 'general', label: 'General', icon: Cog6ToothIcon },

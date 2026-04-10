@@ -232,7 +232,7 @@ export function analyzeTimeSeries(
 // API HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export async function fetchBaseline(walletAddress: string): Promise<VelocityBaseline | null> {
   try {

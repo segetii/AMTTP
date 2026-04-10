@@ -89,6 +89,11 @@ app.use("/pep", pepRouter);
 app.use("/edd", eddRouter);
 app.use("/monitoring", monitoringRouter);
 
+// JSON 404 handler — prevent Express default HTML error page
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not Found", message: "The requested endpoint does not exist" });
+});
+
 async function start() {
   await mongoose.connect(process.env.MONGO_URI!);
   const port = process.env.PORT || 3000;

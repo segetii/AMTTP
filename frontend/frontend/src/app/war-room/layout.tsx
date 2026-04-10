@@ -233,18 +233,30 @@ function WarRoomGuardContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Not authenticated — dev mode: show role picker; prod: redirect to Flutter
+  // Not authenticated — dev mode: show role picker; prod: auto-login for demo
   if (isDev) {
     return <DevLogin />;
   }
 
-  // Production: redirect to Flutter sign-in
+  // Production: auto-login as demo R3 user for public showcase
   if (typeof window !== 'undefined') {
-    window.location.replace('/#/sign-out');
+    const caps = getRoleCapabilities(Role.R3_INSTITUTION_OPS);
+    localStorage.setItem('amttp_session', JSON.stringify({
+      userId: 'demo_r3',
+      address: 'demo@amttp.io',
+      displayName: 'Demo Analyst',
+      role: 'R3_INSTITUTION_OPS',
+      mode: 'WAR_ROOM',
+      capabilities: caps,
+      institutionId: 'inst_demo',
+      institutionName: 'AMTTP Demo',
+      createdAt: Date.now(),
+    }));
+    window.location.reload();
   }
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-gray-400">Redirecting to sign in...</p>
+      <p className="text-gray-400">Entering War Room...</p>
     </div>
   );
 }

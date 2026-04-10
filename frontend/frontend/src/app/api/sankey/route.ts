@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Backend service URL
-const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:8007';
+const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://orchestrator:8007';
 
 interface SankeyNode {
   id: string;

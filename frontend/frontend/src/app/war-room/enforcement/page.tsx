@@ -79,6 +79,9 @@ export default function EnforcementPage() {
     }, []);
   const [showNewAction, setShowNewAction] = useState(false);
   const [newActionType, setNewActionType] = useState<'freeze' | 'unfreeze' | 'blacklist' | 'whitelist' | 'limit'>('freeze');
+  const [newActionAddress, setNewActionAddress] = useState('');
+  const [newActionReason, setNewActionReason] = useState('');
+  const [newActionMultisig, setNewActionMultisig] = useState(true);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -228,6 +231,8 @@ export default function EnforcementPage() {
                 <input 
                   type="text" 
                   placeholder="0x..." 
+                  value={newActionAddress}
+                  onChange={(e) => setNewActionAddress(e.target.value)}
                   className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -236,11 +241,13 @@ export default function EnforcementPage() {
                 <textarea 
                   rows={3}
                   placeholder="Explain the reason for this action..."
+                  value={newActionReason}
+                  onChange={(e) => setNewActionReason(e.target.value)}
                   className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="multisig" className="rounded" defaultChecked />
+                <input type="checkbox" id="multisig" className="rounded" checked={newActionMultisig} onChange={(e) => setNewActionMultisig(e.target.checked)} />
                 <label htmlFor="multisig" className="text-sm text-mutedText">Require multisig approval (3 of 5)</label>
               </div>
             </div>
@@ -248,7 +255,29 @@ export default function EnforcementPage() {
               <button onClick={() => setShowNewAction(false)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg">
                 Cancel
               </button>
-              <button className={`px-4 py-2 rounded-lg ${newActionType === 'freeze' || newActionType === 'blacklist' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}>
+              <button 
+                onClick={() => {
+                  if (!newActionAddress.trim()) return;
+                  const newAction: EnforcementAction = {
+                    id: `enf-${Date.now()}`,
+                    type: newActionType,
+                    targetAddress: newActionAddress.trim(),
+                    reason: newActionReason.trim() || `Manual ${newActionType} action`,
+                    initiatedBy: 'Current User',
+                    timestamp: new Date().toISOString(),
+                    status: 'pending',
+                    requiresMultisig: newActionMultisig,
+                    approvals: 0,
+                    requiredApprovals: newActionMultisig ? 3 : 2,
+                  };
+                  setActions(prev => [newAction, ...prev]);
+                  setNewActionAddress('');
+                  setNewActionReason('');
+                  setShowNewAction(false);
+                }}
+                disabled={!newActionAddress.trim()}
+                className={`px-4 py-2 rounded-lg ${!newActionAddress.trim() ? 'bg-slate-600 cursor-not-allowed opacity-50' : newActionType === 'freeze' || newActionType === 'blacklist' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+              >
                 Submit Action
               </button>
             </div>

@@ -25,14 +25,14 @@ services:
     restart: unless-stopped
     volumes:
       - ./docker/nginx-production.conf:/etc/nginx/nginx.conf:ro
-      - ./frontend/amttp_app/build/web:/var/www/flutter:ro
+      - ./frontend/amttp_app/build/web:/var/www/app:ro
       - ./frontend/frontend/.next/static:/var/www/nextjs/static:ro
     depends_on:
       - nextjs-dashboard
       - orchestrator
       - risk-engine
     ports:
-      - "80:80"
+      - "8888:80"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/health"]
       interval: 30s
@@ -54,8 +54,10 @@ services:
       - PORT=3005
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=/api
+      - ORCHESTRATOR_URL=http://orchestrator:8007
+      - MONGODB_URL=mongodb://mongo:27017
     ports:
-      - "3006:3005"
+      - "3007:3005"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3005"]
       interval: 30s

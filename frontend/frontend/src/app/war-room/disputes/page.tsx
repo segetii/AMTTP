@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { 
   ArrowPathIcon,
   ScaleIcon,
@@ -53,9 +52,10 @@ export default function DisputesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
 
   React.useEffect(() => {
-    fetch('http://127.0.0.1:3001/dispute/list/open')
+    fetch('/oracle/dispute/list/open')
       .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
       .then(data => setDisputes(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
@@ -290,27 +290,27 @@ export default function DisputesPage() {
 
             {/* Actions */}
             <div className="flex gap-2 mt-4 pt-4 border-t border-borderSubtle">
-              <Link 
-                href={`/disputes/${dispute.id}`}
+              <button 
+                onClick={() => setSelectedDispute(dispute)}
                 className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm"
               >
                 View Details
-              </Link>
+              </button>
               {dispute.status === 'evidence' && (
-                <Link 
-                  href={`/disputes/${dispute.id}`}
+                <button 
+                  onClick={() => setSelectedDispute(dispute)}
                   className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-sm"
                 >
                   Submit Evidence
-                </Link>
+                </button>
               )}
               {dispute.status === 'voting' && (
-                <Link 
-                  href={`/disputes/${dispute.id}`}
+                <button 
+                  onClick={() => setSelectedDispute(dispute)}
                   className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-sm"
                 >
                   Cast Vote
-                </Link>
+                </button>
               )}
             </div>
           </div>
@@ -320,6 +320,44 @@ export default function DisputesPage() {
       {filteredDisputes.length === 0 && (
         <div className="text-center py-12 text-mutedText">
           No disputes found matching your filters
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {selectedDispute && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedDispute(null)}>
+          <div className="bg-surface rounded-xl border border-borderSubtle p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text">{selectedDispute.id}</h2>
+              <button onClick={() => setSelectedDispute(null)} className="text-mutedText hover:text-text text-xl">&times;</button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between"><span className="text-mutedText">Status</span><span className="capitalize">{selectedDispute.status}</span></div>
+              <div className="flex justify-between"><span className="text-mutedText">Amount</span><span>{selectedDispute.amount} {selectedDispute.token}</span></div>
+              <div className="flex justify-between"><span className="text-mutedText">Reason</span><span className="text-right max-w-[60%]">{selectedDispute.reason}</span></div>
+              <div><span className="text-mutedText block mb-1">Claimant</span><code className="text-blue-400 text-xs font-mono break-all">{selectedDispute.claimant}</code></div>
+              <div><span className="text-mutedText block mb-1">Respondent</span><code className="text-slate-300 text-xs font-mono break-all">{selectedDispute.respondent}</code></div>
+              <div className="flex justify-between"><span className="text-mutedText">TX ID</span><span className="text-xs font-mono">{selectedDispute.transactionId}</span></div>
+              <div className="flex justify-between"><span className="text-mutedText">Created</span><span>{formatDate(selectedDispute.createdAt)}</span></div>
+              <div className="flex justify-between"><span className="text-mutedText">Deadline</span><span>{getDaysRemaining(selectedDispute.deadline)} ({formatDate(selectedDispute.deadline)})</span></div>
+              {selectedDispute.votes && (
+                <div>
+                  <span className="text-mutedText block mb-1">Votes</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400">{selectedDispute.votes.for}% For</span>
+                    <span className="text-mutedText">vs</span>
+                    <span className="text-red-400">{selectedDispute.votes.against}% Against</span>
+                  </div>
+                </div>
+              )}
+              {selectedDispute.resolution && (
+                <div className="flex justify-between"><span className="text-mutedText">Resolution</span><span className="text-green-400">In favor of {selectedDispute.resolution === 'claimant' ? 'Claimant' : 'Respondent'}</span></div>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button onClick={() => setSelectedDispute(null)} className="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm">Close</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

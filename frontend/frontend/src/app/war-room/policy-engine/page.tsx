@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
-const API = 'http://127.0.0.1:8003';
+const API = '/policy';
 
 interface PolicyThresholds { lowRiskMax: number; mediumRiskMax: number; highRiskMax: number; }
 interface PolicyLimits { maxTransactionAmount: string; dailyLimit: string; monthlyLimit: string; maxCounterparties: number; }

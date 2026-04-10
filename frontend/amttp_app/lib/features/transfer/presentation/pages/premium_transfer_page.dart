@@ -35,18 +35,37 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   // Swap state
   bool _isProcessingSwap = false;
   SwapRiskResult? _riskResult;
+  String? _addressError;
 
-  final List<Map<String, dynamic>> _tokens = [
-    {'symbol': 'ETH', 'name': 'Ethereum', 'balance': '3.245', 'usd': '10,234.56', 'icon': '◆', 'color': AppTheme.brandETH},
-    {'symbol': 'USDC', 'name': 'USD Coin', 'balance': '1,847.00', 'usd': '1,847.00', 'icon': '◎', 'color': AppTheme.brandUSDC},
-    {'symbol': 'USDT', 'name': 'Tether', 'balance': '765.32', 'usd': '765.07', 'icon': '₮', 'color': AppTheme.brandUSDT},
-  ];
+  /// Validate Ethereum address format (0x + 40 hex chars)
+  bool _isValidEthAddress(String addr) {
+    return RegExp(r'^0x[0-9a-fA-F]{40}$').hasMatch(addr);
+  }
+
+  List<Map<String, dynamic>> get _tokens {
+    final walletState = ref.read(walletProvider);
+    final ethBal = walletState.ethBalance ?? 0.0;
+    final ethUsd = ethBal * AppTheme.ethUsdPrice;
+    return [
+      {'symbol': 'ETH', 'name': 'Ethereum', 'balance': ethBal.toStringAsFixed(4), 'usd': ethUsd.toStringAsFixed(2), 'icon': '◆', 'color': AppTheme.brandETH},
+      {'symbol': 'USDC', 'name': 'USD Coin', 'balance': '0.00', 'usd': '0.00', 'icon': '◎', 'color': AppTheme.brandUSDC},
+      {'symbol': 'USDT', 'name': 'Tether', 'balance': '0.00', 'usd': '0.00', 'icon': '₮', 'color': AppTheme.brandUSDT},
+    ];
+  }
 
   final List<Map<String, String>> _recentRecipients = [
     {'name': 'John D.', 'address': '0x1234...5678', 'initials': 'JD'},
     {'name': 'Alice S.', 'address': '0xABCD...EFGH', 'initials': 'AS'},
     {'name': 'Mike K.', 'address': '0x9876...5432', 'initials': 'MK'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Rebuild when text changes so the send button validates live
+    _amountController.addListener(() => setState(() {}));
+    _recipientController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -88,7 +107,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: PremiumCenteredPage(
+      body: PremiumPageContainer(
         child: Column(
           children: [
             // Header
@@ -172,15 +191,55 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
               ),
             ),
           ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.tokenCardElevated,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.tokenBorderStrong),
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (ctx) => Container(
+                  decoration: const BoxDecoration(
+                    color: AppTheme.tokenSurface,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40, height: 4,
+                        margin: const EdgeInsets.only(top: 12),
+                        decoration: BoxDecoration(color: AppTheme.gray700, borderRadius: BorderRadius.circular(2)),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.history_rounded, color: AppTheme.tokenText),
+                        title: const Text('Transaction History', style: TextStyle(color: AppTheme.tokenText)),
+                        onTap: () { Navigator.pop(ctx); context.push('/history'); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.contacts_rounded, color: AppTheme.tokenText),
+                        title: const Text('Address Book', style: TextStyle(color: AppTheme.tokenText)),
+                        onTap: () { Navigator.pop(ctx); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.settings_rounded, color: AppTheme.tokenText),
+                        title: const Text('Transfer Settings', style: TextStyle(color: AppTheme.tokenText)),
+                        onTap: () { Navigator.pop(ctx); },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppTheme.tokenCardElevated,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.tokenBorderStrong),
+              ),
+              child: const Icon(Icons.more_horiz_rounded, color: AppTheme.tokenText, size: 20),
             ),
-            child: const Icon(Icons.more_horiz_rounded, color: AppTheme.tokenText, size: 20),
           ),
         ],
       ),
@@ -365,8 +424,20 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                 child: TextField(
                   controller: _recipientController,
                   style: const TextStyle(color: AppTheme.tokenText, fontSize: 15),
+                  onChanged: (value) {
+                    // Clear trust state and address error when recipient changes
+                    if (_showTrustCheck || _hasTrustResult || _addressError != null) {
+                      setState(() {
+                        _showTrustCheck = false;
+                        _hasTrustResult = false;
+                        _trustError = null;
+                        _addressError = null;
+                        _riskResult = null;
+                      });
+                    }
+                  },
                   decoration: InputDecoration(
-                    hintText: 'Enter address or ENS name',
+                    hintText: 'Enter 0x address (42 chars)',
                     hintStyle: TextStyle(color: Colors.white.withAlpha(77)),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -413,23 +484,50 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           ),
         ),
         const SizedBox(height: 10),
-        GestureDetector(
-          onTap: _checkTrust,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Icon(Icons.shield_rounded, size: 16, color: Colors.white.withAlpha(179)),
-              const SizedBox(width: 6),
-              Text(
-                'Check trust',
-                style: TextStyle(
-                  color: AppTheme.tokenPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Address validation error
+            if (_addressError != null)
+              Expanded(
+                child: Text(
+                  _addressError!,
+                  style: const TextStyle(color: AppTheme.tokenDanger, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
+              )
+            else
+              const Spacer(),
+            GestureDetector(
+              onTap: () {
+                final addr = _recipientController.text.trim();
+                if (addr.isEmpty) {
+                  setState(() => _addressError = 'Enter a recipient address');
+                  return;
+                }
+                if (!_isValidEthAddress(addr)) {
+                  setState(() => _addressError = 'Invalid address — must be 0x followed by 40 hex characters');
+                  return;
+                }
+                setState(() => _addressError = null);
+                _checkTrust();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.shield_rounded, size: 16, color: Colors.white.withAlpha(179)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Check trust',
+                    style: TextStyle(
+                      color: AppTheme.tokenPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -861,12 +959,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
             onPressed: () async {
               final proceed = await _confirmSendAnyway();
               if (proceed) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(risky ? 'Proceeding despite risk' : 'Proceeding to send'),
-                    backgroundColor: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimary,
-                  ),
-                );
+                _confirmSend();
               }
             },
             icon: Icon(Icons.send_rounded, color: risky ? AppTheme.tokenDanger : AppTheme.tokenPrimaryLight),
@@ -905,6 +998,13 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
         false;
   }
 
+  // Compute network fee from gas speed slider (gwei-based estimate)
+  String get _networkFee {
+    // Base fee estimate: slow ~$1.20, normal ~$2.45, fast ~$4.80
+    final fee = 1.20 + (_gasSpeed * 3.60);
+    return '~\$${fee.toStringAsFixed(2)}';
+  }
+
   Widget _buildGasSettings() {
     String speedLabel;
     String speedTime;
@@ -940,25 +1040,39 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppTheme.tokenBorderSubtle,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      '~\$2.45',
-                      style: const TextStyle(
-                        color: AppTheme.tokenText,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  // Cycle through gas speeds: slow -> normal -> fast -> slow
+                  setState(() {
+                    if (_gasSpeed < 0.33) {
+                      _gasSpeed = 0.5;
+                    } else if (_gasSpeed < 0.66) {
+                      _gasSpeed = 1.0;
+                    } else {
+                      _gasSpeed = 0.0;
+                    }
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.tokenBorderSubtle,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        _networkFee,
+                        style: const TextStyle(
+                          color: AppTheme.tokenText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(Icons.edit_rounded, color: AppTheme.slate500, size: 14),
-                  ],
+                      const SizedBox(width: 6),
+                      Icon(Icons.edit_rounded, color: AppTheme.slate500, size: 14),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1028,7 +1142,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
           const SizedBox(height: 16),
           _buildSummaryRow('Amount', '$amount $_selectedToken'),
           const SizedBox(height: 8),
-          _buildSummaryRow('Network fee', '~\$2.45'),
+          _buildSummaryRow('Network fee', _networkFee),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(color: AppTheme.tokenBorderSubtle),
@@ -1064,67 +1178,144 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
   }
 
   Widget _buildSendButton() {
-    final isValid = _recipientController.text.isNotEmpty && 
-                    _amountController.text.isNotEmpty &&
-                    double.tryParse(_amountController.text) != null &&
-                    double.parse(_amountController.text) > 0;
+    final walletState = ref.watch(walletProvider);
+    final amount = double.tryParse(_amountController.text);
+    final recipient = _recipientController.text.trim();
+    final token = _tokens.firstWhere((t) => t['symbol'] == _selectedToken);
+    final balance = double.tryParse((token['balance'] as String).replaceAll(',', '')) ?? 0;
+
+    final hasRecipient = recipient.isNotEmpty;
+    final hasValidAddress = _isValidEthAddress(recipient);
+    final hasAmount = amount != null && amount > 0;
+    final hasSufficientBalance = hasAmount && amount <= balance;
+    final isConnected = walletState.isConnected;
+    final isValid = hasRecipient && hasValidAddress && hasAmount && hasSufficientBalance && isConnected;
+
+    // Determine the helper label when button is disabled
+    String? helperText;
+    if (!isConnected) {
+      helperText = 'Connect wallet first';
+    } else if (!hasRecipient) {
+      helperText = 'Enter a recipient';
+    } else if (!hasValidAddress) {
+      helperText = 'Invalid recipient address';
+    } else if (!hasAmount) {
+      helperText = 'Enter an amount';
+    } else if (!hasSufficientBalance) {
+      helperText = 'Insufficient balance';
+    }
     
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       decoration: BoxDecoration(
         color: AppTheme.tokenBackground,
         border: Border(
           top: BorderSide(color: AppTheme.tokenBorderSubtle),
         ),
       ),
-      child: GestureDetector(
-        onTap: isValid ? () => _confirmSend() : null,
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: isValid
-                ? const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft])
-                : null,
-            color: isValid ? null : AppTheme.tokenBorderSubtle,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isValid
-                ? [
-                    BoxShadow(
-                      color: AppTheme.tokenPrimary.withAlpha(102),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (helperText != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                helperText,
+                style: TextStyle(
+                  color: !isConnected || (!hasSufficientBalance && hasAmount)
+                      ? AppTheme.tokenDanger
+                      : AppTheme.slate400,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          GestureDetector(
+            onTap: isValid ? () => _confirmSend() : null,
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: isValid
+                    ? const LinearGradient(colors: [AppTheme.tokenPrimary, AppTheme.tokenPrimarySoft])
+                    : null,
+                color: isValid ? null : AppTheme.tokenBorderSubtle,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isValid
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.tokenPrimary.withAlpha(102),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Review & Send',
+                      style: TextStyle(
+                        color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ]
-                : null,
-          ),
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Review & Send',
-                  style: TextStyle(
-                    color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
+                      size: 20,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: isValid ? AppTheme.tokenText : Colors.white.withAlpha(77),
-                  size: 20,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  void _confirmSend() {
+  void _confirmSend() async {
     final walletState = ref.read(walletProvider);
+    
+    if (!walletState.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please connect your wallet first'),
+          backgroundColor: AppTheme.tokenDangerStrong,
+        ),
+      );
+      return;
+    }
+
+    // Evaluate risk BEFORE showing the modal
+    final fromAddress = walletState.address ?? '';
+    final toAddress = _recipientController.text.trim();
+    final amount = double.tryParse(_amountController.text) ?? 0;
+
+    setState(() => _isProcessingSwap = true);
+    try {
+      final riskResult = await _swapService.evaluateTransactionRisk(
+        fromAddress: fromAddress,
+        toAddress: toAddress,
+        amountEth: amount,
+      );
+      setState(() {
+        _riskResult = riskResult;
+        _isProcessingSwap = false;
+      });
+    } catch (_) {
+      setState(() => _isProcessingSwap = false);
+    }
+
+    if (!mounted) return;
+    _showConfirmationModal(walletState);
+  }
+
+  void _showConfirmationModal(dynamic walletState) {
     
     showModalBottomSheet(
       context: context,
@@ -1194,7 +1385,7 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                       const SizedBox(height: 20),
                       _buildConfirmRow('To', _recipientController.text),
                       _buildConfirmRow('Network', 'Sepolia Testnet'),
-                      _buildConfirmRow('Fee', '~\$0.50'),
+                      _buildConfirmRow('Fee', _networkFee),
                       
                       // Risk Assessment Section
                       if (_riskResult != null) ...[
@@ -1285,9 +1476,11 @@ class _PremiumTransferPageState extends ConsumerState<PremiumTransferPage> {
                             final toAddress = _recipientController.text.trim();
                             
                             // Execute the transfer via swap service
+                            // Pass the pre-computed risk result to skip duplicate API call
                             final result = await _swapService.executeTransfer(
                               toAddress: toAddress,
                               amountEth: amount,
+                              precomputedRisk: _riskResult,
                             );
                             
                             Navigator.pop(context);

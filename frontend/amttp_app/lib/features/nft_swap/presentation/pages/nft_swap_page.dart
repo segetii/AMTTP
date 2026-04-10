@@ -336,7 +336,7 @@ class _NFTToETHSwapTabState extends ConsumerState<_NFTToETHSwapTab> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedTimelock,
+                    value: _selectedTimelock,
                     decoration: _inputDecoration('Time Lock', Icons.timer),
                     dropdownColor: AppTheme.darkCard,
                     style: const TextStyle(color: AppTheme.cleanWhite),

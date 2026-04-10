@@ -1,0 +1,235 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IAMTTPNFT",
+  "sourceName": "contracts/AMTTPRouter.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "approveSwap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "preimage",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completeNFTSwap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "preimage",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completeNFTtoNFTSwap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "depositETHForNFT",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "depositNFTForSwap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nftContract",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "ethAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hashlock",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timelock",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "riskScore",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "kycHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "oracleSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "initiateNFTtoETHSwap",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "partyB",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nftContractA",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenIdA",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "nftContractB",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenIdB",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hashlock",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timelock",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "riskScore",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "oracleSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "initiateNFTtoNFTSwap",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "evidence",
+          "type": "string"
+        }
+      ],
+      "name": "raiseDispute",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "swapId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "refundNFTSwap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

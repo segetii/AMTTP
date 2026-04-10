@@ -1,10 +1,10 @@
 // API client for SIEM Dashboard
 // Orchestrator Service (master coordinator) - Port 8007
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
-// Risk Engine Service (ML scoring) - Port 8002
-const RISK_ENGINE_URL = process.env.NEXT_PUBLIC_RISK_ENGINE_URL || 'http://127.0.0.1:8002';
-// Explainability Service - Port 8009
-const EXPLAIN_URL = process.env.NEXT_PUBLIC_EXPLAIN_URL || 'http://127.0.0.1:8009';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Risk Engine Service (ML scoring)
+const RISK_ENGINE_URL = process.env.NEXT_PUBLIC_RISK_ENGINE_URL || '/risk';
+// Explainability Service
+const EXPLAIN_URL = process.env.NEXT_PUBLIC_EXPLAIN_URL || '/explain';
 
 import type { Alert, EntityProfile, DashboardStats, TimelineDataPoint } from '@/types/siem';
 
@@ -877,7 +877,7 @@ export async function fetchTimelineData(timeRange: string): Promise<TimelineData
 
 import type { Policy, PolicyFormData } from '@/types/policy';
 
-const POLICY_API = process.env.NEXT_PUBLIC_POLICY_API_URL || 'http://127.0.0.1:8003';
+const POLICY_API = process.env.NEXT_PUBLIC_POLICY_API_URL || '/policy';
 
 // Helper: fetch with timeout to avoid long hangs when backend is off
 async function policyFetch(url: string, init?: RequestInit): Promise<Response> {

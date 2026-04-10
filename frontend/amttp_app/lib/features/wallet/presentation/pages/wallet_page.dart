@@ -93,19 +93,57 @@ class WalletPage extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: AppTheme.premiumGradient,
+        gradient: const LinearGradient(
+          colors: [
+            AppTheme.tokenGradientCard,   // #1E1E3F — deep indigo surface
+            AppTheme.tokenSurface,         // #12121A — app surface
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppTheme.tokenPrimary.withOpacity(0.25),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryPurple.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppTheme.tokenPrimary.withOpacity(0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
+          // Glossy highlight overlay
+          Positioned(
+            top: -20,
+            left: -20,
+            right: 40,
+            child: Container(
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.08),
+                    Colors.white.withOpacity(0.0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -169,6 +207,8 @@ class WalletPage extends ConsumerWidget {
               color: AppTheme.cleanWhite.withOpacity(0.7),
               fontSize: 14,
             ),
+          ),
+        ],
           ),
         ],
       ),

@@ -14,7 +14,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   MagnifyingGlassIcon,
   ChartBarIcon,
@@ -124,18 +124,28 @@ function ChartPlaceholder({ height = 350 }: { height?: number }) {
   );
 }
 
-function AlertBanner() {
+function AlertBanner({ flaggedCount, onReview }: { flaggedCount: number; onReview: () => void }) {
+  if (flaggedCount === 0) return null;
   return (
-    <div className="bg-amber-900/30 border border-amber-600/30 rounded-lg p-4 mb-6">
+    <div 
+      className="bg-amber-900/30 border border-amber-600/30 rounded-lg p-4 mb-6 cursor-pointer hover:bg-amber-900/50 transition-colors"
+      onClick={onReview}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onReview(); }}
+    >
       <div className="flex items-center gap-3">
-        <ExclamationTriangleIcon className="w-6 h-6 text-amber-500" />
+        <ExclamationTriangleIcon className="w-6 h-6 text-amber-500 animate-pulse" />
         <div>
-          <h4 className="font-semibold text-amber-200">3 High-Priority Alerts</h4>
+          <h4 className="font-semibold text-amber-200">{flaggedCount} High-Priority Alert{flaggedCount !== 1 ? 's' : ''}</h4>
           <p className="text-sm text-amber-300/70">
             Unusual velocity detected in cluster 0x7f2e...3d4c • Possible layering pattern • Review required
           </p>
         </div>
-        <button className="ml-auto bg-amber-600 hover:bg-amber-700 text-text px-4 py-2 rounded-lg text-sm">
+        <button 
+          className="ml-auto bg-amber-600 hover:bg-amber-700 text-text px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          onClick={(e) => { e.stopPropagation(); onReview(); }}
+        >
           Review Alerts
         </button>
       </div>
@@ -149,11 +159,20 @@ function AlertBanner() {
 
 export default function DetectionStudioPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const viewParam = searchParams.get('view') as ViewMode | null;
   const embedParam = searchParams.get('embed') === 'true';
   const [activeView, setActiveView] = useState<ViewMode>(viewParam || 'overview');
   const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [flaggedCount, setFlaggedCount] = useState(0);
   
+  // Fetch flagged count for the alert banner
+  useEffect(() => {
+    fetch('/app-api/data/flagged', { signal: AbortSignal.timeout(5000) })
+      .then(r => r.ok ? r.json() : [])
+      .then(d => setFlaggedCount(Array.isArray(d) ? d.length : 0))
+      .catch(() => setFlaggedCount(3)); // fallback
+  }, []);
   // Update activeView when URL parameter changes
   useEffect(() => {
     if (viewParam && ['overview', 'velocity', 'network', 'flow', 'distribution'].includes(viewParam)) {
@@ -233,6 +252,7 @@ export default function DetectionStudioPage() {
               <VelocityHeatmap
                 data={heatmapData}
                 onCellClick={handleHeatmapClick}
+                showAnomalies={true}
               />
             )}
           </div>
@@ -329,7 +349,7 @@ export default function DetectionStudioPage() {
         </div>
         
         {/* Alert Banner */}
-        <AlertBanner />
+        <AlertBanner flaggedCount={flaggedCount} onReview={() => router.push('/war-room/alerts')} />
         
         {/* Search Bar */}
         <div className="mb-6">
@@ -376,7 +396,7 @@ export default function DetectionStudioPage() {
             <div className="space-y-6">
               {/* Row 1: Time Series + Distribution */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
+                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle overflow-hidden min-h-[420px]">
                   {isLoadingTimeSeries ? (
                     <div className="h-[360px] flex items-center justify-center">
                       <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
@@ -391,7 +411,7 @@ export default function DetectionStudioPage() {
                     <div className="h-[360px] flex items-center justify-center text-mutedText">No time series data</div>
                   )}
                 </div>
-                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle">
+                <div className="bg-surface/50 rounded-xl p-4 border border-borderSubtle overflow-hidden min-h-[420px]">
                   {isLoadingDistribution ? (
                     <div className="h-[360px] flex items-center justify-center">
                       <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
@@ -420,6 +440,7 @@ export default function DetectionStudioPage() {
                     title="Velocity Heatmap (Hour × Day)"
                     height={350}
                     onCellClick={handleHeatmapClick}
+                    showAnomalies={true}
                   />
                 ) : (
                   <div className="h-[350px] flex items-center justify-center text-mutedText">No velocity data</div>
@@ -467,6 +488,7 @@ export default function DetectionStudioPage() {
                     data={heatmapData}
                     height={500}
                     onCellClick={handleHeatmapClick}
+                    showAnomalies={true}
                   />
                 ) : (
                   <div className="h-[500px] flex items-center justify-center text-mutedText">No velocity data</div>

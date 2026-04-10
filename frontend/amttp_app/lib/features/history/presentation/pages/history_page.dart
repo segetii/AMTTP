@@ -13,17 +13,18 @@ final transactionHistoryProvider = FutureProvider.family<List<TransactionHistory
     final apiService = ApiService();
     return await apiService.getTransactionHistory(address);
   } catch (e) {
-    // Return mock data for demo
-    return _generateMockTransactions();
+    // Return demo data using the connected wallet address for consistency
+    return _generateMockTransactions(address);
   }
 });
 
-List<TransactionHistoryItem> _generateMockTransactions() {
+List<TransactionHistoryItem> _generateMockTransactions([String connectedAddress = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e']) {
+  final myAddr = connectedAddress.isNotEmpty ? connectedAddress : '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
   final now = DateTime.now();
   return [
     TransactionHistoryItem(
       txId: '0x1a2b3c4d5e6f...',
-      fromAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      fromAddress: myAddr,
       toAddress: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
       amount: 0.15,
       asset: 'ETH',
@@ -34,7 +35,7 @@ List<TransactionHistoryItem> _generateMockTransactions() {
     TransactionHistoryItem(
       txId: '0x2b3c4d5e6f7g...',
       fromAddress: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
-      toAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      toAddress: myAddr,
       amount: 0.25,
       asset: 'ETH',
       timestamp: now.subtract(const Duration(hours: 5)),
@@ -43,7 +44,7 @@ List<TransactionHistoryItem> _generateMockTransactions() {
     ),
     TransactionHistoryItem(
       txId: '0x3c4d5e6f7g8h...',
-      fromAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      fromAddress: myAddr,
       toAddress: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
       amount: 1.5,
       asset: 'ETH',
@@ -54,7 +55,7 @@ List<TransactionHistoryItem> _generateMockTransactions() {
     TransactionHistoryItem(
       txId: '0x4d5e6f7g8h9i...',
       fromAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      toAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      toAddress: myAddr,
       amount: 0.5,
       asset: 'ETH',
       timestamp: now.subtract(const Duration(days: 2)),
@@ -63,7 +64,7 @@ List<TransactionHistoryItem> _generateMockTransactions() {
     ),
     TransactionHistoryItem(
       txId: '0x5e6f7g8h9i0j...',
-      fromAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      fromAddress: myAddr,
       toAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       amount: 0.08,
       asset: 'ETH',

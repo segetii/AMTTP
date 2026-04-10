@@ -33,6 +33,7 @@ from .stack import RepresentationStack
 from .centroid import CentroidEstimator
 from .tensor import AnomalyTensor, TensorResult
 from .projection import HyperplaneProjector
+from .classifier import UDLClassifier
 from .pipeline import UDLPipeline
 from .rank_fusion import RankFusionPipeline
 from .hybrid_pipeline import HybridPipeline
@@ -50,10 +51,11 @@ from .system_mode import (
     SystemMode,
     MolecularEngine,
     GravityModeEngine,
+    HybridGravityEngine,
     Mode4GravityEngine,
     Mode5GravityEngine,
     Mode6GravityEngine,
-    HybridGravityEngine,
+    Mode7GravityEngine,
     MorseTopologyAlarm,
     LyapunovStabiliser,
     ConvergenceReport,
@@ -62,6 +64,7 @@ from .system_mode import (
     UDLPostSimScorer,
     FusedSystemScorer,
 )
+from .ellipsoid_geometry import EllipsoidGeometry
 from .backend import xp, jit, vmap, to_numpy, from_numpy, BACKEND
 
 __all__ = [
@@ -110,10 +113,16 @@ __all__ = [
     "MolecularEngine",
     "GravityModeEngine",
     "HybridGravityEngine",
+    "Mode4GravityEngine",
+    "Mode5GravityEngine",
+    "Mode6GravityEngine",
+    "Mode7GravityEngine",
     "MorseTopologyAlarm",
     "LyapunovStabiliser",
     "ConvergenceReport",
     "SpectraFalseAlarmFilter",
+    # Ellipsoid geometry & trigonometry
+    "EllipsoidGeometry",
     # Backend (JAX / CuPy / NumPy)
     "xp",
     "jit",

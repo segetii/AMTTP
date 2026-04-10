@@ -32,7 +32,7 @@ interface SanctionsListEntry {
 // SANCTIONS API
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const SANCTIONS_URL = 'http://127.0.0.1:8004';
+const SANCTIONS_URL = '/sanctions';
 
 async function checkSanctions(address: string): Promise<SanctionsResult> {
   try {

@@ -25,6 +25,7 @@ const RiskDistributionChart = dynamic(
 );
 
 import { generateMockDistributionData } from '@/components/detection/RiskDistributionChart';
+import { useDistributionData } from '@/lib/data-service';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PLACEHOLDER
@@ -127,18 +128,19 @@ export default function RiskScoringPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8007/dashboard/stats')
+    fetch('/api/dashboard/stats')
       .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
       .then(data => setAssessments(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
-  const distributionData = generateMockDistributionData(); // TODO: Replace with real data if available
+  const { data: apiDistributionData, loading: distLoading } = useDistributionData();
+  const distributionData = apiDistributionData.length > 0 ? apiDistributionData : generateMockDistributionData();
 
   const handleRefresh = () => {
     setLoading(true);
-    fetch('http://127.0.0.1:8007/dashboard/stats')
+    fetch('/api/dashboard/stats')
       .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
       .then(data => setAssessments(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))

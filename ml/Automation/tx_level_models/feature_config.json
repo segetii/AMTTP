@@ -1,0 +1,53 @@
+{
+  "tx_raw_features": [
+    "value_eth",
+    "gas_price_gwei",
+    "gas_used",
+    "gas_limit",
+    "nonce",
+    "transaction_type"
+  ],
+  "derived_features": [
+    "gas_efficiency",
+    "value_log",
+    "gas_price_log",
+    "is_round_amount",
+    "value_gas_ratio",
+    "is_zero_value",
+    "is_high_nonce"
+  ],
+  "sender_features": [
+    "sender_total_transactions",
+    "sender_total_sent",
+    "sender_total_received",
+    "sender_balance",
+    "sender_avg_sent",
+    "sender_unique_receivers",
+    "sender_in_out_ratio",
+    "sender_active_duration_mins"
+  ],
+  "all_features": [
+    "value_eth",
+    "gas_price_gwei",
+    "gas_used",
+    "gas_limit",
+    "nonce",
+    "transaction_type",
+    "gas_efficiency",
+    "value_log",
+    "gas_price_log",
+    "is_round_amount",
+    "value_gas_ratio",
+    "is_zero_value",
+    "is_high_nonce",
+    "sender_total_transactions",
+    "sender_total_sent",
+    "sender_total_received",
+    "sender_balance",
+    "sender_avg_sent",
+    "sender_unique_receivers",
+    "sender_in_out_ratio",
+    "sender_active_duration_mins"
+  ],
+  "label_column": "fraud"
+}

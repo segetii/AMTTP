@@ -25,7 +25,7 @@ import {
 } from '@/types/dispute';
 import { sha256 } from './ui-snapshot-chain';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERVICE RESULT TYPES

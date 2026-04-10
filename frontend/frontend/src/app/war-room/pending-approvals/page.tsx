@@ -25,9 +25,10 @@ export default function PendingApprovalsPage() {
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{ type: 'approve' | 'reject'; title: string } | null>(null);
 
   React.useEffect(() => {
-    fetch('http://127.0.0.1:3001/risk/reviews')
+    fetch('/oracle/risk/reviews')
       .then(r => { if (!r.ok) throw new Error(`API error: ${r.status} ${r.statusText}`); return r.json(); })
       .then(data => setApprovals(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
@@ -65,6 +66,7 @@ export default function PendingApprovalsPage() {
   };
 
   const handleApprove = (id: string) => {
+    const item = approvals.find(a => a.id === id);
     setApprovals(prev => prev.map(a => {
       if (a.id === id) {
         return {
@@ -74,10 +76,19 @@ export default function PendingApprovalsPage() {
       }
       return a;
     }));
+    if (item) {
+      setActionFeedback({ type: 'approve', title: item.title });
+      setTimeout(() => setActionFeedback(null), 3000);
+    }
   };
 
   const handleReject = (id: string) => {
+    const item = approvals.find(a => a.id === id);
     setApprovals(prev => prev.filter(a => a.id !== id));
+    if (item) {
+      setActionFeedback({ type: 'reject', title: item.title });
+      setTimeout(() => setActionFeedback(null), 3000);
+    }
   };
 
   return (
@@ -101,6 +112,11 @@ export default function PendingApprovalsPage() {
       </div>
 
       {/* Stats */}
+      {actionFeedback && (
+        <div className={`rounded-lg p-3 text-sm ${actionFeedback.type === 'approve' ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`}>
+          {actionFeedback.type === 'approve' ? '✓' : '✗'} {actionFeedback.type === 'approve' ? 'Approved' : 'Rejected'}: {actionFeedback.title}
+        </div>
+      )}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-surface rounded-xl p-4 border border-borderSubtle">
           <div className="text-2xl font-bold text-green-400">{approvals.filter(a => a.type === 'transfer').length}</div>

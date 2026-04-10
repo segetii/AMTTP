@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+\noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\\
+\noindent\textbf{Criteria:} Mandatory Criteria (Innovation) \& Optional Criteria 4 (Academic/Research)\\
+\noindent\textbf{Applicant:} Odeyemi Olusegun Israel\\
+\rule{\textwidth}{0.4pt}
+
+\vspace{0.5cm}
+\begin{center}
+    \textbf{\huge Evidence 2: Blind-Spot Decomposition Theory (BSDT) Framework}
+\end{center}
+\vspace{0.5cm}
+
+\section*{1. Research Innovation: The BSDT Mathematical Model}
+This document presents my proprietary mathematical framework, \textbf{Blind-Spot Decomposition Theory (BSDT)}, a domain-agnostic method for decomposing hidden model failure modes into four measurable channels. BSDT was developed alongside AMTTP as a separate research track rather than being embedded in the default production AML pipeline.
+
+\vspace{0.3cm}
+\noindent\fbox{\begin{minipage}{0.95\textwidth}
+\small
+\textbf{BSDT Four-Channel Decomposition:}
+\begin{align*}
+\delta_C &= 1 - \text{clip}\!\left(\frac{\|\mathbf{x} - \boldsymbol{\mu}_{\text{ref}}\|}{d_{\max}},\, 0,\, 1\right) & \text{(Camouflage)} \\
+\delta_G &= \frac{\text{\# near-zero features}}{p} & \text{(Feature Gap)} \\
+\delta_A &= \sigma\!\left(\frac{d_{\text{Mahal}} - \tilde{d}_{\text{ref}}}{\tilde{d}_{\text{ref}}}\right) & \text{(Activity Anomaly)} \\
+\delta_T &= \sigma\!\left(0.5 \cdot \left(\frac{d_{k\text{NN}}}{\tilde{d}_{k\text{NN,ref}}} - 2\right)\right) & \text{(Temporal Novelty)}
+\end{align*}
+\textbf{Blind-Spot Energy \& Missed Fraud Likelihood Score:}
+\begin{align*}
+E_{\text{BS}} &= \sum_{i \in \{C,G,A,T\}} \delta_i^2 & \text{(Total blind-spot energy)} \\
+\text{MFLS} &= \|\nabla E_{\text{BS}}\|_F & \text{(Gradient-norm score)} \\
+\text{Combined} &= 0.5 \cdot \hat{E}_{\text{BS}} + 0.5 \cdot \widehat{\text{MFLS}} & \text{(Equal-weight average)}
+\end{align*}
+\end{minipage}}
+\vspace{0.2cm}
+
+\noindent\textit{Figure 1: Mathematical formulation of the four-channel BSDT decomposition. Each channel captures an independent failure mode; the composite MFLS enables post-hoc diagnosis and optional correction without retraining the base model.}
+
+\section*{2. Code Implementation: From Theory to Practice}
+BSDT is not part of the default AMTTP transaction-scoring pipeline. I kept the production AML stack centered on the already high-performing distilled student models to avoid introducing unnecessary regulatory complexity into the core decision path. Instead, BSDT exists in the workspace as a separate research and enterprise analytics capability that customers can integrate into their own workflows where they need post-hoc failure analysis, model diagnostics, or adaptive feature layers.
+
+\vspace{0.3cm}
+\noindent\textbf{Research Implementation} (from \texttt{research/udl/udl/system\_mode.py}):
+
+\vspace{0.2cm}
+\noindent\fbox{\begin{minipage}{0.95\textwidth}
+\small
+\texttt{class BSDTChannels:}\\
+\texttt{~~~~"""Blind-Spot Detection Tensor --- four complementary channels."""}\\[4pt]
+\texttt{~~~~def fit(self, X\_ref: np.ndarray) -> 'BSDTChannels':}\\
+\texttt{~~~~~~~~self.mu\_ = X\_ref.mean(axis=0)}\\
+\texttt{~~~~~~~~self.d\_max\_ = max(float(np.linalg.norm(X\_ref - self.mu\_, axis=1).max()), self.eps)}\\
+\texttt{~~~~~~~~self.mahal\_ref\_median\_ = float(np.median(self.\_mahalanobis(X\_ref)))}\\
+\texttt{~~~~~~~~self.ref\_knn\_median\_ = float(np.median(ref\_dists[:, -1]))}\\[4pt]
+\texttt{~~~~def mfls(self, X: np.ndarray) -> np.ndarray:}\\
+\texttt{~~~~~~~~return np.linalg.norm(self.\_gradient\_vectors(X), axis=1)}\\[4pt]
+\texttt{~~~~def score(self, X: np.ndarray) -> np.ndarray:}\\
+\texttt{~~~~~~~~e = self.energy(X)}\\
+\texttt{~~~~~~~~m = self.mfls(X)}\\
+\texttt{~~~~~~~~return 0.5 * (e / e.max()) + 0.5 * (m / m.max())}
+\end{minipage}}
+\vspace{0.2cm}
+
+\noindent\textit{Figure 2: BSDT research implementation showing calibration on reference data, computation of blind-spot energy, and MFLS scoring inside the broader research workspace. This framework is maintained as an optional analytical layer rather than a default production scoring dependency.}
+
+\section*{3. Research Impact and Cross-Domain Relevance}
+BSDT should be understood as a complementary research framework, not as evidence that the production AMTTP models required boosting to perform well. The production student models are already sufficiently strong on their own. BSDT instead addresses a different problem: how to analyse hidden failure modes, construct optional post-hoc correction layers, and study instability across domains where customers or researchers may want more diagnostic depth than a regulator-facing default pipeline should carry.
+
+The BSDT research programme has been validated extensively:
+\begin{itemize}
+    \item In the 66-variant, 792-evaluation BSDT study, the best-performing family achieved \textbf{mean F1 = 0.787} while eliminating \textbf{88.1\% of false positives}.
+    \item In one flagship benchmark (Shuttle AMTTP-XGB93), the F2\_QuadSurf variant reduced false alerts from 36,469 to 22 --- a \textbf{99.94\% false-positive reduction} --- while lifting F1 from 0.134 to 0.968.
+    \item In 10 of 12 dataset-model combinations, at least one BSDT variant achieved \textbf{zero missed fraud}, showing strong value as a second-stage alerting or diagnostic layer.
+\end{itemize}
+
+This research also connects directly to my broader ``Geometry of System Collapse'' work. In the wider workspace, the same analytical family is explored across financial stress, power-grid instability, and collapse dynamics, including ERCOT Texas grid experiments (AUC up to \textbf{0.9996}) and broader collapse case studies such as Terra/Luna-style dislocations. That cross-domain reach is important because it shows BSDT is not a narrow AML trick; it is part of a larger research programme on instability detection, adaptive friction, and system resilience.
+
+\end{document}

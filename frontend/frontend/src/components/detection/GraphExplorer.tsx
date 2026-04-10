@@ -180,6 +180,7 @@ export default function GraphExplorer({
   const [searchAddress, setSearchAddress] = useState(initialAddress || '');
 
   // Use external data or fall back to mock
+  const isUsingMockData = !externalNodes || !externalEdges || externalNodes.length === 0;
   const { validNodes: nodes, validEdges: edges } = useMemo(() => {
     const raw =
       externalNodes && externalEdges && externalNodes.length > 0
@@ -245,6 +246,11 @@ export default function GraphExplorer({
     >
       {/* Toolbar */}
       <div className="flex items-center gap-4 p-4 bg-slate-800 border-b border-slate-700">
+        {isUsingMockData && (
+          <span className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded font-medium whitespace-nowrap">
+            Demo Data
+          </span>
+        )}
         <input
           type="text"
           value={searchAddress}

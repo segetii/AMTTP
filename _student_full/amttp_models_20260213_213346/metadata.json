@@ -1,0 +1,61 @@
+{
+  "version": "v2_20260213_213346",
+  "training_date": "2026-02-13T21:33:46.563706",
+  "pipeline": "V2 (Optuna + PCA + Mahalanobis, no VGAE)",
+  "dataset": {
+    "path": "/content/drive/MyDrive/eth_transactions_full_labeled.parquet",
+    "n_samples": 625168,
+    "n_features_raw": 93,
+    "n_features_boost": 160,
+    "fraud_rate": 0.25049906969070435,
+    "n_nodes": 625168,
+    "n_edges": 1673244
+  },
+  "models": {
+    "vae": {
+      "type": "BetaVAE",
+      "latent_dim": 64,
+      "beta": 4.0,
+      "strict_filter": true
+    },
+    "gat": {
+      "type": "GATv2",
+      "hidden": 64,
+      "heads": 4
+    },
+    "graphsage": {
+      "type": "GraphSAGE",
+      "hidden": 128,
+      "layers": 3
+    },
+    "xgboost": {
+      "optuna_trials": 50,
+      "best_auc": 0.9998569683768208
+    },
+    "lightgbm": {
+      "optuna_trials": 50,
+      "best_auc": 0.9999487549606053
+    },
+    "meta1": {
+      "type": "LogisticRegressionCV",
+      "C": 0.615848211066026
+    }
+  },
+  "thresholds": {
+    "CRITICAL": 0.9999853628112049,
+    "HIGH": 0.9999840222986259,
+    "MEDIUM": 0.9999810947395619,
+    "LOW": 0.0010538900857216245
+  },
+  "optimal_threshold": 0.6428131643990649,
+  "performance": {
+    "meta_roc_auc": 0.9999604052197635,
+    "meta_pr_auc": 0.999901990430817,
+    "xgb_roc_auc": 0.9999598911124534,
+    "lgb_roc_auc": 0.9999596345698392,
+    "gat_roc_auc": 0.9965306558392037,
+    "sage_roc_auc": 0.9994093159119385,
+    "meta2_roc_auc": 0.9999964254381056,
+    "meta3_roc_auc": 0.9999897836077462
+  }
+}

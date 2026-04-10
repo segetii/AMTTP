@@ -30,9 +30,12 @@ export default function UserManagementPage() {
   const [showInvite, setShowInvite] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('analyst');
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8007/profiles')
+    fetch('/api/profiles')
       .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
       .then(data => setUsers(Array.isArray(data) ? data : []))
       .catch(e => setError(e.message))
@@ -56,16 +59,21 @@ export default function UserManagementPage() {
   };
 
   const toggleStatus = (id: string) => {
+    const user = users.find(u => u.id === id);
+    const newStatus = user?.status === 'active' ? 'suspended' : 'active';
     setUsers(prev => prev.map(u => {
       if (u.id === id) {
-        return { ...u, status: u.status === 'active' ? 'suspended' : 'active' };
+        return { ...u, status: newStatus };
       }
       return u;
     }));
+    setActionFeedback(`User ${user?.name ?? id} ${newStatus === 'suspended' ? 'suspended' : 'activated'}`);
+    setTimeout(() => setActionFeedback(null), 3000);
   };
 
   return (
     <div className="space-y-6">
+      {actionFeedback && <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-4 text-green-400 text-sm">✓ {actionFeedback}</div>}
       {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-red-400 text-sm">⚠ Backend unavailable: {error}</div>}
       {loading && <div className="text-zinc-500 text-sm mb-4">Loading from backend...</div>}
       {/* Header */}
@@ -195,12 +203,18 @@ export default function UserManagementPage() {
                 <input 
                   type="email"
                   placeholder="user@company.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
                   className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
                 />
               </div>
               <div>
                 <label className="block text-sm text-mutedText mb-1">Role</label>
-                <select className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500">
+                <select 
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="w-full bg-slate-700 border border-borderSubtle rounded-lg px-4 py-2 focus:outline-none focus:border-indigo-500"
+                >
                   {roles.map(role => (
                     <option key={role.id} value={role.id}>{role.name} - {role.description}</option>
                   ))}
@@ -211,7 +225,30 @@ export default function UserManagementPage() {
               <button onClick={() => setShowInvite(false)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg">
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg">
+              <button 
+                onClick={() => {
+                  if (!inviteEmail.trim()) return;
+                  const roleInfo = roles.find(r => r.id === inviteRole);
+                  const newUser = {
+                    id: `user-${Date.now()}`,
+                    email: inviteEmail.trim(),
+                    name: inviteEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                    role: inviteRole,
+                    status: 'active',
+                    lastLogin: 'Never',
+                    createdAt: new Date().toISOString(),
+                    permissions: [],
+                  };
+                  setUsers(prev => [newUser, ...prev]);
+                  setInviteEmail('');
+                  setInviteRole('analyst');
+                  setShowInvite(false);
+                  setActionFeedback(`Invite sent to ${inviteEmail} as ${roleInfo?.name}`);
+                  setTimeout(() => setActionFeedback(null), 3000);
+                }}
+                disabled={!inviteEmail.trim()}
+                className={`px-4 py-2 rounded-lg ${!inviteEmail.trim() ? 'bg-indigo-600/50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+              >
                 Send Invite
               </button>
             </div>

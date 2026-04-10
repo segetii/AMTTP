@@ -155,7 +155,7 @@ services:
       PYTHONPATH: /app
       MODEL_PATH: /app/models
     volumes:
-      - ./ml/Automation/ml_pipeline/models/trained:/app/models:ro
+      - ./ml/Automation/tx_level_models:/app/models:ro
       - ./processed:/app/processed:ro
     networks:
       - amttp-internal

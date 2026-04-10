@@ -62,7 +62,7 @@ function generateUUID(): string {
 
 const UI_VERSION = 'v2.3.0';
 const STORAGE_KEY = 'amttp_snapshot_chain';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8007';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 class SnapshotChainManager {
   private chain: UISnapshot[] = [];
