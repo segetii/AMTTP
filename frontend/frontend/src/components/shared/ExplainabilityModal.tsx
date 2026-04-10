@@ -363,21 +363,21 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-3 bg-surface border-b border-borderSubtle flex items-center gap-3">
-          <div className={`p-1.5 rounded-lg ${rc.bgSoft}`}>
-            <svg className={`w-5 h-5 ${rc.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <div className="px-5 py-3.5 bg-surface border-b border-borderSubtle flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${rc.bgSoft}`}>
+            <svg className={`w-6 h-6 ${rc.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-text">Decision Explainability</h2>
-            <p className="text-xs text-mutedText font-mono truncate">{item.address || item.id}</p>
+            <h2 className="text-lg font-bold text-text">Decision Explainability</h2>
+            <p className="text-sm text-mutedText font-mono truncate">{item.address || item.id}</p>
           </div>
-          <div className={`px-2.5 py-0.5 rounded-full ${rc.bgSoft} border ${rc.border}`}>
-            <span className={`text-xs font-bold ${rc.text}`}>{explanation?.riskLevel || '...'} RISK</span>
+          <div className={`px-3 py-1 rounded-full ${rc.bgSoft} border ${rc.border}`}>
+            <span className={`text-sm font-bold ${rc.text}`}>{explanation?.riskLevel || '...'} RISK</span>
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-700 rounded-lg transition-colors">
-            <svg className="w-4 h-4 text-mutedText" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5 text-mutedText" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -386,33 +386,33 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-8 gap-2">
-              <div className="w-7 h-7 border-2 border-slate-500 border-t-indigo-500 rounded-full animate-spin" />
-              <p className="text-xs text-mutedText">Fetching explanation from XAI service…</p>
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <div className="w-8 h-8 border-2 border-slate-500 border-t-indigo-500 rounded-full animate-spin" />
+              <p className="text-sm text-mutedText">Fetching explanation from XAI service…</p>
             </div>
           ) : explanation ? (
             <>
               {/* Risk Score + Source row */}
               <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  <svg className="w-16 h-16 -rotate-90">
-                    <circle cx="32" cy="32" r="26" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-700" />
+                <div className="relative w-20 h-20 flex-shrink-0">
+                  <svg className="w-20 h-20 -rotate-90">
+                    <circle cx="40" cy="40" r="33" stroke="currentColor" strokeWidth="7" fill="none" className="text-slate-700" />
                     <circle
-                      cx="32" cy="32" r="26"
+                      cx="40" cy="40" r="33"
                       stroke="currentColor"
-                      strokeWidth="6"
+                      strokeWidth="7"
                       fill="none"
-                      strokeDasharray={`${(explanation.riskScore / 100) * 163.4} 163.4`}
+                      strokeDasharray={`${(explanation.riskScore / 100) * 207.3} 207.3`}
                       className={rc.text}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={`text-lg font-bold ${rc.text}`}>{Math.round(explanation.riskScore)}</span>
+                    <span className={`text-xl font-bold ${rc.text}`}>{Math.round(explanation.riskScore)}</span>
                   </div>
                 </div>
-                <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                    <span className={`px-2.5 py-0.5 rounded text-xs font-medium ${
                       explanation.source === 'live'
                         ? 'bg-green-500/15 text-green-400 border border-green-500/30'
                         : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
@@ -420,7 +420,7 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
                       {explanation.source === 'live' ? 'Live XAI' : 'Fallback'}
                     </span>
                     {explanation.action && (
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${
                         explanation.action === 'BLOCK' ? 'bg-red-500/15 text-red-400 border border-red-500/30'
                         : explanation.action === 'ESCROW' ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
                         : explanation.action === 'REVIEW' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
@@ -429,31 +429,31 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
                         {explanation.action}
                       </span>
                     )}
-                    <span className="text-[11px] text-mutedText">Confidence: {Math.round(explanation.confidence * 100)}%</span>
+                    <span className="text-xs text-mutedText">Confidence: {Math.round(explanation.confidence * 100)}%</span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-snug">{explanation.narrative}</p>
+                  <p className="text-sm text-slate-300 leading-snug">{explanation.narrative}</p>
                 </div>
               </div>
 
               {/* Graph Explanation */}
               {explanation.graphExplanation && (
-                <div className="bg-surface rounded-lg px-3 py-2 border border-borderSubtle">
-                  <p className="text-xs text-slate-300"><span className="font-semibold text-mutedText uppercase tracking-wide mr-1.5">Graph:</span>{explanation.graphExplanation}</p>
+                <div className="bg-surface rounded-lg px-3.5 py-2.5 border border-borderSubtle">
+                  <p className="text-sm text-slate-300"><span className="font-semibold text-mutedText uppercase tracking-wide mr-1.5">Graph:</span>{explanation.graphExplanation}</p>
                 </div>
               )}
 
               {/* Patterns */}
               {explanation.patterns.length > 0 && (
                 <div>
-                  <h3 className="text-[11px] font-semibold text-mutedText uppercase tracking-wide mb-1.5">Detected Patterns</h3>
-                  <div className="space-y-1.5">
+                  <h3 className="text-xs font-semibold text-mutedText uppercase tracking-wide mb-2">Detected Patterns</h3>
+                  <div className="space-y-2">
                     {explanation.patterns.map((p, i) => (
-                      <div key={i} className={`border rounded-lg px-3 py-2 ${getSeverityColor(p.severity)}`}>
+                      <div key={i} className={`border rounded-lg px-3.5 py-2.5 ${getSeverityColor(p.severity)}`}>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase">{p.name.replace(/_/g, ' ')}</span>
-                          <span className="text-[10px] opacity-75">{Math.round(p.confidence * 100)}%</span>
+                          <span className="text-sm font-semibold uppercase">{p.name.replace(/_/g, ' ')}</span>
+                          <span className="text-xs opacity-75">{Math.round(p.confidence * 100)}%</span>
                         </div>
-                        <p className="text-xs opacity-90 mt-0.5">{p.description}</p>
+                        <p className="text-sm opacity-90 mt-0.5">{p.description}</p>
                       </div>
                     ))}
                   </div>
@@ -463,18 +463,18 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
               {/* Contributing Factors */}
               {explanation.factors.length > 0 && (
                 <div>
-                  <h3 className="text-[11px] font-semibold text-mutedText uppercase tracking-wide mb-1.5">Contributing Factors</h3>
-                  <div className="space-y-1.5">
+                  <h3 className="text-xs font-semibold text-mutedText uppercase tracking-wide mb-2">Contributing Factors</h3>
+                  <div className="space-y-2">
                     {explanation.factors.map((f, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <span className="w-28 text-xs text-slate-300 truncate flex-shrink-0" title={f.description}>{f.name}</span>
-                        <div className="flex-1 h-4 bg-surface rounded relative">
+                      <div key={i} className="flex items-center gap-2.5">
+                        <span className="w-32 text-sm text-slate-300 truncate flex-shrink-0" title={f.description}>{f.name}</span>
+                        <div className="flex-1 h-5 bg-surface rounded relative">
                           <div
-                            className={`h-4 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
+                            className={`h-5 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
                             style={{ width: `${Math.min(f.impact * 100 * 3, 100)}%` }}
                           />
                         </div>
-                        <span className={`text-xs font-mono w-10 text-right flex-shrink-0 ${f.impact > 0.2 ? 'text-red-400' : 'text-blue-400'}`}>
+                        <span className={`text-sm font-mono w-12 text-right flex-shrink-0 ${f.impact > 0.2 ? 'text-red-400' : 'text-blue-400'}`}>
                           +{Math.round(f.impact * 100)}%
                         </span>
                       </div>
@@ -486,10 +486,10 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
               {/* AML Typologies */}
               {explanation.typologies.length > 0 && (
                 <div>
-                  <h3 className="text-[11px] font-semibold text-mutedText uppercase tracking-wide mb-1.5">AML Typologies</h3>
-                  <div className="flex flex-wrap gap-1.5">
+                  <h3 className="text-xs font-semibold text-mutedText uppercase tracking-wide mb-2">AML Typologies</h3>
+                  <div className="flex flex-wrap gap-2">
                     {explanation.typologies.map((t, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-red-500/15 border border-red-500/30 rounded text-xs text-red-400">
+                      <span key={i} className="px-2.5 py-1 bg-red-500/15 border border-red-500/30 rounded-lg text-sm text-red-400">
                         {t}
                       </span>
                     ))}
@@ -500,11 +500,11 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
               {/* Recommendations */}
               {explanation.recommendations.length > 0 && (
                 <div>
-                  <h3 className="text-[11px] font-semibold text-mutedText uppercase tracking-wide mb-1">Recommendations</h3>
-                  <ul className="space-y-0.5">
+                  <h3 className="text-xs font-semibold text-mutedText uppercase tracking-wide mb-1.5">Recommendations</h3>
+                  <ul className="space-y-1">
                     {explanation.recommendations.map((r, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-xs text-slate-300">
-                        <span className="text-indigo-400 mt-px">→</span>
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                        <span className="text-indigo-400 mt-0.5">→</span>
                         <span>{r}</span>
                       </li>
                     ))}
@@ -520,15 +520,15 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-surface border-t border-borderSubtle flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-1.5 text-sm text-mutedText hover:text-slate-200 transition-colors">
+        <div className="px-5 py-3.5 bg-surface border-t border-borderSubtle flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-mutedText hover:text-slate-200 transition-colors">
             Close
           </button>
           {onInvestigate && (
             <button
               onClick={onInvestigate}
-              className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-text rounded-lg transition-colors flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-text rounded-lg transition-colors flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               Investigate
