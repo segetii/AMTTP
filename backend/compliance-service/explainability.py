@@ -458,9 +458,10 @@ class TypologyMatcher:
     ) -> Optional[TypologyMatch]:
         """Check for structuring (smurfing) pattern"""
         
-        # Look for structuring rule trigger
+        # Look for structuring rule trigger (check both rule_type and rule_id)
         for rule in rule_results:
-            if rule.get("rule_type") == "STRUCTURING" and rule.get("triggered"):
+            rule_key = (rule.get("rule_type") or rule.get("rule_id") or "").upper()
+            if "STRUCTUR" in rule_key and rule.get("triggered"):
                 return TypologyMatch(
                     typology=TypologyType.STRUCTURING,
                     confidence=rule.get("confidence", 0.8),
@@ -502,7 +503,8 @@ class TypologyMatcher:
         """Check for layering pattern"""
         
         for rule in rule_results:
-            if rule.get("rule_type") == "LAYERING" and rule.get("triggered"):
+            rule_key = (rule.get("rule_type") or rule.get("rule_id") or "").upper()
+            if "LAYER" in rule_key and rule.get("triggered"):
                 return TypologyMatch(
                     typology=TypologyType.LAYERING,
                     confidence=rule.get("confidence", 0.85),
@@ -515,6 +517,22 @@ class TypologyMatcher:
                     evidence=rule.get("evidence", {})
                 )
         
+        # Heuristic: high out_degree + rapid movement suggests layering
+        out_degree = graph_context.get("out_degree", 0)
+        tx_count = features.get("tx_count_1h", 0)
+        if out_degree >= 30 and tx_count >= 5:
+            return TypologyMatch(
+                typology=TypologyType.LAYERING,
+                confidence=0.55,
+                description="Transaction pattern consistent with layering — rapid movement through multiple addresses",
+                indicators=[
+                    f"High outgoing connections ({out_degree} addresses)",
+                    f"Elevated velocity ({tx_count} txns/hour)",
+                    "Pattern consistent with fund obfuscation"
+                ],
+                evidence={"out_degree": out_degree, "tx_count_1h": tx_count}
+            )
+        
         return None
     
     def _check_round_trip(
@@ -525,7 +543,8 @@ class TypologyMatcher:
         """Check for round-trip transactions"""
         
         for rule in rule_results:
-            if rule.get("rule_type") == "ROUND_TRIP" and rule.get("triggered"):
+            rule_key = (rule.get("rule_type") or rule.get("rule_id") or "").upper()
+            if "ROUND" in rule_key and rule.get("triggered"):
                 evidence = rule.get("evidence", {})
                 return TypologyMatch(
                     typology=TypologyType.ROUND_TRIP,
@@ -552,7 +571,7 @@ class TypologyMatcher:
         out_degree = graph_context.get("out_degree", 0)
         recent_recipients = features.get("unique_recipients_24h", 0)
         
-        if recent_recipients >= 10 or out_degree >= 500:
+        if recent_recipients >= 10 or out_degree >= 50:
             return TypologyMatch(
                 typology=TypologyType.FAN_OUT,
                 confidence=min(0.9, 0.5 + recent_recipients * 0.05),
@@ -579,7 +598,7 @@ class TypologyMatcher:
         in_degree = graph_context.get("in_degree", 0)
         recent_senders = features.get("unique_senders_24h", 0)
         
-        if recent_senders >= 10 or in_degree >= 1000:
+        if recent_senders >= 10 or in_degree >= 100:
             return TypologyMatch(
                 typology=TypologyType.FAN_IN,
                 confidence=min(0.9, 0.5 + recent_senders * 0.05),
@@ -797,9 +816,18 @@ class RiskExplainer:
         blob = f"{reason} {flags_text}"
 
         # ----- velocity / structuring signals -----
-        if any(kw in blob for kw in ("velocity", "high_velocity", "rapid", "burst", "structur")):
+        if any(kw in blob for kw in ("velocity", "high_velocity", "rapid", "burst", "structur", "cycling")):
             features.setdefault("tx_count_1h", 12)
             features.setdefault("tx_count_24h", 45)
+
+        # ----- structuring-specific -----
+        if any(kw in blob for kw in ("structur", "smurfing", "small txn", "multiple small")):
+            features.setdefault("avg_tx_size_eth", 9.5)  # just below 10 ETH threshold
+            features.setdefault("tx_count_24h", 12)
+
+        # ----- volume / amount anomaly -----
+        if any(kw in blob for kw in ("volume", "anomaly", "spike", "unusual amount")):
+            features.setdefault("amount_vs_average", 8.0)
 
         # ----- dormant account activation -----
         if any(kw in blob for kw in ("dormant", "inactive", "reactivat")):
@@ -818,8 +846,14 @@ class RiskExplainer:
         # ----- fan-out / fan-in network patterns -----
         if any(kw in blob for kw in ("fan-out", "fan_out", "distribut")):
             graph_context.setdefault("out_degree", 60)
+            features.setdefault("unique_recipients_24h", 15)
         if any(kw in blob for kw in ("fan-in", "fan_in", "aggregat", "consolidat")):
             graph_context.setdefault("in_degree", 120)
+            features.setdefault("unique_senders_24h", 15)
+
+        # ----- new counterparty / network expansion -----
+        if any(kw in blob for kw in ("counterpart", "new address", "unknown address")):
+            graph_context.setdefault("out_degree", 45)
 
         # ----- geography -----
         if any(kw in blob for kw in ("fatf", "geography", "geo_risk", "high_risk_jurisdict")):
@@ -973,6 +1007,12 @@ class RiskExplainer:
         
         if (cluster := graph_context.get("clustering_coefficient", 0)) > 0.5:
             parts.append(f"is part of a tightly connected group")
+        
+        if (od := graph_context.get("out_degree", 0)) > 20:
+            parts.append(f"has sent to {od} unique addresses")
+        
+        if (ind := graph_context.get("in_degree", 0)) > 20:
+            parts.append(f"has received from {ind} unique senders")
         
         if parts:
             return "Network analysis: Address " + ", ".join(parts) + "."

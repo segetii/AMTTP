@@ -213,20 +213,57 @@ async function fetchExplanation(item: ExplainabilityItem): Promise<Explainabilit
   if (item.uniqueCounterparties != null) graph_context.out_degree = item.uniqueCounterparties;
 
   // Convert flags into rule_results the backend can use for typology matching
-  const rule_results: Array<{ rule_id: string; triggered: boolean; details: string }> = [];
+  // Maps common flag/reason strings to the rule_type enum the backend expects
+  const FLAG_TO_RULE_TYPE: Record<string, string> = {
+    'structur': 'STRUCTURING', 'smurfing': 'STRUCTURING', 'small txn': 'STRUCTURING',
+    'layer': 'LAYERING', 'chain': 'LAYERING',
+    'round_trip': 'ROUND_TRIP', 'round trip': 'ROUND_TRIP',
+    'mixer': 'MIXER', 'mixing': 'MIXER', 'tumbl': 'MIXER', 'tornado': 'MIXER',
+    'sanction': 'SANCTIONS', 'ofac': 'SANCTIONS',
+    'dormant': 'DORMANT', 'inactive': 'DORMANT',
+    'fan-out': 'FAN_OUT', 'fan_out': 'FAN_OUT', 'distribut': 'FAN_OUT',
+    'fan-in': 'FAN_IN', 'fan_in': 'FAN_IN', 'aggregat': 'FAN_IN', 'consolidat': 'FAN_IN',
+  };
+
+  const rule_results: Array<{ rule_id: string; rule_type?: string; triggered: boolean; details: string }> = [];
+  const allSignals = [...(item.flags || []), item.reason || ''].map(s => s.toLowerCase()).join(' ');
+
   if (item.flags && item.flags.length > 0) {
     for (const flag of item.flags) {
-      rule_results.push({ rule_id: flag, triggered: true, details: flag });
-      // Also promote well-known flags into features/graph_context
       const fl = flag.toLowerCase();
-      if (fl.includes('velocity') || fl.includes('high_velocity')) features.tx_count_1h = features.tx_count_1h ?? 10;
-      if (fl.includes('dormant')) features.dormancy_days = features.dormancy_days ?? 180;
-      if (fl.includes('sanction')) graph_context.hops_to_sanctioned = graph_context.hops_to_sanctioned ?? 2;
-      if (fl.includes('mixer') || fl.includes('mixing')) graph_context.hops_to_mixer = graph_context.hops_to_mixer ?? 1;
-      if (fl.includes('layering') || fl.includes('fan_out') || fl.includes('fan-out')) graph_context.out_degree = graph_context.out_degree ?? 50;
-      if (fl.includes('fan_in') || fl.includes('fan-in') || fl.includes('aggregat')) graph_context.in_degree = graph_context.in_degree ?? 100;
+      // Find matching rule_type for this flag
+      let ruleType: string | undefined;
+      for (const [keyword, rt] of Object.entries(FLAG_TO_RULE_TYPE)) {
+        if (fl.includes(keyword)) { ruleType = rt; break; }
+      }
+      rule_results.push({ rule_id: flag, rule_type: ruleType, triggered: true, details: flag });
     }
   }
+
+  // Promote well-known signal keywords into features/graph_context
+  // (check all flags + reason together for broader coverage)
+  if (/velocity|high_velocity|rapid|cycling|burst/.test(allSignals)) features.tx_count_1h = features.tx_count_1h ?? 10;
+  if (/volume|anomaly|spike/.test(allSignals)) features.amount_vs_average = features.amount_vs_average ?? 8;
+  if (/dormant|inactive|reactivat/.test(allSignals)) features.dormancy_days = features.dormancy_days ?? 200;
+  if (/structur|smurfing|small txn|multiple small/.test(allSignals)) {
+    features.tx_count_1h = features.tx_count_1h ?? 8;
+    features.avg_tx_size_eth = features.avg_tx_size_eth ?? 9.5;
+  }
+  if (/sanction|ofac|hmt|sdn/.test(allSignals)) graph_context.hops_to_sanctioned = graph_context.hops_to_sanctioned ?? 2;
+  if (/mixer|mixing|tumbl|tornado/.test(allSignals)) {
+    graph_context.hops_to_mixer = graph_context.hops_to_mixer ?? 1;
+    graph_context.mixer_interaction = graph_context.mixer_interaction ?? true;
+  }
+  if (/layer|chain|rapid|cycling/.test(allSignals)) graph_context.out_degree = graph_context.out_degree ?? 55;
+  if (/fan.?out|distribut/.test(allSignals)) {
+    graph_context.out_degree = graph_context.out_degree ?? 60;
+    features.unique_recipients_24h = features.unique_recipients_24h ?? 15;
+  }
+  if (/fan.?in|aggregat|consolidat/.test(allSignals)) {
+    graph_context.in_degree = graph_context.in_degree ?? 120;
+    features.unique_senders_24h = features.unique_senders_24h ?? 15;
+  }
+  if (/counterpart|new.?address/.test(allSignals)) graph_context.out_degree = graph_context.out_degree ?? 45;
 
   const payload: Record<string, unknown> = {
     risk_score: rawScore <= 1 ? rawScore : rawScore / 100,
