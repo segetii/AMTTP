@@ -69,14 +69,30 @@ interface ForceGraph2DProps {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const NODE_RADIUS = 11;
-const FONT_SIZE = 9;
-const ARROW_SIZE = 5;
+const BASE_RADIUS = 14;
+const FONT_SIZE = 10;
+const SCORE_FONT_SIZE = 9;
+const ARROW_SIZE = 7;
 const EDGE_COLOR = '#475569';
 const EDGE_HIGHLIGHT = '#818cf8';
+const EDGE_DANGER = '#ef4444';
 const LABEL_COLOR = '#e2e8f0';
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
+
+/** Get node radius scaled by risk score (higher risk = bigger) */
+function getNodeRadius(data?: unknown): number {
+  const d = data as Record<string, unknown> | undefined;
+  const score = (d?.riskScore as number) ?? 0;
+  // 14px base + up to 10px for risk 100
+  return BASE_RADIUS + (score / 100) * 10;
+}
+
+/** Get node type for shape selection */
+function getNodeType(data?: unknown): string {
+  const d = data as Record<string, unknown> | undefined;
+  return (d?.type as string) || 'wallet';
+}
 
 // Force simulation parameters
 const SIM_CHARGE = -400;       // repulsion between all nodes
@@ -302,6 +318,7 @@ const ForceGraph2D = forwardRef<ForceGraph2DRef, ForceGraph2DProps>(
       ctx.scale(cam.zoom, cam.zoom);
 
       // ── Edges ──────────────────────────────────────────────────────────
+      const time = Date.now();
       for (const e of edges) {
         const s = nm.get(e.source);
         const t = nm.get(e.target);
@@ -315,21 +332,40 @@ const ForceGraph2D = forwardRef<ForceGraph2DRef, ForceGraph2DProps>(
         const isHighlighted =
           hoveredNode === e.source || hoveredNode === e.target;
 
+        // Determine edge risk: red if either node is flagged/critical
+        const sData = s.data as Record<string, unknown> | undefined;
+        const tData = t.data as Record<string, unknown> | undefined;
+        const sRisk = (sData?.riskScore as number) ?? 0;
+        const tRisk = (tData?.riskScore as number) ?? 0;
+        const sType = (sData?.type as string) || '';
+        const tType = (tData?.type as string) || '';
+        const isDangerous = sRisk >= 70 || tRisk >= 70 || sType === 'flagged' || tType === 'flagged';
+
+        // Edge width by transaction amount
+        const eData = e.data as Record<string, unknown> | undefined;
+        const amount = (eData?.amount as number) ?? 0;
+        const baseWidth = Math.max(1.5, Math.min(6, 1.5 + amount * 0.3));
+
+        let edgeColor = EDGE_COLOR;
+        if (isHighlighted) edgeColor = EDGE_HIGHLIGHT;
+        else if (isDangerous) edgeColor = EDGE_DANGER;
+
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(tx, ty);
-        ctx.strokeStyle = isHighlighted ? EDGE_HIGHLIGHT : EDGE_COLOR;
-        ctx.lineWidth = isHighlighted ? 2 : 1;
-        ctx.globalAlpha = isHighlighted ? 1 : 0.5;
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = isHighlighted ? baseWidth + 1 : baseWidth;
+        ctx.globalAlpha = isHighlighted ? 1 : isDangerous ? 0.7 : 0.45;
         ctx.stroke();
         ctx.globalAlpha = 1;
 
         // Arrowhead
         const angle = Math.atan2(ty - sy, tx - sx);
+        const tRadius = getNodeRadius(t.data);
         const edgeDist = Math.sqrt((tx - sx) ** 2 + (ty - sy) ** 2);
-        if (edgeDist > NODE_RADIUS * 2) {
-          const ax = tx - Math.cos(angle) * (NODE_RADIUS + 2);
-          const ay = ty - Math.sin(angle) * (NODE_RADIUS + 2);
+        if (edgeDist > tRadius * 2) {
+          const ax = tx - Math.cos(angle) * (tRadius + 3);
+          const ay = ty - Math.sin(angle) * (tRadius + 3);
           ctx.beginPath();
           ctx.moveTo(ax, ay);
           ctx.lineTo(
@@ -341,8 +377,27 @@ const ForceGraph2D = forwardRef<ForceGraph2DRef, ForceGraph2DProps>(
             ay - ARROW_SIZE * Math.sin(angle + Math.PI / 6),
           );
           ctx.closePath();
-          ctx.fillStyle = isHighlighted ? EDGE_HIGHLIGHT : EDGE_COLOR;
+          ctx.fillStyle = edgeColor;
+          ctx.globalAlpha = isHighlighted ? 1 : 0.8;
           ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        // Edge amount label (shown when zoomed in or highlighted)
+        if (e.label && (cam.zoom >= 0.8 || isHighlighted)) {
+          const mx = (sx + tx) / 2;
+          const my = (sy + ty) / 2;
+          ctx.font = `bold 8px ui-monospace, SFMono-Regular, Menlo, monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          // Background pill
+          const textW = ctx.measureText(e.label).width + 6;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.beginPath();
+          ctx.roundRect(mx - textW / 2, my - 6, textW, 12, 3);
+          ctx.fill();
+          ctx.fillStyle = isDangerous ? '#fca5a5' : '#94a3b8';
+          ctx.fillText(e.label, mx, my);
         }
       }
 
@@ -351,34 +406,94 @@ const ForceGraph2D = forwardRef<ForceGraph2DRef, ForceGraph2DProps>(
         const x = n.x ?? 0;
         const y = n.y ?? 0;
         const isHovered = hoveredNode === n.id;
+        const r = getNodeRadius(n.data);
+        const nodeType = getNodeType(n.data);
+        const nData = n.data as Record<string, unknown> | undefined;
+        const riskScore = (nData?.riskScore as number) ?? 0;
+        const isFlagged = nodeType === 'flagged' || riskScore >= 70;
+
+        // Pulsing glow for flagged/critical nodes
+        if (isFlagged) {
+          const pulse = 0.3 + 0.2 * Math.sin(time * 0.003);
+          ctx.beginPath();
+          ctx.arc(x, y, r + 10, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(239, 68, 68, ${pulse})`;
+          ctx.fill();
+        }
 
         // Glow for hovered
         if (isHovered) {
           ctx.beginPath();
-          ctx.arc(x, y, NODE_RADIUS + 6, 0, Math.PI * 2);
-          ctx.fillStyle = n.fill + '33'; // 20% opacity
+          ctx.arc(x, y, r + 8, 0, Math.PI * 2);
+          ctx.fillStyle = n.fill + '44';
           ctx.fill();
         }
 
-        // Node circle
+        // Draw shape by type
         ctx.beginPath();
-        ctx.arc(x, y, NODE_RADIUS, 0, Math.PI * 2);
+        if (nodeType === 'flagged') {
+          // Diamond
+          ctx.moveTo(x, y - r);
+          ctx.lineTo(x + r, y);
+          ctx.lineTo(x, y + r);
+          ctx.lineTo(x - r, y);
+          ctx.closePath();
+        } else if (nodeType === 'exchange') {
+          // Hexagon
+          for (let i = 0; i < 6; i++) {
+            const a = (Math.PI / 3) * i - Math.PI / 6;
+            const px = x + r * Math.cos(a);
+            const py = y + r * Math.sin(a);
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+        } else if (nodeType === 'contract') {
+          // Rounded square
+          const s = r * 0.85;
+          ctx.roundRect(x - s, y - s, s * 2, s * 2, 4);
+        } else {
+          // Circle (wallet)
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+        }
         ctx.fillStyle = n.fill;
         ctx.fill();
 
         // Outline
-        ctx.strokeStyle = isHovered ? '#ffffff' : 'rgba(255,255,255,0.15)';
-        ctx.lineWidth = isHovered ? 2 : 1;
+        ctx.strokeStyle = isHovered ? '#ffffff' : isFlagged ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = isHovered ? 2.5 : isFlagged ? 2 : 1;
         ctx.stroke();
 
-        // Label
+        // Risk score inside the node
+        if (riskScore > 0) {
+          ctx.fillStyle = riskScore >= 70 ? '#ffffff' : riskScore >= 40 ? '#1e293b' : '#1e293b';
+          ctx.font = `bold ${SCORE_FONT_SIZE}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(String(Math.round(riskScore)), x, y);
+        }
+
+        // Type icon/badge above node
+        if (nodeType === 'flagged') {
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText('⚠', x, y - r - 5);
+        } else if (nodeType === 'exchange') {
+          ctx.font = '9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#93c5fd';
+          ctx.fillText('⟐', x, y - r - 4);
+        }
+
+        // Label below node
         ctx.fillStyle = LABEL_COLOR;
         ctx.font = `${FONT_SIZE}px ui-monospace, SFMono-Regular, Menlo, monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         const labelText =
           n.label.length > 14 ? n.label.slice(0, 12) + '…' : n.label;
-        ctx.fillText(labelText, x, y + NODE_RADIUS + 4);
+        ctx.fillText(labelText, x, y + r + 5);
       }
 
       ctx.restore();
@@ -425,7 +540,8 @@ const ForceGraph2D = forwardRef<ForceGraph2DRef, ForceGraph2DProps>(
           const n = nodes[i];
           const dx = (n.x ?? 0) - x;
           const dy = (n.y ?? 0) - y;
-          if (dx * dx + dy * dy <= (NODE_RADIUS + 4) ** 2) return n;
+          const r = getNodeRadius(n.data) + 4;
+          if (dx * dx + dy * dy <= r * r) return n;
         }
         return null;
       },

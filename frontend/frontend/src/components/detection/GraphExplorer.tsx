@@ -369,9 +369,9 @@ export default function GraphExplorer({
         )}
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 p-3 bg-slate-800/95 backdrop-blur border border-slate-600 rounded-lg max-w-[200px]">
+        <div className="absolute bottom-4 left-4 p-3 bg-slate-800/95 backdrop-blur border border-slate-600 rounded-lg">
           <div className="text-xs font-medium text-slate-300 mb-2">Risk Level</div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-3">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
               <span className="text-slate-400">Low (0-30)</span>
@@ -387,6 +387,36 @@ export default function GraphExplorer({
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <span className="text-slate-400">Critical (70+)</span>
+            </div>
+          </div>
+          <div className="text-xs font-medium text-slate-300 mb-2 border-t border-slate-600 pt-2">Node Shape</div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full border border-slate-400"></div>
+              <span className="text-slate-400">Wallet</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rotate-45 bg-red-500/60 border border-red-400"></div>
+              <span className="text-slate-400">Flagged</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-3 h-3" viewBox="0 0 12 12"><polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="#93c5fd" strokeWidth="1.5"/></svg>
+              <span className="text-slate-400">Exchange</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-sm border border-slate-400"></div>
+              <span className="text-slate-400">Contract</span>
+            </div>
+          </div>
+          <div className="text-xs font-medium text-slate-300 mb-1 border-t border-slate-600 pt-2 mt-2">Edges</div>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-0.5 bg-slate-500"></div>
+              <span className="text-slate-400">Normal flow</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-1 bg-red-500"></div>
+              <span className="text-slate-400">Illicit flow</span>
             </div>
           </div>
         </div>
