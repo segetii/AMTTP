@@ -416,6 +416,13 @@ export default function AlertsPage() {
             riskScore: (explainAlert.metadata?.riskScore as number) || 0,
             riskLevel: (explainAlert.metadata?.riskLevel as string) || '',
             reason: explainAlert.message,
+            hash: (explainAlert.metadata?.hash as string) || explainAlert.resourceId || undefined,
+            from: (explainAlert.metadata?.from as string) || undefined,
+            to: (explainAlert.metadata?.to as string) || undefined,
+            value: (explainAlert.metadata?.value as number) || undefined,
+            flags: (explainAlert.metadata?.flags as string[]) || explainAlert.tags || undefined,
+            totalTransactions: (explainAlert.metadata?.totalTransactions as number) || undefined,
+            uniqueCounterparties: (explainAlert.metadata?.uniqueCounterparties as number) || undefined,
           }}
           onClose={() => setExplainAlert(null)}
           onInvestigate={() => {

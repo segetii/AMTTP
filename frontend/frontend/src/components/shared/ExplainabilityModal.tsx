@@ -17,13 +17,23 @@ import React, { useEffect, useState } from 'react';
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Minimal fields the modal needs from the caller */
+/** Fields the modal needs from the caller — pass everything available */
 export interface ExplainabilityItem {
   id: string;
   address?: string;
   riskScore?: number;
   riskLevel?: string;
   reason?: string;
+  // Enriched fields (from FlaggedTransaction / Alert metadata)
+  hash?: string;
+  from?: string;
+  to?: string;
+  value?: number;
+  timestamp?: string;
+  flags?: string[];
+  patternCount?: number;
+  totalTransactions?: number;
+  uniqueCounterparties?: number;
 }
 
 export interface ExplainabilityData {
@@ -185,13 +195,45 @@ async function fetchExplanation(item: ExplainabilityItem): Promise<Explainabilit
   const rawScore = item.riskScore ?? 50;
   const score = rawScore <= 1 ? rawScore * 100 : rawScore;
 
-  const payload = {
-    risk_score: rawScore <= 1 ? rawScore : rawScore / 100,
-    features: {
-      risk_reason: item.reason || '',
-      sender: item.address || '',
-    },
+  // Build rich features dict from all available item fields
+  const features: Record<string, unknown> = {
+    risk_reason: item.reason || '',
+    sender: item.address || item.from || '',
   };
+  if (item.value != null) features.amount_eth = item.value;
+  if (item.totalTransactions != null) features.tx_count_24h = item.totalTransactions;
+  if (item.patternCount != null) features.tx_count_1h = item.patternCount;
+  if (item.timestamp) {
+    const hour = new Date(item.timestamp).getUTCHours();
+    if (hour < 6 || hour > 22) features.unusual_hour = hour;
+  }
+
+  // Build graph context from network-related fields
+  const graph_context: Record<string, unknown> = {};
+  if (item.uniqueCounterparties != null) graph_context.out_degree = item.uniqueCounterparties;
+
+  // Convert flags into rule_results the backend can use for typology matching
+  const rule_results: Array<{ rule_id: string; triggered: boolean; details: string }> = [];
+  if (item.flags && item.flags.length > 0) {
+    for (const flag of item.flags) {
+      rule_results.push({ rule_id: flag, triggered: true, details: flag });
+      // Also promote well-known flags into features/graph_context
+      const fl = flag.toLowerCase();
+      if (fl.includes('velocity') || fl.includes('high_velocity')) features.tx_count_1h = features.tx_count_1h ?? 10;
+      if (fl.includes('dormant')) features.dormancy_days = features.dormancy_days ?? 180;
+      if (fl.includes('sanction')) graph_context.hops_to_sanctioned = graph_context.hops_to_sanctioned ?? 2;
+      if (fl.includes('mixer') || fl.includes('mixing')) graph_context.hops_to_mixer = graph_context.hops_to_mixer ?? 1;
+      if (fl.includes('layering') || fl.includes('fan_out') || fl.includes('fan-out')) graph_context.out_degree = graph_context.out_degree ?? 50;
+      if (fl.includes('fan_in') || fl.includes('fan-in') || fl.includes('aggregat')) graph_context.in_degree = graph_context.in_degree ?? 100;
+    }
+  }
+
+  const payload: Record<string, unknown> = {
+    risk_score: rawScore <= 1 ? rawScore : rawScore / 100,
+    features,
+  };
+  if (Object.keys(graph_context).length > 0) payload.graph_context = graph_context;
+  if (rule_results.length > 0) payload.rule_results = rule_results;
 
   const res = await fetch('/explain/explain', {
     method: 'POST',

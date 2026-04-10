@@ -521,6 +521,15 @@ export default function FlaggedQueuePage() {
             riskScore: explainTx.riskScore,
             riskLevel: explainTx.riskLevel,
             reason: explainTx.reason || explainTx.flags?.[0],
+            hash: explainTx.hash,
+            from: explainTx.from,
+            to: explainTx.to,
+            value: explainTx.value,
+            timestamp: explainTx.timestamp,
+            flags: explainTx.flags,
+            patternCount: explainTx.patternCount,
+            totalTransactions: explainTx.totalTransactions,
+            uniqueCounterparties: explainTx.uniqueCounterparties,
           }}
           onClose={() => setExplainTx(null)}
           onInvestigate={() => {
