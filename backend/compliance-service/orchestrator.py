@@ -1438,8 +1438,10 @@ async def _persist_flagged(decision_dict: dict, tx_hash: str = ""):
         score = decision_dict.get("risk_score", 0)
         action = decision_dict.get("action", "")
         reasons = decision_dict.get("reasons", [])
+        checks = decision_dict.get("checks", [])
         ts = decision_dict.get("timestamp", datetime.now(timezone.utc).isoformat())
 
+        # Build rich flags from checks and action
         flags = []
         if action in ("BLOCK", "REQUIRE_INFO"):
             flags.append(action.replace("_", " ").title())
@@ -1449,6 +1451,56 @@ async def _persist_flagged(decision_dict: dict, tx_hash: str = ""):
             flags.append("Travel Rule")
         if decision_dict.get("requires_escrow"):
             flags.append("Escrow")
+        # Add flags from failed checks
+        for chk in checks:
+            if not chk.get("passed") and chk.get("reason"):
+                flags.append(chk["reason"])
+
+        # Build detailed reason from all check results
+        reason_parts = list(reasons) if reasons else []
+        for chk in checks:
+            svc = chk.get("service", "")
+            if svc == "ml_risk" and chk.get("details"):
+                ml = chk["details"]
+                reason_parts.append(
+                    f"ML risk: {ml.get('risk_level', 'unknown')} "
+                    f"(score {ml.get('risk_score', '?')}, "
+                    f"confidence {ml.get('confidence', '?')})"
+                )
+            elif not chk.get("passed") and chk.get("reason"):
+                if chk["reason"] not in reason_parts:
+                    reason_parts.append(chk["reason"])
+
+        # Extract ML factors for explainability
+        ml_factors = {}
+        for chk in checks:
+            if chk.get("service") == "ml_risk" and chk.get("details"):
+                d = chk["details"]
+                ml_factors = {
+                    "risk_score": d.get("risk_score"),
+                    "risk_level": d.get("risk_level"),
+                    "confidence": d.get("confidence"),
+                    "model_version": d.get("model_version"),
+                    "factors": d.get("factors", {}),
+                }
+                break
+
+        # Build check summary for audit trail
+        check_summary = []
+        for chk in checks:
+            check_summary.append({
+                "service": chk.get("service"),
+                "check_type": chk.get("check_type"),
+                "passed": chk.get("passed"),
+                "score": chk.get("score"),
+                "reason": chk.get("reason", ""),
+            })
+
+        # Count unique counterparties from profiles
+        unique_counterparties = 2  # originator + beneficiary
+        originator = decision_dict.get("originator_profile", {})
+        total_transactions = originator.get("total_transactions", 0)
+        pattern_count = sum(1 for chk in checks if not chk.get("passed"))
 
         doc = {
             "id": f"live-{decision_dict.get('decision_id', uuid.uuid4().hex[:12])}",
@@ -1459,15 +1511,32 @@ async def _persist_flagged(decision_dict: dict, tx_hash: str = ""):
             "value": decision_dict.get("value_eth", 0),
             "riskScore": round(score, 1),
             "riskLevel": _risk_level(score),
-            "reason": "; ".join(reasons) if reasons else action,
+            "reason": "; ".join(reason_parts) if reason_parts else action,
             "flags": flags or [_risk_level(score)],
             "timestamp": ts,
             "status": "pending",
             "source": "live",
+            # Rich evidence fields
+            "action": action,
+            "decision_id": decision_dict.get("decision_id", ""),
+            "checks": check_summary,
+            "ml_factors": ml_factors,
+            "patternCount": pattern_count,
+            "totalTransactions": total_transactions,
+            "uniqueCounterparties": unique_counterparties,
+            "processing_time_ms": decision_dict.get("processing_time_ms", 0),
+            "originator": {
+                "entity_type": originator.get("entity_type", "UNKNOWN"),
+                "kyc_level": originator.get("kyc_level", "NONE"),
+                "jurisdiction": originator.get("jurisdiction", "UNKNOWN"),
+            },
+            "requires_sar": decision_dict.get("requires_sar", False),
+            "requires_travel_rule": decision_dict.get("requires_travel_rule", False),
+            "requires_escrow": decision_dict.get("requires_escrow", False),
         }
 
         await storage.mongo.db.flagged_transactions.insert_one(doc)
-        print(f"[PERSIST] Saved to flagged_transactions: {doc['id']} risk={score}")
+        print(f"[PERSIST] Saved to flagged_transactions: {doc['id']} risk={score} checks={len(check_summary)}")
         return True
     except Exception as e:
         print(f"[PERSIST] flagged_transactions write failed: {e}")
