@@ -1414,6 +1414,66 @@ def get_sample_sankey_data():
     }
 
 
+def _risk_level(score: float) -> str:
+    if score >= 80:
+        return "CRITICAL"
+    elif score >= 60:
+        return "HIGH"
+    elif score >= 40:
+        return "MEDIUM"
+    elif score >= 20:
+        return "LOW"
+    return "MINIMAL"
+
+
+async def _persist_flagged(decision_dict: dict, tx_hash: str = ""):
+    """Persist an evaluated decision to flagged_transactions in War Room schema."""
+    if not USE_STORAGE_LAYER:
+        return False
+    try:
+        storage = await get_storage()
+        if not (storage and storage.mongo and storage.mongo.db is not None):
+            return False
+
+        score = decision_dict.get("risk_score", 0)
+        action = decision_dict.get("action", "")
+        reasons = decision_dict.get("reasons", [])
+        ts = decision_dict.get("timestamp", datetime.now(timezone.utc).isoformat())
+
+        flags = []
+        if action in ("BLOCK", "REQUIRE_INFO"):
+            flags.append(action.replace("_", " ").title())
+        if decision_dict.get("requires_sar"):
+            flags.append("SAR Required")
+        if decision_dict.get("requires_travel_rule"):
+            flags.append("Travel Rule")
+        if decision_dict.get("requires_escrow"):
+            flags.append("Escrow")
+
+        doc = {
+            "id": f"live-{decision_dict.get('decision_id', uuid.uuid4().hex[:12])}",
+            "hash": tx_hash or decision_dict.get("tx_hash", ""),
+            "address": decision_dict.get("to_address", "").lower(),
+            "from": decision_dict.get("from_address", "").lower(),
+            "to": decision_dict.get("to_address", "").lower(),
+            "value": decision_dict.get("value_eth", 0),
+            "riskScore": round(score, 1),
+            "riskLevel": _risk_level(score),
+            "reason": "; ".join(reasons) if reasons else action,
+            "flags": flags or [_risk_level(score)],
+            "timestamp": ts,
+            "status": "pending",
+            "source": "live",
+        }
+
+        await storage.mongo.db.flagged_transactions.insert_one(doc)
+        print(f"[PERSIST] Saved to flagged_transactions: {doc['id']} risk={score}")
+        return True
+    except Exception as e:
+        print(f"[PERSIST] flagged_transactions write failed: {e}")
+        return False
+
+
 @app.post("/evaluate")
 async def evaluate_tx(request: TransactionRequest, auth: dict = Depends(verify_api_key)):
     """
@@ -1426,8 +1486,13 @@ async def evaluate_tx(request: TransactionRequest, auth: dict = Depends(verify_a
         tx_hash=request.tx_hash,
         timestamp=request.timestamp
     )
-    
-    return asdict(decision)
+
+    decision_dict = asdict(decision)
+
+    # Persist to flagged_transactions so it appears in War Room
+    await _persist_flagged(decision_dict, tx_hash=request.tx_hash or "")
+
+    return decision_dict
 
 
 class LogTransactionRequest(BaseModel):
@@ -1447,34 +1512,49 @@ async def log_transaction(request: LogTransactionRequest, auth: dict = Depends(v
     Called by the Flutter consumer app after a swap is broadcast on-chain.
     """
     now = datetime.now(timezone.utc)
-    doc = {
-        "tx_hash": request.tx_hash,
-        "to_address": request.to_address.lower(),
-        "from_address": (request.from_address or "").lower(),
-        "value_eth": request.value_eth,
-        "risk_score": request.risk_score,
+    ts = request.timestamp or now.isoformat()
+
+    # Build War Room-compatible flagged_transactions document
+    risk_score = request.risk_score
+    flagged_doc = {
+        "id": f"live-tx-{request.tx_hash[:12]}",
+        "hash": request.tx_hash,
+        "address": request.to_address.lower(),
+        "from": (request.from_address or "").lower(),
+        "to": request.to_address.lower(),
+        "value": request.value_eth,
+        "riskScore": round(risk_score, 1),
+        "riskLevel": _risk_level(risk_score),
+        "reason": f"Live transaction (risk {risk_score})",
+        "flags": [_risk_level(risk_score)],
+        "timestamp": ts,
+        "status": "pending",
         "chain_id": request.chain_id or 11155111,
-        "timestamp": request.timestamp or now.isoformat(),
-        "logged_at": now.isoformat(),
-        "source": "flutter_app",
+        "source": "live",
     }
 
-    # Persist to MongoDB
+    # Persist to MongoDB flagged_transactions (War Room visible)
     mongo_saved = False
     if USE_STORAGE_LAYER:
         try:
             storage = await get_storage()
             if storage and storage.mongo and storage.mongo.db is not None:
-                await storage.mongo.db.user_transactions.insert_one(doc.copy())
+                # Upsert by tx_hash to avoid duplicates (evaluate may have already inserted)
+                await storage.mongo.db.flagged_transactions.update_one(
+                    {"hash": request.tx_hash},
+                    {"$set": flagged_doc},
+                    upsert=True
+                )
                 mongo_saved = True
+                print(f"[LOG-TX] Saved to flagged_transactions: {flagged_doc['id']}")
         except Exception as e:
             print(f"[LOG-TX] MongoDB write failed: {e}")
 
-    # Also append to decisions JSONL as backup
+    # Also append to JSONL as backup
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         with open(DATA_DIR / "transactions.jsonl", "a") as f:
-            f.write(json.dumps(doc, default=str) + "\n")
+            f.write(json.dumps(flagged_doc, default=str) + "\n")
     except Exception as e:
         print(f"[LOG-TX] JSONL write failed: {e}")
 

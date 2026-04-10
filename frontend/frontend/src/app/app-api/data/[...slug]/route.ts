@@ -58,7 +58,7 @@ async function getMongoDb() {
 async function queryMongo(collection: string, filter: Record<string, unknown> = {}, limit = 50): Promise<unknown[] | null> {
   try {
     const db = await getMongoDb();
-    const results = await db.collection(collection).find(filter).limit(limit).toArray();
+    const results = await db.collection(collection).find(filter).sort({ timestamp: -1 }).limit(limit).toArray();
     return results;
   } catch (e) {
     console.warn('[data-proxy] MongoDB query failed:', e);
