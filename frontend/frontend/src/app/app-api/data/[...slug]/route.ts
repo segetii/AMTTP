@@ -19,7 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://orchestrator:8007';
-const MONGO_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017';
+const MONGO_URL = process.env.MONGODB_URL || (process.env.DOCKER_CONTAINER === 'true' ? 'mongodb://amttp-mongo:27017' : 'mongodb://localhost:27017');
 const DB_NAME = 'amttp';
 
 // ── Real backend fetcher ────────────────────────────────────────
