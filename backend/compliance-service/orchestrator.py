@@ -1429,6 +1429,62 @@ async def evaluate_tx(request: TransactionRequest, auth: dict = Depends(verify_a
     
     return asdict(decision)
 
+
+class LogTransactionRequest(BaseModel):
+    tx_hash: str
+    to_address: str
+    value_eth: float
+    risk_score: float = 0.0
+    timestamp: Optional[str] = None
+    chain_id: Optional[int] = None
+    from_address: Optional[str] = None
+
+
+@app.post("/log-transaction")
+async def log_transaction(request: LogTransactionRequest, auth: dict = Depends(verify_api_key)):
+    """
+    Log a submitted transaction for audit trail.
+    Called by the Flutter consumer app after a swap is broadcast on-chain.
+    """
+    now = datetime.now(timezone.utc)
+    doc = {
+        "tx_hash": request.tx_hash,
+        "to_address": request.to_address.lower(),
+        "from_address": (request.from_address or "").lower(),
+        "value_eth": request.value_eth,
+        "risk_score": request.risk_score,
+        "chain_id": request.chain_id or 11155111,
+        "timestamp": request.timestamp or now.isoformat(),
+        "logged_at": now.isoformat(),
+        "source": "flutter_app",
+    }
+
+    # Persist to MongoDB
+    mongo_saved = False
+    if USE_STORAGE_LAYER:
+        try:
+            storage = await get_storage()
+            if storage and storage.mongo and storage.mongo.db is not None:
+                await storage.mongo.db.user_transactions.insert_one(doc.copy())
+                mongo_saved = True
+        except Exception as e:
+            print(f"[LOG-TX] MongoDB write failed: {e}")
+
+    # Also append to decisions JSONL as backup
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        with open(DATA_DIR / "transactions.jsonl", "a") as f:
+            f.write(json.dumps(doc, default=str) + "\n")
+    except Exception as e:
+        print(f"[LOG-TX] JSONL write failed: {e}")
+
+    return {
+        "status": "logged",
+        "tx_hash": request.tx_hash,
+        "mongo_saved": mongo_saved,
+    }
+
+
 @app.post("/evaluate-with-integrity")
 async def evaluate_with_integrity(
     request: dict,
