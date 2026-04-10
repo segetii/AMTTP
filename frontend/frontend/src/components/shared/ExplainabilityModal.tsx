@@ -6,10 +6,12 @@
  * Renders ML decision explanations for flagged transactions / alerts.
  * Used by: War Room dashboard, Flagged Queue, Alert Center.
  *
- * Accepts a generic item shape so both FlaggedTransaction and Alert can be passed.
+ * Fetches real explanations from the explainability service (port 8009)
+ * via the Next.js API route /api/explain. Falls back to local generation
+ * if the service is unavailable.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -27,6 +29,7 @@ export interface ExplainabilityItem {
 export interface ExplainabilityData {
   riskScore: number;
   riskLevel: string;
+  action: string;
   narrative: string;
   patterns: Array<{
     name: string;
@@ -42,6 +45,9 @@ export interface ExplainabilityData {
   }>;
   typologies: string[];
   confidence: number;
+  recommendations: string[];
+  graphExplanation: string | null;
+  source: 'live' | 'fallback';
 }
 
 interface ExplainabilityModalProps {
@@ -156,6 +162,7 @@ export function buildExplanation(item: ExplainabilityItem): ExplainabilityData {
   return {
     riskScore: score,
     riskLevel,
+    action: score >= 85 ? 'BLOCK' : score >= 70 ? 'ESCROW' : score >= 50 ? 'REVIEW' : 'ALLOW',
     narrative:
       `This transaction was flagged with a ${riskLevel} risk classification. ` +
       `${item.reason || 'The ML pipeline detected patterns requiring review'}. ` +
@@ -164,6 +171,87 @@ export function buildExplanation(item: ExplainabilityItem): ExplainabilityData {
     factors,
     typologies,
     confidence: 0.82,
+    recommendations: [],
+    graphExplanation: null,
+    source: 'fallback' as const,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIVE API FETCH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function fetchExplanation(item: ExplainabilityItem): Promise<ExplainabilityData> {
+  const rawScore = item.riskScore ?? 50;
+  const score = rawScore <= 1 ? rawScore * 100 : rawScore;
+
+  const payload = {
+    risk_score: rawScore <= 1 ? rawScore : rawScore / 100,
+    features: {
+      risk_reason: item.reason || '',
+      sender: item.address || '',
+    },
+  };
+
+  const res = await fetch('/explain/explain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) throw new Error(`API ${res.status}`);
+
+  const data = await res.json();
+  const explanation = data.explanation || data;
+
+  const riskLevel = item.riskLevel?.toUpperCase() || getRiskLevel(score);
+
+  // Map backend factors → UI factors
+  const factors = (explanation.factors || []).map((f: { factor_id?: string; reason?: string; contribution?: number; detail?: string; impact?: string; value?: number }) => ({
+    name: (f.factor_id || '').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+    value: typeof f.value === 'number' ? f.value : 0,
+    impact: f.contribution ?? 0.1,
+    description: f.reason || f.detail || '',
+  }));
+
+  // Map backend typology_matches → UI patterns + typology labels
+  const typologyMatches = explanation.typology_matches || [];
+  const patterns = typologyMatches.map((t: { typology?: string; description?: string; confidence?: number }) => ({
+    name: t.typology || 'unknown',
+    description: t.description || '',
+    severity: (t.confidence ?? 0) >= 0.8 ? 'critical' : (t.confidence ?? 0) >= 0.6 ? 'high' : 'medium',
+    confidence: t.confidence ?? 0.5,
+  }));
+  const typologies = typologyMatches.map((t: { typology?: string }) =>
+    (t.typology || '').replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+  );
+
+  // Also convert top-level factors with impact into patterns if no typology matches
+  if (patterns.length === 0 && factors.length > 0) {
+    for (const f of factors.slice(0, 3)) {
+      if (f.impact >= 0.15) {
+        patterns.push({
+          name: f.name.toLowerCase().replace(/ /g, '_'),
+          description: f.description,
+          severity: f.impact >= 0.3 ? 'high' : 'medium',
+          confidence: Math.min(f.impact * 3, 0.95),
+        });
+      }
+    }
+  }
+
+  return {
+    riskScore: score,
+    riskLevel,
+    action: explanation.action || 'REVIEW',
+    narrative: explanation.summary || `Risk score ${Math.round(score)} — ${riskLevel} risk.`,
+    patterns,
+    factors,
+    typologies,
+    confidence: explanation.confidence ?? 0.5,
+    recommendations: explanation.recommendations || [],
+    graphExplanation: explanation.graph_explanation || null,
+    source: 'live',
   };
 }
 
@@ -172,8 +260,22 @@ export function buildExplanation(item: ExplainabilityItem): ExplainabilityData {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function ExplainabilityModal({ item, onClose, onInvestigate }: ExplainabilityModalProps) {
-  const explanation = React.useMemo(() => buildExplanation(item), [item]);
-  const rc = getRiskColor(explanation.riskLevel);
+  const [explanation, setExplanation] = useState<ExplainabilityData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    fetchExplanation(item)
+      .then((data) => { if (!cancelled) setExplanation(data); })
+      .catch(() => { if (!cancelled) setExplanation(buildExplanation(item)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [item]);
+
+  const rc = getRiskColor(explanation?.riskLevel || getRiskLevel(item.riskScore ?? 50));
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -193,7 +295,7 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
             <p className="text-sm text-mutedText font-mono">{item.address || item.id}</p>
           </div>
           <div className={`px-3 py-1 rounded-full ${rc.bgSoft} border ${rc.border}`}>
-            <span className={`text-sm font-bold ${rc.text}`}>{explanation.riskLevel} RISK</span>
+            <span className={`text-sm font-bold ${rc.text}`}>{explanation?.riskLevel || '...'} RISK</span>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
             <svg className="w-5 h-5 text-mutedText" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -204,90 +306,156 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Risk Score Donut */}
-          <div className="flex items-center gap-6">
-            <div className="relative w-24 h-24">
-              <svg className="w-24 h-24 -rotate-90">
-                <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="none" className="text-slate-700" />
-                <circle
-                  cx="48" cy="48" r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${(explanation.riskScore / 100) * 251.2} 251.2`}
-                  className={rc.text}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className={`text-2xl font-bold ${rc.text}`}>{Math.round(explanation.riskScore)}</span>
-              </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <div className="w-8 h-8 border-2 border-slate-500 border-t-indigo-500 rounded-full animate-spin" />
+              <p className="text-sm text-mutedText">Fetching explanation from XAI service…</p>
             </div>
-            <div>
-              <p className="text-sm text-mutedText">Confidence: {Math.round(explanation.confidence * 100)}%</p>
-              <p className="text-sm text-mutedText mt-1">Model: GraphSAGE + XGBoost</p>
-            </div>
-          </div>
-
-          {/* Narrative */}
-          <div>
-            <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Analysis Summary</h3>
-            <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
-              <p className="text-slate-200 leading-relaxed">{explanation.narrative}</p>
-            </div>
-          </div>
-
-          {/* Patterns */}
-          {explanation.patterns.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Detected Patterns</h3>
-              <div className="space-y-2">
-                {explanation.patterns.map((p, i) => (
-                  <div key={i} className={`border rounded-lg p-3 ${getSeverityColor(p.severity)}`}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-semibold uppercase">{p.name.replace(/_/g, ' ')}</span>
-                      <span className="text-xs opacity-75">{Math.round(p.confidence * 100)}% confidence</span>
-                    </div>
-                    <p className="text-sm opacity-90">{p.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SHAP Factors */}
-          {explanation.factors.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Contributing Factors (SHAP)</h3>
-              <div className="space-y-3">
-                {explanation.factors.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="w-32 text-sm text-slate-300 truncate">{f.name}</span>
-                    <div className="flex-1 h-5 bg-surface rounded relative">
-                      <div
-                        className={`h-5 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
-                        style={{ width: `${Math.min(f.impact * 100 * 3, 100)}%` }}
-                      />
-                    </div>
-                    <span className={`text-sm font-mono w-12 text-right ${f.impact > 0.2 ? 'text-red-400' : 'text-blue-400'}`}>
-                      +{Math.round(f.impact * 100)}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* AML Typologies */}
-          {explanation.typologies.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">AML Typologies</h3>
-              <div className="flex flex-wrap gap-2">
-                {explanation.typologies.map((t, i) => (
-                  <span key={i} className="px-3 py-1 bg-red-500/15 border border-red-500/30 rounded-lg text-sm text-red-400">
-                    {t}
+          ) : explanation ? (
+            <>
+              {/* Source badge */}
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                  explanation.source === 'live'
+                    ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                    : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+                }`}>
+                  {explanation.source === 'live' ? 'Live XAI Service' : 'Fallback (service unavailable)'}
+                </span>
+                {explanation.action && (
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                    explanation.action === 'BLOCK' ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                    : explanation.action === 'ESCROW' ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30'
+                    : explanation.action === 'REVIEW' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+                    : 'bg-green-500/15 text-green-400 border border-green-500/30'
+                  }`}>
+                    Action: {explanation.action}
                   </span>
-                ))}
+                )}
               </div>
+
+              {/* Risk Score Donut */}
+              <div className="flex items-center gap-6">
+                <div className="relative w-24 h-24">
+                  <svg className="w-24 h-24 -rotate-90">
+                    <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="none" className="text-slate-700" />
+                    <circle
+                      cx="48" cy="48" r="40"
+                      stroke="currentColor"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${(explanation.riskScore / 100) * 251.2} 251.2`}
+                      className={rc.text}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-2xl font-bold ${rc.text}`}>{Math.round(explanation.riskScore)}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-mutedText">Confidence: {Math.round(explanation.confidence * 100)}%</p>
+                  <p className="text-sm text-mutedText mt-1">
+                    {explanation.source === 'live' ? 'XAI Engine (Real-time)' : 'Model: GraphSAGE + XGBoost'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Narrative */}
+              <div>
+                <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Analysis Summary</h3>
+                <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+                  <p className="text-slate-200 leading-relaxed">{explanation.narrative}</p>
+                </div>
+              </div>
+
+              {/* Graph Explanation */}
+              {explanation.graphExplanation && (
+                <div>
+                  <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Graph Analysis</h3>
+                  <div className="bg-surface rounded-lg p-4 border border-borderSubtle">
+                    <p className="text-slate-200 leading-relaxed">{explanation.graphExplanation}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Patterns */}
+              {explanation.patterns.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Detected Patterns</h3>
+                  <div className="space-y-2">
+                    {explanation.patterns.map((p, i) => (
+                      <div key={i} className={`border rounded-lg p-3 ${getSeverityColor(p.severity)}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold uppercase">{p.name.replace(/_/g, ' ')}</span>
+                          <span className="text-xs opacity-75">{Math.round(p.confidence * 100)}% confidence</span>
+                        </div>
+                        <p className="text-sm opacity-90">{p.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contributing Factors */}
+              {explanation.factors.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Contributing Factors</h3>
+                  <div className="space-y-3">
+                    {explanation.factors.map((f, i) => (
+                      <div key={i}>
+                        <div className="flex items-center gap-3">
+                          <span className="w-32 text-sm text-slate-300 truncate" title={f.description}>{f.name}</span>
+                          <div className="flex-1 h-5 bg-surface rounded relative">
+                            <div
+                              className={`h-5 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
+                              style={{ width: `${Math.min(f.impact * 100 * 3, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-sm font-mono w-12 text-right ${f.impact > 0.2 ? 'text-red-400' : 'text-blue-400'}`}>
+                            +{Math.round(f.impact * 100)}%
+                          </span>
+                        </div>
+                        {f.description && (
+                          <p className="text-xs text-mutedText mt-1 ml-[8.5rem]">{f.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AML Typologies */}
+              {explanation.typologies.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">AML Typologies</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {explanation.typologies.map((t, i) => (
+                      <span key={i} className="px-3 py-1 bg-red-500/15 border border-red-500/30 rounded-lg text-sm text-red-400">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recommendations */}
+              {explanation.recommendations.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-mutedText uppercase tracking-wide mb-3">Recommendations</h3>
+                  <ul className="space-y-1">
+                    {explanation.recommendations.map((r, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                        <span className="text-indigo-400 mt-0.5">→</span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12 text-mutedText">
+              <p>Unable to load explanation data.</p>
             </div>
           )}
         </div>
