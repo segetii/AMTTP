@@ -208,12 +208,49 @@ async function fetchExplanation(item: ExplainabilityItem): Promise<Explainabilit
     if (hour < 6 || hour > 22) features.unusual_hour = hour;
   }
 
+  // Inject ML factors from the stored record (populated by enriched _persist_flagged)
+  const mlf = (item as Record<string, unknown>).ml_factors as Record<string, unknown> | undefined;
+  if (mlf) {
+    if (mlf.risk_score != null) features.xgb_prob = mlf.risk_score;
+    if (mlf.confidence != null) features.ml_confidence = mlf.confidence;
+    if (mlf.risk_level) features.ml_risk_level = mlf.risk_level;
+    const mlFactors = mlf.factors as Record<string, unknown> | undefined;
+    if (mlFactors) {
+      for (const [k, v] of Object.entries(mlFactors)) {
+        features[k.toLowerCase()] = v;
+      }
+    }
+  }
+
+  // Inject originator data
+  const orig = (item as Record<string, unknown>).originator as Record<string, unknown> | undefined;
+  if (orig) {
+    if (orig.entity_type === 'UNVERIFIED') features.unverified_entity = true;
+    if (orig.kyc_level === 'NONE') features.kyc_required = true;
+  }
+
+  // Inject SAR / travel rule / escrow flags
+  if ((item as Record<string, unknown>).requires_sar) features.sar_required = true;
+  if ((item as Record<string, unknown>).requires_travel_rule) features.travel_rule_triggered = true;
+
   // Build graph context from network-related fields
   const graph_context: Record<string, unknown> = {};
   if (item.uniqueCounterparties != null) graph_context.out_degree = item.uniqueCounterparties;
 
-  // Convert flags into rule_results the backend can use for typology matching
-  // Maps common flag/reason strings to the rule_type enum the backend expects
+  // Convert stored checks into rule_results the backend can use
+  const storedChecks = ((item as Record<string, unknown>).checks || []) as Array<Record<string, unknown>>;
+  const rule_results: Array<{ rule_id: string; rule_type?: string; triggered: boolean; details: string }> = [];
+
+  for (const chk of storedChecks) {
+    rule_results.push({
+      rule_id: String(chk.service || chk.check_type || 'unknown'),
+      rule_type: String(chk.check_type || chk.service || ''),
+      triggered: !chk.passed,
+      details: String(chk.reason || chk.service || ''),
+    });
+  }
+
+  // Convert flags into additional rule_results for typology matching
   const FLAG_TO_RULE_TYPE: Record<string, string> = {
     'structur': 'STRUCTURING', 'smurfing': 'STRUCTURING', 'small txn': 'STRUCTURING',
     'layer': 'LAYERING', 'chain': 'LAYERING',
@@ -225,10 +262,10 @@ async function fetchExplanation(item: ExplainabilityItem): Promise<Explainabilit
     'fan-in': 'FAN_IN', 'fan_in': 'FAN_IN', 'aggregat': 'FAN_IN', 'consolidat': 'FAN_IN',
   };
 
-  const rule_results: Array<{ rule_id: string; rule_type?: string; triggered: boolean; details: string }> = [];
   const allSignals = [...(item.flags || []), item.reason || ''].map(s => s.toLowerCase()).join(' ');
 
-  if (item.flags && item.flags.length > 0) {
+  // Supplement rule_results from flags (for records without stored checks)
+  if (rule_results.length === 0 && item.flags && item.flags.length > 0) {
     for (const flag of item.flags) {
       const fl = flag.toLowerCase();
       // Find matching rule_type for this flag

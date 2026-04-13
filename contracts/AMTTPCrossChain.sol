@@ -856,6 +856,15 @@ contract AMTTPCrossChain is
     }
     
     function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    /**
+     * @notice Update the LayerZero endpoint (for migrating from mock to real)
+     * @param _newEndpoint New LZ endpoint address
+     */
+    function setEndpoint(address _newEndpoint) external onlyOwner {
+        require(_newEndpoint != address(0), "Zero address");
+        lzEndpoint = ILayerZeroEndpoint(_newEndpoint);
+    }
     
     // ============ Receive ETH ============
     

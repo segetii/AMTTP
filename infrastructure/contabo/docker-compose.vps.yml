@@ -1,0 +1,418 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AMTTP — Contabo VPS Production Compose
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This is the VPS-optimised version of docker-compose.production.yml.
+# Differences from local dev:
+#   - Cloudflare runs via connector token (no credentials file)
+#   - All secrets from .env file
+#   - Monitoring enabled by default
+#   - Resource limits set for 48GB / 12 vCPU Contabo VPS L
+#   - No hardhat node (production uses real chains)
+#
+# Usage:
+#   cd /opt/amttp && docker compose -f docker-compose.vps.yml up -d
+# ═══════════════════════════════════════════════════════════════════════════════
+
+x-common-env: &common-env
+  NODE_ENV: production
+  TZ: UTC
+
+x-restart: &restart-policy
+  restart: unless-stopped
+
+x-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+services:
+  # ═════════════════════════════════════════════════════════════════════════════
+  # CLOUDFLARE TUNNEL — outbound-only, no ports exposed
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: amttp-cloudflared
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      nginx-gateway:
+        condition: service_healthy
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NGINX GATEWAY — central reverse proxy
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  nginx-gateway:
+    image: nginx:alpine
+    container_name: amttp-gateway
+    ports:
+      - "127.0.0.1:8888:80" # localhost only — Cloudflare handles public
+    volumes:
+      - ./docker/nginx-production.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/amttp_app/build/web:/var/www/flutter:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      nextjs-dashboard:
+        condition: service_healthy
+      orchestrator:
+        condition: service_started
+      risk-engine:
+        condition: service_healthy
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # FRONTEND
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  nextjs-dashboard:
+    image: amttp/dashboard:latest
+    build:
+      context: ./frontend/frontend
+      dockerfile: Dockerfile
+    container_name: amttp-dashboard
+    environment:
+      <<: *common-env
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: /api
+      MONGODB_URL: mongodb://mongo:27017
+      DOCKER_CONTAINER: "true"
+      ORCHESTRATOR_URL: http://orchestrator:8007
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # BACKEND SERVICES
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  oracle-service:
+    image: amttp/oracle:latest
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile
+    container_name: amttp-oracle
+    environment:
+      <<: *common-env
+      PORT: 3001
+      MONGODB_URL: mongodb://admin:${MONGO_PASSWORD}@mongo:27017
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      MEMGRAPH_URL: bolt://memgraph:7687
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      memgraph:
+        condition: service_healthy
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  orchestrator:
+    image: amttp/orchestrator:latest
+    build:
+      context: ./backend/compliance-service
+      dockerfile: Dockerfile
+    container_name: amttp-orchestrator
+    environment:
+      <<: *common-env
+      MONGODB_URL: mongodb://admin:${MONGO_PASSWORD}@mongo:27017
+      MONGODB_DB: amttp
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_SECURE: "false"
+      MINIO_BUCKET: amttp-documents
+      IPFS_API_URL: http://helia:5001
+      ML_RISK_URL: http://risk-engine:8000
+      ZKNAF_URL: http://zknaf:8010
+      GRAPH_URL: http://memgraph:7687
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      risk-engine:
+        condition: service_healthy
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+
+  risk-engine:
+    image: amttp/risk-engine:latest
+    build:
+      context: ./ml/Automation/risk_engine
+      dockerfile: Dockerfile
+    container_name: amttp-risk-engine
+    environment:
+      <<: *common-env
+      PYTHONPATH: /app
+      MODEL_PATH: /app/models
+      CUDA_VISIBLE_DEVICES: ""
+    volumes:
+      - ./ml/Automation/tx_level_models:/app/models:ro
+      - ./processed:/app/processed:ro
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+
+  zknaf:
+    image: amttp/zknaf:latest
+    build:
+      context: ./backend/oracle-service
+      dockerfile: Dockerfile.zknaf
+    container_name: amttp-zknaf
+    environment:
+      <<: *common-env
+      ZKNAF_PORT: 8010
+      CIRCUITS_PATH: /app/circuits
+      PROVING_KEY_PATH: /app/keys
+    volumes:
+      - ./backend/oracle-service/src/zknaf/circuits:/app/circuits:ro
+      - zknaf-keys:/app/keys
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8010/zknaf/health"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # DATA LAYER
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  mongo:
+    image: mongo:7
+    container_name: amttp-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
+      - ./backups/mongo:/backup
+    command: >-
+      mongod
+      --wiredTigerCacheSizeGB 4
+      --setParameter diagnosticDataCollectionEnabled=false
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 6G
+
+  redis:
+    image: redis:7-alpine
+    container_name: amttp-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD}
+      --save 900 1
+      --save 300 10
+    volumes:
+      - redis-data:/data
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1536M
+
+  memgraph:
+    image: memgraph/memgraph:latest
+    container_name: amttp-memgraph
+    command: >-
+      --log-level=WARNING
+      --query-execution-timeout-sec=30
+      --memory-limit=4096
+      --storage-snapshot-interval-sec=3600
+      --storage-snapshot-retention-count=3
+    volumes:
+      - memgraph-data:/var/lib/memgraph
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'RETURN 1;' | mgconsole || exit 1"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 5G
+
+  minio:
+    image: minio/minio:latest
+    container_name: amttp-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio-data:/data
+    networks:
+      - amttp-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      <<: *default-healthcheck
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  helia:
+    image: ipfs/kubo:latest
+    container_name: amttp-ipfs
+    volumes:
+      - ipfs-data:/data/ipfs
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # MONITORING (always on in production)
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: amttp-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: amttp-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_SERVER_ROOT_URL: https://monitoring.amttp.com
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - amttp-net
+    <<: *restart-policy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+# ═════════════════════════════════════════════════════════════════════════════════
+# NETWORKS
+# ═════════════════════════════════════════════════════════════════════════════════
+
+networks:
+  amttp-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ═════════════════════════════════════════════════════════════════════════════════
+# VOLUMES (persistent on Contabo NVMe)
+# ═════════════════════════════════════════════════════════════════════════════════
+
+volumes:
+  mongo-data:
+  redis-data:
+  memgraph-data:
+  minio-data:
+  ipfs-data:
+  zknaf-keys:
+  nginx-logs:
+  prometheus-data:
+  grafana-data:

@@ -4,22 +4,25 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
- * AMTTP Landing Page — Market-Grade
+ * AMTTP Landing Page — SaaS-Grade
  *
  * Sections:
  *   1. Navbar (sticky, glass)
- *   2. Hero (tagline + animated glow + CTAs)
- *   3. Live Stats Strip
- *   4. Feature Cards (4 pillars)
- *   5. Architecture Map (visual)
- *   6. How It Works (3-step)
- *   7. Trust & Compliance
- *   8. CTA Banner
- *   9. Footer
+ *   2. Hero (outcome-focused tagline + CTAs)
+ *   3. Supported Networks Bar
+ *   4. Performance Stats Strip
+ *   5. Feature Cards (4 pillars — outcome-focused)
+ *   6. Platform Overview (abstract layers)
+ *   7. How It Works (3-step)
+ *   8. Built For (industry segments)
+ *   9. Compliance & Trust
+ *  10. Why AMTTP (differentiators)
+ *  11. CTA Banner
+ *  12. Footer
  * ═══════════════════════════════════════════════════════════════════════════════ */
 
 // ── Animated counter ────────────────────────────────────────────────────────
-function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
+function AnimatedNumber({ target, suffix = '', prefix = '' }: { target: number; suffix?: string; prefix?: string }) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -48,7 +51,7 @@ function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: stri
 
   return (
     <span ref={ref}>
-      {val.toLocaleString()}
+      {prefix}{val.toLocaleString()}
       {suffix}
     </span>
   );
@@ -128,14 +131,10 @@ export function LandingPage() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
-    // Determine Flutter URL based on environment
-    // Always route through /#/sign-out so stale sessions are cleared
     const port = window.location.port;
     if (port === '3006' || port === '3000') {
-      // Dev mode — Flutter on separate port
       setFlutterUrl('http://localhost:3010/#/sign-out');
     } else {
-      // Production (nginx) — Flutter at /app on same origin
       setFlutterUrl('/app/#/sign-out');
     }
     return () => window.removeEventListener('scroll', onScroll);
@@ -169,30 +168,33 @@ export function LandingPage() {
             <a href="#features" className="text-sm text-gray-400 transition hover:text-white">
               Features
             </a>
-            <a href="#architecture" className="text-sm text-gray-400 transition hover:text-white">
-              Architecture
+            <a href="#platform" className="text-sm text-gray-400 transition hover:text-white">
+              Platform
             </a>
             <a href="#how-it-works" className="text-sm text-gray-400 transition hover:text-white">
               How It Works
+            </a>
+            <a href="#solutions" className="text-sm text-gray-400 transition hover:text-white">
+              Solutions
             </a>
             <a href="#compliance" className="text-sm text-gray-400 transition hover:text-white">
               Compliance
             </a>
           </div>
 
-          {/* CTA — Dual Entry */}
+          {/* CTA */}
           <div className="flex items-center gap-3">
             <a
               href={flutterUrl}
               className="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 transition hover:text-white"
             >
-              Consumer Login
+              Sign In
             </a>
             <a
               href={flutterUrl}
               className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500"
             >
-              Institutional Login
+              Get Started
             </a>
           </div>
         </div>
@@ -222,100 +224,83 @@ export function LandingPage() {
           {/* Badge */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-sm text-indigo-300">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            ML-Powered DeFi Compliance Protocol
+            Enterprise DeFi Compliance Platform
           </div>
 
           <h1 className="mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight md:text-7xl">
-            Detect Fraud.{' '}
+            Stop Illicit Flows{' '}
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              Protect Assets.
+              Before They Settle.
             </span>
-            <br />
-            Stay Compliant.
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gray-400 md:text-xl">
-            AMTTP is the enterprise-grade Anti-Money Laundering Transaction Transfer Protocol
-            for decentralised finance — combining real-time machine learning, graph analytics,
-            and on-chain smart contracts to stop illicit flows before they settle.
+            AMTTP combines real-time machine learning, cross-chain intelligence, and on-chain
+            enforcement to protect decentralised finance from money laundering, fraud,
+            and sanctions violations — in under 200 milliseconds.
           </p>
 
-          {/* CTA — Dual Entry Cards */}
-          <div className="mt-4 grid gap-5 sm:grid-cols-2 max-w-2xl mx-auto">
-            {/* Retail / Consumer Path */}
+          {/* CTA Buttons */}
+          <div className="mt-4 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href={flutterUrl}
-              className="group relative flex flex-col items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-6 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/[0.08]"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-2xl shadow-indigo-500/30 transition-all hover:bg-indigo-500"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20">
-                <svg width="24" height="24" fill="none" stroke="currentColor" className="text-emerald-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <path d="M12 17v4M8 21h8" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <div className="text-base font-semibold text-white">Consumer App</div>
-                <div className="mt-1 text-sm text-gray-400">Wallet, transfers &amp; trust checks</div>
-                <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
-                  R1 End User · R2 PEP
-                </div>
-              </div>
-              <svg width="18" height="18" fill="none" stroke="currentColor" className="absolute right-4 top-4 text-emerald-500/50 transition group-hover:text-emerald-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              Get Started Free
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
-
-            {/* Institutional / War Room Path */}
             <a
-              href={flutterUrl}
-              className="group relative flex flex-col items-center gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.04] p-6 transition-all hover:border-indigo-500/40 hover:bg-indigo-500/[0.08]"
+              href="#platform"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.04] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/[0.08]"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/20">
-                <svg width="24" height="24" fill="none" stroke="currentColor" className="text-indigo-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="3" y1="9" x2="21" y2="9" />
-                  <line x1="9" y1="21" x2="9" y2="9" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <div className="text-base font-semibold text-white">Institutional War Room</div>
-                <div className="mt-1 text-sm text-gray-400">Sign in with R3–R6 credentials to enter</div>
-                <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-400">
-                  R3 Ops · R4 Compliance · R5 Admin · R6 Super
-                </div>
-              </div>
-              <svg width="18" height="18" fill="none" stroke="currentColor" className="absolute right-4 top-4 text-indigo-500/50 transition group-hover:text-indigo-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              Explore Platform
             </a>
           </div>
 
-          <div className="mt-6">
-            <a
-              href="#architecture"
-              className="inline-flex items-center gap-2 text-sm text-gray-500 transition-all hover:text-gray-300"
-            >
-              Or explore the architecture below
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12l7 7 7-7" />
-              </svg>
-            </a>
+          <div className="mt-8">
+            <p className="text-sm text-gray-600">
+              No credit card required · Deploy in minutes · Self-hosted or cloud
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── LIVE STATS STRIP ─────────────────────────────────────────── */}
-      <section className="border-y border-white/[0.06] bg-white/[0.015]">
+      {/* ── SUPPORTED NETWORKS ───────────────────────────────────────── */}
+      <section className="border-y border-white/[0.06] bg-white/[0.01] py-8">
+        <div className="mx-auto max-w-5xl px-6">
+          <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-gray-600">
+            Deployed &amp; Verified On
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14">
+            {[
+              { name: 'Ethereum', icon: '⟠' },
+              { name: 'Base', icon: '🔵' },
+              { name: 'Arbitrum', icon: '🔷' },
+              { name: 'LayerZero', icon: '◎' },
+            ].map((chain) => (
+              <div key={chain.name} className="flex items-center gap-2 text-gray-500">
+                <span className="text-lg">{chain.icon}</span>
+                <span className="text-sm font-medium">{chain.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PERFORMANCE STATS ────────────────────────────────────────── */}
+      <section className="border-b border-white/[0.06] bg-white/[0.015]">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px md:grid-cols-4">
           {[
-            { label: 'Transactions Analysed', value: 920848, suffix: '+' },
-            { label: 'Flagged & Investigated', value: 420848, suffix: '' },
-            { label: 'Wallet Profiles', value: 451594, suffix: '+' },
-            { label: 'ML Model Accuracy', value: 97, suffix: '%' },
+            { label: 'Risk Scoring Latency', value: 200, prefix: '<', suffix: 'ms' },
+            { label: 'Detection Accuracy', value: 99, suffix: '.99%' },
+            { label: 'Integrated Services', value: 12, suffix: '+' },
+            { label: 'Supported Networks', value: 3, suffix: ' Chains' },
           ].map((stat) => (
             <div key={stat.label} className="px-6 py-8 text-center md:px-10">
               <div className="mb-1 text-3xl font-bold text-white md:text-4xl">
-                <AnimatedNumber target={stat.value} suffix={stat.suffix} />
+                <AnimatedNumber target={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
               <div className="text-sm text-gray-500">{stat.label}</div>
             </div>
@@ -343,8 +328,8 @@ export function LandingPage() {
                 <path d="M12 6v6l4 2" />
               </svg>
             }
-            title="Real-Time ML Detection"
-            description="XGBoost → VAE → GNN ensemble stack analyses every transaction in under 100ms, catching structuring, layering, and anomalous patterns before settlement."
+            title="Real-Time Risk Detection"
+            description="Every transaction is scored by an ensemble of machine learning models in under 200ms — catching structuring, layering, and anomalous patterns before settlement."
           />
           <FeatureCard
             accent="bg-violet-500/20 text-violet-400"
@@ -357,8 +342,8 @@ export function LandingPage() {
                 <line x1="12" y1="15" x2="12" y2="21" />
               </svg>
             }
-            title="Graph Intelligence"
-            description="Memgraph-powered entity graph maps wallet clusters, transaction chains, and counterparty networks in real-time across 6 blockchain networks."
+            title="Entity Graph Intelligence"
+            description="Automatically maps wallet clusters, transaction chains, and counterparty networks in real-time — surfacing hidden connections human analysts would miss."
           />
           <FeatureCard
             accent="bg-amber-500/20 text-amber-400"
@@ -368,7 +353,7 @@ export function LandingPage() {
               </svg>
             }
             title="On-Chain Enforcement"
-            description="UUPS upgradeable smart contracts enforce policy gates, adaptive friction, and multi-sig approvals — all auditable on-chain with zkSNARK privacy."
+            description="Smart contracts enforce policy gates, adaptive friction, and multi-signature approvals — creating an immutable, auditable compliance trail directly on the blockchain."
           />
           <FeatureCard
             accent="bg-rose-500/20 text-rose-400"
@@ -379,142 +364,94 @@ export function LandingPage() {
                 <line x1="9" y1="21" x2="9" y2="9" />
               </svg>
             }
-            title="Regulatory Dashboard"
-            description="War Room for compliance officers with RBAC-gated access, real-time KPI monitoring, policy editing, and FCA/FATF-compliant reporting."
+            title="Compliance Command Centre"
+            description="A purpose-built operations dashboard for compliance teams — real-time KPI monitoring, flagged transaction triage, policy configuration, and regulatory reporting."
           />
         </div>
       </Section>
 
-      {/* ── ARCHITECTURE ─────────────────────────────────────────────── */}
-      <Section id="architecture" className="border-y border-white/[0.06] bg-white/[0.015]">
+      {/* ── PLATFORM OVERVIEW ──────────────────────────────────────── */}
+      <Section id="platform" className="border-y border-white/[0.06] bg-white/[0.015]">
         <div className="mb-16 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-indigo-400">
-            System Design
+            Platform
           </p>
-          <h2 className="text-3xl font-bold md:text-4xl">Enterprise-Grade Architecture</h2>
+          <h2 className="text-3xl font-bold md:text-4xl">Intelligent Compliance Infrastructure</h2>
+          <p className="mt-4 mx-auto max-w-2xl text-gray-400">
+            Three integrated layers working together — from client applications through
+            an intelligence engine to on-chain enforcement.
+          </p>
         </div>
 
-        {/* Architecture diagram — styled code block */}
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12121A]">
-          {/* Window header */}
-          <div className="flex items-center gap-2 border-b border-white/[0.06] px-5 py-3">
-            <div className="h-3 w-3 rounded-full bg-red-500/80" />
-            <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-            <div className="h-3 w-3 rounded-full bg-green-500/80" />
-            <span className="ml-3 text-xs text-gray-500 font-mono">amttp-architecture.yml</span>
+        {/* Abstract 3-layer diagram */}
+        <div className="mx-auto max-w-3xl space-y-4">
+          {/* Layer 1 — Client */}
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20">
+                <svg width="20" height="20" fill="none" stroke="currentColor" className="text-emerald-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M12 17v4M8 21h8" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">Client Layer</h3>
+                <p className="text-xs text-gray-500">Web app, mobile wallet, API integrations</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {['Wallet Management', 'Transfer Screening', 'Trust Verification', 'Compliance Dashboard'].map((f) => (
+                <div key={f} className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-gray-400 text-center">{f}</div>
+              ))}
+            </div>
           </div>
-          {/* Content */}
-          <div className="p-6 md:p-8 font-mono text-[13px] leading-7 text-gray-400 overflow-x-auto">
-            <div>
-              <span className="text-gray-500"># Client Layer</span>
+
+          {/* Connector */}
+          <div className="flex justify-center">
+            <div className="h-6 w-px bg-gradient-to-b from-emerald-500/30 to-indigo-500/30" />
+          </div>
+
+          {/* Layer 2 — Intelligence */}
+          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.03] p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20">
+                <svg width="20" height="20" fill="none" stroke="currentColor" className="text-indigo-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" /><path d="M12 6v6l4 2" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">Intelligence Engine</h3>
+                <p className="text-xs text-gray-500">ML risk scoring, graph analytics, sanctions screening</p>
+              </div>
             </div>
-            <div>
-              <span className="text-indigo-400">flutter_app</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-gray-500"> # Consumer Wallet (R1/R2)</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {['Risk Scoring', 'Entity Resolution', 'Sanctions Check', 'Explainable AI'].map((f) => (
+                <div key={f} className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-gray-400 text-center">{f}</div>
+              ))}
             </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">port</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 3010</span>
+          </div>
+
+          {/* Connector */}
+          <div className="flex justify-center">
+            <div className="h-6 w-px bg-gradient-to-b from-indigo-500/30 to-amber-500/30" />
+          </div>
+
+          {/* Layer 3 — Blockchain */}
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20">
+                <svg width="20" height="20" fill="none" stroke="currentColor" className="text-amber-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">Blockchain Layer</h3>
+                <p className="text-xs text-gray-500">Multi-chain smart contracts, cross-chain messaging</p>
+              </div>
             </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">features</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-green-400"> [wallet, transfer, trust_check, zk_privacy]</span>
-            </div>
-            <div className="mt-2">
-              <span className="text-indigo-400">nextjs_dashboard</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-gray-500"> # War Room (R3–R6)</span>
-            </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">port</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 3006</span>
-            </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">features</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-green-400"> [flagged_queue, graph_explorer, policy_editor, analytics]</span>
-            </div>
-            <div className="mt-4">
-              <span className="text-gray-500"># Intelligence Layer</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">orchestrator</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8007</span>
-              <span className="text-gray-500"> # Fan-out to all ML services</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">ml_risk_api</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8000</span>
-              <span className="text-gray-500"> # XGBoost → VAE → GNN ensemble</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">graph_service</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8001</span>
-              <span className="text-gray-500"> # Memgraph entity resolution</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">sanctions_api</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8004</span>
-              <span className="text-gray-500"> # OFAC, UN, EU screening</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">explainability</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8009</span>
-              <span className="text-gray-500"> # SHAP + counterfactual reasoning</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">zk_naf</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 8010</span>
-              <span className="text-gray-500"> # Zero-knowledge compliance proofs</span>
-            </div>
-            <div className="mt-4">
-              <span className="text-gray-500"># Data Layer</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">mongodb</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 27017</span>
-              <span className="text-gray-500"> # Transactions, profiles, audit</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">redis</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 6379</span>
-              <span className="text-gray-500"> # Session cache, rate limiting</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">memgraph</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-amber-300"> 7687</span>
-              <span className="text-gray-500"> # Graph DB for entity networks</span>
-            </div>
-            <div className="mt-4">
-              <span className="text-gray-500"># Blockchain Layer</span>
-            </div>
-            <div>
-              <span className="text-indigo-400">smart_contracts</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-green-400"> Solidity ^0.8.24</span>
-            </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">pattern</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-green-400"> UUPS Upgradeable Proxy</span>
-            </div>
-            <div className="pl-6">
-              <span className="text-cyan-400">modules</span>
-              <span className="text-gray-600">:</span>
-              <span className="text-green-400"> [PolicyManager, RiskOracle, DisputeResolver, NFTSwap]</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {['Policy Enforcement', 'Adaptive Friction', 'Cross-Chain Relay', 'Privacy Proofs'].map((f) => (
+                <div key={f} className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-gray-400 text-center">{f}</div>
+              ))}
             </div>
           </div>
         </div>
@@ -593,94 +530,103 @@ export function LandingPage() {
         </div>
       </Section>
 
-      {/* ── RBAC ROLES ───────────────────────────────────────────────── */}
-      <Section>
+      {/* ── BUILT FOR ────────────────────────────────────────────────── */}
+      <Section id="solutions">
         <div className="mb-16 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-indigo-400">
-            Role-Based Access
+            Solutions
           </p>
-          <h2 className="text-3xl font-bold md:text-4xl">Six Roles, Two Interfaces</h2>
+          <h2 className="text-3xl font-bold md:text-4xl">Built for Every Stakeholder</h2>
           <p className="mt-4 text-gray-400 max-w-2xl mx-auto">
-            Retail users (R1–R2) use the <span className="text-emerald-400 font-medium">Consumer App</span> for wallet and transfer management.
-            Institutional users (R3–R6) access the <span className="text-indigo-400 font-medium">War Room</span> for compliance operations.
+            Whether you&apos;re building a DeFi protocol, running a compliant exchange, or overseeing
+            regulatory obligations — AMTTP fits your workflow.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {/* Consumer Group */}
-          <a href={flutterUrl} className="group rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.02] p-6 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/[0.06]">
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" className="text-emerald-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <rect x="2" y="3" width="20" height="14" rx="2" />
-                    <path d="M12 17v4M8 21h8" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-white">Consumer App</div>
-                  <div className="text-xs text-emerald-400/60">Focus Mode · Flutter</div>
-                </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              title: 'DeFi Protocols',
+              description: 'Embed compliance directly into smart contract transactions. Screen users and enforce policies without sacrificing decentralisation.',
+              icon: (
+                <svg width="22" height="22" fill="none" stroke="currentColor" className="text-cyan-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                </svg>
+              ),
+              accent: 'bg-cyan-500/20',
+            },
+            {
+              title: 'Financial Institutions',
+              description: 'Extend your AML/KYC programme to digital assets with enterprise-grade controls, audit trails, and integrations with existing compliance tooling.',
+              icon: (
+                <svg width="22" height="22" fill="none" stroke="currentColor" className="text-violet-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+              ),
+              accent: 'bg-violet-500/20',
+            },
+            {
+              title: 'Compliance Teams',
+              description: 'Investigate flagged transactions with explainable AI risk factors, entity graphs, and one-click regulatory reporting — all from a single dashboard.',
+              icon: (
+                <svg width="22" height="22" fill="none" stroke="currentColor" className="text-amber-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              ),
+              accent: 'bg-amber-500/20',
+            },
+            {
+              title: 'Regulators',
+              description: 'Access transparent, immutable compliance records. Verify policy enforcement and transaction history without compromising user privacy.',
+              icon: (
+                <svg width="22" height="22" fill="none" stroke="currentColor" className="text-rose-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              ),
+              accent: 'bg-rose-500/20',
+            },
+          ].map((item) => (
+            <div key={item.title} className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]">
+              <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${item.accent}`}>
+                {item.icon}
               </div>
-              <svg width="20" height="20" fill="none" stroke="currentColor" className="text-emerald-500/40 transition group-hover:text-emerald-400 group-hover:translate-x-1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <h3 className="mb-3 text-lg font-semibold text-white">{item.title}</h3>
+              <p className="text-sm leading-relaxed text-gray-400">{item.description}</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { role: 'R1', title: 'End User', desc: 'Wallet, transfers, trust checks' },
-                { role: 'R2', title: 'PEP / High-Risk', desc: 'Enhanced due diligence view' },
-              ].map((r) => (
-                <div key={r.role} className="rounded-xl border border-emerald-500/10 bg-white/[0.02] p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-white">{r.role}</span>
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400">Focus Mode</span>
-                  </div>
-                  <h3 className="mb-1 text-sm font-semibold text-white">{r.title}</h3>
-                  <p className="text-xs text-gray-500">{r.desc}</p>
-                </div>
-              ))}
-            </div>
-          </a>
+          ))}
+        </div>
+      </Section>
 
-          {/* Institutional Group */}
-          <a href={flutterUrl} className="group rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.02] p-6 transition-all hover:border-indigo-500/40 hover:bg-indigo-500/[0.06]">
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" className="text-indigo-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <line x1="3" y1="9" x2="21" y2="9" />
-                    <line x1="9" y1="21" x2="9" y2="9" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-white">War Room</div>
-                  <div className="text-xs text-indigo-400/60">Command Centre · Next.js</div>
-                </div>
+      {/* ── WHY AMTTP ────────────────────────────────────────────────── */}
+      <Section>
+        <div className="mb-16 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-indigo-400">
+            Why AMTTP
+          </p>
+          <h2 className="text-3xl font-bold md:text-4xl">What Sets Us Apart</h2>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[
+            { title: 'Pre-Settlement Blocking', desc: 'Risk scores are computed and enforced before transactions settle — not after the damage is done.' },
+            { title: 'Self-Hosted Option', desc: 'Deploy on your own infrastructure. Your data never leaves your environment. Full sovereignty over compliance operations.' },
+            { title: 'Parallel Processing', desc: 'Multiple intelligence services run concurrently — sanctions, risk scoring, graph analysis — delivering results in under 200ms.' },
+            { title: 'Explainable Decisions', desc: 'Every risk score comes with human-readable explanations and contributing factors, satisfying regulator audit requirements.' },
+            { title: 'Cross-Chain Native', desc: 'Built-in cross-chain messaging via LayerZero. Share risk intelligence across Ethereum, Base, and Arbitrum seamlessly.' },
+            { title: 'Privacy by Design', desc: 'Zero-knowledge proofs allow compliance verification without revealing sensitive transaction details or wallet identities.' },
+          ].map((item) => (
+            <div key={item.title} className="flex gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12]">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20">
+                <svg width="16" height="16" fill="none" stroke="currentColor" className="text-indigo-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
               </div>
-              <svg width="20" height="20" fill="none" stroke="currentColor" className="text-indigo-500/40 transition group-hover:text-indigo-400 group-hover:translate-x-1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <div>
+                <h3 className="mb-1 text-sm font-semibold text-white">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500">{item.desc}</p>
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { role: 'R3', title: 'Institution Ops', desc: 'Flagged queue triage, graphs' },
-                { role: 'R4', title: 'Compliance Officer', desc: 'Policy editing, enforcement' },
-                { role: 'R5', title: 'Platform Admin', desc: 'User management, ML models' },
-                { role: 'R6', title: 'Super Admin', desc: 'Emergency override, full access' },
-              ].map((r) => (
-                <div key={r.role} className="rounded-xl border border-indigo-500/10 bg-white/[0.02] p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-white">{r.role}</span>
-                    <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs font-medium text-indigo-400">War Room</span>
-                  </div>
-                  <h3 className="mb-1 text-sm font-semibold text-white">{r.title}</h3>
-                  <p className="text-xs text-gray-500">{r.desc}</p>
-                </div>
-              ))}
-            </div>
-          </a>
+          ))}
         </div>
       </Section>
 
@@ -694,27 +640,24 @@ export function LandingPage() {
             Ready to Secure Your DeFi Operations?
           </h2>
           <p className="mb-8 text-lg text-gray-400">
-            Choose your entry point — retail users get a streamlined wallet experience, institutions get full compliance command & control.
+            Get started in minutes — deploy AMTTP on your infrastructure or use our hosted platform.
+            No credit card required.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href={flutterUrl}
-              className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-emerald-500/20"
-            >
-              <svg width="18" height="18" fill="none" stroke="currentColor" className="text-emerald-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M12 17v4M8 21h8" />
-              </svg>
-              Consumer App
-            </a>
-            <a
-              href={flutterUrl}
               className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-2xl shadow-indigo-500/30 transition-all hover:bg-indigo-500"
             >
-              Institutional War Room
+              Get Started Free
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
+            </a>
+            <a
+              href="#platform"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.04] px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/[0.08]"
+            >
+              Explore Platform
             </a>
           </div>
         </div>
@@ -737,7 +680,7 @@ export function LandingPage() {
                 <span className="text-base font-bold">AMTTP</span>
               </div>
               <p className="text-sm text-gray-500">
-                Anti-Money Laundering Transaction Transfer Protocol
+                Anti-Money Laundering Transaction Transfer Protocol for decentralised finance.
               </p>
             </div>
 
@@ -746,21 +689,20 @@ export function LandingPage() {
               <h4 className="mb-3 text-sm font-semibold text-gray-300">Product</h4>
               <ul className="space-y-2 text-sm text-gray-500">
                 <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                <li><a href="#architecture" className="hover:text-white transition">Architecture</a></li>
+                <li><a href="#platform" className="hover:text-white transition">Platform</a></li>
+                <li><a href="#solutions" className="hover:text-white transition">Solutions</a></li>
                 <li><a href="#compliance" className="hover:text-white transition">Compliance</a></li>
-                <li><a href={flutterUrl} className="hover:text-white transition">War Room</a></li>
-                <li><a href={flutterUrl} className="hover:text-white transition">Consumer App</a></li>
               </ul>
             </div>
 
-            {/* Research */}
+            {/* Resources */}
             <div>
-              <h4 className="mb-3 text-sm font-semibold text-gray-300">Research</h4>
+              <h4 className="mb-3 text-sm font-semibold text-gray-300">Resources</h4>
               <ul className="space-y-2 text-sm text-gray-500">
-                <li><span className="cursor-default">SIAM Publication</span></li>
-                <li><span className="cursor-default">UDL Framework</span></li>
-                <li><span className="cursor-default">BSDT Protocol</span></li>
-                <li><span className="cursor-default">zkNAF Architecture</span></li>
+                <li><a href={flutterUrl} className="hover:text-white transition">Get Started</a></li>
+                <li><span className="cursor-default">Documentation</span></li>
+                <li><span className="cursor-default">API Reference</span></li>
+                <li><span className="cursor-default">Status Page</span></li>
               </ul>
             </div>
 
@@ -779,11 +721,6 @@ export function LandingPage() {
             <p className="text-sm text-gray-600">
               &copy; {new Date().getFullYear()} AMTTP Protocol. All rights reserved.
             </p>
-            <div className="flex gap-4 text-gray-500">
-              <span className="text-xs">
-                Built with Next.js · Flutter · FastAPI · Solidity · XGBoost · Memgraph
-              </span>
-            </div>
           </div>
         </div>
       </footer>

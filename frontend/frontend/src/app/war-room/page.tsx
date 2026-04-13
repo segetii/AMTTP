@@ -303,11 +303,18 @@ const MOCK_ALERTS: Alert[] = [
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const SERVICES = [
+  { name: 'Orchestrator', prefix: '/api', path: '/health' },
   { name: 'Risk Engine', prefix: '/risk', path: '/health' },
-  { name: 'Policy', prefix: '/policy', path: '/health' },
   { name: 'Sanctions', prefix: '/sanctions', path: '/health' },
   { name: 'Monitoring', prefix: '/monitoring', path: '/health' },
-  { name: 'Orchestrator', prefix: '/api', path: '/health' },
+  { name: 'Policy', prefix: '/policy', path: '/health' },
+  { name: 'FCA', prefix: '/fca', path: '/compliance/health' },
+  { name: 'Geo-Risk', prefix: '/geo', path: '/health' },
+  { name: 'Integrity', prefix: '/integrity', path: '/health' },
+  { name: 'Explainability', prefix: '/explain', path: '/health' },
+  { name: 'zkNAF', prefix: '/zknaf', path: '/health' },
+  { name: 'Graph', prefix: '/graph', path: '/health' },
+  { name: 'Oracle', prefix: '/oracle', path: '/health' },
 ];
 
 function SystemStatusBar() {

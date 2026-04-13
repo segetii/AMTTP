@@ -95,7 +95,13 @@ app.use((_req, res) => {
 });
 
 async function start() {
-  await mongoose.connect(process.env.MONGO_URI!);
+  const mongoUrl = process.env.MONGO_URI || process.env.MONGODB_URL;
+  if (mongoUrl) {
+    await mongoose.connect(mongoUrl);
+    console.log("Connected to MongoDB");
+  } else {
+    console.warn("[oracle-service] No MONGO_URI or MONGODB_URL set — running without MongoDB");
+  }
   const port = process.env.PORT || 3000;
   app.listen(port, () => console.log(`oracle-service listening on ${port}`));
 }

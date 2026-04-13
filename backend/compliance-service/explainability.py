@@ -287,42 +287,286 @@ class FeatureExplainer:
             }
         },
         
-        # Model scores (for internal use, not shown directly)
+        # Model scores (visible to War Room analysts)
         "xgb_prob": {
             "name": "ML Risk Score (XGBoost)",
             "templates": {
-                ImpactLevel.HIGH: "Machine learning model detected high-risk patterns",
-                ImpactLevel.MEDIUM: "Machine learning model detected moderate risk signals",
+                ImpactLevel.CRITICAL: "ML ensemble flagged CRITICAL risk patterns (confidence: {value:.0%})",
+                ImpactLevel.HIGH: "Machine learning model detected high-risk patterns (score: {value:.2f})",
+                ImpactLevel.MEDIUM: "Machine learning model detected moderate risk signals (score: {value:.2f})",
             },
             "thresholds": {
+                ImpactLevel.CRITICAL: 0.9,
                 ImpactLevel.HIGH: 0.7,
                 ImpactLevel.MEDIUM: 0.4,
             },
-            "internal_only": True  # Don't show raw score to users
         },
         "vae_recon_error": {
-            "name": "Anomaly Score",
+            "name": "Anomaly Detection Score",
             "templates": {
-                ImpactLevel.HIGH: "Transaction pattern is highly unusual compared to normal behavior",
-                ImpactLevel.MEDIUM: "Transaction shows some unusual characteristics",
+                ImpactLevel.CRITICAL: "Transaction is a major statistical outlier — {value:.1f} standard deviations from normal behavior",
+                ImpactLevel.HIGH: "Transaction pattern is highly unusual compared to normal behavior ({value:.1f}σ)",
+                ImpactLevel.MEDIUM: "Transaction shows some unusual characteristics ({value:.1f}σ)",
             },
             "thresholds": {
-                ImpactLevel.HIGH: 2.0,  # Standard deviations
+                ImpactLevel.CRITICAL: 3.0,
+                ImpactLevel.HIGH: 2.0,
                 ImpactLevel.MEDIUM: 1.5,
             },
-            "internal_only": True
         },
         "sage_prob": {
-            "name": "Network Risk Score",
+            "name": "Graph Neural Network Risk",
             "templates": {
-                ImpactLevel.HIGH: "Network analysis indicates high-risk transaction pattern",
-                ImpactLevel.MEDIUM: "Network analysis shows elevated risk signals",
+                ImpactLevel.CRITICAL: "Graph neural network flagged CRITICAL network risk pattern (score: {value:.2f})",
+                ImpactLevel.HIGH: "Network analysis indicates high-risk transaction pattern (score: {value:.2f})",
+                ImpactLevel.MEDIUM: "Network analysis shows elevated risk signals (score: {value:.2f})",
             },
             "thresholds": {
+                ImpactLevel.CRITICAL: 0.9,
                 ImpactLevel.HIGH: 0.7,
                 ImpactLevel.MEDIUM: 0.4,
             },
-            "internal_only": True
+        },
+        
+        # Compliance / Regulatory features
+        "kyc_required": {
+            "name": "KYC Verification Required",
+            "templates": {
+                ImpactLevel.HIGH: "Transaction requires KYC verification — counterparty identity unverified",
+                ImpactLevel.MEDIUM: "Enhanced due diligence recommended for counterparty",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 1,
+                ImpactLevel.MEDIUM: 0.5,
+            }
+        },
+        "travel_rule_triggered": {
+            "name": "Travel Rule Compliance",
+            "templates": {
+                ImpactLevel.CRITICAL: "FATF Travel Rule triggered — originator/beneficiary information required (threshold exceeded)",
+                ImpactLevel.HIGH: "Travel Rule applies — transaction exceeds reporting threshold; originator data must accompany transfer",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.5,
+            }
+        },
+        "sar_required": {
+            "name": "Suspicious Activity Report",
+            "templates": {
+                ImpactLevel.CRITICAL: "SAR filing required — transaction meets suspicious activity reporting criteria",
+                ImpactLevel.HIGH: "SAR review recommended — multiple risk indicators triggered",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.5,
+            }
+        },
+        "unverified_entity": {
+            "name": "Unverified Entity",
+            "templates": {
+                ImpactLevel.HIGH: "Counterparty is an unverified entity — identity and legitimacy not confirmed",
+                ImpactLevel.MEDIUM: "Counterparty verification incomplete",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 1,
+                ImpactLevel.MEDIUM: 0.5,
+            }
+        },
+
+        # Integrity Service features
+        "integrity_violation": {
+            "name": "Data Integrity Violation",
+            "templates": {
+                ImpactLevel.CRITICAL: "Data integrity check FAILED — transaction payload has been tampered with or is malformed",
+                ImpactLevel.HIGH: "Integrity verification detected inconsistencies in transaction data",
+                ImpactLevel.MEDIUM: "Minor integrity discrepancy detected in transaction metadata",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.7,
+                ImpactLevel.MEDIUM: 0.3,
+            }
+        },
+        "integrity_valid": {
+            "name": "Integrity Check Passed",
+            "templates": {
+                ImpactLevel.LOW: "Transaction passed data integrity verification",
+            },
+            "thresholds": {}
+        },
+
+        # Monitoring / AML Alert features
+        "monitoring_alert_count": {
+            "name": "AML Monitoring Alerts",
+            "templates": {
+                ImpactLevel.CRITICAL: "AML monitoring triggered {value} alerts — immediate review required",
+                ImpactLevel.HIGH: "AML monitoring raised {value} alert(s) for this transaction",
+                ImpactLevel.MEDIUM: "AML monitoring flagged minor concern ({value} alert)",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 3,
+                ImpactLevel.HIGH: 1,
+                ImpactLevel.MEDIUM: 0,
+            }
+        },
+        "structuring_detected": {
+            "name": "Structuring / Smurfing Pattern",
+            "templates": {
+                ImpactLevel.CRITICAL: "Structuring pattern detected — multiple transactions appear designed to evade reporting thresholds",
+                ImpactLevel.HIGH: "Possible structuring: {value} transactions near reporting threshold in short timeframe",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.5,
+            }
+        },
+        "dormant_reactivation": {
+            "name": "Dormant Account Reactivation",
+            "templates": {
+                ImpactLevel.HIGH: "Dormant account reactivated after {value} days of inactivity — suspicious timing",
+                ImpactLevel.MEDIUM: "Account was inactive for {value} days before this transaction",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 180,
+                ImpactLevel.MEDIUM: 60,
+            }
+        },
+        "rapid_movement": {
+            "name": "Rapid Fund Movement",
+            "templates": {
+                ImpactLevel.HIGH: "Funds moved rapidly through {value} addresses within minutes — possible layering",
+                ImpactLevel.MEDIUM: "Elevated velocity of fund movement detected",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 3,
+                ImpactLevel.MEDIUM: 2,
+            }
+        },
+
+        # Profile Limit features
+        "daily_limit_exceeded": {
+            "name": "Daily Transaction Limit Exceeded",
+            "templates": {
+                ImpactLevel.CRITICAL: "Daily transaction limit exceeded — cumulative volume surpasses daily cap",
+                ImpactLevel.HIGH: "Transaction would push daily total above authorized daily limit",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.8,
+            }
+        },
+        "single_tx_limit_exceeded": {
+            "name": "Single Transaction Limit Exceeded",
+            "templates": {
+                ImpactLevel.CRITICAL: "Single transaction amount exceeds the per-transaction limit",
+                ImpactLevel.HIGH: "Transaction amount approaches the per-transaction cap",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+                ImpactLevel.HIGH: 0.8,
+            }
+        },
+
+        # Entity Risk Adjustment features
+        "entity_risk_adjustment": {
+            "name": "Entity Risk Modifier",
+            "templates": {
+                ImpactLevel.HIGH: "Risk score multiplied by {value:.1f}x — elevated due to counterparty classification",
+                ImpactLevel.MEDIUM: "Minor risk adjustment (×{value:.1f}) applied based on entity classification",
+                ImpactLevel.LOW: "VASP counterparty verified — risk discount applied (×{value:.1f})",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 1.2,
+                ImpactLevel.MEDIUM: 1.0,
+            }
+        },
+        "vasp_verified": {
+            "name": "VASP Verification",
+            "templates": {
+                ImpactLevel.LOW: "Counterparty is a registered VASP — risk discount applied (×0.8)",
+            },
+            "thresholds": {}
+        },
+        "unverified_penalty": {
+            "name": "Unverified Entity Penalty",
+            "templates": {
+                ImpactLevel.HIGH: "Counterparty is unverified — risk penalty applied (×1.2), enhanced due diligence required",
+                ImpactLevel.MEDIUM: "Entity verification pending — moderate risk uplift applied",
+            },
+            "thresholds": {
+                ImpactLevel.HIGH: 1.2,
+                ImpactLevel.MEDIUM: 1.1,
+            }
+        },
+
+        # Geo-Risk enhanced features
+        "geo_risk_score": {
+            "name": "Geographic Risk Score",
+            "templates": {
+                ImpactLevel.CRITICAL: "Jurisdiction risk score {value}/100 — transaction involves PROHIBITED territory",
+                ImpactLevel.HIGH: "High geographic risk (score: {value}/100) — jurisdiction flagged as VERY HIGH risk",
+                ImpactLevel.MEDIUM: "Elevated geographic risk (score: {value}/100) for counterparty jurisdiction",
+                ImpactLevel.LOW: "Geographic risk within acceptable range (score: {value}/100)",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 90,
+                ImpactLevel.HIGH: 70,
+                ImpactLevel.MEDIUM: 40,
+            }
+        },
+        "geo_risk_country": {
+            "name": "Country Risk Classification",
+            "templates": {
+                ImpactLevel.CRITICAL: "Transaction involves {value} — classified as PROHIBITED jurisdiction",
+                ImpactLevel.HIGH: "Transaction involves {value} — FATF grey-listed jurisdiction",
+                ImpactLevel.MEDIUM: "Transaction involves {value} — elevated monitoring jurisdiction",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: "PROHIBITED",
+                ImpactLevel.HIGH: "VERY_HIGH",
+            }
+        },
+
+        # Sanctions list specifics
+        "sanctions_list_match": {
+            "name": "Sanctions List Identification",
+            "templates": {
+                ImpactLevel.CRITICAL: "Matched on {value} sanctions list — transaction MUST be blocked per regulatory mandate",
+            },
+            "thresholds": {}
+        },
+        "sanctions_match_type": {
+            "name": "Sanctions Match Quality",
+            "templates": {
+                ImpactLevel.CRITICAL: "Exact name/address match on sanctions list (match type: {value})",
+                ImpactLevel.HIGH: "Fuzzy match on sanctions list (type: {value}) — manual verification required",
+            },
+            "thresholds": {}
+        },
+
+        # Mixer / Layering features
+        "hops_to_mixer": {
+            "name": "Proximity to Mixing Service",
+            "templates": {
+                ImpactLevel.CRITICAL: "Funds sent directly to known mixing service (Tornado Cash / equivalent)",
+                ImpactLevel.HIGH: "Transaction {value} hop(s) from known mixing service — possible layering",
+                ImpactLevel.MEDIUM: "Indirect connection to mixing service ({value} hops)",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 0,
+                ImpactLevel.HIGH: 1,
+                ImpactLevel.MEDIUM: 2,
+            }
+        },
+        "mixer_interaction": {
+            "name": "Mixer Interaction Detected",
+            "templates": {
+                ImpactLevel.CRITICAL: "Address has direct interaction with mixing/tumbling service — high laundering risk",
+            },
+            "thresholds": {
+                ImpactLevel.CRITICAL: 1,
+            }
         },
     }
     
@@ -859,9 +1103,68 @@ class RiskExplainer:
         if any(kw in blob for kw in ("fatf", "geography", "geo_risk", "high_risk_jurisdict")):
             features.setdefault("fatf_country_risk", "greylist")
 
+        # ----- travel rule / KYC / SAR -----
+        if any(kw in blob for kw in ("travel rule", "travel_rule", "kyc", "require info", "require_info")):
+            features.setdefault("kyc_required", True)
+            features.setdefault("travel_rule_triggered", True)
+        if any(kw in blob for kw in ("sar", "suspicious activity", "sar required", "sar_required")):
+            features.setdefault("sar_required", True)
+        if any(kw in blob for kw in ("unverified", "unknown jurisdiction")):
+            features.setdefault("unverified_entity", True)
+            features.setdefault("unverified_penalty", 1.2)
+
         # ----- PEP -----
         if any(kw in blob for kw in ("pep", "politically_exposed")):
             features.setdefault("pep_match", True)
+
+        # ----- integrity -----
+        if any(kw in blob for kw in ("integrity", "tamper", "malform", "invalid payload", "corrupt")):
+            features.setdefault("integrity_violation", True)
+        if any(kw in blob for kw in ("integrity pass", "integrity_valid", "verified payload")):
+            features.setdefault("integrity_valid", True)
+
+        # ----- monitoring / AML alerts -----
+        if any(kw in blob for kw in ("alert", "aml", "monitoring", "rules_triggered")):
+            features.setdefault("monitoring_alert_count", 1)
+        if any(kw in blob for kw in ("structur", "smurfing", "split", "micro_tx")):
+            features.setdefault("structuring_detected", True)
+        if any(kw in blob for kw in ("dormant", "reactivat", "inactive")):
+            features.setdefault("dormant_reactivation", 200)
+        if any(kw in blob for kw in ("rapid", "layering", "chain hop", "fast move")):
+            features.setdefault("rapid_movement", 3)
+
+        # ----- profile limits -----
+        if any(kw in blob for kw in ("daily limit", "daily_limit", "cumulative", "daily cap")):
+            features.setdefault("daily_limit_exceeded", True)
+        if any(kw in blob for kw in ("single tx limit", "single_tx_limit", "per-transaction", "tx limit")):
+            features.setdefault("single_tx_limit_exceeded", True)
+
+        # ----- entity risk adjustments -----
+        if any(kw in blob for kw in ("vasp", "registered vasp", "verified vasp")):
+            features.setdefault("vasp_verified", True)
+        if any(kw in blob for kw in ("risk adjust", "risk_adjust", "entity_risk", "penalty", "multiplier")):
+            features.setdefault("entity_risk_adjustment", 1.2)
+
+        # ----- geo-risk enhanced -----
+        if any(kw in blob for kw in ("geo_risk_score", "geo risk score", "jurisdiction score")):
+            features.setdefault("geo_risk_score", 75)
+        if any(kw in blob for kw in ("prohibited", "very_high", "very high risk")):
+            features.setdefault("geo_risk_country", "HIGH_RISK")
+
+        # ----- specific sanctions list -----
+        if any(kw in blob for kw in ("ofac", "sdn")):
+            features.setdefault("sanctions_list_match", "OFAC/SDN")
+        elif any(kw in blob for kw in ("hmt", "uk_hmt")):
+            features.setdefault("sanctions_list_match", "UK_HMT")
+        elif any(kw in blob for kw in ("eu sanction", "eu_sanctions")):
+            features.setdefault("sanctions_list_match", "EU")
+        elif any(kw in blob for kw in ("un sanction", "un_sanctions")):
+            features.setdefault("sanctions_list_match", "UN")
+
+        # ----- mixer / layering -----
+        if any(kw in blob for kw in ("mixer", "mixing", "tornado", "tumbl")):
+            features.setdefault("mixer_interaction", True)
+            graph_context.setdefault("hops_to_mixer", 1)
 
         # ----- unusual timing -----
         if any(kw in blob for kw in ("unusual_hour", "timing", "off_hours")):
@@ -932,8 +1235,10 @@ class RiskExplainer:
         
         # Add rule-based reasons
         for rule in rule_results:
-            if rule.get("triggered") and rule.get("description"):
-                reasons.append(rule["description"])
+            if rule.get("triggered"):
+                desc = rule.get("description") or rule.get("details") or rule.get("rule_id", "")
+                if desc:
+                    reasons.append(desc)
         
         # Add factor-based reasons
         for factor in factors:

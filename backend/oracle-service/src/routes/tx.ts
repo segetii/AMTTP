@@ -8,6 +8,9 @@ export const txRouter = Router();
 
 // Send ETH swap using AMTTPUpgradeable.initiateSwapETH
 txRouter.post("/sendTransaction", async (req, res) => {
+  if (!amttp) {
+    return res.status(503).json({ ok: false, error: "Contract not configured (AMTTP_ADDRESS not set)" });
+  }
   const { buyer, seller, amountEth, timelockSec, secret, kycHash, riskLevel } = req.body;
 
   // compute hash(secret)

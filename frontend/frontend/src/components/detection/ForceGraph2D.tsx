@@ -69,10 +69,10 @@ interface ForceGraph2DProps {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BASE_RADIUS = 14;
-const FONT_SIZE = 10;
-const SCORE_FONT_SIZE = 9;
-const ARROW_SIZE = 7;
+const BASE_RADIUS = 9;
+const FONT_SIZE = 9;
+const SCORE_FONT_SIZE = 7;
+const ARROW_SIZE = 5;
 const EDGE_COLOR = '#475569';
 const EDGE_HIGHLIGHT = '#818cf8';
 const EDGE_DANGER = '#ef4444';
@@ -84,8 +84,8 @@ const MAX_ZOOM = 5;
 function getNodeRadius(data?: unknown): number {
   const d = data as Record<string, unknown> | undefined;
   const score = (d?.riskScore as number) ?? 0;
-  // 14px base + up to 10px for risk 100
-  return BASE_RADIUS + (score / 100) * 10;
+  // 9px base + up to 5px for risk 100
+  return BASE_RADIUS + (score / 100) * 5;
 }
 
 /** Get node type for shape selection */
@@ -95,9 +95,9 @@ function getNodeType(data?: unknown): string {
 }
 
 // Force simulation parameters
-const SIM_CHARGE = -400;       // repulsion between all nodes
-const SIM_LINK_DISTANCE = 120; // ideal link length
-const SIM_LINK_STRENGTH = 0.3;
+const SIM_CHARGE = -600;       // repulsion between all nodes
+const SIM_LINK_DISTANCE = 180; // ideal link length
+const SIM_LINK_STRENGTH = 0.25;
 const SIM_CENTER_STRENGTH = 0.05;
 const SIM_FRICTION = 0.85;     // velocity damping
 const SIM_ALPHA_DECAY = 0.005; // how fast the sim cools

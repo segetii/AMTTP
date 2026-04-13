@@ -33,7 +33,7 @@ module.exports = {
       timeout: 120000
     },
     arbitrumSepolia: {
-      url: process.env.ARBITRUM_SEPOLIA_RPC || "https://sepolia-rollup.arbitrum.io/rpc",
+      url: process.env.ARBITRUM_SEPOLIA_RPC || "https://arb-sepolia.g.alchemy.com/v2/89pxLpYGB_qLyt6T-mVQC",
       accounts: process.env.PRIVATE_KEY ? [`0x${process.env.PRIVATE_KEY.replace('0x', '')}`] : [],
       timeout: 120000
     },
