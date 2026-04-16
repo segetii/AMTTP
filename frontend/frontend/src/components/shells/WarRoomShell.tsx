@@ -538,27 +538,14 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
         {/* Content */}
         <main className="flex-1 p-4 lg:p-6 overflow-auto bg-background">
           {isLoading ? <SkeletonDashboard /> : children}
-          {!isLoading && (
-            <div className="mt-4 text-xs text-mutedText">Last updated at {lastUpdatedLabel}</div>
-          )}
         </main>
         
         {/* Footer Status Bar */}
-        <footer className="min-h-[2rem] bg-surface/70 border-t border-borderSubtle flex flex-wrap items-center justify-between px-4 py-1 text-xs text-mutedText gap-x-4 gap-y-1">
-          <div className="flex items-center gap-4">
-            <span>AMTTP v2.3</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">ML Pipeline: GraphSAGE+LightGBM+XGBoost+β-VAE</span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-            <span className="hidden md:inline">Orchestrator: Connected</span>
-            <span className="hidden md:inline">•</span>
-            <span className="hidden sm:inline">Risk Engine: Active</span>
-            <span className="hidden sm:inline">•</span>
-            <span className={isVerified ? 'text-green-400' : 'text-red-400'}>
-              Chain: {isVerified ? 'Verified' : 'Invalid'}
-            </span>
-          </div>
+        <footer className="min-h-[2rem] bg-surface/70 border-t border-borderSubtle flex items-center justify-between px-4 py-1 text-xs text-mutedText">
+          <span>AMTTP v2.3</span>
+          <span className={isVerified ? 'text-green-400' : 'text-red-400'}>
+            Chain: {isVerified ? 'Verified' : 'Invalid'}
+          </span>
         </footer>
       </div>
 

@@ -299,84 +299,60 @@ const MOCK_ALERTS: Alert[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LIVE SYSTEM STATUS BAR
+// COMPACT SYSTEM STATUS INDICATOR
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const SERVICES = [
-  { name: 'Orchestrator', prefix: '/api', path: '/health' },
-  { name: 'Risk Engine', prefix: '/risk', path: '/health' },
-  { name: 'Sanctions', prefix: '/sanctions', path: '/health' },
-  { name: 'Monitoring', prefix: '/monitoring', path: '/health' },
-  { name: 'Policy', prefix: '/policy', path: '/health' },
-  { name: 'FCA', prefix: '/fca', path: '/compliance/health' },
-  { name: 'Geo-Risk', prefix: '/geo', path: '/health' },
-  { name: 'Integrity', prefix: '/integrity', path: '/health' },
-  { name: 'Explainability', prefix: '/explain', path: '/health' },
-  { name: 'zkNAF', prefix: '/zknaf', path: '/health' },
-  { name: 'Graph', prefix: '/graph', path: '/health' },
-  { name: 'Oracle', prefix: '/oracle', path: '/health' },
+const SERVICE_ENDPOINTS = [
+  { prefix: '/api', path: '/health' },
+  { prefix: '/risk', path: '/health' },
+  { prefix: '/sanctions', path: '/health' },
+  { prefix: '/monitoring', path: '/health' },
+  { prefix: '/policy', path: '/health' },
+  { prefix: '/fca', path: '/compliance/health' },
+  { prefix: '/geo', path: '/health' },
+  { prefix: '/integrity', path: '/health' },
+  { prefix: '/explain', path: '/health' },
+  { prefix: '/zknaf', path: '/health' },
+  { prefix: '/graph', path: '/health' },
+  { prefix: '/oracle', path: '/health' },
 ];
 
-function SystemStatusBar() {
-  const [statuses, setStatuses] = React.useState<Record<string, 'up' | 'down' | 'checking'>>(
-    Object.fromEntries(SERVICES.map(s => [s.name, 'checking']))
-  );
-  const [lastChecked, setLastChecked] = React.useState<Date | null>(null);
+function SystemStatusIndicator() {
+  const [upCount, setUpCount] = React.useState(0);
+  const total = SERVICE_ENDPOINTS.length;
 
   React.useEffect(() => {
     const check = async () => {
-      const results: Record<string, 'up' | 'down'> = {};
-      await Promise.allSettled(SERVICES.map(async svc => {
+      let up = 0;
+      await Promise.allSettled(SERVICE_ENDPOINTS.map(async svc => {
         try {
-          const r = await fetch(`${svc.prefix}${svc.path}`, {
-            signal: AbortSignal.timeout(2000),
-          });
-          results[svc.name] = r.ok ? 'up' : 'down';
-        } catch {
-          results[svc.name] = 'down';
-        }
+          const r = await fetch(`${svc.prefix}${svc.path}`, { signal: AbortSignal.timeout(2000) });
+          if (r.ok) up++;
+        } catch { /* down */ }
       }));
-      setStatuses(results);
-      setLastChecked(new Date());
+      setUpCount(up);
     };
     check();
     const t = setInterval(check, 30000);
     return () => clearInterval(t);
   }, []);
 
-  const upCount = Object.values(statuses).filter(s => s === 'up').length;
-
   return (
-    <div className="bg-surface rounded-xl border border-borderSubtle p-4">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-6">
-          {SERVICES.map(svc => (
-            <div key={svc.name} className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${
-                statuses[svc.name] === 'up' ? 'bg-green-500' :
-                statuses[svc.name] === 'down' ? 'bg-red-500' :
-                'bg-gray-500 animate-pulse'
-              }`} />
-              <span className="text-sm text-slate-300">{svc.name}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-xs px-2 py-1 rounded-full ${
-            upCount === SERVICES.length ? 'bg-green-500/10 text-green-400' :
-            upCount > 0 ? 'bg-amber-500/10 text-amber-400' :
-            'bg-red-500/10 text-red-400'
-          }`}>
-            {upCount}/{SERVICES.length} online
-          </span>
-          {lastChecked && (
-            <span className="text-sm text-mutedText">
-              Updated {lastChecked.toLocaleTimeString()}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+    <Link
+      href="/war-room/system-settings"
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+        upCount === total
+          ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+          : upCount > 0
+          ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+          : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20'
+      }`}
+    >
+      <div className={`w-2 h-2 rounded-full ${
+        upCount === total ? 'bg-green-500' : upCount > 0 ? 'bg-amber-500 animate-pulse' : 'bg-red-500 animate-pulse'
+      }`} />
+      {upCount}/{total} services online
+    </Link>
   );
 }
 
@@ -427,10 +403,7 @@ export default function WarRoomDashboard() {
             <p className="text-mutedText mt-1">Real-time monitoring and alerts</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm text-green-400">Live</span>
-            </div>
+            <SystemStatusIndicator />
           </div>
         </div>
 
@@ -562,8 +535,7 @@ export default function WarRoomDashboard() {
           </div>
         </div>
         
-        {/* System Status Bar with live checks */}
-        <SystemStatusBar />
+
       </div>
       {/* Explainability Modal */}
       {selectedItem !== null && selectedItem && (

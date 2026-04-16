@@ -30,8 +30,13 @@
     "explorer.autoReveal": false,
     "breadcrumbs.enabled": false,
     "workbench.editor.enablePreview": false,
-    "typescript.tsserver.maxTsServerMemory": 2048,
+    "typescript.tsserver.maxTsServerMemory": 512,
     "typescript.disableAutomaticTypeAcquisition": true,
+    "typescript.tsserver.watchOptions": {
+        "excludeDirectories": ["**/node_modules", "**/.next", "**/build", "**/dist", "**/forge-out", "**/coverage"]
+    },
+    "typescript.suggest.enabled": false,
+    "typescript.validate.enable": false,
     "chat.tools.terminal.autoApprove": {
         "cls": true,
         "Out-File": true,
@@ -73,7 +78,20 @@
         "cache": true,
         "hardhat": true,
         "plots": true,
-        "screenshots": true
+        "screenshots": true,
+        "reports": true,
+        "documentation": true,
+        "docs": true,
+        "notebooks": true,
+        "ml": true,
+        "lib": true,
+        "coverage": true,
+        "audit": true,
+        "deployments": true,
+        "spec": true,
+        "tools": true,
+        "automation": true,
+        "docker": true
     },
     "files.watcherExclude": {
         "**/.git/objects/**": true,
@@ -152,6 +170,26 @@
         "**/*.out": true,
         "**/*.log": true
     },
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false,
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.value": 5,
+    "editor.minimap.enabled": false,
+    "editor.bracketPairColorization.enabled": false,
+    "editor.occurrencesHighlight": "off",
+    "editor.codeLens": false,
+    "editor.hover.delay": 1000,
+    "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
+    "editor.parameterHints.enabled": false,
+    "editor.wordBasedSuggestions": "off",
+    "editor.suggestOnTriggerCharacters": false,
+    "files.participants.timeout": 5000,
+    "git.decorations.enabled": false,
+    "git.enabled": false,
+    "scm.diffDecorations": "none",
+    "telemetry.telemetryLevel": "off",
+    "update.mode": "none",
+    "window.restoreWindows": "none",
     "python.analysis.diagnosticMode": "openFilesOnly",
     "python.analysis.indexing": false,
     "python.analysis.autoSearchPaths": false,
@@ -181,5 +219,7 @@
         "results/**",
         "research/quantum/results/**",
         "research/supply-chain/figures/**"
-    ]
+    ],
+    "remote.autoForwardPorts": false,
+    "jupyter.disableJupyterAutoStart": true
 }

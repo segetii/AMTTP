@@ -23,6 +23,9 @@ from typing import Optional, List, Dict, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 import re
+import csv
+import io
+import xml.etree.ElementTree as ET
 import logging
 from functools import lru_cache
 
@@ -39,32 +42,35 @@ DATA_DIR = Path(__file__).parent / "data" / "sanctions"
 CACHE_FILE = DATA_DIR / "sanctions_cache.json"
 AUDIT_LOG = DATA_DIR / "sanctions_audit.jsonl"
 
-# Official sanctions list sources
+# Official sanctions list sources (updated June 2025)
 SANCTIONS_SOURCES = {
-    "HMT": {
-        "name": "UK HM Treasury Consolidated List",
-        "url": "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/consolidated_list.json",
-        "backup_url": "https://ofsistorage.blob.core.windows.net/publishlive/ConList.csv",
-        "format": "json",
+    "UK": {
+        "name": "UK Sanctions List (FCDO)",
+        "url": "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.csv",
+        "backup_url": "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.xml",
+        "format": "csv",
+        "backup_format": "xml",
         "refresh_hours": 24
     },
     "OFAC_SDN": {
         "name": "US OFAC Specially Designated Nationals",
-        "url": "https://www.treasury.gov/ofac/downloads/sdn.json",
+        "url": "https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/SDN.CSV",
         "backup_url": "https://www.treasury.gov/ofac/downloads/sdn.csv",
-        "format": "json",
+        "format": "csv",
         "refresh_hours": 24
     },
     "EU": {
-        "name": "EU Consolidated Sanctions List",
-        "url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/jsonFullSanctionsList_1_1/content",
-        "format": "json",
+        "name": "EU Consolidated Financial Sanctions List",
+        "url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw",
+        "backup_url": "https://webgate.ec.europa.eu/fsd/fsf/public/files/xmlFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw",
+        "format": "csv",
+        "backup_format": "xml",
         "refresh_hours": 24
     },
     "UN": {
         "name": "UN Security Council Consolidated List",
-        "url": "https://scsanctions.un.org/resources/xml/en/consolidated.json",
-        "format": "json",
+        "url": "https://scsanctions.un.org/resources/xml/en/consolidated.xml",
+        "format": "xml",
         "refresh_hours": 24
     }
 }
@@ -107,7 +113,7 @@ logger = logging.getLogger("sanctions_service")
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class SanctionsList(str, Enum):
-    HMT = "HMT"
+    UK = "UK"
     OFAC = "OFAC"
     EU = "EU"
     UN = "UN"
@@ -415,148 +421,354 @@ async def download_sanctions_list(source_key: str, session: aiohttp.ClientSessio
         return None
     
     try:
-        logger.info(f"Downloading {source['name']}...")
-        async with session.get(source["url"], timeout=aiohttp.ClientTimeout(total=60)) as response:
+        logger.info(f"Downloading {source['name']} from {source['url'][:80]}...")
+        async with session.get(source["url"], timeout=aiohttp.ClientTimeout(total=120), allow_redirects=True) as response:
             if response.status == 200:
-                if source["format"] == "json":
-                    return await response.json()
-                else:
-                    return {"raw": await response.text()}
+                raw_text = await response.text()
+                return {"raw": raw_text, "format": source["format"]}
             else:
                 logger.warning(f"Failed to download {source_key}: HTTP {response.status}")
                 
                 # Try backup URL
                 if "backup_url" in source:
-                    async with session.get(source["backup_url"]) as backup_response:
+                    backup_fmt = source.get("backup_format", source["format"])
+                    logger.info(f"Trying backup URL for {source_key}...")
+                    async with session.get(source["backup_url"], timeout=aiohttp.ClientTimeout(total=120), allow_redirects=True) as backup_response:
                         if backup_response.status == 200:
-                            return {"raw": await backup_response.text()}
+                            raw_text = await backup_response.text()
+                            return {"raw": raw_text, "format": backup_fmt}
                 
                 return None
     except Exception as e:
         logger.error(f"Error downloading {source_key}: {e}")
+        # Try backup URL on exception too
+        if "backup_url" in source:
+            try:
+                backup_fmt = source.get("backup_format", source["format"])
+                logger.info(f"Trying backup URL for {source_key} after error...")
+                async with session.get(source["backup_url"], timeout=aiohttp.ClientTimeout(total=120), allow_redirects=True) as backup_response:
+                    if backup_response.status == 200:
+                        raw_text = await backup_response.text()
+                        return {"raw": raw_text, "format": backup_fmt}
+            except Exception as be:
+                logger.error(f"Backup URL also failed for {source_key}: {be}")
         return None
 
-def parse_hmt_list(data: Dict) -> List[SanctionedEntity]:
-    """Parse UK HMT consolidated list"""
+def parse_uk_list(data: Dict) -> List[SanctionedEntity]:
+    """Parse UK Sanctions List (FCDO CSV or XML)"""
     entities = []
-    
-    # HMT JSON structure varies - handle common formats
-    items = data.get("ConsolidatedList", {}).get("Designations", [])
-    if not items:
-        items = data.get("designations", [])
-    if not items:
-        items = data if isinstance(data, list) else []
-    
-    for item in items:
+    fmt = data.get("format", "csv")
+    raw = data.get("raw", "")
+
+    if fmt == "csv":
         try:
-            entity = SanctionedEntity(
-                id=f"HMT-{item.get('UniqueID', item.get('id', hashlib.md5(str(item).encode()).hexdigest()[:12]))}",
-                name=item.get("Name", item.get("name", "Unknown")),
-                aliases=[a.get("Name", a) for a in item.get("Aliases", item.get("aliases", []))],
-                entity_type=item.get("Type", item.get("type", "unknown")).lower(),
-                countries=[item.get("Country", item.get("country", ""))],
-                programs=item.get("Regimes", item.get("regimes", [])),
-                source_list="HMT",
-                designation_date=item.get("DateDesignated", item.get("date_designated")),
-            )
-            entities.append(entity)
+            reader = csv.DictReader(io.StringIO(raw))
+            for row in reader:
+                try:
+                    name = row.get("Name 6", "") or row.get("name", "")
+                    # Build full name from parts if available
+                    name_parts = [row.get(f"Name {i}", "") for i in range(1, 7)]
+                    full_name = " ".join(p for p in name_parts if p).strip()
+                    if full_name:
+                        name = full_name
+
+                    aliases = []
+                    for i in range(1, 7):
+                        alias = row.get(f"Name {i} (Alias)", "") or row.get(f"Alias Name {i}", "")
+                        if alias:
+                            aliases.append(alias)
+
+                    entity = SanctionedEntity(
+                        id=f"UK-{row.get('Group ID', row.get('Unique ID', hashlib.md5(str(row).encode()).hexdigest()[:12]))}",
+                        name=name or "Unknown",
+                        aliases=aliases,
+                        entity_type=row.get("Group Type", row.get("Type", "unknown")).lower(),
+                        countries=[row.get("Country", "")],
+                        programs=[row.get("Regime", row.get("Listed Under", ""))],
+                        source_list="UK",
+                        designation_date=row.get("Listed On", row.get("Date Designated", None)),
+                    )
+                    entities.append(entity)
+                except Exception as e:
+                    logger.warning(f"Error parsing UK CSV row: {e}")
         except Exception as e:
-            logger.warning(f"Error parsing HMT entity: {e}")
-    
+            logger.error(f"Error reading UK CSV: {e}")
+    elif fmt == "xml":
+        try:
+            root = ET.fromstring(raw)
+            ns = {'': root.tag.split('}')[0] + '}'} if '}' in root.tag else {}
+            for designation in root.iter():
+                if 'Designation' in designation.tag or 'Individual' in designation.tag or 'Entity' in designation.tag:
+                    try:
+                        name_el = designation.find('.//Name') or designation.find('.//name')
+                        name = name_el.text if name_el is not None else "Unknown"
+                        uid_el = designation.find('.//UniqueID') or designation.find('.//GroupID')
+                        uid = uid_el.text if uid_el is not None else hashlib.md5(ET.tostring(designation)).hexdigest()[:12]
+                        entity = SanctionedEntity(
+                            id=f"UK-{uid}",
+                            name=name,
+                            source_list="UK",
+                            entity_type="unknown",
+                        )
+                        entities.append(entity)
+                    except Exception:
+                        pass
+        except Exception as e:
+            logger.error(f"Error parsing UK XML: {e}")
+
+    logger.info(f"Parsed {len(entities)} UK sanctions entities")
     return entities
+
 
 def parse_ofac_list(data: Dict) -> List[SanctionedEntity]:
-    """Parse US OFAC SDN list"""
+    """Parse US OFAC SDN list (CSV format)"""
     entities = []
-    
-    sdn_entries = data.get("sdnList", data.get("entries", []))
-    if not sdn_entries:
-        sdn_entries = data if isinstance(data, list) else []
-    
-    for entry in sdn_entries:
-        try:
-            # Extract addresses (including crypto)
-            crypto_addresses = []
-            addresses = []
-            
-            for addr in entry.get("addresses", []):
-                addr_str = addr.get("address", "")
-                if addr_str.startswith("0x") and len(addr_str) == 42:
-                    crypto_addresses.append(addr_str.lower())
-                else:
-                    addresses.append(addr_str)
-            
-            # Check ID list for crypto addresses
-            for id_item in entry.get("idList", []):
-                id_num = id_item.get("idNumber", "")
-                if id_num.startswith("0x") and len(id_num) == 42:
-                    crypto_addresses.append(id_num.lower())
-            
-            entity = SanctionedEntity(
-                id=f"OFAC-{entry.get('uid', hashlib.md5(str(entry).encode()).hexdigest()[:12])}",
-                name=entry.get("firstName", "") + " " + entry.get("lastName", entry.get("name", "")),
-                aliases=[a.get("name", a) for a in entry.get("akaList", [])],
-                entity_type=entry.get("sdnType", "unknown").lower(),
-                addresses=addresses,
-                crypto_addresses=crypto_addresses,
-                countries=[entry.get("nationality", "")],
-                programs=entry.get("programList", []),
-                source_list="OFAC",
-            )
-            entities.append(entity)
-        except Exception as e:
-            logger.warning(f"Error parsing OFAC entity: {e}")
-    
+    raw = data.get("raw", "")
+
+    try:
+        # OFAC SDN.CSV is pipe-delimited with no header row
+        # Format: uid|sdnType|program|lastName|firstName|title|...|remarks|...
+        lines = raw.strip().split('\n')
+        current_entity = None
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            parts = line.split('","')
+            if len(parts) < 2:
+                parts = line.split(',')
+
+            # Clean up quotes
+            parts = [p.strip('"').strip() for p in parts]
+
+            # Detect if this is header row
+            if parts[0].upper() in ('ENT_NUM', 'UID', 'ID'):
+                continue
+
+            # Try to identify OFAC pipe-delimited SDN CSV
+            # The SDN.CSV has no headers: each row is an entity
+            # Fields vary, but first field is numeric UID
+            try:
+                uid = parts[0].strip()
+                if not uid:
+                    continue
+
+                # Collect full row text for name extraction
+                full_text = line
+
+                # SDN.CSV typical structure: ent_num, SDN_Name, SDN_Type, Program, ...
+                sdn_name = parts[1] if len(parts) > 1 else ""
+                sdn_type = parts[2] if len(parts) > 2 else ""
+                program = parts[3] if len(parts) > 3 else ""
+
+                # Extract crypto addresses from remarks
+                crypto_addresses = []
+                remarks = full_text
+                # OFAC lists crypto addresses as "Digital Currency Address - XBT ..."
+                addr_matches = re.findall(r'(?:Digital Currency Address[^;]*?|alt\.\s*Digital Currency Address[^;]*?)([0-9a-fA-Fx]{40,42})', remarks)
+                for addr in addr_matches:
+                    addr_lower = addr.lower()
+                    if addr_lower.startswith('0x') and len(addr_lower) == 42:
+                        crypto_addresses.append(addr_lower)
+                    elif len(addr_lower) == 40:
+                        crypto_addresses.append('0x' + addr_lower)
+
+                # Also check for ETH addresses directly
+                eth_matches = re.findall(r'0x[0-9a-fA-F]{40}', remarks)
+                for addr in eth_matches:
+                    addr_lower = addr.lower()
+                    if addr_lower not in crypto_addresses:
+                        crypto_addresses.append(addr_lower)
+
+                entity = SanctionedEntity(
+                    id=f"OFAC-{uid}",
+                    name=sdn_name or "Unknown",
+                    entity_type=sdn_type.lower() if sdn_type else "unknown",
+                    crypto_addresses=crypto_addresses,
+                    programs=[program] if program else [],
+                    source_list="OFAC",
+                )
+                entities.append(entity)
+            except Exception as e:
+                logger.warning(f"Error parsing OFAC CSV line: {e}")
+    except Exception as e:
+        logger.error(f"Error reading OFAC CSV: {e}")
+
+    logger.info(f"Parsed {len(entities)} OFAC SDN entities")
     return entities
+
 
 def parse_eu_list(data: Dict) -> List[SanctionedEntity]:
-    """Parse EU consolidated sanctions list"""
+    """Parse EU Consolidated Financial Sanctions List (CSV or XML)"""
     entities = []
-    
-    entries = data.get("sanctionedPersons", data.get("entries", []))
-    if not entries:
-        entries = data if isinstance(data, list) else []
-    
-    for entry in entries:
+    fmt = data.get("format", "csv")
+    raw = data.get("raw", "")
+
+    if fmt == "csv":
         try:
-            entity = SanctionedEntity(
-                id=f"EU-{entry.get('logicalId', hashlib.md5(str(entry).encode()).hexdigest()[:12])}",
-                name=entry.get("nameAlias", [{}])[0].get("wholeName", entry.get("name", "Unknown")),
-                aliases=[a.get("wholeName", a) for a in entry.get("nameAlias", [])[1:]],
-                entity_type=entry.get("subjectType", {}).get("code", "unknown").lower(),
-                countries=[entry.get("citizenships", [{}])[0].get("countryIso2Code", "")],
-                programs=[entry.get("regulation", {}).get("programme", "")],
-                source_list="EU",
-            )
-            entities.append(entity)
+            # EU CSV uses semicolons as separator
+            reader = csv.DictReader(io.StringIO(raw), delimiter=';')
+            seen_ids = set()
+            for row in reader:
+                try:
+                    logical_id = row.get("Entity_LogicalId", row.get("logicalId", ""))
+                    subject_type = row.get("Entity_SubjectType", row.get("subjectType", "unknown"))
+                    whole_name = row.get("NameAlias_WholeName", row.get("wholeName", ""))
+                    country = row.get("Citizenship_CountryIso2Code", row.get("countryIso2Code", ""))
+                    programme = row.get("Entity_Regulation_Programme", row.get("programme", ""))
+
+                    if not logical_id or logical_id in seen_ids:
+                        continue
+                    seen_ids.add(logical_id)
+
+                    entity = SanctionedEntity(
+                        id=f"EU-{logical_id}",
+                        name=whole_name or "Unknown",
+                        entity_type=subject_type.lower() if subject_type else "unknown",
+                        countries=[country] if country else [],
+                        programs=[programme] if programme else [],
+                        source_list="EU",
+                    )
+                    entities.append(entity)
+                except Exception as e:
+                    logger.warning(f"Error parsing EU CSV row: {e}")
         except Exception as e:
-            logger.warning(f"Error parsing EU entity: {e}")
-    
+            logger.error(f"Error reading EU CSV: {e}")
+    elif fmt == "xml":
+        try:
+            root = ET.fromstring(raw)
+            for entity_el in root.iter():
+                tag = entity_el.tag.split('}')[-1] if '}' in entity_el.tag else entity_el.tag
+                if tag == 'sanctionEntity':
+                    try:
+                        logical_id = entity_el.get('logicalId', hashlib.md5(ET.tostring(entity_el)).hexdigest()[:12])
+                        name_el = entity_el.find('.//nameAlias')
+                        name = name_el.get('wholeName', 'Unknown') if name_el is not None else 'Unknown'
+                        entity = SanctionedEntity(
+                            id=f"EU-{logical_id}",
+                            name=name,
+                            source_list="EU",
+                            entity_type="unknown",
+                        )
+                        entities.append(entity)
+                    except Exception:
+                        pass
+        except Exception as e:
+            logger.error(f"Error parsing EU XML: {e}")
+
+    logger.info(f"Parsed {len(entities)} EU sanctions entities")
     return entities
 
+
 def parse_un_list(data: Dict) -> List[SanctionedEntity]:
-    """Parse UN Security Council sanctions list"""
+    """Parse UN Security Council Consolidated List (XML)"""
     entities = []
-    
-    entries = data.get("CONSOLIDATED_LIST", {}).get("INDIVIDUALS", {}).get("INDIVIDUAL", [])
-    entities_list = data.get("CONSOLIDATED_LIST", {}).get("ENTITIES", {}).get("ENTITY", [])
-    
-    for entry in entries + entities_list:
-        try:
-            entity = SanctionedEntity(
-                id=f"UN-{entry.get('DATAID', hashlib.md5(str(entry).encode()).hexdigest()[:12])}",
-                name=f"{entry.get('FIRST_NAME', '')} {entry.get('SECOND_NAME', '')} {entry.get('THIRD_NAME', '')}".strip() or entry.get("NAME", "Unknown"),
-                aliases=[a.get("ALIAS_NAME", a) for a in entry.get("INDIVIDUAL_ALIAS", [])],
-                entity_type="individual" if "FIRST_NAME" in entry else "entity",
-                countries=[entry.get("NATIONALITY", {}).get("VALUE", "")],
-                programs=[entry.get("UN_LIST_TYPE", "")],
-                source_list="UN",
-                designation_date=entry.get("LISTED_ON"),
-            )
-            entities.append(entity)
-        except Exception as e:
-            logger.warning(f"Error parsing UN entity: {e}")
-    
+    raw = data.get("raw", "")
+
+    try:
+        root = ET.fromstring(raw)
+
+        # Parse individuals
+        for individual in root.iter('INDIVIDUAL'):
+            try:
+                dataid = ""
+                for child in individual:
+                    if child.tag == 'DATAID':
+                        dataid = child.text or ""
+                        break
+                if not dataid:
+                    dataid = hashlib.md5(ET.tostring(individual)).hexdigest()[:12]
+
+                first_name = ""
+                second_name = ""
+                third_name = ""
+                aliases = []
+                nationality = ""
+                un_list_type = ""
+                listed_on = ""
+
+                for child in individual:
+                    if child.tag == 'FIRST_NAME':
+                        first_name = child.text or ""
+                    elif child.tag == 'SECOND_NAME':
+                        second_name = child.text or ""
+                    elif child.tag == 'THIRD_NAME':
+                        third_name = child.text or ""
+                    elif child.tag == 'INDIVIDUAL_ALIAS':
+                        alias_name = child.findtext('ALIAS_NAME', '')
+                        if alias_name:
+                            aliases.append(alias_name)
+                    elif child.tag == 'NATIONALITY':
+                        val = child.findtext('VALUE', '')
+                        if val:
+                            nationality = val
+                    elif child.tag == 'UN_LIST_TYPE':
+                        un_list_type = child.text or ""
+                    elif child.tag == 'LISTED_ON':
+                        listed_on = child.text or ""
+
+                name = f"{first_name} {second_name} {third_name}".strip()
+
+                entity = SanctionedEntity(
+                    id=f"UN-{dataid}",
+                    name=name or "Unknown",
+                    aliases=aliases,
+                    entity_type="individual",
+                    countries=[nationality] if nationality else [],
+                    programs=[un_list_type] if un_list_type else [],
+                    source_list="UN",
+                    designation_date=listed_on or None,
+                )
+                entities.append(entity)
+            except Exception as e:
+                logger.warning(f"Error parsing UN individual: {e}")
+
+        # Parse entities
+        for un_entity in root.iter('ENTITY'):
+            try:
+                dataid = ""
+                for child in un_entity:
+                    if child.tag == 'DATAID':
+                        dataid = child.text or ""
+                        break
+                if not dataid:
+                    dataid = hashlib.md5(ET.tostring(un_entity)).hexdigest()[:12]
+
+                name = ""
+                aliases = []
+                un_list_type = ""
+                listed_on = ""
+
+                for child in un_entity:
+                    if child.tag == 'FIRST_NAME':
+                        name = child.text or ""
+                    elif child.tag == 'ENTITY_ALIAS':
+                        alias_name = child.findtext('ALIAS_NAME', '')
+                        if alias_name:
+                            aliases.append(alias_name)
+                    elif child.tag == 'UN_LIST_TYPE':
+                        un_list_type = child.text or ""
+                    elif child.tag == 'LISTED_ON':
+                        listed_on = child.text or ""
+
+                entity = SanctionedEntity(
+                    id=f"UN-{dataid}",
+                    name=name or "Unknown",
+                    aliases=aliases,
+                    entity_type="entity",
+                    programs=[un_list_type] if un_list_type else [],
+                    source_list="UN",
+                    designation_date=listed_on or None,
+                )
+                entities.append(entity)
+            except Exception as e:
+                logger.warning(f"Error parsing UN entity: {e}")
+    except Exception as e:
+        logger.error(f"Error parsing UN XML: {e}")
+
+    logger.info(f"Parsed {len(entities)} UN sanctions entities")
     return entities
 
 async def refresh_sanctions_database():
@@ -579,12 +791,12 @@ async def refresh_sanctions_database():
         # Parse and load
         new_db = SanctionsDatabase()
         
-        # HMT
-        if results.get("HMT"):
-            for entity in parse_hmt_list(results["HMT"]):
+        # UK (formerly HMT)
+        if results.get("UK"):
+            for entity in parse_uk_list(results["UK"]):
                 new_db.add_entity(entity)
-            new_db.last_refresh["HMT"] = datetime.utcnow()
-            logger.info(f"Loaded HMT list")
+            new_db.last_refresh["UK"] = datetime.utcnow()
+            logger.info(f"Loaded UK sanctions list")
         
         # OFAC
         if results.get("OFAC_SDN"):
@@ -727,7 +939,7 @@ async def check_sanctions(request: SanctionsCheckRequest):
     Check an address or name against sanctions lists
     """
     matches = []
-    checked_lists = request.lists if "ALL" not in request.lists else ["HMT", "OFAC", "EU", "UN"]
+    checked_lists = request.lists if "ALL" not in request.lists else ["UK", "OFAC", "EU", "UN"]
     
     # Check address
     if request.address:

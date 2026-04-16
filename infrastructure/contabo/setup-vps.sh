@@ -66,7 +66,8 @@ sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/ssh
 sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 sed -i 's/^#\?MaxAuthTries.*/MaxAuthTries 3/' /etc/ssh/sshd_config
-systemctl restart sshd
+# Ubuntu 24.04 uses ssh.service, 22.04 uses sshd.service
+systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null || true
 
 # ── 4. Install Docker ───────────────────────────────────────────────────────
 
