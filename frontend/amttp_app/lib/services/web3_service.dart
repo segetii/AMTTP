@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'dart:html' as html;
-import 'dart:js_util' as jsu;
+import '../core/platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
+import '../core/platform/js_util_stub.dart'
+    if (dart.library.html) 'dart:js_util' as jsu;
 import 'package:flutter/foundation.dart';
 
 class Web3Service {

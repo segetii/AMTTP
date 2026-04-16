@@ -4,7 +4,8 @@
 /// Provides consistent branding and navigation across Flutter and Next.js apps
 library;
 
-import 'dart:html' as html;
+import '../../core/platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../auth/shared_auth_service.dart';

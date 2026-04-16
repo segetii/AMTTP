@@ -422,8 +422,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
               Text('Add New User', style: TextStyle(color: isDark ? Colors.white : AppTheme.slate800)),
             ],
           ),
-          content: SizedBox(
-            width: 400,
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

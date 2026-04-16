@@ -9,8 +9,10 @@ library;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:ui_web' as ui_web;
-import 'dart:html' as html;
+import '../../../../core/platform/ui_web_stub.dart'
+    if (dart.library.html) 'dart:ui_web' as ui_web;
+import '../../../../core/platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/rbac/rbac_provider.dart';

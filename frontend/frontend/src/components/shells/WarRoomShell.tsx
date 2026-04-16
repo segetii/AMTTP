@@ -544,17 +544,17 @@ export default function WarRoomShell({ children }: WarRoomShellProps) {
         </main>
         
         {/* Footer Status Bar */}
-        <footer className="h-8 bg-surface/70 border-t border-borderSubtle flex items-center justify-between px-4 text-xs text-mutedText">
+        <footer className="min-h-[2rem] bg-surface/70 border-t border-borderSubtle flex flex-wrap items-center justify-between px-4 py-1 text-xs text-mutedText gap-x-4 gap-y-1">
           <div className="flex items-center gap-4">
             <span>AMTTP v2.3</span>
-            <span>•</span>
-            <span>ML Pipeline: GraphSAGE+LightGBM+XGBoost+β-VAE</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="hidden sm:inline">ML Pipeline: GraphSAGE+LightGBM+XGBoost+β-VAE</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span>Orchestrator: Connected</span>
-            <span>•</span>
-            <span>Risk Engine: Active</span>
-            <span>•</span>
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            <span className="hidden md:inline">Orchestrator: Connected</span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden sm:inline">Risk Engine: Active</span>
+            <span className="hidden sm:inline">•</span>
             <span className={isVerified ? 'text-green-400' : 'text-red-400'}>
               Chain: {isVerified ? 'Verified' : 'Invalid'}
             </span>

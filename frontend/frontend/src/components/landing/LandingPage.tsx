@@ -126,6 +126,7 @@ function StepCard({
 
 export function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [flutterUrl, setFlutterUrl] = useState('/app/#/sign-out');
 
   useEffect(() => {
@@ -182,22 +183,58 @@ export function LandingPage() {
             </a>
           </div>
 
-          {/* CTA */}
+          {/* CTA + Hamburger */}
           <div className="flex items-center gap-3">
             <a
               href={flutterUrl}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 transition hover:text-white"
+              className="hidden sm:inline-block rounded-lg px-4 py-2 text-sm font-medium text-gray-300 transition hover:text-white"
             >
               Sign In
             </a>
             <a
               href={flutterUrl}
-              className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500"
+              className="hidden sm:inline-block rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500"
             >
               Get Started
             </a>
+            {/* Hamburger button — mobile only */}
+            <button
+              className="md:hidden flex items-center justify-center h-10 w-10 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.06] transition"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12h18" />
+                  <path d="M3 6h18" />
+                  <path d="M3 18h18" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/[0.06] bg-[#0A0A0F]/95 backdrop-blur-xl px-6 pb-6 pt-4">
+            <div className="flex flex-col gap-4">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm text-gray-400 transition hover:text-white">Features</a>
+              <a href="#platform" onClick={() => setMobileMenuOpen(false)} className="text-sm text-gray-400 transition hover:text-white">Platform</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm text-gray-400 transition hover:text-white">How It Works</a>
+              <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="text-sm text-gray-400 transition hover:text-white">Solutions</a>
+              <a href="#compliance" onClick={() => setMobileMenuOpen(false)} className="text-sm text-gray-400 transition hover:text-white">Compliance</a>
+              <div className="flex flex-col gap-3 pt-4 border-t border-white/[0.06]">
+                <a href={flutterUrl} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-300 text-center border border-white/[0.1] transition hover:text-white hover:bg-white/[0.04]">Sign In</a>
+                <a href={flutterUrl} className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white text-center shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500">Get Started</a>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
@@ -227,7 +264,7 @@ export function LandingPage() {
             Enterprise DeFi Compliance Platform
           </div>
 
-          <h1 className="mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight md:text-7xl">
+          <h1 className="mb-6 text-3xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight md:text-7xl">
             Stop Illicit Flows{' '}
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
               Before They Settle.

@@ -54,8 +54,8 @@ class _PolicyEnginePageState extends ConsumerState<PolicyEnginePage> {
               Text('Create New Rule', style: TextStyle(color: isDark ? Colors.white : AppTheme.slate800)),
             ],
           ),
-          content: SizedBox(
-            width: 450,
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 450),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -461,8 +461,8 @@ class _EnforcementActionsPageState extends ConsumerState<EnforcementActionsPage>
               Text('New Enforcement Action', style: TextStyle(color: isDark ? Colors.white : AppTheme.slate800)),
             ],
           ),
-          content: SizedBox(
-            width: 400,
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

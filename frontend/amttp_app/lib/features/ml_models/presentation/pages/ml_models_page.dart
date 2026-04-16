@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-import 'dart:ui_web' as ui;
+import '../../../../core/platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
+import '../../../../core/platform/ui_web_stub.dart'
+    if (dart.library.html) 'dart:ui_web' as ui;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';

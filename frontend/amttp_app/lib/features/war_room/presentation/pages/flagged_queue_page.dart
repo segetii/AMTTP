@@ -588,8 +588,7 @@ class _ExplainabilityModal extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        width: 600,
-        constraints: const BoxConstraints(maxHeight: 700),
+        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
         decoration: BoxDecoration(
           color: AppTheme.slate900,
           borderRadius: BorderRadius.circular(16),

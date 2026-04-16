@@ -5,7 +5,8 @@
 library;
 
 import 'dart:convert';
-import 'dart:html' as html;
+import '../platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 

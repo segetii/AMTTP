@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:html' as html;
+import '../../../../core/platform/web_stub.dart'
+    if (dart.library.html) 'dart:html' as html;
 import '../../../../core/auth/auth_provider.dart';
 
 /// A trampoline page that performs a full browser redirect to the

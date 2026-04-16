@@ -89,6 +89,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
       statusBarIconBrightness: Brightness.light,
     ));
 
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
       backgroundColor: AppTheme.tokenBackground,
       body: Column(
@@ -96,8 +98,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
           // Fixed platform header at top
           const CompactPlatformHeader(currentApp: 'wallet'),
 
-          // Top navigation bar (moved from bottom)
-          _buildTopNav(),
+          // Top navigation bar (desktop only)
+          if (!isMobile) _buildTopNav(),
 
           // Main scrollable content
           Expanded(
@@ -105,6 +107,8 @@ class _PremiumFintechShellState extends ConsumerState<PremiumFintechShell> {
           ),
         ],
       ),
+      // Bottom navigation bar (mobile only)
+      bottomNavigationBar: isMobile ? _buildTopNav() : null,
     );
   }
 
