@@ -1,6 +1,19 @@
 # @amttp/client-sdk
 
-TypeScript SDK for integrating with the AMTTP (AI-powered Multi-signature Transaction Trust Protocol) fraud detection system.
+**TypeScript SDK for AMTTP — a pre-settlement blockchain compliance system.**
+
+AMTTP evaluates transaction risk *before* it hits the chain, inside Ethereum's 12-second block window. Unlike post-transaction tools (Chainalysis, Elliptic, TRM Labs), AMTTP produces deterministic outcomes — Approve, Review, Escrow, or Block — before settlement occurs.
+
+Live product: **[amttp.com](https://amttp.com)** | UK Patent Application No. 1026066039
+
+Research paper: **[AMTTP Infrastructure — TechRxiv preprint](https://doi.org/10.36227/techrxiv.177220113.33816607/v1)**
+
+> ⚠️ **Important:** AMTTP is currently a proof-of-concept running on Ethereum Sepolia testnet.
+> **Do not connect real wallets or send mainnet funds.** Use testnet accounts only.
+
+## Press & Coverage
+
+<!-- Links will be added as coverage is published -->
 
 ## Features
 

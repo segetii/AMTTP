@@ -7,39 +7,44 @@
 
 \begin{document}
 \noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\\
-\noindent\textbf{Criteria:} Mandatory Criteria (Proof of Technical Innovation \& Product Architecture)\\
+\noindent\textbf{Criteria:} Mandatory Criteria (Innovation and Technical Leadership)\\
 \noindent\textbf{Applicant:} Odeyemi Olusegun Israel\\
 \rule{\textwidth}{0.4pt}
 
-\vspace{0.5cm}
-\begin{center}
-    \textbf{\huge Evidence 1: AMTTP Product Functional Demonstration \& System Architecture}
-\end{center}
-\vspace{0.5cm}
-
-\section*{1. Live Functional Demonstration}
-The complexity of the Anti-Money Laundering Transaction Transfer Protocol (AMTTP) spans multiple domains: Machine Learning infrastructure, Web3 decentralized settlement, and dual-client frontend architectures. To best evaluate the scale of this technical achievement, please view the short functional demonstration of the final product in action.
-
-\vspace{0.5cm}
-\begin{center}
-    \fcolorbox{black}{yellow!10}{
-    \begin{minipage}{0.8\textwidth}
-        \centering
-        \vspace{0.5cm}
-        {\Large \textbf{\href{https://youtube.com/your-unlisted-video-link}{[CLICK HERE TO VIEW THE 3-MINUTE VIDEO DEMONSTRATION]}}}
-        \vspace{0.5cm}\\
-        \textit{(Hosted securely via unlisted URL)}
-    \end{minipage}}
-\end{center}
-\vspace{0.5cm}
-
-\section*{2. High-Level Macro Architecture}
-As the sole Founder and Lead Architect, I engineered the entire data pipeline from initial consumer wallet interaction through to predictive ML risk scoring and final immutable blockchain settlement via Zero-Knowledge Proofs (ZK-SNARKs).
-
 \vspace{0.3cm}
-\noindent\textbf{Live Production Service Map:}
+\begin{center}
+    \textbf{\Large MC-1: Design and Development of AMTTP --- A Four-Layer Real-Time Blockchain Compliance System}
+\end{center}
+\vspace{0.3cm}
+
+\section*{1. Overview}
+The Anti-Money Laundering Transaction Trust Protocol (AMTTP) is a real-time compliance system that evaluates blockchain transactions \textbf{before settlement}, producing deterministic outcomes (Approve, Review, Escrow, or Block) within Ethereum's 12-second block window. Existing tools --- including Chainalysis, Elliptic, and TRM Labs --- operate post-transaction and cannot prevent risk exposure before execution. AMTTP introduces pre-settlement compliance enforcement as a novel architectural approach.
+
+I am the \textbf{sole architect and developer} of this system, independently designing and implementing all components across machine learning, blockchain infrastructure, compliance logic, and client integration.
+
+\section*{2. Live Demonstration}
 
 \vspace{0.2cm}
+\begin{center}
+    \fcolorbox{black}{yellow!10}{
+    \begin{minipage}{0.85\textwidth}
+        \centering
+        \vspace{0.4cm}
+        {\large \textbf{\href{https://youtube.com/your-unlisted-video-link}{[CLICK HERE TO VIEW THE 3-MINUTE VIDEO DEMONSTRATION]}}}
+        \vspace{0.3cm}\\
+        \textit{Live deployment: \textbf{amttp.com} | 794 unique visitors, 34.39k total requests, 192 MB served (17 March -- 16 April, Cloudflare analytics)}
+    \end{minipage}}
+\end{center}
+\vspace{0.3cm}
+\begin{center}
+    \includegraphics[width=0.95\textwidth]{images/cloudflare_analytics.png}
+\end{center}
+\noindent\textit{Figure 1: Cloudflare dashboard for amttp.com --- 794 unique visitors, 34.39k total requests, 45.93\% cached, 192 MB served over 30 days (17 March -- 16 April 2026). Confirms live public deployment with sustained organic traffic.}
+\vspace{0.15cm}
+
+\section*{3. Four-Layer System Architecture}
+
+\vspace{0.1cm}
 \noindent\fbox{\begin{minipage}{0.95\textwidth}
 \small
 \texttt{User $\rightarrow$ Flutter Consumer App (port 3010)}\\
@@ -65,65 +70,51 @@ As the sole Founder and Lead Architect, I engineered the entire data pipeline fr
 \end{minipage}}
 \vspace{0.2cm}
 
-\noindent\textit{Figure 1: Full-stack infrastructure mapping Flutter/Next.js to 10 Python microservices and the Solidity execution layer --- 14 independently deployable services engineered by a single architect.}
+\noindent\textit{Figure 1: Four-layer service map --- 17 containerised services engineered by a single developer.}
 
-\vspace{0.3cm}
-\begin{center}
-\includegraphics[width=0.95\textwidth]{images/vscode_multitab.png}
-\end{center}
+\section*{4. Key Technical Innovations}
+\begin{itemize}
+    \item \textbf{Pre-settlement enforcement} --- compliance decisions made within the transaction lifecycle, not after
+    \item \textbf{Hybrid ML + graph scoring} --- XGBoost tabular combined with GraphSAGE graph analysis
+    \item \textbf{Knowledge distillation pipeline} --- composite teacher model reduced to a lightweight student for real-time inference (see Evidence~6)
+    \item \textbf{Privacy-preserving compliance} --- Groth16 ZK-SNARKs on BN254 prove compliance facts without exposing personal data
+    \item \textbf{Deterministic decision matrix} --- Approve / Review / Escrow / Block with regulatory reproducibility
+\end{itemize}
+
+\section*{5. Product Screenshots}
+
+\noindent\textbf{War Room Compliance Dashboard:}
 \vspace{0.1cm}
-\textit{Figure 1b: VS Code workspace showing simultaneous development across Dart (Flutter), Solidity (smart contracts), JavaScript (deploy scripts), Python (ML pipeline), and TypeScript (Next.js) --- all authored by a single full-stack engineer. The terminal shows the Next.js War Room dev server running live on port 3006.}
-
-\newpage
-\section*{3. The Enterprise "War Room": ML Risk Infrastructure}
-Below is the administrative dashboard (Next.js) directly interfacing with the Python/FastAPI ML inference pipeline. This system processes high-throughput data streams, surfacing anomalies via distilled XGBoost student models.
-
-\vspace{0.3cm}
-\noindent\textbf{FastAPI Risk Scoring Endpoint} (from \texttt{ml/Automation/risk\_engine/}):
+\begin{center}
+    \includegraphics[width=0.95\textwidth]{images/warroom_alerts.png}
+\end{center}
+\noindent\textit{Figure 2: War Room real-time transaction alerts, risk scores, and compliance decisions --- live on amttp.com.}
 
 \vspace{0.2cm}
+\noindent\textbf{War Room Explainability Panel:}
+\vspace{0.1cm}
+\begin{center}
+    \includegraphics[width=0.95\textwidth]{images/warroom_explainability.png}
+\end{center}
+\noindent\textit{Figure 3: SHAP/LIME explainability panel --- per-transaction feature contributions from the Explainability Service (port 8009).}
+
+\section*{6. ZK Enforcement (Implementation Evidence)}
+
+\noindent\textbf{ZK-SNARK On-Chain Verification} (\texttt{contracts/zknaf/}):
+
+\vspace{0.15cm}
 \noindent\fbox{\begin{minipage}{0.95\textwidth}
 \small
-\texttt{@app.post("/score")}\\
-\texttt{async def score\_transaction(request: TransactionRequest):}\\
-\texttt{~~~~features = extract\_features(request)}\\\texttt{~~~~tabular\_score = xgb\_model.predict\_proba(features)[:,1]}\\
-\texttt{~~~~graph\_score = await memgraph.query\_risk(request.from\_addr)}\\
-\texttt{~~~~combined = 0.7 * tabular\_score + 0.3 * graph\_score}\\
-\texttt{~~~~return \{"risk\_score": combined, "action": get\_policy\_action(combined)\}}
-\end{minipage}}
-\vspace{0.2cm}
-
-\noindent\textit{Figure 2: FastAPI prediction endpoint (port 8000) combining XGBoost tabular scoring with Memgraph graph analysis. The War Room dashboard (Next.js, port 3006) consumes this API to render real-time risk panels and transaction alerts.}
-
-\section*{4. Consumer Edge \& Decentralized Settlement}
-The final tier involves the cross-platform consumer client (built in Flutter) routing safe transactions to EVM-compatible blockchains. Compliance checks are verified entirely on-chain without leaking private keys or PII.
-
-\vspace{0.3cm}
-\noindent\textbf{ZK-SNARK On-Chain Verification} (from \texttt{contracts/zknaf/sanctions\_non\_membership\_verifier.sol}):
-
-\vspace{0.2cm}
-\noindent\fbox{\begin{minipage}{0.95\textwidth}
-\small
-\texttt{function verifyProof(}\\
-\texttt{~~~~uint[2] calldata \_pA, uint[2][2] calldata \_pB,}\\
-\texttt{~~~~uint[2] calldata \_pC, uint[4] calldata \_pubSignals}\\
-\texttt{) public view returns (bool) \{}\\
-\texttt{~~~~assembly \{}\\
-\texttt{~~~~~~~~// G1 point multiplication via EVM precompile 7}\\
-\texttt{~~~~~~~~function g1\_mulAccC(pR, x, y, s) \{}\\
-\texttt{~~~~~~~~~~~~success := staticcall(sub(gas(), 2000), 7, mIn, 96, mIn, 64)}\\
-\texttt{~~~~~~~~\}}\\
-\texttt{~~~~~~~~// Groth16 pairing check via precompile 8}\\
-\texttt{~~~~~~~~function checkPairing(pA, pB, pC, pubSignals, pMem) -> isOk \{}\\
-\texttt{~~~~~~~~~~~~g1\_mulAccC(\_pVk, IC1x, IC1y, calldataload(add(pubSignals, 0)))}\\
-\texttt{~~~~~~~~~~~~g1\_mulAccC(\_pVk, IC2x, IC2y, calldataload(add(pubSignals, 32)))}\\
-\texttt{~~~~~~~~~~~~isOk := and(success, mload(\_pPairing))}\\
-\texttt{~~~~~~~~\}}\\
-\texttt{~~~~\}}\\
+\texttt{function verifyProof(uint[2] calldata \_pA, uint[2][2] calldata \_pB,}\\
+\texttt{~~~~uint[2] calldata \_pC, uint[4] calldata \_pubSignals) public view returns (bool) \{}\\
+\texttt{~~~~// G1 point multiplication via EVM precompile 7}\\
+\texttt{~~~~success := staticcall(sub(gas(), 2000), 7, mIn, 96, mIn, 64)}\\
+\texttt{~~~~// Groth16 pairing check via precompile 8}\\
+\texttt{~~~~isOk := and(success, mload(\_pPairing))}\\
 \texttt{\}}
 \end{minipage}}
-\vspace{0.2cm}
+\vspace{0.15cm}
 
-\noindent\textit{Figure 3: Groth16 ZK-SNARK proof verification in Solidity --- sanctions non-membership is verified on-chain using BN254 elliptic curve pairings without revealing the user's identity. The Flutter consumer app initiates transactions that ultimately settle through this verification layer.}
+\noindent\textit{Figure 4: Groth16 ZK-SNARK verifier --- sanctions non-membership proven on-chain via BN254 pairings without revealing user identity.}
 
 \end{document}
