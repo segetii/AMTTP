@@ -1,0 +1,75 @@
+{
+  "model": "Crypto BSDT: ETH/BTC Directional + Pair Model",
+  "architecture": {
+    "setup_A": "ETH/USD directional: w1(\u03a9_eth) \u00d7 w2(MFLS_eth/\u03b3_eth) \u00d7 phase_direction",
+    "setup_B": "ETH/BTC pair: \u0394MFLS = A_eth\u2212A_btc, gate on \u03a9_joint",
+    "setup_C": "Hybrid: rolling_corr(ETH,BTC) > 0.80 \u2192 A; < 0.60 \u2192 B; else blend"
+  },
+  "pnl_results": {
+    "A_directional_eth": {
+      "label": "A_directional",
+      "sharpe": -4.2209,
+      "sharpe_per_lev": -93.4542,
+      "max_dd": -0.3449,
+      "cum_return": -0.3335,
+      "active_days": 95,
+      "total_days": 1207,
+      "hit_rate": 0.3684,
+      "tail_acc": 0.4,
+      "tail_pnl": -0.003741,
+      "leverage": 0.0452,
+      "bh_sharpe": 0.2603,
+      "bh_max_dd": -0.7272,
+      "bh_cum": -0.0135
+    },
+    "B_pairs_ethbtc": {
+      "label": "B_pairs",
+      "sharpe": -1.0,
+      "sharpe_per_lev": -3.5816,
+      "max_dd": -0.4684,
+      "cum_return": -0.3561,
+      "active_days": 337,
+      "total_days": 1207,
+      "hit_rate": 0.4748,
+      "tail_acc": 0.1429,
+      "tail_pnl": -0.022973,
+      "leverage": 0.2792,
+      "bh_sharpe": -0.5816,
+      "bh_max_dd": -0.7972,
+      "bh_cum": -0.6649
+    },
+    "C_hybrid": {
+      "label": "C_hybrid",
+      "sharpe": -2.5593,
+      "sharpe_per_lev": -28.196,
+      "max_dd": -0.4779,
+      "cum_return": -0.4531,
+      "active_days": 212,
+      "total_days": 1207,
+      "hit_rate": 0.4292,
+      "tail_acc": 0.2963,
+      "tail_pnl": -0.014198,
+      "leverage": 0.0908,
+      "bh_sharpe": 0.2603,
+      "bh_max_dd": -0.7272,
+      "bh_cum": -0.0135
+    }
+  },
+  "divergence_analysis": {
+    "high_coupling": {
+      "n": 773,
+      "sharpe_A": -5.3168,
+      "sharpe_B": -1.9664
+    },
+    "medium_coupling": {
+      "n": 434,
+      "sharpe_A": -2.6756,
+      "sharpe_B": 0.0341
+    }
+  },
+  "key_insights": {
+    "omega_coupling": -0.7918,
+    "delta_mfls_interpretation": "\u0394MFLS > 0 means ETH activity exceeds BTC \u2192 ETH leads instability. Use long ETH/short BTC. Negative = BTC dominates.",
+    "hybrid_logic": "When ETH-BTC correlation is high, pair trades cancel out \u2192 use directional. When correlation is low, divergence is present \u2192 pair trade captures the spread."
+  }
+}

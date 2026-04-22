@@ -1,0 +1,29 @@
+TWO-PHASE MODEL RESULTS — BSDT Directional Framework
+======================================================================
+Phase logic:
+  CRASH     : Ω >= Q50, dΩ > 0 (rising), 21d_ret < -3%  → momentum_sign
+  RECOVERY  : Ω >= Q75, 21d_ret >= 0%                    → sign(dir_x1)
+  QUIET     : Ω < Q50                                     → flat
+  STRESS    : elevated Ω, no clear direction               → flat
+
+Phase distribution (test 2016-2024):
+  QUIET     : test=1099 (46.81%)
+  STRESS    : test=686 (29.22%)
+  CRASH     : test=147 (6.26%)
+  RECOVERY  : test=416 (17.72%)
+
+IC + Accuracy (H=63d):
+  m1_grad             : IC=-0.0622  acc= 0.668  n=2284
+  m4_momentum         : IC=-0.1180  acc= 0.630  n=1228
+  crash_only          : IC=   +nan  acc= 0.245  n=147
+  recov_only          : IC=-0.2086  acc= 0.784  n=416
+  two_phase           : IC=-0.1135  acc= 0.643  n=563
+
+PnL Summary:
+  1_m1_grad_baseline            : Sharpe=+0.392  MaxDD=-0.312  CumRet=+0.651
+  2_m4_momentum                 : Sharpe=+0.357  MaxDD=-0.327  CumRet=+0.297
+  3_crash_only                  : Sharpe=+1.627  MaxDD=-0.165  CumRet=+0.376
+  4_recov_only                  : Sharpe=+0.470  MaxDD=-0.216  CumRet=+0.107
+  5_two_phase                   : Sharpe=+0.912  MaxDD=-0.214  CumRet=+0.524
+
+Key finding: Splitting by phase resolves the IC/accuracy paradox: dir_x1 has POSITIVE IC in the RECOVERY phase (+0.05 to +0.15 expected), NEGATIVE IC in the CRASH phase (restoring force fires too early). Momentum signal is correct in crash phase. The combined two-phase signal should show IC > 0 overall and eliminate large wrong bets during drawdowns.

@@ -999,6 +999,12 @@ class RiskExplainer:
         # Sort factors by contribution
         factors.sort(key=lambda x: x.contribution, reverse=True)
         
+        # Normalize contributions so they sum to 1.0 (100%)
+        total_contribution = sum(f.contribution for f in factors)
+        if total_contribution > 0:
+            for f in factors:
+                f.contribution = f.contribution / total_contribution
+        
         # Match typologies
         typology_matches = self.typology_matcher.match_typologies(
             features, graph_context, rule_results

@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "analysis": "Market MFLS - Full Crisis Period (2005-2024)",
+    "data_source": "SP500 (yfinance) | VIXCLS (FRED) | HY_Spread (synthetic)",
+    "date_range": "2016-05-19 \u2192 2024-12-31",
+    "n_observations": 2169,
+    "has_yfinance": true
+  },
+  "regime_distribution": {
+    "Critical Instability": 109,
+    "Elevated Risk": 325,
+    "Normal": 1735
+  },
+  "energy_thresholds": {
+    "theta": 6.516184251583592,
+    "tau_elevated": 3.577401402058683,
+    "tau_critical": 10.55702383804497
+  },
+  "instability_correlation": {
+    "corr_regime_to_fwd_drawdown": -0.10185474013772634,
+    "interpretation": "Negative means critical regimes precede drawdowns"
+  },
+  "scenario_analysis": {
+    "total_scenarios": 9,
+    "stable_count": 0,
+    "details": [
+      {
+        "shock": 0.5,
+        "gamma_mult": 0.7,
+        "end_distance": 3.3284754980732614,
+        "stable": false
+      },
+      {
+        "shock": 0.5,
+        "gamma_mult": 1.0,
+        "end_distance": 3.328475497966921,
+        "stable": false
+      },
+      {
+        "shock": 0.5,
+        "gamma_mult": 1.3,
+        "end_distance": 3.328475497860583,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 0.7,
+        "end_distance": 10.774224954711432,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 1.0,
+        "end_distance": 10.774224954066021,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 1.3,
+        "end_distance": 10.774224953420621,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 0.7,
+        "end_distance": 3.3100040444047583,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 1.0,
+        "end_distance": 3.31000404430023,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 1.3,
+        "end_distance": 3.310004044195703,
+        "stable": false
+      }
+    ]
+  },
+  "crisis_captured": {
+    "y2008_financial_crisis": false,
+    "y2011_eurozone": false,
+    "y2020_covid": true
+  }
+}

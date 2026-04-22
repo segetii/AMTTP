@@ -7,12 +7,12 @@
   "n_us_real_fdic": 6,
   "n_nonus_real_worldbank": 14,
   "d_features": 5,
-  "lambda_max_W": 10.220601894884958,
-  "rho_star": 0.11399624448668765,
-  "auroc": 0.7809680065627563,
+  "lambda_max_W": 10.487233030340501,
+  "rho_star": 0.11187837898345365,
+  "auroc": 0.5627563576702215,
   "auroc_95ci": [
-    0.3647,
-    0.9545
+    0.1173,
+    0.7232
   ],
   "hit_rate": 1.0,
   "hit_rate_95ci": [
@@ -23,17 +23,17 @@
   "lead_quarters_gfc": 6,
   "gfc_alarm_date": "2007-03-31 00:00:00",
   "causality": {
-    "linear_granger_min_p": 0.053,
+    "linear_granger_min_p": 0.0667,
     "linear_verdict": "PASS",
-    "threshold_granger_min_p": 0.043,
+    "threshold_granger_min_p": 0.009,
     "threshold_verdict": "PASS (upper-regime predictive)",
-    "quantile_min_p": 0.492,
+    "quantile_min_p": 0.576,
     "quantile_verdict": "FAIL"
   },
   "region_auroc": {
-    "US": 0.3897,
-    "EU": 0.685,
-    "Asia": 0.8031
+    "US": 0.397,
+    "EU": 0.6792,
+    "Asia": 0.5808
   },
   "bank_meta": [
     {
@@ -231,5 +231,5 @@
       "ecb_cc": null
     }
   ],
-  "runtime_sec": 17.5
+  "runtime_sec": 14.8
 }

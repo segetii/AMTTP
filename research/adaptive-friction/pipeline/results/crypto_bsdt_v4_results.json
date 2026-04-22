@@ -1,0 +1,158 @@
+{
+  "model": "Crypto BSDT v4 \u2014 \u0394A Activity Acceleration + Rolling \u03b2",
+  "version": "v4",
+  "key_changes_from_v3": [
+    "Regime split: \u0394A (activity acceleration) instead of level A",
+    "ETH/SOL: rolling 252d \u03b2 instead of fixed training \u03b2",
+    "Pre-cascade = dA_rank \u2265 Q66 \u2192 continuation",
+    "Post-shock  = dA_rank <  Q66 \u2192 reversion"
+  ],
+  "pnl_results": {
+    "A_directional": {
+      "label": "A_directional",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.777,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1207,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.079,
+      "bh_sharpe": 0.259,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.017
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "sharpe": 0.758,
+      "sharpe_per_lev": 2.799,
+      "max_dd": -0.212,
+      "cum_return": 0.199,
+      "active_days": 387,
+      "total_days": 1207,
+      "hit_rate": 0.519,
+      "tail_acc": 0.375,
+      "tail_pnl": -0.00347,
+      "leverage": 0.2709,
+      "bh_sharpe": -0.378,
+      "bh_max_dd": -0.497,
+      "bh_cum": -0.331
+    },
+    "P2_ETH_SOL_roll": {
+      "label": "P2_ETH_SOL_roll",
+      "sharpe": 0.835,
+      "sharpe_per_lev": 2.555,
+      "max_dd": -0.222,
+      "cum_return": 0.34,
+      "active_days": 497,
+      "total_days": 1207,
+      "hit_rate": 0.511,
+      "tail_acc": 0.703,
+      "tail_pnl": 0.01172,
+      "leverage": 0.3269,
+      "bh_sharpe": 0.4,
+      "bh_max_dd": -0.497,
+      "bh_cum": 0.392
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "sharpe": 1.251,
+      "sharpe_per_lev": 20.0,
+      "max_dd": -0.161,
+      "cum_return": 0.138,
+      "active_days": 113,
+      "total_days": 1207,
+      "hit_rate": 0.531,
+      "tail_acc": 0.571,
+      "tail_pnl": 0.0025,
+      "leverage": 0.0625,
+      "bh_sharpe": 0.078,
+      "bh_max_dd": -0.541,
+      "bh_cum": -0.067
+    },
+    "P4_BTC_ALT": {
+      "label": "P4_BTC_ALT",
+      "sharpe": -0.45,
+      "sharpe_per_lev": -1.391,
+      "max_dd": -0.218,
+      "cum_return": -0.152,
+      "active_days": 474,
+      "total_days": 1207,
+      "hit_rate": 0.506,
+      "tail_acc": 0.571,
+      "tail_pnl": -7e-05,
+      "leverage": 0.3231,
+      "bh_sharpe": 0.855,
+      "bh_max_dd": -0.319,
+      "bh_cum": 1.087
+    }
+  },
+  "ic_results": {
+    "A_directional": {
+      "label": "A",
+      "n": 152,
+      "ic": 0.0921,
+      "acc": 0.507
+    },
+    "P1_ETH_BTC": {
+      "label": "P1",
+      "n": 367,
+      "ic": 0.0451,
+      "acc": 0.537
+    },
+    "P2_ETH_SOL_roll": {
+      "label": "P2_roll",
+      "n": 477,
+      "ic": -0.0993,
+      "acc": 0.453
+    },
+    "P4_BTC_ALT": {
+      "label": "P4",
+      "n": 454,
+      "ic": -0.0031,
+      "acc": 0.489
+    }
+  },
+  "crisis_breakdown": {
+    "2022_winter": {
+      "v2_A": 1.991,
+      "P1_ETH_BTC": -7.355,
+      "P2_ETH_SOL_roll": -0.755,
+      "P4_BTC_ALT": -1.02
+    },
+    "2023_recovery": {
+      "v2_A": 3.749,
+      "P1_ETH_BTC": 0.0,
+      "P2_ETH_SOL_roll": -0.783,
+      "P4_BTC_ALT": 0.467
+    },
+    "2024_bull": {
+      "v2_A": 1.151,
+      "P1_ETH_BTC": -0.775,
+      "P2_ETH_SOL_roll": 2.122,
+      "P4_BTC_ALT": -0.165
+    },
+    "2025_bear": {
+      "v2_A": -1.074,
+      "P1_ETH_BTC": 0.204,
+      "P2_ETH_SOL_roll": 0.821,
+      "P4_BTC_ALT": 0.134
+    }
+  },
+  "v3_vs_v4": {
+    "P1_ETH_BTC": {
+      "v3": 0.656,
+      "v4": 0.758
+    },
+    "P2_ETH_SOL": {
+      "v3": -0.9,
+      "v4": 0.835
+    },
+    "P4_BTC_ALT": {
+      "v3": 0.685,
+      "v4": -0.45
+    }
+  }
+}

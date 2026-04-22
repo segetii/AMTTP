@@ -1,0 +1,50 @@
+{
+  "timestamp_utc": "2026-04-21T11:31:17.991500+00:00",
+  "root": "C:\\amttp\\research\\siam-paper",
+  "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "git_commit": "24fd000ac6263a40235b0ca237ce4c7ab2ff7eef",
+  "git_status_short": "M ../../backend/compliance-service/explainability.py\n M ../../backend/compliance-service/orchestrator.py\n M ../../frontend/frontend/src/components/shared/ExplainabilityModal.tsx\n?? ../../causal_physics_results.txt\n?? ../../early_warning_results.txt\n?? ../../ercot_collapse_results.txt\n?? ../../ercot_component_results.txt\n?? ../../full_collapse_domains_output.txt\n?? ../../full_collapse_supply_vs_combined.txt\n?? ../../full_engine_results.txt\n?? ../../physics_engine_results.txt\n?? ../../physics_ercot_supply_results.txt\n?? replication_artifacts/\n?? reproduce_and_archive.py\n?? ../udl/energyv3/",
+  "execution": {
+    "archive_only": false,
+    "phases": [
+      "full-stress"
+    ],
+    "phase_results": [
+      {
+        "script": "C:\\amttp\\research\\siam-paper\\full_stress_test.py",
+        "status": "failed",
+        "error": "ModuleNotFoundError: No module named 'cupy'",
+        "duration_seconds": 1.356,
+        "log": "C:\\amttp\\research\\siam-paper\\replication_artifacts\\run_20260421_113117\\logs\\full-stress.log",
+        "phase": "full-stress"
+      }
+    ]
+  },
+  "artifacts": {
+    "source_files": [
+      "main.tex",
+      "appendix_computational_ns.tex",
+      "siam.bst",
+      "siamltex.cls",
+      "nu_critical_experiment.py",
+      "road_forward_experiments.py",
+      "full_stress_test.py",
+      "reproduce_and_archive.py"
+    ],
+    "result_files": [
+      "adaptive_calibration_timeline.pdf",
+      "adaptive_calibration_timeline.png",
+      "auroc_ranking.pdf",
+      "auroc_ranking.png",
+      "compile_out.txt",
+      "compile_out2.txt",
+      "compile_out3.txt",
+      "compile_out4.txt",
+      "fixed_vs_adaptive_comparison.pdf",
+      "fixed_vs_adaptive_comparison.png",
+      "main.pdf",
+      "molecular_no_leakage_timeline.pdf"
+    ]
+  }
+}

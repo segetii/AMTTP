@@ -1,0 +1,20 @@
+Unified Paper Deviation Report
+=
+
+ERCOT AUC
+  target=0.9940  observed=0.7526 (best engine: Hybrid(Mol+Grav))  delta=-0.2414
+  source=C:\amttp\physics_ercot_supply_results.txt
+  note=Parsed from ERCOT supply-only original-data report.
+
+FRED AUC
+  target=0.9999  observed(proxy)=1.0000 delta=+0.0001
+  source=C:\amttp\results\full_engine_results.json
+  note=No explicit FRED-tagged JSON metric found under C:/amttp/results; using Bank/Hybrid AUC as closest available proxy.
+
+Mol+ExpoGate (Adaptive P99 table row)
+  AUROC: target=0.8670 observed=0.9231 delta=+0.0561
+  FAR%:  target=0.0 observed=11.1 delta=+11.1
+  Recall%: target=38.5 observed=38.5 delta=+0.0
+  Prec.%:  target=100.0 observed=41.7 delta=-58.3
+  GFC first: target=2007-Q4 observed=2007-Q4
+  source=C:\amttp\research\adaptive-friction\banklevel_enhanced\results\gsib_real\paper_calibrated_adaptive_p99_gsib_real.json

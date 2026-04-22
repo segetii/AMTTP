@@ -1,0 +1,43 @@
+BSDT DIRECTIONAL SIGNAL FRAMEWORK RESULTS
+Run: 2026-04-22T00:39:03.552374
+Train 2005-2015 | Test 2016-2024
+
+LAYER 1 — TIMING AUC
+  H21_train 2005-2015: AUC=0.6001  events=488  lift@top25%=1.468  lift@top10%=?
+  H21_test  2016-2024: AUC=0.5073  events=339  lift@top25%=1.086  lift@top10%=?
+  H63_train 2005-2015: AUC=0.5529  events=1005  lift@top25%=1.127  lift@top10%=?
+  H63_test  2016-2024: AUC=0.4844  events=634  lift@top25%=0.826  lift@top10%=?
+  H126_train 2005-2015: AUC=0.5636  events=1272  lift@top25%=1.095  lift@top10%=?
+  H126_test  2016-2024: AUC=0.4289  events=774  lift@top25%=0.667  lift@top10%=?
+
+  Lead-lag peak: tau=-5d  corr=0.2891
+
+LAYER 2 — DIRECTION IC
+  Horizon H21:
+            m1_grad: IC=-0.0141  acc_uncond=0.6273  acc|Q75=0.6649  acc|Q90=0.6438
+            m2_evec: IC=None  acc_uncond=0.697  acc|Q75=0.7543  acc|Q90=0.7983
+        m3_condrift: IC=-0.0791  acc_uncond=0.6812  acc|Q75=0.7456  acc|Q90=0.7729
+        m4_momentum: IC=-0.13  acc_uncond=0.589  acc|Q75=0.5687  acc|Q90=0.5451
+        m5_friction: IC=-0.079  acc_uncond=0.6319  acc|Q75=0.589  acc|Q90=0.5185
+           ensemble: IC=-0.0691  acc_uncond=0.7438  acc|Q75=0.7438  acc|Q90=0.7839
+  Horizon H63:
+            m1_grad: IC=-0.0622  acc_uncond=0.6677  acc|Q75=0.7513  acc|Q90=0.7293
+            m2_evec: IC=None  acc_uncond=0.7742  acc|Q75=0.8687  acc|Q90=0.8952
+        m3_condrift: IC=-0.1625  acc_uncond=0.7596  acc|Q75=0.837  acc|Q90=0.84
+        m4_momentum: IC=-0.118  acc_uncond=0.6303  acc|Q75=0.6445  acc|Q90=0.5677
+        m5_friction: IC=-0.1825  acc_uncond=0.6614  acc|Q75=0.7234  acc|Q90=0.6731
+           ensemble: IC=-0.0903  acc_uncond=0.8612  acc|Q75=0.8558  acc|Q90=0.8718
+
+LAYER 3 — PnL
+                                   buyhold: sharpe=+0.677  maxDD=-33.9%  hitrate=52.5%
+                                  momentum: sharpe=+0.102  maxDD=-37.4%  hitrate=50.4%
+                               m1_grad_Q75: sharpe=+0.063  maxDD=-30.2%  hitrate=41.5%
+                               m2_evec_Q75: sharpe=+0.395  maxDD=-29.6%  hitrate=43.7%
+                           m4_momentum_Q75: sharpe=+0.078  maxDD=-33.6%  hitrate=42.1%
+                              ensemble_Q75: sharpe=+0.488  maxDD=-17.4%  hitrate=42.6%
+                               m1_grad_Q90: sharpe=+0.043  maxDD=-22.4%  hitrate=41.8%
+                               m2_evec_Q90: sharpe=+0.246  maxDD=-22.4%  hitrate=47.5%
+                           m4_momentum_Q90: sharpe=-0.243  maxDD=-29.8%  hitrate=41.0%
+                              ensemble_Q90: sharpe=+0.303  maxDD=-11.7%  hitrate=41.9%
+                        long_when_calm_Q75: sharpe=+0.540  maxDD=-20.7%  hitrate=47.5%
+                        long_when_calm_Q90: sharpe=+0.635  maxDD=-25.6%  hitrate=51.8%

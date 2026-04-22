@@ -1,0 +1,208 @@
+{
+  "n_obs": 4965,
+  "date_start": "2005-12-21",
+  "date_end": "2024-12-31",
+  "regime_counts": {
+    "Normal": 3972,
+    "Elevated Risk": 744,
+    "Critical Instability": 249
+  },
+  "theta": 490.0082636521698,
+  "tau_elevated": 492.26518213348993,
+  "tau_critical": 639.0387024221646,
+  "drawdown_metrics": {
+    "corr_S_to_future_drawdown": 0.06142651945949118,
+    "min_drawdown": -0.4215026206524513,
+    "critical_count": 249,
+    "elevated_count": 744
+  },
+  "scenario_results": [
+    {
+      "shock": 0.5,
+      "gamma_mult": 0.7,
+      "end_distance": 0.5997016523494765,
+      "max_distance": 0.8399654924407872,
+      "stable": true
+    },
+    {
+      "shock": 0.5,
+      "gamma_mult": 1.0,
+      "end_distance": 0.5998361991149987,
+      "max_distance": 0.8399497891301636,
+      "stable": true
+    },
+    {
+      "shock": 0.5,
+      "gamma_mult": 1.3,
+      "end_distance": 0.5999703356254827,
+      "max_distance": 0.8399340876490345,
+      "stable": true
+    },
+    {
+      "shock": 1.0,
+      "gamma_mult": 0.7,
+      "end_distance": 0.8948516584711967,
+      "max_distance": 1.4919183095750297,
+      "stable": true
+    },
+    {
+      "shock": 1.0,
+      "gamma_mult": 1.0,
+      "end_distance": 0.8948385494289322,
+      "max_distance": 1.4920005140753851,
+      "stable": true
+    },
+    {
+      "shock": 1.0,
+      "gamma_mult": 1.3,
+      "end_distance": 0.8948242953012944,
+      "max_distance": 1.4920827278724815,
+      "stable": true
+    },
+    {
+      "shock": 1.5,
+      "gamma_mult": 0.7,
+      "end_distance": 0.9078100717376661,
+      "max_distance": 2.0891624134348024,
+      "stable": true
+    },
+    {
+      "shock": 1.5,
+      "gamma_mult": 1.0,
+      "end_distance": 0.907589448056932,
+      "max_distance": 2.0891344377959586,
+      "stable": true
+    },
+    {
+      "shock": 1.5,
+      "gamma_mult": 1.3,
+      "end_distance": 0.907358260518457,
+      "max_distance": 2.089106463061223,
+      "stable": true
+    }
+  ],
+  "config": {
+    "start": "2005-01-01",
+    "end": "2024-12-31",
+    "window": 252,
+    "drawdown_window": 63,
+    "horizon": 21,
+    "alpha": 1.0,
+    "dt": 0.05,
+    "theta_quantile": 0.9,
+    "p_elevated": 0.8,
+    "p_critical": 0.95,
+    "sigma_pair": 1.0,
+    "eps_att": 0.5,
+    "eps_rep": 0.1,
+    "eps_smooth": 0.001,
+    "pca_var_frac": 0.8,
+    "kde_log_floor": -20.0,
+    "fisher_high_q": 0.8,
+    "fisher_low_q": 0.5,
+    "min_window": 30,
+    "normal_end": "2007-06-30"
+  },
+  "output_csv": "C:\\amttp\\research\\adaptive-friction\\pipeline\\results\\market_mfls_timeseries.csv",
+  "input_csv": "C:\\amttp\\research\\adaptive-friction\\pipeline\\results\\market_mfls_inputs.csv",
+  "crisis_captured": {
+    "y2008_financial_crisis": true,
+    "y2011_eurozone": true,
+    "y2020_covid": true
+  },
+  "bsdt_exact": {
+    "theory": "Blind-Spot Decomposition Theory (SIAM paper, Odeyemi 2025)",
+    "channels": {
+      "delta_C": "Mahalanobis distance [(X-mu0)'Sigma0^-1(X-mu0)]^{1/2}",
+      "delta_G": "PCA residual ||(I-Pk)X||_2",
+      "delta_A": "Excess velocity max(0, ||dX|| - v0)",
+      "delta_T": "Temporal novelty -log p_hat(X_t) via rolling KDE"
+    },
+    "fisher_weights": {
+      "w_C": 0.24914173900102923,
+      "w_G": 0.04510582562746523,
+      "w_A": 0.014683375132284734,
+      "w_T": 0.6910690602392207,
+      "FR_C": 4.446398188891107,
+      "FR_G": 0.8049974371318445,
+      "FR_A": 0.26205216699852063,
+      "FR_T": 12.333414024350436
+    },
+    "energy_formula": "E_BS = sum_k w_k*delta_k(X) + sum_{i<j} phi(||x_i-x_j||)",
+    "mfls_formula": "MFLS = ||grad E_BS(X_t)||_F  (Frobenius norm of gradient)",
+    "friction_formula": "gamma(E) = E / (E + theta)  [paper line 859]",
+    "dynamics_formula": "X_{t+1} = X_t + dt*(F(X_t) - gamma(E_BS)*grad E_BS(X_t))  [eq:bsdamped]",
+    "channel_mean": {
+      "delta_C_mean": 17.663589513417072,
+      "delta_G_mean": 1.3634852499015335,
+      "delta_A_mean": 0.6050135480920552,
+      "delta_T_mean": 421.0218248294401
+    }
+  },
+  "transition_diagnostics": {
+    "transition_dates_above_cman": [
+      "2008-10-07",
+      "2008-10-09",
+      "2008-10-15",
+      "2009-04-20",
+      "2009-04-29",
+      "2009-05-04",
+      "2009-05-08",
+      "2009-05-13",
+      "2009-05-18",
+      "2020-03-12",
+      "2020-04-06",
+      "2020-04-08",
+      "2020-06-11"
+    ],
+    "n_transitions": 13,
+    "mean_entropy_production": 63853.39164985342,
+    "max_entropy_production": 1004854.7450418426,
+    "pct_above_cman": 0.033635448136958714
+  },
+  "data_source_log": {
+    "sp500_source": "Yahoo Finance (^GSPC)",
+    "vix_source": "Yahoo Finance (^VIX)",
+    "hy_spread_source": "BAA10Y",
+    "hy_vix_correlation": 0.6850707278520308,
+    "date_range": "2005-01-03 -> 2024-12-31",
+    "n_raw": 5217
+  },
+  "normal_period_calibration": {
+    "normal_end": "2007-06-30",
+    "n_normal_rows": 398,
+    "description": "All BSDT channels (delta_C/G/A/T) measure deviation from this fixed normal-period baseline N. mu_0, Sigma_0, PCA projector P_k, KDE p_hat, and velocity threshold v_0 are calibrated ONCE on this window and held fixed for the entire 2005-2024 evaluation."
+  },
+  "outcome_probabilities": {
+    "Critical Instability": {
+      "P(DD<-3pct)": 0.24899598393574296,
+      "P(DD<-5pct)": 0.1285140562248996,
+      "P(DD<-10pct)": 0.008032128514056224,
+      "n_obs": 249
+    },
+    "Elevated Risk": {
+      "P(DD<-3pct)": 0.30913978494623656,
+      "P(DD<-5pct)": 0.2110215053763441,
+      "P(DD<-10pct)": 0.11827956989247312,
+      "n_obs": 744
+    },
+    "Normal": {
+      "P(DD<-3pct)": 0.3616805871931157,
+      "P(DD<-5pct)": 0.24702606934953175,
+      "P(DD<-10pct)": 0.10022779043280182,
+      "n_obs": 3951
+    }
+  },
+  "validation": {
+    "lift_critical_vs_normal_5pct": 0.5202449140825597,
+    "auc_mfls_to_5pct_drawdown": 0.48915022822078646,
+    "confusion_matrix_at_tau_critical": {
+      "TP": 32,
+      "FP": 217,
+      "TN": 3562,
+      "FN": 1133,
+      "precision": 0.12851405621973838,
+      "recall": 0.027467811158562512
+    }
+  }
+}

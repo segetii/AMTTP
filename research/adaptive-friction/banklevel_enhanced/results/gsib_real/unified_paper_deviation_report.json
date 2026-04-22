@@ -1,0 +1,65 @@
+{
+  "targets": {
+    "ercot_auc": 0.994,
+    "fred_auc": 0.9999,
+    "mol_expogate": {
+      "auroc": 0.867,
+      "far_pct": 0.0,
+      "recall_pct": 38.5,
+      "precision_pct": 100.0,
+      "gfc_first_alarm": "2007-Q4"
+    }
+  },
+  "ercot": {
+    "source": "C:\\amttp\\physics_ercot_supply_results.txt",
+    "best_engine": "Hybrid(Mol+Grav)",
+    "observed_auc": 0.7526,
+    "delta_vs_target": -0.2414,
+    "source_note": "Parsed from ERCOT supply-only original-data report."
+  },
+  "fred": {
+    "source": "C:\\amttp\\results\\full_engine_results.json",
+    "observed_auc_proxy": 1.0,
+    "proxy_note": "No explicit FRED-tagged JSON metric found under C:/amttp/results; using Bank/Hybrid AUC as closest available proxy.",
+    "delta_vs_target": 0.0001
+  },
+  "mol_expogate": {
+    "source": "C:\\amttp\\research\\adaptive-friction\\banklevel_enhanced\\results\\gsib_real\\paper_calibrated_adaptive_p99_gsib_real.json",
+    "observed_posthoc_in_sample": {
+      "auroc": 0.9231,
+      "gfc_auc": 0.942,
+      "far_pct": 11.1,
+      "recall_pct": 38.5,
+      "precision_pct": 41.7,
+      "gfc_first_alarm": "2007-Q4",
+      "tp": 5,
+      "fp": 7,
+      "n_crisis": 13,
+      "n_calm": 63,
+      "window_quarters": 8,
+      "defined_threshold_points": 68
+    },
+    "observed_strict_pre2007": {
+      "auroc": 0.5,
+      "gfc_auc": 0.5,
+      "far_pct": 0.0,
+      "recall_pct": 0.0,
+      "precision_pct": 0.0,
+      "gfc_first_alarm": null,
+      "tp": 0,
+      "fp": 0,
+      "n_crisis": 13,
+      "n_calm": 63,
+      "window_quarters": 8,
+      "defined_threshold_points": 68
+    },
+    "delta_posthoc_in_sample": {
+      "auroc": 0.0561,
+      "far_pct": 11.1,
+      "recall_pct": 0.0,
+      "precision_pct": -58.3,
+      "gfc_first_alarm_target": "2007-Q4",
+      "gfc_first_alarm_observed": "2007-Q4"
+    }
+  }
+}

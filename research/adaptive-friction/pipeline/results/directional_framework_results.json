@@ -1,0 +1,321 @@
+{
+  "metadata": {
+    "title": "BSDT Directional Signal Framework \u2014 Market (SP500+VIX+HY, 2005-2024)",
+    "run_timestamp": "2026-04-22T00:39:03.552374",
+    "train_period": "2005-01-01 to 2015-12-31",
+    "test_period": "2016-01-01 to 2024-12-31",
+    "mechanism": "Position = Omega(timing) x direction_signal",
+    "n_train": 2617,
+    "n_test": 2348
+  },
+  "directional_methods": {
+    "m1_grad": "Gradient -nabla_E_BS on return dim (dir_x1 column)",
+    "m2_evec": "Dominant eigenvector v_max[r_idx] loading on returns",
+    "m3_condrift": "Empirical conditional drift E[ret|Omega>tau] expanding window",
+    "m4_momentum": "21d rolling return sign gated by Omega > median",
+    "m5_friction": "Momentum sign when Omega rising AND gamma falling",
+    "ensemble": "Majority vote of m1-m5 gated by Omega > Q75"
+  },
+  "layer1_timing": {
+    "H21_train 2005-2015": {
+      "n": 2617,
+      "events": 488,
+      "base_rate": 0.1865,
+      "auc": 0.6001,
+      "lifts": {
+        "top25pct": 1.468,
+        "top9pct": 2.252
+      }
+    },
+    "H21_test  2016-2024": {
+      "n": 2348,
+      "events": 339,
+      "base_rate": 0.1444,
+      "auc": 0.5073,
+      "lifts": {
+        "top25pct": 1.086,
+        "top9pct": 1.415
+      }
+    },
+    "H63_train 2005-2015": {
+      "n": 2617,
+      "events": 1005,
+      "base_rate": 0.384,
+      "auc": 0.5529,
+      "lifts": {
+        "top25pct": 1.127,
+        "top9pct": 1.312
+      }
+    },
+    "H63_test  2016-2024": {
+      "n": 2348,
+      "events": 634,
+      "base_rate": 0.27,
+      "auc": 0.4844,
+      "lifts": {
+        "top25pct": 0.826,
+        "top9pct": 0.914
+      }
+    },
+    "H126_train 2005-2015": {
+      "n": 2617,
+      "events": 1272,
+      "base_rate": 0.4861,
+      "auc": 0.5636,
+      "lifts": {
+        "top25pct": 1.095,
+        "top9pct": 1.139
+      }
+    },
+    "H126_test  2016-2024": {
+      "n": 2348,
+      "events": 774,
+      "base_rate": 0.3296,
+      "auc": 0.4289,
+      "lifts": {
+        "top25pct": 0.667,
+        "top9pct": 0.749
+      }
+    },
+    "lead_lag_peak": {
+      "tau": -5,
+      "corr": 0.2891
+    }
+  },
+  "layer2_direction": {
+    "H21": {
+      "m1_grad": {
+        "ic": -0.0141,
+        "ic_p": 0.4969,
+        "acc_unconditional": 0.6273,
+        "acc_cond_q75": 0.6649,
+        "acc_cond_q90": 0.6438
+      },
+      "m2_evec": {
+        "ic": null,
+        "ic_p": null,
+        "acc_unconditional": 0.697,
+        "acc_cond_q75": 0.7543,
+        "acc_cond_q90": 0.7983
+      },
+      "m3_condrift": {
+        "ic": -0.0791,
+        "ic_p": 0.0005,
+        "acc_unconditional": 0.6812,
+        "acc_cond_q75": 0.7456,
+        "acc_cond_q90": 0.7729
+      },
+      "m4_momentum": {
+        "ic": -0.13,
+        "ic_p": 0.0,
+        "acc_unconditional": 0.589,
+        "acc_cond_q75": 0.5687,
+        "acc_cond_q90": 0.5451
+      },
+      "m5_friction": {
+        "ic": -0.079,
+        "ic_p": 0.0582,
+        "acc_unconditional": 0.6319,
+        "acc_cond_q75": 0.589,
+        "acc_cond_q90": 0.5185
+      },
+      "ensemble": {
+        "ic": -0.0691,
+        "ic_p": 0.1019,
+        "acc_unconditional": 0.7438,
+        "acc_cond_q75": 0.7438,
+        "acc_cond_q90": 0.7839
+      }
+    },
+    "H63": {
+      "m1_grad": {
+        "ic": -0.0622,
+        "ic_p": 0.0029,
+        "acc_unconditional": 0.6677,
+        "acc_cond_q75": 0.7513,
+        "acc_cond_q90": 0.7293
+      },
+      "m2_evec": {
+        "ic": null,
+        "ic_p": null,
+        "acc_unconditional": 0.7742,
+        "acc_cond_q75": 0.8687,
+        "acc_cond_q90": 0.8952
+      },
+      "m3_condrift": {
+        "ic": -0.1625,
+        "ic_p": 0.0,
+        "acc_unconditional": 0.7596,
+        "acc_cond_q75": 0.837,
+        "acc_cond_q90": 0.84
+      },
+      "m4_momentum": {
+        "ic": -0.118,
+        "ic_p": 0.0,
+        "acc_unconditional": 0.6303,
+        "acc_cond_q75": 0.6445,
+        "acc_cond_q90": 0.5677
+      },
+      "m5_friction": {
+        "ic": -0.1825,
+        "ic_p": 0.0,
+        "acc_unconditional": 0.6614,
+        "acc_cond_q75": 0.7234,
+        "acc_cond_q90": 0.6731
+      },
+      "ensemble": {
+        "ic": -0.0903,
+        "ic_p": 0.0324,
+        "acc_unconditional": 0.8612,
+        "acc_cond_q75": 0.8558,
+        "acc_cond_q90": 0.8718
+      }
+    }
+  },
+  "layer3_pnl": {
+    "buyhold": {
+      "total_return": 1.8776,
+      "annual_return": 0.1201,
+      "annual_vol": 0.1774,
+      "sharpe": 0.6771,
+      "max_drawdown": -0.3392,
+      "calmar": 0.3541,
+      "hit_rate": 0.5247,
+      "avg_trade_return": 0.000513,
+      "tail_pnl": -0.027563,
+      "active_days": 2348
+    },
+    "momentum": {
+      "total_return": 0.1823,
+      "annual_return": 0.0181,
+      "annual_vol": 0.1776,
+      "sharpe": 0.1021,
+      "max_drawdown": -0.3739,
+      "calmar": 0.0485,
+      "hit_rate": 0.5043,
+      "avg_trade_return": 0.000134,
+      "tail_pnl": 0.006634,
+      "active_days": 2348
+    },
+    "m1_grad_Q75": {
+      "total_return": 0.0782,
+      "annual_return": 0.0081,
+      "annual_vol": 0.129,
+      "sharpe": 0.0629,
+      "max_drawdown": -0.302,
+      "calmar": 0.0269,
+      "hit_rate": 0.4149,
+      "avg_trade_return": 7.3e-05,
+      "tail_pnl": -0.010385,
+      "active_days": 629
+    },
+    "m2_evec_Q75": {
+      "total_return": 0.5879,
+      "annual_return": 0.0509,
+      "annual_vol": 0.129,
+      "sharpe": 0.3945,
+      "max_drawdown": -0.296,
+      "calmar": 0.1719,
+      "hit_rate": 0.4372,
+      "avg_trade_return": 0.000664,
+      "tail_pnl": -0.013526,
+      "active_days": 629
+    },
+    "m4_momentum_Q75": {
+      "total_return": 0.0972,
+      "annual_return": 0.01,
+      "annual_vol": 0.129,
+      "sharpe": 0.0776,
+      "max_drawdown": -0.3355,
+      "calmar": 0.0298,
+      "hit_rate": 0.4213,
+      "avg_trade_return": 0.000337,
+      "tail_pnl": 0.004108,
+      "active_days": 629
+    },
+    "ensemble_Q75": {
+      "total_return": 0.5518,
+      "annual_return": 0.0483,
+      "annual_vol": 0.099,
+      "sharpe": 0.4879,
+      "max_drawdown": -0.1738,
+      "calmar": 0.2779,
+      "hit_rate": 0.4257,
+      "avg_trade_return": 0.000694,
+      "tail_pnl": -0.007172,
+      "active_days": 552
+    },
+    "m1_grad_Q90": {
+      "total_return": 0.0405,
+      "annual_return": 0.0043,
+      "annual_vol": 0.0997,
+      "sharpe": 0.0428,
+      "max_drawdown": -0.2237,
+      "calmar": 0.0191,
+      "hit_rate": 0.418,
+      "avg_trade_return": 0.000283,
+      "tail_pnl": -0.006228,
+      "active_days": 122
+    },
+    "m2_evec_Q90": {
+      "total_return": 0.2537,
+      "annual_return": 0.0246,
+      "annual_vol": 0.0997,
+      "sharpe": 0.2464,
+      "max_drawdown": -0.2237,
+      "calmar": 0.1098,
+      "hit_rate": 0.4754,
+      "avg_trade_return": 0.001807,
+      "tail_pnl": -0.006534,
+      "active_days": 122
+    },
+    "m4_momentum_Q90": {
+      "total_return": -0.2044,
+      "annual_return": -0.0242,
+      "annual_vol": 0.0997,
+      "sharpe": -0.2433,
+      "max_drawdown": -0.2985,
+      "calmar": -0.0812,
+      "hit_rate": 0.4098,
+      "avg_trade_return": -0.000992,
+      "tail_pnl": 0.001434,
+      "active_days": 122
+    },
+    "ensemble_Q90": {
+      "total_return": 0.2162,
+      "annual_return": 0.0212,
+      "annual_vol": 0.0701,
+      "sharpe": 0.3029,
+      "max_drawdown": -0.117,
+      "calmar": 0.1815,
+      "hit_rate": 0.419,
+      "avg_trade_return": 0.001117,
+      "tail_pnl": -0.002402,
+      "active_days": 105
+    },
+    "long_when_calm_Q75": {
+      "total_return": 0.8122,
+      "annual_return": 0.0659,
+      "annual_vol": 0.1219,
+      "sharpe": 0.5403,
+      "max_drawdown": -0.2072,
+      "calmar": 0.318,
+      "hit_rate": 0.4753,
+      "avg_trade_return": 0.000648,
+      "tail_pnl": -0.014037,
+      "active_days": 1719
+    },
+    "long_when_calm_Q90": {
+      "total_return": 1.2953,
+      "annual_return": 0.0933,
+      "annual_vol": 0.1468,
+      "sharpe": 0.6352,
+      "max_drawdown": -0.2556,
+      "calmar": 0.3649,
+      "hit_rate": 0.518,
+      "avg_trade_return": 0.00055,
+      "tail_pnl": -0.021029,
+      "active_days": 2226
+    }
+  }
+}

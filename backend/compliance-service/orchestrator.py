@@ -353,7 +353,7 @@ PROFILE_PRESETS = {
         "monthly_limit_eth": 5.0,
         "single_tx_limit_eth": 0.5,
         "risk_tolerance": RiskTolerance.STRICT,
-        "travel_rule_threshold_eth": 0.0,  # Always require Travel Rule info
+        "travel_rule_threshold_eth": 0.84,  # FATF threshold (~€1 000 / 0.84 ETH)
     },
 }
 
@@ -654,7 +654,8 @@ async def check_ml_risk(session: aiohttp.ClientSession, tx_data: Dict) -> Compli
             reason="ML service unavailable - using default score"
         )
     
-    risk_score = result.get("risk_score", 0.5) * 100
+    # ML engine returns risk_score as 0-1000 integer; normalise to 0-100
+    risk_score = result.get("risk_score", 500) / 10
     risk_level = result.get("risk_level", "medium")
     
     if risk_level == "critical":
@@ -674,7 +675,7 @@ async def check_ml_risk(session: aiohttp.ClientSession, tx_data: Dict) -> Compli
         service="ml_risk",
         check_type="transaction_risk",
         passed=passed,
-        score=100 - risk_score,
+        score=max(0, min(100, 100 - risk_score)),
         details=result,
         action_required=action,
         reason=f"ML risk: {risk_level}"
@@ -942,10 +943,12 @@ async def evaluate_transaction(
                 else:
                     reasons.append("Travel Rule applies - originator info will be collected")
         
+        travel_rule_passed = not requires_travel_rule or originator.kyc_level != KYCLevel.NONE
         checks.append(ComplianceCheck(
             service="travel_rule",
             check_type="threshold",
-            passed=not requires_travel_rule or originator.kyc_level != KYCLevel.NONE,
+            passed=travel_rule_passed,
+            score=100 if travel_rule_passed else 25,
             details={
                 "threshold_eth": originator.travel_rule_threshold_eth,
                 "value_eth": value_eth,

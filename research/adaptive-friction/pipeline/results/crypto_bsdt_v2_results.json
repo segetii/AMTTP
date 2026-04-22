@@ -1,0 +1,109 @@
+{
+  "model": "Crypto BSDT v2 \u2014 Crypto-Native Feature Space",
+  "version": "v2",
+  "features": [
+    "ret_eth_z",
+    "ret_btc_z",
+    "ret_sol_z",
+    "ret_bnb_z",
+    "vol_eth_z",
+    "vol_btc_z",
+    "btc_dom_z",
+    "cross_disp_z"
+  ],
+  "calibration": {
+    "crash_threshold_7d": -0.1,
+    "recovery_confirm_3d": 0.03,
+    "btc_dominance_stress": 1.5,
+    "direction_window": 5,
+    "omega_gate": "Q50",
+    "activity_gate": "Q33"
+  },
+  "fixes_from_v1": [
+    "\u03a9 feature space: 8-dimensional (4 assets + vols + BTC dominance + dispersion)",
+    "Crash threshold: 7d ret < -10% (was 21d < -3% \u2014 too loose for crypto volatility)",
+    "Direction: 5d momentum (was 21d \u2014 proven noise at fwd_5d accuracy 48.8%)",
+    "BTC dominance proxy: btc_rel = ret_btc - mean(ret_alts) feeds into both feature matrix and crash trigger",
+    "Recovery: always long ETH (alt-season recovery is directional, not gradient-based)"
+  ],
+  "pnl_results": {
+    "A_directional_eth": {
+      "label": "A_directional_eth",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.777,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1207,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.079,
+      "bh_sharpe": 0.26,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.013
+    },
+    "B_pairs_eth_btc": {
+      "label": "B_pairs_eth_btc",
+      "sharpe": -1.092,
+      "sharpe_per_lev": -3.116,
+      "max_dd": -0.573,
+      "cum_return": -0.498,
+      "active_days": 423,
+      "total_days": 1207,
+      "hit_rate": 0.513,
+      "tail_acc": 0.578,
+      "tail_pnl": 0.00354,
+      "leverage": 0.3505,
+      "bh_sharpe": -0.582,
+      "bh_max_dd": -0.797,
+      "bh_cum": -0.665
+    },
+    "C_hybrid": {
+      "label": "C_hybrid",
+      "sharpe": -0.516,
+      "sharpe_per_lev": -4.921,
+      "max_dd": -0.346,
+      "cum_return": -0.225,
+      "active_days": 250,
+      "total_days": 1207,
+      "hit_rate": 0.444,
+      "tail_acc": 0.6,
+      "tail_pnl": 0.01315,
+      "leverage": 0.1049,
+      "bh_sharpe": 0.26,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.013
+    },
+    "crash_only_signal": {
+      "label": "crash_only_signal",
+      "sharpe": -0.397,
+      "sharpe_per_lev": -5.263,
+      "max_dd": -0.442,
+      "cum_return": -0.204,
+      "active_days": 91,
+      "total_days": 1207,
+      "hit_rate": 0.484,
+      "tail_acc": 1.0,
+      "tail_pnl": 0.07077,
+      "leverage": 0.0754,
+      "bh_sharpe": 0.26,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.013
+    }
+  },
+  "ic_results": {
+    "A_directional": {
+      "label": "A_directional",
+      "n": 152,
+      "ic": 0.0921,
+      "acc": 0.507
+    },
+    "B_pairs": {
+      "label": "B_pairs",
+      "n": 423,
+      "ic": -0.079,
+      "acc": 0.48
+    }
+  }
+}

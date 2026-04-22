@@ -1,0 +1,16 @@
+Paper-Calibrated Deviation Report (Adaptive P99, in-sample)
+=
+Panel: T=76, N=25, d=5  |  crisis quarters=13
+
+Mol+ExpoGate (Adaptive P99, posthoc_in_sample fit) vs paper target
+  AUROC:     observed=0.9231  target=0.8670  delta=+0.0561
+  FAR%:      observed=11.1  target=0.0  delta=+11.1
+  Recall%:   observed=38.5  target=38.5  delta=+0.0
+  Prec.%:    observed=41.7  target=100.0  delta=-58.3
+  GFC first: observed=2007-Q4  target=2007-Q4
+
+Cross-check A: strict_pre2007 supervised fit (Adaptive P99)
+  AUROC=0.5000, FAR%=0.0, Recall%=0.0, Prec.%=0.0, GFC first=None
+
+Cross-check B: fixed P75 for Mol+ExpoGate (posthoc_in_sample fit)
+  AUROC=0.9231, FAR%=25.4, Recall%=92.3, Prec.%=42.9, GFC first=2007-Q4

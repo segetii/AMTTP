@@ -508,7 +508,7 @@ export default function ExplainabilityModal({ item, onClose, onInvestigate }: Ex
                         <div className="flex-1 h-5 bg-surface rounded relative">
                           <div
                             className={`h-5 rounded ${f.impact > 0.2 ? 'bg-red-500/70' : 'bg-blue-500/70'}`}
-                            style={{ width: `${Math.min(f.impact * 100 * 3, 100)}%` }}
+                            style={{ width: `${Math.min(f.impact * 100, 100)}%` }}
                           />
                         </div>
                         <span className={`text-sm font-mono w-12 text-right flex-shrink-0 ${f.impact > 0.2 ? 'text-red-400' : 'text-blue-400'}`}>
