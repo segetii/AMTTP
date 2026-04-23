@@ -2262,6 +2262,126 @@ def main():
     print(f"\n  VERDICT: {verdict}")
     print("═" * 96)
 
+    # ════════════════════════════════════════════════════════════════════════
+    #  EQUITY CURVE REPORT — what does v18_smooth do to real money?
+    #  Compounded equity from $500 and $1,200, with and without 5 bps t-cost.
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "═" * 96)
+    print("  EQUITY CURVE REPORT  —  $500 and $1,200 starting capital")
+    print("═" * 96)
+
+    TCOST_BPS = 5.0   # 5 basis points charged on each active (non-zero) day
+
+    def _equity_report(returns, label, capital_list=(500.0, 1200.0),
+                        tcost_bps=0.0):
+        r = returns.dropna().astype(float).copy()
+        if tcost_bps > 0:
+            cost = (tcost_bps / 1e4) * (r.abs() > 0).astype(float)
+            r = r - cost
+        cum = (1.0 + r).cumprod()
+        rows = []
+        for cap in capital_list:
+            eq = cap * cum
+            final = float(eq.iloc[-1])
+            pnl = final - cap
+            roll_max = eq.cummax()
+            dd_dollars = float((eq - roll_max).min())
+            dd_pct = float(((eq - roll_max) / roll_max).min() * 100)
+            under = (eq < roll_max).values
+            max_uw, cur = 0, 0
+            for u in under:
+                cur = cur + 1 if u else 0
+                if cur > max_uw: max_uw = cur
+            yrs = len(r) / 252.0
+            cagr_pct = (cum.iloc[-1] ** (1.0 / yrs) - 1.0) * 100.0 if yrs > 0 else float('nan')
+            sh = float(np.sqrt(252) * r.mean() / r.std()) if r.std() > 0 else float('nan')
+            rows.append({
+                'cap': cap, 'final': final, 'pnl': pnl,
+                'dd_d': dd_dollars, 'dd_pct': dd_pct,
+                'uw_days': max_uw, 'cagr': cagr_pct, 'sh': sh,
+            })
+        cost_tag = f' (after {tcost_bps:.0f} bps t-cost)' if tcost_bps > 0 else ' (gross)'
+        print(f"\n  {label}{cost_tag}")
+        print(f"  Window: {r.index[0].date()} → {r.index[-1].date()}  "
+              f"({len(r)} trading days, {len(r)/252:.2f} yrs)")
+        print(f"  Sharpe={rows[0]['sh']:+.3f}   CAGR={rows[0]['cagr']:+.2f}%   "
+              f"MaxDD={rows[0]['dd_pct']:+.2f}%   "
+              f"longest underwater={rows[0]['uw_days']}d")
+        print(f"  {'Initial':>10}  {'Final':>10}  {'PnL':>11}  "
+              f"{'MaxDD ($)':>12}  {'MaxDD (%)':>10}")
+        print("  " + "─" * 60)
+        for row in rows:
+            print(f"  ${row['cap']:>9,.0f}  ${row['final']:>9,.2f}  "
+                  f"${row['pnl']:>+10,.2f}  ${row['dd_d']:>+11,.2f}  "
+                  f"{row['dd_pct']:>+9.2f}%")
+        return rows
+
+    rep_v16_gross = _equity_report(pnl_v16_t,  'v16 (prev PROD)',     tcost_bps=0.0)
+    rep_v18_gross = _equity_report(pnl_v18s_t, 'v18_smooth (PROD)',   tcost_bps=0.0)
+    rep_v16_net   = _equity_report(pnl_v16_t,  'v16 (prev PROD)',     tcost_bps=TCOST_BPS)
+    rep_v18_net   = _equity_report(pnl_v18s_t, 'v18_smooth (PROD)',   tcost_bps=TCOST_BPS)
+
+    print("\n  ── Head-to-head at $1,200 starting capital, net of 5 bps ─────────")
+    a, b = rep_v16_net[1], rep_v18_net[1]
+    print(f"  {'metric':<22}  {'v16':>12}  {'v18_smooth':>12}  {'Δ':>10}")
+    print("  " + "─" * 62)
+    print(f"  {'Final equity':<22}  ${a['final']:>11,.2f}  ${b['final']:>11,.2f}  "
+          f"${b['final']-a['final']:>+9,.2f}")
+    print(f"  {'PnL':<22}  ${a['pnl']:>+11,.2f}  ${b['pnl']:>+11,.2f}  "
+          f"${b['pnl']-a['pnl']:>+9,.2f}")
+    print(f"  {'MaxDD ($)':<22}  ${a['dd_d']:>+11,.2f}  ${b['dd_d']:>+11,.2f}  "
+          f"${b['dd_d']-a['dd_d']:>+9,.2f}")
+    print(f"  {'MaxDD (%)':<22}  {a['dd_pct']:>+11.2f}%  {b['dd_pct']:>+11.2f}%  "
+          f"{b['dd_pct']-a['dd_pct']:>+9.2f}%")
+    print(f"  {'CAGR':<22}  {a['cagr']:>+11.2f}%  {b['cagr']:>+11.2f}%  "
+          f"{b['cagr']-a['cagr']:>+9.2f}%")
+    print(f"  {'Sharpe':<22}  {a['sh']:>+12.3f}  {b['sh']:>+12.3f}  "
+          f"{b['sh']-a['sh']:>+10.3f}")
+    print(f"  {'Longest underwater':<22}  {a['uw_days']:>11}d  {b['uw_days']:>11}d  "
+          f"{b['uw_days']-a['uw_days']:>+9}d")
+
+    eq_out = pd.DataFrame({
+        'date':         pnl_v18s_t.index,
+        'ret_v16':      pnl_v16_t.values,
+        'ret_v18s':     pnl_v18s_t.values,
+        'eq_v16_500':   500.0  * (1.0 + pnl_v16_t.fillna(0.0)).cumprod().values,
+        'eq_v18s_500':  500.0  * (1.0 + pnl_v18s_t.fillna(0.0)).cumprod().values,
+        'eq_v16_1200':  1200.0 * (1.0 + pnl_v16_t.fillna(0.0)).cumprod().values,
+        'eq_v18s_1200': 1200.0 * (1.0 + pnl_v18s_t.fillna(0.0)).cumprod().values,
+    })
+    eq_csv_path = os.path.join(OUT_DIR, 'crypto_bsdt_v18_equity_curves.csv')
+    eq_out.to_csv(eq_csv_path, index=False)
+    print(f"\n  Equity curves saved → {eq_csv_path}")
+
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
+        ax[0].plot(eq_out['date'], eq_out['eq_v16_500'],
+                    label='v16  $500',  lw=1.2, color='#888888')
+        ax[0].plot(eq_out['date'], eq_out['eq_v18s_500'],
+                    label='v18s $500',  lw=1.4, color='#1f77b4')
+        ax[0].set_ylabel('Equity ($)'); ax[0].legend(loc='upper left')
+        ax[0].set_title('v18_smooth vs v16 — $500 starting capital (gross)')
+        ax[0].grid(alpha=0.3)
+        ax[1].plot(eq_out['date'], eq_out['eq_v16_1200'],
+                    label='v16  $1,200', lw=1.2, color='#888888')
+        ax[1].plot(eq_out['date'], eq_out['eq_v18s_1200'],
+                    label='v18s $1,200', lw=1.4, color='#d62728')
+        ax[1].set_ylabel('Equity ($)'); ax[1].legend(loc='upper left')
+        ax[1].set_title('v18_smooth vs v16 — $1,200 starting capital (gross)')
+        ax[1].grid(alpha=0.3)
+        plt.tight_layout()
+        png_path = os.path.join(OUT_DIR, 'crypto_bsdt_v18_equity_curves.png')
+        plt.savefig(png_path, dpi=110)
+        plt.close(fig)
+        print(f"  Equity plot   saved → {png_path}")
+    except Exception as e:
+        print(f"  (matplotlib unavailable — skipped PNG: {e})")
+
+    print("═" * 96)
+
 
 if __name__ == '__main__':
     main()
