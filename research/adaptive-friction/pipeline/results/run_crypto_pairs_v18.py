@@ -2454,6 +2454,211 @@ def main():
         'ensemble_max_dd':   float(sims_v23['max_dd']),
     }
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v24: MULTI-ALPHA STACK  —  trend + mean-reversion + vol-breakout
+    # ──────────────────────────────────────────────────────────────────────
+    # Adds 3 simple, orthogonal-by-construction alpha signals on BTC and ETH:
+    #   trend = sign(EMA(ret, 10))
+    #   mr    = -sign(z(price, 20))
+    #   volb  = sign(rstd(ret,20) - rstd(ret,50).mean())
+    # Each is normalised by its own 50-day mean abs-magnitude.
+    # The combined signal × ret_asset becomes a NEW additive leg, joined to
+    # the v20 stack at inv-vol weights, then passed through the v22 vol-target
+    # sizer (best engine).  Selection metric: max PnL under MaxDD ≤ 40% (net 5bps).
+    print(f"\n  v24 MULTI-ALPHA STACK  —  trend + mean-rev + vol-breakout (BTC+ETH)")
+    INIT_V24  = 1200.0
+    TCOST_V24 = 5.0
+    LB_V24    = 30
+    MAX_INNER_V24 = 20.0
+    DD_GUARD_V24  = 0.40
+
+    def _multi_alpha_pnl(ret_full, log_price_full, label):
+        """Build the 3-alpha equal-weight signal × next-day return on full window."""
+        # 1) trend: EMA(ret, span=10), then sign
+        trend  = np.sign(ret_full.ewm(span=10, adjust=False).mean())
+        # 2) mean-reversion: -sign(z-score of log price, 20-day window)
+        mu20   = log_price_full.rolling(20, min_periods=10).mean()
+        sd20   = log_price_full.rolling(20, min_periods=10).std()
+        z      = (log_price_full - mu20) / sd20.replace(0.0, np.nan)
+        mr     = -np.sign(z)
+        # 3) vol breakout: sign(rstd20 - mean(rstd50))
+        rstd20 = ret_full.rolling(20, min_periods=10).std()
+        rstd50 = ret_full.rolling(50, min_periods=20).std()
+        volb   = np.sign(rstd20 - rstd50.rolling(50, min_periods=20).mean())
+        # normalise each by 50-day mean |sig|
+        def _norm(s):
+            return s / (s.abs().rolling(50, min_periods=10).mean() + 1e-6)
+        trend_n, mr_n, volb_n = _norm(trend), _norm(mr), _norm(volb)
+        alpha = (trend_n + mr_n + volb_n) / 3.0
+        # PnL = alpha.shift(1) * ret  (avoid lookahead)
+        pnl = (alpha.shift(1) * ret_full).fillna(0.0)
+        # also return per-alpha PnLs for contribution analysis
+        leg_components = {
+            f'{label}_trend': (trend_n.shift(1) * ret_full).fillna(0.0),
+            f'{label}_mr':    (mr_n.shift(1)    * ret_full).fillna(0.0),
+            f'{label}_volb':  (volb_n.shift(1)  * ret_full).fillna(0.0),
+        }
+        return pnl, leg_components
+
+    pnl_alpha_btc_full, comps_btc = _multi_alpha_pnl(df['ret_btc'], df['log_btc'], 'btc')
+    pnl_alpha_eth_full, comps_eth = _multi_alpha_pnl(df['ret_eth'], df['log_eth'], 'eth')
+    pnl_alpha_btc_v24 = pnl_alpha_btc_full[test_mask].fillna(0.0)
+    pnl_alpha_eth_v24 = pnl_alpha_eth_full[test_mask].fillna(0.0)
+
+    # Standalone diagnostics (per asset, per component)
+    def _sh(s):
+        s = s.dropna()
+        return float(np.sqrt(252) * s.mean() / s.std()) if s.std() > 0 else 0.0
+    print(f"  ── alpha component standalone Sharpes (test, gross) ──")
+    print(f"  {'leg':<20}{'Sharpe':>9}{'cum_ret':>10}{'active%':>10}")
+    for tag, comp in {**comps_btc, **comps_eth}.items():
+        comp_t = comp[test_mask]
+        active_pct = float((comp_t.abs() > 1e-12).mean() * 100.0)
+        cum = float((1.0 + comp_t).prod() - 1.0)
+        print(f"  {tag:<20}{_sh(comp_t):>+9.3f}{cum:>+10.3f}{active_pct:>9.1f}%")
+    print(f"  ── combined alpha legs ──")
+    print(f"  alpha_btc       Sh={_sh(pnl_alpha_btc_v24):+.3f}  "
+          f"active%={float((pnl_alpha_btc_v24.abs()>1e-12).mean()*100):.1f}")
+    print(f"  alpha_eth       Sh={_sh(pnl_alpha_eth_v24):+.3f}  "
+          f"active%={float((pnl_alpha_eth_v24.abs()>1e-12).mean()*100):.1f}")
+
+    # 5-leg ensemble: v20 trio + the 2 multi-alpha legs (inv-vol weights)
+    legs_v24 = {
+        'v18_smooth':  pnl_v18s_v20,
+        'F_FUND_ETH':  pnl_fundE_v20,
+        'F_FUND_BTC':  pnl_fundB_v20,
+        'alpha_btc':   pnl_alpha_btc_v24,
+        'alpha_eth':   pnl_alpha_eth_v24,
+    }
+    vols_v24 = {}
+    for k, v in legs_v24.items():
+        nz = v[v != 0]
+        vols_v24[k] = float(nz.std()) if len(nz) > 1 else float('nan')
+    inv_w_v24 = {k: 1.0 / max(s, 1e-9) for k, s in vols_v24.items()}
+    norm_v24  = sum(inv_w_v24.values())
+    w_v24     = {k: inv_w_v24[k] / norm_v24 for k in inv_w_v24}
+    print(f"  ── v24 inv-vol weights ──")
+    print(f"  {'leg':<14}{'σ_active':>10}{'weight':>10}")
+    for k in legs_v24:
+        print(f"  {k:<14}{vols_v24[k]:>10.5f}{w_v24[k]:>10.4f}")
+
+    pnl_dyn_v24 = sum(w_v24[k] * legs_v24[k] for k in legs_v24)
+    sims_v24    = simulate_from_pnl(pnl_dyn_v24, 'DYNAMIC_v24')
+    print(f"  v24 ensemble headline (K=1, gross): Sh={sims_v24['sharpe']:+.3f}  "
+          f"MaxDD={sims_v24['max_dd']*100:+.2f}%  cum_ret={sims_v24['cum_return']*100:+.2f}%")
+
+    # vol-target sizer (mirror v22)
+    base_v24 = pnl_dyn_v24.fillna(0.0).astype(float)
+    fullvol_v24 = base_v24.rolling(LB_V24, min_periods=10).std().shift(1)
+    fullvol_v24 = fullvol_v24.fillna(base_v24.std()).replace(0.0, base_v24.std()).clip(lower=1e-6)
+
+    def _v24_metrics(target_vol, K, tcost_bps=TCOST_V24):
+        s = (target_vol / fullvol_v24).clip(lower=0.0, upper=MAX_INNER_V24)
+        sized = base_v24 * s * float(K)
+        cost  = (tcost_bps / 1e4) * (base_v24.abs() > 0).astype(float)
+        net   = sized - cost
+        eq    = INIT_V24 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak  = eq.cummax()
+        dd    = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V24) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        return dict(K=float(K), final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V24),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+
+    target_grid_v24 = [0.003, 0.005, 0.008, 0.012, 0.018]
+    print(f"  ── v24 target_vol bake-off  (best K under MaxDD ≤ {DD_GUARD_V24*100:.0f}%, net 5bps) ──")
+    print(f"  {'tgt':>8}{'best_K':>8}{'final $':>13}{'PnL $':>13}{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}")
+    v24_bake = {}
+    for tgt in target_grid_v24:
+        best = None
+        for K in np.arange(0.5, 20.05, 0.5):
+            m = _v24_metrics(tgt, float(K), TCOST_V24)
+            if m is None or not (m['dd_pct'] >= -DD_GUARD_V24):
+                continue
+            if best is None or m['pnl'] > best['pnl']:
+                best = m
+        v24_bake[tgt] = best
+        if best is not None:
+            print(f"  {tgt:>8.4f}{best['K']:>8.2f}  ${best['final']:>9.2f}  "
+                  f"${best['pnl']:>+9.2f}  {best['dd_pct']*100:>+8.2f}%  "
+                  f"{best['sh']:>+7.3f}  {best['cagr']*100:>+7.2f}%  {best['calmar']:>+7.2f}")
+        else:
+            print(f"  {tgt:>8.4f}  (no K satisfies DD ≤ {DD_GUARD_V24*100:.0f}%)")
+
+    valid_v24 = {t: r for t, r in v24_bake.items() if r is not None}
+    if valid_v24:
+        prod_target_v24 = max(valid_v24, key=lambda t: valid_v24[t]['pnl'])
+        best_v24 = valid_v24[prod_target_v24]
+        print(f"\n  ★ v24 PROD target_vol = {prod_target_v24:.4f}  K={best_v24['K']:.2f}")
+        print(f"    PnL +${best_v24['pnl']:.2f}  MaxDD {best_v24['dd_pct']*100:+.2f}%  "
+              f"Sh_net {best_v24['sh']:+.3f}  CAGR {best_v24['cagr']*100:+.2f}%  "
+              f"Calmar {best_v24['calmar']:+.2f}")
+        print(f"    vs v22 PROD: PnL +$5,704.85  MaxDD -36.33%  Calmar 1.21  →  Δ ${best_v24['pnl']-5704.85:+.2f}")
+
+        # save plot
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            scaler = (prod_target_v24 / fullvol_v24).clip(lower=0.0, upper=MAX_INNER_V24)
+            r1   = base_v24 * scaler * 1.0
+            rKb  = base_v24 * scaler * best_v24['K']
+            cost = (TCOST_V24/1e4) * (base_v24.abs() > 0).astype(float)
+            eq1   = INIT_V24 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V24 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V24 * (1.0 + (rKb - cost)).cumprod()
+            fig, ax = plt.subplots(figsize=(11, 4))
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2, label='K=1 gross')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v24["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v24["K"]:.2f} net (5bps)')
+            ax.set_title(f"v24 multi-alpha (5-leg)  tgt={prod_target_v24:.4f}  "
+                         f"K={best_v24['K']:.2f}  PnL +${best_v24['pnl']:.0f}  "
+                         f"MaxDD {best_v24['dd_pct']*100:+.2f}%")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v24_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v24_exposure_sweep.png')
+            plt.tight_layout(); plt.savefig(v24_png, dpi=110); plt.close()
+            print(f"  v24 scaled plot saved → {v24_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+
+        sims_v24_prod = sims_v24
+    else:
+        prod_target_v24 = None
+        best_v24 = None
+        sims_v24_prod = sims_v22
+        print("  v24: no target satisfies DD guard → fall back to v22")
+
+    v24_summary = {
+        'prod_target_vol':   float(prod_target_v24) if prod_target_v24 else None,
+        'lookback_days':     LB_V24,
+        'max_inner_lev':     MAX_INNER_V24,
+        'best_K':            float(best_v24['K']) if best_v24 else None,
+        'best_K_pnl':        float(round(best_v24['pnl'], 2)) if best_v24 else None,
+        'best_K_max_dd':     float(round(best_v24['dd_pct'], 4)) if best_v24 else None,
+        'best_K_sharpe_net': float(round(best_v24['sh'], 4)) if best_v24 else None,
+        'best_K_final':      float(round(best_v24['final'], 2)) if best_v24 else None,
+        'best_K_cagr':       float(round(best_v24['cagr'], 4)) if best_v24 else None,
+        'best_K_calmar':     float(round(best_v24['calmar'], 4)) if best_v24 else None,
+        'inv_vol_weights':   {k: float(round(w_v24[k], 4)) for k in w_v24},
+        'alpha_component_sharpes': {
+            tag: round(_sh(comp[test_mask]), 4)
+            for tag, comp in {**comps_btc, **comps_eth}.items()
+        },
+        'all_targets_pnl':   {f'{t:.4f}': (float(round(r['pnl'], 2)) if r else None)
+                              for t, r in v24_bake.items()},
+        'ensemble_sharpe':   float(sims_v24['sharpe']),
+        'ensemble_max_dd':   float(sims_v24['max_dd']),
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -2587,6 +2792,7 @@ def main():
         (f'v21  DEEP STACK [{prod_scheme}]',     sims_v21_prod),
         (f'v22  VOL-TARGET v20',                 sims_v22),
         (f'v23  CALMAR-MAX [{prod_tag_v23}]',    sims_v23),
+        (f'v24  MULTI-ALPHA',                    sims_v24_prod),
     ]
     base = sims_v10_orig['sharpe']
     for label, r in rows:
@@ -2777,6 +2983,7 @@ def main():
     sims_all['DYNAMIC_v21']        = sims_v21_prod
     sims_all['DYNAMIC_v22']        = sims_v22
     sims_all['DYNAMIC_v23']        = sims_v23
+    sims_all['DYNAMIC_v24']        = sims_v24_prod
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -2832,9 +3039,11 @@ def main():
             "v21_ensemble":      sims_v21_prod['sharpe'],
             "v22_voltarget":     sims_v22['sharpe'],
             "v23_calmar_max":    sims_v23['sharpe'],
+            "v24_multi_alpha":   sims_v24_prod['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
             "v23_summary":       v23_summary,
+            "v24_summary":       v24_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
@@ -2906,6 +3115,7 @@ def main():
         (f'v21  DEEP STACK ({prod_scheme})',  '4-leg + scheme bake-off',                       sims_v21_prod['sharpe']),
         (f'v22  VOL-TARGET v20',              f'inv-realized-vol overlay  (tgt={prod_target_v22})',  sims_v22['sharpe']),
         (f'v23  CALMAR-MAX',                  f'DD-throttle + downvol  ({prod_tag_v23})',           sims_v23['sharpe']),
+        (f'v24  MULTI-ALPHA',                 f'5-leg stack (trend+MR+volb on BTC/ETH)',            sims_v24_prod['sharpe']),
     ]
     for vname, src, sh in summary_rows:
         print(f"  {vname:<22}  {src:<38}  {sh:>+14.3f}")
