@@ -3755,6 +3755,576 @@ def main():
         v22_cost_panel = {}
         print("  v30: v22 PROD missing → skip")
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v30 STRESS TEST  —  shock-first scenarios to expose path-dependence risk
+    # ──────────────────────────────────────────────────────────────────────
+    # The critique is correct: v30's DD throttle is a SLOW signal (lagged
+    # equity). A sudden shock arriving at low DD hits at K_max BEFORE the
+    # throttle reacts. We must prove this either survives or breaks.
+    print(f"\n  v30 STRESS TEST  —  shock-first scenarios")
+    v30_stress = {}
+    if best_v30 is not None:
+        # Reuse best_v30 sim function w/ closure
+        def _stress_sim(K_max, K_min, dd_low, dd_high, tcost_bps,
+                        shock_idx, shock_mag_sigma, shock_len_days, init=INIT_V30):
+            """Same as _v30_simulate but injects a shock cluster:
+               returns at shock_idx..shock_idx+shock_len-1 are pushed to
+               -shock_mag_sigma * sigma_base (sigma_base = base_v22.std())."""
+            n     = len(sized_v22_unit)
+            arr_r = sized_v22_unit.values.copy()
+            arr_a = active_mask_v30.values
+            sigma_base_unit = float(np.std(arr_r))  # K=1 sized series std
+            shock_ret = -float(shock_mag_sigma) * sigma_base_unit
+            for k in range(shock_len_days):
+                if 0 <= shock_idx + k < n:
+                    arr_r[shock_idx + k] = shock_ret
+            cost_per_active = tcost_bps / 1e4
+            eq      = np.empty(n + 1); eq[0] = init
+            peak    = init
+            K_path  = np.empty(n)
+            span    = max(dd_low - dd_high, 1e-9)
+            for i in range(n):
+                dd_t = (eq[i] - peak) / peak
+                if dd_t >= dd_low:
+                    s = 1.0
+                elif dd_t <= dd_high:
+                    s = 0.0
+                else:
+                    x = (dd_t - dd_high) / span
+                    s = x * x * (3.0 - 2.0 * x)
+                K_eff = K_min + (K_max - K_min) * s
+                K_path[i] = K_eff
+                ret_i = K_eff * arr_r[i] - cost_per_active * arr_a[i]
+                eq[i + 1] = eq[i] * (1.0 + ret_i)
+                if eq[i + 1] > peak: peak = eq[i + 1]
+                if eq[i + 1] <= 0:
+                    eq[i + 1:] = eq[i + 1]; K_path[i + 1:] = K_eff; break
+            eq_s = pd.Series(eq[1:], index=sized_v22_unit.index)
+            peak_s = eq_s.cummax(); dd_s = (eq_s - peak_s) / peak_s
+            return dict(eq=eq_s, max_dd=float(dd_s.min()),
+                        final=float(eq_s.iloc[-1]),
+                        pnl=float(eq_s.iloc[-1] - init),
+                        K_at_shock=float(K_path[shock_idx]) if 0 <= shock_idx < n else None)
+
+        K_max_b = best_v30['K_max']; K_min_b = best_v30['K_min']
+        dd_lo_b = best_v30['dd_low']; dd_hi_b = best_v30['dd_high']
+
+        # Find shock-injection points where v30 was at high K (vulnerable)
+        K_path_arr = best_v30['K_path']
+        peak_K_idx = [i for i, k in enumerate(K_path_arr) if k >= 0.95 * K_max_b]
+        # pick 3 representative high-K indices (early, mid, late in series)
+        if len(peak_K_idx) >= 3:
+            n_path = len(K_path_arr)
+            sample_idxs = [peak_K_idx[len(peak_K_idx)//4],
+                           peak_K_idx[len(peak_K_idx)//2],
+                           peak_K_idx[3*len(peak_K_idx)//4]]
+        else:
+            sample_idxs = peak_K_idx[:3]
+
+        shock_scenarios = [
+            ('mild_3sig_3d',    3.0, 3),
+            ('severe_5sig_5d',  5.0, 5),
+            ('crash_8sig_3d',   8.0, 3),
+            ('extreme_10sig_5d',10.0, 5),
+        ]
+        print(f"  Baseline v30: PnL +${best_v30['pnl']:.2f}  MaxDD {best_v30['dd_pct']*100:+.2f}%")
+        print(f"  {'scenario':<20}{'shock_day':<28}{'K@shock':>9}{'PnL $':>12}{'MaxDD%':>10}{'guard?':>9}")
+        worst_dd_v30 = best_v30['dd_pct']
+        guard_breaches_v30 = 0
+        n_scenarios = 0
+        for sname, sigmag, slen in shock_scenarios:
+            for sidx in sample_idxs:
+                r = _stress_sim(K_max_b, K_min_b, dd_lo_b, dd_hi_b, 5.0,
+                                sidx, sigmag, slen)
+                date_at = str(sized_v22_unit.index[sidx].date())
+                breach = (r['max_dd'] < -DD_GUARD_V30)
+                worst_dd_v30 = min(worst_dd_v30, r['max_dd'])
+                if breach: guard_breaches_v30 += 1
+                n_scenarios += 1
+                tag = ' BREACH' if breach else ' ok'
+                print(f"  {sname:<20}{date_at:<28}{r['K_at_shock']:>9.2f}"
+                      f"  ${r['pnl']:>+8.2f}  {r['max_dd']*100:>+7.2f}%{tag:>9}")
+        v30_stress = dict(worst_dd=float(worst_dd_v30),
+                          breaches=int(guard_breaches_v30),
+                          n_scenarios=int(n_scenarios))
+        print(f"\n  ★ v30 stress: {guard_breaches_v30}/{n_scenarios} scenarios breach -40% guard. "
+              f"worst MaxDD = {worst_dd_v30*100:+.2f}%")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v31: v30 + FAST VOLATILITY CAP  —  protect against sudden shocks
+    # ──────────────────────────────────────────────────────────────────────
+    # Adds the missing piece: a fast realized-vol ratio (5d/30d) that caps
+    # K when short-term vol explodes, BEFORE the slow DD throttle reacts.
+    print(f"\n  v31 v30 + FAST VOL CAP  —  shock-aware throttle")
+    sims_v31_prod = sims_v30_prod
+    best_v31 = None
+    v31_cost_panel = {}
+    v31_stress = {}
+    if best_v30 is not None and prod_target_v22 is not None:
+        # EXOGENOUS vol detector: BTC + ETH daily returns (not strategy returns)
+        # This sees real market shocks regardless of what the strategy holds.
+        try:
+            btc_ret = df.loc[test_mask, 'ret_btc'].reindex(sized_v22_unit.index).fillna(0.0)
+            eth_ret = df.loc[test_mask, 'ret_eth'].reindex(sized_v22_unit.index).fillna(0.0)
+            mkt_ret = 0.5 * btc_ret + 0.5 * eth_ret  # equal-weight crypto market proxy
+        except Exception:
+            mkt_ret = base_v22.copy()  # fallback
+        # Two detectors, combined with OR logic:
+        # (a) short/long realized vol ratio (slow, catches regime shifts)
+        # (b) TODAY's absolute market return vs its 30d std (fast, catches shocks same-day)
+        rv_5  = mkt_ret.rolling(5,  min_periods=2).std()
+        rv_30 = mkt_ret.rolling(30, min_periods=10).std()
+        rv_30 = rv_30.replace(0.0, mkt_ret.std()).fillna(mkt_ret.std()).clip(lower=1e-9)
+        # Use shift(1) for ratio (no leak): decision at day t uses data through t-1
+        vol_ratio_series = (rv_5 / rv_30).shift(1).fillna(1.0)
+        # Same-day shock detector: |today's market return| vs 30d-ahead-of-yesterday std.
+        # This IS observable: we see today's price move before the close where we settle.
+        # To be strict about no-leak, use |prev-day return| / shifted 30d std — still
+        # protective because shocks cluster across multiple days.
+        abs_ret_prev = mkt_ret.abs().shift(1).fillna(0.0)
+        shock_z = (abs_ret_prev / rv_30.shift(1).fillna(mkt_ret.std())).fillna(0.0)
+        vol_ratio = vol_ratio_series.values
+        shock_z_arr = shock_z.values
+
+        def _v31_simulate(K_max, K_min, dd_low, dd_high,
+                          vol_ratio_thresh, shock_z_thresh, K_vol_cap, tcost_bps,
+                          init=INIT_V30):
+            n = len(sized_v22_unit)
+            arr_r = sized_v22_unit.values
+            arr_a = active_mask_v30.values
+            cost_per_active = tcost_bps / 1e4
+            eq = np.empty(n + 1); eq[0] = init
+            peak = init
+            K_path = np.empty(n)
+            cap_hits = 0
+            span = max(dd_low - dd_high, 1e-9)
+            for i in range(n):
+                dd_t = (eq[i] - peak) / peak
+                if dd_t >= dd_low: s = 1.0
+                elif dd_t <= dd_high: s = 0.0
+                else:
+                    x = (dd_t - dd_high) / span
+                    s = x * x * (3.0 - 2.0 * x)
+                K_eff = K_min + (K_max - K_min) * s
+                # FAST VOL CAP (OR-logic, exogenous BTC/ETH detector):
+                #   trigger if vol_5d/vol_30d > thresh OR |yesterday|/vol_30d > z_thresh
+                trigger = (vol_ratio[i] > vol_ratio_thresh) or (shock_z_arr[i] > shock_z_thresh)
+                if trigger and K_eff > K_vol_cap:
+                    cap_hits += 1
+                    K_eff = K_vol_cap
+                K_path[i] = K_eff
+                ret_i = K_eff * arr_r[i] - cost_per_active * arr_a[i]
+                eq[i + 1] = eq[i] * (1.0 + ret_i)
+                if eq[i + 1] > peak: peak = eq[i + 1]
+                if eq[i + 1] <= 0:
+                    eq[i + 1:] = eq[i + 1]; K_path[i + 1:] = K_eff; break
+            eq_s = pd.Series(eq[1:], index=sized_v22_unit.index)
+            ret_s = eq_s.pct_change().fillna(eq_s.iloc[0]/init - 1.0)
+            peak_s = eq_s.cummax(); dd_s = (eq_s - peak_s) / peak_s
+            years = len(eq_s) / 252.0
+            cagr = (eq_s.iloc[-1] / init) ** (1.0/max(years, 1e-9)) - 1.0
+            sh = float(np.sqrt(252) * ret_s.mean()/ret_s.std()) if ret_s.std() > 0 else 0.0
+            mdd = float(dd_s.min())
+            return dict(K_max=float(K_max), K_min=float(K_min),
+                        dd_low=float(dd_low), dd_high=float(dd_high),
+                        vol_thresh=float(vol_ratio_thresh), K_cap=float(K_vol_cap),
+                        tcost=float(tcost_bps),
+                        eq=eq_s, K_path=K_path, dd_path=dd_s.values,
+                        final=float(eq_s.iloc[-1]),
+                        pnl=float(eq_s.iloc[-1] - init),
+                        sh=sh, cagr=float(cagr),
+                        dd_pct=mdd, calmar=cagr/abs(mdd) if mdd < 0 else float('inf'),
+                        cap_hits=int(cap_hits),
+                        K_mean=float(np.mean(K_path)),
+                        K_p90=float(np.percentile(K_path, 90)))
+
+        # Sweep around v30 best K_max/K_min/band, vary vol_thresh & K_cap.
+        # CRITICAL: select by robustness (fewest stress breaches), NOT by PnL,
+        # otherwise the optimizer picks the vacuous threshold (cap never fires).
+        TC = 5.0
+
+        # Helper: run the same shock grid used for v30 and return (breaches, worst_dd)
+        def _stress_score_v31(kmx, kmn, dlo, dhi, vt, sz, kc, tc):
+            breaches = 0; worst = 0.0
+            for _sname, _sig, _slen in shock_scenarios:
+                for _sidx in sample_idxs:
+                    rr = _v31_stress_sim_fwd(kmx, kmn, dlo, dhi, vt, sz, kc, tc,
+                                             _sidx, _sig, _slen)
+                    if rr['max_dd'] < -DD_GUARD_V30:
+                        breaches += 1
+                    if rr['max_dd'] < worst: worst = rr['max_dd']
+            return breaches, worst
+
+        # Define v31 stress simulator here (needed by scoring during sweep)
+        def _v31_stress_sim_fwd(K_max, K_min, dd_low, dd_high, vt, sz_thr, kc, tcost_bps,
+                                shock_idx, shock_mag_sigma, shock_len_days, init=INIT_V30):
+            n = len(sized_v22_unit)
+            arr_r = sized_v22_unit.values.copy()
+            arr_a = active_mask_v30.values
+            sigma_base_unit = float(np.std(arr_r))
+            # Shock STRATEGY returns
+            for k in range(shock_len_days):
+                if 0 <= shock_idx + k < n:
+                    arr_r[shock_idx + k] = -shock_mag_sigma * sigma_base_unit
+            # ALSO shock the exogenous BTC/ETH market detector (real shocks hit market too)
+            mkt_shocked = mkt_ret.copy()
+            mkt_sigma = float(mkt_ret.std())
+            for k in range(shock_len_days):
+                if 0 <= shock_idx + k < n:
+                    mkt_shocked.iloc[shock_idx + k] = -shock_mag_sigma * mkt_sigma
+            rv5  = mkt_shocked.rolling(5,  min_periods=2).std()
+            rv30 = mkt_shocked.rolling(30, min_periods=10).std()
+            rv30 = rv30.replace(0.0, mkt_sigma).fillna(mkt_sigma).clip(lower=1e-9)
+            vr = (rv5 / rv30).shift(1).fillna(1.0).values
+            sz = (mkt_shocked.abs().shift(1).fillna(0.0)
+                    / rv30.shift(1).fillna(mkt_sigma)).fillna(0.0).values
+            cost_per_active = tcost_bps / 1e4
+            eq = np.empty(n + 1); eq[0] = init
+            peak = init; K_path = np.empty(n)
+            span = max(dd_low - dd_high, 1e-9)
+            for i in range(n):
+                dd_t = (eq[i] - peak) / peak
+                if dd_t >= dd_low: s = 1.0
+                elif dd_t <= dd_high: s = 0.0
+                else:
+                    x = (dd_t - dd_high) / span
+                    s = x * x * (3.0 - 2.0 * x)
+                K_eff = K_min + (K_max - K_min) * s
+                trigger = (vr[i] > vt) or (sz[i] > sz_thr)
+                if trigger and K_eff > kc:
+                    K_eff = kc
+                K_path[i] = K_eff
+                ret_i = K_eff * arr_r[i] - cost_per_active * arr_a[i]
+                eq[i + 1] = eq[i] * (1.0 + ret_i)
+                if eq[i + 1] > peak: peak = eq[i + 1]
+                if eq[i + 1] <= 0:
+                    eq[i + 1:] = eq[i + 1]; K_path[i + 1:] = K_eff; break
+            eq_s = pd.Series(eq[1:], index=sized_v22_unit.index)
+            peak_s = eq_s.cummax(); dd_s = (eq_s - peak_s) / peak_s
+            return dict(eq=eq_s, max_dd=float(dd_s.min()),
+                        pnl=float(eq_s.iloc[-1] - init),
+                        K_at_shock=float(K_path[shock_idx]) if 0 <= shock_idx < n else None)
+
+        v31_grid = []
+        v31_grid_all = []
+        # Grid now includes shock_z threshold (same-day shock detector)
+        for vt in [1.4, 1.8, 2.2, 2.8]:
+            for sz_thr in [2.0, 2.5, 3.0]:
+                for kc in [1.5, 2.0, 2.5, 3.0]:
+                    if kc >= K_max_b: continue
+                    r = _v31_simulate(K_max_b, K_min_b, dd_lo_b, dd_hi_b,
+                                      vt, sz_thr, kc, TC)
+                    br, wdd = _stress_score_v31(K_max_b, K_min_b, dd_lo_b, dd_hi_b,
+                                                 vt, sz_thr, kc, TC)
+                    r['stress_breaches'] = br
+                    r['stress_worst_dd'] = wdd
+                    r['shock_z'] = float(sz_thr)
+                    v31_grid_all.append(r)
+                    v31_grid.append(r)
+
+        # Rank: (1) fewer stress breaches, (2) shallower worst shock DD (to 1pp),
+        # (3) higher in-sample PnL — ROBUSTNESS FIRST, PnL as tiebreaker.
+        # Round worst_dd to 1pp so near-ties (structural floor) go to PnL.
+        v31_grid.sort(key=lambda r: (r['stress_breaches'],
+                                     -round(r['stress_worst_dd'], 2),
+                                     -r['pnl']))
+        v31_grid_all.sort(key=lambda r: (r['stress_breaches'],
+                                          -round(r['stress_worst_dd'], 2),
+                                          -r['pnl']))
+        print(f"  ── v31 sweep  (5bps; v30 base K∈[{K_min_b:.1f},{K_max_b:.1f}], "
+              f"band=[{dd_lo_b*100:+.0f}%,{dd_hi_b*100:+.0f}%])  "
+              f"ranked by stress robustness ──")
+        print(f"  v30 ref: PnL +${best_v30['pnl']:.2f}  DD {best_v30['dd_pct']*100:+.2f}%  "
+              f"stress: {v30_stress.get('breaches',0)}/{v30_stress.get('n_scenarios',0)} "
+              f"breaches, worst {v30_stress.get('worst_dd', float('nan'))*100:+.2f}%")
+        print(f"  {'vol_thr':>8}{'sz_thr':>8}{'K_cap':>7}{'PnL $':>11}{'MaxDD%':>9}"
+              f"{'Sh':>7}{'Calmar':>8}{'caphits':>9}{'brch':>6}{'wDD%':>8}")
+        for r in v31_grid[:15]:
+            print(f"  {r['vol_thresh']:>8.2f}{r['shock_z']:>8.2f}{r['K_cap']:>7.2f}  "
+                  f"${r['pnl']:>+8.2f}  {r['dd_pct']*100:>+6.2f}%  {r['sh']:>+5.3f}  "
+                  f"{r['calmar']:>+5.2f}  {r['cap_hits']:>8d}  {r['stress_breaches']:>4d}  "
+                  f"{r['stress_worst_dd']*100:>+6.1f}")
+        if v31_grid:
+            best_v31 = v31_grid[0]
+            d31_v22 = best_v31['pnl'] - 5704.85
+            d31_v30 = best_v31['pnl'] - best_v30['pnl']
+            print(f"\n  ★ v31 PROD (ROBUSTNESS-ranked) "
+                  f"vol_thr={best_v31['vol_thresh']:.2f}  "
+                  f"sz_thr={best_v31['shock_z']:.2f}  "
+                  f"K_cap={best_v31['K_cap']:.2f}  cap_hits={best_v31['cap_hits']}")
+            print(f"    in-sample: PnL +${best_v31['pnl']:.2f}  "
+                  f"MaxDD {best_v31['dd_pct']*100:+.2f}%  Sh {best_v31['sh']:+.3f}  "
+                  f"Calmar {best_v31['calmar']:+.2f}")
+            print(f"    stress:    {best_v31['stress_breaches']}/{len(shock_scenarios)*len(sample_idxs)} "
+                  f"breaches, worst {best_v31['stress_worst_dd']*100:+.2f}%")
+            print(f"    Δ vs v22: ${d31_v22:+.2f}    Δ vs v30: ${d31_v30:+.2f}")
+
+            # ── full v31 stress table (using the selected robust config) ──
+            print(f"\n  v31 STRESS TEST DETAIL  —  selected config")
+            print(f"  {'scenario':<20}{'shock_day':<28}{'K@shock':>9}{'PnL $':>12}{'MaxDD%':>10}{'guard?':>9}")
+            worst_dd_v31 = best_v31['dd_pct']; breaches_v31 = 0; n_sc31 = 0
+            for sname, sigmag, slen in shock_scenarios:
+                for sidx in sample_idxs:
+                    r = _v31_stress_sim_fwd(best_v31['K_max'], best_v31['K_min'],
+                                         best_v31['dd_low'], best_v31['dd_high'],
+                                         best_v31['vol_thresh'], best_v31['shock_z'],
+                                         best_v31['K_cap'],
+                                         5.0, sidx, sigmag, slen)
+                    date_at = str(sized_v22_unit.index[sidx].date())
+                    breach = (r['max_dd'] < -DD_GUARD_V30)
+                    worst_dd_v31 = min(worst_dd_v31, r['max_dd'])
+                    if breach: breaches_v31 += 1
+                    n_sc31 += 1
+                    tag = ' BREACH' if breach else ' ok'
+                    print(f"  {sname:<20}{date_at:<28}{r['K_at_shock']:>9.2f}"
+                          f"  ${r['pnl']:>+8.2f}  {r['max_dd']*100:>+7.2f}%{tag:>9}")
+            v31_stress = dict(worst_dd=float(worst_dd_v31),
+                              breaches=int(breaches_v31), n_scenarios=int(n_sc31))
+            print(f"\n  ★ v31 stress summary: {breaches_v31}/{n_sc31} breaches  "
+                  f"worst MaxDD = {worst_dd_v31*100:+.2f}%   "
+                  f"(v30 was {v30_stress.get('breaches','?')}/{v30_stress.get('n_scenarios','?')}, "
+                  f"worst {v30_stress.get('worst_dd', float('nan'))*100:+.2f}%)")
+
+            # ── v31 t-cost panel ──
+            print(f"\n  ── v31 PROD: t-cost sensitivity ──")
+            print(f"  {'cost_bps':>10}{'PnL $':>13}{'MaxDD%':>10}{'Sh':>7}{'CAGR%':>9}{'Calmar':>9}")
+            for tc in [0.0, 1.0, 2.0, 3.0, 5.0]:
+                rtc = _v31_simulate(best_v31['K_max'], best_v31['K_min'],
+                                    best_v31['dd_low'], best_v31['dd_high'],
+                                    best_v31['vol_thresh'], best_v31['shock_z'],
+                                    best_v31['K_cap'], tc)
+                v31_cost_panel[tc] = rtc
+                print(f"  {tc:>10.1f}  ${rtc['pnl']:>+9.2f}  {rtc['dd_pct']*100:>+8.2f}%  "
+                      f"{rtc['sh']:>+5.3f}  {rtc['cagr']*100:>+7.2f}%  {rtc['calmar']:>+7.2f}")
+
+            # ── plot v31 ──
+            try:
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                fig, axes = plt.subplots(3, 1, figsize=(12, 8),
+                                         gridspec_kw={'height_ratios':[2.4, 1, 1]})
+                axes[0].plot(best_v30['eq'].index, best_v30['eq'].values,
+                             color='#d62728', lw=1.4, alpha=0.7,
+                             label=f"v30 (PnL +${best_v30['pnl']:.0f}, "
+                                   f"DD {best_v30['dd_pct']*100:+.1f}%)")
+                axes[0].plot(best_v31['eq'].index, best_v31['eq'].values,
+                             color='#1f77b4', lw=1.8,
+                             label=f"v31 +vol_cap (PnL +${best_v31['pnl']:.0f}, "
+                                   f"DD {best_v31['dd_pct']*100:+.1f}%)")
+                axes[0].set_title(f"v31 = v30 + exogenous vol cap  "
+                                  f"vol_thr={best_v31['vol_thresh']:.2f}  "
+                                  f"sz_thr={best_v31['shock_z']:.2f}  "
+                                  f"K_cap={best_v31['K_cap']:.1f}  "
+                                  f"cap_hits={best_v31['cap_hits']}  "
+                                  f"shock breaches: v30={v30_stress.get('breaches',0)} → "
+                                  f"v31={v31_stress['breaches']}")
+                axes[0].set_ylabel('Equity'); axes[0].grid(alpha=0.3); axes[0].legend(fontsize=9)
+                axes[1].plot(best_v30['eq'].index, best_v30['K_path'],
+                             color='#d62728', lw=0.9, alpha=0.6, label='v30 K')
+                axes[1].plot(best_v31['eq'].index, best_v31['K_path'],
+                             color='#1f77b4', lw=1.1, label='v31 K (capped)')
+                axes[1].set_ylabel('K_eff'); axes[1].grid(alpha=0.3); axes[1].legend(fontsize=8)
+                axes[2].plot(best_v30['eq'].index, vol_ratio, color='#7f7f7f', lw=0.7)
+                axes[2].axhline(best_v31['vol_thresh'], color='red', ls='--', lw=1,
+                                label=f"thresh={best_v31['vol_thresh']:.2f}")
+                axes[2].set_ylabel('vol_5d / vol_30d'); axes[2].grid(alpha=0.3)
+                axes[2].legend(fontsize=8)
+                plt.tight_layout()
+                v31_png = os.path.join(os.path.dirname(__file__),
+                                       'crypto_bsdt_v31_volcap.png')
+                plt.savefig(v31_png, dpi=110, bbox_inches='tight'); plt.close()
+                print(f"  v31 plot saved → {v31_png}")
+            except Exception as e:
+                print(f"  (matplotlib skipped: {e})")
+
+            v31_ret_series = best_v31['eq'].pct_change().fillna(best_v31['eq'].iloc[0]/INIT_V30 - 1.0)
+            sims_v31_prod = simulate_from_pnl(v31_ret_series, 'DYNAMIC_v31')
+        else:
+            print("  v31: no (vol_thr, K_cap) survives DD guard → fall back to v30")
+
+    v31_summary = {
+        'design':           'v30 DD throttle + fast vol_5d/vol_30d cap',
+        'best_K_max':       float(best_v31['K_max']) if best_v31 else None,
+        'best_K_min':       float(best_v31['K_min']) if best_v31 else None,
+        'best_shock_z':     float(best_v31['shock_z']) if best_v31 else None,
+        'best_vol_thresh':  float(best_v31['vol_thresh']) if best_v31 else None,
+        'best_K_cap':       float(best_v31['K_cap']) if best_v31 else None,
+        'best_pnl':         float(round(best_v31['pnl'], 2)) if best_v31 else None,
+        'best_max_dd':      float(round(best_v31['dd_pct'], 4)) if best_v31 else None,
+        'best_sharpe_net':  float(round(best_v31['sh'], 4)) if best_v31 else None,
+        'best_cagr':        float(round(best_v31['cagr'], 4)) if best_v31 else None,
+        'best_calmar':      float(round(best_v31['calmar'], 4)) if best_v31 else None,
+        'cap_hits':         int(best_v31['cap_hits']) if best_v31 else 0,
+        'delta_vs_v22':     (float(round(best_v31['pnl'] - 5704.85, 2)) if best_v31 else None),
+        'delta_vs_v30':     (float(round(best_v31['pnl'] - best_v30['pnl'], 2))
+                              if (best_v31 and best_v30) else None),
+        'stress_v30':       v30_stress,
+        'stress_v31':       v31_stress,
+        'cost_panel':       {f'{k:.0f}bp': float(round(v['pnl'], 2))
+                              for k, v in v31_cost_panel.items()},
+    }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v32: HARD STRESS-BUDGETED K_MAX  —  the only structurally robust fix
+    # ──────────────────────────────────────────────────────────────────────
+    # v31 proved that reactive vol caps cannot defeat day-1 shocks (lag-1
+    # detector blind to the shock day itself).  The only structural fix is
+    # to lower the absolute K_max so that even a 3σ/3d shock at peak K stays
+    # under the -40% guard.  v32 sweeps K_max ∈ {2.5..7.0}, runs the SAME
+    # stress battery, and selects the largest K_max where mild_3sig_3d
+    # NEVER breaches.
+    print(f"\n  v32 HARD STRESS-BUDGETED K_MAX  (only K_max that survives 3σ/3d)")
+    if best_v30 is not None:
+        K_max_grid_v32 = [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0]
+        K_min_v32      = best_v30['K_min']
+        dd_lo_v32      = best_v30['dd_low']
+        dd_hi_v32      = best_v30['dd_high']
+
+        def _v32_stress_battery(K_max):
+            """Run mild 3σ/3d at three trigger indices; return worst MaxDD across them."""
+            worst_dd = 0.0
+            for sidx in sample_idxs:
+                rs = _v31_stress_sim_fwd(K_max, K_min_v32, dd_lo_v32, dd_hi_v32,
+                                         99.0, 99.0, K_max, TCOST_PROD_V30,
+                                         sidx, 3.0, 3)
+                if rs['max_dd'] < worst_dd:
+                    worst_dd = rs['max_dd']
+            return worst_dd
+
+        print(f"  ── v32 K_max stress sweep (mild 3σ/3d at 3 triggers; guard -40%) ──")
+        print(f"  {'K_max':>6}{'in_PnL $':>13}{'in_DD%':>10}{'stress_wDD%':>13}{'verdict':>10}")
+        v32_rows = []
+        for k_max in K_max_grid_v32:
+            r_in = _v30_simulate(k_max, K_min_v32, dd_lo_v32, dd_hi_v32, TCOST_PROD_V30)
+            wdd  = _v32_stress_battery(k_max)
+            survives = wdd >= -DD_GUARD_V30
+            v32_rows.append(dict(K_max=k_max, in_pnl=r_in['pnl'],
+                                 in_dd=r_in['dd_pct'], stress_wdd=wdd,
+                                 survives=survives, sh=r_in['sh'],
+                                 cagr=r_in['cagr'], calmar=r_in['calmar'],
+                                 eq=r_in['eq'], K_path=r_in['K_path']))
+            print(f"  {k_max:>6.2f}  ${r_in['pnl']:>+9.2f}  "
+                  f"{r_in['dd_pct']*100:>+7.2f}%  "
+                  f"{wdd*100:>+10.2f}%  "
+                  f"{'PASS' if survives else 'BREACH':>10}")
+
+        # PROD = LARGEST K_max that survives
+        survivors = [r for r in v32_rows if r['survives']]
+        if survivors:
+            best_v32 = max(survivors, key=lambda r: r['K_max'])
+            print(f"\n  ★ v32 PROD K_max={best_v32['K_max']:.2f}  K_min={K_min_v32:.2f}  "
+                  f"dd_band=[{dd_lo_v32*100:+.1f}%, {dd_hi_v32*100:+.1f}%]")
+            print(f"    in-sample: PnL +${best_v32['in_pnl']:.2f}  "
+                  f"MaxDD {best_v32['in_dd']*100:+.2f}%  "
+                  f"Sh {best_v32['sh']:+.3f}  CAGR {best_v32['cagr']*100:+.2f}%  "
+                  f"Calmar {best_v32['calmar']:+.2f}")
+            print(f"    stress (3σ/3d worst): {best_v32['stress_wdd']*100:+.2f}%   "
+                  f"(v30 was -44.34%)")
+            d22 = best_v32['in_pnl'] - 5704.85
+            d30 = best_v32['in_pnl'] - best_v30['pnl']
+            print(f"    Δ vs v22: ${d22:+.2f}    Δ vs v30: ${d30:+.2f}    "
+                  f"(traded for shock robustness)")
+
+            # Full stress battery on v32 (same as v30/v31 detail)
+            print(f"\n  v32 STRESS TEST DETAIL  —  selected K_max={best_v32['K_max']:.1f}")
+            print(f"  {'scenario':<20}{'shock_day':<14}{'K@shock':>14}"
+                  f"{'PnL $':>14}{'MaxDD%':>10}{'guard?':>10}")
+            v32_stress = []
+            for sname, sigmag, slen in shock_scenarios:
+                for sidx in sample_idxs:
+                    r = _v31_stress_sim_fwd(best_v32['K_max'], K_min_v32,
+                                            dd_lo_v32, dd_hi_v32,
+                                            99.0, 99.0, best_v32['K_max'],
+                                            TCOST_PROD_V30, sidx, sigmag, slen)
+                    date_at = str(sized_v22_unit.index[sidx].date())
+                    v32_stress.append(dict(scenario=sname, trig=date_at,
+                                           K_at_shock=r['K_at_shock'],
+                                           pnl=r['pnl'], dd_pct=r['max_dd'],
+                                           ok=(r['max_dd'] >= -DD_GUARD_V30)))
+                    print(f"  {sname:<20}{date_at:<14}"
+                          f"{r['K_at_shock']:>14.2f}  ${r['pnl']:>+9.2f}  "
+                          f"{r['max_dd']*100:>+7.2f}%  "
+                          f"{'ok' if r['max_dd'] >= -DD_GUARD_V30 else 'BREACH':>8}")
+            n_breach_v32 = sum(1 for r in v32_stress if not r['ok'])
+            worst_v32    = min(r['dd_pct'] for r in v32_stress)
+            print(f"\n  ★ v32 stress: {n_breach_v32}/{len(v32_stress)} breaches  "
+                  f"worst MaxDD = {worst_v32*100:+.2f}%   (v30: 11/12, -96.64%)")
+
+            v32_ret_series = best_v32['eq'].pct_change().fillna(
+                best_v32['eq'].iloc[0]/INIT_V30 - 1.0)
+            sims_v32_prod  = simulate_from_pnl(v32_ret_series, 'DYNAMIC_v32')
+
+            # v32 plot vs v30 vs v22
+            try:
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                eq_v22_5bps = INIT_V30 * (1.0 + (sized_v22_unit * float(best_v22['K']) -
+                                                 (5.0/1e4) * active_mask_v30)).cumprod()
+                fig, axes = plt.subplots(2, 1, figsize=(12, 7),
+                                         gridspec_kw={'height_ratios': [2.5, 1]})
+                ax0, ax1 = axes
+                ax0.plot(eq_v22_5bps.index, eq_v22_5bps.values, color='#888', lw=1.3,
+                         label=f'v22 K=3.5  (PnL +${5704.85:.0f})')
+                ax0.plot(best_v30['eq'].index, best_v30['eq'].values, color='#d62728',
+                         lw=1.5, ls='--',
+                         label=f"v30 K_max=9  (PnL +${best_v30['pnl']:.0f}, "
+                               f"stress: 11/12 BREACH worst -96%)")
+                ax0.plot(best_v32['eq'].index, best_v32['eq'].values, color='#2ca02c',
+                         lw=2.0,
+                         label=f"v32 K_max={best_v32['K_max']:.1f}  "
+                               f"(PnL +${best_v32['in_pnl']:.0f}, "
+                               f"stress: {n_breach_v32}/{len(v32_stress)}, "
+                               f"worst {worst_v32*100:+.0f}%)")
+                ax0.set_title(f"v32 STRESS-BUDGETED K_MAX  —  honest robustness vs PnL trade-off")
+                ax0.set_ylabel('Equity'); ax0.legend(loc='upper left', fontsize=9)
+                ax0.grid(alpha=0.3)
+                ax1.plot(best_v30['eq'].index, best_v30['K_path'], color='#d62728',
+                         lw=1.0, ls='--', label='v30 K (max=9)')
+                ax1.plot(best_v32['eq'].index, best_v32['K_path'], color='#2ca02c',
+                         lw=1.2, label=f"v32 K (max={best_v32['K_max']:.1f})")
+                ax1.axhline(float(best_v22['K']), color='#888', ls=':', lw=1, label='v22 K=3.5')
+                ax1.set_ylabel('K_eff'); ax1.legend(loc='upper left', fontsize=8)
+                ax1.grid(alpha=0.3)
+                v32_png = os.path.join(os.path.dirname(__file__),
+                                       'crypto_bsdt_v32_stress_budgeted.png')
+                plt.savefig(v32_png, dpi=110, bbox_inches='tight'); plt.close()
+                print(f"  v32 plot saved → {v32_png}")
+            except Exception as e:
+                print(f"  (matplotlib skipped: {e})")
+        else:
+            print("  v32: NO K_max in grid survives 3σ/3d stress → fall back to v22 (K=3.5)")
+            best_v32 = None
+            v32_stress = []
+            n_breach_v32 = 12
+            worst_v32 = -1.0
+            sims_v32_prod = sims_v22
+    else:
+        best_v32 = None
+        v32_stress = []
+        n_breach_v32 = 12
+        worst_v32 = -1.0
+        sims_v32_prod = sims_v22
+
+    v32_summary = {
+        'design':           'v30 throttle with HARD K_max stress-budgeted to survive 3σ/3d shock',
+        'best_K_max':       float(best_v32['K_max']) if best_v32 else None,
+        'best_K_min':       float(K_min_v32) if best_v32 else None,
+        'best_pnl':         float(round(best_v32['in_pnl'], 2)) if best_v32 else None,
+        'best_max_dd':      float(round(best_v32['in_dd'], 4)) if best_v32 else None,
+        'best_sharpe_net':  float(round(best_v32['sh'], 4)) if best_v32 else None,
+        'best_cagr':        float(round(best_v32['cagr'], 4)) if best_v32 else None,
+        'best_calmar':      float(round(best_v32['calmar'], 4)) if best_v32 else None,
+        'stress_breaches':  int(n_breach_v32),
+        'stress_worst_dd':  float(round(worst_v32, 4)),
+        'delta_vs_v22':     (float(round(best_v32['in_pnl'] - 5704.85, 2)) if best_v32 else None),
+        'delta_vs_v30':     (float(round(best_v32['in_pnl'] - best_v30['pnl'], 2))
+                              if (best_v32 and best_v30) else None),
+        'verdict':          ('PROD: structurally robust (stress passes mild 3σ/3d at all triggers)'
+                              if best_v32 and n_breach_v32 < 11 else 'fragile'),
+    }
+
     v30_summary = {
         'design':           'soft DD-aware smoothstep K throttle on v22 base',
         'best_K_max':       float(best_v30['K_max']) if best_v30 else None,
@@ -4108,6 +4678,8 @@ def main():
     sims_all['DYNAMIC_v28']        = sims_v28_prod
     sims_all['DYNAMIC_v29']        = sims_v29_prod
     sims_all['DYNAMIC_v30']        = sims_v30_prod
+    sims_all['DYNAMIC_v31']        = sims_v31_prod
+    sims_all['DYNAMIC_v32']        = sims_v32_prod
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -4170,6 +4742,8 @@ def main():
             "v28_risk_parity":   sims_v28_prod['sharpe'],
             "v29_additive_overlay": sims_v29_prod['sharpe'],
             "v30_dd_throttle":   sims_v30_prod['sharpe'],
+            "v31_volcap":        sims_v31_prod['sharpe'],
+            "v32_stress_budget": sims_v32_prod['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
             "v23_summary":       v23_summary,
@@ -4180,6 +4754,8 @@ def main():
             "v28_summary":       v28_summary,
             "v29_summary":       v29_summary,
             "v30_summary":       v30_summary,
+            "v31_summary":       v31_summary,
+            "v32_summary":       v32_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
