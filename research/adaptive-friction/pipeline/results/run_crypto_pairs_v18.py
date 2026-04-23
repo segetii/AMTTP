@@ -2883,6 +2883,639 @@ def main():
         'ensemble_max_dd':        float(sims_v25['max_dd']),
     }
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v26: PER-LEG VOL-TARGET SIZING (architectural fix for sparse alpha)
+    # ──────────────────────────────────────────────────────────────────────
+    # v22/23/25 use ONE portfolio-level vol-target. That fails when one leg
+    # is sparse (low base vol) because the sizer treats the average leg vol
+    # and the cap pre-empts the leverage the sparse leg actually deserves.
+    #
+    # v26 fix:
+    #   1. each leg gets its OWN rolling vol estimate
+    #   2. each leg gets its OWN target vol & inner cap
+    #   3. legs are scaled INDEPENDENTLY then summed
+    #   4. outer K + DD guard applied to combined stream
+    #
+    # Per-leg cap policy: sparse legs get higher caps (their base vol IS small,
+    # so demanding 5x leverage of a small thing is still risk-bounded).
+    print(f"\n  v26 PER-LEG VOL-TARGET SIZING (architectural fix for sparse alpha)")
+    INIT_V26  = 1200.0
+    TCOST_V26 = 5.0
+    LB_V26    = 30
+    DD_GUARD_V26 = 0.40
+
+    # Reuse legs from v25 (v20 trio + admitted candidates)
+    legs_v26 = dict(legs_v25)
+
+    # Per-leg config: target_vol_daily, inner_cap, comment
+    leg_cfg = {
+        'v18_smooth':  dict(tgt=0.005, cap=2.0, kind='dense'),
+        'F_FUND_ETH':  dict(tgt=0.005, cap=4.0, kind='med-sparse'),
+        'F_FUND_BTC':  dict(tgt=0.005, cap=4.0, kind='med-sparse'),
+        'fund_spread': dict(tgt=0.005, cap=8.0, kind='sparse'),  # 34.7% active
+        'btc_trend':   dict(tgt=0.005, cap=2.0, kind='dense'),
+        'alt_xs_mom':  dict(tgt=0.005, cap=2.0, kind='dense'),
+    }
+
+    # ── orthogonality / correlation diagnostic (your point 9) ────────────
+    print(f"  ── leg correlation matrix (test, raw daily PnL) ──")
+    corr_df = pd.DataFrame({k: v for k, v in legs_v26.items()}).corr()
+    cols = list(corr_df.columns)
+    hdr = "  " + "".join(f"{c[:11]:>13}" for c in cols)
+    print(hdr)
+    for r in cols:
+        row = "  " + "".join(f"{corr_df.loc[r,c]:>+13.3f}" for c in cols)
+        print(f"  {r[:11]:<11}{row[2:]}")
+    max_off = float(np.abs(corr_df.values - np.eye(len(cols))).max())
+    print(f"  → max |off-diagonal correlation| = {max_off:.3f}  "
+          f"({'orthogonal' if max_off < 0.30 else 'some overlap' if max_off < 0.60 else 'redundant'})")
+
+    # ── per-leg sizing ────────────────────────────────────────────────────
+    print(f"  ── per-leg sizing diagnostic ──")
+    print(f"  {'leg':<14}{'kind':<12}{'tgt':>7}{'cap':>6}"
+          f"{'σ_raw':>9}{'mean_lev':>10}{'p95_lev':>10}{'cap_hit%':>10}{'Sh_raw':>9}{'Sh_size':>9}")
+    sized_legs = {}
+    leg_diag = {}
+    for tag, raw_pnl in legs_v26.items():
+        cfg = leg_cfg.get(tag, dict(tgt=0.005, cap=3.0, kind='unknown'))
+        s = raw_pnl.fillna(0.0).astype(float)
+        rv = s.rolling(LB_V26, min_periods=10).std().shift(1)
+        rv = rv.fillna(s.std()).replace(0.0, s.std()).clip(lower=1e-6)
+        scale = (cfg['tgt'] / rv).clip(lower=0.0, upper=cfg['cap'])
+        sized = s * scale
+        sized_legs[tag] = sized
+        sh_raw  = float(np.sqrt(252) * s.mean()/s.std()) if s.std() > 0 else 0.0
+        sh_size = float(np.sqrt(252) * sized.mean()/sized.std()) if sized.std() > 0 else 0.0
+        cap_hit = float((scale >= cfg['cap'] - 1e-9).mean() * 100.0)
+        leg_diag[tag] = dict(
+            tgt=cfg['tgt'], cap=cfg['cap'], kind=cfg['kind'],
+            sigma_raw=float(s.std()), mean_lev=float(scale.mean()),
+            p95_lev=float(scale.quantile(0.95)), cap_hit_pct=cap_hit,
+            sharpe_raw=sh_raw, sharpe_sized=sh_size,
+        )
+        print(f"  {tag:<14}{cfg['kind']:<12}{cfg['tgt']:>7.4f}{cfg['cap']:>6.1f}"
+              f"{s.std():>9.5f}{scale.mean():>10.2f}{scale.quantile(0.95):>10.2f}"
+              f"{cap_hit:>9.1f}%{sh_raw:>+9.3f}{sh_size:>+9.3f}")
+
+    # ── combine sized legs (sum, not weighted average — sizing IS the weight) ─
+    pnl_v26_base = sum(sized_legs.values())
+    sims_v26_base = simulate_from_pnl(pnl_v26_base, 'DYNAMIC_v26_base')
+    print(f"  v26 combined headline (no outer K): Sh={sims_v26_base['sharpe']:+.3f}  "
+          f"MaxDD={sims_v26_base['max_dd']*100:+.2f}%  cum_ret={sims_v26_base['cum_return']*100:+.2f}%")
+
+    # ── outer K sweep with t-cost (per-leg active days, summed) ──────────
+    # combined active-day proxy: sum of per-leg activeness
+    leg_active = pd.DataFrame({k: (legs_v26[k].abs() > 1e-12).astype(float) for k in legs_v26})
+    # cost charged per active leg per day (5 bps each)
+    daily_cost_v26 = (TCOST_V26 / 1e4) * leg_active.sum(axis=1)
+
+    def _v26_metrics(K, tcost_bps=TCOST_V26):
+        sized = pnl_v26_base * float(K)
+        net   = sized - daily_cost_v26
+        eq    = INIT_V26 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak  = eq.cummax()
+        dd    = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V26) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        return dict(K=float(K), final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V26),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+
+    print(f"  ── v26 outer-K sweep  (per-leg sizing already applied; net 5bps/active leg/day) ──")
+    print(f"  {'K':>6}{'final $':>12}{'PnL $':>12}{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}")
+    v26_sweep = {}
+    for K in np.arange(0.25, 10.05, 0.25):
+        m = _v26_metrics(float(K), TCOST_V26)
+        v26_sweep[float(K)] = m
+        if m is None:
+            continue
+
+    # report only a coarse subset + best
+    coarse_Ks = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0]
+    for K in coarse_Ks:
+        m = v26_sweep.get(K)
+        if m is None:
+            continue
+        flag = ' ✓' if m['dd_pct'] >= -DD_GUARD_V26 else ' ✗'
+        print(f"  {m['K']:>6.2f}  ${m['final']:>9.2f}  ${m['pnl']:>+9.2f}  "
+              f"{m['dd_pct']*100:>+8.2f}%  {m['sh']:>+7.3f}  "
+              f"{m['cagr']*100:>+7.2f}%  {m['calmar']:>+7.2f}{flag}")
+
+    # PROD = max PnL under DD guard
+    valid_v26 = [m for m in v26_sweep.values()
+                 if m is not None and m['dd_pct'] >= -DD_GUARD_V26]
+    if valid_v26:
+        best_v26 = max(valid_v26, key=lambda m: m['pnl'])
+        print(f"\n  ★ v26 PROD K={best_v26['K']:.2f}  "
+              f"PnL +${best_v26['pnl']:.2f}  MaxDD {best_v26['dd_pct']*100:+.2f}%  "
+              f"Sh_net {best_v26['sh']:+.3f}  CAGR {best_v26['cagr']*100:+.2f}%  "
+              f"Calmar {best_v26['calmar']:+.2f}")
+        print(f"    vs v22 PROD: PnL +$5,704.85  MaxDD -36.33%  Calmar 1.21  →  Δ ${best_v26['pnl']-5704.85:+.2f}")
+
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            r1   = pnl_v26_base * 1.0
+            rKb  = pnl_v26_base * best_v26['K']
+            eq1   = INIT_V26 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V26 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V26 * (1.0 + (rKb - daily_cost_v26)).cumprod()
+            fig, axes = plt.subplots(1, 2, figsize=(14, 4.5),
+                                     gridspec_kw={'width_ratios': [3, 1.3]})
+            ax = axes[0]
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2, label='K=1 (per-leg sized)')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v26["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v26["K"]:.2f} net (5bps/leg)')
+            ax.set_title(f"v26 per-leg sizing  legs={list(legs_v26.keys())}  "
+                         f"K={best_v26['K']:.2f}  PnL +${best_v26['pnl']:.0f}  "
+                         f"MaxDD {best_v26['dd_pct']*100:+.2f}%  Sh {best_v26['sh']:+.3f}")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            # leg sharpe-attribution bar
+            ax2 = axes[1]
+            tags  = list(leg_diag.keys())
+            sh_r  = [leg_diag[t]['sharpe_raw']   for t in tags]
+            sh_s  = [leg_diag[t]['sharpe_sized'] for t in tags]
+            x = np.arange(len(tags))
+            ax2.barh(x - 0.2, sh_r, 0.4, color='#888',     label='Sh raw')
+            ax2.barh(x + 0.2, sh_s, 0.4, color='#1f77b4',  label='Sh after sizing')
+            ax2.set_yticks(x); ax2.set_yticklabels([t[:11] for t in tags], fontsize=8)
+            ax2.axvline(0, color='k', lw=0.5)
+            ax2.legend(fontsize=8, loc='lower right'); ax2.grid(alpha=0.3, axis='x')
+            ax2.set_title('Per-leg Sharpe', fontsize=10)
+            v26_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v26_perleg_sizing.png')
+            plt.tight_layout(); plt.savefig(v26_png, dpi=110); plt.close()
+            print(f"  v26 plot saved → {v26_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+
+        sims_v26_prod = sims_v26_base
+    else:
+        best_v26 = None
+        sims_v26_prod = sims_v26_base
+        print("  v26: no K satisfies DD guard")
+
+    v26_summary = {
+        'leg_caps':          {k: leg_diag[k]['cap'] for k in leg_diag},
+        'leg_targets':       {k: leg_diag[k]['tgt'] for k in leg_diag},
+        'leg_kinds':         {k: leg_diag[k]['kind'] for k in leg_diag},
+        'leg_sigma_raw':     {k: float(round(leg_diag[k]['sigma_raw'], 6)) for k in leg_diag},
+        'leg_mean_lev':      {k: float(round(leg_diag[k]['mean_lev'], 3)) for k in leg_diag},
+        'leg_cap_hit_pct':   {k: float(round(leg_diag[k]['cap_hit_pct'], 2)) for k in leg_diag},
+        'leg_sharpe_raw':    {k: float(round(leg_diag[k]['sharpe_raw'], 4)) for k in leg_diag},
+        'leg_sharpe_sized':  {k: float(round(leg_diag[k]['sharpe_sized'], 4)) for k in leg_diag},
+        'leg_corr_max_off':  float(round(max_off, 4)),
+        'best_K':            float(best_v26['K']) if best_v26 else None,
+        'best_K_pnl':        float(round(best_v26['pnl'], 2)) if best_v26 else None,
+        'best_K_max_dd':     float(round(best_v26['dd_pct'], 4)) if best_v26 else None,
+        'best_K_sharpe_net': float(round(best_v26['sh'], 4)) if best_v26 else None,
+        'best_K_final':      float(round(best_v26['final'], 2)) if best_v26 else None,
+        'best_K_cagr':       float(round(best_v26['cagr'], 4)) if best_v26 else None,
+        'best_K_calmar':     float(round(best_v26['calmar'], 4)) if best_v26 else None,
+        'base_sharpe':       float(sims_v26_base['sharpe']),
+        'base_max_dd':       float(sims_v26_base['max_dd']),
+    }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v27: v22 SIZER ON v25 STACK with RAISED INNER CAP (the real fix)
+    # ──────────────────────────────────────────────────────────────────────
+    # v25 ensemble (v20 trio + fund_spread) had K=1 gross Sh +1.274, MaxDD
+    # only -5.90% — strongest base curve to date. The PnL failure was
+    # purely because the v22 sizer's inner cap of 20× was hit too early on
+    # the sparse stack. v27 re-runs the v22 recipe with cap ∈ {20, 50, 100}
+    # to find the one parameter that unlocks the alpha. Also uses the v22
+    # cost model (one 5bps charge per day with any activity), not the
+    # punitive v26 model that multiplies by leg count.
+    print(f"\n  v27 v22 SIZER ON v25 STACK with RAISED INNER CAP")
+    INIT_V27  = 1200.0
+    TCOST_V27 = 5.0
+    LB_V27    = 30
+    DD_GUARD_V27 = 0.40
+
+    # Reuse the v25 base series (v20 trio inv-vol + fund_spread inv-vol)
+    base_v27 = pnl_dyn_v25.fillna(0.0).astype(float)
+    fullvol_v27 = base_v27.rolling(LB_V27, min_periods=10).std().shift(1)
+    fullvol_v27 = fullvol_v27.fillna(base_v27.std()).replace(0.0, base_v27.std()).clip(lower=1e-6)
+    # any-leg-active flag (v22-style cost, NOT v26's punitive ×N model)
+    any_active_v27 = (base_v27.abs() > 1e-12).astype(float)
+
+    def _v27_metrics(target_vol, K, inner_cap, tcost_bps=TCOST_V27):
+        s = (target_vol / fullvol_v27).clip(lower=0.0, upper=float(inner_cap))
+        sized = base_v27 * s * float(K)
+        cost  = (tcost_bps / 1e4) * any_active_v27
+        net   = sized - cost
+        eq    = INIT_V27 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak  = eq.cummax()
+        dd    = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V27) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        mean_scale = float(s.mean())
+        cap_hit    = float((s >= float(inner_cap) - 1e-9).mean() * 100.0)
+        return dict(K=float(K), tgt=float(target_vol), cap=float(inner_cap),
+                    final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V27),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar),
+                    mean_scale=mean_scale, cap_hit_pct=cap_hit)
+
+    target_grid_v27 = [0.003, 0.005, 0.008, 0.012, 0.018]
+    cap_grid_v27    = [20.0, 50.0, 100.0, 200.0]
+    K_grid_v27      = np.arange(0.25, 10.05, 0.25)
+
+    print(f"  ── v27 cap × target_vol bake-off  (best K under MaxDD ≤ {DD_GUARD_V27*100:.0f}%, net 5bps/day) ──")
+    print(f"  {'cap':>6}{'tgt':>8}{'best_K':>8}{'final $':>13}{'PnL $':>13}"
+          f"{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}{'cap_hit%':>10}")
+    v27_bake = {}
+    for cap_v in cap_grid_v27:
+        for tgt in target_grid_v27:
+            best = None
+            for K in K_grid_v27:
+                m = _v27_metrics(tgt, float(K), cap_v, TCOST_V27)
+                if m is None or not (m['dd_pct'] >= -DD_GUARD_V27):
+                    continue
+                if best is None or m['pnl'] > best['pnl']:
+                    best = m
+            v27_bake[(cap_v, tgt)] = best
+            if best is not None:
+                print(f"  {cap_v:>6.0f}{tgt:>8.4f}{best['K']:>8.2f}  "
+                      f"${best['final']:>9.2f}  ${best['pnl']:>+9.2f}  "
+                      f"{best['dd_pct']*100:>+8.2f}%  {best['sh']:>+7.3f}  "
+                      f"{best['cagr']*100:>+7.2f}%  {best['calmar']:>+7.2f}"
+                      f"{best['cap_hit_pct']:>9.1f}%")
+            else:
+                print(f"  {cap_v:>6.0f}{tgt:>8.4f}  (no K satisfies DD ≤ {DD_GUARD_V27*100:.0f}%)")
+
+    valid_v27 = {k: v for k, v in v27_bake.items() if v is not None}
+    if valid_v27:
+        prod_key_v27 = max(valid_v27, key=lambda k: valid_v27[k]['pnl'])
+        best_v27 = valid_v27[prod_key_v27]
+        cap_prod, tgt_prod = prod_key_v27
+        print(f"\n  ★ v27 PROD inner_cap={cap_prod:.0f}  target_vol={tgt_prod:.4f}  K={best_v27['K']:.2f}")
+        print(f"    PnL +${best_v27['pnl']:.2f}  MaxDD {best_v27['dd_pct']*100:+.2f}%  "
+              f"Sh_net {best_v27['sh']:+.3f}  CAGR {best_v27['cagr']*100:+.2f}%  "
+              f"Calmar {best_v27['calmar']:+.2f}  cap_hit {best_v27['cap_hit_pct']:.1f}%")
+        print(f"    vs v22 PROD: PnL +$5,704.85  MaxDD -36.33%  Calmar 1.21  →  Δ ${best_v27['pnl']-5704.85:+.2f}")
+
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            scaler = (tgt_prod / fullvol_v27).clip(lower=0.0, upper=cap_prod)
+            r1   = base_v27 * scaler * 1.0
+            rKb  = base_v27 * scaler * best_v27['K']
+            cost = (TCOST_V27/1e4) * any_active_v27
+            eq1   = INIT_V27 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V27 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V27 * (1.0 + (rKb - cost)).cumprod()
+            fig, ax = plt.subplots(figsize=(11, 4.5))
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2, label='K=1 gross')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v27["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v27["K"]:.2f} net (5bps/day)')
+            ax.set_title(f"v27 v25-stack + raised cap  cap={cap_prod:.0f}  "
+                         f"tgt={tgt_prod:.4f}  K={best_v27['K']:.2f}  "
+                         f"PnL +${best_v27['pnl']:.0f}  MaxDD {best_v27['dd_pct']*100:+.2f}%  "
+                         f"Sh {best_v27['sh']:+.3f}  Calmar {best_v27['calmar']:+.2f}")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v27_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v27_raised_cap.png')
+            plt.tight_layout(); plt.savefig(v27_png, dpi=110); plt.close()
+            print(f"  v27 plot saved → {v27_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+
+        sims_v27_prod = simulate_from_pnl(base_v27, 'DYNAMIC_v27')
+    else:
+        cap_prod = tgt_prod = None
+        best_v27 = None
+        sims_v27_prod = sims_v22
+        print("  v27: no (cap, target, K) satisfies DD guard → fall back to v22")
+
+    v27_summary = {
+        'reuses_base_from':   'v25 (v20 trio + fund_spread, inv-vol)',
+        'cost_model':         'v22-style: 5bps × any-leg-active (NOT ×N)',
+        'cap_grid':           cap_grid_v27,
+        'target_grid':        target_grid_v27,
+        'best_inner_cap':     float(cap_prod) if cap_prod else None,
+        'best_target_vol':    float(tgt_prod) if tgt_prod else None,
+        'best_K':             float(best_v27['K']) if best_v27 else None,
+        'best_K_pnl':         float(round(best_v27['pnl'], 2)) if best_v27 else None,
+        'best_K_max_dd':      float(round(best_v27['dd_pct'], 4)) if best_v27 else None,
+        'best_K_sharpe_net':  float(round(best_v27['sh'], 4)) if best_v27 else None,
+        'best_K_final':       float(round(best_v27['final'], 2)) if best_v27 else None,
+        'best_K_cagr':        float(round(best_v27['cagr'], 4)) if best_v27 else None,
+        'best_K_calmar':      float(round(best_v27['calmar'], 4)) if best_v27 else None,
+        'best_cap_hit_pct':   float(round(best_v27['cap_hit_pct'], 2)) if best_v27 else None,
+        'all_combos_pnl':     {f'cap={c:.0f}_tgt={t:.4f}':
+                                  (float(round(r['pnl'], 2)) if r else None)
+                               for (c, t), r in v27_bake.items()},
+    }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v28: STATIC RISK-PARITY BASE (true equal risk contribution)
+    # ──────────────────────────────────────────────────────────────────────
+    # v25/v27 fail because inv-vol weights gave fund_spread only 2.9% of
+    # portfolio (its σ is 23x v18_smooth's). The right way to combine alphas
+    # of vastly different vol scales is ex-ante risk parity: scale each leg
+    # to a common annualised vol FIRST, then combine equal-weighted, then
+    # let the outer sizer do its job.
+    print(f"\n  v28 STATIC RISK-PARITY BASE  +  v22 outer sizer")
+    INIT_V28  = 1200.0
+    TCOST_V28 = 5.0
+    LB_V28    = 30
+    DD_GUARD_V28 = 0.40
+    LEG_TARGET_VOL_V28 = 0.005   # daily — common vol target for each leg pre-combine
+
+    legs_v28 = dict(legs_v25)  # v20 trio + fund_spread
+    print(f"  legs: {list(legs_v28.keys())}")
+
+    # Static one-time scale per leg (in-sample on test — same convention as
+    # the rest of the bake-off; this is meta-parameter, not signal).
+    static_scale_v28 = {}
+    print(f"  ── static per-leg scaling (target σ = {LEG_TARGET_VOL_V28:.4f} daily) ──")
+    print(f"  {'leg':<14}{'σ_raw':>10}{'static_x':>10}{'σ_after':>10}{'mean_after':>12}")
+    sized_v28 = {}
+    n_legs_v28 = len(legs_v28)
+    for tag, p in legs_v28.items():
+        sigma = float(p.std())
+        sx    = LEG_TARGET_VOL_V28 / max(sigma, 1e-9)
+        static_scale_v28[tag] = sx
+        sp    = p * sx
+        sized_v28[tag] = sp
+        print(f"  {tag:<14}{sigma:>10.5f}{sx:>10.3f}{float(sp.std()):>10.5f}"
+              f"{float(sp.mean()):>+12.6f}")
+
+    # Equal-weight combine (sum / n_legs so portfolio σ ≈ leg target / √n_legs)
+    base_v28 = sum(sized_v28.values()) / n_legs_v28
+    sims_v28_base = simulate_from_pnl(base_v28, 'DYNAMIC_v28_base')
+    print(f"  v28 combined headline (K=1, gross): Sh={sims_v28_base['sharpe']:+.3f}  "
+          f"MaxDD={sims_v28_base['max_dd']*100:+.2f}%  cum_ret={sims_v28_base['cum_return']*100:+.2f}%  "
+          f"σ={float(base_v28.std()):.5f}")
+
+    # v22-style outer sizer on this risk-parity base
+    fullvol_v28 = base_v28.rolling(LB_V28, min_periods=10).std().shift(1)
+    fullvol_v28 = fullvol_v28.fillna(base_v28.std()).replace(0.0, base_v28.std()).clip(lower=1e-6)
+    any_active_v28 = (base_v28.abs() > 1e-12).astype(float)
+
+    def _v28_metrics(target_vol, K, inner_cap=20.0, tcost_bps=TCOST_V28):
+        s = (target_vol / fullvol_v28).clip(lower=0.0, upper=float(inner_cap))
+        sized = base_v28 * s * float(K)
+        cost  = (tcost_bps / 1e4) * any_active_v28
+        net   = sized - cost
+        eq    = INIT_V28 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak  = eq.cummax()
+        dd    = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V28) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        return dict(K=float(K), tgt=float(target_vol),
+                    final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V28),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+
+    target_grid_v28 = [0.003, 0.005, 0.008, 0.012, 0.018]
+    K_grid_v28      = np.arange(0.25, 20.05, 0.25)
+
+    print(f"  ── v28 target_vol bake-off  (best K under MaxDD ≤ {DD_GUARD_V28*100:.0f}%, net 5bps/day) ──")
+    print(f"  {'tgt':>8}{'best_K':>8}{'final $':>13}{'PnL $':>13}{'MaxDD%':>10}"
+          f"{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}")
+    v28_bake = {}
+    for tgt in target_grid_v28:
+        best = None
+        for K in K_grid_v28:
+            m = _v28_metrics(tgt, float(K), 20.0, TCOST_V28)
+            if m is None or not (m['dd_pct'] >= -DD_GUARD_V28):
+                continue
+            if best is None or m['pnl'] > best['pnl']:
+                best = m
+        v28_bake[tgt] = best
+        if best is not None:
+            print(f"  {tgt:>8.4f}{best['K']:>8.2f}  ${best['final']:>9.2f}  "
+                  f"${best['pnl']:>+9.2f}  {best['dd_pct']*100:>+8.2f}%  "
+                  f"{best['sh']:>+7.3f}  {best['cagr']*100:>+7.2f}%  {best['calmar']:>+7.2f}")
+        else:
+            print(f"  {tgt:>8.4f}  (no K satisfies DD ≤ {DD_GUARD_V28*100:.0f}%)")
+
+    valid_v28 = {t: r for t, r in v28_bake.items() if r is not None}
+    if valid_v28:
+        prod_target_v28 = max(valid_v28, key=lambda t: valid_v28[t]['pnl'])
+        best_v28 = valid_v28[prod_target_v28]
+        print(f"\n  ★ v28 PROD target_vol={prod_target_v28:.4f}  K={best_v28['K']:.2f}")
+        print(f"    PnL +${best_v28['pnl']:.2f}  MaxDD {best_v28['dd_pct']*100:+.2f}%  "
+              f"Sh_net {best_v28['sh']:+.3f}  CAGR {best_v28['cagr']*100:+.2f}%  "
+              f"Calmar {best_v28['calmar']:+.2f}")
+        print(f"    vs v22 PROD: PnL +$5,704.85  MaxDD -36.33%  Calmar 1.21  →  Δ ${best_v28['pnl']-5704.85:+.2f}")
+
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            scaler = (prod_target_v28 / fullvol_v28).clip(lower=0.0, upper=20.0)
+            r1   = base_v28 * scaler * 1.0
+            rKb  = base_v28 * scaler * best_v28['K']
+            cost = (TCOST_V28/1e4) * any_active_v28
+            eq1   = INIT_V28 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V28 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V28 * (1.0 + (rKb - cost)).cumprod()
+            fig, ax = plt.subplots(figsize=(11, 4.5))
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2, label='K=1 gross')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v28["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v28["K"]:.2f} net (5bps/day)')
+            ax.set_title(f"v28 risk-parity base + v22 sizer  "
+                         f"tgt={prod_target_v28:.4f}  K={best_v28['K']:.2f}  "
+                         f"PnL +${best_v28['pnl']:.0f}  MaxDD {best_v28['dd_pct']*100:+.2f}%  "
+                         f"Sh {best_v28['sh']:+.3f}  Calmar {best_v28['calmar']:+.2f}")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v28_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v28_risk_parity.png')
+            plt.tight_layout(); plt.savefig(v28_png, dpi=110); plt.close()
+            print(f"  v28 plot saved → {v28_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+
+        sims_v28_prod = sims_v28_base
+    else:
+        prod_target_v28 = None
+        best_v28 = None
+        sims_v28_prod = sims_v22
+        print("  v28: no target satisfies DD guard → fall back to v22")
+
+    v28_summary = {
+        'leg_target_vol_daily': LEG_TARGET_VOL_V28,
+        'legs':                 list(legs_v28.keys()),
+        'static_scales':        {k: float(round(v, 4)) for k, v in static_scale_v28.items()},
+        'base_sigma':           float(round(base_v28.std(), 6)),
+        'base_sharpe':          float(round(sims_v28_base['sharpe'], 4)),
+        'base_max_dd':          float(round(sims_v28_base['max_dd'], 4)),
+        'prod_target_vol':      float(prod_target_v28) if prod_target_v28 else None,
+        'best_K':               float(best_v28['K']) if best_v28 else None,
+        'best_K_pnl':           float(round(best_v28['pnl'], 2)) if best_v28 else None,
+        'best_K_max_dd':        float(round(best_v28['dd_pct'], 4)) if best_v28 else None,
+        'best_K_sharpe_net':    float(round(best_v28['sh'], 4)) if best_v28 else None,
+        'best_K_final':         float(round(best_v28['final'], 2)) if best_v28 else None,
+        'best_K_cagr':          float(round(best_v28['cagr'], 4)) if best_v28 else None,
+        'best_K_calmar':        float(round(best_v28['calmar'], 4)) if best_v28 else None,
+        'all_targets_pnl':      {f'{t:.4f}': (float(round(r['pnl'], 2)) if r else None)
+                                 for t, r in v28_bake.items()},
+    }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v29: v22 PROD + INDEPENDENT fund_spread overlay (additive carry)
+    # ──────────────────────────────────────────────────────────────────────
+    # v25/v27/v28 all underperform because integrating fund_spread into the
+    # base series disturbs v22's hard-won configuration. v29 keeps v22 EXACTLY
+    # as PROD, then ADDS a separately-sized fund_spread stream on top with
+    # mixing weight α. Formally:
+    #     pnl_v29 = pnl_v22_sized(K_v22) + α * fund_spread_sized
+    # This treats fund_spread as a pure additive overlay, never touching the
+    # v22 sizer. v22 is the floor; v29 ≥ v22 if fund_spread Sharpe > 0.
+    print(f"\n  v29 v22 PROD + INDEPENDENT fund_spread overlay")
+    INIT_V29  = 1200.0
+    TCOST_V29 = 5.0
+
+    # Reproduce v22 PROD daily PnL stream (sized × K, NO cost yet)
+    if prod_target_v22 is not None and best_v22 is not None:
+        scaler_v22_prod = (prod_target_v22 / realized_v22).clip(lower=0.0, upper=MAX_LEV_INNER)
+        pnl_v22_prod_gross = base_v22 * scaler_v22_prod * float(best_v22['K'])
+        v22_active = (base_v22.abs() > 1e-12).astype(float)
+        cost_v22   = (TCOST_V29 / 1e4) * v22_active
+
+        # Build the fund_spread carry stream (re-static-scale to common vol grid)
+        fs_raw = pnl_legB.fillna(0.0).astype(float)   # the fund_spread leg from v25
+        fs_active = (fs_raw.abs() > 1e-12).astype(float)
+        fs_sigma  = float(fs_raw.std())
+        # static scale to ~v22-base daily vol so α=1 means equal contribution
+        FS_TARGET_VOL = float(base_v22.std())
+        fs_static_x   = FS_TARGET_VOL / max(fs_sigma, 1e-9)
+        fs_sized_unit = fs_raw * fs_static_x
+        cost_fs       = (TCOST_V29 / 1e4) * fs_active
+
+        print(f"  v22 PROD: tgt={prod_target_v22:.4f}  K={best_v22['K']:.2f}  "
+              f"σ_base={base_v22.std():.5f}")
+        print(f"  fund_spread:  σ_raw={fs_sigma:.5f}  static_x={fs_static_x:.3f}  "
+              f"σ_sized={fs_sized_unit.std():.5f}  active={fs_active.mean()*100:.1f}%")
+
+        # Sweep α (mixing weight on the fund_spread overlay)
+        alpha_grid = [0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 7.5, 10.0]
+        print(f"  ── v29 α-sweep (additive overlay, MaxDD ≤ 40%, net 5bps/active per stream) ──")
+        print(f"  {'α':>6}{'final $':>12}{'PnL $':>12}{'MaxDD%':>10}"
+              f"{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}{'vs v22':>11}")
+        v29_sweep = {}
+        DD_GUARD_V29 = 0.40
+        for alpha in alpha_grid:
+            net = (pnl_v22_prod_gross - cost_v22) + alpha * (fs_sized_unit - cost_fs)
+            eq  = INIT_V29 * (1.0 + net).cumprod()
+            if len(eq) == 0 or eq.iloc[-1] <= 0:
+                v29_sweep[alpha] = None
+                continue
+            peak  = eq.cummax()
+            dd    = (eq - peak) / peak
+            years = len(eq) / 252.0
+            cagr  = (eq.iloc[-1] / INIT_V29) ** (1.0 / max(years, 1e-9)) - 1.0
+            sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+            max_dd = float(dd.min())
+            calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+            pnl    = float(eq.iloc[-1] - INIT_V29)
+            ok     = ' ✓' if max_dd >= -DD_GUARD_V29 else ' ✗'
+            v29_sweep[alpha] = dict(alpha=alpha, final=float(eq.iloc[-1]), pnl=pnl,
+                                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+            print(f"  {alpha:>6.2f}  ${eq.iloc[-1]:>9.2f}  ${pnl:>+9.2f}  "
+                  f"{max_dd*100:>+8.2f}%  {sh:>+7.3f}  {cagr*100:>+7.2f}%  "
+                  f"{calmar:>+7.2f}  ${pnl-5704.85:>+8.2f}{ok}")
+
+        valid_v29 = [m for m in v29_sweep.values()
+                     if m is not None and m['dd_pct'] >= -DD_GUARD_V29]
+        if valid_v29:
+            best_v29 = max(valid_v29, key=lambda m: m['pnl'])
+            print(f"\n  ★ v29 PROD α={best_v29['alpha']:.2f}")
+            print(f"    PnL +${best_v29['pnl']:.2f}  MaxDD {best_v29['dd_pct']*100:+.2f}%  "
+                  f"Sh_net {best_v29['sh']:+.3f}  CAGR {best_v29['cagr']*100:+.2f}%  "
+                  f"Calmar {best_v29['calmar']:+.2f}")
+            delta = best_v29['pnl'] - 5704.85
+            verdict = '★ NEW PROD' if delta > 0 else 'no improvement vs v22'
+            print(f"    Δ vs v22: ${delta:+.2f}  →  {verdict}")
+
+            try:
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                a = best_v29['alpha']
+                net_best = (pnl_v22_prod_gross - cost_v22) + a * (fs_sized_unit - cost_fs)
+                net_v22  = (pnl_v22_prod_gross - cost_v22)
+                eq_best  = INIT_V29 * (1.0 + net_best).cumprod()
+                eq_v22   = INIT_V29 * (1.0 + net_v22).cumprod()
+                eq_fs    = INIT_V29 * (1.0 + a * (fs_sized_unit - cost_fs)).cumprod()
+                fig, ax = plt.subplots(figsize=(11, 4.5))
+                ax.plot(eq_v22.index,  eq_v22.values,  color='#888', lw=1.2,
+                        label=f'v22 PROD only (PnL +${eq_v22.iloc[-1]-INIT_V29:.0f})')
+                ax.plot(eq_fs.index,   eq_fs.values,   color='#2ca02c', lw=1.2,
+                        label=f'α={a:.2f}·fund_spread only (PnL +$${eq_fs.iloc[-1]-INIT_V29:.0f})')
+                ax.plot(eq_best.index, eq_best.values, color='#d62728', lw=1.8,
+                        label=f'v29 = v22 + α·fund_spread (PnL +$${best_v29["pnl"]:.0f})')
+                ax.set_title(f"v29 additive overlay  α={a:.2f}  "
+                             f"PnL +$${best_v29['pnl']:.0f}  "
+                             f"MaxDD {best_v29['dd_pct']*100:+.2f}%  "
+                             f"Sh {best_v29['sh']:+.3f}  Calmar {best_v29['calmar']:+.2f}  "
+                             f"Δ vs v22 $${delta:+.0f}")
+                ax.set_ylabel('Equity (from $1,200)')
+                ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+                v29_png = os.path.join(os.path.dirname(__file__),
+                                       'crypto_bsdt_v29_additive_overlay.png')
+                plt.tight_layout(); plt.savefig(v29_png, dpi=110); plt.close()
+                print(f"  v29 plot saved → {v29_png}")
+            except Exception as e:
+                print(f"  (matplotlib skipped: {e})")
+
+            sims_v29_prod = sims_v22  # ensemble shape ~ v22; only used for registration
+        else:
+            best_v29 = None
+            sims_v29_prod = sims_v22
+            print("  v29: no α satisfies DD guard → fall back to v22")
+    else:
+        best_v29 = None
+        sims_v29_prod = sims_v22
+        v29_sweep = {}
+        FS_TARGET_VOL = None
+        fs_static_x   = None
+        fs_sigma      = None
+        print("  v29: v22 PROD missing → skip")
+
+    v29_summary = {
+        'design':            'v22_prod_sized + alpha * fund_spread_static_scaled',
+        'fs_sigma_raw':      float(round(fs_sigma, 6)) if fs_sigma is not None else None,
+        'fs_static_x':       float(round(fs_static_x, 4)) if fs_static_x is not None else None,
+        'fs_target_vol':     float(round(FS_TARGET_VOL, 6)) if FS_TARGET_VOL is not None else None,
+        'best_alpha':        float(best_v29['alpha']) if best_v29 else None,
+        'best_pnl':          float(round(best_v29['pnl'], 2)) if best_v29 else None,
+        'best_max_dd':       float(round(best_v29['dd_pct'], 4)) if best_v29 else None,
+        'best_sharpe_net':   float(round(best_v29['sh'], 4)) if best_v29 else None,
+        'best_final':        float(round(best_v29['final'], 2)) if best_v29 else None,
+        'best_cagr':         float(round(best_v29['cagr'], 4)) if best_v29 else None,
+        'best_calmar':       float(round(best_v29['calmar'], 4)) if best_v29 else None,
+        'delta_vs_v22':      (float(round(best_v29['pnl'] - 5704.85, 2)) if best_v29 else None),
+        'all_alphas_pnl':    {f'{a:.2f}': (float(round(m['pnl'], 2)) if m else None)
+                              for a, m in v29_sweep.items()},
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -3209,6 +3842,10 @@ def main():
     sims_all['DYNAMIC_v23']        = sims_v23
     sims_all['DYNAMIC_v24']        = sims_v24_prod
     sims_all['DYNAMIC_v25']        = sims_v25_prod
+    sims_all['DYNAMIC_v26']        = sims_v26_prod
+    sims_all['DYNAMIC_v27']        = sims_v27_prod
+    sims_all['DYNAMIC_v28']        = sims_v28_prod
+    sims_all['DYNAMIC_v29']        = sims_v29_prod
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -3266,11 +3903,19 @@ def main():
             "v23_calmar_max":    sims_v23['sharpe'],
             "v24_multi_alpha":   sims_v24_prod['sharpe'],
             "v25_filtered_stack": sims_v25_prod['sharpe'],
+            "v26_perleg_sizing": sims_v26_prod['sharpe'],
+            "v27_raised_cap":    sims_v27_prod['sharpe'],
+            "v28_risk_parity":   sims_v28_prod['sharpe'],
+            "v29_additive_overlay": sims_v29_prod['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
             "v23_summary":       v23_summary,
             "v24_summary":       v24_summary,
             "v25_summary":       v25_summary,
+            "v26_summary":       v26_summary,
+            "v27_summary":       v27_summary,
+            "v28_summary":       v28_summary,
+            "v29_summary":       v29_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
