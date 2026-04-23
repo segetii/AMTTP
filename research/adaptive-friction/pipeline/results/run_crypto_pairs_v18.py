@@ -3516,6 +3516,267 @@ def main():
                               for a, m in v29_sweep.items()},
     }
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v30: SOFT DD-AWARE K THROTTLE (the upgrade that should make money)
+    # ──────────────────────────────────────────────────────────────────────
+    # v22 PROD locked K=3.5 because higher K breached the -40% MaxDD guard.
+    # But v22's MaxDD is concentrated in one period. If K throttles smoothly
+    # with current drawdown — full K when near-peak, reduced K deep in DD —
+    # the favorable regime can be harvested at HIGHER leverage while the
+    # bad regime sees LESS leverage. Net: more dollars at same DD budget.
+    #
+    # K_eff(t) = K_min + (K_max - K_min) * smoothstep(dd_t; dd_low, dd_high)
+    #   where smoothstep -> 1 when dd shallow (>= dd_low, e.g. -5%)
+    #         smoothstep -> 0 when dd deep   (<= dd_high, e.g. -30%)
+    # dd_t computed from PRIOR equity (no leak — uses K_eff(t-1)'s outcome).
+    #
+    # Bonus: t-cost sensitivity panel showing PnL at {1, 2, 3, 5} bps so the
+    # real-world execution-cost picture is visible.
+    print(f"\n  v30 SOFT DD-AWARE K THROTTLE (upgrade designed to extract more $)")
+    INIT_V30 = 1200.0
+    DD_GUARD_V30 = 0.40
+
+    if prod_target_v22 is not None and best_v22 is not None:
+        # Reuse v22's risk-targeted base (same scaler & base series)
+        scaler_v22_base = (prod_target_v22 / realized_v22).clip(lower=0.0, upper=MAX_LEV_INNER)
+        sized_v22_unit  = base_v22 * scaler_v22_base   # K=1 sized series
+        active_mask_v30 = (base_v22.abs() > 1e-12).astype(float)
+
+        def _v30_simulate(K_max, K_min, dd_low, dd_high, tcost_bps, init=INIT_V30):
+            """Simulate equity with soft DD-aware K throttle."""
+            n     = len(sized_v22_unit)
+            arr_r = sized_v22_unit.values
+            arr_a = active_mask_v30.values
+            cost_per_active = tcost_bps / 1e4
+            eq      = np.empty(n + 1)
+            eq[0]   = init
+            peak    = init
+            K_path  = np.empty(n)
+            dd_path = np.empty(n)
+            # dd_low (e.g. -0.05) shallower, dd_high (e.g. -0.35) deeper; both negative.
+            span    = max(dd_low - dd_high, 1e-9)  # positive: 0.30 for [-0.05,-0.35]
+            for i in range(n):
+                dd_t = (eq[i] - peak) / peak  # ≤ 0
+                dd_path[i] = dd_t
+                # smoothstep on dd: 1 above dd_low (shallow), 0 below dd_high (deep)
+                if dd_t >= dd_low:
+                    s = 1.0
+                elif dd_t <= dd_high:
+                    s = 0.0
+                else:
+                    x = (dd_t - dd_high) / span
+                    s = x * x * (3.0 - 2.0 * x)  # cubic Hermite smoothstep
+                K_eff      = K_min + (K_max - K_min) * s
+                K_path[i]  = K_eff
+                ret_i      = K_eff * arr_r[i] - cost_per_active * arr_a[i]
+                eq[i + 1]  = eq[i] * (1.0 + ret_i)
+                if eq[i + 1] > peak:
+                    peak = eq[i + 1]
+                if eq[i + 1] <= 0:  # bankruptcy guard
+                    eq[i + 1:] = eq[i + 1]
+                    K_path[i + 1:]  = K_eff
+                    dd_path[i + 1:] = -1.0
+                    break
+            eq_series = pd.Series(eq[1:], index=sized_v22_unit.index)
+            ret_series = eq_series.pct_change().fillna(eq_series.iloc[0]/init - 1.0)
+            peak_s = eq_series.cummax()
+            dd_s   = (eq_series - peak_s) / peak_s
+            years  = len(eq_series) / 252.0
+            cagr   = (eq_series.iloc[-1] / init) ** (1.0 / max(years, 1e-9)) - 1.0
+            sh     = float(np.sqrt(252) * ret_series.mean() / ret_series.std()) \
+                     if ret_series.std() > 0 else 0.0
+            max_dd = float(dd_s.min())
+            calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+            return dict(K_max=float(K_max), K_min=float(K_min),
+                        dd_low=float(dd_low), dd_high=float(dd_high),
+                        tcost_bps=float(tcost_bps),
+                        eq=eq_series, K_path=K_path, dd_path=dd_path,
+                        final=float(eq_series.iloc[-1]),
+                        pnl=float(eq_series.iloc[-1] - init),
+                        sh=sh, cagr=float(cagr),
+                        dd_pct=max_dd, calmar=float(calmar),
+                        K_mean=float(np.mean(K_path)),
+                        K_p10=float(np.percentile(K_path, 10)),
+                        K_p90=float(np.percentile(K_path, 90)))
+
+        # Parameter grid
+        K_max_grid  = [3.5, 4.5, 5.5, 7.0, 9.0]
+        K_min_grid  = [0.5, 1.0, 1.5]
+        dd_band_grid = [(-0.05, -0.25), (-0.05, -0.30), (-0.05, -0.35),
+                        (-0.10, -0.30), (-0.10, -0.35),
+                        (-0.15, -0.35), (-0.15, -0.40)]
+        TCOST_PROD_V30 = 5.0  # conservative cost for PROD selection
+
+        print(f"  ── v30 grid sweep  (cost={TCOST_PROD_V30:.0f}bps; MaxDD ≤ {DD_GUARD_V30*100:.0f}%) ──")
+        print(f"  v22 reference: K=3.50  PnL +$5704.85  MaxDD -36.33%  Sh +0.852  Calmar 1.21")
+        print(f"  {'K_max':>6}{'K_min':>6}{'dd_lo':>7}{'dd_hi':>7}"
+              f"{'PnL $':>11}{'MaxDD%':>9}{'Sh':>7}{'Calmar':>8}"
+              f"{'K_mean':>8}{'K_p90':>7}")
+        v30_sweep_prod = []
+        best_v30 = None
+        for k_max in K_max_grid:
+            for k_min in K_min_grid:
+                if k_min >= k_max: continue
+                for dd_lo, dd_hi in dd_band_grid:
+                    r = _v30_simulate(k_max, k_min, dd_lo, dd_hi, TCOST_PROD_V30)
+                    if r['dd_pct'] < -DD_GUARD_V30: continue
+                    v30_sweep_prod.append(r)
+                    if best_v30 is None or r['pnl'] > best_v30['pnl']:
+                        best_v30 = r
+        # display top-12 by PnL
+        v30_sweep_prod.sort(key=lambda r: -r['pnl'])
+        for r in v30_sweep_prod[:12]:
+            mark = ' ★' if r is best_v30 else ''
+            print(f"  {r['K_max']:>6.2f}{r['K_min']:>6.2f}"
+                  f"{r['dd_low']*100:>+7.1f}{r['dd_high']*100:>+7.1f}"
+                  f"  ${r['pnl']:>+8.2f}  {r['dd_pct']*100:>+7.2f}%"
+                  f"  {r['sh']:>+5.3f}  {r['calmar']:>+6.2f}"
+                  f"  {r['K_mean']:>6.2f}  {r['K_p90']:>5.2f}{mark}")
+
+        if best_v30 is not None:
+            delta = best_v30['pnl'] - 5704.85
+            verdict = '★ NEW PROD' if delta > 0 else 'no improvement vs v22'
+            print(f"\n  ★ v30 PROD K_max={best_v30['K_max']:.2f}  K_min={best_v30['K_min']:.2f}  "
+                  f"dd_band=[{best_v30['dd_low']*100:+.1f}%, {best_v30['dd_high']*100:+.1f}%]")
+            print(f"    PnL +${best_v30['pnl']:.2f}  MaxDD {best_v30['dd_pct']*100:+.2f}%  "
+                  f"Sh_net {best_v30['sh']:+.3f}  CAGR {best_v30['cagr']*100:+.2f}%  "
+                  f"Calmar {best_v30['calmar']:+.2f}")
+            print(f"    K path: mean={best_v30['K_mean']:.2f}  "
+                  f"p10={best_v30['K_p10']:.2f}  p90={best_v30['K_p90']:.2f}")
+            print(f"    Δ vs v22: ${delta:+.2f}  →  {verdict}")
+
+            # ── t-cost sensitivity at PROD parameters ────────────────────
+            print(f"\n  ── v30 PROD: t-cost sensitivity (same K_max/K_min/dd_band) ──")
+            print(f"  {'cost_bps':>10}{'PnL $':>13}{'MaxDD%':>10}{'Sh':>7}{'CAGR%':>9}{'Calmar':>9}")
+            tcost_grid = [0.0, 1.0, 2.0, 3.0, 5.0]
+            v30_cost_panel = {}
+            for tc in tcost_grid:
+                r_tc = _v30_simulate(best_v30['K_max'], best_v30['K_min'],
+                                     best_v30['dd_low'], best_v30['dd_high'], tc)
+                v30_cost_panel[tc] = r_tc
+                print(f"  {tc:>10.1f}  ${r_tc['pnl']:>+9.2f}  "
+                      f"{r_tc['dd_pct']*100:>+8.2f}%  {r_tc['sh']:>+5.3f}  "
+                      f"{r_tc['cagr']*100:>+7.2f}%  {r_tc['calmar']:>+7.2f}")
+
+            # ── v22 t-cost reference at same costs (apples-to-apples) ────
+            print(f"  ── v22 PROD: t-cost reference (K=3.5 fixed) ──")
+            print(f"  {'cost_bps':>10}{'PnL $':>13}{'MaxDD%':>10}{'Sh':>7}{'CAGR%':>9}{'Calmar':>9}")
+            v22_cost_panel = {}
+            for tc in tcost_grid:
+                r22 = _v22_metrics(prod_target_v22, float(best_v22['K']), tcost_bps=tc)
+                r22['calmar'] = (r22['cagr'] / abs(r22['dd_pct'])
+                                 if r22.get('dd_pct') and r22['dd_pct'] < 0 else float('inf'))
+                v22_cost_panel[tc] = r22
+                print(f"  {tc:>10.1f}  ${r22['pnl']:>+9.2f}  "
+                      f"{r22['dd_pct']*100:>+8.2f}%  {r22['sh']:>+5.3f}  "
+                      f"{r22['cagr']*100:>+7.2f}%  {r22['calmar']:>+7.2f}")
+
+            # ── v30 vs v22 net delta per cost ─────────────────────────────
+            print(f"  ── Δ(v30 - v22) per cost level ──")
+            print(f"  {'cost_bps':>10}{'Δ PnL $':>13}{'Δ Sh':>9}{'Δ Calmar':>11}")
+            for tc in tcost_grid:
+                d_pnl = v30_cost_panel[tc]['pnl'] - v22_cost_panel[tc]['pnl']
+                d_sh  = v30_cost_panel[tc]['sh']  - v22_cost_panel[tc]['sh']
+                d_cal = v30_cost_panel[tc]['calmar'] - v22_cost_panel[tc]['calmar']
+                print(f"  {tc:>10.1f}  ${d_pnl:>+9.2f}  {d_sh:>+7.3f}  {d_cal:>+8.2f}")
+
+            # ── plot ──
+            try:
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                # v22 reference equity at 5bps
+                r22_ref = v22_cost_panel[5.0]
+                eq_v22_5bps = INIT_V30 * (1.0 + (sized_v22_unit * float(best_v22['K']) -
+                                                 (5.0/1e4) * active_mask_v30)).cumprod()
+                fig = plt.figure(figsize=(13, 7))
+                gs  = fig.add_gridspec(3, 2, height_ratios=[2.4, 1.0, 1.0],
+                                       width_ratios=[3, 1.4], hspace=0.4, wspace=0.25)
+                ax0 = fig.add_subplot(gs[0, :])
+                ax0.plot(eq_v22_5bps.index, eq_v22_5bps.values, color='#888', lw=1.4,
+                         label=f'v22 PROD K=3.50 net 5bps (PnL +${r22_ref["pnl"]:.0f})')
+                ax0.plot(best_v30['eq'].index, best_v30['eq'].values, color='#d62728', lw=1.8,
+                         label=f"v30 PROD K_max={best_v30['K_max']:.1f} net 5bps "
+                               f"(PnL +${best_v30['pnl']:.0f})")
+                ax0.plot(v30_cost_panel[2.0]['eq'].index, v30_cost_panel[2.0]['eq'].values,
+                         color='#1f77b4', lw=1.4, ls='--',
+                         label=f"v30 @ 2bps realistic exec (PnL +${v30_cost_panel[2.0]['pnl']:.0f})")
+                ax0.set_title(f"v30 SOFT DD-AWARE K THROTTLE  "
+                              f"K∈[{best_v30['K_min']:.1f}, {best_v30['K_max']:.1f}]  "
+                              f"dd_band=[{best_v30['dd_low']*100:+.0f}%, {best_v30['dd_high']*100:+.0f}%]  "
+                              f"Δ vs v22 +${delta:.0f}")
+                ax0.set_ylabel('Equity (from $1,200)')
+                ax0.legend(loc='upper left', fontsize=9); ax0.grid(alpha=0.3)
+                # K path
+                ax1 = fig.add_subplot(gs[1, :])
+                ax1.plot(best_v30['eq'].index, best_v30['K_path'], color='#2ca02c', lw=1.0)
+                ax1.axhline(float(best_v22['K']), color='#888', ls=':', lw=1, label='v22 K=3.5')
+                ax1.set_ylabel('K_eff(t)'); ax1.legend(loc='upper left', fontsize=8)
+                ax1.grid(alpha=0.3)
+                # DD path
+                ax2 = fig.add_subplot(gs[2, 0])
+                ax2.fill_between(best_v30['eq'].index, best_v30['dd_path']*100, 0,
+                                 color='#d62728', alpha=0.4, label='v30 DD%')
+                ax2.axhline(best_v30['dd_low']*100, color='gray', ls='--', lw=0.8)
+                ax2.axhline(best_v30['dd_high']*100, color='black', ls='--', lw=0.8)
+                ax2.set_ylabel('DD %'); ax2.legend(loc='lower left', fontsize=8)
+                ax2.grid(alpha=0.3)
+                # Cost sensitivity bar
+                ax3 = fig.add_subplot(gs[2, 1])
+                xs = list(v30_cost_panel.keys())
+                v22_pnls = [v22_cost_panel[t]['pnl'] for t in xs]
+                v30_pnls = [v30_cost_panel[t]['pnl'] for t in xs]
+                w = 0.35
+                xx = np.arange(len(xs))
+                ax3.bar(xx - w/2, v22_pnls, w, color='#888', label='v22')
+                ax3.bar(xx + w/2, v30_pnls, w, color='#d62728', label='v30')
+                ax3.set_xticks(xx); ax3.set_xticklabels([f'{t:.0f}bp' for t in xs], fontsize=8)
+                ax3.set_title('PnL vs t-cost', fontsize=10); ax3.legend(fontsize=8)
+                ax3.grid(alpha=0.3, axis='y')
+                v30_png = os.path.join(os.path.dirname(__file__),
+                                       'crypto_bsdt_v30_dd_throttle.png')
+                plt.savefig(v30_png, dpi=110, bbox_inches='tight'); plt.close()
+                print(f"  v30 plot saved → {v30_png}")
+            except Exception as e:
+                print(f"  (matplotlib skipped: {e})")
+
+            # Build a registration sim_v30 from the best run (return series → simulate_from_pnl)
+            v30_ret_series = best_v30['eq'].pct_change().fillna(best_v30['eq'].iloc[0]/INIT_V30 - 1.0)
+            sims_v30_prod  = simulate_from_pnl(v30_ret_series, 'DYNAMIC_v30')
+        else:
+            sims_v30_prod = sims_v22
+            v30_cost_panel = {}
+            v22_cost_panel = {}
+            print("  v30: no (K_max, K_min, band) satisfies DD guard → fall back to v22")
+    else:
+        best_v30 = None
+        sims_v30_prod = sims_v22
+        v30_cost_panel = {}
+        v22_cost_panel = {}
+        print("  v30: v22 PROD missing → skip")
+
+    v30_summary = {
+        'design':           'soft DD-aware smoothstep K throttle on v22 base',
+        'best_K_max':       float(best_v30['K_max']) if best_v30 else None,
+        'best_K_min':       float(best_v30['K_min']) if best_v30 else None,
+        'best_dd_low':      float(best_v30['dd_low']) if best_v30 else None,
+        'best_dd_high':     float(best_v30['dd_high']) if best_v30 else None,
+        'best_pnl':         float(round(best_v30['pnl'], 2)) if best_v30 else None,
+        'best_max_dd':      float(round(best_v30['dd_pct'], 4)) if best_v30 else None,
+        'best_sharpe_net':  float(round(best_v30['sh'], 4)) if best_v30 else None,
+        'best_final':       float(round(best_v30['final'], 2)) if best_v30 else None,
+        'best_cagr':        float(round(best_v30['cagr'], 4)) if best_v30 else None,
+        'best_calmar':      float(round(best_v30['calmar'], 4)) if best_v30 else None,
+        'K_mean':           float(round(best_v30['K_mean'], 3)) if best_v30 else None,
+        'K_p10':            float(round(best_v30['K_p10'], 3)) if best_v30 else None,
+        'K_p90':            float(round(best_v30['K_p90'], 3)) if best_v30 else None,
+        'delta_vs_v22':     (float(round(best_v30['pnl'] - 5704.85, 2)) if best_v30 else None),
+        'cost_panel_v30':   {f'{k:.0f}bp': float(round(v['pnl'], 2))
+                             for k, v in v30_cost_panel.items()},
+        'cost_panel_v22':   {f'{k:.0f}bp': float(round(v['pnl'], 2))
+                             for k, v in v22_cost_panel.items()},
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -3846,6 +4107,7 @@ def main():
     sims_all['DYNAMIC_v27']        = sims_v27_prod
     sims_all['DYNAMIC_v28']        = sims_v28_prod
     sims_all['DYNAMIC_v29']        = sims_v29_prod
+    sims_all['DYNAMIC_v30']        = sims_v30_prod
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -3907,6 +4169,7 @@ def main():
             "v27_raised_cap":    sims_v27_prod['sharpe'],
             "v28_risk_parity":   sims_v28_prod['sharpe'],
             "v29_additive_overlay": sims_v29_prod['sharpe'],
+            "v30_dd_throttle":   sims_v30_prod['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
             "v23_summary":       v23_summary,
@@ -3916,6 +4179,7 @@ def main():
             "v27_summary":       v27_summary,
             "v28_summary":       v28_summary,
             "v29_summary":       v29_summary,
+            "v30_summary":       v30_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
