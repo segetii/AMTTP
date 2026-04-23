@@ -57,9 +57,9 @@
       "tail_acc": 0.65,
       "tail_pnl": 0.01736,
       "leverage": 0.0789,
-      "bh_sharpe": 0.262,
+      "bh_sharpe": 0.261,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.008
+      "bh_cum": -0.012
     },
     "P1_ETH_BTC": {
       "label": "P1_ETH_BTC",
@@ -89,9 +89,9 @@
       "tail_acc": 0.538,
       "tail_pnl": 0.00342,
       "leverage": 0.0369,
-      "bh_sharpe": 0.406,
+      "bh_sharpe": 0.405,
       "bh_max_dd": -0.497,
-      "bh_cum": 0.403
+      "bh_cum": 0.401
     },
     "P3_ETH_BNB": {
       "label": "P3_ETH_BNB",
@@ -105,7 +105,7 @@
       "tail_acc": 0.053,
       "tail_pnl": -0.01564,
       "leverage": 0.048,
-      "bh_sharpe": -0.305,
+      "bh_sharpe": -0.306,
       "bh_max_dd": -0.617,
       "bh_cum": -0.367
     },
@@ -121,9 +121,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.03113,
       "leverage": 0.0657,
-      "bh_sharpe": 0.819,
+      "bh_sharpe": 0.818,
       "bh_max_dd": -0.519,
-      "bh_cum": 2.244
+      "bh_cum": 2.236
     },
     "M1_ALT_macro": {
       "label": "M1_ALT_macro",
@@ -137,9 +137,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.07584,
       "leverage": 0.0347,
-      "bh_sharpe": 0.262,
+      "bh_sharpe": 0.261,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.008
+      "bh_cum": -0.012
     },
     "COMBINED_4way": {
       "label": "COMBINED_4way",
@@ -153,9 +153,9 @@
       "tail_acc": 0.171,
       "tail_pnl": -0.00716,
       "leverage": 0.035,
-      "bh_sharpe": 0.262,
+      "bh_sharpe": 0.261,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.008
+      "bh_cum": -0.012
     },
     "DYNAMIC_v10": {
       "label": "DYNAMIC_v10",
@@ -382,6 +382,24 @@
       "total_days": 1209,
       "hit_rate": 0.489
     },
+    "DYNAMIC_v21": {
+      "label": "DYNAMIC_v21_invvol",
+      "sharpe": 1.191,
+      "max_dd": -0.044,
+      "cum_return": 0.141,
+      "active_days": 342,
+      "total_days": 1209,
+      "hit_rate": 0.488
+    },
+    "DYNAMIC_v22": {
+      "label": "DYNAMIC_v22",
+      "sharpe": 1.747,
+      "max_dd": -0.104,
+      "cum_return": 0.927,
+      "active_days": 333,
+      "total_days": 1209,
+      "hit_rate": 0.489
+    },
     "F_FUND_ETH": {
       "label": "F_FUND_ETH_mom",
       "sharpe": 1.742,
@@ -473,6 +491,51 @@
       "best_K_pnl": 1273.6,
       "best_K_max_dd": -0.3996,
       "best_K_sharpe_net": 0.5491
+    },
+    "v21_ensemble": 1.191,
+    "v22_voltarget": 1.747,
+    "v21_summary": {
+      "prod_scheme": "invvol",
+      "ensemble_sharpe": 1.191,
+      "ensemble_max_dd": -0.044,
+      "weights": {
+        "v18_smooth": 0.7154,
+        "F_FUND_ETH": 0.0874,
+        "F_FUND_BTC": 0.0882,
+        "M1_ALT_macro": 0.109
+      },
+      "best_K": 9.5,
+      "best_K_pnl": 1194.5,
+      "best_K_max_dd": -0.3954,
+      "best_K_sharpe_net": 0.5493,
+      "best_K_final": 2394.5,
+      "best_K_cagr": 0.1549,
+      "all_schemes_pnl": {
+        "invvol": 1194.5,
+        "equal": 1021.22,
+        "sharpe": 1044.13,
+        "kelly": 1152.15
+      }
+    },
+    "v22_summary": {
+      "prod_target_vol": 0.003,
+      "lookback_days": 30,
+      "max_inner_lev": 20.0,
+      "best_K": 3.5,
+      "best_K_pnl": 5704.85,
+      "best_K_max_dd": -0.3633,
+      "best_K_sharpe_net": 0.852,
+      "best_K_final": 6904.85,
+      "best_K_cagr": 0.4401,
+      "all_targets_pnl": {
+        "0.0030": 5704.85,
+        "0.0050": 5630.06,
+        "0.0080": 3546.98,
+        "0.0120": 2553.78,
+        "0.0180": 3453.88
+      },
+      "ensemble_sharpe": 1.747,
+      "ensemble_max_dd": -0.104
     }
   },
   "v14_diagnostics": {
@@ -501,7 +564,7 @@
     "alignment_mean": 0.5576,
     "alignment_std": 0.4135,
     "alignment_p90": 0.9498,
-    "corr_phi_alignment": -0.3932,
+    "corr_phi_alignment": -0.3933,
     "corr_phi_gamma_rank": -0.0462,
     "lev_v16_mean": 0.586,
     "lev_v16_std": 0.143,

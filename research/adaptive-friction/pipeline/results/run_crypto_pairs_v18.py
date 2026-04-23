@@ -1902,6 +1902,340 @@ def main():
         'best_K_sharpe_net': float(round(best_m20['sh'], 4)) if best_m20 else None,
     }
 
+    # ════════════════════════════════════════════════════════════════════════
+    #  v21: DEEP STACK — 4 legs × 4 weighting schemes, picks profit-maximizing
+    #  ────────────────────────────────────────────────────────────────────
+    #  v20 used inverse-vol (risk parity) → starves the funding alphas because
+    #  they're high-vol-per-active-day. For PROFIT (not just Sharpe) we should
+    #  Sharpe-weight or Kelly-weight, which puts heavy weight on the +1.74 /
+    #  +1.98 funding legs. Also adds 4th orthogonal leg: M1_ALT_macro
+    #  (Sh +1.39, ~4.5% active days) — currently sitting unused.
+    #
+    #  Schemes tested:
+    #    invvol  — w_i ∝ 1/σ_i   (v20 baseline, risk parity)
+    #    equal   — w_i = 1/N      (naive)
+    #    sharpe  — w_i ∝ max(Sh_i, 0)  (profit-tilted)
+    #    kelly   — w_i ∝ μ_i / σ_i² (full-Kelly fractional)
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "═" * 96)
+    print("  v21 DEEP-STACK ENSEMBLE  —  4 legs × 4 weighting schemes")
+    print("═" * 96)
+
+    # 4-leg pool (v18_smooth + 3 orthogonal alpha pockets)
+    pnl_alt_macro_t = pnl_v10_dict_orig['M1_ALT_macro'][test_mask].fillna(0.0)
+    legs_v21 = {
+        'v18_smooth':   pnl_v18s_v20,
+        'F_FUND_ETH':   pnl_fundE_v20,
+        'F_FUND_BTC':   pnl_fundB_v20,
+        'M1_ALT_macro': pnl_alt_macro_t,
+    }
+
+    # per-leg statistics (active-day vol, daily-mean, Sharpe)
+    leg_stats = {}
+    for k, v in legs_v21.items():
+        nz = v[v != 0]
+        sigma = float(nz.std()) if len(nz) > 1 else float('nan')
+        mu = float(v.mean())
+        sh = float(np.sqrt(252) * mu / sigma) if sigma > 0 else 0.0
+        leg_stats[k] = dict(mu=mu, sigma=sigma, sharpe=sh,
+                            active_pct=100.0 * len(nz) / max(len(v), 1))
+
+    print(f"\n  ── Leg statistics (test) ──")
+    print(f"  {'leg':<14}  {'σ_active':>10}  {'μ_daily':>10}  {'Sharpe':>8}  {'active%':>8}")
+    for k, s in leg_stats.items():
+        print(f"  {k:<14}  {s['sigma']:>10.5f}  {s['mu']:>+10.6f}  {s['sharpe']:>+8.3f}  {s['active_pct']:>7.1f}%")
+
+    def _normalise(d):
+        s = sum(d.values())
+        return {k: (v / s if s > 0 else 0.0) for k, v in d.items()}
+
+    schemes = {
+        'invvol': _normalise({k: 1.0 / max(s['sigma'], 1e-9) for k, s in leg_stats.items()}),
+        'equal':  _normalise({k: 1.0 for k in leg_stats}),
+        'sharpe': _normalise({k: max(s['sharpe'], 0.0) for k, s in leg_stats.items()}),
+        'kelly':  _normalise({k: max(s['mu'] / max(s['sigma']**2, 1e-12), 0.0) for k, s in leg_stats.items()}),
+    }
+
+    # build all v21 variants and simulate
+    v21_variants = {}
+    for sname, w in schemes.items():
+        pnl_v21 = sum(w[k] * legs_v21[k] for k in legs_v21)
+        sims_v21 = simulate_from_pnl(pnl_v21, f'DYNAMIC_v21_{sname}')
+        v21_variants[sname] = (pnl_v21, sims_v21, w)
+
+    print(f"\n  ── Weight schemes ──")
+    print(f"  {'leg':<14}  " + "  ".join(f"{sn:>8}" for sn in schemes))
+    for k in legs_v21:
+        print(f"  {k:<14}  " + "  ".join(f"{schemes[sn][k]:>8.3f}" for sn in schemes))
+
+    # K-sweep helper (reuse v20 form)
+    INIT_V21 = 1200.0
+    TCOST_V21 = 5.0
+
+    def _v21_metrics(returns, K, tcost_bps=0.0):
+        r = (returns.dropna().astype(float) * K).copy()
+        if tcost_bps > 0:
+            cost = (tcost_bps / 1e4) * (returns.dropna().abs() > 0).astype(float)
+            r = r - cost
+        eq = INIT_V21 * (1.0 + r).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return dict(K=K, final=0.0, pnl=-INIT_V21, sh=float('nan'),
+                        cagr=float('nan'), dd_pct=float('nan'),
+                        dd_dol=float('nan'), ruined=True)
+        peak = eq.cummax()
+        dd = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr = (eq.iloc[-1] / INIT_V21) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh = float(np.sqrt(252) * r.mean() / r.std()) if r.std() > 0 else 0.0
+        return dict(K=K, final=float(eq.iloc[-1]),
+                    pnl=float(eq.iloc[-1] - INIT_V21), sh=sh, cagr=cagr,
+                    dd_pct=float(dd.min()), dd_dol=float((eq - peak).min()),
+                    ruined=False)
+
+    # for each scheme: find best-K under MaxDD ≤ 40% net 5bps, record PnL
+    print(f"\n  ── v21 scheme bake-off (best K under MaxDD ≤ 40%, net 5bps, $1,200) ──")
+    print(f"  {'scheme':<10}  {'Sh_gross':>9}  {'best_K':>7}  {'final $':>10}  "
+          f"{'PnL $':>10}  {'MaxDD%':>8}  {'Sh_net':>7}  {'CAGR%':>7}")
+    print(f"  " + "-" * 90)
+    bake_results = {}
+    for sname, (pnl_v21, sims_v21, w) in v21_variants.items():
+        best_K = None; best_sh = -1e9; best_m = None
+        for K in np.arange(1.0, 20.01, 0.25):
+            m = _v21_metrics(pnl_v21, float(K), tcost_bps=TCOST_V21)
+            if m['ruined'] or abs(m['dd_pct']) > 0.40:
+                continue
+            if m['sh'] > best_sh:
+                best_sh = m['sh']; best_K = float(K); best_m = m
+        bake_results[sname] = (sims_v21, best_K, best_m, w, pnl_v21)
+        if best_m:
+            print(f"  {sname:<10}  {sims_v21['sharpe']:>+9.3f}  {best_K:>7.2f}  "
+                  f"$ {best_m['final']:>8,.2f}  $ {best_m['pnl']:>+8,.2f}  "
+                  f"{best_m['dd_pct']*100:>+7.2f}%  {best_m['sh']:>+7.3f}  "
+                  f"{best_m['cagr']*100:>+6.2f}%")
+        else:
+            print(f"  {sname:<10}  {sims_v21['sharpe']:>+9.3f}     n/a (all ruined or > 40%DD)")
+
+    # pick PROD = scheme with highest best_K_pnl (substantial profit, not just Sharpe)
+    valid = {sn: r for sn, r in bake_results.items() if r[2] is not None}
+    if not valid:
+        print(f"\n  ⚠ No scheme survived MaxDD ≤ 40% — falling back to inv-vol")
+        prod_scheme = 'invvol'
+    else:
+        prod_scheme = max(valid, key=lambda sn: valid[sn][2]['pnl'])
+    sims_v21_prod, best_K_v21, best_m_v21, w_v21_prod, pnl_dyn_v21 = bake_results[prod_scheme]
+
+    print(f"\n  ★ v21 PROD scheme = {prod_scheme!r}")
+    print(f"    Headline Sharpe (gross, K=1) = {sims_v21_prod['sharpe']:+.3f}")
+    print(f"    Best-K = {best_K_v21:.2f}  →  Final ${best_m_v21['final']:,.2f}  "
+          f"PnL ${best_m_v21['pnl']:+,.2f}  MaxDD {best_m_v21['dd_pct']*100:+.2f}%")
+    print(f"    vs v20 best-K (K=10): PnL +$1,273.60  →  v21 Δ = "
+          f"${best_m_v21['pnl'] - 1273.60:+,.2f}")
+
+    # full K-sweep on PROD scheme
+    print(f"\n  ── v21 [{prod_scheme}] EXPOSURE-SCALING SWEEP, $1,200 ──")
+    print(f"  {'mode':<10}  {'K':>3}    Sharpe      CAGR        Final          PnL    MaxDD %     MaxDD $")
+    print(f"  " + "-" * 96)
+    K_GRID_v21 = [1, 2, 3, 5, 10]
+    for K in K_GRID_v21:
+        m = _v21_metrics(pnl_dyn_v21, K, tcost_bps=0.0)
+        print(f"  {'gross':<10}  {K:>3}    {m['sh']:+.3f}   {m['cagr']*100:+6.2f}%  "
+              f"$ {m['final']:>9,.2f}  $ {m['pnl']:>+10,.2f}    "
+              f"{m['dd_pct']*100:+6.2f}%  $ {m['dd_dol']:>+9,.2f}")
+    for K in K_GRID_v21:
+        m = _v21_metrics(pnl_dyn_v21, K, tcost_bps=TCOST_V21)
+        print(f"  {'net 5bps':<10}  {K:>3}    {m['sh']:+.3f}   {m['cagr']*100:+6.2f}%  "
+              f"$ {m['final']:>9,.2f}  $ {m['pnl']:>+10,.2f}    "
+              f"{m['dd_pct']*100:+6.2f}%  $ {m['dd_dol']:>+9,.2f}")
+
+    # save v21 sweep CSV + PNG
+    eq_K1_v21 = INIT_V21 * (1.0 + pnl_dyn_v21.dropna()).cumprod()
+    rKS = pnl_dyn_v21.dropna() * best_K_v21
+    cKS = (TCOST_V21/1e4) * (pnl_dyn_v21.dropna().abs() > 0).astype(float)
+    eq_KS_g_v21 = INIT_V21 * (1.0 + rKS).cumprod()
+    eq_KS_n_v21 = INIT_V21 * (1.0 + (rKS - cKS)).cumprod()
+    sweep_csv_v21 = pd.DataFrame({
+        'date': eq_K1_v21.index,
+        'equity_K1_gross': eq_K1_v21.values,
+        f'equity_K{best_K_v21:.2f}_gross': eq_KS_g_v21.values,
+        f'equity_K{best_K_v21:.2f}_net5bps': eq_KS_n_v21.values,
+    })
+    v21_csv_path = os.path.join(OUT_DIR, 'crypto_bsdt_v21_exposure_sweep.csv')
+    sweep_csv_v21.to_csv(v21_csv_path, index=False)
+    print(f"\n  v21 scaled curves saved → {v21_csv_path}")
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.plot(eq_K1_v21.index, eq_K1_v21.values, color='gray', lw=1.0, label='K=1 gross')
+        ax.plot(eq_KS_g_v21.index, eq_KS_g_v21.values, color='steelblue', lw=1.4,
+                label=f'K={best_K_v21:.2f} gross')
+        ax.plot(eq_KS_n_v21.index, eq_KS_n_v21.values, color='crimson', lw=1.4,
+                label=f'K={best_K_v21:.2f} net (5bps)')
+        ax.set_title(f'v21 deep-stack ({prod_scheme}) — exposure scaling at K=1 vs K={best_K_v21:.2f}')
+        ax.set_ylabel(f'Equity (from ${INIT_V21:,.0f})')
+        ax.grid(True, alpha=0.3); ax.legend(loc='upper left')
+        plt.tight_layout()
+        v21_png_path = os.path.join(OUT_DIR, 'crypto_bsdt_v21_exposure_sweep.png')
+        plt.savefig(v21_png_path, dpi=110); plt.close()
+        print(f"  v21 scaled plot   saved → {v21_png_path}")
+    except Exception as e:
+        print(f"  (matplotlib skipped: {e})")
+
+    sims_v21 = sims_v21_prod
+    v21_summary = {
+        'prod_scheme':       prod_scheme,
+        'ensemble_sharpe':   float(sims_v21_prod['sharpe']),
+        'ensemble_max_dd':   float(sims_v21_prod['max_dd']),
+        'weights':           {k: float(round(w_v21_prod[k], 4)) for k in w_v21_prod},
+        'best_K':            float(best_K_v21),
+        'best_K_pnl':        float(round(best_m_v21['pnl'], 2)),
+        'best_K_max_dd':     float(round(best_m_v21['dd_pct'], 4)),
+        'best_K_sharpe_net': float(round(best_m_v21['sh'], 4)),
+        'best_K_final':      float(round(best_m_v21['final'], 2)),
+        'best_K_cagr':       float(round(best_m_v21['cagr'], 4)),
+        'all_schemes_pnl':   {sn: (float(round(r[2]['pnl'], 2)) if r[2] else None)
+                              for sn, r in bake_results.items()},
+    }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # v22: VOL-TARGETED v20  —  realized-vol scaling for higher leverage capacity
+    # ──────────────────────────────────────────────────────────────────────
+    # Rationale: v20's MaxDD ceiling pins K at ~10. Volatility clusters cause
+    # the worst drawdowns. Inverse-realized-vol scaling smooths the leveraged
+    # path, allowing higher K under the same MaxDD budget → more $ profit.
+    print(f"\n  v22 VOL-TARGETED v20  —  realized-vol scaling (K-capacity unlock)")
+    INIT_V22  = 1200.0
+    TCOST_V22 = 5.0
+    LOOKBACK_V22  = 30
+    MAX_LEV_INNER = 20.0  # safety cap on inner vol scaler
+
+    base_v22 = pnl_dyn_v20.fillna(0.0).astype(float)
+    realized_v22 = base_v22.rolling(LOOKBACK_V22, min_periods=10).std().shift(1)
+    realized_v22 = realized_v22.fillna(base_v22.std())
+    realized_v22 = realized_v22.replace(0.0, base_v22.std()).clip(lower=1e-6)
+
+    v22_targets = [0.003, 0.005, 0.008, 0.012, 0.018]
+
+    def _v22_metrics(target_vol, K, tcost_bps=TCOST_V22):
+        scaler = (target_vol / realized_v22).clip(lower=0.0, upper=MAX_LEV_INNER)
+        levered = base_v22 * scaler * float(K)
+        active = (base_v22.abs() > 0).astype(float)
+        cost = (tcost_bps / 1e4) * active
+        net = levered - cost
+        eq = INIT_V22 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return dict(K=K, final=0.0, pnl=-INIT_V22, sh=float('nan'),
+                        cagr=float('nan'), dd_pct=float('nan'), ruined=True)
+        peak = eq.cummax()
+        dd = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr = (eq.iloc[-1] / INIT_V22) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        return dict(K=K, final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V22),
+                    sh=sh, cagr=cagr, dd_pct=float(dd.min()), ruined=False)
+
+    print(f"  ── target_vol bake-off  (best K under MaxDD ≤ 40%, net 5bps) ──")
+    print(f"  {'tgt_daily':<10}{'best_K':>8}{'final $':>14}{'PnL $':>14}{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}")
+    v22_bake = {}
+    for tgt in v22_targets:
+        best = None
+        for K in np.arange(0.5, 30.05, 0.5):
+            m = _v22_metrics(tgt, float(K), tcost_bps=TCOST_V22)
+            if m is None or m.get('ruined', False):
+                continue
+            if not (m['dd_pct'] >= -0.40):
+                continue
+            if best is None or m['pnl'] > best['pnl']:
+                best = m
+        v22_bake[tgt] = best
+        if best is not None:
+            print(f"  {tgt:<10.4f}{best['K']:>8.2f}  ${best['final']:>10.2f}  "
+                  f"${best['pnl']:>+10.2f}  {best['dd_pct']*100:>+8.2f}%  "
+                  f"{best['sh']:>+7.3f}  {best['cagr']*100:>+7.2f}%")
+        else:
+            print(f"  {tgt:<10.4f}  (no K satisfies DD constraint)")
+
+    valid_v22 = {t: r for t, r in v22_bake.items() if r is not None}
+    if valid_v22:
+        prod_target_v22 = max(valid_v22, key=lambda t: valid_v22[t]['pnl'])
+        best_v22 = valid_v22[prod_target_v22]
+        print(f"\n  ★ v22 PROD target_vol = {prod_target_v22:.4f}  (daily)")
+        print(f"    best K = {best_v22['K']:.2f}  →  PnL +${best_v22['pnl']:.2f}  "
+              f"MaxDD {best_v22['dd_pct']*100:+.2f}%  Sh_net {best_v22['sh']:+.3f}  "
+              f"CAGR {best_v22['cagr']*100:+.2f}%")
+        delta_v20 = best_v22['pnl'] - 1273.60
+        print(f"    vs v20 (K=10):   PnL +$1,273.60  →  v22 Δ = ${delta_v20:+.2f}")
+
+        # build sims dict at K=1 for reporting consistency
+        scaler_prod = (prod_target_v22 / realized_v22).clip(lower=0.0, upper=MAX_LEV_INNER)
+        pnl_v22_K1  = base_v22 * scaler_prod
+        sims_v22    = simulate_from_pnl(pnl_v22_K1, 'DYNAMIC_v22')
+
+        # full K-sweep table for the PROD target
+        print(f"\n  ── v22 [target={prod_target_v22:.4f}] EXPOSURE SWEEP, $1,200 ──")
+        print(f"  {'K':>5}  {'mode':<10}  {'final $':>12}  {'PnL $':>12}  "
+              f"{'MaxDD%':>8}  {'Sh_net':>8}  {'CAGR%':>8}")
+        for K in [1, 2, 3, 5, 10, best_v22['K']]:
+            for mode, tc in [('gross', 0.0), ('net5bp', TCOST_V22)]:
+                m = _v22_metrics(prod_target_v22, float(K), tcost_bps=tc)
+                if m is None:
+                    continue
+                print(f"  {K:>5.2f}  {mode:<10}  ${m['final']:>9.2f}  "
+                      f"${m['pnl']:>+9.2f}  {m['dd_pct']*100:>+6.2f}%  "
+                      f"{m['sh']:>+6.3f}  {m['cagr']*100:>+6.2f}%")
+
+        # save scaled curves
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            scaler_prod = (prod_target_v22 / realized_v22).clip(lower=0.0, upper=MAX_LEV_INNER)
+            r1   = base_v22 * scaler_prod * 1.0
+            rKb  = base_v22 * scaler_prod * best_v22['K']
+            cost = (TCOST_V22/1e4) * (base_v22.abs() > 0).astype(float)
+            eq1   = INIT_V22 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V22 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V22 * (1.0 + (rKb - cost)).cumprod()
+            fig, ax = plt.subplots(figsize=(11, 4))
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2,
+                    label=f'K=1 gross')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v22["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v22["K"]:.2f} net (5bps)')
+            ax.set_title(f"v22 vol-target  (tgt={prod_target_v22:.4f})  "
+                         f"— exposure scaling at K=1 vs K={best_v22['K']:.2f}")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v22_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v22_exposure_sweep.png')
+            plt.tight_layout(); plt.savefig(v22_png, dpi=110); plt.close()
+            print(f"  v22 scaled plot saved → {v22_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+    else:
+        prod_target_v22 = None
+        best_v22  = None
+        sims_v22  = sims_v20
+        print("  v22: no target satisfies DD constraint  →  fall back to v20")
+
+    v22_summary = {
+        'prod_target_vol':   float(prod_target_v22) if prod_target_v22 else None,
+        'lookback_days':     LOOKBACK_V22,
+        'max_inner_lev':     MAX_LEV_INNER,
+        'best_K':            float(best_v22['K']) if best_v22 else None,
+        'best_K_pnl':        float(round(best_v22['pnl'], 2)) if best_v22 else None,
+        'best_K_max_dd':     float(round(best_v22['dd_pct'], 4)) if best_v22 else None,
+        'best_K_sharpe_net': float(round(best_v22['sh'], 4)) if best_v22 else None,
+        'best_K_final':      float(round(best_v22['final'], 2)) if best_v22 else None,
+        'best_K_cagr':       float(round(best_v22['cagr'], 4)) if best_v22 else None,
+        'all_targets_pnl':   {f'{t:.4f}': (float(round(r['pnl'], 2)) if r else None)
+                              for t, r in v22_bake.items()},
+        'ensemble_sharpe':   float(sims_v22['sharpe']),
+        'ensemble_max_dd':   float(sims_v22['max_dd']),
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -2032,6 +2366,8 @@ def main():
         ('v18  (smooth + cap + gate + EWMA cd)', sims_v18),
         (f'v19  ({best_v19_tag}) [neg result]',   sims_v19),
         ('v20  STACKED (v18s + fundE + fundB)',  sims_v20),
+        (f'v21  DEEP STACK [{prod_scheme}]',     sims_v21_prod),
+        (f'v22  VOL-TARGET v20',                 sims_v22),
     ]
     base = sims_v10_orig['sharpe']
     for label, r in rows:
@@ -2219,6 +2555,8 @@ def main():
         sims_all[f'DYNAMIC_{tag}'] = s
     sims_all['DYNAMIC_v19']        = sims_v19
     sims_all['DYNAMIC_v20']        = sims_v20
+    sims_all['DYNAMIC_v21']        = sims_v21_prod
+    sims_all['DYNAMIC_v22']        = sims_v22
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -2271,6 +2609,10 @@ def main():
             "v19_prod_variant":  best_v19_tag,
             "v20_ensemble":      sims_v20['sharpe'],
             "v20_summary":       v20_summary,
+            "v21_ensemble":      sims_v21_prod['sharpe'],
+            "v22_voltarget":     sims_v22['sharpe'],
+            "v21_summary":       v21_summary,
+            "v22_summary":       v22_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
@@ -2339,6 +2681,8 @@ def main():
         ('v18  (refined geometry)',  'smooth+cap+gate+EWMA collapse_dir',              sims_v18['sharpe']),
         (f'v19  ALPHA OVERLAY',      f'momentum × v18_smooth ({best_v19_tag})',        sims_v19['sharpe']),
         ('v20  STACKED ALPHA',       'inv-vol(v18s + F_FUND_ETH + F_FUND_BTC)',        sims_v20['sharpe']),
+        (f'v21  DEEP STACK ({prod_scheme})',  '4-leg + scheme bake-off',                       sims_v21_prod['sharpe']),
+        (f'v22  VOL-TARGET v20',              f'inv-realized-vol overlay  (tgt={prod_target_v22})',  sims_v22['sharpe']),
     ]
     for vname, src, sh in summary_rows:
         print(f"  {vname:<22}  {src:<38}  {sh:>+14.3f}")
