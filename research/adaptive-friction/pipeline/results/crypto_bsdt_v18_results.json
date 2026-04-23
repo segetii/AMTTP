@@ -57,9 +57,9 @@
       "tail_acc": 0.65,
       "tail_pnl": 0.01736,
       "leverage": 0.0789,
-      "bh_sharpe": 0.265,
+      "bh_sharpe": 0.262,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.001
+      "bh_cum": -0.008
     },
     "P1_ETH_BTC": {
       "label": "P1_ETH_BTC",
@@ -89,9 +89,9 @@
       "tail_acc": 0.538,
       "tail_pnl": 0.00342,
       "leverage": 0.0369,
-      "bh_sharpe": 0.407,
+      "bh_sharpe": 0.406,
       "bh_max_dd": -0.497,
-      "bh_cum": 0.406
+      "bh_cum": 0.403
     },
     "P3_ETH_BNB": {
       "label": "P3_ETH_BNB",
@@ -105,9 +105,9 @@
       "tail_acc": 0.053,
       "tail_pnl": -0.01564,
       "leverage": 0.048,
-      "bh_sharpe": -0.304,
+      "bh_sharpe": -0.305,
       "bh_max_dd": -0.617,
-      "bh_cum": -0.366
+      "bh_cum": -0.367
     },
     "M1_BTC_macro": {
       "label": "M1_BTC_macro",
@@ -121,9 +121,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.03113,
       "leverage": 0.0657,
-      "bh_sharpe": 0.822,
+      "bh_sharpe": 0.819,
       "bh_max_dd": -0.519,
-      "bh_cum": 2.258
+      "bh_cum": 2.244
     },
     "M1_ALT_macro": {
       "label": "M1_ALT_macro",
@@ -137,9 +137,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.07584,
       "leverage": 0.0347,
-      "bh_sharpe": 0.265,
+      "bh_sharpe": 0.262,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.001
+      "bh_cum": -0.008
     },
     "COMBINED_4way": {
       "label": "COMBINED_4way",
@@ -153,9 +153,9 @@
       "tail_acc": 0.171,
       "tail_pnl": -0.00716,
       "leverage": 0.035,
-      "bh_sharpe": 0.265,
+      "bh_sharpe": 0.262,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.001
+      "bh_cum": -0.008
     },
     "DYNAMIC_v10": {
       "label": "DYNAMIC_v10",
@@ -310,6 +310,78 @@
       "total_days": 1209,
       "hit_rate": 0.498
     },
+    "DYNAMIC_v19_btc_w5": {
+      "label": "DYNAMIC_v19_btc_w5",
+      "sharpe": 0.158,
+      "max_dd": -0.083,
+      "cum_return": 0.01,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.518
+    },
+    "DYNAMIC_v19_strat_w5": {
+      "label": "DYNAMIC_v19_strat_w5",
+      "sharpe": 0.148,
+      "max_dd": -0.085,
+      "cum_return": 0.009,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.537
+    },
+    "DYNAMIC_v19_btc_w10": {
+      "label": "DYNAMIC_v19_btc_w10",
+      "sharpe": 0.066,
+      "max_dd": -0.09,
+      "cum_return": 0.002,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.514
+    },
+    "DYNAMIC_v19_strat_w10": {
+      "label": "DYNAMIC_v19_strat_w10",
+      "sharpe": 0.388,
+      "max_dd": -0.05,
+      "cum_return": 0.028,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.556
+    },
+    "DYNAMIC_v19_btc_w20": {
+      "label": "DYNAMIC_v19_btc_w20",
+      "sharpe": -0.013,
+      "max_dd": -0.082,
+      "cum_return": -0.004,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.506
+    },
+    "DYNAMIC_v19_strat_w20": {
+      "label": "DYNAMIC_v19_strat_w20",
+      "sharpe": 0.505,
+      "max_dd": -0.053,
+      "cum_return": 0.038,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.56
+    },
+    "DYNAMIC_v19": {
+      "label": "DYNAMIC_v19_strat_w20",
+      "sharpe": 0.505,
+      "max_dd": -0.053,
+      "cum_return": 0.038,
+      "active_days": 257,
+      "total_days": 1209,
+      "hit_rate": 0.56
+    },
+    "DYNAMIC_v20": {
+      "label": "DYNAMIC_v20",
+      "sharpe": 1.195,
+      "max_dd": -0.042,
+      "cum_return": 0.139,
+      "active_days": 333,
+      "total_days": 1209,
+      "hit_rate": 0.489
+    },
     "F_FUND_ETH": {
       "label": "F_FUND_ETH_mom",
       "sharpe": 1.742,
@@ -374,7 +446,34 @@
     "v18_smooth": 1.041,
     "v18_cap": 1.015,
     "v18_gate": 1.014,
-    "v18_dynamic": 1.021
+    "v18_dynamic": 1.021,
+    "v19_btc_w5": 0.158,
+    "v19_strat_w5": 0.148,
+    "v19_btc_w10": 0.066,
+    "v19_strat_w10": 0.388,
+    "v19_btc_w20": -0.013,
+    "v19_strat_w20": 0.505,
+    "v19_prod": 0.505,
+    "v19_prod_variant": "v19_strat_w20",
+    "v20_ensemble": 1.195,
+    "v20_summary": {
+      "ensemble_sharpe": 1.195,
+      "ensemble_max_dd": -0.042,
+      "weights": {
+        "v18_smooth": 0.8029,
+        "F_FUND_ETH": 0.0981,
+        "F_FUND_BTC": 0.099
+      },
+      "corr_v18s_fundE": 0.217,
+      "corr_v18s_fundB": 0.2542,
+      "corr_fundE_fundB": 0.5509,
+      "breakeven_K": 1.2999999999999998,
+      "breakeven_pnl": 1.58,
+      "best_K": 10.0,
+      "best_K_pnl": 1273.6,
+      "best_K_max_dd": -0.3996,
+      "best_K_sharpe_net": 0.5491
+    }
   },
   "v14_diagnostics": {
     "lev_mult_mean": 0.991,
@@ -402,8 +501,8 @@
     "alignment_mean": 0.5576,
     "alignment_std": 0.4135,
     "alignment_p90": 0.9498,
-    "corr_phi_alignment": -0.3933,
-    "corr_phi_gamma_rank": -0.0464,
+    "corr_phi_alignment": -0.3932,
+    "corr_phi_gamma_rank": -0.0462,
     "lev_v16_mean": 0.586,
     "lev_v16_std": 0.143,
     "lev_v16_min": 0.3,

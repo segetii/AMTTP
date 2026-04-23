@@ -83,6 +83,7 @@ Falsifiable 4-way ablation (all on v10_orig 6-strat baseline):
 Funding strategies retained but NOT in production pnl (kept for diagnostics).
 """
 
+import os
 import numpy as np
 import pandas as pd
 import json
@@ -1662,6 +1663,245 @@ def main():
     pnl_dyn_v18 = pnl_dyn_v10_orig * lev_v18.shift(1).fillna(1.0)
     sims_v18    = simulate_from_pnl(pnl_dyn_v18[test_mask], 'DYNAMIC_v18')
 
+    # ── v19: ALPHA OVERLAY — momentum direction × BSDT leverage ───────────
+    # Layer 1 (alpha)      : trend = sign(EMA(ret_base, span))   → +1/−1
+    # Layer 2 (risk/exposure): lev_v18_smooth (already in pnl_dyn_v18_smooth)
+    # Layer 3 (execution)  : pnl_dyn_v19 = trend.shift(1) × pnl_dyn_v18_smooth
+    #
+    # This is the user-spec engine. v18 was a passive filter (~21% active days,
+    # net unprofitable at 5 bps). v19 multiplies BSDT exposure by a directional
+    # market-trend signal, turning the system from defensive into actively
+    # directional. Sweep window ∈ {5, 10, 20} on two trend bases:
+    #   - BTC return       (dominant market driver)
+    #   - strategy mean    (pnl_dyn_v18_smooth's own short-term momentum)
+    # Pick the highest-Sharpe combination as PROD v19.
+
+    def _build_v19(ret_base_series, span, base_pnl):
+        """trend = sign(EWM(ret_base, span)); pnl = trend.shift(1) * base_pnl."""
+        trend = np.sign(ret_base_series.ewm(span=span, adjust=False).mean())
+        # forward-fill zeros so first few bars don't kill the signal
+        trend = trend.replace(0, np.nan).ffill().fillna(0.0)
+        return (trend.shift(1).fillna(0.0) * base_pnl), trend
+
+    # Two candidate trend bases
+    ret_btc_base    = df['ret_btc']
+    ret_strat_base  = pnl_dyn_v18_smooth   # strategy's own daily PnL stream
+
+    v19_variants = {}
+    for span in (5, 10, 20):
+        for base_label, base_series in (('btc', ret_btc_base),
+                                         ('strat', ret_strat_base)):
+            pnl_v19_w, _trend_w = _build_v19(base_series, span, pnl_dyn_v18_smooth)
+            tag = f'v19_{base_label}_w{span}'
+            sims_v19_w = simulate_from_pnl(pnl_v19_w[test_mask], f'DYNAMIC_{tag}')
+            v19_variants[tag] = (pnl_v19_w, sims_v19_w)
+
+    # Pick best by Sharpe → PROD
+    best_v19_tag = max(v19_variants, key=lambda k: v19_variants[k][1]['sharpe'])
+    pnl_dyn_v19, sims_v19 = v19_variants[best_v19_tag]
+    print(f"\n── v19 ALPHA-OVERLAY sweep [test] ────────────────────────────────────")
+    print(f"  {'variant':<22}  Sharpe   MaxDD   ActiveDays")
+    print(f"  {'-'*22}  ------  ------   ----------")
+    for tag, (_, s) in sorted(v19_variants.items(),
+                              key=lambda kv: -kv[1][1]['sharpe']):
+        marker = '  ★ PROD' if tag == best_v19_tag else ''
+        print(f"  {tag:<22}  {s['sharpe']:+.3f}  {s['max_dd']:+.3f}   "
+              f"{s['active_days']:>4}/{s['total_days']}{marker}")
+    print(f"\n  v19 PROD = {best_v19_tag}")
+    print(f"  v18_smooth Sharpe = {sims_v18_smooth['sharpe']:+.3f}  →  "
+          f"v19 Sharpe = {sims_v19['sharpe']:+.3f}  "
+          f"(Δ = {sims_v19['sharpe'] - sims_v18_smooth['sharpe']:+.3f})")
+
+    # ════════════════════════════════════════════════════════════════════════
+    #  v20: STACK uncorrelated alphas — v18_smooth + funding strategies
+    #  ────────────────────────────────────────────────────────────────────
+    #  F_FUND_ETH (Sh=+1.74, ~6% active) and F_FUND_BTC (Sh=+1.98, ~6% active)
+    #  are higher-Sharpe than any DYNAMIC variant, and trade on different days
+    #  than v18 (~21% active). v15 destroyed them by Sharpe-blending with weak
+    #  strats. v20 stacks them ADDITIVELY at INVERSE-VOL weights so each leg
+    #  contributes equal daily risk to the portfolio.
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "═" * 96)
+    print("  v20 STACKED-ALPHA ENSEMBLE  —  v18_smooth + F_FUND_ETH + F_FUND_BTC")
+    print("═" * 96)
+
+    pnl_v18s_v20 = pnl_dyn_v18_smooth[test_mask].fillna(0.0)
+    pnl_fundE_v20 = pnl_base['F_FUND_ETH_M'][test_mask].fillna(0.0)
+    pnl_fundB_v20 = pnl_base['F_FUND_BTC_M'][test_mask].fillna(0.0)
+
+    legs_v20 = {
+        'v18_smooth':  pnl_v18s_v20,
+        'F_FUND_ETH':  pnl_fundE_v20,
+        'F_FUND_BTC':  pnl_fundB_v20,
+    }
+    # inverse-vol weights over non-zero days (active-day risk parity)
+    vols_v20 = {}
+    for k, v in legs_v20.items():
+        nz = v[v != 0]
+        vols_v20[k] = float(nz.std()) if len(nz) > 1 else float('nan')
+    inv_w  = {k: 1.0 / max(s, 1e-9) for k, s in vols_v20.items()}
+    norm   = sum(inv_w.values())
+    w_v20  = {k: inv_w[k] / norm for k in inv_w}
+
+    pnl_dyn_v20 = sum(w_v20[k] * legs_v20[k] for k in legs_v20)
+    sims_v20    = simulate_from_pnl(pnl_dyn_v20, 'DYNAMIC_v20')
+
+    # cross-correlations (orthogonality sanity)
+    def _corr(a, b):
+        s = pd.concat([a, b], axis=1).dropna()
+        if len(s) < 5:
+            return float('nan')
+        return float(s.iloc[:, 0].corr(s.iloc[:, 1]))
+    corr_v18s_fE = _corr(pnl_v18s_v20, pnl_fundE_v20)
+    corr_v18s_fB = _corr(pnl_v18s_v20, pnl_fundB_v20)
+    corr_fE_fB   = _corr(pnl_fundE_v20, pnl_fundB_v20)
+
+    print(f"\n  ── Per-leg standalone metrics (test) ──")
+    print(f"  {'leg':<14}  {'σ_active':>10}  {'weight':>8}  {'Sharpe':>8}  {'active%':>8}")
+    for k in legs_v20:
+        nz = legs_v20[k][legs_v20[k] != 0]
+        sh_k = float(np.sqrt(252) * legs_v20[k].mean() / vols_v20[k]) if vols_v20[k] > 0 else 0.0
+        act_pct = 100.0 * len(nz) / len(legs_v20[k]) if len(legs_v20[k]) else 0.0
+        print(f"  {k:<14}  {vols_v20[k]:>10.5f}  {w_v20[k]:>8.3f}  {sh_k:>+8.3f}  {act_pct:>7.1f}%")
+
+    print(f"\n  ── Cross-correlations (orthogonality check) ──")
+    print(f"    corr(v18_smooth, F_FUND_ETH) = {corr_v18s_fE:+.3f}")
+    print(f"    corr(v18_smooth, F_FUND_BTC) = {corr_v18s_fB:+.3f}")
+    print(f"    corr(F_FUND_ETH, F_FUND_BTC) = {corr_fE_fB:+.3f}")
+    if max(abs(corr_v18s_fE), abs(corr_v18s_fB), abs(corr_fE_fB)) > 0.30:
+        print(f"    ⚠ WARNING: |corr| > 0.30 — orthogonality assumption weakened")
+    else:
+        print(f"    ✓ all |corr| < 0.30 — orthogonality holds, inverse-vol stacking valid")
+
+    print(f"\n  ── v20 ensemble headline ──")
+    print(f"    Sharpe        = {sims_v20['sharpe']:+.3f}   "
+          f"(v18_smooth = {sims_v18_smooth['sharpe']:+.3f},  "
+          f"Δ = {sims_v20['sharpe']-sims_v18_smooth['sharpe']:+.3f})")
+    print(f"    MaxDD         = {sims_v20['max_dd']:+.3f}")
+    print(f"    cum return    = {sims_v20['cum_return']:+.3f}")
+    print(f"    active days   = {sims_v20['active_days']}/{sims_v20['total_days']}")
+
+    # ── v20 K-sweep (gross + 5bps net), $1,200 capital ───────────────────
+    INIT_V20 = 1200.0
+    TCOST_V20 = 5.0  # bps per active day
+
+    def _v20_metrics(returns, K, tcost_bps=0.0):
+        r = (returns.dropna().astype(float) * K).copy()
+        if tcost_bps > 0:
+            cost = (tcost_bps / 1e4) * (returns.dropna().abs() > 0).astype(float)
+            r = r - cost
+        eq = INIT_V20 * (1.0 + r).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return dict(K=K, final=0.0, pnl=-INIT_V20, sh=float('nan'),
+                        cagr=float('nan'), dd_pct=float('nan'),
+                        dd_dol=float('nan'), ruined=True)
+        peak = eq.cummax()
+        dd   = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V20) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * r.mean() / r.std()) if r.std() > 0 else 0.0
+        return dict(K=K, final=float(eq.iloc[-1]),
+                    pnl=float(eq.iloc[-1] - INIT_V20), sh=sh, cagr=cagr,
+                    dd_pct=float(dd.min()), dd_dol=float((eq - peak).min()),
+                    ruined=False)
+
+    K_GRID_v20 = [1, 2, 3, 5, 10]
+    print(f"\n  ── v20 EXPOSURE-SCALING SWEEP ($1,200 starting capital) ──")
+    print(f"  {'mode':<10}  {'K':>3}    Sharpe      CAGR        Final          PnL    MaxDD %     MaxDD $")
+    print(f"  " + "-" * 96)
+    for K in K_GRID_v20:
+        m = _v20_metrics(pnl_dyn_v20, K, tcost_bps=0.0)
+        print(f"  {'gross':<10}  {K:>3}    {m['sh']:+.3f}   {m['cagr']*100:+6.2f}%  "
+              f"$ {m['final']:>9,.2f}  $ {m['pnl']:>+10,.2f}    "
+              f"{m['dd_pct']*100:+6.2f}%  $ {m['dd_dol']:>+9,.2f}")
+    for K in K_GRID_v20:
+        m = _v20_metrics(pnl_dyn_v20, K, tcost_bps=TCOST_V20)
+        print(f"  {'net 5bps':<10}  {K:>3}    {m['sh']:+.3f}   {m['cagr']*100:+6.2f}%  "
+              f"$ {m['final']:>9,.2f}  $ {m['pnl']:>+10,.2f}    "
+              f"{m['dd_pct']*100:+6.2f}%  $ {m['dd_dol']:>+9,.2f}")
+
+    # break-even K (smallest K making net PnL > 0)
+    breakeven_K20 = None; breakeven_m20 = None
+    for K in np.arange(0.25, 20.01, 0.05):
+        m = _v20_metrics(pnl_dyn_v20, float(K), tcost_bps=TCOST_V20)
+        if not m['ruined'] and m['pnl'] > 0:
+            breakeven_K20 = float(K); breakeven_m20 = m
+            break
+    if breakeven_m20:
+        print(f"\n  v20 NET break-even K = {breakeven_K20:.2f}")
+        print(f"    Final ${breakeven_m20['final']:.2f}  PnL ${breakeven_m20['pnl']:+.2f}  "
+              f"MaxDD {breakeven_m20['dd_pct']*100:+.2f}%  Sharpe {breakeven_m20['sh']:+.3f}")
+    else:
+        print(f"\n  v20 NET break-even K not reached in [0.25, 20]")
+
+    # best risk-adjusted K under MaxDD ≤ 40%, net of 5bps
+    best_K20 = None; best_sh20 = -1e9; best_m20 = None
+    for K in np.arange(1.0, 20.01, 0.25):
+        m = _v20_metrics(pnl_dyn_v20, float(K), tcost_bps=TCOST_V20)
+        if m['ruined'] or abs(m['dd_pct']) > 0.40:
+            continue
+        if m['sh'] > best_sh20:
+            best_sh20 = m['sh']; best_K20 = float(K); best_m20 = m
+    if best_m20:
+        print(f"\n  v20 best risk-adjusted K (net Sharpe, MaxDD ≤ 40%): K={best_K20:.2f}")
+        print(f"    Final ${best_m20['final']:.2f}  PnL ${best_m20['pnl']:+.2f}  "
+              f"MaxDD {best_m20['dd_pct']*100:+.2f}% (${best_m20['dd_dol']:+.2f})  "
+              f"Sharpe {best_m20['sh']:+.3f}")
+
+    # save v20 sweep CSV + 2-line PNG (K=1 vs best_K, net 5bps)
+    K_save_v20 = best_K20 if best_K20 else 10.0
+    eq_K1_v20  = INIT_V20 * (1.0 + pnl_dyn_v20.dropna()).cumprod()
+    r_KS_v20   = pnl_dyn_v20.dropna() * K_save_v20
+    cost_v20   = (TCOST_V20/1e4) * (pnl_dyn_v20.dropna().abs() > 0).astype(float)
+    eq_KS_g    = INIT_V20 * (1.0 + r_KS_v20).cumprod()
+    eq_KS_n    = INIT_V20 * (1.0 + (r_KS_v20 - cost_v20)).cumprod()
+
+    sweep_csv_v20 = pd.DataFrame({
+        'date':            eq_K1_v20.index,
+        'equity_K1_gross': eq_K1_v20.values,
+        f'equity_K{K_save_v20:.2f}_gross': eq_KS_g.values,
+        f'equity_K{K_save_v20:.2f}_net5bps': eq_KS_n.values,
+    })
+    v20_csv_path = os.path.join(OUT_DIR, 'crypto_bsdt_v20_exposure_sweep.csv')
+    sweep_csv_v20.to_csv(v20_csv_path, index=False)
+    print(f"\n  v20 scaled curves saved → {v20_csv_path}")
+
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.plot(eq_K1_v20.index, eq_K1_v20.values, color='gray', lw=1.0, label='K=1 gross')
+        ax.plot(eq_KS_g.index,   eq_KS_g.values,   color='steelblue', lw=1.4,
+                label=f'K={K_save_v20:.2f} gross')
+        ax.plot(eq_KS_n.index,   eq_KS_n.values,   color='crimson', lw=1.4,
+                label=f'K={K_save_v20:.2f} net (5bps)')
+        ax.set_title(f'v20 stacked-alpha ensemble — exposure scaling at K=1 vs K={K_save_v20:.2f}')
+        ax.set_ylabel(f'Equity (from ${INIT_V20:,.0f})')
+        ax.grid(True, alpha=0.3); ax.legend(loc='upper left')
+        plt.tight_layout()
+        v20_png_path = os.path.join(OUT_DIR, 'crypto_bsdt_v20_exposure_sweep.png')
+        plt.savefig(v20_png_path, dpi=110); plt.close()
+        print(f"  v20 scaled plot   saved → {v20_png_path}")
+    except Exception as e:
+        print(f"  (matplotlib skipped: {e})")
+
+    # store v20 K-sweep summary for JSON
+    v20_summary = {
+        'ensemble_sharpe':   float(sims_v20['sharpe']),
+        'ensemble_max_dd':   float(sims_v20['max_dd']),
+        'weights':           {k: float(round(w_v20[k], 4)) for k in w_v20},
+        'corr_v18s_fundE':   float(round(corr_v18s_fE, 4)),
+        'corr_v18s_fundB':   float(round(corr_v18s_fB, 4)),
+        'corr_fundE_fundB':  float(round(corr_fE_fB, 4)),
+        'breakeven_K':       float(breakeven_K20) if breakeven_K20 else None,
+        'breakeven_pnl':     float(round(breakeven_m20['pnl'], 2)) if breakeven_m20 else None,
+        'best_K':            float(best_K20) if best_K20 else None,
+        'best_K_pnl':        float(round(best_m20['pnl'], 2)) if best_m20 else None,
+        'best_K_max_dd':     float(round(best_m20['dd_pct'], 4)) if best_m20 else None,
+        'best_K_sharpe_net': float(round(best_m20['sh'], 4)) if best_m20 else None,
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -1790,6 +2030,8 @@ def main():
         ('v18_cap    (+ φ z-cap [0,3])',         sims_v18_cap),
         ('v18_gate   (+ gated alignment)',       sims_v18_gate),
         ('v18  (smooth + cap + gate + EWMA cd)', sims_v18),
+        (f'v19  ({best_v19_tag}) [neg result]',   sims_v19),
+        ('v20  STACKED (v18s + fundE + fundB)',  sims_v20),
     ]
     base = sims_v10_orig['sharpe']
     for label, r in rows:
@@ -1973,6 +2215,10 @@ def main():
     sims_all['DYNAMIC_v18_cap']    = sims_v18_cap
     sims_all['DYNAMIC_v18_gate']   = sims_v18_gate
     sims_all['DYNAMIC_v18']        = sims_v18
+    for tag, (_, s) in v19_variants.items():
+        sims_all[f'DYNAMIC_{tag}'] = s
+    sims_all['DYNAMIC_v19']        = sims_v19
+    sims_all['DYNAMIC_v20']        = sims_v20
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -2019,6 +2265,12 @@ def main():
             "v18_cap":           sims_v18_cap['sharpe'],
             "v18_gate":          sims_v18_gate['sharpe'],
             "v18_dynamic":       sims_v18['sharpe'],
+            **{f"v19_{tag.replace('v19_','')}": s['sharpe']
+               for tag, (_, s) in v19_variants.items()},
+            "v19_prod":          sims_v19['sharpe'],
+            "v19_prod_variant":  best_v19_tag,
+            "v20_ensemble":      sims_v20['sharpe'],
+            "v20_summary":       v20_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
@@ -2056,7 +2308,6 @@ def main():
         },
     }
 
-    import os
     out_path = os.path.join(OUT_DIR, "crypto_bsdt_v18_results.json")
     with open(out_path, 'w') as f:
         json.dump(_clean(results), f, indent=2)
@@ -2086,6 +2337,8 @@ def main():
         ('v18_cap',                  'v18_smooth + z-scored φ capped at 3',            sims_v18_cap['sharpe']),
         ('v18_gate',                 'v18_cap + alignment gated by φ>0.5',             sims_v18_gate['sharpe']),
         ('v18  (refined geometry)',  'smooth+cap+gate+EWMA collapse_dir',              sims_v18['sharpe']),
+        (f'v19  ALPHA OVERLAY',      f'momentum × v18_smooth ({best_v19_tag})',        sims_v19['sharpe']),
+        ('v20  STACKED ALPHA',       'inv-vol(v18s + F_FUND_ETH + F_FUND_BTC)',        sims_v20['sharpe']),
     ]
     for vname, src, sh in summary_rows:
         print(f"  {vname:<22}  {src:<38}  {sh:>+14.3f}")
