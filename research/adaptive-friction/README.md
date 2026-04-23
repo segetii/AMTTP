@@ -62,9 +62,14 @@ Standard economics treats friction as a distortion to be minimised. This work pr
 - [x] GravityEngine implemented and benchmarked
 - [x] AMTTP compliance matrix operational
 - [x] Benchmark results: UDL vs DeepSVDD vs ECOD (5-seed, 5 datasets)
+- [x] Crypto BSDT pipeline v22 → v32 with stress-tested PROD strategy
 - [ ] Formal Lyapunov stability proof
 - [ ] Historical collapse simulations (Terra/Luna, Iron Finance, FTX)
 - [ ] RL friction controller
 - [ ] Paper 1 draft (theory)
 - [ ] Paper 2 draft (RL + simulation)
 - [ ] Paper 3 elevation (AMTTP + theoretical foundation)
+
+## Live Results
+
+**Crypto BSDT sizing-architecture arc (v22 → v32):** see [pipeline/results/SIZING_ARCHITECTURE_RESULTS.md](pipeline/results/SIZING_ARCHITECTURE_RESULTS.md) for the complete honest record of what worked, what failed, and why. PROD recommendation: **v22 (K=3.5, +$5,705 PnL)** or **v32 (stress-budgeted K_max=4.0, +$3,840 PnL with 3σ shock survival)**.
