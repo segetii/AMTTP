@@ -2382,6 +2382,126 @@ def main():
 
     print("═" * 96)
 
+    # ════════════════════════════════════════════════════════════════════════
+    #  EXPOSURE-SCALING SWEEP
+    #  Multiply v18_smooth daily returns by K ∈ {1, 2, 3, 5, 10}.
+    #  Gross Sharpe is invariant to K; NET Sharpe improves with K because
+    #  t-cost (per active day) is fixed while signal scales linearly.
+    #  Question: at what K does v18_smooth turn net-profitable on $1,200?
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "═" * 96)
+    print("  EXPOSURE-SCALING SWEEP  —  v18_smooth at K × leverage")
+    print("═" * 96)
+
+    K_GRID = [1.0, 2.0, 3.0, 5.0, 10.0]
+    INIT_CAP = 1200.0
+
+    def _scaled_metrics(returns, K, tcost_bps=0.0, init_cap=INIT_CAP):
+        r = (returns.dropna().astype(float) * K).copy()
+        if tcost_bps > 0:
+            cost = (tcost_bps / 1e4) * (returns.dropna().abs() > 0).astype(float)
+            r = r - cost
+        cum = (1.0 + r).cumprod()
+        eq = init_cap * cum
+        final = float(eq.iloc[-1])
+        pnl = final - init_cap
+        roll_max = eq.cummax()
+        dd_pct = float(((eq - roll_max) / roll_max).min() * 100)
+        dd_dol = float((eq - roll_max).min())
+        sh = float(np.sqrt(252) * r.mean() / r.std()) if r.std() > 0 else float('nan')
+        yrs = len(r) / 252.0
+        cagr = (cum.iloc[-1] ** (1.0 / yrs) - 1.0) * 100.0 if yrs > 0 and cum.iloc[-1] > 0 else float('nan')
+        # ruin check: any equity ≤ 0?
+        ruined = bool((eq <= 0).any())
+        return {
+            'K': K, 'final': final, 'pnl': pnl, 'sh': sh,
+            'cagr': cagr, 'dd_pct': dd_pct, 'dd_dol': dd_dol,
+            'ruined': ruined,
+        }
+
+    for tag, tcost in [('GROSS (no t-cost)', 0.0),
+                        ('NET (5 bps per active day)', 5.0)]:
+        print(f"\n  ── {tag}, $1,200 starting capital ───────────────────────────")
+        print(f"  {'K':>4}  {'Sharpe':>8}  {'CAGR':>8}  {'Final':>10}  "
+              f"{'PnL':>11}  {'MaxDD %':>9}  {'MaxDD $':>10}  notes")
+        print("  " + "─" * 86)
+        for K in K_GRID:
+            m = _scaled_metrics(pnl_v18s_t, K, tcost_bps=tcost)
+            note = '  RUINED' if m['ruined'] else ''
+            if m['dd_pct'] < -50.0 and not m['ruined']:
+                note = '  >50% DD'
+            print(f"  {m['K']:>4.0f}  {m['sh']:>+8.3f}  {m['cagr']:>+7.2f}%  "
+                  f"${m['final']:>9,.2f}  ${m['pnl']:>+10,.2f}  "
+                  f"{m['dd_pct']:>+8.2f}%  ${m['dd_dol']:>+9,.2f}{note}")
+
+    # Find break-even K (smallest K where NET PnL ≥ 0)
+    print("\n  ── NET break-even analysis ────────────────────────────────────────")
+    K_fine = np.arange(1.0, 20.1, 0.25)
+    be_K = None
+    for K in K_fine:
+        m = _scaled_metrics(pnl_v18s_t, float(K), tcost_bps=5.0)
+        if m['pnl'] >= 0 and not m['ruined']:
+            be_K = float(K); be_m = m; break
+    if be_K is None:
+        print("  No K in [1, 20] makes v18_smooth profitable net of 5 bps.")
+        print("  Strategy is structurally unprofitable at retail crypto cost levels.")
+    else:
+        print(f"  Break-even K = {be_K:.2f}")
+        print(f"    Final ${be_m['final']:,.2f}   PnL ${be_m['pnl']:+,.2f}   "
+              f"MaxDD {be_m['dd_pct']:+.2f}% (${be_m['dd_dol']:+,.2f})   "
+              f"Sharpe {be_m['sh']:+.3f}")
+        # Sweet-spot K = max risk-adjusted (net Sharpe / MaxDD%) within K ≤ 10
+        best_K, best_score = None, -np.inf
+        for K in K_fine[K_fine <= 10.0]:
+            m = _scaled_metrics(pnl_v18s_t, float(K), tcost_bps=5.0)
+            if m['ruined'] or m['dd_pct'] < -40.0: continue
+            score = m['sh']  # maximise net Sharpe under DD < 40% constraint
+            if score > best_score:
+                best_score, best_K, best_m = score, float(K), m
+        if best_K is not None:
+            print(f"  Best risk-adjusted K (net Sharpe, MaxDD ≤ 40%): K={best_K:.2f}")
+            print(f"    Final ${best_m['final']:,.2f}   PnL ${best_m['pnl']:+,.2f}   "
+                  f"MaxDD {best_m['dd_pct']:+.2f}% (${best_m['dd_dol']:+,.2f})   "
+                  f"Sharpe {best_m['sh']:+.3f}")
+
+    # Save scaled equity curves at K = best_K (or K=5 fallback)
+    K_save = best_K if (be_K is not None and best_K is not None) else 5.0
+    r_scaled_gross = (pnl_v18s_t.fillna(0.0) * K_save)
+    r_scaled_net   = r_scaled_gross - (5.0/1e4) * (pnl_v18s_t.fillna(0.0).abs() > 0).astype(float)
+    eq_scaled = pd.DataFrame({
+        'date':            pnl_v18s_t.index,
+        'eq_gross_K1':     INIT_CAP * (1.0 + pnl_v18s_t.fillna(0.0)).cumprod().values,
+        f'eq_gross_K{int(K_save)}':  INIT_CAP * (1.0 + r_scaled_gross).cumprod().values,
+        f'eq_net_K{int(K_save)}':    INIT_CAP * (1.0 + r_scaled_net).cumprod().values,
+    })
+    sc_csv_path = os.path.join(OUT_DIR, 'crypto_bsdt_v18_exposure_sweep.csv')
+    eq_scaled.to_csv(sc_csv_path, index=False)
+    print(f"\n  Scaled curves saved → {sc_csv_path}")
+
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(1, 1, figsize=(11, 5))
+        ax.plot(eq_scaled['date'], eq_scaled['eq_gross_K1'],
+                 label='K=1 gross', lw=1.0, color='#888888')
+        ax.plot(eq_scaled['date'], eq_scaled[f'eq_gross_K{int(K_save)}'],
+                 label=f'K={int(K_save)} gross', lw=1.4, color='#1f77b4')
+        ax.plot(eq_scaled['date'], eq_scaled[f'eq_net_K{int(K_save)}'],
+                 label=f'K={int(K_save)} net (5bps)', lw=1.4, color='#d62728')
+        ax.set_ylabel(f'Equity ($ from ${int(INIT_CAP)})')
+        ax.set_title(f'v18_smooth — exposure scaling at K=1 vs K={int(K_save)}')
+        ax.legend(loc='upper left'); ax.grid(alpha=0.3)
+        plt.tight_layout()
+        png_path = os.path.join(OUT_DIR, 'crypto_bsdt_v18_exposure_sweep.png')
+        plt.savefig(png_path, dpi=110)
+        plt.close(fig)
+        print(f"  Scaled plot   saved → {png_path}")
+    except Exception as e:
+        print(f"  (matplotlib unavailable — skipped PNG: {e})")
+
+    print("═" * 96)
+
 
 if __name__ == '__main__':
     main()
