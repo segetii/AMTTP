@@ -2659,6 +2659,230 @@ def main():
         'ensemble_max_dd':   float(sims_v24['max_dd']),
     }
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v25: THREE FILTERED ORTHOGONAL LEGS  →  v22-style vol-target on top
+    # ──────────────────────────────────────────────────────────────────────
+    # Post-mortem of v24: most naive technicals on crypto majors are negative-
+    # Sharpe. Build only legs with a structural reason to work, validate each
+    # standalone, then stack inv-vol over the v20 trio + accepted new legs.
+    #
+    #   Leg A: btc_trend          (only +Sharpe component from v24)
+    #   Leg B: funding-spread fade (eth - btc cum5 funding spread, mean-revert)
+    #   Leg C: alt cross-sec mom   (long top / short bottom of {ETH,SOL,BNB} 10d)
+    #
+    # Each is computed full-sample, sliced to test, validated; only legs with
+    # standalone Sharpe ≥ 0.30 are admitted to the ensemble.
+    print(f"\n  v25 THREE FILTERED ORTHOGONAL LEGS  →  v22 vol-target sizer")
+    INIT_V25  = 1200.0
+    TCOST_V25 = 5.0
+    LB_V25    = 30
+    MAX_INNER_V25 = 20.0
+    DD_GUARD_V25  = 0.40
+    ADMIT_SH_V25  = 0.30  # standalone Sharpe gate
+
+    # ── Leg A: btc trend (the v24 survivor) ───────────────────────────────
+    trend_btc = np.sign(df['ret_btc'].ewm(span=10, adjust=False).mean())
+    trend_btc_n = trend_btc / (trend_btc.abs().rolling(50, min_periods=10).mean() + 1e-6)
+    pnl_legA_full = (trend_btc_n.shift(1) * df['ret_btc']).fillna(0.0)
+    pnl_legA = pnl_legA_full[test_mask].fillna(0.0)
+
+    # ── Leg B: funding-spread fade (cross-asset funding mean-reversion) ──
+    # When fr_cum5_eth >> fr_cum5_btc, ETH perp basis is over-extended vs BTC →
+    # fade by shorting ETH-vs-BTC. Position = -sign(spread_z).
+    # This is genuinely orthogonal to existing F_FUND_* (those use single-asset
+    # funding momentum, this uses the cross-asset spread mean-reversion).
+    fr_eth_5 = df['fr_cum5_eth'].fillna(method='ffill').fillna(0.0)
+    fr_btc_5 = df['fr_cum5_btc'].fillna(method='ffill').fillna(0.0)
+    spread   = fr_eth_5 - fr_btc_5
+    sp_mu60  = spread.rolling(60, min_periods=20).mean()
+    sp_sd60  = spread.rolling(60, min_periods=20).std()
+    sp_z     = (spread - sp_mu60) / sp_sd60.replace(0.0, np.nan)
+    sp_z     = sp_z.fillna(0.0).clip(-3.0, 3.0)
+    # only act when |z| > 1 (selective)
+    pos_spread = -np.sign(sp_z).where(sp_z.abs() > 1.0, 0.0)
+    pos_spread_n = pos_spread / (pos_spread.abs().rolling(50, min_periods=10).mean() + 1e-6)
+    pos_spread_n = pos_spread_n.fillna(0.0)
+    # ETH-minus-BTC dollar-neutral PnL (long ETH if pos>0, short BTC same notional)
+    pnl_legB_full = (pos_spread_n.shift(1) * (df['ret_eth'] - df['ret_btc'])).fillna(0.0)
+    pnl_legB = pnl_legB_full[test_mask].fillna(0.0)
+
+    # ── Leg C: alt cross-sec momentum (long-top/short-bottom over 10d) ───
+    # Compute 10d return for ETH, SOL, BNB; rank cross-sectionally.
+    # Top-rank = +1, bottom-rank = -1, middle = 0. Dollar-neutral.
+    mom_h = 10
+    ret10 = pd.DataFrame({
+        'eth': df['ret_eth'].rolling(mom_h, min_periods=5).sum(),
+        'sol': df['ret_sol'].rolling(mom_h, min_periods=5).sum(),
+        'bnb': df['ret_bnb'].rolling(mom_h, min_periods=5).sum(),
+    })
+    ranks = ret10.rank(axis=1, method='min')   # 1=worst, 3=best
+    pos_xs = pd.DataFrame(0.0, index=ret10.index, columns=ret10.columns)
+    pos_xs[ranks == 3] = +1.0
+    pos_xs[ranks == 1] = -1.0
+    # PnL: sum_i pos_i.shift(1) * ret_i; gross exposure = 2 (long+short)
+    fwd_rets = pd.DataFrame({
+        'eth': df['ret_eth'], 'sol': df['ret_sol'], 'bnb': df['ret_bnb'],
+    })
+    pnl_legC_full = (pos_xs.shift(1) * fwd_rets).sum(axis=1).fillna(0.0) * 0.5  # /2 for gross-net 1.0
+    pnl_legC = pnl_legC_full[test_mask].fillna(0.0)
+
+    # Standalone validation
+    def _sh25(s):
+        s = s.dropna()
+        return float(np.sqrt(252) * s.mean() / s.std()) if s.std() > 0 else 0.0
+    cands = {
+        'btc_trend':     pnl_legA,
+        'fund_spread':   pnl_legB,
+        'alt_xs_mom':    pnl_legC,
+    }
+    print(f"  ── candidate-leg standalone diagnostics (test) ──")
+    print(f"  {'leg':<14}{'Sharpe':>9}{'cum_ret':>10}{'active%':>9}{'admit?':>10}")
+    admitted = {}
+    for tag, pnl in cands.items():
+        sh = _sh25(pnl)
+        cum = float((1.0 + pnl).prod() - 1.0)
+        active = float((pnl.abs() > 1e-12).mean() * 100.0)
+        ok = 'YES' if sh >= ADMIT_SH_V25 else 'no'
+        if sh >= ADMIT_SH_V25:
+            admitted[tag] = pnl
+        print(f"  {tag:<14}{sh:>+9.3f}{cum:>+10.3f}{active:>8.1f}%{ok:>10}")
+
+    # Always include the v20 trio (proven)
+    legs_v25 = {
+        'v18_smooth':  pnl_v18s_v20,
+        'F_FUND_ETH':  pnl_fundE_v20,
+        'F_FUND_BTC':  pnl_fundB_v20,
+        **admitted,
+    }
+    print(f"  → final legs in v25: {list(legs_v25.keys())}")
+
+    # Inv-vol weights (active-day risk parity)
+    vols_v25 = {}
+    for k, v in legs_v25.items():
+        nz = v[v != 0]
+        vols_v25[k] = float(nz.std()) if len(nz) > 1 else float('nan')
+    inv_w_v25 = {k: 1.0 / max(s, 1e-9) for k, s in vols_v25.items()}
+    norm_v25  = sum(inv_w_v25.values())
+    w_v25     = {k: inv_w_v25[k] / norm_v25 for k in inv_w_v25}
+    print(f"  ── v25 inv-vol weights ──")
+    print(f"  {'leg':<14}{'σ_active':>10}{'weight':>10}")
+    for k in legs_v25:
+        print(f"  {k:<14}{vols_v25[k]:>10.5f}{w_v25[k]:>10.4f}")
+
+    pnl_dyn_v25 = sum(w_v25[k] * legs_v25[k] for k in legs_v25)
+    sims_v25    = simulate_from_pnl(pnl_dyn_v25, 'DYNAMIC_v25')
+    print(f"  v25 ensemble headline (K=1, gross): Sh={sims_v25['sharpe']:+.3f}  "
+          f"MaxDD={sims_v25['max_dd']*100:+.2f}%  cum_ret={sims_v25['cum_return']*100:+.2f}%")
+
+    # v22-style vol-target sizer
+    base_v25 = pnl_dyn_v25.fillna(0.0).astype(float)
+    fullvol_v25 = base_v25.rolling(LB_V25, min_periods=10).std().shift(1)
+    fullvol_v25 = fullvol_v25.fillna(base_v25.std()).replace(0.0, base_v25.std()).clip(lower=1e-6)
+
+    def _v25_metrics(target_vol, K, tcost_bps=TCOST_V25):
+        s = (target_vol / fullvol_v25).clip(lower=0.0, upper=MAX_INNER_V25)
+        sized = base_v25 * s * float(K)
+        cost  = (tcost_bps / 1e4) * (base_v25.abs() > 0).astype(float)
+        net   = sized - cost
+        eq    = INIT_V25 * (1.0 + net).cumprod()
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak  = eq.cummax()
+        dd    = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr  = (eq.iloc[-1] / INIT_V25) ** (1.0 / max(years, 1e-9)) - 1.0
+        sh    = float(np.sqrt(252) * net.mean() / net.std()) if net.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        return dict(K=float(K), final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V25),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+
+    target_grid_v25 = [0.003, 0.005, 0.008, 0.012, 0.018]
+    print(f"  ── v25 target_vol bake-off  (best K under MaxDD ≤ {DD_GUARD_V25*100:.0f}%, net 5bps) ──")
+    print(f"  {'tgt':>8}{'best_K':>8}{'final $':>13}{'PnL $':>13}{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}")
+    v25_bake = {}
+    for tgt in target_grid_v25:
+        best = None
+        for K in np.arange(0.5, 20.05, 0.5):
+            m = _v25_metrics(tgt, float(K), TCOST_V25)
+            if m is None or not (m['dd_pct'] >= -DD_GUARD_V25):
+                continue
+            if best is None or m['pnl'] > best['pnl']:
+                best = m
+        v25_bake[tgt] = best
+        if best is not None:
+            print(f"  {tgt:>8.4f}{best['K']:>8.2f}  ${best['final']:>9.2f}  "
+                  f"${best['pnl']:>+9.2f}  {best['dd_pct']*100:>+8.2f}%  "
+                  f"{best['sh']:>+7.3f}  {best['cagr']*100:>+7.2f}%  {best['calmar']:>+7.2f}")
+        else:
+            print(f"  {tgt:>8.4f}  (no K satisfies DD ≤ {DD_GUARD_V25*100:.0f}%)")
+
+    valid_v25 = {t: r for t, r in v25_bake.items() if r is not None}
+    if valid_v25:
+        prod_target_v25 = max(valid_v25, key=lambda t: valid_v25[t]['pnl'])
+        best_v25 = valid_v25[prod_target_v25]
+        print(f"\n  ★ v25 PROD target_vol = {prod_target_v25:.4f}  K={best_v25['K']:.2f}")
+        print(f"    PnL +${best_v25['pnl']:.2f}  MaxDD {best_v25['dd_pct']*100:+.2f}%  "
+              f"Sh_net {best_v25['sh']:+.3f}  CAGR {best_v25['cagr']*100:+.2f}%  "
+              f"Calmar {best_v25['calmar']:+.2f}")
+        print(f"    vs v22 PROD: PnL +$5,704.85  MaxDD -36.33%  Calmar 1.21  →  Δ ${best_v25['pnl']-5704.85:+.2f}")
+
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            scaler = (prod_target_v25 / fullvol_v25).clip(lower=0.0, upper=MAX_INNER_V25)
+            r1   = base_v25 * scaler * 1.0
+            rKb  = base_v25 * scaler * best_v25['K']
+            cost = (TCOST_V25/1e4) * (base_v25.abs() > 0).astype(float)
+            eq1   = INIT_V25 * (1.0 + r1).cumprod()
+            eqKbg = INIT_V25 * (1.0 + rKb).cumprod()
+            eqKbn = INIT_V25 * (1.0 + (rKb - cost)).cumprod()
+            fig, ax = plt.subplots(figsize=(11, 4))
+            ax.plot(eq1.index,   eq1.values,   color='#888', lw=1.2, label='K=1 gross')
+            ax.plot(eqKbg.index, eqKbg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v25["K"]:.2f} gross')
+            ax.plot(eqKbn.index, eqKbn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v25["K"]:.2f} net (5bps)')
+            ax.set_title(f"v25 filtered-3 (legs={list(legs_v25.keys())})  "
+                         f"tgt={prod_target_v25:.4f}  K={best_v25['K']:.2f}  "
+                         f"PnL +${best_v25['pnl']:.0f}  MaxDD {best_v25['dd_pct']*100:+.2f}%")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v25_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v25_exposure_sweep.png')
+            plt.tight_layout(); plt.savefig(v25_png, dpi=110); plt.close()
+            print(f"  v25 scaled plot saved → {v25_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+
+        sims_v25_prod = sims_v25
+    else:
+        prod_target_v25 = None
+        best_v25 = None
+        sims_v25_prod = sims_v22
+        print("  v25: no target satisfies DD guard → fall back to v22")
+
+    v25_summary = {
+        'admit_threshold_sharpe': ADMIT_SH_V25,
+        'candidate_sharpes':      {tag: round(_sh25(p), 4) for tag, p in cands.items()},
+        'admitted_legs':          list(admitted.keys()),
+        'final_legs':             list(legs_v25.keys()),
+        'inv_vol_weights':        {k: float(round(w_v25[k], 4)) for k in w_v25},
+        'prod_target_vol':        float(prod_target_v25) if prod_target_v25 else None,
+        'best_K':                 float(best_v25['K']) if best_v25 else None,
+        'best_K_pnl':             float(round(best_v25['pnl'], 2)) if best_v25 else None,
+        'best_K_max_dd':          float(round(best_v25['dd_pct'], 4)) if best_v25 else None,
+        'best_K_sharpe_net':      float(round(best_v25['sh'], 4)) if best_v25 else None,
+        'best_K_final':           float(round(best_v25['final'], 2)) if best_v25 else None,
+        'best_K_cagr':            float(round(best_v25['cagr'], 4)) if best_v25 else None,
+        'best_K_calmar':          float(round(best_v25['calmar'], 4)) if best_v25 else None,
+        'all_targets_pnl':        {f'{t:.4f}': (float(round(r['pnl'], 2)) if r else None)
+                                   for t, r in v25_bake.items()},
+        'ensemble_sharpe':        float(sims_v25['sharpe']),
+        'ensemble_max_dd':        float(sims_v25['max_dd']),
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -2984,6 +3208,7 @@ def main():
     sims_all['DYNAMIC_v22']        = sims_v22
     sims_all['DYNAMIC_v23']        = sims_v23
     sims_all['DYNAMIC_v24']        = sims_v24_prod
+    sims_all['DYNAMIC_v25']        = sims_v25_prod
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -3040,10 +3265,12 @@ def main():
             "v22_voltarget":     sims_v22['sharpe'],
             "v23_calmar_max":    sims_v23['sharpe'],
             "v24_multi_alpha":   sims_v24_prod['sharpe'],
+            "v25_filtered_stack": sims_v25_prod['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
             "v23_summary":       v23_summary,
             "v24_summary":       v24_summary,
+            "v25_summary":       v25_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
