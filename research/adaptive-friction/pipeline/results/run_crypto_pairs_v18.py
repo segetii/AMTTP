@@ -2095,6 +2095,173 @@ def main():
     print(f"  γ_fast [test]:  mean={gf_t.mean():.3f}  std={gf_t.std():.3f}  "
           f">0.6: 0.0%  <0.4: 0.0%  (v11 reference)")
 
+    # ════════════════════════════════════════════════════════════════════════
+    #  KILL TEST: is v18_smooth genuinely better than v16, or just lucky?
+    #  5 falsifiable tests - revert to v16 if any major one fails.
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "═" * 96)
+    print("  KILL TEST  —  v18_smooth vs v16 robustness audit")
+    print("═" * 96)
+
+    def _sharpe(pnl):
+        s = pnl.dropna()
+        if len(s) < 5 or s.std() == 0:
+            return float('nan')
+        return float(np.sqrt(252) * s.mean() / s.std())
+
+    def _max_dd(pnl):
+        cum = pnl.fillna(0.0).cumsum()
+        peak = cum.cummax()
+        return float((cum - peak).min())
+
+    def _dd_duration(pnl):
+        cum = pnl.fillna(0.0).cumsum()
+        peak = cum.cummax()
+        under = (cum < peak).values
+        max_run = cur = 0
+        for u in under:
+            cur = cur + 1 if u else 0
+            if cur > max_run:
+                max_run = cur
+        return int(max_run)
+
+    test_idx = df.index[test_mask]
+    pnl_v16_t = pnl_dyn_v16[test_mask]
+    pnl_v18s_t = pnl_dyn_v18_smooth[test_mask]
+
+    # ── TEST 1: Time-split robustness ─────────────────────────────────────
+    print("\n── TEST 1  Time-split robustness ─────────────────────────────────────")
+    splits = [
+        ('A 2023-01 → 2024-06', '2023-01-01', '2024-06-30'),
+        ('B 2024-07 → 2025-06', '2024-07-01', '2025-06-30'),
+        ('C 2025-07 → 2026-04', '2025-07-01', '2026-12-31'),
+    ]
+    print(f"  {'Split':<24}  {'v16 Sh':>8}  {'v18s Sh':>8}  {'Δ':>7}  {'winner':>8}")
+    print("  " + "─" * 72)
+    wins_v18 = 0
+    for name, s, e in splits:
+        m = (test_idx >= s) & (test_idx <= e)
+        sh16 = _sharpe(pnl_v16_t[m])
+        sh18 = _sharpe(pnl_v18s_t[m])
+        win = 'v18' if sh18 >= sh16 else 'v16'
+        if sh18 >= sh16: wins_v18 += 1
+        print(f"  {name:<24}  {sh16:>+8.3f}  {sh18:>+8.3f}  {sh18-sh16:>+7.3f}  {win:>8}")
+    print(f"  → v18 wins {wins_v18}/3 splits.  "
+          f"PASS: v18 ≥ v16 in 2 of 3.   "
+          f"VERDICT: {'PASS ✓' if wins_v18 >= 2 else 'FAIL ✗  (overfit)'}")
+
+    # ── TEST 2: EMA-span sensitivity ──────────────────────────────────────
+    print("\n── TEST 2  state-EMA span sensitivity ────────────────────────────────")
+    print(f"  {'span':>5}  {'Sharpe':>8}  {'Δ vs span=3':>13}")
+    print("  " + "─" * 32)
+    # base_sh = recomputed v18_smooth Sharpe under the SAME _sharpe formula
+    base_sh = _sharpe(pnl_v18s_t)
+    sh16_full = _sharpe(pnl_v16_t)
+    print(f"  (reference: _sharpe(v16)={sh16_full:+.3f}, _sharpe(v18s)={base_sh:+.3f})")
+    span_results = []
+    for span in [2, 3, 4, 5, 6]:
+        phi_x, align_x, _ = compute_geom_signals_v18(V_state,
+                                                       state_ema_span=span,
+                                                       smooth_state=True,
+                                                       z_phi=False,
+                                                       cap_phi=False,
+                                                       ewma_collapse=False)
+        lev_x = apply_geom_penalties(lev_mult, phi_x, align_x,
+                                       phi_pen=GEOM_PHI_PEN,
+                                       align_pen=GEOM_ALIGN_PEN,
+                                       ema_span=GEOM_EMA_SPAN,
+                                       lo=GEOM_LEV_LO, hi=GEOM_LEV_HI)
+        pnl_x = pnl_dyn_v10_orig * lev_x.shift(1).fillna(1.0)
+        sh_x = _sharpe(pnl_x[test_mask])
+        d = sh_x - base_sh
+        marker = ' ←' if span == 3 else ''
+        print(f"  {span:>5}  {sh_x:>+8.3f}  {d:>+13.3f}{marker}")
+        span_results.append(sh_x)
+    sweep_range = max(span_results) - min(span_results)
+    print(f"  → Sharpe range across spans 2-6: {sweep_range:.3f}.   "
+          f"PASS: ≤ 0.10.   "
+          f"VERDICT: {'PASS ✓' if sweep_range <= 0.10 else 'FAIL ✗  (parameter-tuned)'}")
+
+    # ── TEST 3: φ removal ─────────────────────────────────────────────────
+    print("\n── TEST 3  remove φ entirely (smoothing alone vs full v18_smooth) ────")
+    # v18_no_phi: take smoothed state, no φ penalty, no alignment penalty
+    # → this is just lev_mult passed through EMA(5) and clipped.
+    lev_no_phi = lev_mult.ewm(span=GEOM_EMA_SPAN, adjust=False).mean() \
+                          .clip(lower=GEOM_LEV_LO, upper=GEOM_LEV_HI)
+    pnl_no_phi = pnl_dyn_v10_orig * lev_no_phi.shift(1).fillna(1.0)
+    sh_no_phi = _sharpe(pnl_no_phi[test_mask])
+    pnl_v14b_t = (pnl_dyn_v10_orig * lev_mult.shift(1).fillna(1.0))[test_mask]
+    print(f"  {'v14b (raw lev_mult)':<32}  Sharpe={_sharpe(pnl_v14b_t):>+7.3f}")
+    print(f"  {'v16 (raw φ + raw align)':<32}  Sharpe={sh16_full:>+7.3f}")
+    print(f"  {'v18_smooth (smoothed φ+align)':<32}  Sharpe={base_sh:>+7.3f}")
+    print(f"  {'v18_no_phi (EMA only, no φ)':<32}  Sharpe={sh_no_phi:>+7.3f}")
+    edge = base_sh - sh_no_phi
+    print(f"  → φ contribution = v18_smooth − v18_no_phi = {edge:+.3f}.   "
+          f"PASS: > 0.03.   "
+          f"VERDICT: {'PASS ✓' if edge > 0.03 else 'FAIL ✗  (smoothing is the edge, not φ)'}")
+
+    # ── TEST 4: φ shuffle / lag test ──────────────────────────────────────
+    print("\n── TEST 4  shuffle test (lag φ by 3 days, kill its timing) ───────────")
+    phi_18s, align_18s, _ = compute_geom_signals_v18(V_state,
+                                                       smooth_state=True,
+                                                       z_phi=False,
+                                                       cap_phi=False,
+                                                       ewma_collapse=False)
+    phi_lag = phi_18s.shift(3)
+    align_lag = align_18s.shift(3)
+    lev_lag = apply_geom_penalties(lev_mult, phi_lag, align_lag,
+                                     phi_pen=GEOM_PHI_PEN,
+                                     align_pen=GEOM_ALIGN_PEN,
+                                     ema_span=GEOM_EMA_SPAN,
+                                     lo=GEOM_LEV_LO, hi=GEOM_LEV_HI)
+    pnl_lag = pnl_dyn_v10_orig * lev_lag.shift(1).fillna(1.0)
+    sh_lag = _sharpe(pnl_lag[test_mask])
+    drop = base_sh - sh_lag
+    print(f"  v18_smooth (real timing):    Sharpe={base_sh:>+7.3f}")
+    print(f"  v18_smooth (φ lagged by 3d): Sharpe={sh_lag:>+7.3f}   Δ={-drop:+.3f}")
+    print(f"  → Performance drop from broken timing = {drop:+.3f}.   "
+          f"PASS: ≥ 0.02.   "
+          f"VERDICT: {'PASS ✓' if drop >= 0.02 else 'FAIL ✗  (φ timing is irrelevant)'}")
+
+    # ── TEST 5: drawdown profile ──────────────────────────────────────────
+    print("\n── TEST 5  drawdown severity AND duration ────────────────────────────")
+    dd16 = _max_dd(pnl_v16_t); dur16 = _dd_duration(pnl_v16_t)
+    dd18 = _max_dd(pnl_v18s_t); dur18 = _dd_duration(pnl_v18s_t)
+    print(f"  v16:        MaxDD={dd16:>+7.4f}   longest underwater = {dur16:>4d} days")
+    print(f"  v18_smooth: MaxDD={dd18:>+7.4f}   longest underwater = {dur18:>4d} days")
+    sev_better = dd18 >= dd16          # less negative = better
+    dur_better = dur18 <= dur16
+    print(f"  → severity {'better' if sev_better else 'worse'},   "
+          f"duration {'better/equal' if dur_better else 'worse'}.   "
+          f"PASS: BOTH improve.   "
+          f"VERDICT: {'PASS ✓' if (sev_better and dur_better) else 'FAIL ✗  (one-sided)'}")
+
+    # ── KILL TEST SUMMARY ─────────────────────────────────────────────────
+    t1_pass = wins_v18 >= 2
+    t2_pass = sweep_range <= 0.10
+    t3_pass = edge > 0.03
+    t4_pass = drop >= 0.02
+    t5_pass = sev_better and dur_better
+    n_pass = sum([t1_pass, t2_pass, t3_pass, t4_pass, t5_pass])
+    print("\n" + "═" * 96)
+    print(f"  KILL TEST RESULT:  {n_pass}/5 passed")
+    for i, (lbl, ok) in enumerate([
+        ('1 time-split   (v18 ≥ v16 in ≥2/3)',           t1_pass),
+        ('2 EMA span     (Sharpe range ≤ 0.10)',         t2_pass),
+        ('3 φ removal    (φ contributes > 0.03)',        t3_pass),
+        ('4 shuffle      (lag-3 φ drops Sharpe ≥ 0.02)', t4_pass),
+        ('5 drawdown     (both severity AND duration)',  t5_pass),
+    ], 1):
+        print(f"    Test {lbl:<48}  {'PASS ✓' if ok else 'FAIL ✗'}")
+    if n_pass == 5:
+        verdict = "🟢 SHIP v18_smooth — all five kill-tests passed.  Stop optimizing."
+    elif n_pass >= 3:
+        verdict = "🟡 MIXED — keep v16 as fallback, v18_smooth is conditional."
+    else:
+        verdict = "🔴 REVERT to v16 — gain was noise."
+    print(f"\n  VERDICT: {verdict}")
+    print("═" * 96)
+
 
 if __name__ == '__main__':
     main()
