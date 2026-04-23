@@ -57,9 +57,9 @@
       "tail_acc": 0.65,
       "tail_pnl": 0.01736,
       "leverage": 0.0789,
-      "bh_sharpe": 0.261,
+      "bh_sharpe": 0.26,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.012
+      "bh_cum": -0.015
     },
     "P1_ETH_BTC": {
       "label": "P1_ETH_BTC",
@@ -73,7 +73,7 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.01193,
       "leverage": 0.0249,
-      "bh_sharpe": -0.249,
+      "bh_sharpe": -0.25,
       "bh_max_dd": -0.571,
       "bh_cum": -0.284
     },
@@ -89,9 +89,9 @@
       "tail_acc": 0.538,
       "tail_pnl": 0.00342,
       "leverage": 0.0369,
-      "bh_sharpe": 0.405,
+      "bh_sharpe": 0.403,
       "bh_max_dd": -0.497,
-      "bh_cum": 0.401
+      "bh_cum": 0.4
     },
     "P3_ETH_BNB": {
       "label": "P3_ETH_BNB",
@@ -105,9 +105,9 @@
       "tail_acc": 0.053,
       "tail_pnl": -0.01564,
       "leverage": 0.048,
-      "bh_sharpe": -0.306,
+      "bh_sharpe": -0.308,
       "bh_max_dd": -0.617,
-      "bh_cum": -0.367
+      "bh_cum": -0.368
     },
     "M1_BTC_macro": {
       "label": "M1_BTC_macro",
@@ -121,9 +121,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.03113,
       "leverage": 0.0657,
-      "bh_sharpe": 0.818,
+      "bh_sharpe": 0.817,
       "bh_max_dd": -0.519,
-      "bh_cum": 2.236
+      "bh_cum": 2.233
     },
     "M1_ALT_macro": {
       "label": "M1_ALT_macro",
@@ -137,9 +137,9 @@
       "tail_acc": 0.0,
       "tail_pnl": -0.07584,
       "leverage": 0.0347,
-      "bh_sharpe": 0.261,
+      "bh_sharpe": 0.26,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.012
+      "bh_cum": -0.015
     },
     "COMBINED_4way": {
       "label": "COMBINED_4way",
@@ -153,9 +153,9 @@
       "tail_acc": 0.171,
       "tail_pnl": -0.00716,
       "leverage": 0.035,
-      "bh_sharpe": 0.261,
+      "bh_sharpe": 0.26,
       "bh_max_dd": -0.727,
-      "bh_cum": -0.012
+      "bh_cum": -0.015
     },
     "DYNAMIC_v10": {
       "label": "DYNAMIC_v10",
@@ -400,6 +400,15 @@
       "total_days": 1209,
       "hit_rate": 0.489
     },
+    "DYNAMIC_v23": {
+      "label": "DYNAMIC_v23",
+      "sharpe": 1.747,
+      "max_dd": -0.104,
+      "cum_return": 0.927,
+      "active_days": 333,
+      "total_days": 1209,
+      "hit_rate": 0.489
+    },
     "F_FUND_ETH": {
       "label": "F_FUND_ETH_mom",
       "sharpe": 1.742,
@@ -494,6 +503,7 @@
     },
     "v21_ensemble": 1.191,
     "v22_voltarget": 1.747,
+    "v23_calmar_max": 1.747,
     "v21_summary": {
       "prod_scheme": "invvol",
       "ensemble_sharpe": 1.191,
@@ -533,6 +543,34 @@
         "0.0080": 3546.98,
         "0.0120": 2553.78,
         "0.0180": 3453.88
+      },
+      "ensemble_sharpe": 1.747,
+      "ensemble_max_dd": -0.104
+    },
+    "v23_summary": {
+      "prod_variant": "v23a_full_hard",
+      "prod_target_vol": 0.003,
+      "dd_guard": 0.25,
+      "best_K": 2.5,
+      "best_K_pnl": 2306.87,
+      "best_K_max_dd": -0.2233,
+      "best_K_sharpe_net": 0.9384,
+      "best_K_final": 3506.87,
+      "best_K_cagr": 0.2505,
+      "best_K_calmar": 1.1216,
+      "all_variants_calmar": {
+        "v23a_full_hard": 1.1216,
+        "v23b_full_soft": 0.859,
+        "v23c_down_none": 0.2677,
+        "v23d_down_hard": 0.1114,
+        "v23e_down_soft": -0.0724
+      },
+      "all_variants_pnl": {
+        "v23a_full_hard": 2306.87,
+        "v23b_full_soft": 1828.53,
+        "v23c_down_none": 408.9,
+        "v23d_down_hard": 133.17,
+        "v23e_down_soft": -77.45
       },
       "ensemble_sharpe": 1.747,
       "ensemble_max_dd": -0.104

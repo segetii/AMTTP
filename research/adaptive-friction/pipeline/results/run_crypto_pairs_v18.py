@@ -2236,6 +2236,224 @@ def main():
         'ensemble_max_dd':   float(sims_v22['max_dd']),
     }
 
+    # ──────────────────────────────────────────────────────────────────────
+    # v23: PROFIT-MAX / BLOW-OUT-MIN  —  DD-aware throttle + downside-vol
+    # ──────────────────────────────────────────────────────────────────────
+    # Selection metric switches from "max PnL under MaxDD≤40%" to
+    # CALMAR (CAGR / |MaxDD|), with hard MaxDD ≤ 25% guard.
+    print(f"\n  v23 PROFIT-MAX / BLOW-OUT-MIN  —  DD throttle + downside-vol target")
+    INIT_V23  = 1200.0
+    TCOST_V23 = 5.0
+    LB_V23    = 30
+    MAX_INNER_V23 = 20.0
+    DD_GUARD  = 0.25  # hard MaxDD constraint
+
+    base_v23 = pnl_dyn_v20.fillna(0.0).astype(float)
+
+    # full-vol scaler (mirror v22)
+    fullvol_v23 = base_v23.rolling(LB_V23, min_periods=10).std().shift(1)
+    fullvol_v23 = fullvol_v23.fillna(base_v23.std()).replace(0.0, base_v23.std()).clip(lower=1e-6)
+
+    # downside-vol scaler  —  semi-deviation of negative returns only
+    neg_only = base_v23.clip(upper=0.0)
+    downvol_v23 = neg_only.rolling(LB_V23, min_periods=10).std().shift(1)
+    downvol_v23 = downvol_v23.fillna(neg_only.std()).replace(0.0, neg_only.std()).clip(lower=1e-6)
+
+    def _v23_metrics(target_vol, K, scaler_kind, dd_throttle, tcost_bps=TCOST_V23):
+        """One-pass equity sim with optional DD-aware exposure throttle.
+
+        dd_throttle: None  → no throttle
+                     'hard' → cut K by 50% when DD < -15%, restore at -5%
+                     'soft' → linear ramp K_eff = K * max(0.25, 1 + 3.33*DD)
+                              (=> K at 0%, 0.5*K at -15%, 0.25*K at -22.5%+)
+        """
+        scaler_series = fullvol_v23 if scaler_kind == 'full' else downvol_v23
+        s = (target_vol / scaler_series).clip(lower=0.0, upper=MAX_INNER_V23)
+        sized = base_v23 * s  # K=1 vol-targeted PnL
+        active = (base_v23.abs() > 0).astype(float)
+        cost_unit = (tcost_bps / 1e4) * active
+
+        if dd_throttle is None:
+            r = sized * float(K) - cost_unit
+            eq = INIT_V23 * (1.0 + r).cumprod()
+        else:
+            # path-dependent: must loop
+            eq_vals = np.empty(len(sized), dtype=float)
+            cur_eq = INIT_V23
+            cur_peak = INIT_V23
+            half_mode = False  # only used by 'hard'
+            sized_arr = sized.values
+            cost_arr  = cost_unit.values
+            for i in range(len(sized_arr)):
+                if dd_throttle == 'hard':
+                    dd_now = (cur_eq / cur_peak) - 1.0
+                    if not half_mode and dd_now < -0.15:
+                        half_mode = True
+                    elif half_mode and dd_now > -0.05:
+                        half_mode = False
+                    K_eff = float(K) * (0.5 if half_mode else 1.0)
+                else:  # 'soft'
+                    dd_now = (cur_eq / cur_peak) - 1.0
+                    K_eff = float(K) * max(0.25, 1.0 + 3.33 * dd_now)
+                ri = sized_arr[i] * K_eff - cost_arr[i]
+                cur_eq *= (1.0 + ri)
+                if cur_eq > cur_peak:
+                    cur_peak = cur_eq
+                eq_vals[i] = cur_eq
+            eq = pd.Series(eq_vals, index=sized.index)
+
+        if len(eq) == 0 or eq.iloc[-1] <= 0:
+            return None
+        peak = eq.cummax()
+        dd = (eq - peak) / peak
+        years = len(eq) / 252.0
+        cagr = (eq.iloc[-1] / INIT_V23) ** (1.0 / max(years, 1e-9)) - 1.0
+        # for sharpe, recompute returns from equity
+        ret = eq.pct_change().fillna(0.0)
+        sh = float(np.sqrt(252) * ret.mean() / ret.std()) if ret.std() > 0 else 0.0
+        max_dd = float(dd.min())
+        calmar = cagr / abs(max_dd) if max_dd < 0 else float('inf')
+        return dict(K=K, final=float(eq.iloc[-1]), pnl=float(eq.iloc[-1] - INIT_V23),
+                    sh=sh, cagr=float(cagr), dd_pct=max_dd, calmar=float(calmar))
+
+    # variants: (label, scaler_kind, throttle)
+    v23_specs = [
+        ('v23a_full_hard',  'full', 'hard'),
+        ('v23b_full_soft',  'full', 'soft'),
+        ('v23c_down_none',  'down', None),
+        ('v23d_down_hard',  'down', 'hard'),
+        ('v23e_down_soft',  'down', 'soft'),
+    ]
+    target_grid = [0.003, 0.005, 0.008, 0.012]
+    K_grid_v23 = list(np.arange(0.5, 20.05, 0.5))
+
+    print(f"  ── variant bake-off   (objective: max CALMAR under MaxDD ≤ {DD_GUARD*100:.0f}%, net 5bps) ──")
+    print(f"  {'variant':<18}{'tgt':>8}{'K':>7}{'final $':>13}{'PnL $':>13}{'MaxDD%':>10}{'Sh_net':>9}{'CAGR%':>9}{'Calmar':>9}")
+    v23_results = {}
+    for tag, kind, thr in v23_specs:
+        best = None
+        best_tgt = None
+        for tgt in target_grid:
+            for K in K_grid_v23:
+                m = _v23_metrics(tgt, K, kind, thr, TCOST_V23)
+                if m is None:
+                    continue
+                if not (m['dd_pct'] >= -DD_GUARD):
+                    continue
+                if best is None or m['calmar'] > best['calmar']:
+                    best = m; best_tgt = tgt
+        v23_results[tag] = (best, best_tgt)
+        if best is not None:
+            print(f"  {tag:<18}{best_tgt:>8.4f}{best['K']:>7.2f}  ${best['final']:>9.2f}  "
+                  f"${best['pnl']:>+9.2f}  {best['dd_pct']*100:>+8.2f}%  "
+                  f"{best['sh']:>+7.3f}  {best['cagr']*100:>+7.2f}%  {best['calmar']:>+7.2f}")
+        else:
+            print(f"  {tag:<18}  (no (tgt,K) satisfies DD≤{DD_GUARD*100:.0f}%)")
+
+    valid_v23 = {tag: r for tag, r in v23_results.items() if r[0] is not None}
+    if valid_v23:
+        prod_tag_v23 = max(valid_v23, key=lambda t: valid_v23[t][0]['calmar'])
+        best_v23, best_tgt_v23 = valid_v23[prod_tag_v23]
+        print(f"\n  ★ v23 PROD = '{prod_tag_v23}'   (Calmar {best_v23['calmar']:+.2f})")
+        print(f"    target_vol={best_tgt_v23:.4f}  K={best_v23['K']:.2f}  →  PnL +${best_v23['pnl']:.2f}  "
+              f"MaxDD {best_v23['dd_pct']*100:+.2f}%  Sh_net {best_v23['sh']:+.3f}  "
+              f"CAGR {best_v23['cagr']*100:+.2f}%")
+        # comparison vs prior
+        v22_calmar = 0.4401 / 0.3633  # ≈ 1.21
+        print(f"    vs v22 PROD:     PnL +$5,704.85  Calmar ~{v22_calmar:.2f}  MaxDD -36.33%")
+        print(f"    vs v20 (K=10):   PnL +$1,273.60  Calmar ~{0.16/0.40:.2f}  MaxDD -40.00%")
+
+        # also report MAX-PnL-under-DD-guard variant for reference
+        prod_pnl_tag = max(valid_v23, key=lambda t: valid_v23[t][0]['pnl'])
+        bp, btp = valid_v23[prod_pnl_tag]
+        print(f"\n  (alt: max-PnL under DD guard = '{prod_pnl_tag}'  "
+              f"→ ${bp['pnl']:+.2f}  MaxDD {bp['dd_pct']*100:+.2f}%  Calmar {bp['calmar']:+.2f})")
+
+        # K=1 sims dict for reporting consistency
+        kind_prod = 'full' if 'full' in prod_tag_v23 else 'down'
+        thr_prod = None if 'none' in prod_tag_v23 else ('hard' if 'hard' in prod_tag_v23 else 'soft')
+        scaler_prod_v23 = (best_tgt_v23 / (fullvol_v23 if kind_prod == 'full' else downvol_v23)).clip(lower=0.0, upper=MAX_INNER_V23)
+        pnl_v23_K1 = base_v23 * scaler_prod_v23
+        sims_v23   = simulate_from_pnl(pnl_v23_K1, 'DYNAMIC_v23')
+
+        # save scaled curves for PROD
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            # rebuild equity at K=1 and K=best
+            m1 = _v23_metrics(best_tgt_v23, 1.0, kind_prod, thr_prod, TCOST_V23)
+            mB_g = _v23_metrics(best_tgt_v23, best_v23['K'], kind_prod, thr_prod, 0.0)
+            mB_n = best_v23
+            # rebuild equity series via small re-loop
+            def _eq_series(K, tcost):
+                s_series = fullvol_v23 if kind_prod == 'full' else downvol_v23
+                s = (best_tgt_v23 / s_series).clip(lower=0.0, upper=MAX_INNER_V23)
+                sized = base_v23 * s
+                cost_unit = (tcost / 1e4) * (base_v23.abs() > 0).astype(float)
+                if thr_prod is None:
+                    r = sized * float(K) - cost_unit
+                    return INIT_V23 * (1.0 + r).cumprod()
+                eq_vals = np.empty(len(sized))
+                cur_eq, cur_peak, half_mode = INIT_V23, INIT_V23, False
+                sa, ca = sized.values, cost_unit.values
+                for i in range(len(sa)):
+                    if thr_prod == 'hard':
+                        ddn = cur_eq/cur_peak - 1.0
+                        if not half_mode and ddn < -0.15: half_mode = True
+                        elif half_mode and ddn > -0.05: half_mode = False
+                        Ke = float(K) * (0.5 if half_mode else 1.0)
+                    else:
+                        ddn = cur_eq/cur_peak - 1.0
+                        Ke = float(K) * max(0.25, 1.0 + 3.33*ddn)
+                    cur_eq *= (1.0 + sa[i]*Ke - ca[i])
+                    if cur_eq > cur_peak: cur_peak = cur_eq
+                    eq_vals[i] = cur_eq
+                return pd.Series(eq_vals, index=sized.index)
+            eq1   = _eq_series(1.0,           0.0)
+            eqKg  = _eq_series(best_v23['K'], 0.0)
+            eqKn  = _eq_series(best_v23['K'], TCOST_V23)
+            fig, ax = plt.subplots(figsize=(11, 4))
+            ax.plot(eq1.index,  eq1.values,  color='#888', lw=1.2, label='K=1 gross')
+            ax.plot(eqKg.index, eqKg.values, color='#1f77b4', lw=1.6,
+                    label=f'K={best_v23["K"]:.2f} gross')
+            ax.plot(eqKn.index, eqKn.values, color='#d62728', lw=1.6,
+                    label=f'K={best_v23["K"]:.2f} net (5bps)')
+            ax.set_title(f"v23 PROD '{prod_tag_v23}'  tgt={best_tgt_v23:.4f}  "
+                         f"K={best_v23['K']:.2f}  Calmar={best_v23['calmar']:+.2f}  "
+                         f"MaxDD={best_v23['dd_pct']*100:+.2f}%")
+            ax.set_ylabel('Equity (from $1,200)')
+            ax.legend(loc='upper left', fontsize=9); ax.grid(alpha=0.3)
+            v23_png = os.path.join(os.path.dirname(__file__),
+                                   'crypto_bsdt_v23_exposure_sweep.png')
+            plt.tight_layout(); plt.savefig(v23_png, dpi=110); plt.close()
+            print(f"  v23 scaled plot saved → {v23_png}")
+        except Exception as e:
+            print(f"  (matplotlib skipped: {e})")
+    else:
+        prod_tag_v23 = None; best_v23 = None; best_tgt_v23 = None
+        sims_v23 = sims_v22
+        print("  v23: no variant satisfies DD guard  →  fall back to v22")
+
+    v23_summary = {
+        'prod_variant':      prod_tag_v23,
+        'prod_target_vol':   float(best_tgt_v23) if best_tgt_v23 else None,
+        'dd_guard':          DD_GUARD,
+        'best_K':            float(best_v23['K']) if best_v23 else None,
+        'best_K_pnl':        float(round(best_v23['pnl'], 2)) if best_v23 else None,
+        'best_K_max_dd':     float(round(best_v23['dd_pct'], 4)) if best_v23 else None,
+        'best_K_sharpe_net': float(round(best_v23['sh'], 4)) if best_v23 else None,
+        'best_K_final':      float(round(best_v23['final'], 2)) if best_v23 else None,
+        'best_K_cagr':       float(round(best_v23['cagr'], 4)) if best_v23 else None,
+        'best_K_calmar':     float(round(best_v23['calmar'], 4)) if best_v23 else None,
+        'all_variants_calmar': {tag: (float(round(r[0]['calmar'], 4)) if r[0] else None)
+                                for tag, r in v23_results.items()},
+        'all_variants_pnl':    {tag: (float(round(r[0]['pnl'], 2)) if r[0] else None)
+                                for tag, r in v23_results.items()},
+        'ensemble_sharpe':   float(sims_v23['sharpe']),
+        'ensemble_max_dd':   float(sims_v23['max_dd']),
+    }
+
     # ── v16 geometry diagnostics ──────────────────────────────────────────
     print(f"\n── v16 BSDT vector-geometry signals [test] ───────────────────────────")
     phi_t_test   = phi_t[test_mask].dropna()
@@ -2368,6 +2586,7 @@ def main():
         ('v20  STACKED (v18s + fundE + fundB)',  sims_v20),
         (f'v21  DEEP STACK [{prod_scheme}]',     sims_v21_prod),
         (f'v22  VOL-TARGET v20',                 sims_v22),
+        (f'v23  CALMAR-MAX [{prod_tag_v23}]',    sims_v23),
     ]
     base = sims_v10_orig['sharpe']
     for label, r in rows:
@@ -2557,6 +2776,7 @@ def main():
     sims_all['DYNAMIC_v20']        = sims_v20
     sims_all['DYNAMIC_v21']        = sims_v21_prod
     sims_all['DYNAMIC_v22']        = sims_v22
+    sims_all['DYNAMIC_v23']        = sims_v23
     sims_all['F_FUND_ETH']   = sim_fund_eth
     sims_all['F_FUND_BTC']   = sim_fund_btc
 
@@ -2611,8 +2831,10 @@ def main():
             "v20_summary":       v20_summary,
             "v21_ensemble":      sims_v21_prod['sharpe'],
             "v22_voltarget":     sims_v22['sharpe'],
+            "v23_calmar_max":    sims_v23['sharpe'],
             "v21_summary":       v21_summary,
             "v22_summary":       v22_summary,
+            "v23_summary":       v23_summary,
         },
         "v14_diagnostics": {
             "lev_mult_mean": float(round(lev_t.mean(), 3)),
@@ -2683,6 +2905,7 @@ def main():
         ('v20  STACKED ALPHA',       'inv-vol(v18s + F_FUND_ETH + F_FUND_BTC)',        sims_v20['sharpe']),
         (f'v21  DEEP STACK ({prod_scheme})',  '4-leg + scheme bake-off',                       sims_v21_prod['sharpe']),
         (f'v22  VOL-TARGET v20',              f'inv-realized-vol overlay  (tgt={prod_target_v22})',  sims_v22['sharpe']),
+        (f'v23  CALMAR-MAX',                  f'DD-throttle + downvol  ({prod_tag_v23})',           sims_v23['sharpe']),
     ]
     for vname, src, sh in summary_rows:
         print(f"  {vname:<22}  {src:<38}  {sh:>+14.3f}")
