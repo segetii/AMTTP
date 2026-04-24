@@ -12,7 +12,7 @@ from collapse_geometry import (
     MasterOperator, Snapshot, LedoitWolfNetwork,
     LyapunovCertificate, CollapseGeometry, EarlyWarning,
     EscapeTime, StochasticExtension, AgentSensitivity,
-    RecoveryDynamics, InformationGeometry,
+    RecoveryDynamics, InformationGeometry, WelfareCalibration,
     Gravity, Molecular, Hybrid,
 )
 
@@ -150,6 +150,46 @@ def main() -> None:
     print(f"  Molecular final e_BSDT = {final_e(Xm):.4f}")
     print(f"  Hybrid    final e_BSDT = {final_e(Xh):.4f}")
     print(f"  initial    e_BSDT     = {M.damp.e_BSDT(snap):.4f}")
+
+    # 13. §IX — CCyB regulatory calibration & welfare loss
+    print(f"\n--- REGULATORY (§IX) — CCyB & WELFARE LOSS ---")
+    welf = WelfareCalibration(op=M, sigma_calib=1.0)
+    sigma_ell = panel[..., 0].std(axis=1)            # leverage vol per t
+    ccyb = welf.ccyb(panel, sigma_ell)
+    wloss = welf.welfare_loss(panel)
+    print(f"  CCyB(t) range     = [{ccyb.min():.1f}, {ccyb.max():.1f}] bps")
+    print(f"  Welfare loss      = {wloss:.4f} pp consumption-equivalent")
+
+    # 14. §V — supercritical fraction over the panel trajectory
+    p_sc = M.potential.supercritical_fraction(panel)
+    print(f"\n--- §V SUPERCRITICAL FRACTION ---")
+    print(f"  p̂_SC over panel   = {p_sc:.4f}")
+
+    # 15. §VII channel-cosine + §XIV.3 curvature-tangent
+    print(f"\n--- §VII / §XIV.3 ANGULAR DIAGNOSTICS ---")
+    print(f"  cos θ_channel     = {geom.cos_theta_channel(snap):.4f}")
+    print(f"  tan θ_curv (φ=π/4)= {geom.tan_theta_curv(snap, phi=np.pi/4):.4f}")
+
+    # 16. §XVI MFLS decay rate, §XVII EWS threshold, §XIX stationary p*
+    print(f"\n--- §XVI / §XVII / §XIX ADDITIONAL DIAGNOSTICS ---")
+    print(f"  dMFLS/dt          = {lyap.mfls_rate(snap):.4f}")
+    print(f"  EWS* threshold    = {ews.threshold(theta=M.damp.theta, e_star=e_star):.4f}")
+    e_grid = np.linspace(0.1, e_star, 50)
+    p_star = sde.stationary_density(snap, e_grid)
+    print(f"  p*(e) at e_star   = {p_star[-1]:.4e}  (∫p*=1, len={len(e_grid)})")
+
+    # 17. §XXI network amplification, §XXII energy barriers
+    print(f"\n--- §XXI / §XXII NETWORK & BARRIER DIAGNOSTICS ---")
+    amp = sens.network_amplification(snap)
+    print(f"  ∂L/∂x_i amplif.   = {amp.round(3)}")
+    # build a saddle and a crisis state for barrier comparison
+    X_saddle = M.cal.mu0 + 0.5 * (snap.X - M.cal.mu0)
+    X_crisis = M.cal.mu0 + 1.5 * (snap.X - M.cal.mu0)
+    bars = rec.energy_barriers(M.cal.mu0[None, :].repeat(snap.N, 0),
+                               X_saddle, X_crisis)
+    print(f"  ΔΦ_collapse       = {bars['delta_collapse']:.4f}")
+    print(f"  ΔΦ_recovery       = {bars['delta_recovery']:.4f}")
+    print(f"  asymmetry         = {bars['asymmetry']:.4f}")
 
     print("\n=== DEMO COMPLETE — full §I–XXVII pipeline operational ===\n")
 

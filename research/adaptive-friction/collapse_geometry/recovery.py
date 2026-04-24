@@ -35,3 +35,19 @@ class RecoveryDynamics:
         u = -self.op.collapse_direction_state(snap)
         proj = float((F * u).sum())
         return F + gamma_rec * proj * u
+
+    # §XXII.2 hysteresis energy barriers — collapse vs recovery asymmetry
+    def energy_barriers(self, X_normal: np.ndarray, X_saddle: np.ndarray,
+                        X_crisis: np.ndarray) -> dict[str, float]:
+        """ΔΦ_collapse = Φ(saddle) − Φ(normal); ΔΦ_recovery = Φ(saddle) − Φ(crisis).
+        Asymmetric in general — recovery barrier is smaller than collapse barrier
+        when Φ(crisis) > Φ(normal) (system is trapped in a deeper local minimum)."""
+        from .state import Snapshot
+        def phi(X):
+            s = Snapshot(X=X)
+            return self.op.potential.E_total(X, self.op.cal.mu0, s.distance_matrix())
+        phi_n = phi(X_normal); phi_s = phi(X_saddle); phi_c = phi(X_crisis)
+        return dict(phi_normal=phi_n, phi_saddle=phi_s, phi_crisis=phi_c,
+                    delta_collapse=phi_s - phi_n,
+                    delta_recovery=phi_s - phi_c,
+                    asymmetry=(phi_s - phi_n) - (phi_s - phi_c))

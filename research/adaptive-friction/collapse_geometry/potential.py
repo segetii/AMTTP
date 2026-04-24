@@ -45,3 +45,15 @@ class Potential:
 
     def supercritical(self, D: np.ndarray) -> bool:
         return self.lambda_max_bound(D) > 1.0
+
+    # ─── §V trajectory-level supercritical fraction p̂_SC ───────────────
+    def supercritical_fraction(self, panel: np.ndarray) -> float:
+        """p̂_SC = (1/T) Σ 𝟙[λ_max(t) > 1] over a (T, N, d) trajectory."""
+        from .state import Snapshot
+        T = panel.shape[0]
+        hits = 0
+        for t in range(T):
+            D = Snapshot(X=panel[t]).distance_matrix()
+            if self.supercritical(D):
+                hits += 1
+        return hits / T

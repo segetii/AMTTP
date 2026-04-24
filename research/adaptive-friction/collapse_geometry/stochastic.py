@@ -53,3 +53,24 @@ class StochasticExtension:
         if tau_K == float("inf"):
             return 0.0
         return float(1.0 - np.exp(-tau / tau_K))
+
+    # §XIX.3 Fokker-Planck stationary distribution p*(e) ∝ exp(-2/σ_n² ∫ μ_e(e')de')
+    # Discretised on a user-supplied energy grid via cumulative trapezoid.
+    def stationary_density(self, snap: Snapshot, e_grid: np.ndarray,
+                           dt: float = 1e-2) -> np.ndarray:
+        """Closed-form drift μ_e(e) is evaluated at the current state and
+        approximated locally as constant — appropriate for a 1-D projection on
+        the energy axis around e_t. Returns a normalised pdf over e_grid."""
+        mu = self.expected_dV(snap)  # local drift
+        # constant-drift OU has Gaussian stationary centred at e_t with var σ_n²/(-2μ)
+        e_t = self.op.damp.e_BSDT(snap)
+        if mu >= 0:
+            # no stationary distribution exists → return improper exp tail (clipped)
+            log_p = -2.0 * mu * (e_grid - e_t) / max(self.sigma_n ** 2, 1e-12)
+        else:
+            var = self.sigma_n ** 2 / max(-2.0 * mu, 1e-12)
+            log_p = -((e_grid - e_t) ** 2) / (2.0 * var)
+        log_p -= log_p.max()        # numerical stabilisation
+        p = np.exp(np.clip(log_p, -700.0, 0.0))
+        Z = np.trapz(p, e_grid) + 1e-12
+        return p / Z

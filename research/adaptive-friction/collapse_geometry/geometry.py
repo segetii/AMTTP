@@ -28,6 +28,25 @@ class CollapseGeometry:
         nF = np.linalg.norm(F, "fro")
         return float((F * u).sum() / nF) if nF > 1e-12 else 0.0
 
+    # §VII original alignment — channel-space (early warning, valid in all regimes)
+    def cos_theta_channel(self, snap: Snapshot) -> float:
+        F = self.op.force(snap)
+        Gtilde = self.op.mfls.state_pullback(snap)  # ⟨g, F⟩ via pullback ≡ ⟨G̃, F⟩
+        nF = np.linalg.norm(F, "fro")
+        nG = np.linalg.norm(Gtilde, "fro")
+        if nF < 1e-12 or nG < 1e-12:
+            return 0.0
+        return float((Gtilde * F).sum() / (nF * nG))
+
+    # §XIV.3 curvature-relative tangent  tan θ_curv = (MFLS / λ_max(∇²E_BS)) · tan φ
+    def tan_theta_curv(self, snap: Snapshot, phi: float = 0.0) -> float:
+        S = self.op.bsdt.channel_state(snap)
+        lam = self.op.energy.lambda_max_bound(S)
+        m = self.op.mfls.state_mfls(snap)
+        if lam < 1e-12:
+            return float("inf")
+        return float((m / lam) * np.tan(phi))
+
     def tan_theta(self, snap: Snapshot) -> float:
         c = self.cos_theta_state(snap)
         c = float(np.clip(abs(c), 1e-12, 1.0))

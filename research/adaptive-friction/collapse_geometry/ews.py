@@ -50,3 +50,13 @@ class EarlyWarning:
         xi = np.array([s["xi1"], s["xi2"], s["xi3"], s["xi4"], s["xi5"], s["xi6"]])
         xi = np.clip(xi, 1e-12, 1.0)
         return float(np.exp((self.weights * np.log(xi)).sum()))
+
+    # §XVII.2 critical threshold  EWS* = Π ξ_k*^{w_k}  at the manifold (ξ_2*=1, ξ_4*=1)
+    def threshold(self, theta: float, e_star: float) -> float:
+        """Closed-form EWS* assuming spectral & alignment at criticality, others at
+        their normal-period 1-σ default (xi_3* = 0.5, xi_5* tied to e_star)."""
+        gamma_star = e_star / (e_star + theta)
+        xi_star = np.array([gamma_star, 1.0, 0.5, 1.0,
+                            e_star / (1.0 + e_star), 1.0])
+        xi_star = np.clip(xi_star, 1e-12, 1.0)
+        return float(np.exp((self.weights * np.log(xi_star)).sum()))

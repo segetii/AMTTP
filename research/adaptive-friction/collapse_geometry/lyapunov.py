@@ -53,6 +53,14 @@ class LyapunovCertificate:
         b = self._bundle(snap)
         return b["Pt"] - b["gamma"] * b["Qt"] / max(b["gnorm2"], 1e-12)
 
+    # ── §XVI.7 MFLS decay rate  d MFLS/dt = M_t · (|P|+|Q|/||g||²) / ||g|| ────
+    def mfls_rate(self, snap: Snapshot) -> float:
+        b = self._bundle(snap)
+        gn = float(np.sqrt(max(b["gnorm2"], 1e-12)))
+        gn2 = max(b["gnorm2"], 1e-12)
+        scale = abs(b["Pt"]) + abs(b["Qt"]) / gn2
+        return self.margin(snap) * scale / gn
+
     # ── §XXIV.5 stability margin M_t ───────────────────────────
     def margin(self, snap: Snapshot) -> float:
         b = self._bundle(snap)

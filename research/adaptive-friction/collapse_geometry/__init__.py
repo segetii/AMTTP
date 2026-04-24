@@ -47,6 +47,7 @@ from .inverse import ParameterIdentification
 from .sensitivity import AgentSensitivity
 from .recovery import RecoveryDynamics
 from .info_theory import InformationGeometry
+from .welfare import WelfareCalibration
 from .engines import Gravity, Molecular, Hybrid
 
 __all__ = [
@@ -57,7 +58,7 @@ __all__ = [
     "LyapunovCertificate", "CollapseGeometry", "EarlyWarning",
     "EscapeTime", "StochasticExtension",
     "ParameterIdentification", "AgentSensitivity", "RecoveryDynamics",
-    "InformationGeometry",
+    "InformationGeometry", "WelfareCalibration",
     "Gravity", "Molecular", "Hybrid",
 ]
 __version__ = "1.0.0"
