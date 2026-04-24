@@ -130,10 +130,14 @@ def main() -> None:
 
     # 12. Run all three engines for 50 steps
     print(f"\n--- ENGINE COMPARISON (50 steps, dt=1e-2) ---")
-    grav = Gravity(op=M, dt=1e-2, controlled=True)
-    mol  = Molecular(op=M, dt=1e-2, zeta=0.5, kT=1e-4)
-    hyb  = Hybrid(op=M, dt=1e-3, zeta=0.5, kT=1e-4,
-                  lj_eps=1e-4, lj_sigma=0.05, cutoff=2.0)
+    # 12. Run all three engines — every parameter derived from the panel
+    print(f"\n--- ENGINE COMPARISON (50 steps, all params from panel) ---")
+    grav = Gravity.from_panel(M, panel)
+    mol  = Molecular.from_panel(M, panel)
+    hyb  = Hybrid.from_panel(M, panel)
+    print(f"  Gravity   {grav.report()}")
+    print(f"  Molecular {mol.report()}")
+    print(f"  Hybrid    {hyb.report()}")
 
     Xg = grav.trajectory(snap, T=50)
     Xm, _ = mol.trajectory(snap, T=50)

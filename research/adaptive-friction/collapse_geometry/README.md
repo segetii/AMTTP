@@ -55,10 +55,28 @@ snap = Snapshot(X=X_now, X_prev=X_prev, history=X_normal[-20:])
 # Single-step controlled velocity (§XV master operator):
 dXdt = M.step(snap)
 
-# Run with the production Hybrid engine (gravity + molecular + control):
-engine = Hybrid(op=M, dt=1e-2, zeta=0.1, kT=1e-4)
+# Run with the production Hybrid engine — every physical scale derived
+# from the panel itself (σ_LJ, ε_LJ, cutoff, dt, ζ, kT). No heuristics.
+engine = Hybrid.from_panel(M, X_normal)
 trajectory, _ = engine.trajectory(snap, T=500)
+print(engine.report())  # inspect data-derived scales
 ```
+
+## Data-driven engine calibration
+
+Every engine has a `from_panel(op, panel)` constructor that derives all
+physical scales from the calibration data — no user-tuned numbers:
+
+| Scale | Source | MD/physics identity |
+|---|---|---|
+| `σ_LJ` | 1st percentile of pairwise distances | wall location below typical crowding |
+| `ε_LJ` | `F_max · σ / 24` | LJ force at r=σ matches gravity F_max |
+| `cutoff` | `median(distance) / σ` | short-range hands off to gravity above median |
+| `dt` (gravity / molecular) | `0.1 · σ_min / F_max` | CFL — 10% of smallest length per step |
+| `dt` (hybrid) | `2π / (20·ω_LJ)` | 20 velocity-Verlet steps per LJ vibration |
+| `ζ` (molecular) | `2√(α·m)` | critical damping at radial spring |
+| `ζ` (hybrid) | `2√(72ε·m/σ²)` | critical damping at LJ minimum |
+| `kT` | `m·⟨‖Δx‖²⟩/d` | equipartition from observed displacements |
 
 ## Demo
 
