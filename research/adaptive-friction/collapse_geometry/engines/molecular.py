@@ -80,6 +80,35 @@ class Molecular:
             Xs[t + 1], Vs[t + 1] = s.X, V
         return Xs, Vs
 
+    # ── §I–XXVII full diagnostics ─────────────────────────────────────────
+    def diagnostics(self, snap: Snapshot, V: np.ndarray | None = None) -> dict:
+        """Per-snapshot §I–XXVII closed-form diagnostics (kinetic energy uses V)."""
+        from .diagnostics import engine_diagnostics
+        return engine_diagnostics(self.op, snap, V=V, mass=self.mass)
+
+    def trajectory_with_diagnostics(self, snap: Snapshot, T: int,
+                                    V0: np.ndarray | None = None
+                                    ) -> tuple[np.ndarray, np.ndarray, list]:
+        """Forward integrate AND record per-step diagnostics.
+
+        Returns
+        -------
+        Xs    : (T+1, N, d)
+        Vs    : (T+1, N, d)
+        diags : list of length T+1 of diagnostic dicts
+        """
+        V = np.zeros_like(snap.X) if V0 is None else V0
+        Xs = np.empty((T + 1, *snap.X.shape))
+        Vs = np.empty_like(Xs)
+        Xs[0], Vs[0] = snap.X, V
+        diags = [self.diagnostics(snap, V)]
+        s = snap
+        for t in range(T):
+            s, V = self.step(s, V)
+            Xs[t + 1], Vs[t + 1] = s.X, V
+            diags.append(self.diagnostics(s, V))
+        return Xs, Vs, diags
+
     def report(self) -> dict:
         return dict(dt=self.dt, mass=self.mass, zeta=self.zeta, kT=self.kT,
                     controlled=self.controlled)

@@ -105,16 +105,28 @@ class Hybrid:
         return F_lj * scale
 
     def _total_force(self, snap: Snapshot, V: np.ndarray) -> np.ndarray:
+        """§XV master operator applied to *conservative* forces only.
+
+        F_cons = F_grav + F_lj   ← the "free dynamics" of §XIII
+        Drag (-ζV) is already dissipative; thermal noise is stochastic (§XIX).
+        Per the minimal-intervention principle (§XIII.2) the control law damps
+        only the collapse-directed component of the conservative force.
+        """
         F_grav = self.op.force(snap)
         F_lj   = self._lj_force(snap.X)
+        F_cons = F_grav + F_lj
+
+        # §XV control: project conservative force onto state-space collapse direction
+        u = self.op.collapse_direction_state(snap)
+        proj  = float((F_cons * u).sum())
+        gamma = self.op.damp.gamma_star(snap)
+        F_controlled = F_cons - gamma * proj * u
+
+        # Add dissipative drag + stochastic noise (uncontrolled, per §XIX)
         F_drag = -self.zeta * V
         noise_std = float(np.sqrt(2.0 * self.zeta * self.kT / max(self.dt, 1e-12)))
         xi = self.rng.standard_normal(size=snap.X.shape)
-        F = F_grav + F_lj + F_drag + noise_std * xi
-        u = self.op.collapse_direction_state(snap)
-        proj = float((F * u).sum())
-        gamma = self.op.damp.gamma_star(snap)
-        return F - gamma * proj * u
+        return F_controlled + F_drag + noise_std * xi
 
     # ───────────────────────────────── stepping ─────────────────────────────────
     def step(self, snap: Snapshot, V: np.ndarray) -> tuple[Snapshot, np.ndarray]:
@@ -137,6 +149,36 @@ class Hybrid:
             s, V = self.step(s, V)
             Xs[t + 1], Vs[t + 1] = s.X, V
         return Xs, Vs
+
+    # ── §I–XXVII full diagnostics ─────────────────────────────────────────
+    def diagnostics(self, snap: Snapshot, V: np.ndarray | None = None) -> dict:
+        """Per-snapshot §I–XXVII closed-form diagnostics + LJ-specific scalars."""
+        from .diagnostics import engine_diagnostics
+        d = engine_diagnostics(self.op, snap, V=V, mass=self.mass)
+        # Hybrid-specific: short-range LJ contribution
+        F_lj = self._lj_force(snap.X)
+        d["hybrid"] = dict(
+            F_lj_norm   = float(np.linalg.norm(F_lj, "fro")),
+            lj_sigma    = self.lj_sigma,
+            lj_eps      = self.lj_eps,
+            cutoff_sigma= self.cutoff,
+        )
+        return d
+
+    def trajectory_with_diagnostics(self, snap: Snapshot, T: int,
+                                    V0: np.ndarray | None = None
+                                    ) -> tuple[np.ndarray, np.ndarray, list]:
+        V = np.zeros_like(snap.X) if V0 is None else V0
+        Xs = np.empty((T + 1, *snap.X.shape))
+        Vs = np.empty_like(Xs)
+        Xs[0], Vs[0] = snap.X, V
+        diags = [self.diagnostics(snap, V)]
+        s = snap
+        for t in range(T):
+            s, V = self.step(s, V)
+            Xs[t + 1], Vs[t + 1] = s.X, V
+            diags.append(self.diagnostics(s, V))
+        return Xs, Vs, diags
 
     def report(self) -> dict:
         """Inspect the data-derived physics scales."""

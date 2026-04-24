@@ -49,7 +49,7 @@ from .sensitivity import AgentSensitivity
 from .recovery import RecoveryDynamics
 from .info_theory import InformationGeometry
 from .welfare import WelfareCalibration
-from .engines import Gravity, Molecular, Hybrid
+from .engines import Gravity, Molecular, Hybrid, engine_diagnostics
 
 __all__ = [
     "CalibrationState", "Snapshot",
@@ -61,6 +61,6 @@ __all__ = [
     "EscapeTime", "StochasticExtension",
     "ParameterIdentification", "AgentSensitivity", "RecoveryDynamics",
     "InformationGeometry", "WelfareCalibration",
-    "Gravity", "Molecular", "Hybrid",
+    "Gravity", "Molecular", "Hybrid", "engine_diagnostics",
 ]
-__version__ = "1.2.0"
+__version__ = "1.3.0"

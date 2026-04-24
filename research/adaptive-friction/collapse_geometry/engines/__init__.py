@@ -7,5 +7,6 @@ Hybrid    — gravity field + short-range Lennard-Jones repulsion + BSDT control
 from .gravity import Gravity
 from .molecular import Molecular
 from .hybrid import Hybrid
+from .diagnostics import engine_diagnostics
 
-__all__ = ["Gravity", "Molecular", "Hybrid"]
+__all__ = ["Gravity", "Molecular", "Hybrid", "engine_diagnostics"]

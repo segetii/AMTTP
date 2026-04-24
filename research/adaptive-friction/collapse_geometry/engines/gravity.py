@@ -56,5 +56,29 @@ class Gravity:
             out[t + 1] = s.X
         return out
 
+    # ── §I–XXVII full diagnostics ─────────────────────────────────────────
+    def diagnostics(self, snap: Snapshot) -> dict:
+        """Per-snapshot §I–XXVII closed-form diagnostics (read-only)."""
+        from .diagnostics import engine_diagnostics
+        return engine_diagnostics(self.op, snap, V=None)
+
+    def trajectory_with_diagnostics(self, snap: Snapshot, T: int) -> tuple:
+        """Forward integrate AND record per-step diagnostics.
+
+        Returns
+        -------
+        Xs    : (T+1, N, d) trajectory
+        diags : list of length T+1 of diagnostic dicts (one per snapshot)
+        """
+        Xs = np.empty((T + 1, *snap.X.shape))
+        Xs[0] = snap.X
+        diags = [self.diagnostics(snap)]
+        s = snap
+        for t in range(T):
+            s = self.step(s)
+            Xs[t + 1] = s.X
+            diags.append(self.diagnostics(s))
+        return Xs, diags
+
     def report(self) -> dict:
         return dict(dt=self.dt, controlled=self.controlled)
