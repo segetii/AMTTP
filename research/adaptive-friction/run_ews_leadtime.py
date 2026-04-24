@@ -1,11 +1,15 @@
-"""§XVII Early-Warning lead-time sweep.
+"""§XVII Early-Warning lead-time sweep — two-layer (Precursor + Geometry).
 
 For each of FDIC, WORLD-BANK, ERCOT, PROTEIN we replay a lookback window
-ending at the stress event and evaluate EWS(t) for every t.  The lead time
-is (t_stress - t_first_breach), expressed in the dataset's native time unit.
+ending at the stress event and evaluate both EWS layers for every t:
 
-This answers the question: did the §I-XXVII pipeline retain the
-*early-warning* capability that the prior version had?
+  Layer A (Precursor):  p1=max(0,P_t), p2=1-cosψ, p3=std(S), p4=Σ|ΔS|
+                        Normalised vs P95 of the normal period.  Alarm ≥ 1.0.
+  Layer B (Geometry):   six ξ signals, geometric mean.
+                        Alarm ≥ empirical μ+2σ of the normal period (min of
+                        this and the §XVII.2 closed-form threshold).
+
+Lead time = t_event − t_first_breach, in dataset-native units.
 """
 from __future__ import annotations
 import json
@@ -19,7 +23,7 @@ sys.path.insert(0, str(ROOT / "research" / "adaptive-friction"))
 
 from collapse_geometry import (
     MasterOperator, Snapshot, LedoitWolfNetwork,
-    CollapseGeometry, EarlyWarning, InformationGeometry,
+    CollapseGeometry, EarlyWarning, PrecursorScale, InformationGeometry,
 )
 
 from run_real_data_simulations import (
@@ -30,7 +34,7 @@ from run_real_data_simulations import (
 def sweep_ews(name: str, panel: np.ndarray, X_normal: np.ndarray,
               t_event: int, lookback: int, unit: str,
               dates_or_idx) -> dict:
-    """Replay EWS(t) for t in [t_event-lookback, t_event] and report breaches."""
+    """Two-layer EWS sweep: Layer A (precursor) + Layer B (geometry)."""
     print(f"\n{'='*72}\n  {name}\n{'='*72}")
     T0, N, d = X_normal.shape
     M = MasterOperator.calibrate(X_normal, k=min(4, d), theta=1.0)
@@ -38,12 +42,15 @@ def sweep_ews(name: str, panel: np.ndarray, X_normal: np.ndarray,
     info = InformationGeometry(op=M)
     e_star = info.chi2_threshold(N, d, alpha_conf=0.01)
     ews = EarlyWarning(op=M, geom=geom)
-    thresh_closed = ews.threshold(theta=M.damp.theta, e_star=e_star)
 
-    # Empirical threshold: replay EWS over the calibration window itself,
-    # then set thresh = mean + 2·std of the normal-period scores. This is the
-    # operational §XVII.2 threshold the prior pipeline used; the closed-form
-    # ξ_4*=1 ceiling is a theoretical upper bound.
+    # ── Layer A: self-calibrate PrecursorScale from the normal period ──────
+    print(f"  Calibrating PrecursorScale (T0={T0}, pct=95) ...")
+    pre_scale = PrecursorScale.from_panel(M, X_normal, pct=95.0)
+    ews.precursor_scale = pre_scale
+    print(f"  P95 scales: P={pre_scale.P_scale:.4g}  ψ={pre_scale.psi_scale:.4g}"
+          f"  S={pre_scale.S_scale:.4g}  V={pre_scale.V_scale:.4g}")
+
+    # ── Layer B: empirical threshold μ+2σ over the normal period ──────────
     norm_scores = []
     for t in range(1, T0):
         snap_n = Snapshot(X=X_normal[t], X_prev=X_normal[t - 1],
@@ -52,51 +59,76 @@ def sweep_ews(name: str, panel: np.ndarray, X_normal: np.ndarray,
         net_n  = LedoitWolfNetwork.from_panel(feat0n) if feat0n.shape[0] >= 3 else None
         norm_scores.append(ews.score(snap_n, net_n))
     norm_scores = np.array(norm_scores)
+    thresh_closed    = ews.threshold(theta=M.damp.theta, e_star=e_star)
     thresh_empirical = float(norm_scores.mean() + 2.0 * norm_scores.std())
-    thresh = min(thresh_closed, thresh_empirical)
+    thresh_B         = min(thresh_closed, thresh_empirical)
 
+    # ── Sweep lookback window ─────────────────────────────────────────────
     t_start = max(1, t_event - lookback)
-    history = []
-    breach_t = None
+    history: list = []
+    breach_A_t = None   # Layer A first breach
+    breach_B_t = None   # Layer B first breach
+    snap_prev = None
     for t in range(t_start, t_event + 1):
         snap = Snapshot(X=panel[t], X_prev=panel[t - 1],
                         history=panel[max(0, t - 5): t])
-        feat0 = panel[max(0, t - T0): t, :, 0]                # (≤T0, N)
-        if feat0.shape[0] < 3:
-            net = None
+        feat0 = panel[max(0, t - T0): t, :, 0]
+        net   = LedoitWolfNetwork.from_panel(feat0) if feat0.shape[0] >= 3 else None
+
+        result = ews.two_layer(snap, net, snap_prev, e_star,
+                               geometry_threshold=thresh_B)
+        g_alarm = result["geometry_alarm"]
+        a_alarm = result["precursor_alarm"]
+
+        history.append(dict(
+            t=int(t),
+            geometry_score=float(result["geometry_score"]),
+            precursor_score=float(result["precursor_score"]),
+            geometry_alarm=g_alarm,
+            precursor_alarm=a_alarm,
+            **{k: float(v) for k, v in result["geometry_signals"].items()},
+            **{f"p_{k}": float(v) for k, v in result["precursor_signals"].items()},
+        ))
+        if breach_A_t is None and a_alarm:
+            breach_A_t = t
+        if breach_B_t is None and g_alarm:
+            breach_B_t = t
+        snap_prev = snap
+
+    # ── Report ────────────────────────────────────────────────────────────
+    print(f"  Layer B threshold : {thresh_B:.4f}  "
+          f"(closed={thresh_closed:.4f}, empirical μ+2σ={thresh_empirical:.4f})")
+    print(f"  Layer A threshold : 1.0  (P95-normalised precursor score)")
+    print(f"  Lookback          : {lookback} {unit}  "
+          f"(t={t_start} … {t_event}  |  event={dates_or_idx(t_event)})")
+    for label, bt in (("A — Precursor", breach_A_t), ("B — Geometry", breach_B_t)):
+        if bt is None:
+            print(f"  Layer {label}: !! No breach in lookback window")
         else:
-            net = LedoitWolfNetwork.from_panel(feat0)
-        score  = ews.score(snap, net)
-        sigs   = ews.signals(snap, net)
-        cos_t  = geom.cos_theta_state(snap)
-        gamma  = M.damp.gamma_star(snap)
-        history.append(dict(t=int(t), score=float(score),
-                            cos_theta=float(cos_t), gamma=float(gamma),
-                            **{k: float(v) for k, v in sigs.items()}))
-        if breach_t is None and score >= thresh:
-            breach_t = t
+            lead = t_event - bt
+            print(f"  Layer {label}: first breach t={bt} ({dates_or_idx(bt)})"
+                  f"  →  lead = {lead} {unit}")
 
-    print(f"  EWS threshold     : {thresh:.4f}  (closed={thresh_closed:.4f}, "
-          f"empirical μ+2σ={thresh_empirical:.4f})")
-    print(f"  Lookback          : {lookback} {unit}  (t={t_start} ... {t_event})")
-    if breach_t is None:
-        print(f"  !! No breach in lookback window")
-    else:
-        lead = t_event - breach_t
-        print(f"  First breach      : t={breach_t}  ({dates_or_idx(breach_t)})")
-        print(f"  Stress event      : t={t_event}  ({dates_or_idx(t_event)})")
-        print(f"  Lead time         : {lead} {unit}")
-
-    print(f"  --- last 8 scores ---")
+    print(f"  --- last 8 frames ---")
     for h in history[-8:]:
-        flag = " <-- BREACH" if h["score"] >= thresh else ""
-        print(f"    t={h['t']:4d}  EWS={h['score']:.4f}  γ={h['gamma']:.3f}  "
-              f"cosθ={h['cos_theta']:+.3f}  ξ4={h['xi4']:.3f}  ξ5={h['xi5']:.3f}{flag}")
+        gf = " G!" if h["geometry_alarm"] else "   "
+        af = " A!" if h["precursor_alarm"] else "   "
+        print(f"    t={h['t']:4d}  B={h['geometry_score']:.4f}"
+              f"  A={h['precursor_score']:.4f}"
+              f"  γ={h.get('xi1', 0):.3f}  cosθ={h.get('xi4', 0):.3f}"
+              f"{gf}{af}")
 
-    return dict(name=name, threshold=thresh, lookback=lookback,
-                t_event=int(t_event), breach_t=breach_t,
-                lead_time=None if breach_t is None else int(t_event - breach_t),
-                unit=unit, history=history)
+    return dict(
+        name=name,
+        thresh_B=thresh_B, thresh_A=1.0,
+        lookback=lookback, unit=unit,
+        t_event=int(t_event),
+        breach_A_t=None if breach_A_t is None else int(breach_A_t),
+        breach_B_t=None if breach_B_t is None else int(breach_B_t),
+        lead_A=None if breach_A_t is None else int(t_event - breach_A_t),
+        lead_B=None if breach_B_t is None else int(t_event - breach_B_t),
+        history=history,
+    )
 
 
 # ─────────────────────────────────── FDIC ───────────────────────────────────
@@ -132,7 +164,10 @@ def sweep_fdic():
     t_event   = int(np.argmin(np.abs(dates - pd.Timestamp("2008-12-31"))))
     return sweep_ews("FDIC (GFC Q4-2008)", panel, X_normal,
                      t_event=t_event, lookback=20, unit="quarters",
-                     dates_or_idx=lambda t: dates[t].strftime("%Y-Q%q") if hasattr(dates[t], "strftime") else str(dates[t]))
+                     dates_or_idx=lambda t: (
+                         f"{dates[t].year}-Q{(dates[t].month - 1) // 3 + 1}"
+                         if hasattr(dates[t], "month") else str(dates[t])
+                     ))
 
 
 def pickle_load(p):

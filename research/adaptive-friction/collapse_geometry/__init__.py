@@ -40,7 +40,7 @@ from .damping import AdaptiveDamping
 from .control import MasterOperator
 from .lyapunov import LyapunovCertificate
 from .geometry import CollapseGeometry
-from .ews import EarlyWarning
+from .ews import EarlyWarning, PrecursorScale
 from .escape import EscapeTime
 from .stochastic import StochasticExtension
 from .inverse import ParameterIdentification
@@ -55,10 +55,10 @@ __all__ = [
     "LedoitWolfNetwork", "Potential", "ForceField",
     "BSDT", "UnifiedEnergy", "MFLS",
     "AdaptiveDamping", "MasterOperator",
-    "LyapunovCertificate", "CollapseGeometry", "EarlyWarning",
+    "LyapunovCertificate", "CollapseGeometry", "EarlyWarning", "PrecursorScale",
     "EscapeTime", "StochasticExtension",
     "ParameterIdentification", "AgentSensitivity", "RecoveryDynamics",
     "InformationGeometry", "WelfareCalibration",
     "Gravity", "Molecular", "Hybrid",
 ]
-__version__ = "1.0.0"
+__version__ = "1.1.0"
