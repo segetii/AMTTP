@@ -41,6 +41,22 @@ class UnifiedEnergy:
         explosion = float((self.beta ** 2 * np.exp(self.beta * S)).max(initial=0.0))
         return 2.0 * lam_A + explosion
 
+    # §XII.4 unit collapse direction in channel space
+    def unit_direction(self, S: np.ndarray) -> np.ndarray:
+        g = self.grad(S)
+        n = float(np.linalg.norm(g))
+        return g / max(n, 1e-12)
+
+    # §XII.5 per-channel collapse attribution  c_k = [g]_k² / ||g||²
+    def channel_attribution(self, S: np.ndarray) -> np.ndarray:
+        g = self.grad(S)
+        g2 = g ** 2
+        return g2 / max(g2.sum(), 1e-12)
+
+    # §XII.5 dominant channel  k* = argmax_k c_k
+    def dominant_channel(self, S: np.ndarray) -> int:
+        return int(np.argmax(self.channel_attribution(S)))
+
     @classmethod
     def pure_mahalanobis(cls) -> "UnifiedEnergy":
         """§XII.6 reduction: A=I, β=0, w=0  → recovers original BSDT."""

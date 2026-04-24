@@ -76,6 +76,18 @@ class LyapunovCertificate:
             return None  # already self-stabilising or uncontrollable
         return b["gnorm2"] * b["Pt"] / b["Qt"]
 
+    # ── §XVI.7 intervention-cost ceiling  θ < e_t · (Q/(||g||²P) − 1) ────
+    def theta_ceiling(self, snap: Snapshot) -> float | None:
+        """Maximum intervention cost θ for which the control γ* = e/(e+θ) is
+        still strong enough to satisfy V̇ ≤ 0.  Returns None when the system is
+        in the uncontrollable regime (P≤0 or Q≤0) — no finite θ suffices."""
+        b = self._bundle(snap)
+        if b["Pt"] <= 0 or b["Qt"] <= 0:
+            return None
+        et = self.op.damp.e_BSDT(snap)
+        ratio = b["Qt"] / (b["gnorm2"] * b["Pt"])
+        return et * (ratio - 1.0)
+
     # ── §XXV per-channel V̇_k decomposition ────────────────────
     def channel_decomposition(self, snap: Snapshot) -> dict[str, dict]:
         b = self._bundle(snap)

@@ -191,6 +191,27 @@ def main() -> None:
     print(f"  ΔΦ_recovery       = {bars['delta_recovery']:.4f}")
     print(f"  asymmetry         = {bars['asymmetry']:.4f}")
 
+    # 18. §XII.4-5 unit collapse direction + per-channel attribution + dominant
+    print(f"\n--- §XII.4-5 CHANNEL-SPACE DECOMPOSITION ---")
+    S = M.bsdt.channel_state(snap)
+    u_ch = M.energy.unit_direction(S)
+    c_k  = M.energy.channel_attribution(S)
+    k_st = M.energy.dominant_channel(S)
+    print(f"  S (channel state) = {S.round(4)}")
+    print(f"  u (unit, ||·||=1) = {u_ch.round(4)}  (||u||={np.linalg.norm(u_ch):.4f})")
+    print(f"  c_k (Σ=1)         = {c_k.round(4)}")
+    print(f"  dominant channel  = #{k_st}  ({'CGAT'[k_st]})")
+
+    # 19. §XVI.7 intervention-cost ceiling  θ_max  (Basel III calibration limit)
+    theta_max = lyap.theta_ceiling(snap)
+    print(f"\n--- §XVI.7 INTERVENTION-COST CEILING ---")
+    print(f"  current θ         = {M.damp.theta:.4f}")
+    if theta_max is None:
+        print(f"  θ_max             = None  (uncontrollable regime: P≤0 or Q≤0)")
+    else:
+        print(f"  θ_max             = {theta_max:.4f}  "
+              f"({'OK' if M.damp.theta < theta_max else 'BREACH — control insufficient'})")
+
     print("\n=== DEMO COMPLETE — full §I–XXVII pipeline operational ===\n")
 
 
