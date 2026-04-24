@@ -41,6 +41,7 @@ from .control import MasterOperator
 from .lyapunov import LyapunovCertificate
 from .geometry import CollapseGeometry
 from .ews import EarlyWarning, PrecursorScale
+from .udl_transform import UDLTransform
 from .escape import EscapeTime
 from .stochastic import StochasticExtension
 from .inverse import ParameterIdentification
@@ -56,9 +57,10 @@ __all__ = [
     "BSDT", "UnifiedEnergy", "MFLS",
     "AdaptiveDamping", "MasterOperator",
     "LyapunovCertificate", "CollapseGeometry", "EarlyWarning", "PrecursorScale",
+    "UDLTransform",
     "EscapeTime", "StochasticExtension",
     "ParameterIdentification", "AgentSensitivity", "RecoveryDynamics",
     "InformationGeometry", "WelfareCalibration",
     "Gravity", "Molecular", "Hybrid",
 ]
-__version__ = "1.1.0"
+__version__ = "1.2.0"

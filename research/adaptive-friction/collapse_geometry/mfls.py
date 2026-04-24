@@ -5,11 +5,26 @@
     MFLS_channel   = ||g_t||                            (abstract intensity)
     MFLS_state     = ||G̃_t||_F                         (physical intensity)
     ρ_MFLS         = MFLS_state / MFLS_channel          (amplification factor)
-    cos ψ_t        = ⟨G̃_t, g_t·…⟩ / (||G̃_t||·||g_t||)   — see §XXVI
-                   ≡ ⟨G̃_t, R_t-decomp⟩ / norms
 
-Note on ψ_t: g_t lives in R⁴, G̃_t in R^{N×d}; the cosine is computed via
-the scalar  R_t = Σ_k g_k ⟨∂_X δ_k, g_t⟩_F ÷ ||·||  in §XXV.
+§XXVI.1 — Correct formula for ψ_t (misalignment angle):
+
+    R_t = Σ_k [g_t]_k ⟨∂_X δ_k, G̃_t⟩_F
+        = Σ_k [g_t]_k [Gram · g_t]_k          (Gram_{ij} = ⟨J_i, J_j⟩_F)
+        = g_t^T Gram g_t
+        = ||G̃_t||_F^2                          (by definition of G̃_t)
+
+    cos ψ_t = R_t / (||G̃_t||_F · ||g_t||)
+            = ||G̃_t||_F^2 / (||G̃_t||_F · ||g_t||)
+            = ||G̃_t||_F / ||g_t||
+            = ρ_MFLS
+
+    ψ_t = arccos(min(1, ρ_MFLS))   (clamped — ρ > 1 means over-amplification, ψ → 0)
+    ξ_6 = cos² ψ_t = min(1, ρ_MFLS²)    ∈ [0, 1]
+
+Interpretation:
+    ρ_MFLS < 1  (ψ > 0)  : state does not fully transmit channel risk  → contained
+    ρ_MFLS = 1  (ψ = 0)  : perfect transmission — channel MFLS = state MFLS
+    ρ_MFLS > 1  (ψ = 0)  : state over-amplifies channel signal         → real collapse
 """
 from __future__ import annotations
 from dataclasses import dataclass
@@ -47,24 +62,17 @@ class MFLS:
         ch = self.channel_mfls(snap)
         return self.state_mfls(snap) / ch if ch > 1e-12 else 0.0
 
-    # ── ψ_t misalignment angle (§XXVI) ──────────────────────────
+    # ── ψ_t misalignment angle (§XXVI.1) ────────────────────────
     def psi(self, snap: Snapshot) -> float:
-        """ψ_t = arccos(R_t / (||G̃||·||g||))  with R_t = Σ g_k ⟨∂δ_k, G̃⟩_F / ||g||
-        Equivalently: cos ψ = ⟨G̃, G̃⟩_F / (||G̃||·||G̃||) when same construction →
-        we use the canonical form  cos ψ = ⟨G̃, J g⟩ / (norms)  where J g rebuilds G̃.
-        Since G̃ ≡ Σ g_k J_k by construction, the natural angle is between G̃ and the
-        component obtained by projecting onto the g-direction in ⟨∂δ_k,·⟩ space."""
-        g = self.channel_gradient(snap)
-        J = self.bsdt.jacobians(snap)
-        Gtilde = g[0]*J["C"] + g[1]*J["G"] + g[2]*J["A"] + g[3]*J["T"]
-        # R_t in §XXV.4: Σ_k g_k ⟨∂δ_k, g_t⟩_F
-        # Here ⟨·,·⟩_F is between (N,d) matrix and a vector — interpret as
-        # ⟨Σ g_k ∂δ_k, Σ g_k ∂δ_k⟩_F / (norms) = 1 in trivial case;
-        # the meaningful misalignment is between G̃ and the *uniform-weight* pullback.
-        Gtilde_uniform = J["C"] + J["G"] + J["A"] + J["T"]
-        a = np.linalg.norm(Gtilde, "fro")
-        b = np.linalg.norm(Gtilde_uniform, "fro")
-        if a < 1e-12 or b < 1e-12:
-            return 0.0
-        cos_psi = float(np.clip((Gtilde * Gtilde_uniform).sum() / (a * b), -1.0, 1.0))
-        return float(np.arccos(cos_psi))
+        """ψ_t = arccos(min(1, ρ_MFLS))  per §XXVI.1.
+
+        Derivation (see module docstring):
+            R_t = g_t^T Gram g_t = ||G̃_t||_F^2
+            cos ψ_t = R_t / (||G̃_t||_F · ||g_t||) = ρ_MFLS
+
+        Clamped to [0, 1] so arccos is always defined.
+        ρ > 1 (over-amplified) maps to ψ = 0 (fully aligned → real collapse).
+        ρ < 1 (under-amplified) gives ψ > 0 (risk is partially contained).
+        """
+        rho = min(1.0, self.rho_mfls(snap))
+        return float(np.arccos(rho))
