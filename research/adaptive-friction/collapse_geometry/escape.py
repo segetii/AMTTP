@@ -42,6 +42,13 @@ class EscapeTime:
         D = snap.distance_matrix()
         K = self.op.forces.kernel(D)
         L = self.op.forces.laplacian(K)
-        lam_L = float(np.linalg.eigvalsh(L)[-1])
+        try:
+            lam_L = float(np.linalg.eigvalsh(L)[-1])
+        except np.linalg.LinAlgError:
+            n = L.shape[0]
+            try:
+                lam_L = float(np.linalg.eigvalsh(L + 1e-8 * np.eye(n))[-1])
+            except np.linalg.LinAlgError:
+                lam_L = float(np.linalg.norm(L, ord='fro'))
         relax = 1.0 / (self.op.potential.alpha + max(lam_L, 1e-12))
         return self.linear(snap, e_star) - relax

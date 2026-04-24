@@ -37,7 +37,15 @@ class UnifiedEnergy:
 
     def lambda_max_bound(self, S: np.ndarray) -> float:
         """§XIV.5 closed-form bound on λ_max(∇² E_BS)."""
-        lam_A = float(np.linalg.eigvalsh(self.A).max())
+        try:
+            lam_A = float(np.linalg.eigvalsh(self.A).max())
+        except np.linalg.LinAlgError:
+            d = self.A.shape[0]
+            try:
+                lam_A = float(np.linalg.eigvalsh(self.A + 1e-8 * np.eye(d)).max())
+            except np.linalg.LinAlgError:
+                # Frobenius bound: λ_max ≤ ||A||_F
+                lam_A = float(np.linalg.norm(self.A, ord='fro'))
         explosion = float((self.beta ** 2 * np.exp(self.beta * S)).max(initial=0.0))
         return 2.0 * lam_A + explosion
 

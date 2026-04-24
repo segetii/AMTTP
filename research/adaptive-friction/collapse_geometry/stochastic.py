@@ -44,7 +44,10 @@ class StochasticExtension:
         if dmu < 1e-12:
             return float("inf")
         prefac = 2.0 * np.pi / dmu
-        barrier = np.exp(2.0 * (e_star - e) / max(self.sigma_n ** 2, 1e-12))
+        log_barrier = 2.0 * (e_star - e) / max(self.sigma_n ** 2, 1e-12)
+        # cap to avoid overflow when e_star >> e and σ_n is small
+        log_barrier = min(log_barrier, 700.0)
+        barrier = float(np.exp(log_barrier))
         return float(prefac * barrier)
 
     def cross_probability(self, snap: Snapshot, e_star: float,

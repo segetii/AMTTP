@@ -32,7 +32,18 @@ class CalibrationState:
         c = flat - mu0
         Sigma0 = (c.T @ c) / (T0 * N) + jitter * np.eye(d)
         # eigendecomp once → both inverse, sqrt-inverse, PCA basis
-        w, V = np.linalg.eigh(Sigma0)
+        # robust to LAPACK convergence failures: try eigh → jitter → SVD on centered data
+        try:
+            w, V = np.linalg.eigh(Sigma0)
+        except np.linalg.LinAlgError:
+            try:
+                w, V = np.linalg.eigh(Sigma0 + 1e-6 * np.eye(d))
+            except np.linalg.LinAlgError:
+                # SVD-based fallback: c = U S V^T  ⇒  Σ = V (S²/(T0 N)) V^T
+                # SVD uses different LAPACK driver (gesdd) and is more numerically stable
+                _, s, Vt = np.linalg.svd(c, full_matrices=False)
+                V = Vt.T
+                w = (s ** 2) / (T0 * N) + jitter
         w = np.clip(w, jitter, None)
         order = np.argsort(w)[::-1]
         w, V = w[order], V[:, order]

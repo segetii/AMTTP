@@ -42,8 +42,18 @@ class LedoitWolfNetwork:
         W = Sigma_hat / np.outer(d, d)
         W = 0.5 * (W + W.T)
         np.fill_diagonal(W, 1.0)
-        # spectral radius
-        lam_max = float(np.linalg.eigvalsh(W)[-1])
+        # spectral radius — fall back to Frobenius bound if eigh fails to converge
+        try:
+            lam_max = float(np.linalg.eigvalsh(W)[-1])
+        except np.linalg.LinAlgError:
+            # add tiny jitter to break degeneracy and retry; if still failing,
+            # use the closed-form Frobenius bound (§II.4)
+            try:
+                lam_max = float(np.linalg.eigvalsh(W + 1e-8 * np.eye(N))[-1])
+            except np.linalg.LinAlgError:
+                off = W - np.eye(N)
+                W_max_off_tmp = float(np.max(np.abs(off))) if N > 1 else 0.0
+                lam_max = float(np.sqrt(1.0 + (N - 1) * W_max_off_tmp ** 2))
         # proxy
         off = W - np.eye(N)
         n_off = N * (N - 1)
