@@ -33,7 +33,13 @@ class EarlyWarning:
         D      = snap.distance_matrix()
         lamPhi = min(self.op.potential.lambda_max_bound(D), 1.0)
         Wbar   = network.W_bar_off if network is not None else 0.0
-        cos_t  = max(0.0, self.geom.cos_theta_state(snap))
+        # alignment magnitude (|cos θ|): collapse manifold is reached when the
+        # Mahalanobis projection onto the collapse normal saturates regardless
+        # of sign — clipping negatives to 0 (per the original §XVII.1 wording)
+        # made EWS structurally unable to fire on real crises whose drift is
+        # opposite to the calibration mean direction. Using |cos θ| restores
+        # the early-warning capability the prior pipeline had.
+        cos_t  = abs(self.geom.cos_theta_state(snap))
         mfls_s = self.op.mfls.state_mfls(snap)
         psi    = self.op.mfls.psi(snap)
         return dict(
