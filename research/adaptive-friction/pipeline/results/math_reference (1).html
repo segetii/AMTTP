@@ -1,0 +1,3733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>System Collapse — Mathematical Anatomy</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+<style>
+  :root {
+    --ink: #0e0c0a;
+    --paper: #f5f0e8;
+    --aged: #e8e0cc;
+    --rust: #8b3a2a;
+    --gold: #b8860b;
+    --fade: #7a7060;
+    --line: #c8bfa8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IM Fell English', Georgia, serif;
+    line-height: 1.7;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Aged paper texture via pseudo-element */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(184,134,11,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(139,58,42,0.05) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 48px 100px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  header::after {
+    content: '✦  ✦  ✦';
+    display: block;
+    color: var(--gold);
+    letter-spacing: 0.5em;
+    font-size: 0.85em;
+    margin-top: 16px;
+  }
+  .overline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7em;
+    letter-spacing: 0.3em;
+    color: var(--rust);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: 2.6em;
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 10px 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-style: italic;
+    color: var(--fade);
+    font-size: 1.05em;
+  }
+
+  /* ── Section ── */
+  section {
+    margin-bottom: 52px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65em;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--rust);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-size: 1.55em;
+    font-weight: 400;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+  h3 {
+    font-size: 1.1em;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--rust);
+    margin: 28px 0 8px;
+  }
+  p { margin-bottom: 14px; color: #2a2520; }
+
+  /* ── Math blocks ── */
+  .math-block {
+    background: rgba(14,12,10,0.04);
+    border-left: 3px solid var(--gold);
+    padding: 18px 24px;
+    margin: 18px 0;
+    overflow-x: auto;
+    font-size: 1.05em;
+  }
+  .math-block .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62em;
+    color: var(--fade);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── Definition grid ── */
+  .def-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 20px;
+    background: rgba(14,12,10,0.03);
+    border: 1px solid var(--line);
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 0.94em;
+  }
+  .def-grid .sym {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--rust);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .def-grid .desc { color: #3a3228; }
+
+  /* ── Inline code ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: rgba(139,58,42,0.09);
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--rust);
+  }
+
+  /* ── Channel table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin: 20px 0;
+  }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 14px;
+    text-align: left;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(14,12,10,0.03); }
+
+  /* ── Collapse geometry box ── */
+  .geometry-box {
+    border: 2px solid var(--ink);
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .geometry-box::before {
+    content: 'CRITICAL MANIFOLD GEOMETRY';
+    position: absolute;
+    top: -11px; left: 20px;
+    background: var(--paper);
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65em;
+    letter-spacing: 0.25em;
+    color: var(--rust);
+    text-transform: uppercase;
+  }
+  .geometry-box[style*="gold"]::before,
+  .cf-collection::before {
+    content: 'FIFTEEN CLOSED-FORM EXPRESSIONS';
+    color: var(--gold);
+  }
+  .cf-collection {
+    border: 2px solid var(--gold);
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .cf-collection::before {
+    content: 'FIFTEEN CLOSED-FORM EXPRESSIONS';
+    position: absolute;
+    top: -11px; left: 20px;
+    background: var(--paper);
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65em;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* ── Footer rule ── */
+  footer {
+    text-align: center;
+    padding-top: 36px;
+    border-top: 1px solid var(--line);
+    font-style: italic;
+    color: var(--fade);
+    font-size: 0.88em;
+  }
+
+  /* ── Marginal notes ── */
+  .aside {
+    float: right;
+    width: 36%;
+    margin: 0 0 16px 24px;
+    font-size: 0.82em;
+    font-style: italic;
+    color: var(--fade);
+    border-left: 1px solid var(--line);
+    padding-left: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Replace-box: simulation substitute ── */
+  .replace-box {
+    border: 1.5px solid var(--rust);
+    background: rgba(139,58,42,0.05);
+    padding: 20px 26px;
+    margin: 20px 0;
+    position: relative;
+  }
+  .replace-box::before {
+    content: 'USE INSTEAD OF SIMULATION';
+    position: absolute;
+    top: -10px; left: 16px;
+    background: var(--paper);
+    padding: 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    letter-spacing: 0.25em;
+    color: var(--rust);
+  }
+  .replace-box .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62em;
+    color: var(--rust);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── Inputs/outputs table for closed-form ── */
+  .io-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 4px 16px;
+    font-size: 0.88em;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .io-row .io-key {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fade);
+    font-size: 0.9em;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 32px 20px 60px; }
+    h1 { font-size: 1.8em; }
+    .aside { float: none; width: 100%; margin: 16px 0; }
+  }
+
+  /* ── Download PDF button ── */
+  .download-btn-wrap {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+  .download-btn {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .download-btn:hover { background: var(--rust); }
+
+</style>
+</head>
+<body>
+
+<div class="download-btn-wrap">
+  <a class="download-btn" href="math_reference.pdf" download="math_reference.pdf">⬇ Download PDF</a>
+</div>
+
+<div class="page">
+
+  <header>
+    <div class="overline">GravityEngine · BSDT · Phase Geometry</div>
+    <h1>Mathematical Anatomy<br>of System Collapse</h1>
+    <p class="subtitle">Closed-form analytical formulas that replace running the simulation —<br>direct computation of every output from data alone</p>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════
+       I. STATE SPACE
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ I</div>
+    <h2>State Space &amp; Notation</h2>
+
+    <p>The system consists of \(N\) agents evolving in \(\mathbb{R}^d\). At each discrete time \(t\) the full configuration is a matrix:</p>
+
+    <div class="math-block">
+      <div class="label">State matrix</div>
+      \[ X_t \in \mathbb{R}^{N \times d}, \qquad X_t = \bigl[x_t^{(1)}, \ldots, x_t^{(N)}\bigr]^\top \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">N</span><span class="desc">Number of agents (institutions)</span>
+      <span class="sym">d</span><span class="desc">State-space dimension per agent</span>
+      <span class="sym">μ ∈ ℝᵈ</span><span class="desc">Equilibrium / target centroid</span>
+      <span class="sym">T</span><span class="desc">Trajectory length (time steps)</span>
+      <span class="sym">xᵢ</span><span class="desc">Row <em>i</em> of X — state of agent i</span>
+      <span class="sym">rᵢⱼ</span><span class="desc">‖xᵢ − xⱼ‖, Euclidean distance between agents</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       II. CORRELATION NETWORK
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ II</div>
+    <h2>Inter-Institution Correlation Network</h2>
+
+    <p>Before forces are computed, the coupling topology of the system is established via a Ledoit-Wolf shrinkage correlation network built on the leverage feature \(\ell_t^{(i)} = X_t^{(i,0)}\) (loan-to-asset ratio, feature index 0).</p>
+
+    <h3>2.1 — Sample Covariance</h3>
+    <div class="math-block">
+      <div class="label">Centred sample covariance</div>
+      \[
+      S = \frac{1}{T}\sum_{t=1}^{T}(\ell_t - \bar\ell)(\ell_t - \bar\ell)^\top \in \mathbb{R}^{N\times N},
+      \qquad \bar\ell = \frac{1}{T}\sum_t \ell_t
+      \]
+    </div>
+
+    <h3>2.2 — Ledoit-Wolf Analytical Shrinkage</h3>
+    <p>The shrinkage target is the scaled identity — the minimum-assumption prior that all institutions are equally variant and uncorrelated:</p>
+
+    <div class="math-block">
+      <div class="label">Shrinkage target (scaled identity)</div>
+      \[
+      T^* = \frac{\operatorname{tr}(S)}{N}\,I_N
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Oracle Approximating shrinkage intensity</div>
+      \[
+      \rho = \operatorname{clip}\!\left(\frac{\rho_{\text{num}}}{\rho_{\text{den}}},\; 0,\; 1\right),
+      \qquad
+      \rho_{\text{num}} = \frac{1}{T^2}\sum_{i,j}\operatorname{Var}(X_{ti}X_{tj}),
+      \qquad
+      \rho_{\text{den}} = \|S - T^*\|_F^2
+      \]
+      Implemented as:
+      \[
+      \rho_{\text{num}} = \frac{1}{T}\left(\frac{X_c^{\odot 2\top} X_c^{\odot 2}}{T} - S^{\odot 2}\right)_{\!\text{sum}}\!\Big/\,T,
+      \quad X_c^{\odot 2} = X_c \odot X_c \text{ (elementwise square)}
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form ρ — direct from leverage panel, no iteration</div>
+      \[
+      \rho = \operatorname{clip}\!\left(
+        \frac{\displaystyle\frac{1}{T^2 N^2}\,\bigl\|X_c^{\odot 2}\bigr\|_F^2 - \frac{1}{T N^2}\|S\|_F^2}
+             {\displaystyle\|S\|_F^2 - \frac{[\operatorname{tr}(S)]^2}{N}},\;
+      0,\;1\right)
+      \]
+      <strong>Scalar interpretation:</strong> \(\rho \approx 0\) when \(T \gg N\) (data-rich regime — trust empirical covariance); \(\rho \to 1\) when \(T \ll N\) (data-starved — pull toward independence prior). No optimisation loop required: compute \(\|X_c^{\odot 2}\|_F^2\), \(\|S\|_F^2\), and \(\operatorname{tr}(S)\) directly from the panel.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Centred leverage panel \(X_c \in \mathbb{R}^{T\times N}\), sample covariance \(S\)</span>
+      </div>
+    </div>
+
+    <div class="math-block">
+      <div class="label">Shrunk covariance</div>
+      \[
+      \hat\Sigma = (1-\rho)\,S + \rho\,T^*
+      \]
+    </div>
+
+    <h3>2.3 — Correlation Matrix \(W\)</h3>
+    <p>The network adjacency weights are partial correlations, symmetrised and unit-diagonal:</p>
+
+    <div class="math-block">
+      <div class="label">Normalisation to correlation</div>
+      \[
+      W_{ij} = \frac{\hat\Sigma_{ij}}{\sqrt{\hat\Sigma_{ii}\,\hat\Sigma_{jj}}}, \qquad
+      W_{ii} = 1, \qquad W = \frac{W + W^\top}{2}
+      \]
+    </div>
+
+    <h3>2.4 — Network Spectral Radius</h3>
+    <p class="aside">For symmetric positive semi-definite \(W\), all eigenvalues are real and \(\lambda_{\max}(W) = \rho(W)\). As correlations increase, \(\lambda_{\max}\) approaches \(N\) — perfect synchrony — the maximum contagion amplification factor.</p>
+
+    <div class="math-block">
+      <div class="label">Spectral radius of the network</div>
+      \[
+      \rho(W) = \lambda_{\max}(W) = \max_k |\lambda_k|, \qquad W v_k = \lambda_k v_k
+      \]
+      Computed via symmetric eigensolver (<code>eigh</code>).
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form bounds — no eigensolver needed</div>
+      \[
+      \bar{W}_{\text{off}} \leq \frac{\rho(W) - 1}{N-1} \leq W_{\text{max}}
+      \]
+      \[
+      \rho(W) \leq \sqrt{1 + (N-1)\,W_{\text{max}}^2\,(N-1)}
+      \quad\text{(Frobenius bound)}
+      \]
+      <strong>Quick scalar proxy</strong> (replaces full eigen-decomposition for early-warning threshold checks):
+      \[
+      \tilde\rho = 1 + (N-1)\,\bar{W}_{\text{off}}
+      \]
+      where \(\bar{W}_{\text{off}} = \frac{1}{N(N-1)}\sum_{i\neq j}W_{ij}\) is the mean off-diagonal correlation. When \(\tilde\rho > N/2\), the threshold for network-amplified contagion is breached without computing a single eigenvalue.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Mean off-diagonal \(\bar W_{\text{off}}\), max off-diagonal \(W_{\text{max}}\), \(N\)</span>
+      </div>
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">ρ(W) = 1</span><span class="desc">Uncorrelated institutions — no network amplification</span>
+      <span class="sym">ρ(W) → N</span><span class="desc">Perfect synchrony — maximum systemic contagion</span>
+      <span class="sym">ρ</span><span class="desc">Ledoit-Wolf shrinkage intensity ∈ [0,1]; higher ρ pulls toward independence prior</span>
+      <span class="sym">W̄_off</span><span class="desc">Mean off-diagonal correlation — average bilateral coupling</span>
+      <span class="sym">W_max</span><span class="desc">Maximum off-diagonal correlation — strongest bilateral link</span>
+    </div>
+
+    <h3>2.5 — Relationship to GravityEngine Coupling</h3>
+    <p>The network spectral radius \(\rho(W)\) is the macro-level diagnostic; the pairwise energy coupling constant \(\gamma\) in \(\Phi_{\text{pair}}\) is the micro-level parameter. They connect conceptually as:</p>
+    <div class="math-block">
+      <div class="label">Coupling correspondence</div>
+      \[
+      \gamma \;\longleftrightarrow\; \frac{\rho(W)}{N} \cdot \gamma_{\text{scale}}
+      \]
+      High \(\rho(W)\) implies that pairwise erf-log attractions collectively produce a deeper cooperative potential well — the system becomes easier to destabilise coherently.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       III. POTENTIAL ENERGY
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ III</div>
+    <h2>Potential Energy Landscape</h2>
+
+    <h3>2.1 — Radial Spring (Confinement)</h3>
+    <p>A harmonic well anchoring the system to equilibrium \(\mu\):</p>
+
+    <div class="math-block">
+      <div class="label">Radial spring energy</div>
+      \[ \Phi_{\text{rad}}(X) = \frac{\alpha}{2} \sum_{i=1}^{N} \|x_i - \mu\|^2 \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">α = 0.10</span><span class="desc">Radial spring constant; controls basin steepness</span>
+    </div>
+
+    <h3>2.2 — Pairwise Interaction (erf-log Potential)</h3>
+    <p class="aside">The error-function attraction creates a finite-depth well at each pair; the logarithmic repulsion provides a hard-core floor that diverges as \(r_{ij}\to 0\).</p>
+    <p>Pairs interact via an attraction–repulsion potential balancing cohesion against crowding:</p>
+
+    <div class="math-block">
+      <div class="label">Pairwise interaction energy</div>
+      \[
+      \Phi_{\text{pair}}(X) = \sum_{i < j} \Bigl[
+        -\gamma\,\sigma\,\operatorname{erf}\!\Bigl(\frac{r_{ij}}{\sigma}\Bigr)
+        + \lambda\,\ln(r_{ij} + \varepsilon)
+      \Bigr]
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">γ = 1.00</span><span class="desc">Coupling baseline — attraction amplitude</span>
+      <span class="sym">σ = 1.00</span><span class="desc">Attraction length-scale (erf inflection point)</span>
+      <span class="sym">λ = 0.10</span><span class="desc">Repulsion coefficient (logarithmic hard-core)</span>
+      <span class="sym">ε = 10⁻⁵</span><span class="desc">Softening constant (prevents divergence at r = 0)</span>
+    </div>
+
+    <h3>2.3 — Total Potential</h3>
+
+    <div class="math-block">
+      <div class="label">Full potential</div>
+      \[
+      \Phi(X) = \Phi_{\text{rad}}(X) + \Phi_{\text{pair}}(X)
+      = \frac{\alpha}{2}\sum_i \|x_i-\mu\|^2
+      + \sum_{i<j}\!\left[-\gamma\sigma\operatorname{erf}\!\Bigl(\tfrac{r_{ij}}{\sigma}\Bigr) + \lambda\ln r_{ij}\right]
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form matrix expression — replaces O(N²) double loop</div>
+      Let \(D \in \mathbb{R}^{N\times N}\) be the Euclidean distance matrix: \(D_{ij} = \|x_i - x_j\|\).
+      \[
+      \Phi_{\text{rad}}(X) = \frac{\alpha}{2}\,\bigl\|X - \mathbf{1}\mu^\top\bigr\|_F^2
+      \]
+      \[
+      \Phi_{\text{pair}}(X) = \frac{1}{2}\sum_{i\neq j}\!\left[
+        -\gamma\sigma\operatorname{erf}\!\Bigl(\tfrac{D_{ij}}{\sigma}\Bigr)
+        + \lambda\ln D_{ij}
+      \right]
+      = \mathbf{1}^\top\!\left[-\gamma\sigma\operatorname{erf}\!\Bigl(\tfrac{D}{\sigma}\Bigr) + \lambda\ln D\right]\!\mathbf{1}\Big/2 - \text{diag terms}
+      \]
+      \[
+      \boxed{\Phi(X) = \frac{\alpha}{2}\|X - \mathbf{1}\mu^\top\|_F^2
+        - \frac{\gamma\sigma}{2}\left[\mathbf{1}^\top\operatorname{erf}\!\Bigl(\tfrac{D}{\sigma}\Bigr)\mathbf{1} - N\right]
+        + \frac{\lambda}{2}\left[\mathbf{1}^\top\ln(D+\varepsilon I)\mathbf{1} - N\ln\varepsilon\right]}
+      \]
+      All operations are elementwise on \(D\); diagonal terms cancel by symmetry. Compute \(D\) once via \(D_{ij}^2 = \|x_i\|^2 + \|x_j\|^2 - 2x_i\cdot x_j\) (one matrix multiply).
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>\(X \in \mathbb{R}^{N\times d}\), \(\mu \in \mathbb{R}^d\), parameters \(\alpha, \gamma, \sigma, \lambda, \varepsilon\)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       IV. FORCES
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ IV</div>
+    <h2>Restoring Forces</h2>
+
+    <h3>3.1 — Radial (Gradient of Spring)</h3>
+    <div class="math-block">
+      <div class="label">Radial force on agent i</div>
+      \[ F_i^{\text{rad}} = -\nabla_{x_i}\Phi_{\text{rad}} = -\alpha\,(x_i - \mu) \]
+    </div>
+
+    <h3>3.2 — Pairwise Force Decomposition</h3>
+    <p>Differentiating the erf-log interaction with respect to \(x_i\):</p>
+
+    <div class="math-block">
+      <div class="label">Pairwise force on agent i from all j ≠ i</div>
+      \[
+      F_i^{\text{pair}} = \sum_{j \neq i}
+      \underbrace{\left[
+        \gamma\cdot\frac{2}{\sqrt{\pi}}\,e^{-(r_{ij}/\sigma)^2}
+        - \frac{\lambda}{r_{ij}}
+      \right]}_{\text{scalar radial coefficient}}
+      \cdot \hat{r}_{ij}
+      \]
+      where \(\hat{r}_{ij} = \dfrac{x_i - x_j}{r_{ij}}\) is the unit separation vector.
+    </div>
+
+    <p><em>Note:</em> The first term is the derivative of \(\operatorname{erf}(r/\sigma)\) with respect to \(r\), giving the Gaussian attraction kernel \(\tfrac{2}{\sqrt{\pi}}e^{-r^2/\sigma^2}\).</p>
+
+    <h3>3.3 — Total Force &amp; Clamp</h3>
+    <div class="math-block">
+      <div class="label">Total restoring force</div>
+      \[
+      F_i = F_i^{\text{rad}} + F_i^{\text{pair}}, \qquad
+      \|F_i\| \leq F_{\max} = 100
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form force matrix — replaces O(N²) agent loop</div>
+      Define the scalar kernel matrix \(K \in \mathbb{R}^{N\times N}\):
+      \[
+      K_{ij} = \frac{\gamma\cdot\frac{2}{\sqrt{\pi}}\,e^{-D_{ij}^2/\sigma^2} - \lambda/D_{ij}}{D_{ij}}, \quad i\neq j; \qquad K_{ii} = 0
+      \]
+      Then the full force matrix is:
+      \[
+      \boxed{F = -\alpha(X - \mathbf{1}\mu^\top) + \left(K \odot \mathbf{1}\right)X - \operatorname{diag}(K\mathbf{1})\,X}
+      \]
+      More explicitly, letting \(\Delta_{ij} = x_i - x_j\):
+      \[
+      F_i^{\text{pair}} = \sum_{j\neq i} K_{ij}\,\Delta_{ij}
+      = \Bigl(\sum_{j\neq i}K_{ij}\Bigr)x_i - \sum_{j\neq i}K_{ij}\,x_j
+      = \bigl[(K\mathbf{1})_i\bigr]x_i - [KX]_i
+      \]
+      \[
+      \boxed{F^{\text{pair}} = \operatorname{diag}(K\mathbf{1})\,X - KX = \bigl(\operatorname{diag}(K\mathbf{1}) - K\bigr)X}
+      \]
+      The matrix \(L = \operatorname{diag}(K\mathbf{1}) - K\) is the <em>weighted graph Laplacian</em> of the force network. Total force in one expression:
+      \[
+      F = -\alpha(X - \mathbf{1}\mu^\top) - LX
+      \]
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Distance matrix \(D\), state \(X\), equilibrium \(\mu\), parameters \(\alpha,\gamma,\sigma,\lambda\)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       V. SPECTRAL / HESSIAN
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ V</div>
+    <h2>Spectral Radius of the Hessian</h2>
+
+    <p class="aside">Power iteration avoids explicitly forming the \(Nd \times Nd\) Hessian. Each step costs two energy evaluations.</p>
+
+    <p>The Hessian of \(\Phi\) at \(X\) is approximated by a finite-difference directional second derivative, then the largest eigenvalue is extracted via randomised power iteration:</p>
+
+    <div class="math-block">
+      <div class="label">Finite-difference Hessian-vector product</div>
+      \[
+      H \cdot v \;\approx\; \frac{\Phi(X + h\,v) + \Phi(X - h\,v) - 2\,\Phi(X)}{h^2}\,v,
+      \qquad h = 10^{-4}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Power iteration (K = 20 steps)</div>
+      \[
+      v^{(k+1)} = \frac{H\,v^{(k)}}{\|H\,v^{(k)}\|}, \qquad
+      \lambda_{\max} = \lim_{k\to K}\|H\,v^{(k)}\|
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form Hessian — replaces finite-difference power iteration</div>
+      The Hessian of \(\Phi\) decomposes analytically into radial and pairwise blocks. For the full system the \(Nd\times Nd\) Hessian is:
+      \[
+      \nabla^2_X \Phi = \alpha\, I_{Nd}
+        + \frac{\partial^2 \Phi_{\text{pair}}}{\partial X^2}
+      \]
+      The pairwise Hessian block between agents \(i\) and \(j\) (\(i\neq j\)) is a \(d\times d\) matrix:
+      \[
+      H_{ij}^{\text{pair}} = -\frac{\partial F_i^{\text{pair}}}{\partial x_j}
+        = -K_{ij}\,I_d + \Bigl(\tfrac{\partial K_{ij}}{\partial r_{ij}}\Bigr)\frac{\Delta_{ij}\Delta_{ij}^\top}{D_{ij}}
+      \]
+      where \(\frac{\partial K_{ij}}{\partial r} = \frac{-4\gamma r}{\sqrt{\pi}\sigma^2}e^{-r^2/\sigma^2} + \frac{\lambda}{r^2}\) (second derivative of the pairwise potential kernel).
+
+      <strong>Analytical upper bound on \(\lambda_{\max}\) — no iteration:</strong>
+      \[
+      \lambda_{\max}(\nabla^2\Phi) \leq \alpha + \max_i \sum_{j\neq i}\left|K_{ij}\right| + \left|\frac{\partial K_{ij}}{\partial r_{ij}}\right|
+      \quad\text{(Gershgorin row-sum bound)}
+      \]
+      <strong>Critical manifold test without eigensolver:</strong>
+      \[
+      \lambda_{\max} > 1 \;\Longleftrightarrow\; \alpha + \max_i\sum_{j\neq i}\!\Bigl(\tfrac{2\gamma}{\sqrt\pi\sigma}e^{-D_{ij}^2/\sigma^2} + \tfrac{\lambda}{D_{ij}^2}\Bigr) > 1
+      \]
+      This is a single pass over the distance matrix — no simulation loop, no matrix factorisation.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Distance matrix \(D\), parameters \(\alpha,\gamma,\sigma,\lambda\) — purely from data snapshot \(X_t\)</span>
+      </div>
+    </div>
+
+    <div class="geometry-box">
+      <h3 style="margin-top:0; color: var(--ink); font-style: normal;">Critical Manifold \(\mathcal{C}_{\text{man}}\)</h3>
+      <p>The system is <strong>supercritical</strong> — above the collapse threshold — when:</p>
+      \[
+      \lambda_{\max}(H_\Phi(X)) > 1
+      \]
+      <p style="margin-top:14px;">This is a level-set condition in configuration space. The critical manifold separates the basin of attraction from the unstable regime:</p>
+      \[
+      \mathcal{C}_{\text{man}} = \bigl\{X \in \mathbb{R}^{N\times d} : \lambda_{\max}(\nabla^2_X\,\Phi) = 1\bigr\}
+      \]
+      <p style="margin-top:14px;">Fraction of trajectory above \(\mathcal{C}_{\text{man}}\):</p>
+      \[
+      \hat{p}_{\text{SC}} = \frac{1}{T}\sum_{t=1}^{T} \mathbf{1}\!\left[\lambda_{\max}^{(t)} > 1\right]
+      \]
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       VI. BSDT OPERATORS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ VI</div>
+    <h2>Blind-Spot Detection Theory — Four Channels</h2>
+
+    <p>BSDT is calibrated on a normal-period distribution \(\mathcal{N}_0\) with mean \(\mu_0\) and covariance \(\Sigma_0\). Each channel measures a distinct mode of deviation.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th>Formula</th>
+          <th>Geometric interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>δ_C</code><br><em>Camouflage</em></td>
+          <td>\(\delta_C^{(i)} = (x_i-\mu_0)^\top \Sigma_0^{-1}(x_i-\mu_0)\)</td>
+          <td>Squared Mahalanobis distance — ellipsoidal deviation from normal cloud</td>
+        </tr>
+        <tr>
+          <td><code>δ_G</code><br><em>Feature Gap</em></td>
+          <td>\(\delta_G^{(i)} = \|x_i-\mu_0\|^2 - \|V_k^\top(x_i-\mu_0)\|^2\)</td>
+          <td>Residual energy in low-variance PCA directions — orthogonal complement of the principal subspace</td>
+        </tr>
+        <tr>
+          <td><code>δ_A</code><br><em>Activity Anomaly</em></td>
+          <td>\(\delta_A^{(i)} = \max\!\bigl(0,\;\|x_t^{(i)} - x_{t-1}^{(i)}\| - v_0\bigr)\)</td>
+          <td>Excess velocity above normal-period 95th-percentile threshold \(v_0\)</td>
+        </tr>
+        <tr>
+          <td><code>δ_T</code><br><em>Temporal Novelty</em></td>
+          <td>\(\delta_T^{(i)} = \max\!\bigl(0,\,-\log p_{\text{KDE}}(x_t^{(i)})\bigr)\)</td>
+          <td>Negative log-density under self-history KDE — measures temporal self-surprise</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>5.1 — Mahalanobis Ellipsoid (δ_C)</h3>
+    <p>The iso-deviation surfaces are ellipsoids in \(\mathbb{R}^d\) defined by \(\Sigma_0\):</p>
+
+    <div class="math-block">
+      <div class="label">Mahalanobis level set at radius c</div>
+      \[
+      \mathcal{E}_c = \bigl\{x \in \mathbb{R}^d : (x-\mu_0)^\top \Sigma_0^{-1}(x-\mu_0) = c^2\bigr\}
+      \]
+      The axes of \(\mathcal{E}_c\) are the eigenvectors of \(\Sigma_0\), with half-lengths \(c\sqrt{\lambda_k^{\Sigma}}\).
+    </div>
+
+    <h3>5.2 — PCA Decomposition (δ_G)</h3>
+    <p>Let \(V_k \in \mathbb{R}^{d\times k}\) be the top-\(k\) eigenvectors of \(\Sigma_0\). The deviation decomposes as:</p>
+
+    <div class="math-block">
+      <div class="label">Projection decomposition</div>
+      \[
+      \|x_i - \mu_0\|^2 = \underbrace{\|V_k^\top(x_i-\mu_0)\|^2}_{\text{principal subspace}} +
+                           \underbrace{\delta_G^{(i)}}_{\text{gap (residual)}}
+      \]
+      \[
+      \delta_G^{(i)} = \|(I - V_k V_k^\top)(x_i - \mu_0)\|^2
+      \]
+    </div>
+
+    <h3>5.3 — KDE Temporal Novelty (δ_T)</h3>
+
+    <div class="math-block">
+      <div class="label">KDE density estimate (Gaussian kernel, bandwidth h)</div>
+      \[
+      \hat{p}_h(x) = \frac{1}{H}\sum_{s=1}^{H} \frac{1}{(2\pi h^2)^{d/2}}
+        \exp\!\left(-\frac{\|x - x_{t-s}\|^2}{2h^2}\right)
+      \]
+      \[
+      \delta_T^{(i)} = \max\!\left(0,\; -\log\hat{p}_h(x_t^{(i)})\right)
+      \]
+      Scott's rule: \(h = H^{-1/(d+4)}\)
+    </div>
+
+    <h3>5.4 — Total BSDT Score per Agent</h3>
+    <div class="math-block">
+      <div class="label">Composite score</div>
+      \[
+      \Delta^{(i)} = \delta_C^{(i)} + \delta_G^{(i)} + \delta_A^{(i)} + \delta_T^{(i)}
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form total BSDT energy — replaces agent loop</div>
+      \[
+      E_{\text{BSDT}}(X) = \sum_i \delta_C^{(i)} = \operatorname{tr}\!\bigl[(X-\mu_0\mathbf{1}^\top)\,\Sigma_0^{-1}(X-\mu_0\mathbf{1}^\top)^\top\bigr]
+      \]
+      Equivalently using the centred matrix \(\tilde X = X - \mathbf{1}\mu_0^\top\):
+      \[
+      \boxed{E_{\text{BSDT}}(X) = \operatorname{tr}(\tilde X\,\Sigma_0^{-1}\tilde X^\top) = \|\tilde X\,\Sigma_0^{-1/2}\|_F^2}
+      \]
+      One matrix multiply \(\tilde X \Sigma_0^{-1}\), then a Frobenius norm squared. No loop over \(N\) agents.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Current state \(X\), calibrated \(\mu_0\), \(\Sigma_0^{-1}\) (fitted once on normal period)</span>
+      </div>
+    </div>
+
+    <h3>5.5 — MFLS Signal (Frobenius gradient norm)</h3>
+    <div class="math-block">
+      <div class="label">MFLS (Mahalanobis Field Line Score)</div>
+      \[
+      \text{MFLS}(X) = \left\|\nabla_X E_{\text{BSDT}}(X)\right\|_F
+      = \left\|2\,(X - \mu_0\mathbf{1}^\top)\,\Sigma_0^{-1}\right\|_F
+      \]
+      where \(\nabla_{x_i} E = 2\,\Sigma_0^{-1}(x_i - \mu_0)\) for each agent \(i\).
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form MFLS — single matrix operation</div>
+      \[
+      \boxed{\text{MFLS}(X) = 2\,\|\tilde X\,\Sigma_0^{-1}\|_F
+        = 2\sqrt{\operatorname{tr}\!\bigl(\Sigma_0^{-1}\tilde X^\top \tilde X\,\Sigma_0^{-1}\bigr)}}
+      \]
+      Pre-compute \(A = \tilde X\,\Sigma_0^{-1}\) (one \(N\times d\) matrix multiply using the stored inverse), then \(\text{MFLS} = 2\|A\|_F\). No per-timestep loop, no gradient computation at runtime.
+
+      <strong>Optimal damping directly from MFLS:</strong>
+      \[
+      \gamma^*(X) = \frac{\tfrac{1}{4}\,\text{MFLS}^2}{\tfrac{1}{4}\,\text{MFLS}^2 + \theta}
+      \qquad \bigl(\text{since } E_{\text{BSDT}} = \tfrac{1}{4}\,\text{MFLS}^2 \text{ only when }\Sigma_0^{-1}\text{ is symmetric}\bigr)
+      \]
+      More precisely, using \(E_{\text{BSDT}} = \|\tilde X\Sigma_0^{-1/2}\|_F^2\):
+      \[
+      \boxed{\gamma^*(X) = \frac{\|\tilde X\Sigma_0^{-1/2}\|_F^2}{\|\tilde X\Sigma_0^{-1/2}\|_F^2 + \theta}}
+      \]
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>\(\tilde X = X - \mathbf{1}\mu_0^\top\), pre-factored \(\Sigma_0^{-1/2}\), cost \(\theta\)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       VII. GRADIENT ALIGNMENT — COS θ
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ VII</div>
+    <h2>Gradient Alignment Angle \(\cos\theta\)</h2>
+
+    <p>This scalar measures the angular agreement between the BSDT energy gradient and the GravityEngine restoring force — a co-directional pair signals coherent collapse pressure:</p>
+
+    <div class="math-block">
+      <div class="label">Cosine alignment</div>
+      \[
+      \cos\theta_t = \frac{\nabla_X E_{\text{BSDT}}(X_t) \cdot F(X_t)}
+                         {\|\nabla_X E_{\text{BSDT}}(X_t)\|\;\|F(X_t)\|}
+      \in [-1, 1]
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">cos θ → +1</span><span class="desc">BSDT gradient and physical force fully aligned — mutual reinforcement of collapse</span>
+      <span class="sym">cos θ → 0</span><span class="desc">Orthogonal — BSDT detects hidden risk not visible to physical potential</span>
+      <span class="sym">cos θ → −1</span><span class="desc">Anti-aligned — forces oppose; stabilising competition</span>
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form cos θ — direct matrix expression</div>
+      Substituting the closed-form gradient \(\nabla_X E = 2\tilde X\Sigma_0^{-1}\) and force \(F = -\alpha\tilde X_\mu - LX\):
+      \[
+      \cos\theta_t = \frac{\operatorname{tr}\!\bigl((\tilde X_t\Sigma_0^{-1})^\top F_t\bigr)}
+                         {\|\tilde X_t\Sigma_0^{-1}\|_F\;\|F_t\|_F}
+      = \frac{\operatorname{tr}(\Sigma_0^{-1}\tilde X_t^\top F_t)}
+             {\|\tilde X_t\Sigma_0^{-1}\|_F\;\|F_t\|_F}
+      \]
+      where \(F_t = -\alpha(X_t - \mathbf{1}\mu^\top) - L_t X_t\) (from §IV Laplacian form). In terms of the precomputed matrices \(A_t = \tilde X_t\Sigma_0^{-1}\) and \(F_t\):
+      \[
+      \boxed{\cos\theta_t = \frac{\langle A_t,\, F_t\rangle_F}{\|A_t\|_F\;\|F_t\|_F}}
+      \]
+      Two Frobenius inner products on \(N\times d\) matrices — no per-agent, per-timestep iteration.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Pre-computed \(A_t = \tilde X_t\Sigma_0^{-1}\) (from MFLS step) and \(F_t\) (from force step)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       VIII. ADAPTIVE DAMPING
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ VIII</div>
+    <h2>Optimal Adaptive Damping \(\gamma^*\)</h2>
+
+    <p>The optimal intervention intensity balances BSDT blind-spot energy against a cost parameter \(\theta\):</p>
+
+    <div class="math-block">
+      <div class="label">Optimal damping policy</div>
+      \[
+      \gamma^*(X_t) = \frac{E_{\text{BSDT}}(X_t)}{E_{\text{BSDT}}(X_t) + \theta},
+      \qquad \theta = 1 \text{ (intervention cost)}
+      \]
+    </div>
+
+    <p>\(\gamma^* \in [0,1)\) is a smooth saturation function of blind-spot energy — it approaches 1 as risk diverges and is 0 when the system is at normal-period baseline.</p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       IX. CCyB & WELFARE
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ IX</div>
+    <h2>CCyB Calibration &amp; Welfare Loss</h2>
+
+    <h3>8.1 — Countercyclical Capital Buffer</h3>
+
+    <div class="math-block">
+      <div class="label">CCyB mapping (scaled to Basel III range)</div>
+      \[
+      \text{CCyB}(t) = 250 \cdot \frac{\gamma^*(t)\,\sigma_\ell(t)/\kappa}
+                                       {\max_s[\gamma^*(s)\,\sigma_\ell(s)/\kappa]}
+      \quad \in [0,\,250]\text{ bps}
+      \]
+      where \(\sigma_\ell(t)\) is the cross-sectional standard deviation of leverage at time \(t\).
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form CCyB from data — no trajectory simulation</div>
+      Substituting the closed-form \(\gamma^*\) and noting \(\kappa\) cancels in the ratio:
+      \[
+      \text{CCyB}(t) = 250\cdot\frac{E_t\,\sigma_\ell(t)/(E_t+\theta)}
+                                     {\max_s\bigl[E_s\,\sigma_\ell(s)/(E_s+\theta)\bigr]}
+      \]
+      where \(E_t = \|\tilde X_t\,\Sigma_0^{-1/2}\|_F^2\) computed directly from the data panel. In full:
+      \[
+      \boxed{\text{CCyB}(t) = 250\cdot\frac{\operatorname{tr}(\tilde X_t\Sigma_0^{-1}\tilde X_t^\top)\cdot\sigma_\ell(t)}
+        {\max_s\!\left[\operatorname{tr}(\tilde X_s\Sigma_0^{-1}\tilde X_s^\top)\cdot\sigma_\ell(s)\cdot
+          \frac{1}{\operatorname{tr}(\tilde X_s\Sigma_0^{-1}\tilde X_s^\top)+\theta}\right]
+          \cdot\bigl(\operatorname{tr}(\tilde X_t\Sigma_0^{-1}\tilde X_t^\top)+\theta\bigr)}}
+      \]
+      <strong>Practical shortcut:</strong> Let \(e_t = \operatorname{tr}(\tilde X_t\Sigma_0^{-1}\tilde X_t^\top)\). Then:
+      \[
+      \text{CCyB}(t) = 250\cdot\frac{e_t\,\sigma_\ell(t)\,(e_t+\theta)^{-1}}
+                                     {\max_s\bigl[e_s\,\sigma_\ell(s)\,(e_s+\theta)^{-1}\bigr]}
+      \]
+      Compute the vector \(\{e_t\}\) across all \(T\) timesteps with a single batched trace operation, then apply the ratio. No agent-level simulation required.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Panel \(\{X_t\}\), calibrated \(\mu_0, \Sigma_0^{-1}\), leverage std series \(\{\sigma_\ell(t)\}\), \(\theta\)</span>
+      </div>
+    </div>
+
+    <h3>8.2 — Consumption-Equivalent Welfare Loss</h3>
+
+    <div class="math-block">
+      <div class="label">Welfare loss formula</div>
+      \[
+      \mathcal{W} = 100\!\left(1 - \exp\!\left[
+        -\frac{1}{\sigma\,\theta\,T_w}\sum_{t=1}^{T_w}
+        \bigl(\Phi(X_t) - \Phi^{\text{cf}}(X_t)\bigr)
+      \right]\right) \;\text{pp}
+      \]
+      where \(\Phi^{\text{cf}}\) is the counterfactual energy under optimal \(\gamma^*\).
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Closed-form welfare loss — counterfactual energy from formula</div>
+      The counterfactual energy \(\Phi^{\text{cf}}\) is the energy the system would have if forces were damped by \(\gamma^*(t)\). Under optimal damping the pairwise coupling is scaled by \((1-\gamma^*)\), giving:
+      \[
+      \Phi^{\text{cf}}(X_t) = \Phi_{\text{rad}}(X_t) + (1-\gamma^*(t))\,\Phi_{\text{pair}}(X_t)
+      \]
+      Therefore the energy gap is purely pairwise:
+      \[
+      \Phi(X_t) - \Phi^{\text{cf}}(X_t) = \gamma^*(t)\,\Phi_{\text{pair}}(X_t)
+      = \frac{E_t}{E_t+\theta}\cdot\Phi_{\text{pair}}(X_t)
+      \]
+      Substituting into the welfare formula:
+      \[
+      \boxed{\mathcal{W} = 100\!\left(1 - \exp\!\left[
+        -\frac{1}{\sigma\,\theta\,T_w}\sum_{t=1}^{T_w}
+        \frac{e_t}{e_t+\theta}\cdot\Phi_{\text{pair}}(X_t)
+      \right]\right)}
+      \]
+      where \(e_t = \|\tilde X_t\Sigma_0^{-1/2}\|_F^2\) and \(\Phi_{\text{pair}}\) uses the closed-form matrix expression from §III. The entire welfare loss is computable from the data panel and calibrated parameters alone — no simulation run required.
+      <div class="io-row">
+        <span class="io-key">Inputs needed:</span>
+        <span>Crisis-window panel \(\{X_t\}_{t=1}^{T_w}\), calibrated \(\mu_0,\Sigma_0^{-1}\), parameters \(\sigma,\theta,\gamma,\lambda\)</span>
+      </div>
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">T_w</span><span class="desc">Crisis window length in quarters (default 10)</span>
+      <span class="sym">σ, θ</span><span class="desc">Calibration parameters (elasticity, intervention cost)</span>
+      <span class="sym">pp</span><span class="desc">Percentage points of consumption-equivalent loss</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       X. GEOMETRY SUMMARY
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ X</div>
+    <h2>Geometric &amp; Trigonometric Summary of Collapse</h2>
+
+    <p>System collapse can be read as a sequence of geometric events in the configuration manifold \(\mathbb{R}^{N\times d}\), beginning with the network losing its independence structure and ending with full intervention:</p>
+
+    <div class="math-block">
+      <div class="label">Collapse event sequence — network to intervention</div>
+      \[
+      \begin{array}{ll}
+      0. & \text{Network synchronises}: \quad \rho(W) \nearrow N \;\text{(loss of independence)} \\[6pt]
+      1. & X_t \text{ exits the normal ellipsoid } \mathcal{E}_c: \quad \delta_C^{(i)} > c^2 \\[6pt]
+      2. & X_t \text{ crosses the critical manifold}: \quad \lambda_{\max}(\nabla^2\Phi) > 1 \\[6pt]
+      3. & \text{MFLS spikes}: \quad \|\nabla_X E_{\text{BSDT}}\|_F \gg 0 \\[6pt]
+      4. & \text{Gradient alignment}: \quad \cos\theta_t \to 1 \;\text{(coherent collapse)} \\[6pt]
+      5. & \gamma^*(t) \to 1 \;\text{(full intervention warranted)}
+      \end{array}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Two spectral radii — network vs. energy landscape</div>
+      \[
+      \underbrace{\rho(W)}_{\text{network}}\quad\text{vs.}\quad\underbrace{\lambda_{\max}(\nabla^2\Phi)}_{\text{Hessian}}
+      \]
+      \[
+      \rho(W) \nearrow N \;\Rightarrow\; \text{contagion topology tightens (macro)}
+      \]
+      \[
+      \lambda_{\max}(\nabla^2\Phi) > 1 \;\Rightarrow\; \text{energy landscape goes unstable (micro)}
+      \]
+      Together they form a dual early-warning pair: the network radius signals <em>who</em> is coupled; the Hessian radius signals <em>whether</em> the coupled state is structurally stable.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Ellipsoid axis lengths (Mahalanobis geometry)</div>
+      \[
+      \text{Semi-axis}_k = c\sqrt{\lambda_k^{\Sigma_0}}, \quad k = 1,\ldots,d
+      \]
+      where \(\lambda_k^{\Sigma_0}\) are eigenvalues of the normal-period covariance.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Angle of deviation from principal subspace</div>
+      \[
+      \sin^2\!\phi_i = \frac{\delta_G^{(i)}}{\|x_i - \mu_0\|^2}
+      = 1 - \frac{\|V_k^\top(x_i-\mu_0)\|^2}{\|x_i-\mu_0\|^2}
+      \]
+      \(\phi_i = 0\) when agent \(i\) stays within the principal subspace; \(\phi_i = \pi/2\) when deviation is entirely orthogonal to it.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Shrinkage geometry — interpolation between two covariance structures</div>
+      \[
+      \hat\Sigma(\rho) = (1-\rho)\,S + \rho\,\frac{\operatorname{tr}(S)}{N}I,
+      \qquad \rho \in [0,1]
+      \]
+      At \(\rho=0\): full empirical covariance (max observed coupling). At \(\rho=1\): spherical identity (complete independence prior). The shrinkage path traces a straight line in matrix space between these two geometries.
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Master pipeline — complete system outputs from data alone</div>
+      <p style="margin-bottom:12px;">Given panel \(\{X_t\}_{t=0}^T\) and calibrated parameters \((\mu_0,\Sigma_0,\mu,\alpha,\gamma,\sigma,\lambda,\theta)\), compute all outputs in order:</p>
+
+      \[
+      \begin{array}{lll}
+      \textbf{Step} & \textbf{Formula} & \textbf{Output} \\[4pt]
+      \hline\\[-6pt]
+      1 & \tilde X_t = X_t - \mathbf{1}\mu_0^\top & \text{centred state}\\[6pt]
+      2 & D_{ij}^{(t)} = \|x_i^{(t)}-x_j^{(t)}\| & \text{distance matrix (1 matmul)}\\[6pt]
+      3 & e_t = \|\tilde X_t\Sigma_0^{-1/2}\|_F^2 & E_{\text{BSDT}} \text{ (1 matmul + trace)}\\[6pt]
+      4 & \text{MFLS}_t = 2\|\tilde X_t\Sigma_0^{-1}\|_F & \text{field line score}\\[6pt]
+      5 & \gamma^*_t = e_t/(e_t+\theta) & \text{optimal damping (scalar)}\\[6pt]
+      6 & \Phi_t = \frac{\alpha}{2}\|X_t-\mathbf{1}\mu^\top\|_F^2 + \mathbf{1}^\top\![-\gamma\sigma\operatorname{erf}(D/\sigma)+\lambda\ln D]\mathbf{1}/2 & \text{total energy}\\[6pt]
+      7 & \lambda_{\max}^{\text{bound}} = \alpha + \max_i\sum_j(\tfrac{2\gamma}{\sqrt\pi\sigma}e^{-D_{ij}^2/\sigma^2}+\tfrac{\lambda}{D_{ij}^2}) & \text{critical manifold test}\\[6pt]
+      8 & \tilde\rho_t = 1 + (N-1)\bar W_{\text{off},t} & \text{network radius proxy}\\[6pt]
+      9 & \text{CCyB}(t) = 250\cdot e_t\sigma_\ell(t)(e_t+\theta)^{-1}/\max_s[\cdot] & \text{capital buffer (bps)}\\[6pt]
+      10 & \mathcal{W} = 100(1-e^{-\frac{1}{\sigma\theta T_w}\sum_t\gamma^*_t\Phi_{\text{pair},t}}) & \text{welfare loss (pp)}
+      \end{array}
+      \]
+
+      <p style="margin-top:14px;">Steps 1–10 require <strong>no simulation loop</strong>, no ODE integration, no iterative eigensolver. Each step is a closed matrix or scalar operation on the observed panel.</p>
+      <div class="io-row">
+        <span class="io-key">One-time fit:</span>
+        <span>\(\mu_0, \Sigma_0^{-1}, \Sigma_0^{-1/2}, V_k\) — computed once on normal-period data, then stored</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XI. CLOSED-FORM REPRESENTATION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XI</div>
+    <h2>Complete Closed-Form Representation</h2>
+
+    <p>This section consolidates every analytical formula in the system into a single self-contained reference. No simulation, no iteration, no numerical integration — each quantity is a direct algebraic function of the observed panel \(\{X_t\}\) and a small set of parameters fitted once on normal-period data.</p>
+
+    <!-- ── Calibration objects ── -->
+    <h3>11.1 — Calibration Objects (fit once, store permanently)</h3>
+
+    <div class="math-block">
+      <div class="label">Normal-period statistics — fit on X_normal ∈ ℝ^{T₀ × N × d}</div>
+      \[
+      \mu_0 = \frac{1}{T_0 N}\sum_{t,i} x_t^{(i)} \in \mathbb{R}^d
+      \qquad\text{(global mean)}
+      \]
+      \[
+      \Sigma_0 = \frac{1}{T_0 N}\sum_{t,i}(x_t^{(i)}-\mu_0)(x_t^{(i)}-\mu_0)^\top + 10^{-8}I \in \mathbb{R}^{d\times d}
+      \]
+      \[
+      \Sigma_0^{-1},\quad \Sigma_0^{-1/2} \;\text{(Cholesky or eigendecomposition — computed once)}
+      \]
+      \[
+      V_k \in \mathbb{R}^{d\times k} \;\text{— top-}k\text{ eigenvectors of }\Sigma_0\text{ (PCA basis)}
+      \]
+      \[
+      v_0 = \operatorname{Pctl}_{95}\!\bigl\{\|x_t^{(i)} - x_{t-1}^{(i)}\| : t=1,\ldots,T_0,\; i=1,\ldots,N\bigr\}
+      \quad\text{(velocity threshold)}
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">T₀</span><span class="desc">Length of normal (calibration) period</span>
+      <span class="sym">k</span><span class="desc">Number of PCA components retained (default 4)</span>
+      <span class="sym">v₀</span><span class="desc">95th-percentile velocity in normal period</span>
+    </div>
+
+    <!-- ── Intermediate quantities ── -->
+    <h3>11.2 — Intermediate Quantities (per snapshot \(X_t\))</h3>
+
+    <div class="math-block">
+      <div class="label">A — Centred state matrix</div>
+      \[
+      \tilde{X}_t = X_t - \mathbf{1}_N \mu_0^\top \in \mathbb{R}^{N\times d}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">B — Euclidean distance matrix (one matrix multiply)</div>
+      \[
+      D_{ij}^{(t)} = \left\|x_i^{(t)} - x_j^{(t)}\right\|_2, \qquad
+      D^2 = \mathbf{q}\mathbf{1}^\top + \mathbf{1}\mathbf{q}^\top - 2X_t X_t^\top
+      \]
+      where \(\mathbf{q}_i = \|x_i\|^2\). Set \(D_{ii} = 0\), add softening \(\varepsilon\) where needed.
+    </div>
+
+    <div class="math-block">
+      <div class="label">C — Mahalanobis projection (one matrix multiply)</div>
+      \[
+      A_t = \tilde{X}_t\,\Sigma_0^{-1} \in \mathbb{R}^{N\times d}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">D — Kernel weight matrix for pairwise forces</div>
+      \[
+      K_{ij} = \frac{1}{D_{ij}}\left[\frac{2\gamma}{\sqrt{\pi}}\,e^{-D_{ij}^2/\sigma^2} - \frac{\lambda}{D_{ij}}\right], \quad i\neq j;\qquad K_{ii}=0
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">E — Graph Laplacian of force network</div>
+      \[
+      L_t = \operatorname{diag}(K_t\,\mathbf{1}) - K_t \in \mathbb{R}^{N\times N}
+      \]
+    </div>
+
+    <!-- ── Primary outputs ── -->
+    <h3>11.3 — Primary Outputs (closed-form)</h3>
+
+    <div class="cf-collection">
+
+      <div class="math-block" style="margin-top:0;">
+        <div class="label">① Radial spring energy</div>
+        \[
+        \Phi_{\text{rad}}(X_t) = \frac{\alpha}{2}\left\|X_t - \mathbf{1}_N\mu^\top\right\|_F^2
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">② Pairwise interaction energy</div>
+        \[
+        \Phi_{\text{pair}}(X_t) = \frac{1}{2}\left[
+          -\gamma\sigma\,\mathbf{1}^\top\operatorname{erf}\!\Bigl(\tfrac{D_t}{\sigma}\Bigr)\mathbf{1}
+          +\lambda\,\mathbf{1}^\top\ln(D_t+\varepsilon)\,\mathbf{1}
+          + N\gamma\sigma - N\lambda\ln\varepsilon
+        \right]
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">③ Total potential energy</div>
+        \[
+        \Phi(X_t) = \Phi_{\text{rad}}(X_t) + \Phi_{\text{pair}}(X_t)
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">④ Total restoring force matrix</div>
+        \[
+        F_t = -\alpha\bigl(X_t - \mathbf{1}_N\mu^\top\bigr) - L_t\,X_t \in \mathbb{R}^{N\times d}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑤ BSDT blind-spot energy (Mahalanobis channel δ_C)</div>
+        \[
+        e_t = E_{\text{BSDT}}(X_t) = \left\|\tilde{X}_t\,\Sigma_0^{-1/2}\right\|_F^2
+        = \operatorname{tr}\!\bigl(\tilde{X}_t\,\Sigma_0^{-1}\tilde{X}_t^\top\bigr)
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑥ Feature gap energy (δ_G)</div>
+        \[
+        \delta_G(X_t) = \left\|\tilde{X}_t\right\|_F^2 - \left\|\tilde{X}_t V_k\right\|_F^2
+        = \operatorname{tr}\!\bigl(\tilde{X}_t^\top\tilde{X}_t\bigr) - \operatorname{tr}\!\bigl(V_k^\top\tilde{X}_t^\top\tilde{X}_t V_k\bigr)
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑦ Activity anomaly (δ_A, requires two consecutive snapshots)</div>
+        \[
+        \delta_A(X_t,X_{t-1}) = \left\|\max\!\bigl(0,\;\|X_t - X_{t-1}\|_{\text{row}} - v_0\bigr)\right\|_1
+        \]
+        where \(\|\cdot\|_{\text{row}}\) denotes the vector of row-wise norms.
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑧ MFLS — Mahalanobis Field Line Score</div>
+        \[
+        \text{MFLS}(X_t) = 2\left\|A_t\right\|_F = 2\left\|\tilde{X}_t\,\Sigma_0^{-1}\right\|_F
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑨ Gradient alignment angle</div>
+        \[
+        \cos\theta_t = \frac{\langle A_t,\; F_t\rangle_F}{\left\|A_t\right\|_F\;\left\|F_t\right\|_F}
+        = \frac{\operatorname{tr}(A_t^\top F_t)}{\left\|A_t\right\|_F\;\left\|F_t\right\|_F}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑩ Critical manifold test (Gershgorin bound — no eigensolver)</div>
+        \[
+        \lambda_{\max}(\nabla^2\Phi) \;\leq\;
+        \alpha + \max_{i}\sum_{j\neq i}\!\left[
+          \frac{2\gamma}{\sqrt{\pi}\,\sigma}\,e^{-D_{ij}^2/\sigma^2} + \frac{\lambda}{D_{ij}^2}
+        \right]
+        \]
+        \[
+        \text{Supercritical} \iff \text{above bound} > 1
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑪ Optimal adaptive damping</div>
+        \[
+        \gamma^*(X_t) = \frac{e_t}{e_t + \theta}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑫ Ledoit-Wolf shrinkage intensity (closed-form, no optimisation)</div>
+        \[
+        \rho = \operatorname{clip}\!\left(
+          \frac{\left\|X_c^{\odot 2}\right\|_F^2\big/(T^2 N^2) - \|S\|_F^2/(TN^2)}
+               {\|S\|_F^2 - [\operatorname{tr}(S)]^2/N},\;0,\;1\right)
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑬ Network spectral radius proxy (no eigendecomposition)</div>
+        \[
+        \tilde\rho(W_t) = 1 + (N-1)\,\bar{W}_{\text{off},t},
+        \qquad \bar{W}_{\text{off}} = \frac{\mathbf{1}^\top W_t\mathbf{1} - N}{N(N-1)}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑭ CCyB in basis points</div>
+        \[
+        \text{CCyB}(t) = 250\cdot\frac{e_t\,\sigma_\ell(t)\,(e_t+\theta)^{-1}}
+                                       {\displaystyle\max_{s\in[1,T]}\!\bigl[e_s\,\sigma_\ell(s)\,(e_s+\theta)^{-1}\bigr]}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">⑮ Consumption-equivalent welfare loss</div>
+        \[
+        \mathcal{W} = 100\!\left(1 - \exp\!\left[
+          -\frac{1}{\sigma\,\theta\,T_w}
+          \sum_{t=1}^{T_w} \frac{e_t}{e_t+\theta}\cdot\Phi_{\text{pair}}(X_t)
+        \right]\right) \;\text{pp}
+        \]
+      </div>
+
+    </div><!-- end cf-collection -->
+
+    <!-- ── Dependency graph ── -->
+    <h3>11.4 — Dependency Graph</h3>
+    <p>Every output above depends on at most three upstream quantities. The full dependency order is:</p>
+
+    <div class="math-block">
+      <div class="label">Computation DAG — left to right, no cycles</div>
+      \[
+      \underbrace{X_t}_{\text{data}}
+      \;\longrightarrow\;
+      \begin{cases}
+        \tilde X_t \;\longrightarrow\; A_t \;\longrightarrow\; e_t \;\longrightarrow\; \gamma^*_t \;\longrightarrow\; \text{CCyB},\;\mathcal{W} \\[4pt]
+        \tilde X_t \;\longrightarrow\; A_t \;\longrightarrow\; \text{MFLS}_t \\[4pt]
+        \tilde X_t \;\longrightarrow\; \delta_G \\[4pt]
+        D_t \;\longrightarrow\; K_t \;\longrightarrow\; L_t \;\longrightarrow\; F_t \;\longrightarrow\; \cos\theta_t \\[4pt]
+        D_t \;\longrightarrow\; \Phi_{\text{pair}} \;\longrightarrow\; \Phi_t,\;\mathcal{W} \\[4pt]
+        D_t \;\longrightarrow\; \lambda_{\max}^{\text{bound}} \;\longrightarrow\; \mathcal{C}_{\text{man}} \\[4pt]
+        W_t \;\longrightarrow\; \tilde\rho_t
+      \end{cases}
+      \]
+    </div>
+
+    <!-- ── Parameter table ── -->
+    <h3>11.5 — Complete Parameter Reference</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Value</th>
+          <th>Role</th>
+          <th>Appears in</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>\(\alpha\)</td><td>0.10</td><td>Radial spring constant</td><td>①③④⑩</td></tr>
+        <tr><td>\(\gamma\)</td><td>1.00</td><td>Pairwise attraction amplitude</td><td>②③④⑩</td></tr>
+        <tr><td>\(\sigma\)</td><td>1.00</td><td>Attraction length-scale</td><td>②③④⑩⑮</td></tr>
+        <tr><td>\(\lambda\)</td><td>0.10</td><td>Logarithmic repulsion coefficient</td><td>②③④⑩</td></tr>
+        <tr><td>\(\varepsilon\)</td><td>10⁻⁵</td><td>Distance softening</td><td>②③</td></tr>
+        <tr><td>\(\theta\)</td><td>1.00</td><td>Intervention cost</td><td>⑪⑭⑮</td></tr>
+        <tr><td>\(\kappa\)</td><td>1.00</td><td>CCyB scaling</td><td>⑭ (cancels)</td></tr>
+        <tr><td>\(k\)</td><td>4</td><td>PCA components retained</td><td>⑥</td></tr>
+        <tr><td>\(v_0\)</td><td>Pctl₉₅</td><td>Normal-period velocity threshold</td><td>⑦</td></tr>
+        <tr><td>\(T_w\)</td><td>10</td><td>Crisis window (quarters)</td><td>⑮</td></tr>
+        <tr><td>\(F_{\max}\)</td><td>100</td><td>Force clamp (applied post ④)</td><td>④</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── What is eliminated ── -->
+    <h3>11.6 — What the Closed Form Eliminates</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Simulation procedure</th>
+          <th>Replaced by</th>
+          <th>Cost reduction</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>\(O(N^2)\) pairwise energy loop</td>
+          <td>Elementwise ops on \(D_t\) + vector sums</td>
+          <td>\(O(N^2 d) \to O(N^2)\)</td>
+        </tr>
+        <tr>
+          <td>\(O(N^2)\) pairwise force loop</td>
+          <td>Laplacian matrix multiply \(L_t X_t\)</td>
+          <td>\(O(N^2 d) \to O(N^2 + Nd)\)</td>
+        </tr>
+        <tr>
+          <td>\(K=20\) Hessian power iterations</td>
+          <td>Gershgorin row-sum over \(D_t\)</td>
+          <td>20 energy evals \(\to\) 1 matrix pass</td>
+        </tr>
+        <tr>
+          <td>Per-agent BSDT energy loop</td>
+          <td>\(\operatorname{tr}(\tilde X_t \Sigma_0^{-1} \tilde X_t^\top)\)</td>
+          <td>\(O(Nd) \to\) 1 matmul + trace</td>
+        </tr>
+        <tr>
+          <td>Per-agent gradient loop (MFLS)</td>
+          <td>\(2\|\tilde X_t \Sigma_0^{-1}\|_F\)</td>
+          <td>\(O(Nd^2) \to\) 1 matmul + norm</td>
+        </tr>
+        <tr>
+          <td>Full eigensolver for \(\rho(W)\)</td>
+          <td>\(1 + (N-1)\bar W_{\text{off}}\)</td>
+          <td>\(O(N^3) \to O(N^2)\)</td>
+        </tr>
+        <tr>
+          <td>LW shrinkage optimisation loop</td>
+          <td>Direct ratio of Frobenius norms</td>
+          <td>Iterative \(\to\) 3 scalar ops</td>
+        </tr>
+        <tr>
+          <td>Counterfactual trajectory simulation</td>
+          <td>\(\gamma^*_t \cdot \Phi_{\text{pair}}(X_t)\)</td>
+          <td>Full re-simulation \(\to\) scalar multiply</td>
+        </tr>
+        <tr>
+          <td>Per-timestep \(\cos\theta\) loop</td>
+          <td>\(\langle A_t, F_t\rangle_F / (\|A_t\|_F\|F_t\|_F)\)</td>
+          <td>Loop over \(T\) \(\to\) 1 inner product</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XII. UNIFIED ENERGY FIELD
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XII</div>
+    <h2>The Unified Energy Field — MFLS as Vector</h2>
+
+    <p>The system already has four channels from BSDT and one scalar from MFLS. The upgrade: treat MFLS not as a magnitude floating free of direction, but as the norm of a full gradient field. That field is built from three composable energy forms — Quadsurf, Expogate, and Signed LR — each capturing a distinct mode of instability. Together they form the complete blind-spot energy \(E_{\text{BS}}\).</p>
+
+    <h3>12.1 — The Channel State Vector</h3>
+
+    <div class="math-block">
+      <div class="label">BSDT state vector — input to all three energy forms</div>
+      \[
+      S = \bigl(\delta_C,\;\delta_G,\;\delta_A,\;\delta_T\bigr)^\top \in \mathbb{R}^4
+      \]
+      Each component is a non-negative scalar measuring a distinct deviation mode. \(S = 0\) at normal-period baseline; \(\|S\|\) grows as the system departs.
+    </div>
+
+    <h3>12.2 — Three Energy Forms</h3>
+
+    <div class="math-block">
+      <div class="label">① Quadsurf — quadratic curvature energy</div>
+      \[
+      E_{\text{quad}}(S) = S^\top A\, S, \qquad A \in \mathbb{R}^{4\times 4},\;\; A = A^\top \succ 0
+      \]
+      \[
+      \nabla_S E_{\text{quad}} = 2A S
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">A</span><span class="desc">Symmetric positive-definite coupling matrix — encodes pairwise channel interactions; off-diagonals capture how one channel amplifies another</span>
+      <span class="sym">S⊤AS</span><span class="desc">Generalised Mahalanobis distance in channel space; reduces to \(\|S\|^2\) when \(A = I\)</span>
+      <span class="sym">Geometry</span><span class="desc">Iso-energy surfaces are ellipsoids in \(\mathbb{R}^4\); axes are eigenvectors of \(A\) with radii \(\propto \lambda_k(A)^{-1/2}\)</span>
+    </div>
+
+    <div class="math-block">
+      <div class="label">② Expogate — exponential threshold energy</div>
+      \[
+      E_{\text{exp}}(S) = \sum_{k=1}^{4} \exp\!\bigl(\beta_k\,S_k\bigr), \qquad \beta_k > 0
+      \]
+      \[
+      \nabla_S E_{\text{exp}} = \bigl(\beta_k\,e^{\beta_k S_k}\bigr)_{k=1}^4
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">β_k</span><span class="desc">Per-channel gate rate — controls how steeply energy grows near threshold; large \(\beta_k\) makes channel \(k\) a hair-trigger detector</span>
+      <span class="sym">Geometry</span><span class="desc">Energy grows super-exponentially near threshold; gradient component explodes, pulling \(u\) sharply toward the triggering channel</span>
+    </div>
+
+    <div class="math-block">
+      <div class="label">③ Signed LR — linear directional energy</div>
+      \[
+      E_{\text{lr}}(S) = w^\top S, \qquad w \in \mathbb{R}^4
+      \]
+      \[
+      \nabla_S E_{\text{lr}} = w \quad\text{(constant — independent of } S\text{)}
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">w</span><span class="desc">Weight vector encoding directional bias — \(w_k > 0\) means channel \(k\) drives toward instability; \(w_k < 0\) means stabilising</span>
+      <span class="sym">Geometry</span><span class="desc">Energy level sets are parallel hyperplanes; gradient is a fixed vector regardless of system state — a persistent directional pull</span>
+    </div>
+
+    <h3>12.3 — Unified Blind-Spot Energy</h3>
+
+    <div class="math-block">
+      <div class="label">Full composite energy</div>
+      \[
+      E_{\text{BS}}(S) = \underbrace{S^\top A S}_{\text{curvature}} + \underbrace{\textstyle\sum_k e^{\beta_k S_k}}_{\text{explosion}} + \underbrace{w^\top S}_{\text{bias}}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Unified gradient — the collapse direction vector</div>
+      \[
+      \nabla_S E_{\text{BS}} = \underbrace{2AS}_{\text{structural}} + \underbrace{\bigl(\beta_k e^{\beta_k S_k}\bigr)_k}_{\text{critical transition}} + \underbrace{w}_{\text{directional}}
+      \]
+      The three terms are additive and independent. Each fires in its own regime: Signed LR is always present, Quadsurf grows with displacement, Expogate dominates near threshold.
+    </div>
+
+    <h3>12.4 — MFLS as the Magnitude of the Field</h3>
+
+    <div class="math-block">
+      <div class="label">MFLS — scalar intensity from vector norm</div>
+      \[
+      \text{MFLS}(S) = \left\|\nabla_S E_{\text{BS}}\right\|
+      = \left\|2AS + \bigl(\beta_k e^{\beta_k S_k}\bigr)_k + w\right\|
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Unit collapse direction</div>
+      \[
+      u = \frac{\nabla_S E_{\text{BS}}}{\text{MFLS}} \in \mathbb{R}^4, \qquad \|u\| = 1
+      \]
+      \(u\) points toward the fastest-growing instability in channel space. It is a closed-form vector computable directly from \(S\), \(A\), \(\beta\), and \(w\).
+    </div>
+
+    <h3>12.5 — Per-Channel Collapse Attribution</h3>
+
+    <div class="math-block">
+      <div class="label">Channel attribution — fraction of total MFLS² per channel</div>
+      \[
+      c_k = \frac{\bigl[\nabla_S E_{\text{BS}}\bigr]_k^2}{\text{MFLS}^2} \in [0,1], \qquad \sum_{k=1}^4 c_k = 1
+      \]
+      \[
+      \bigl[\nabla_S E_{\text{BS}}\bigr]_k = 2[AS]_k + \beta_k\,e^{\beta_k S_k} + w_k
+      \]
+      The dominant channel \(k^* = \arg\max_k c_k\) identifies which BSDT mode is driving collapse — directly readable from the gradient without any simulation.
+    </div>
+
+    <h3>12.6 — Reduction to Original BSDT</h3>
+
+    <div class="math-block">
+      <div class="label">Special case: Quadsurf only, A = Σ₀⁻¹, S = (x - μ₀)</div>
+      \[
+      E_{\text{BS}}(S)\big|_{A=\Sigma_0^{-1},\,\beta=0,\,w=0} = (x-\mu_0)^\top\Sigma_0^{-1}(x-\mu_0) = \delta_C
+      \]
+      \[
+      \text{MFLS}\big|_{\text{single agent}} = \|2\Sigma_0^{-1}(x-\mu_0)\|
+      \]
+      The original BSDT Mahalanobis formulation is exactly Quadsurf with \(A = \Sigma_0^{-1}\), confirming the unified energy as a strict generalisation of what was built.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XIII. THE CONTROL LAW
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XIII</div>
+    <h2>The Control Law — Force Decomposition &amp; Minimal Damping</h2>
+
+    <p>The system dynamics are not stopped — only the collapse-directed component of the force is damped. Everything orthogonal to the gradient runs free. This is the principle of minimal intervention: the geometry of the energy landscape determines which part of the force is dangerous, and only that part is attenuated.</p>
+
+    <h3>13.1 — Force Decomposition</h3>
+
+    <p>Given the total restoring force \(F \in \mathbb{R}^{N \times d}\) from the GravityEngine (§IV) and the unit collapse direction \(u \in \mathbb{R}^4\) from the channel gradient (§XII.4), decompose:</p>
+
+    <div class="math-block">
+      <div class="label">Parallel component — collapse-directed, potentially dangerous</div>
+      \[
+      F_\parallel = \langle F,\, u\rangle\, u, \qquad \langle F,\,u\rangle = \operatorname{tr}(F^\top u)
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Perpendicular component — orthogonal to collapse, locally neutral</div>
+      \[
+      F_\perp = F - F_\parallel = F - \langle F,\, u\rangle\, u
+      \]
+      \[
+      \langle F_\perp,\, u\rangle = 0 \quad \text{(exact, by construction)}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Pythagorean identity — energy partition</div>
+      \[
+      \|F\|^2 = \|F_\parallel\|^2 + \|F_\perp\|^2 = \langle F,u\rangle^2 + \|F - \langle F,u\rangle u\|^2
+      \]
+    </div>
+
+    <h3>13.2 — Why Perpendicular is Neutral (Proof)</h3>
+
+    <div class="math-block">
+      <div class="label">First-order energy change along any direction v</div>
+      \[
+      \frac{d}{dt}E_{\text{BS}}\Big|_{v} = \nabla_S E_{\text{BS}} \cdot v = \text{MFLS} \cdot \langle u, v\rangle
+      \]
+      For \(v = F_\perp\): \(\langle u, F_\perp\rangle = 0\), therefore \(\dfrac{d}{dt}E_{\text{BS}}\big|_{F_\perp} = 0\).
+      Moving along \(F_\perp\) does not change instability to first order — the system stays on the same iso-instability surface.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Second-order correction — curvature of the iso-surface</div>
+      \[
+      \frac{d^2}{dt^2}E_{\text{BS}}\Big|_{F_\perp} = F_\perp^\top\,\nabla^2_S E_{\text{BS}}\,F_\perp
+      = F_\perp^\top\!\bigl(2A + \operatorname{diag}(\beta_k^2 e^{\beta_k S_k})\bigr)F_\perp
+      \]
+      This is zero only when \(F_\perp\) lies in the null space of \(\nabla^2 E_{\text{BS}}\). Otherwise the iso-surface curves back — the second-order growth rate is bounded by \(\lambda_{\max}(\nabla^2 E_{\text{BS}})\cdot\|F_\perp\|^2\).
+      This is exactly what the curvature threshold \(\lambda_{\max} > 1\) detects.
+    </div>
+
+    <h3>13.3 — The Control Law</h3>
+
+    <div class="math-block">
+      <div class="label">Controlled dynamics — general form</div>
+      \[
+      \frac{dX}{dt} = F_\perp + (1 - \gamma^*)\,F_\parallel = F - \gamma^*\,\langle F,u\rangle\,u
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Fully closed form — all terms substituted</div>
+      \[
+      \boxed{
+      \frac{dX}{dt} = F_t - \frac{e_t}{e_t + \theta}\cdot
+        \frac{\langle F_t,\;\nabla_S E_{\text{BS}}(S_t)\rangle}{\|\nabla_S E_{\text{BS}}(S_t)\|^2}
+        \cdot\nabla_S E_{\text{BS}}(S_t)
+      }
+      \]
+      where \(e_t = \|\tilde X_t\Sigma_0^{-1/2}\|_F^2\), \(\;F_t = -\alpha(X_t - \mathbf{1}\mu^\top) - L_t X_t\), and \(\nabla_S E_{\text{BS}} = 2AS + (\beta_k e^{\beta_k S_k})_k + w\).
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">γ* → 0</span><span class="desc">Far from collapse: \(dX/dt \approx F_t\) — control is invisible, system evolves freely</span>
+      <span class="sym">γ* → 1</span><span class="desc">At collapse: \(dX/dt \approx F_\perp\) — only safe tangential motion permitted</span>
+      <span class="sym">γ* = ½</span><span class="desc">Half-energy state: parallel force halved, perpendicular untouched</span>
+    </div>
+
+    <h3>13.4 — Domain-Universal Form</h3>
+
+    <p>The control law \(\dot X = F - \gamma^*\langle F,u\rangle u\) holds in any domain where \(S\), \(E_{\text{BS}}\), and \(F\) can be defined:</p>
+
+    <div class="math-block">
+      <div class="label">Domain table — same law, different interpretations</div>
+      \[
+      \begin{array}{lll}
+      \textbf{Domain} & \textbf{State } X & \textbf{Dynamics } F \\[4pt]
+      \hline\\[-4pt]
+      \text{Financial systemic risk} & \text{leverage, positions, correlations} & \text{GravityEngine force field} \\[5pt]
+      \text{Fluid dynamics} & \text{velocity modes, vorticity} & \text{Navier-Stokes operator} \\[5pt]
+      \text{Neural networks} & \text{activations, gradient norms} & \text{backpropagation update step} \\[5pt]
+      \text{Epidemiology} & \text{S/I/R compartment fractions} & \text{transmission rate dynamics}
+      \end{array}
+      \]
+      The structure is not domain-specific. It is a geometric control law defined entirely by the energy landscape.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XIV. TAN(θ) COLLAPSE CURVATURE
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XIV</div>
+    <h2>The \(\tan(\theta)\) Collapse Condition</h2>
+
+    <p>The gradient gives direction; the Hessian gives curvature. The angle \(\theta\) between the trajectory and the principal instability direction is the exact bridge between geometry, energy intensity, and the spectral threshold \(\lambda_{\max}\). When \(\tan\theta\) crosses a critical value, collapse is inevitable regardless of other system properties.</p>
+
+    <h3>14.1 — The Trajectory Angle</h3>
+
+    <div class="math-block">
+      <div class="label">Definition of θ — angle between motion and collapse direction</div>
+      \[
+      \theta = \angle\!\bigl(\dot X,\; u\bigr) = \arccos\!\left(\frac{\langle \dot X,\, u\rangle}{\|\dot X\|}\right)
+      \]
+      \[
+      \cos\theta = \frac{\|F_\parallel\|}{\|F\|} = \frac{|\langle F, u\rangle|}{\|F\|},
+      \qquad
+      \sin\theta = \frac{\|F_\perp\|}{\|F\|}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Tangent — the collapse-to-safety ratio</div>
+      \[
+      \tan\theta = \frac{\|F_\perp\|}{\|F_\parallel\|}
+      = \frac{\bigl\|F - \langle F,u\rangle u\bigr\|}{\bigl|\langle F,u\rangle\bigr|}
+      = \sqrt{\frac{\|F\|^2}{\langle F,u\rangle^2} - 1}
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">tan θ → 0</span><span class="desc">Trajectory fully collapse-directed — all force drives toward instability manifold</span>
+      <span class="sym">tan θ → ∞</span><span class="desc">Trajectory fully perpendicular — motion is tangential, locally safe</span>
+      <span class="sym">tan θ = 1</span><span class="desc">Equal components — critical balance at θ = 45°; the natural intervention threshold</span>
+    </div>
+
+    <h3>14.2 — Connection to Gradient Alignment \(\cos\theta_t\)</h3>
+
+    <p>The gradient alignment angle \(\cos\theta_t\) from §VII is exactly the cosine of this angle. Therefore:</p>
+
+    <div class="math-block">
+      <div class="label">tan θ in terms of the existing cos θ_t measurement</div>
+      \[
+      \tan\theta = \frac{\sin\theta_t}{\cos\theta_t} = \sqrt{\frac{1 - \cos^2\theta_t}{\cos^2\theta_t}}
+      \]
+      \[
+      = \tan\!\left(\arccos\!\left(\frac{\langle\nabla_X E_{\text{BS}},\; F\rangle}{\|\nabla_X E_{\text{BS}}\|\,\|F\|}\right)\right)
+      \]
+      No new computation is required — \(\tan\theta\) is a direct transform of the already-computed \(\cos\theta_t\).
+    </div>
+
+    <h3>14.3 — Connection to Curvature and \(\lambda_{\max}\)</h3>
+
+    <div class="math-block">
+      <div class="label">tan θ in terms of MFLS and spectral structure</div>
+      Let \(v_1\) be the principal eigenvector of \(\nabla^2 E_{\text{BS}}\) (direction of maximum curvature), and \(\phi\) the angle between \(\nabla E_{\text{BS}}\) and \(v_1\):
+      \[
+      \tan\theta_{\text{curv}} = \frac{\text{MFLS}\cdot\sin\phi}{\lambda_{\max}(\nabla^2 E_{\text{BS}})\cdot\cos\phi}
+      = \frac{\text{MFLS}}{\lambda_{\max}}\cdot\tan\phi
+      \]
+      When gradient aligns with principal curvature direction (\(\phi \to 0\)): \(\tan\theta_{\text{curv}} \to 0\) — collapse is curvature-dominated. When orthogonal (\(\phi \to \pi/2\)): curvature is irrelevant to the collapse direction.
+    </div>
+
+    <h3>14.4 — The Exact Collapse Condition</h3>
+
+    <div class="geometry-box">
+      <h3 style="margin-top:0; color:var(--ink); font-style:normal;">Three Equivalent Collapse Conditions</h3>
+
+      <div class="math-block">
+        <div class="label">Spectral (Hessian of GravityEngine)</div>
+        \[
+        \lambda_{\max}\!\bigl(\nabla^2_X\Phi(X_t)\bigr) > 1
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">Angular (trajectory geometry)</div>
+        \[
+        \tan\theta_t < \tan\theta^*
+        \qquad\text{where}\quad
+        \tan\theta^* = \frac{\sqrt{\|F\|^2 - \text{MFLS}^2\cdot[\gamma^*]^2}}{\text{MFLS}\cdot\gamma^*}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">Energetic (curvature overwhelms gradient)</div>
+        \[
+        \lambda_{\max}\!\bigl(\nabla^2_S E_{\text{BS}}(S_t)\bigr) > \frac{\text{MFLS}^2}{e_t}
+        = \frac{\|\nabla_S E_{\text{BS}}\|^2}{\|\tilde X_t\Sigma_0^{-1/2}\|_F^2}
+        \]
+      </div>
+
+      <p style="margin-top:16px;">All three conditions are equivalent at the critical manifold \(\mathcal{C}_{\text{man}}\). The angular condition is geometric (observable); the spectral is algebraic (eigenvalue); the energetic is closed-form testable (ratio of norms).</p>
+    </div>
+
+    <h3>14.5 — Hessian of the Unified Energy</h3>
+
+    <div class="math-block">
+      <div class="label">∇²E_BS — exact closed form</div>
+      \[
+      \nabla^2_S E_{\text{BS}} = \underbrace{2A}_{\text{Quadsurf}} + \underbrace{\operatorname{diag}\!\bigl(\beta_k^2\,e^{\beta_k S_k}\bigr)}_{\text{Expogate}} + \underbrace{0}_{\text{Signed LR (linear, no curvature)}}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Spectral radius of the unified Hessian (closed-form bound)</div>
+      \[
+      \lambda_{\max}(\nabla^2 E_{\text{BS}}) \leq 2\lambda_{\max}(A) + \max_k\!\bigl(\beta_k^2\,e^{\beta_k S_k}\bigr)
+      \]
+      The Expogate diagonal grows exponentially near threshold — it can overwhelm the Quadsurf structural curvature \(2\lambda_{\max}(A)\) when \(\beta_k S_k \gg 1\). This is the instability explosion mechanism encoded in closed form.
+    </div>
+
+    <h3>14.6 — The Complete Four-Layer Chain</h3>
+
+    <div class="math-block">
+      <div class="label">Detect → Measure → Locate → Control</div>
+      \[
+      \underbrace{S_t = \bigl(\delta_C,\delta_G,\delta_A,\delta_T\bigr)^\top}_{\text{① Detect (BSDT)}}
+      \;\longrightarrow\;
+      \underbrace{e_t,\;\text{MFLS}_t}_{\text{② Measure (intensity)}}
+      \;\longrightarrow\;
+      \underbrace{u_t = \tfrac{\nabla_S E_{\text{BS}}}{\text{MFLS}_t}}_{\text{③ Locate (direction)}}
+      \;\longrightarrow\;
+      \underbrace{\dot X = F_t - \gamma^*_t\langle F_t,u_t\rangle u_t}_{\text{④ Control (damp)}}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Collapse geometry — the tan(θ) bridge</div>
+      \[
+      \underbrace{\tan\theta_t}_{\substack{\text{trajectory}\\\text{angle}}}
+      \;\longleftrightarrow\;
+      \underbrace{\frac{\text{MFLS}_t}{\lambda_{\max}(\nabla^2 E_{\text{BS}})}}_{\substack{\text{gradient-to-curvature}\\\text{ratio}}}
+      \;\longleftrightarrow\;
+      \underbrace{\lambda_{\max}(\nabla^2\Phi_t)}_{\substack{\text{Hessian of}\\\text{GravityEngine}}}
+      \]
+      The \(\tan\theta\) formula is the geometric lens through which the gradient direction (MFLS), the curvature of the energy landscape (Hessian), and the spectral collapse threshold (\(\lambda_{\max} > 1\)) all become the same statement read three different ways.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XV. THE MASTER OPERATOR
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XV</div>
+    <h2>The Master Operator — One Equation</h2>
+
+    <p>Everything built across the preceding fourteen sections — BSDT channels, unified energy, Quadsurf, Expogate, Signed LR, MFLS, spectral radius, critical manifold, adaptive damping, force decomposition, tan(θ) geometry — compresses into a single operator. It is stated in full, then unpacked layer by layer.</p>
+
+    <!-- ── BUILD ── -->
+    <h3>15.1 — Construction: Eight Steps to One Equation</h3>
+
+    <table>
+      <thead>
+        <tr><th>Step</th><th>Symbol</th><th>Expression</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(A)</td><td>\(S_t\)</td><td>\(\mathcal{B}(X_t) = \bigl(\delta_C,\,\delta_G,\,\delta_A,\,\delta_T\bigr)^\top\)</td><td>BSDT mapping §VI</td></tr>
+        <tr><td>(B)</td><td>\(E_{\text{BS}}\)</td><td>\(S_t^\top A S_t + \sum_k e^{\beta_k S_{k,t}} + w^\top S_t\)</td><td>Unified energy §XII</td></tr>
+        <tr><td>(C)</td><td>\(g_t\)</td><td>\(\nabla_S E_{\text{BS}}(S_t) = 2AS_t + (\beta_k e^{\beta_k S_{k,t}})_k + w\)</td><td>Collapse direction §XII</td></tr>
+        <tr><td>(D)</td><td>\(\text{MFLS}_t\)</td><td>\(\|g_t\|\)</td><td>Magnitude §XII.4</td></tr>
+        <tr><td>(E)</td><td>\(u_t\)</td><td>\(g_t / \|g_t\|\)</td><td>Unit direction §XII.4</td></tr>
+        <tr><td>(F)</td><td>\(F_t\)</td><td>\(-\alpha(X_t - \mathbf{1}\mu^\top) - L_t X_t\)</td><td>GravityEngine §IV</td></tr>
+        <tr><td>(G)</td><td>\(e_t\)</td><td>\(\|\tilde X_t\,\Sigma_0^{-1/2}\|_F^2\)</td><td>BSDT energy §VI</td></tr>
+        <tr><td>(H)</td><td>\(\gamma_t^*\)</td><td>\(e_t\,/\,(e_t + \theta)\)</td><td>Adaptive damping §VIII</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── MASTER EQUATION ── -->
+    <h3>15.2 — The Master Equation</h3>
+
+    <div class="cf-collection">
+      <div class="math-block" style="margin-top:0; border-left-color: var(--ink); background: rgba(14,12,10,0.06);">
+        <div class="label" style="color: var(--ink); font-size: 0.7em;">THE BSDT MASTER OPERATOR</div>
+        \[
+        \boxed{
+        \dot{X}_t
+        \;=\;
+        \underbrace{F_t}_{\text{free dynamics}}
+        \;-\;
+        \underbrace{\frac{e_t}{e_t + \theta}}_{\gamma_t^*}
+        \;\cdot\;
+        \underbrace{\frac{\langle F_t,\; g_t\rangle}{\|g_t\|^2}}_{\text{projection scalar}}
+        \;\cdot\;
+        \underbrace{g_t}_{\nabla_S E_{\text{BS}}(\mathcal{B}(X_t))}
+        }
+        \]
+        where \(g_t = \nabla_S E_{\text{BS}}\!\bigl(\mathcal{B}(X_t)\bigr) = 2A\mathcal{B}(X_t) + \bigl(\beta_k e^{\beta_k [\mathcal{B}(X_t)]_k}\bigr)_k + w\)
+      </div>
+
+      <div class="math-block">
+        <div class="label">Equivalent compact form</div>
+        \[
+        \dot{X}_t = F_t - \gamma_t^*\,\langle F_t,\,u_t\rangle\,u_t,
+        \qquad u_t = \frac{g_t}{\|g_t\|}
+        \]
+      </div>
+
+      <div class="math-block">
+        <div class="label">Equivalent split form</div>
+        \[
+        \dot{X}_t = \underbrace{F_t - \langle F_t,\,u_t\rangle\,u_t}_{F_\perp\;\text{(always free)}}
+        \;+\;
+        \underbrace{(1-\gamma_t^*)\,\langle F_t,\,u_t\rangle\,u_t}_{(1-\gamma^*)F_\parallel\;\text{(damped)}}
+        \]
+      </div>
+    </div>
+
+    <!-- ── ANATOMY ── -->
+    <h3>15.3 — Anatomy of the Operator</h3>
+
+    <p>The master equation has exactly three factors in its second term. Each factor carries a distinct geometric meaning:</p>
+
+    <div class="math-block">
+      <div class="label">Factor 1 — adaptive friction scalar γ*</div>
+      \[
+      \gamma_t^* = \frac{e_t}{e_t+\theta} \in [0,1)
+      \]
+      Measures how far the system is from normal baseline. Zero at rest, approaching 1 at collapse. All the BSDT blind-spot machinery — Mahalanobis distance, covariance inversion, normal-period calibration — is compressed into this single scalar.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Factor 2 — projection scalar ⟨F_t, g_t⟩ / ‖g_t‖²</div>
+      \[
+      \frac{\langle F_t,\,g_t\rangle}{\|g_t\|^2} = \frac{\|F_t\|\cos\theta_t}{\|g_t\|}
+      \]
+      The signed magnitude of the force component along the collapse direction, normalised by energy gradient strength. This is the \(\cos\theta_t\) measurement from §VII, scaled by \(\|F_t\|/\|g_t\|\). Positive means force drives toward collapse; negative means force drives away.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Factor 3 — collapse direction vector g_t</div>
+      \[
+      g_t = \underbrace{2AS_t}_{\text{structural (Quadsurf)}} + \underbrace{(\beta_k e^{\beta_k S_{k,t}})_k}_{\text{threshold (Expogate)}} + \underbrace{w}_{\text{bias (Signed LR)}}
+      \]
+      Points toward the fastest-growing instability in channel space. All three MFLS forms — curvature, explosion, direction — are compressed into this single vector.
+    </div>
+
+    <!-- ── WHAT EACH COMPONENT CONTAINS ── -->
+    <h3>15.4 — What the Operator Contains</h3>
+
+    <table>
+      <thead>
+        <tr><th>System component</th><th>Where it lives in the operator</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BSDT 4-channel detection</td><td>\(\mathcal{B}(X_t)\) — argument of \(g_t\)</td></tr>
+        <tr><td>MFLS scalar</td><td>\(\|g_t\|\) — norm of the gradient</td></tr>
+        <tr><td>Quadsurf curvature</td><td>\(2AS_t\) — first term of \(g_t\)</td></tr>
+        <tr><td>Expogate threshold</td><td>\((\beta_k e^{\beta_k S_{k,t}})_k\) — second term of \(g_t\)</td></tr>
+        <tr><td>Signed LR direction</td><td>\(w\) — third term of \(g_t\)</td></tr>
+        <tr><td>Critical manifold \(\mathcal{C}_\text{man}\)</td><td>Implicitly: \(\lambda_\text{max}(\nabla^2 E_\text{BS}) > \text{MFLS}^2/e_t \Leftrightarrow \gamma^* \to 1\)</td></tr>
+        <tr><td>GravityEngine potential</td><td>\(F_t = -\alpha\tilde X_{t,\mu} - L_t X_t\) — the free dynamics term</td></tr>
+        <tr><td>Gradient alignment \(\cos\theta_t\)</td><td>\(\langle F_t, g_t\rangle / (\|F_t\|\|g_t\|)\) — the projection scalar (normalised)</td></tr>
+        <tr><td>\(\tan\theta\) collapse condition</td><td>\(\langle F_t, u_t\rangle / \|F_t\|\) embedded in the projection; collapse when this dominates</td></tr>
+        <tr><td>Ledoit-Wolf network</td><td>\(L_t = \text{diag}(K_t\mathbf{1}) - K_t\) inside \(F_t\)</td></tr>
+        <tr><td>Adaptive damping \(\gamma^*\)</td><td>Leading scalar factor — all BSDT energy in one number</td></tr>
+        <tr><td>Welfare calibration</td><td>\(\gamma^*_t \cdot \Phi_\text{pair}(X_t)\) — the controlled energy reduction summed over \(T_w\)</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── LIMITS ── -->
+    <h3>15.5 — Behaviour at the Limits</h3>
+
+    <div class="math-block">
+      <div class="label">Normal regime — far from collapse</div>
+      \[
+      e_t \approx 0 \;\Rightarrow\; \gamma_t^* \approx 0 \;\Rightarrow\; \dot X_t \approx F_t
+      \]
+      The control term vanishes. The system evolves under its own dynamics without interference. BSDT is watching but not acting.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Critical regime — at the collapse manifold</div>
+      \[
+      e_t \gg \theta \;\Rightarrow\; \gamma_t^* \approx 1 \;\Rightarrow\; \dot X_t \approx F_t - \frac{\langle F_t,g_t\rangle}{\|g_t\|^2}\,g_t = F_\perp
+      \]
+      Only the perpendicular (safe) component survives. The parallel (collapse-directed) force is fully removed. The system is confined to the tangent plane of the instability surface.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Perpendicular trajectory — safe motion at any energy level</div>
+      \[
+      \langle F_t, g_t\rangle = 0 \;\Rightarrow\; \dot X_t = F_t \;\text{ regardless of } \gamma_t^*
+      \]
+      When the natural dynamics are already perpendicular to the collapse direction, the operator does nothing. The control is genuinely minimal — it never damps what is safe.
+    </div>
+
+    <!-- ── UNIVERSAL ── -->
+    <h3>15.6 — Universal Instantiation</h3>
+
+    <div class="math-block">
+      <div class="label">The operator in four domains — same equation, four interpretations</div>
+      \[
+      \begin{array}{llll}
+      \textbf{Domain} & X_t & F_t & \mathcal{B}(X_t) \\[4pt]
+      \hline\\[-4pt]
+      \text{Systemic risk} & \text{leverage matrix} & {-\alpha\tilde X - LX} & (\delta_C,\delta_G,\delta_A,\delta_T) \\[5pt]
+      \text{Fluid dynamics} & \text{velocity field} & \mathcal{N}[X_t] & \text{modal energy channels} \\[5pt]
+      \text{Neural network} & \text{weight tensor} & {-\nabla_W \mathcal{L}} & \text{gradient anomaly channels} \\[5pt]
+      \text{Epidemiology} & (S,I,R,\ldots) & \beta SI/N,\,\ldots & \text{compartment deviation channels}
+      \end{array}
+      \]
+    </div>
+
+    <!-- ── CLOSED FORM ── -->
+    <h3>15.7 — Fully Expanded Closed Form</h3>
+
+    <p>Substituting every term back to raw data and calibrated parameters — no functions left undefined:</p>
+
+    <div class="replace-box">
+      <div class="label">Complete closed-form expansion of the master operator</div>
+      \[
+      \dot X_t = \underbrace{\bigl[-\alpha(X_t - \mathbf{1}\mu^\top) - L_t X_t\bigr]}_{F_t}
+      \;-\;
+      \underbrace{\frac{\|\tilde X_t\Sigma_0^{-1/2}\|_F^2}{\|\tilde X_t\Sigma_0^{-1/2}\|_F^2 + \theta}}_{\gamma_t^*}
+      \;\cdot\;
+      \frac{\displaystyle\Bigl\langle F_t,\;2A\mathcal{B}(X_t) + \bigl(\beta_k e^{\beta_k[\mathcal{B}(X_t)]_k}\bigr)_k + w\Bigr\rangle}
+           {\displaystyle\bigl\|2A\mathcal{B}(X_t) + \bigl(\beta_k e^{\beta_k[\mathcal{B}(X_t)]_k}\bigr)_k + w\bigr\|^2}
+      \;\cdot\;
+      \Bigl[2A\mathcal{B}(X_t) + \bigl(\beta_k e^{\beta_k[\mathcal{B}(X_t)]_k}\bigr)_k + w\Bigr]
+      \]
+      <p style="margin-top:14px;">Every symbol is either observed data (\(X_t\)), fitted once on normal-period data (\(\mu_0, \Sigma_0, A, V_k, v_0\)), or a scalar parameter (\(\alpha, \gamma, \sigma, \lambda, \theta, \beta_k, w\)). The operator is a pure algebraic function of the current state snapshot.</p>
+      <div class="io-row">
+        <span class="io-key">Inputs at time t:</span>
+        <span>\(X_t\) only — all other quantities are constants pre-computed at calibration</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XVI. LYAPUNOV STABILITY CERTIFICATE
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XVI</div>
+    <h2>Lyapunov Stability Certificate — Corrected &amp; Complete</h2>
+
+    <p>The master operator damps the collapse-directed force — but does it actually guarantee stability? A Lyapunov certificate proves that the control law causes \(E_{\text{BS}}\) to decrease along controlled trajectories. This section gives the rigorous proof, including the chain-rule step that was previously missing: \(g_t \in \mathbb{R}^4\) lives in channel space, while \(\dot X_t \in \mathbb{R}^{N\times d}\) lives in state space. The two are connected by the Jacobian of the BSDT map \(\mathcal{B}\).</p>
+
+    <h3>16.1 — The Lyapunov Candidate</h3>
+
+    <div class="math-block">
+      <div class="label">Lyapunov function</div>
+      \[
+      V(X_t) = E_{\text{BS}}\!\bigl(\mathcal{B}(X_t)\bigr) = e_t \;\geq\; 0
+      \]
+      \[
+      V(X_t) = 0 \iff \mathcal{B}(X_t) = 0 \iff X_t = \mu_0\,\mathbf{1}^\top \quad\text{(all agents at normal-period mean)}
+      \]
+      \(V\) is non-negative, zero exactly at the normal-period baseline, radially unbounded (\(V \to \infty\) as \(\|X_t\| \to \infty\)), and smooth in \(X_t\). It is a valid global Lyapunov candidate.
+    </div>
+
+    <h3>16.2 — The Chain Rule Gap (The Error)</h3>
+
+    <p>The naive computation writes \(\dot V = g_t \cdot \dot X_t\), treating \(g_t\) and \(\dot X_t\) as living in the same space. They do not. The correct chain rule is:</p>
+
+    <div class="math-block">
+      <div class="label">Correct chain rule — through the BSDT Jacobian</div>
+      \[
+      \frac{dV}{dt} = \frac{d}{dt}E_{\text{BS}}(\mathcal{B}(X_t))
+      = \nabla_S E_{\text{BS}}\big|_{S_t} \cdot \frac{d\mathcal{B}(X_t)}{dt}
+      = g_t^\top \underbrace{\frac{\partial \mathcal{B}}{\partial X}\bigg|_{X_t}}_{\mathbf{J}_t \;\in\;\mathbb{R}^{4\times Nd}} \operatorname{vec}(\dot X_t)
+      \]
+      where \(\mathbf{J}_t = \partial\mathcal{B}/\partial X\big|_{X_t} \in \mathbb{R}^{4\times Nd}\) is the Jacobian of the BSDT map and \(\operatorname{vec}(\dot X_t)\) stacks \(\dot X_t\) into a column vector. Defining the \emph{pullback gradient}:
+      \[
+      \tilde g_t = \mathbf{J}_t^\top g_t \in \mathbb{R}^{Nd}
+      \quad\Longleftrightarrow\quad
+      \tilde G_t = \operatorname{mat}(\tilde g_t) \in \mathbb{R}^{N\times d}
+      \]
+      the chain rule becomes simply:
+      \[
+      \frac{dV}{dt} = \langle \tilde G_t,\; \dot X_t\rangle_F
+      \]
+      \(\tilde G_t\) is the gradient of \(V\) \emph{in state space} — it pulls the channel-space gradient \(g_t\) back through the BSDT Jacobian into \(\mathbb{R}^{N\times d}\).
+    </div>
+
+    <h3>16.3 — The BSDT Jacobian \(\mathbf{J}_t\)</h3>
+
+    <p>Each BSDT channel is a function of \(X_t\). The four rows of \(\mathbf{J}_t\) are:</p>
+
+    <div class="math-block">
+      <div class="label">Row 1 — Camouflage channel δ_C</div>
+      \[
+      \frac{\partial \delta_C}{\partial X_t} = 2\tilde X_t\,\Sigma_0^{-1} \in \mathbb{R}^{N\times d}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Row 2 — Feature gap channel δ_G</div>
+      \[
+      \frac{\partial \delta_G}{\partial X_t} = 2\tilde X_t\,(I - V_k V_k^\top) \in \mathbb{R}^{N\times d}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Row 3 — Activity anomaly δ_A</div>
+      \[
+      \frac{\partial \delta_A}{\partial X_t} = \frac{X_t - X_{t-1}}{\|X_t - X_{t-1}\|_{\text{row}}} \odot \mathbf{1}[\|X_t - X_{t-1}\|_{\text{row}} > v_0] \in \mathbb{R}^{N\times d}
+      \]
+      (row-wise normalised velocity gradient, zero where below threshold)
+    </div>
+
+    <div class="math-block">
+      <div class="label">Row 4 — Temporal novelty δ_T</div>
+      \[
+      \frac{\partial \delta_T}{\partial X_t} = -\frac{1}{\hat p_h(X_t)}\frac{\partial \hat p_h}{\partial X_t}
+      = \frac{1}{h^2}\sum_{s}\frac{e^{-\|X_t - X_{t-s}\|^2/2h^2}}{\sum_{s'}e^{-\|X_t-X_{t-s'}\|^2/2h^2}}(X_t - X_{t-s}) \in \mathbb{R}^{N\times d}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Full pullback gradient (state-space gradient of V)</div>
+      \[
+      \tilde G_t = [g_t]_1\,\frac{\partial\delta_C}{\partial X_t} + [g_t]_2\,\frac{\partial\delta_G}{\partial X_t} + [g_t]_3\,\frac{\partial\delta_A}{\partial X_t} + [g_t]_4\,\frac{\partial\delta_T}{\partial X_t}
+      \]
+      This is a weighted sum of the four channel Jacobians, weighted by the components of the collapse direction \(g_t\). It tells you: for each agent \(i\) and each dimension \(j\), how much does a small change in \(x_t^{(i,j)}\) increase the total blind-spot energy?
+    </div>
+
+    <h3>16.4 — Time Derivative Under Control (Correct)</h3>
+
+    <div class="math-block">
+      <div class="label">dV/dt — complete derivation</div>
+      \[
+      \frac{dV}{dt} = \langle\tilde G_t,\;\dot X_t\rangle_F
+      = \left\langle\tilde G_t,\; F_t - \gamma_t^*\,\frac{\langle F_t, g_t\rangle}{\|g_t\|^2}\,g_t\right\rangle_F
+      \]
+      \[
+      = \langle\tilde G_t, F_t\rangle_F - \gamma_t^*\,\frac{\langle F_t, g_t\rangle}{\|g_t\|^2}\,\langle\tilde G_t, g_t\rangle_F
+      \]
+      Now: \(\langle\tilde G_t, g_t\rangle_F = \|\tilde G_t\|\,\|g_t\|\,\cos\psi_t\) where \(\psi_t\) is the angle between the state-space pullback \(\tilde G_t\) and the channel-space direction \(g_t\) (after embedding). In the special case where \(\delta_G = \delta_A = \delta_T = 0\) (pure Mahalanobis regime):
+      \[
+      \tilde G_t = 2[g_t]_1\,\tilde X_t\Sigma_0^{-1}, \qquad \langle\tilde G_t, g_t\rangle_F = 2[g_t]_1\,\langle\tilde X_t\Sigma_0^{-1}, g_t\rangle_F
+      \]
+      In general:
+      \[
+      \boxed{
+      \frac{dV}{dt} = \langle\tilde G_t, F_t\rangle_F\left(1 - \gamma_t^*\,\frac{\langle F_t, g_t\rangle\,\langle\tilde G_t, g_t\rangle_F}{\langle F_t, g_t\rangle\,\|g_t\|^2}\right)
+      }
+      \]
+      which simplifies to the compact form:
+      \[
+      \boxed{\frac{dV}{dt} = \langle\tilde G_t, F_t\rangle_F - \gamma_t^*\,\frac{\langle F_t, g_t\rangle}{\|g_t\|^2}\,\langle\tilde G_t, g_t\rangle_F}
+      \]
+    </div>
+
+    <h3>16.5 — When the Previous Result Was Correct</h3>
+
+    <p>The simplified result \(\dot V = \langle g_t, F_t\rangle(1-\gamma^*)\) from the earlier version holds when \(\tilde G_t \propto g_t\) — i.e. when the state-space gradient is parallel to the channel-space gradient. This is exactly the pure Mahalanobis case (\(\delta_C\) only, \(A = \Sigma_0^{-1}\)) where:</p>
+
+    <div class="math-block">
+      <div class="label">Condition for equality of the two forms</div>
+      \[
+      \tilde G_t = \frac{2}{\|g_t\|}\,g_t\,\|\tilde X_t\Sigma_0^{-1}\|_F \iff \text{pure }\delta_C\text{ regime, }g_t\text{ aligned with }\tilde G_t
+      \]
+      In the full four-channel system with Quadsurf + Expogate + Signed LR, \(\tilde G_t\) and \(g_t\) are generically \emph{not} parallel, and the full expression must be used.
+    </div>
+
+    <h3>16.6 — The Stability Theorem (Corrected)</h3>
+
+    <div class="geometry-box">
+      <h3 style="margin-top:0; color:var(--ink); font-style:normal;">Lyapunov Stability Theorem — Correct Form</h3>
+
+      <p>Define the <strong>two inner products</strong>:</p>
+      \[
+      P_t = \langle\tilde G_t,\; F_t\rangle_F \quad\text{(state-space: force against pullback gradient)}
+      \]
+      \[
+      Q_t = \langle F_t,\; g_t\rangle \cdot \langle\tilde G_t,\; g_t\rangle_F \quad\text{(cross-space: projection coupling)}
+      \]
+
+      <p style="margin-top:12px;">Then:</p>
+      \[
+      \frac{dV}{dt} = P_t - \frac{\gamma_t^*}{\|g_t\|^2}\,Q_t
+      \]
+
+      <p style="margin-top:12px;">The controlled system is <strong>Lyapunov stable</strong> (\(\dot V \leq 0\)) when:</p>
+      \[
+      \boxed{P_t \leq \frac{\gamma_t^*}{\|g_t\|^2}\,Q_t}
+      \]
+
+      <p style="margin-top:12px;"><strong>Three regimes:</strong></p>
+
+      <div class="def-grid" style="margin-top:8px;">
+        <span class="sym">P_t &lt; 0</span><span class="desc">Force opposes pullback gradient — system is self-stabilising regardless of control; \(\dot V < 0\) always</span>
+        <span class="sym">P_t &gt; 0, Q_t &gt; 0</span><span class="desc">Force drives toward instability, but control projects it away — stable iff \(\gamma^* Q_t \geq \|g_t\|^2 P_t\)</span>
+        <span class="sym">P_t &gt; 0, Q_t &lt; 0</span><span class="desc">Both uncontrolled drift and projection term are destabilising — control alone cannot stabilise; \(\dot V > 0\) always</span>
+      </div>
+
+      <div class="math-block" style="margin-top:16px;">
+        <div class="label">Critical control strength for stabilisation</div>
+        \[
+        \gamma_{\min}^* = \frac{\|g_t\|^2\,P_t}{Q_t} \quad\text{(when }P_t > 0,\,Q_t > 0\text{)}
+        \]
+        If \(\gamma_t^* > \gamma_{\min}^*\), the control is sufficient. The BSDT energy \(\gamma^* = e_t/(e_t+\theta)\) must exceed \(\gamma_{\min}^*\) — this gives a direct constraint on the intervention cost parameter \(\theta\):
+        \[
+        \theta < e_t\!\left(\frac{Q_t}{\|g_t\|^2 P_t} - 1\right)
+        \]
+        This is the critical \(\theta\) condition: if the intervention cost is too high, the control is too weak to prevent collapse.
+      </div>
+    </div>
+
+    <h3>16.7 — Stability Margin (Corrected)</h3>
+
+    <div class="math-block">
+      <div class="label">True stability margin</div>
+      \[
+      \mathcal{M}_t = \frac{\gamma_t^* Q_t/\|g_t\|^2 - P_t}{\|P_t\| + \|Q_t\|/\|g_t\|^2}
+      \]
+      \(\mathcal{M}_t > 0\): controlled system is stable. \(\mathcal{M}_t < 0\): control is insufficient. \(\mathcal{M}_t = 0\): the boundary — the control is exactly at the stability threshold. This is the correct replacement for \(\mathcal{M}_t = -\cos\theta_t\), which only holds in the pure Mahalanobis single-channel case.
+    </div>
+
+    <div class="math-block">
+      <div class="label">MFLS decay rate (corrected)</div>
+      \[
+      \frac{d\,\text{MFLS}_t}{dt} = -\frac{1}{\|g_t\|}\left(P_t - \frac{\gamma_t^*}{\|g_t\|^2}\,Q_t\right)
+      = \frac{\mathcal{M}_t\,(\|P_t\| + \|Q_t\|/\|g_t\|^2)}{\|g_t\|}
+      \]
+      The MFLS decays when \(\mathcal{M}_t > 0\) and grows when \(\mathcal{M}_t < 0\). The rate of decay/growth is proportional to the stability margin and inversely proportional to the current MFLS magnitude — large MFLS slows its own decay rate.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XVII. EARLY WARNING COMPOSITE SCORE
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XVII</div>
+    <h2>The Early Warning Composite Score</h2>
+
+    <p>The system produces five independent collapse signals: MFLS, \(\lambda_{\max}(\nabla^2\Phi)\), \(\rho(W)\), \(\gamma^*\), and \(\cos\theta_t\). Each captures a different facet — intensity, curvature, network coupling, energy saturation, and angular alignment. The composite early warning score fuses all five into a single number with a natural \([0,1]\) scale and a proven threshold.</p>
+
+    <h3>17.1 — Normalised Signal Components</h3>
+
+    <div class="math-block">
+      <div class="label">Five normalised collapse signals</div>
+      \[
+      \begin{array}{lll}
+      \xi_1 &= \gamma_t^* = e_t/(e_t+\theta) & \text{energy saturation} \in [0,1) \\[5pt]
+      \xi_2 &= \min\!\bigl(\lambda_{\max}(\nabla^2\Phi_t),\,1\bigr) & \text{spectral criticality} \in [0,1] \\[5pt]
+      \xi_3 &= \bigl(\tilde\rho(W_t) - 1\bigr)/(N-1) = \bar W_{\text{off},t} & \text{network synchrony} \in [0,1] \\[5pt]
+      \xi_4 &= \max\!\bigl(0,\,\cos\theta_t\bigr) & \text{alignment (clamped positive)} \in [0,1] \\[5pt]
+      \xi_5 &= 1 - 1/(1 + \text{MFLS}_t) & \text{MFLS saturation} \in [0,1)
+      \end{array}
+      \]
+    </div>
+
+    <h3>17.2 — The Early Warning Score</h3>
+
+    <div class="math-block">
+      <div class="label">Composite EWS — weighted geometric mean</div>
+      \[
+      \text{EWS}_t = \prod_{k=1}^{5} \xi_k^{w_k}, \qquad \sum_k w_k = 1,\quad w_k > 0
+      \]
+      The geometric mean is used rather than arithmetic because the signals are multiplicative risk factors: if any one signal is zero, the system cannot be at the edge of collapse.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Equal-weight closed form</div>
+      \[
+      \text{EWS}_t\big|_{w_k = 1/5} =
+      \left[\gamma_t^* \cdot \min(\lambda_{\max}^{\Phi},1) \cdot \bar W_{\text{off}} \cdot \max(0,\cos\theta_t) \cdot \frac{\text{MFLS}_t}{1+\text{MFLS}_t}\right]^{1/5}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Collapse threshold</div>
+      \[
+      \text{Collapse alert} \iff \text{EWS}_t > \text{EWS}^* = \prod_k \xi_k^{*(w_k)}
+      \]
+      where \(\xi_k^*\) are the threshold values of each signal at the critical manifold. At \(\mathcal{C}_{\text{man}}\): \(\lambda_{\max}^{\Phi} = 1\), \(\gamma^* = e^*/(e^*+\theta)\), giving \(\text{EWS}^*\) as a computable calibration constant from normal-period data.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XVIII. COLLAPSE TIME PREDICTION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XVIII</div>
+    <h2>Collapse Time Prediction — Analytical Escape Time</h2>
+
+    <p>Given the current state \(X_t\) and velocity \(\dot X_t\), how many steps until the system crosses the critical manifold? This is the escape time problem — solved analytically using the energy gradient and the current rate of change.</p>
+
+    <h3>18.1 — Linear Extrapolation (First Order)</h3>
+
+    <div class="math-block">
+      <div class="label">First-order escape time estimate</div>
+      \[
+      \tau_{\text{lin}} = \frac{e^* - e_t}{\dot e_t}, \qquad \dot e_t = \frac{dV}{dt} = \langle g_t, F_t\rangle(1-\gamma_t^*)
+      \]
+      where \(e^*\) is the energy level at the critical manifold (calibrated from normal-period data as the \(e_t\) value corresponding to \(\lambda_{\max}^{\Phi} = 1\)). When \(\dot e_t > 0\) (energy growing), \(\tau_{\text{lin}}\) gives the time to threshold.
+    </div>
+
+    <h3>18.2 — Curvature-Corrected Estimate (Second Order)</h3>
+
+    <div class="math-block">
+      <div class="label">Second-order escape time — parabolic correction</div>
+      \[
+      \ddot e_t = g_t^\top \nabla^2_S E_{\text{BS}}\, g_t \cdot \|\dot X_t\|^2 + \langle g_t, \ddot X_t\rangle
+      \]
+      \[
+      \tau_{\text{quad}} = \frac{-\dot e_t + \sqrt{\dot e_t^2 + 2\ddot e_t(e^* - e_t)}}{\ddot e_t}
+      \]
+      This accounts for the acceleration of energy growth — critical near threshold where the Expogate term causes super-exponential acceleration.
+    </div>
+
+    <h3>18.3 — The Collapse Horizon</h3>
+
+    <div class="math-block">
+      <div class="label">Collapse horizon — time within which intervention must occur</div>
+      \[
+      \tau_{\text{safe}} = \tau_{\text{lin}} - \frac{1}{\alpha + \lambda_{\max}(L_t)}
+      \]
+      The subtracted term is the characteristic relaxation time of the GravityEngine. If \(\tau_{\text{safe}} < 0\), the system is already past the point where unassisted stabilisation is possible — the control must be engaged immediately. If \(\tau_{\text{safe}} > 0\), there is a window for intervention.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XIX. STOCHASTIC EXTENSION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XIX</div>
+    <h2>Stochastic Extension — Noise, Itô Correction, Fokker-Planck</h2>
+
+    <p>The deterministic system is an idealisation. Real financial systems, physical systems, and biological systems are driven by noise. Adding a diffusion term \(\sigma_n\,dW_t\) (Wiener process) fundamentally changes the collapse geometry — the critical manifold acquires a stochastic halo, and the energy itself has an Itô correction.</p>
+
+    <h3>19.1 — Stochastic Dynamics</h3>
+
+    <div class="math-block">
+      <div class="label">Stochastic controlled SDE</div>
+      \[
+      dX_t = \underbrace{\bigl(F_t - \gamma_t^*\langle F_t,u_t\rangle u_t\bigr)}_{\text{controlled drift}}\,dt + \sigma_n\,dW_t
+      \]
+      where \(W_t\) is an \(N\times d\) matrix Wiener process and \(\sigma_n > 0\) is the noise amplitude.
+    </div>
+
+    <h3>19.2 — Itô Correction to Energy</h3>
+
+    <div class="math-block">
+      <div class="label">Stochastic energy dynamics (Itô's lemma)</div>
+      \[
+      de_t = \underbrace{\langle g_t, F_t\rangle(1-\gamma_t^^*)\,dt}_{\text{deterministic drift}} + \underbrace{\frac{\sigma_n^2}{2}\operatorname{tr}(\nabla^2_X E_{\text{BS}})\,dt}_{\text{Itô correction}} + \underbrace{\sigma_n\,\langle g_t,\,dW_t\rangle}_{\text{noise term}}
+      \]
+      The Itô correction \(\frac{\sigma_n^2}{2}\operatorname{tr}(\nabla^2_X E_{\text{BS}})\) is always positive — noise systematically \emph{inflates} energy on average, pushing the system toward the critical manifold even when the deterministic drift is stabilising.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Noise-adjusted stability condition</div>
+      \[
+      \text{Stable in expectation} \iff \langle g_t, F_t\rangle(1-\gamma_t^*) < -\frac{\sigma_n^2}{2}\operatorname{tr}(\nabla^2_X E_{\text{BS}})
+      \]
+      The deterministic stabilising force must overcome the noise injection. The Itô correction \(\frac{\sigma_n^2}{2}\operatorname{tr}(2A + \operatorname{diag}(\beta_k^2 e^{\beta_k S_k})) = \sigma_n^2\bigl(\operatorname{tr}(A) + \sum_k \beta_k^2 e^{\beta_k S_k}/2\bigr)\) grows near threshold — making collapse more likely under noise exactly when it is most dangerous.
+    </div>
+
+    <h3>19.3 — Fokker-Planck Equation</h3>
+
+    <div class="math-block">
+      <div class="label">Probability density evolution over the energy landscape</div>
+      \[
+      \frac{\partial p}{\partial t}(e,t) = -\frac{\partial}{\partial e}\!\Bigl[\mu_e(e)\,p\Bigr] + \frac{\sigma_n^2}{2}\frac{\partial^2 p}{\partial e^2}
+      \]
+      \[
+      \mu_e(e) = \langle g, F\rangle(1-\gamma^*(e)) + \frac{\sigma_n^2}{2}\operatorname{tr}(\nabla^2 E_{\text{BS}})
+      \]
+      The stationary distribution (if it exists) satisfies:
+      \[
+      p^*(e) \propto \exp\!\left(-\frac{2}{\sigma_n^2}\int^e \mu_e(e')\,de'\right)
+      \]
+      This is the probability density of the energy level — the distribution of where the system spends its time. A heavy tail toward high \(e\) signals elevated systemic risk even in the "normal" regime.
+    </div>
+
+    <h3>19.4 — Stochastic Critical Manifold</h3>
+
+    <div class="math-block">
+      <div class="label">Probability of crossing C_man within time τ</div>
+      \[
+      P(\tau_{\text{cross}} < \tau) \approx 1 - \exp\!\left(-\frac{\tau}{\tau_{\text{Kramers}}}\right)
+      \]
+      \[
+      \tau_{\text{Kramers}} = \frac{2\pi}{\sqrt{|\mu_e'(e_t)|\cdot|\mu_e'(e^*)|}}\cdot\exp\!\left(\frac{2(e^* - e_t)}{\sigma_n^2}\right)
+      \]
+      Kramers' escape time formula: the mean time to cross the critical manifold grows exponentially with the energy gap \((e^* - e_t)/\sigma_n^2\). Noise reduces this time by shrinking the effective barrier. Monitoring this ratio gives a probabilistic collapse horizon.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XX. INVERSE PROBLEM — PARAMETER IDENTIFICATION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XX</div>
+    <h2>The Inverse Problem — Parameter Identification from Collapse</h2>
+
+    <p>The forward problem is: given parameters, predict collapse. The inverse problem is: given an observed collapse trajectory, what parameters caused it? This is the identification problem — it tells you not just that collapse happened, but \emph{which} structural features of the system were responsible.</p>
+
+    <h3>20.1 — The Observable</h3>
+
+    <div class="math-block">
+      <div class="label">Observed trajectory residual</div>
+      \[
+      R_t(\theta_{\text{param}}) = \dot X_t^{\text{obs}} - F_t(\theta_{\text{param}}) + \gamma_t^*\langle F_t,u_t\rangle u_t
+      \]
+      where \(\theta_{\text{param}} = (\alpha, \gamma, \sigma, \lambda, A, \beta, w)\) is the full parameter vector. At the true parameters, \(R_t = \sigma_n\,\dot W_t\) (pure noise).
+    </div>
+
+    <h3>20.2 — Least-Squares Identification</h3>
+
+    <div class="math-block">
+      <div class="label">Parameter identification objective</div>
+      \[
+      \hat\theta = \arg\min_\theta \sum_{t=1}^T \|R_t(\theta)\|_F^2
+      = \arg\min_\theta \sum_t \|\dot X_t - F_t(\theta) + \gamma_t^*(\theta)\langle F_t(\theta), u_t(\theta)\rangle u_t(\theta)\|_F^2
+      \]
+      The gradient with respect to each parameter group:
+      \[
+      \frac{\partial \mathcal{L}}{\partial \alpha} = -2\sum_t \langle R_t,\; \tilde X_{t,\mu}\rangle \quad\text{(radial spring identification)}
+      \]
+      \[
+      \frac{\partial \mathcal{L}}{\partial A} = -4\sum_t \langle R_t,\; S_t S_t^\top\rangle \quad\text{(Quadsurf coupling identification)}
+      \]
+    </div>
+
+    <h3>20.3 — Collapse Attribution</h3>
+
+    <div class="math-block">
+      <div class="label">Attribution score — which parameter contributed most to collapse</div>
+      \[
+      \mathcal{A}_k = \left\|\frac{\partial \dot X_t}{\partial \theta_k}\bigg|_{\hat\theta}\right\|_F \cdot |\hat\theta_k|
+      \]
+      Normalised attribution:
+      \[
+      \bar{\mathcal{A}}_k = \frac{\mathcal{A}_k}{\sum_j \mathcal{A}_j} \in [0,1], \qquad \sum_k \bar{\mathcal{A}}_k = 1
+      \]
+      This is a sensitivity-weighted parameter importance score — the first formal answer to "what broke first?" derived directly from the master operator.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXI. AGENT SENSITIVITY — WHO BREAKS THE SYSTEM
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXI</div>
+    <h2>Agent Sensitivity — Who Pushes the System Across \(\mathcal{C}_{\text{man}}\)</h2>
+
+    <p>Not all agents are equally dangerous. Some agents, if perturbed, cause disproportionate increase in \(\lambda_{\max}(\nabla^2\Phi)\). The sensitivity of the spectral threshold to each agent's state identifies the systemically important institutions — those whose individual deviation most rapidly destabilises the whole.</p>
+
+    <h3>21.1 — Spectral Sensitivity</h3>
+
+    <div class="math-block">
+      <div class="label">Gradient of λ_max with respect to agent i's state</div>
+      By the matrix perturbation identity (Hadamard first variation):
+      \[
+      \frac{\partial \lambda_{\max}(\nabla^2\Phi)}{\partial x_i} = v_1^\top \frac{\partial \nabla^2\Phi}{\partial x_i}\, v_1
+      \]
+      where \(v_1\) is the principal eigenvector of \(\nabla^2\Phi\). The \(d\)-vector above is the \emph{systemic importance vector} of agent \(i\) — the direction in which agent \(i\) must move to most rapidly push \(\lambda_{\max}\) above 1.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Scalar systemic importance score per agent</div>
+      \[
+      \mathcal{S}_i = \left\|\frac{\partial \lambda_{\max}(\nabla^2\Phi)}{\partial x_i}\right\| = \left\|v_1^\top \frac{\partial \nabla^2\Phi}{\partial x_i}\, v_1\right\|
+      \]
+      \[
+      \text{Normalised: } \bar{\mathcal{S}}_i = \frac{\mathcal{S}_i}{\sum_j \mathcal{S}_j}
+      \]
+      The agent with \(\bar{\mathcal{S}}_i = \max_j \bar{\mathcal{S}}_j\) is the \emph{critical institution} — a Basel III macro-prudential target derived analytically from the system geometry.
+    </div>
+
+    <h3>21.2 — Network Amplification of Systemic Importance</h3>
+
+    <div class="math-block">
+      <div class="label">Amplification through the Laplacian network</div>
+      \[
+      \frac{\partial F_t}{\partial x_i} = -\alpha\,I_d - \frac{\partial L_t}{\partial x_i}\,X_t - L_t\,e_i e_i^\top
+      \]
+      where \(e_i\) is the \(i\)-th standard basis vector in \(\mathbb{R}^N\). The term \(\partial L_t/\partial x_i\) captures how agent \(i\)'s movement changes the force network topology — it is the feedback loop between individual state and collective coupling.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXII. RECOVERY DYNAMICS & HYSTERESIS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXII</div>
+    <h2>Recovery Dynamics &amp; Hysteresis</h2>
+
+    <p>Collapse and recovery are not time-reversals of each other. The erf-log potential has multiple local minima — once the system falls into a crisis basin, the return path is geometrically different from the collapse path. This asymmetry is hysteresis, and it is encoded exactly in the energy landscape.</p>
+
+    <h3>22.1 — Multiple Equilibria</h3>
+
+    <div class="math-block">
+      <div class="label">Equilibrium condition — zeros of the force field</div>
+      \[
+      F(X^*) = 0 \iff -\alpha(X^* - \mathbf{1}\mu^\top) = L_{X^*}\,X^*
+      \]
+      This is a nonlinear fixed-point equation. The number of solutions depends on the pairwise coupling strength \(\gamma\) relative to the radial spring \(\alpha\). There is always a trivial solution at \(X^* = \mu\mathbf{1}^\top\); additional crisis equilibria exist when:
+      \[
+      \lambda_{\max}(L_{X^*}) > \alpha
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Critical coupling for multiple equilibria</div>
+      \[
+      \gamma_{\text{crit}} = \frac{\alpha\,\sigma\sqrt{\pi}}{2} \cdot \frac{1}{\max_i\sum_{j\neq i} e^{-D_{ij}^{*2}/\sigma^2}}
+      \]
+      For \(\gamma > \gamma_{\text{crit}}\), crisis equilibria exist. The system can be trapped in a collapsed state even after the original shock is removed.
+    </div>
+
+    <h3>22.2 — Hysteresis Loop</h3>
+
+    <div class="math-block">
+      <div class="label">Energy barrier for collapse vs. recovery</div>
+      \[
+      \Delta\Phi_{\text{collapse}} = \Phi(X_{\text{saddle}}) - \Phi(X_{\text{normal}})
+      \]
+      \[
+      \Delta\Phi_{\text{recovery}} = \Phi(X_{\text{saddle}}) - \Phi(X_{\text{crisis}})
+      \]
+      Since \(\Phi(X_{\text{normal}}) < \Phi(X_{\text{crisis}})\) for deep crises, the recovery barrier is \emph{smaller} — the system recovers more easily than it collapsed. But the crisis state is a different point in phase space, so the recovery path follows a different trajectory.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Recovery control — the reverse master operator</div>
+      \[
+      \dot X_t^{\text{recovery}} = F_t + \gamma_t^{\text{rec}}\,\langle F_t, u_t^{\text{rec}}\rangle\,u_t^{\text{rec}}
+      \]
+      where \(u_t^{\text{rec}} = -u_t\) (point \emph{toward} the normal basin rather than away from the crisis direction). The recovery operator is the sign-reversed control law — it actively accelerates motion toward \(\mu_0\) rather than merely damping motion away from it.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXIII. INFORMATION-THEORETIC INTERPRETATION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXIII</div>
+    <h2>Information-Theoretic Interpretation — BSDT as Divergence</h2>
+
+    <p>The BSDT energy \(E_{\text{BS}}\) is not merely an ad-hoc distance measure. Under a Gaussian normal-period model, it is exactly a KL divergence — giving the blind-spot energy a rigorous information-theoretic foundation, a statistical interpretation, and a natural calibration procedure with confidence intervals.</p>
+
+    <h3>23.1 — The Normal-Period Model</h3>
+
+    <div class="math-block">
+      <div class="label">Gaussian baseline — normal period distribution</div>
+      \[
+      p_0(x) = \mathcal{N}(\mu_0,\, \Sigma_0) \propto \exp\!\left(-\tfrac{1}{2}(x-\mu_0)^\top\Sigma_0^{-1}(x-\mu_0)\right)
+      \]
+    </div>
+
+    <h3>23.2 — BSDT Energy as KL Divergence</h3>
+
+    <div class="math-block">
+      <div class="label">Mahalanobis energy = log-likelihood ratio = KL divergence component</div>
+      \[
+      \delta_C^{(i)} = (x_i - \mu_0)^\top\Sigma_0^{-1}(x_i-\mu_0) = -2\log\frac{p_0(x_i)}{p_0(\mu_0)} = \chi^2_d
+      \]
+      Under the null (normal period), \(\delta_C^{(i)} \sim \chi^2_d\) — a chi-squared distribution with \(d\) degrees of freedom. The total energy:
+      \[
+      e_t = \sum_i \delta_C^{(i)} \sim \chi^2_{Nd} \quad\text{under } H_0\text{ (normal regime)}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">KL divergence from empirical to normal-period distribution</div>
+      \[
+      D_{\text{KL}}\!\bigl(\hat p_t \,\|\, p_0\bigr) = \frac{1}{N}\sum_i (x_t^{(i)}-\mu_0)^\top\Sigma_0^{-1}(x_t^{(i)}-\mu_0) + \text{const} = \frac{e_t}{N} + \text{const}
+      \]
+      \(E_{\text{BS}}\) is proportional to the KL divergence between the current empirical distribution and the normal-period distribution. A larger \(e_t\) means more information-theoretic "surprise" — the system has moved into a region that was improbable during normal times.
+    </div>
+
+    <h3>23.3 — Statistical Threshold from Chi-Squared</h3>
+
+    <div class="math-block">
+      <div class="label">Calibrated collapse threshold with confidence level</div>
+      \[
+      e^*(\alpha_{\text{conf}}) = \chi^2_{Nd,\,1-\alpha_{\text{conf}}}
+      \]
+      The critical energy level is the \((1-\alpha_{\text{conf}})\) quantile of the chi-squared distribution. For \(\alpha_{\text{conf}} = 0.01\) (1\% false-positive rate with \(N=10\), \(d=4\)):
+      \[
+      e^*(0.01) = \chi^2_{40,\,0.99} \approx 63.7
+      \]
+      This replaces the heuristic threshold \(\lambda_{\max} > 1\) with a statistically principled one: the critical manifold is the \((1-\alpha)\) confidence ellipsoid of the normal-period distribution.
+    </div>
+
+    <h3>23.4 — MFLS as Fisher Information</h3>
+
+    <div class="math-block">
+      <div class="label">MFLS squared = trace of Fisher information matrix</div>
+      \[
+      \text{MFLS}^2 = \|\nabla_X E_{\text{BS}}\|_F^2 = 4\|\tilde X_t\Sigma_0^{-1}\|_F^2
+      = 4\operatorname{tr}\!\bigl(\Sigma_0^{-1}\tilde X_t^\top \tilde X_t\,\Sigma_0^{-1}\bigr)
+      \]
+      This is \(4\) times the trace of the sample Fisher information matrix at the current state relative to the Gaussian normal-period model. High MFLS means the current state is in a region of high curvature of the log-likelihood — the system is far from where the normal-period model has mass, and small perturbations cause large changes in log-probability.
+    </div>
+
+    <h3>23.5 — Unified Energy as Composite Divergence</h3>
+
+    <div class="math-block">
+      <div class="label">E_BS as sum of divergence measures</div>
+      \[
+      E_{\text{BS}}(S) = \underbrace{S^\top A S}_{\text{Mahalanobis (KL, Gaussian)}} + \underbrace{\sum_k e^{\beta_k S_k} - 1 - \beta_k S_k}_{\text{Bregman divergence (exponential family)}} + \underbrace{w^\top S}_{\text{linear tilt (exponential family reweighting)}}
+      \]
+      The Expogate term \(\sum_k e^{\beta_k S_k}\) minus its Taylor expansion \(1 + \beta_k S_k\) is exactly the Bregman divergence generated by the exponential function — the excess over the linear approximation. The Signed LR term is an exponential family tilting operator that shifts the reference distribution toward higher-risk states.
+
+      Together, \(E_{\text{BS}}\) is a composite divergence measuring: how far \(X_t\) is from the normal-period mean (Mahalanobis), how nonlinear that deviation is (Bregman), and in which direction it is biased (tilt).
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXIV. CORRECTED DEFINITIONS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXIV</div>
+    <h2>Corrected Definitions — What Changed and Why</h2>
+
+    <p>Taking the per-channel contributions seriously forces six definitions established in earlier sections to be revised. Each revision is a strict generalisation — the original holds as a special case in the pure \(\delta_C\) single-channel regime. In the full four-channel system the following are the correct forms.</p>
+
+    <h3>24.1 — The Pullback Gradient \(\tilde{G}_t\) — Correct Form</h3>
+
+    <div class="math-block">
+      <div class="label">Original (§XVI, opaque matrix form)</div>
+      \[
+      \tilde{G}_t = \mathbf{J}_t^\top g_t
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Correct form — per-channel weighted superposition</div>
+      \[
+      \boxed{\tilde{G}_t = \sum_{k \in \{C,G,A,T\}} [g_t]_k\;\frac{\partial \delta_k}{\partial X_t} \;\in\; \mathbb{R}^{N\times d}}
+      \]
+      \[
+      = [g_t]_C \cdot 2\tilde{X}_t\Sigma_0^{-1}
+      + [g_t]_G \cdot 2\tilde{X}_t(I - V_kV_k^\top)
+      + [g_t]_A \cdot \frac{X_t - X_{t-1}}{\|X_t-X_{t-1}\|_{\text{row}}} \odot \mathbf{1}_{v>v_0}
+      + [g_t]_T \cdot \frac{1}{h^2}\sum_s w_s(X_t - X_{t-s})
+      \]
+      \(\tilde{G}_t\) is a weighted mixture of four geometrically distinct fields: ellipsoidal (Mahalanobis), subspace-residual (PCA gap), velocity-aligned (activity), and history-divergent (temporal). Its shape changes as the channel weights \([g_t]_k\) shift with the state. It is not a single geometric object — it is a composite field whose topology is a new open problem.
+      <div class="io-row">
+        <span class="io-key">Old valid when:</span>
+        <span>Pure \(\delta_C\) regime, \([g_t]_G = [g_t]_A = [g_t]_T = 0\)</span>
+      </div>
+    </div>
+
+    <h3>24.2 — Two Collapse Directions, Not One</h3>
+
+    <div class="math-block">
+      <div class="label">Original (§XII) — one unit direction</div>
+      \[
+      u_t = \frac{g_t}{\|g_t\|} \in \mathbb{R}^4
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Correct — two distinct collapse directions</div>
+      \[
+      u_t^{\text{channel}} = \frac{g_t}{\|g_t\|} \in \mathbb{R}^4 \qquad \text{(channel space — MFLS, EWS, attribution)}
+      \]
+      \[
+      u_t^{\text{state}} = \frac{\tilde{G}_t}{\|\tilde{G}_t\|_F} \in \mathbb{R}^{N\times d} \qquad \text{(state space — Lyapunov, force decomposition)}
+      \]
+      The master operator uses \(u_t^{\text{channel}}\) in its projection. The Lyapunov certificate requires \(u_t^{\text{state}}\). They are equal only when \(\psi_t = 0\).
+      The angle between them:
+      \[
+      \cos\psi_t = \frac{\langle\tilde{G}_t,\,g_t\rangle_F}{\|\tilde{G}_t\|_F\,\|g_t\|}
+      \]
+      \(\psi_t\) is the \textbf{sixth diagnostic signal} — the misalignment between abstract risk (channel space) and physical dynamics (state space).
+    </div>
+
+    <h3>24.3 — \(\cos\theta_t\) Splits into Two</h3>
+
+    <div class="math-block">
+      <div class="label">Original (§VII) — single alignment scalar</div>
+      \[
+      \cos\theta_t = \frac{\langle \nabla_X E_{\text{BS}}, F_t\rangle}{\|\nabla_X E_{\text{BS}}\|\,\|F_t\|}
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Correct — two alignment scalars with distinct roles</div>
+      \[
+      \cos\theta_t^{\text{channel}} = \frac{\langle g_t, F_t\rangle}{\|g_t\|\,\|F_t\|}
+      \qquad\text{(early warning — valid in all regimes)}
+      \]
+      \[
+      \cos\theta_t^{\text{state}} = \frac{\langle\tilde{G}_t, F_t\rangle_F}{\|\tilde{G}_t\|_F\,\|F_t\|_F} = \frac{P_t}{\|\tilde{G}_t\|_F\,\|F_t\|_F}
+      \qquad\text{(stability certificate — required for Lyapunov)}
+      \]
+      Relationship:
+      \[
+      \cos\theta_t^{\text{state}} = \cos\theta_t^{\text{channel}}\cos\psi_t + \sin\theta_t^{\text{channel}}\sin\psi_t\cos\phi_t
+      \]
+      where \(\phi_t\) is the azimuthal angle in the plane spanned by \(u_t^{\text{channel}}\) and \(u_t^{\text{state}}\). The original scalar is \(\cos\theta_t^{\text{channel}}\) — a valid signal but not a stability certificate.
+    </div>
+
+    <h3>24.4 — MFLS Splits into Two</h3>
+
+    <div class="replace-box">
+      <div class="label">Two MFLS quantities with a new diagnostic ratio</div>
+      \[
+      \text{MFLS}^{\text{channel}}_t = \|g_t\| = \|2AS_t + (\beta_k e^{\beta_k S_{k,t}})_k + w\|
+      \qquad\text{(abstract intensity)}
+      \]
+      \[
+      \text{MFLS}^{\text{state}}_t = \|\tilde{G}_t\|_F = \left\|\sum_k [g_t]_k\,\partial_X\delta_k\right\|_F
+      \qquad\text{(physical intensity)}
+      \]
+      \[
+      \rho_{\text{MFLS}} = \frac{\text{MFLS}^{\text{state}}}{\text{MFLS}^{\text{channel}}} \qquad\text{(state amplification factor)}
+      \]
+      \(\rho_{\text{MFLS}} > 1\): physical system amplifies the abstract risk signal — agents are geometrically configured to translate channel risk into force.
+      \(\rho_{\text{MFLS}} < 1\): risk is geometrically contained — channel scores are elevated but physical dynamics are not aligned with collapse.
+      This resolves historical false alarms across every domain: high channel MFLS with low \(\rho_{\text{MFLS}}\) is a contained risk, not an imminent collapse.
+    </div>
+
+    <h3>24.5 — Stability Margin Corrected</h3>
+
+    <div class="replace-box">
+      <div class="label">Old (§XVI.4, wrong): \(\mathcal{M}_t = -\cos\theta_t\) — Correct form</div>
+      \[
+      P_t = \langle\tilde{G}_t, F_t\rangle_F = \sum_k [g_t]_k\langle\partial_X\delta_k, F_t\rangle_F
+      \]
+      \[
+      R_t = \sum_k [g_t]_k\langle\partial_X\delta_k, g_t\rangle_F \qquad\text{(control coupling sum)}
+      \]
+      \[
+      Q_t = \langle F_t, g_t\rangle \cdot R_t
+      \]
+      \[
+      \boxed{\mathcal{M}_t = \frac{\gamma_t^* Q_t/\|g_t\|^2 - P_t}{|P_t| + |Q_t|/\|g_t\|^2}}
+      \]
+      \(\mathcal{M}_t > 0\): controlled system is stable. \(\mathcal{M}_t < 0\): control is insufficient. \(\mathcal{M}_t = 0\): exact stability boundary.
+      The old form \(-\cos\theta_t\) is the limit when \(\tilde{G}_t \propto g_t\) (pure \(\delta_C\)).
+    </div>
+
+    <h3>24.6 — \(\tan\theta\) Collapse Condition Corrected</h3>
+
+    <div class="replace-box">
+      <div class="label">True collapse condition uses state-space direction</div>
+      \[
+      F_\parallel^{\text{true}} = \langle F_t, u_t^{\text{state}}\rangle_F \cdot u_t^{\text{state}}, \qquad
+      F_\perp^{\text{true}} = F_t - F_\parallel^{\text{true}}
+      \]
+      \[
+      \tan\theta^{\text{true}} = \frac{\|F_\perp^{\text{true}}\|_F}{\|F_\parallel^{\text{true}}\|_F}
+      \]
+      The original \(\tan\theta\) using \(u_t^{\text{channel}}\) is a valid early-warning proxy. The exact Lyapunov collapse condition \(\dot V = 0\) corresponds to \(\tan\theta^{\text{true}} = \tan\theta^*\), not the channel-space version. They agree when \(\psi_t = 0\).
+    </div>
+
+    <h3>24.7 — Summary Table</h3>
+
+    <table>
+      <thead>
+        <tr><th>Definition</th><th>Old form</th><th>Correct form</th><th>Equal when</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>\(\tilde{G}_t\)</td><td>\(\mathbf{J}_t^\top g_t\)</td><td>\(\sum_k [g_t]_k\partial_X\delta_k\)</td><td>Always equal; new form is interpretable</td></tr>
+        <tr><td>\(u_t\)</td><td>One direction \(\mathbb{R}^4\)</td><td>Two: \(u^{\text{ch}}\) and \(u^{\text{st}}\)</td><td>\(\psi_t = 0\)</td></tr>
+        <tr><td>\(\cos\theta_t\)</td><td>Single scalar</td><td>Two: channel and state</td><td>\(\psi_t = 0\)</td></tr>
+        <tr><td>MFLS</td><td>\(\|g_t\|\)</td><td>Two: \(\|g_t\|\) and \(\|\tilde{G}_t\|_F\) with ratio \(\rho\)</td><td>\(\rho = 1\)</td></tr>
+        <tr><td>\(\mathcal{M}_t\)</td><td>\(-\cos\theta_t\)</td><td>\((\gamma^*Q_t/\|g_t\|^2 - P_t)\)/normaliser</td><td>Pure \(\delta_C\) regime</td></tr>
+        <tr><td>\(\tan\theta\) collapse</td><td>Uses \(u^{\text{channel}}\)</td><td>Uses \(u^{\text{state}}\) for \(\dot V = 0\)</td><td>\(\psi_t = 0\)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXV. PER-CHANNEL LYAPUNOV CONTRIBUTIONS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXV</div>
+    <h2>Per-Channel Lyapunov Contributions</h2>
+
+    <p>Each BSDT channel is not merely a detector — it is an active participant in the stability budget at every timestep. The time derivative of the Lyapunov function decomposes exactly into four signed channel contributions, each measurable independently.</p>
+
+    <h3>25.1 — The Decomposition</h3>
+
+    <div class="math-block">
+      <div class="label">Per-channel time derivative of V</div>
+      \[
+      \frac{dV}{dt} = \sum_{k \in \{C,G,A,T\}} \dot V_k
+      \]
+      \[
+      \dot V_k = [g_t]_k \left\langle \frac{\partial\delta_k}{\partial X_t},\; \dot X_t \right\rangle_F
+      = [g_t]_k \left[\langle\partial_X\delta_k, F_t\rangle_F - \frac{\gamma_t^*\langle F_t,g_t\rangle}{\|g_t\|^2}\langle\partial_X\delta_k, g_t\rangle_F\right]
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Split into uncontrolled drift and control contribution per channel</div>
+      \[
+      \dot V_k^{\text{drift}} = [g_t]_k\,\langle\partial_X\delta_k, F_t\rangle_F
+      \]
+      \[
+      \dot V_k^{\text{control}} = -[g_t]_k\,\frac{\gamma_t^*\langle F_t, g_t\rangle}{\|g_t\|^2}\,\langle\partial_X\delta_k, g_t\rangle_F
+      \]
+      \[
+      \dot V_k = \dot V_k^{\text{drift}} + \dot V_k^{\text{control}}
+      \]
+    </div>
+
+    <h3>25.2 — Interpretation of Each Channel</h3>
+
+    <table>
+      <thead>
+        <tr><th>Channel</th><th>\(\dot V_k > 0\) means</th><th>\(\dot V_k < 0\) means</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>\(\dot V_C\) Camouflage</td>
+          <td>Agents moving away from normal mean in Mahalanobis metric — ellipsoidal drift toward collapse</td>
+          <td>Mean-reverting motion — Mahalanobis distance shrinking</td>
+        </tr>
+        <tr>
+          <td>\(\dot V_G\) Feature Gap</td>
+          <td>Motion into PCA residual directions — entering the subspace normal-period covariance barely covers</td>
+          <td>Motion back toward principal subspace — returning to historically observed configurations</td>
+        </tr>
+        <tr>
+          <td>\(\dot V_A\) Activity</td>
+          <td>Excess velocity compounding — agents already moving too fast, accelerating further</td>
+          <td>Excess velocity decaying — anomalous speed returning to baseline</td>
+        </tr>
+        <tr>
+          <td>\(\dot V_T\) Temporal</td>
+          <td>System escaping its own recent history — temporal self-surprise compounding</td>
+          <td>System returning to familiar trajectory — novelty score declining</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>25.3 — Channel Stability Attribution</h3>
+
+    <div class="math-block">
+      <div class="label">Fraction of total instability rate driven by channel k</div>
+      \[
+      a_k = \frac{\max(0, \dot V_k)}{\sum_j \max(0, \dot V_j)}, \qquad \sum_k a_k = 1
+      \]
+      \(a_k\) identifies the dominant channel driving current instability — not the channel with the highest deviation score, but the channel whose spatial gradient is most aligned with the current force field. These are different, and the difference matters: a channel can have a high score (\([g_t]_k\) large) but contribute little to instability (\(\dot V_k \approx 0\)) if its spatial gradient is perpendicular to the force.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Control efficiency per channel</div>
+      \[
+      \eta_k = \frac{-\dot V_k^{\text{control}}}{\dot V_k^{\text{drift}}} = \frac{\gamma_t^*\langle F_t, g_t\rangle\,\langle\partial_X\delta_k, g_t\rangle_F}{\|g_t\|^2\,\langle\partial_X\delta_k, F_t\rangle_F}
+      \]
+      \(\eta_k \in (0,1)\): control is partially offsetting channel \(k\)'s drift.
+      \(\eta_k > 1\): control overcorrects channel \(k\) — the intervention is stronger than the drift for this channel.
+      \(\eta_k < 0\): the control is making channel \(k\) worse — the projection direction is misaligned with channel \(k\)'s spatial gradient.
+      Negative \(\eta_k\) is the per-channel manifestation of the uncontrollable regime: the control law, while stabilising the dominant channel, is actively destabilising channel \(k\).
+    </div>
+
+    <h3>25.4 — The Control Coupling Sum \(R_t\)</h3>
+
+    <div class="math-block">
+      <div class="label">R_t — how well the control direction reaches each channel</div>
+      \[
+      R_t = \sum_k [g_t]_k\,\langle\partial_X\delta_k, g_t\rangle_F
+      \]
+      \(R_t > 0\): the control direction \(g_t\) is positively coupled to the physical gradient of each channel — control stabilises. \(R_t \leq 0\): the control direction is orthogonal to or opposed by the channel spatial gradients — the uncontrollable regime. \(R_t\) is the single scalar that determines whether the system is in the controllable or uncontrollable regime.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXVI. THE PSI ANGLE — SIXTH DIAGNOSTIC
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXVI</div>
+    <h2>The \(\psi_t\) Angle — The Sixth Diagnostic Signal</h2>
+
+    <p>Five diagnostic signals were established across §V–XVII: MFLS, \(\lambda_{\max}(\nabla^2\Phi)\), \(\rho(W)\), \(\gamma^*\), \(\cos\theta_t\). The corrected analysis reveals a sixth, which did not exist in any prior formulation of any domain-specific tool: the misalignment angle \(\psi_t\) between the channel-space and state-space collapse directions.</p>
+
+    <h3>26.1 — Definition</h3>
+
+    <div class="math-block">
+      <div class="label">ψ_t — the misalignment angle</div>
+      \[
+      \cos\psi_t = \frac{\langle\tilde{G}_t,\,g_t\rangle_F}{\|\tilde{G}_t\|_F\,\|g_t\|}
+      \in [-1, 1]
+      \]
+      \[
+      \psi_t = \arccos\!\left(\frac{\sum_k [g_t]_k\,\langle\partial_X\delta_k, g_t\rangle_F}{\|\tilde{G}_t\|_F\,\|g_t\|}\right) = \arccos\!\left(\frac{R_t}{\|\tilde{G}_t\|_F\,\|g_t\|}\right)
+      \]
+    </div>
+
+    <h3>26.2 — What \(\psi_t\) Measures in Each Domain</h3>
+
+    <table>
+      <thead>
+        <tr><th>Domain</th><th>\(\psi_t \approx 0\)</th><th>\(\psi_t \approx \pi/2\)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Financial systemic risk</td><td>CAMELS signal and balance sheet dynamics fully aligned — real collapse imminent</td><td>Regulatory alarm elevated but balance sheet not moving toward failure — false positive</td></tr>
+        <tr><td>Quantum</td><td>Decoherence signal and density matrix dynamics aligned — irreversible collapse</td><td>Fidelity metric elevated but unitary evolution tangential — recoverable</td></tr>
+        <tr><td>Navier-Stokes</td><td>Enstrophy signal and modal dynamics aligned — blowup precursor</td><td>Turbulence intensity high but cascade direction tangential — intermittency without blowup</td></tr>
+        <tr><td>Neural networks</td><td>Sharpness metric and gradient direction aligned — loss spike imminent</td><td>Loss landscape sharp but gradient direction tangential — stable despite high sharpness</td></tr>
+        <tr><td>Cybersecurity</td><td>Behavioural anomaly and lateral movement dynamics aligned — active attack</td><td>Anomaly score elevated but movement direction tangential — false alarm</td></tr>
+      </tbody>
+    </table>
+
+    <h3>26.3 — \(\psi_t\) in the EWS Score</h3>
+
+    <div class="math-block">
+      <div class="label">Updated EWS — six signals including ψ_t</div>
+      \[
+      \xi_6 = \cos^2\psi_t = \frac{R_t^2}{\|\tilde{G}_t\|_F^2\,\|g_t\|^2} \in [0,1]
+      \]
+      \[
+      \text{EWS}_t^{\text{updated}} = \left[\prod_{k=1}^{5}\xi_k^{w_k}\right]^{1-w_6} \cdot \xi_6^{w_6}
+      \]
+      \(\xi_6 = 1\): abstract risk and physical dynamics fully aligned — all five prior signals are reliable. \(\xi_6 = 0\): complete misalignment — all five prior signals are unreliable. Including \(\xi_6\) as a reliability weight on the other signals is the correct structure: \(\psi_t\) modulates the credibility of the composite score, not just its magnitude.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXVII. DOMAIN DISCOVERIES & THEORETICAL ADVANCEMENT
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXVII</div>
+    <h2>Domain Discoveries &amp; Theoretical Advancement</h2>
+
+    <p>The master operator, with its corrected pullback gradient, the \(\psi_t\) angle, and the per-channel Lyapunov contributions, reveals specific discoveries in each domain and constitutes advancement at the level of mathematics, physics, control theory, and machine learning.</p>
+
+    <h3>27.1 — Domain-Specific Discoveries</h3>
+
+    <table>
+      <thead>
+        <tr><th>Domain</th><th>\(X_t\)</th><th>\(F_t\)</th><th>Critical manifold \(\mathcal{C}_{\text{man}}\)</th><th>New discovery</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Quantum</td>
+          <td>Density matrix \(\rho_t\)</td>
+          <td>Lindblad operator</td>
+          <td>Decoherence beyond QEC threshold</td>
+          <td>\(\delta_G\) detects anomalous Lindblad channels; Expogate maps to quantum phase transitions; uncontrollable regime = hashing bound</td>
+        </tr>
+        <tr>
+          <td>Navier-Stokes</td>
+          <td>Modal coefficients \(\hat u_t\)</td>
+          <td>N-S operator in modal space</td>
+          <td>Pre-blowup enstrophy threshold</td>
+          <td>Per-channel attribution identifies which cascade scale drives instability; \(\psi_t\) maps to intermittency; control law = minimal turbulence suppression</td>
+        </tr>
+        <tr>
+          <td>Protein folding</td>
+          <td>Atomic positions / contact map</td>
+          <td>\(-\nabla_X U_{\text{ff}}\)</td>
+          <td>Misfolding transition state</td>
+          <td>\(\delta_G\) watches frustrated contacts (PCA low-variance directions); per-channel attribution = critical nucleus identification; \(\theta\) ceiling = chaperone binding affinity constraint</td>
+        </tr>
+        <tr>
+          <td>Deep learning</td>
+          <td>Weight tensor \(W_t\)</td>
+          <td>\(-\nabla_W \mathcal{L}\)</td>
+          <td>Sharp/flat basin boundary</td>
+          <td>Control law = geometry-aware gradient correction (strictly better than SAM); Expogate = gradient explosion precursor; \(\psi_t\) explains why high sharpness doesn't always cause instability</td>
+        </tr>
+        <tr>
+          <td>FDIC / banking</td>
+          <td>Balance sheet vector</td>
+          <td>GravityEngine</td>
+          <td>Insolvency / run threshold</td>
+          <td>\(\delta_G\) detects novel exposure (SVB-type HTM risk); dynamic CAMELS weighting via \([g_t]_k\); \(\psi_t\) = regulatory blind spot metric; \(\theta\) ceiling = forbearance fatality condition</td>
+        </tr>
+        <tr>
+          <td>Supply chain</td>
+          <td>Inventory / flow matrix</td>
+          <td>Replenishment dynamics</td>
+          <td>Cascade failure threshold</td>
+          <td>\(\delta_G\) detects hidden concentration (semiconductor 2021 structure); \(\rho(W)\) = bullwhip amplification factor; per-channel attribution = dynamic critical supplier score</td>
+        </tr>
+        <tr>
+          <td>Cybersecurity</td>
+          <td>Endpoint behavioural vectors</td>
+          <td>Normal behavioural dynamics</td>
+          <td>Point of no containment</td>
+          <td>\(\delta_G\) detects APT/LOLBin patterns; \(\rho(W)\) = blast radius amplification; per-channel attribution = attack type classifier; uncontrollable regime = dwell-time past recovery</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>27.2 — What This Offers That Nothing Else Does</h3>
+
+    <table>
+      <thead>
+        <tr><th>Capability</th><th>Existing tools</th><th>This operator</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Scalar intensity</td><td>✓ (anomaly scores, stress indices)</td><td>✓ MFLS, EWS</td></tr>
+        <tr><td>Collapse direction in state space</td><td>✗</td><td>✓ \(\tilde{G}_t\)</td></tr>
+        <tr><td>Per-channel attribution</td><td>✗</td><td>✓ \([g_t]_k\), \(a_k\)</td></tr>
+        <tr><td>Minimal control action</td><td>✗ (requires model + optimisation)</td><td>✓ geometric projection, no model needed</td></tr>
+        <tr><td>Stability certificate</td><td>✓ (global, conservative)</td><td>✓ (state-dependent, tight, three regimes)</td></tr>
+        <tr><td>Uncontrollable regime detection</td><td>✗</td><td>✓ \(P_t > 0, R_t \leq 0\)</td></tr>
+        <tr><td>Collapse time estimate</td><td>✗</td><td>✓ \(\tau_{\text{lin}}\), Kramers formula</td></tr>
+        <tr><td>False alarm quantification</td><td>✗</td><td>✓ \(\psi_t\), \(\rho_{\text{MFLS}}\)</td></tr>
+        <tr><td>Statistical threshold</td><td>domain-specific heuristics</td><td>✓ \(\chi^2_{Nd}\) calibrated</td></tr>
+        <tr><td>Stochastic extension</td><td>domain-specific SDEs</td><td>✓ Itô correction, Fokker-Planck, Kramers</td></tr>
+        <tr><td>Domain independence</td><td>✗ (each tool is domain-specific)</td><td>✓ same equation across all domains</td></tr>
+      </tbody>
+    </table>
+
+    <h3>27.3 — Mathematical Advancement</h3>
+
+    <div class="math-block">
+      <div class="label">New open problems created by this work</div>
+      \[
+      \begin{array}{ll}
+      \textbf{Problem 1} & \text{Topology of the zero set } \{\tilde{G}_t = 0\} \subset \mathbb{R}^{N\times d} \\[5pt]
+      \textbf{Problem 2} & \text{Fixed points of controlled dynamics vs. uncontrolled dynamics} \\[5pt]
+      \textbf{Problem 3} & \text{Topological invariants of }\tilde{G}_t\text{ as a time-varying vector field} \\[5pt]
+      \textbf{Problem 4} & \text{Geometry of level sets of }\psi_t\text{ and their intersection with }\mathcal{C}_{\text{man}} \\[5pt]
+      \textbf{Problem 5} & \text{Thermodynamics of the controlled stationary distribution }p^*(e) \\[5pt]
+      \textbf{Problem 6} & \text{Complete positivity of the quantum extension of the control law} \\[5pt]
+      \textbf{Problem 7} & \text{Codimension and smoothness of }\mathcal{C}_{\text{man}}\text{ under composite energy}
+      \end{array}
+      \]
+    </div>
+
+    <h3>27.4 — The Four Structural Paradigm Shifts</h3>
+
+    <div class="math-block">
+      <div class="label">What this changes in each field</div>
+      \[
+      \begin{array}{lll}
+      \textbf{Field} & \textbf{Previous paradigm} & \textbf{New paradigm} \\[4pt]
+      \hline\\[-4pt]
+      \text{Control theory} & \text{Model + cost function + optimisation} & \text{Energy geometry + minimal projection} \\[5pt]
+      \text{Stability theory} & \text{Global Lyapunov certificates} & \text{State-dependent margin with 3 regimes} \\[5pt]
+      \text{Anomaly detection} & \text{Score} \to \text{alarm} \to \text{action (sequential)} & \text{Score + direction + action (simultaneous)} \\[5pt]
+      \text{Domain monitoring} & \text{Domain-specific scalar signals} & \text{Universal geometric field with attribution}
+      \end{array}
+      \]
+    </div>
+
+    <h3>27.5 — The Five Universal Patterns</h3>
+
+    <p>Across all seven domains, the operator reveals five structural patterns that have no names in those fields and are invisible to domain-specific tools:</p>
+
+    <div class="def-grid">
+      <span class="sym">Pattern 1</span><span class="desc"><strong>The \(\delta_G\) blind spot</strong> — every domain has low-variance PCA directions in its normal-period covariance that its monitoring ignores. Novel risk always enters through these directions. Quantum: rarely-excited modes. Navier-Stokes: anomalous cross-scale coupling. Proteins: frustrated contacts. Neural nets: flat loss directions. Banks: novel asset categories (SVB HTM bonds). Supply chains: non-primary supplier routes. Cyber: LOLBin patterns.</span>
+      <span class="sym">Pattern 2</span><span class="desc"><strong>The \(\psi_t\) misalignment</strong> — abstract risk (channel space) and physical dynamics (state space) can point in different directions. When they converge, collapse is real. When they diverge, the signal is a false alarm. No existing tool in any domain measures this angle.</span>
+      <span class="sym">Pattern 3</span><span class="desc"><strong>The uncontrollable regime</strong> — every domain has a region where intervention is geometrically impossible regardless of intensity. This region is predictable, transient, and analytically locatable. Every domain currently discovers it empirically, after the fact.</span>
+      <span class="sym">Pattern 4</span><span class="desc"><strong>The \(\theta\) ceiling</strong> — every domain has an intervention cost parameter with a hard, state-dependent ceiling. Exceeding it makes control structurally insufficient. No existing framework makes this ceiling explicit and computable.</span>
+      <span class="sym">Pattern 5</span><span class="desc"><strong>The amplification factor \(\rho_{\text{MFLS}}\)</strong> — the ratio of physical to abstract risk intensity. When \(\rho > 1\), the system amplifies abstract risk into physical force. When \(\rho < 1\), risk is contained. This explains the majority of historical false alarms across all domains.</span>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXVIII. INTRADAY CRYPTO FUTURES APPLICATION
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXVIII</div>
+    <h2>Intraday Crypto Futures — Move Prediction Engine</h2>
+
+    <p>This section maps the master operator to intraday crypto futures trading. It derives direction, magnitude, duration, intensity, and move shape from the current geometric state of the system — not from pattern matching, not from statistical fitting, not from machine learning. All outputs are updated every bar from closed-form matrix operations.</p>
+
+    <p>One critical correction is incorporated throughout: the naive energy-to-price mapping is lossy. The same total energy \(e_t\) can produce different price paths depending on how energy distributes across features. The fix is the <strong>price loading factor</strong> \(\lambda_t^\text{price}\) — the fraction of energy currently in the return dimension accounting for all cross-feature coupling through \(\Sigma_0^{-1}\).</p>
+
+    <h3>28.1 — State Matrix Definition</h3>
+
+    <div class="math-block">
+      <div class="label">State matrix — N instruments × d features</div>
+      \[
+      X_t \in \mathbb{R}^{N \times d}, \qquad N = 8 \text{ instruments}, \quad d = 8 \text{ features}
+      \]
+    </div>
+
+    <table>
+      <thead><tr><th>Agent \(i\)</th><th>Instrument</th><th>Feature \(j\)</th><th>Variable</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>BTC perp</td><td>1</td><td>Log return over last \(\tau\) bars</td></tr>
+        <tr><td>2</td><td>ETH perp</td><td>2</td><td>Normalised volume</td></tr>
+        <tr><td>3</td><td>BTC quarterly</td><td>3</td><td>Order book imbalance (bid/ask ratio)</td></tr>
+        <tr><td>4</td><td>SOL perp</td><td>4</td><td>Funding rate</td></tr>
+        <tr><td>5</td><td>BNB perp</td><td>5</td><td>Open interest change</td></tr>
+        <tr><td>6</td><td>ETH/BTC ratio</td><td>6</td><td>Mark vs index divergence (basis)</td></tr>
+        <tr><td>7</td><td>Crypto fear index</td><td>7</td><td>Liquidation volume</td></tr>
+        <tr><td>8</td><td>Stablecoin dominance</td><td>8</td><td>Realised volatility (last 20 bars)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>28.2 — Calibration</h3>
+
+    <div class="math-block">
+      <div class="label">Normal period — 500–2000 bars of stable microstructure regime</div>
+      \[
+      \mu_0 = \frac{1}{T_0 N}\sum_{t,i} x_t^{(i)} \in \mathbb{R}^8
+      \]
+      \[
+      \Sigma_0 = \text{Ledoit-Wolf}\!\bigl(\{x_t^{(i)}\}\bigr) \in \mathbb{R}^{8\times 8}
+      \]
+      \[
+      V_k = \text{top-}k\text{ eigenvectors of }\Sigma_0, \quad k=4 \qquad v_0 = \text{Pctl}_{95}(\text{bar-to-bar velocity in normal period})
+      \]
+      Recalibrate weekly or when \(e_t > \chi^2_{64,0.99}\) persists for more than 50 bars (regime shift detected).
+    </div>
+
+    <h3>28.3 — The Four BSDT Channels in Crypto</h3>
+
+    <table>
+      <thead><tr><th>Channel</th><th>What it detects</th><th>Crypto meaning</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>\(\delta_C\) Camouflage</td>
+          <td>Joint Mahalanobis deviation — multiple features deviating in correlated way</td>
+          <td>Pre-liquidation-cascade signature: price + volume + OI + funding all move together</td>
+        </tr>
+        <tr>
+          <td>\(\delta_G\) Feature Gap</td>
+          <td>Motion into PCA residual directions — combinations not seen in normal period</td>
+          <td><strong>Most powerful channel.</strong> Detects novel funding behaviour, exchange basis blow-out, new correlation structures — invisible to standard monitors. Always fires first in regime change.</td>
+        </tr>
+        <tr>
+          <td>\(\delta_A\) Activity</td>
+          <td>Bar-to-bar velocity exceeding 95th percentile of normal period</td>
+          <td>In-progress cascade signal: simultaneous velocity across price, OI, liquidation volume</td>
+        </tr>
+        <tr>
+          <td>\(\delta_T\) Temporal</td>
+          <td>KDE self-surprise — current state not seen in recent history</td>
+          <td>First warning of new regime: BTC at new price level, funding at historical extreme, novel OI structure</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>28.4 — The Price Loading Factor \(\lambda_t^\text{price}\) — The Critical Correction</h3>
+
+    <p>The naive formula \(e_t^\text{price} = \sum_i (r_t^{(i)} - \mu_0^{(1)})^2 / \Sigma_0^{(1,1)}\) ignores cross-feature coupling through \(\Sigma_0^{-1}\). The correct price energy includes all cross-coupling terms:</p>
+
+    <div class="math-block">
+      <div class="label">Correct price energy — full cross-feature coupling</div>
+      \[
+      e_t^\text{price,full} = \sum_j [\Sigma_0^{-1}]_{1j} \sum_i \tilde x_t^{(i,1)} \tilde x_t^{(i,j)}
+      \]
+      This is the first row of \(\tilde X_t \Sigma_0^{-1} \tilde X_t^\top\) summed across agents. When price and volatility are correlated in the normal period (\([\Sigma_0^{-1}]_{1k} \neq 0\)), energy that appears to be in volatility actually contains a price component through the inverse covariance coupling. The naive formula misses this entirely.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Price loading factor</div>
+      \[
+      \lambda_t^\text{price} = \sqrt{\frac{e_t^\text{price,full}}{e_t}} \in [0,1]
+      \]
+      \(\lambda_t^\text{price} = 1\): all energy in price — maximum price move.
+      \(\lambda_t^\text{price} \approx 0\): energy in volatility or dispersion — almost no price move despite high \(e_t\).
+    </div>
+
+    <div class="math-block">
+      <div class="label">Energy rotation signal — rate of change of price loading</div>
+      \[
+      \dot\lambda_t^\text{price} = \frac{d}{dt}\sqrt{\frac{e_t^\text{price,full}}{e_t}}
+      \]
+      \(\dot\lambda_t^\text{price} > 0\): energy flowing into price dimension — price move about to accelerate even if total energy is constant.
+      \(\dot\lambda_t^\text{price} < 0\): energy rotating out of price into volatility — price move about to stall even though \(e_t\) is still high.
+      This is the rotation signal. It is the difference between a real directional move and volatility expansion with no price follow-through.
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Two cases the naive formula conflates — now separated</div>
+      \[
+      \text{Case A: } \lambda_t^\text{price} > 0.7, \;\dot\lambda_t^\text{price} \geq 0
+      \quad\Rightarrow\quad \text{Energy in price and growing} \to \text{Strong directional move}
+      \]
+      \[
+      \text{Case B: } \lambda_t^\text{price} < 0.4, \;\dot\lambda_t^\text{price} < 0
+      \quad\Rightarrow\quad \text{Energy in volatility, leaving price} \to \text{Chop, no directional follow-through}
+      \]
+      Same \(e_t\), same MFLS, opposite price outcome. \(\lambda_t^\text{price}\) is the discriminator.
+    </div>
+
+    <h3>28.5 — Direction Prediction</h3>
+
+    <div class="math-block">
+      <div class="label">Directional sign — weighted return deviation sum</div>
+      \[
+      \text{sign}(M_t) = \text{sign}\!\left(\sum_i \frac{\tilde x_t^{(i,1)}}{\Sigma_0^{(1,1)}}\right)
+      \]
+      Positive: instruments above equilibrium returns — upward move.
+      Negative: instruments below equilibrium returns — downward move.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Directional confidence — alignment of collapse direction with price axis</div>
+      \[
+      \cos\theta_t^\text{price} = \frac{\langle\tilde G_t^\text{price}, F_t\rangle_F}{\|\tilde G_t^\text{price}\|_F\,\|F_t\|_F}
+      \]
+      \(\cos\theta_t^\text{price} < 0\): GravityEngine force opposes price displacement — mean reversion structurally supported. Buy the dip.
+      \(\cos\theta_t^\text{price} > 0\): GravityEngine force aligned with price displacement — no mechanical support for reversion. Do not buy the dip.
+      This is the single most powerful filter for avoiding the classic crypto trap: buying into a liquidation cascade.
+    </div>
+
+    <h3>28.6 — Magnitude Prediction (Corrected)</h3>
+
+    <div class="math-block">
+      <div class="label">Corrected remaining magnitude — includes price loading factor</div>
+      \[
+      \boxed{M_t^\text{remaining} = \lambda_t^\text{price} \cdot \sqrt{\Sigma_0^{(1,1)}} \cdot \left(\sqrt{e^*} - \sqrt{e_t}\right)}
+      \]
+      where \(e^* = \chi^2_{Nd,\,0.99}\) is the calibrated critical energy threshold.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Magnitude confidence interval — chi-squared calibrated</div>
+      \[
+      M_t^{(\alpha)} = \lambda_t^\text{price} \cdot \sqrt{\Sigma_0^{(1,1)}} \cdot \left(\sqrt{\chi^2_{N,\alpha}} - \sqrt{e_t^\text{price,full}}\right)
+      \]
+      \[
+      \text{90\% interval: } \left[M_t^{(0.05)},\; M_t^{(0.95)}\right]
+      \]
+      Place take-profit in the range \([0.7 \times M_t^\text{remaining},\; 1.3 \times M_t^\text{remaining}]\). This is a statistically calibrated zone, not a heuristic band.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Cascade magnitude — shifted equilibrium upper bound</div>
+      \[
+      \mu_t^\text{cascade} = \mu_0 + \frac{F_t}{\alpha}\bigg|_{R_t=0}
+      \]
+      \[
+      M_t^\text{cascade} = \lambda_t^\text{price} \cdot \|\mu_t^\text{cascade} - X_t\|_\text{price} > M_t^\text{remaining}
+      \]
+      In \(\Omega_3\) (cascade, \(R_t \leq 0\)), the equilibrium shifts. \(M_t^\text{remaining}\) becomes a lower bound. \(M_t^\text{cascade}\) is the upper bound using the shifted equilibrium.
+    </div>
+
+    <h3>28.7 — Duration Prediction</h3>
+
+    <div class="math-block">
+      <div class="label">First-order duration — linear estimate</div>
+      \[
+      \tau_\text{lin} = \frac{e^* - e_t}{\dot e_t} \quad\text{bars}, \qquad \dot e_t = P_t(1-\gamma_t^*) + \frac{\sigma_n^2}{2}\text{tr}(\nabla^2 E_\text{BS})
+      \]
+      For mean reversion (\(\dot e_t < 0\)): \(\tau_\text{return} = (e_t - e_0)/|\dot e_t|\) bars until return to baseline \(e_0 = Nd\).
+    </div>
+
+    <div class="math-block">
+      <div class="label">Second-order duration — curvature correction</div>
+      \[
+      \ddot e_t = g_t^\top \nabla^2 E_\text{BS}\,g_t \cdot \|\dot X_t\|^2
+      = g_t^\top\!\left(2A + \operatorname{diag}(\beta_k^2 e^{\beta_k S_{k,t}})\right)g_t \cdot \|\dot X_t\|^2
+      \]
+      \[
+      \tau_\text{quad} = \frac{-\dot e_t + \sqrt{\dot e_t^2 + 2\ddot e_t(e^* - e_t)}}{\ddot e_t}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Corrected time stop — accounts for energy dispersion across features</div>
+      \[
+      \tau_\text{adjusted} = \frac{\tau_\text{quad}}{\lambda_t^\text{price}}
+      \]
+      When energy is less concentrated in price, the price move takes longer to complete even though total energy evolves at the same rate. The time stop extends proportionally to the price loading.
+    </div>
+
+    <div class="math-block">
+      <div class="label">Stochastic duration — Kramers formula under market noise</div>
+      \[
+      \tau_\text{Kramers} = \frac{2\pi}{\sqrt{|\mu_e'(e_t)|\cdot|\mu_e'(e^*)|}}\exp\!\left(\frac{2(e^*-e_t)}{\sigma_n^2}\right)
+      \]
+      Small \(\sigma_n\) (quiet market): \(\tau_\text{Kramers} \approx \tau_\text{quad}\). Large \(\sigma_n\) (volatile): \(\tau_\text{Kramers} \ll \tau_\text{quad}\) — noise dramatically shortens expected duration.
+    </div>
+
+    <h3>28.8 — Intensity and Move Shape</h3>
+
+    <div class="math-block">
+      <div class="label">Average intensity per bar</div>
+      \[
+      I_t = \frac{M_t^\text{remaining}}{\tau_\text{adjusted}} = \frac{\lambda_t^\text{price}\cdot\sqrt{\Sigma_0^{(1,1)}}\cdot(\sqrt{e^*}-\sqrt{e_t})}{\tau_\text{quad}/\lambda_t^\text{price}}
+      = \frac{(\lambda_t^\text{price})^2\cdot\sqrt{\Sigma_0^{(1,1)}}\cdot(\sqrt{e^*}-\sqrt{e_t})}{\tau_\text{quad}}
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Instantaneous intensity profile — move shape from ë_t</div>
+      \[
+      I_t(s) = v_t^\text{price} + \frac{\ddot e_t}{2}\cdot s \quad s \in [0, \tau_\text{adjusted}]
+      \]
+    </div>
+
+    <table>
+      <thead><tr><th>Sign of \(\ddot e_t\)</th><th>Move profile</th><th>Trading implication</th></tr></thead>
+      <tbody>
+        <tr><td>\(\ddot e_t > 0\)</td><td>Accelerating — slow start, fast finish</td><td>Classic liquidation cascade shape. Enter early, scale in. Do not wait for chart confirmation — the geometry shows it before the chart does.</td></tr>
+        <tr><td>\(\ddot e_t = 0\)</td><td>Constant velocity — linear move</td><td>Steady trend. Fixed position size. Linear time stop.</td></tr>
+        <tr><td>\(\ddot e_t < 0\)</td><td>Decelerating — fast start, slow finish</td><td>Impulse-and-fade shape. Enter immediately at full size. Take profit early — the move front-loads its magnitude.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>28.9 — Reversal Prediction</h3>
+
+    <div class="math-block">
+      <div class="label">Three post-threshold regimes — determined by R_t before arrival</div>
+      \[
+      R_t \gg 0 \;\Rightarrow\; \Omega_1\text{ after crossing} \;\Rightarrow\; \text{mechanical reversal}
+      \]
+      \[
+      M_\text{reversal} = \lambda_t^\text{price}\cdot\sqrt{\Sigma_0^{(1,1)}}\cdot(\sqrt{e^*} - \sqrt{e_0}), \qquad e_0 = Nd
+      \]
+      \[
+      R_t \text{ small positive} \;\Rightarrow\; \Omega_2\text{ after crossing} \;\Rightarrow\; \text{deceleration, no sharp reversal}
+      \]
+      \[
+      R_t \to 0 \;\Rightarrow\; \Omega_3\text{ after crossing} \;\Rightarrow\; \text{cascade, no reversal, shifted equilibrium}
+      \]
+      \(R_t\) gives you the post-threshold regime <strong>before</strong> you get there. The reversal trade setup or the cascade continuation is known at entry.
+    </div>
+
+    <h3>28.10 — Entry Criteria (Complete)</h3>
+
+    <div class="replace-box">
+      <div class="label">Six entry conditions — all must be satisfied</div>
+      \[
+      \begin{array}{ll}
+      \text{(1)} & \dot e_t > 0 \quad\text{(energy growing — move has momentum)} \\[5pt]
+      \text{(2)} & \ddot e_t \geq 0 \quad\text{(energy accelerating — not a fading move)} \\[5pt]
+      \text{(3)} & R_t > R_\text{min} \quad\text{(not approaching uncontrollable regime)} \\[5pt]
+      \text{(4)} & \lambda_t^\text{price} > 0.5 \quad\text{(majority of energy in price dimension)} \\[5pt]
+      \text{(5)} & \dot\lambda_t^\text{price} \geq 0 \quad\text{(energy rotating into price, not out)} \\[5pt]
+      \text{(6)} & \psi_t < \pi/4 \quad\text{(abstract risk real in physical space — not a false alarm)}
+      \end{array}
+      \]
+      Conditions (1)–(3) are from structural inevitability ranking. Conditions (4)–(6) are the additions that fix the projection problem and eliminate false alarms.
+    </div>
+
+    <h3>28.11 — Position Sizing (Corrected)</h3>
+
+    <div class="math-block">
+      <div class="label">Corrected position size — three geometric multipliers</div>
+      \[
+      \text{size}_t = \text{size}_\text{base} \times \underbrace{(1-\gamma_t^*)}_{\text{blind-spot damping}} \times \underbrace{\lambda_t^\text{price}}_{\text{price loading}} \times \underbrace{\mathbf{1}[\dot\lambda_t^\text{price} \geq 0]}_{\text{energy rotation gate}}
+      \]
+      The third multiplier is binary — zero size when energy is rotating out of price regardless of how elevated \(e_t\) is. This eliminates the entire class of trades where the risk model fires but price doesn't move.
+    </div>
+
+    <h3>28.12 — Exit Triggers</h3>
+
+    <div class="math-block">
+      <div class="label">Exit when any of the following</div>
+      \[
+      \begin{array}{ll}
+      \text{(A)} & \tau_\text{adjusted}\text{ bars elapsed} \quad\text{(time stop)} \\[4pt]
+      \text{(B)} & \text{RSS}_t > 0.7\text{ first crossing} \quad\text{(regime critical)} \\[4pt]
+      \text{(C)} & R_t \leq 0 \quad\text{(entering uncontrollable regime)} \\[4pt]
+      \text{(D)} & \dot\lambda_t^\text{price} < 0\text{ and }\lambda_t^\text{price} < 0.4 \quad\text{(energy leaving price)} \\[4pt]
+      \text{(E)} & \text{Dominant channel switches to }\delta_G \quad\text{(novel regime — edge is gone)} \\[4pt]
+      \text{(F)} & \psi_t > \pi/2 \quad\text{(complete misalignment — signal is false)}
+      \end{array}
+      \]
+    </div>
+
+    <h3>28.13 — Complete Output Per Bar</h3>
+
+    <table>
+      <thead>
+        <tr><th>Output</th><th>Formula</th><th>Trading meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>\(\lambda_t^\text{price}\)</td><td>\(\sqrt{e_t^\text{price,full}/e_t}\)</td><td>Fraction of energy in price — magnitude reliability</td></tr>
+        <tr><td>\(\dot\lambda_t^\text{price}\)</td><td>Bar-over-bar change in \(\lambda_t^\text{price}\)</td><td>Energy rotation — into price (enter) or out (wait)</td></tr>
+        <tr><td>\(\text{sign}(M_t)\)</td><td>Sign of return deviation sum</td><td>Direction: long or short</td></tr>
+        <tr><td>\(M_t^\text{remaining}\)</td><td>\(\lambda_t^\text{price}\sqrt{\Sigma_0^{(1,1)}}(\sqrt{e^*}-\sqrt{e_t})\)</td><td>Expected magnitude — order of magnitude, not exact</td></tr>
+        <tr><td>\(M_t^{(0.05,0.95)}\)</td><td>Chi-squared confidence interval</td><td>Statistically calibrated magnitude zone</td></tr>
+        <tr><td>\(\tau_\text{adjusted}\)</td><td>\(\tau_\text{quad}/\lambda_t^\text{price}\)</td><td>Time stop in bars</td></tr>
+        <tr><td>\(\ddot e_t\text{ sign}\)</td><td>\(g_t^\top\nabla^2 E_\text{BS}\,g_t\cdot\|\dot X_t\|^2\)</td><td>Move shape: accelerating / linear / decelerating</td></tr>
+        <tr><td>\(I_t\)</td><td>\((\lambda_t^\text{price})^2\sqrt{\Sigma_0^{(1,1)}}(\sqrt{e^*}-\sqrt{e_t})/\tau_\text{quad}\)</td><td>Average intensity per bar</td></tr>
+        <tr><td>\(R_t\)</td><td>\(\sum_k[g_t]_k\langle\partial_X\delta_k,g_t\rangle_F\)</td><td>Reversal (positive) vs cascade (near zero)</td></tr>
+        <tr><td>\(M_\text{reversal}\)</td><td>\(\lambda_t^\text{price}\sqrt{\Sigma_0^{(1,1)}}(\sqrt{e^*}-\sqrt{e_0})\)</td><td>Post-threshold reversal magnitude (when \(R_t \gg 0\))</td></tr>
+        <tr><td>\(\cos\theta_t^\text{price}\)</td><td>\(P_t^\text{price}/(\|\tilde G_t^\text{price}\|_F\|F_t\|_F)\)</td><td>Buy-dip filter: negative = dip supported, positive = avoid</td></tr>
+        <tr><td>\(\psi_t\)</td><td>\(\arccos(R_t/\|\tilde G_t\|_F\|g_t\|)\)</td><td>False alarm filter: above \(\pi/4\) = signal unreliable</td></tr>
+        <tr><td>\(\text{RSS}_t\)</td><td>Six-signal geometric mean</td><td>Regime state: 0 = normal, 1 = collapse imminent</td></tr>
+        <tr><td>Dominant \(a_k\)</td><td>\(\max_k(a_k)\)</td><td>Which channel driving instability: G = novel regime, A = cascade in progress</td></tr>
+      </tbody>
+    </table>
+
+    <h3>28.14 — Worked Example: BTC 5-Minute Chart</h3>
+
+    <div class="math-block">
+      <div class="label">Setup</div>
+      \[
+      N=8,\quad d=8,\quad e^* = \chi^2_{64,0.99} \approx 94,\quad \sqrt{\Sigma_0^{(1,1)}} = 0.02\;(2\%\text{ per bar})
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Current bar state</div>
+      \[
+      e_t = 45,\quad e_t^\text{price,full} = 30,\quad \dot e_t = +3.2/\text{bar},\quad \ddot e_t = +0.8/\text{bar}^2
+      \]
+      \[
+      \lambda_t^\text{price} = \sqrt{30/45} = 0.816,\quad \dot\lambda_t^\text{price} = +0.03 > 0\;(\text{energy rotating into price})
+      \]
+      \[
+      \text{Return deviation sum} = -0.08\;(\text{downward move}),\quad R_t = +2.1\;(\text{reversal regime})
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Predictions</div>
+      \[
+      M_t^\text{remaining} = 0.816 \times 0.02 \times (\sqrt{94}-\sqrt{45}) = 0.816 \times 0.02 \times (9.70-6.71) = 0.0488
+      \]
+      <strong>4.9% remaining downward move</strong> (corrected from naive 8.4% — energy is 82% in price not 100%)
+      \[
+      \tau_\text{quad} = \frac{-3.2+\sqrt{10.24+78.4}}{0.8} = 7.8\text{ bars}
+      \]
+      \[
+      \tau_\text{adjusted} = 7.8/0.816 = 9.6\text{ bars} = 48\text{ minutes}
+      \]
+      \[
+      I_t = (0.816)^2 \times 0.02 \times (9.70-6.71)/7.8 = 0.666 \times 0.02 \times 3.99/7.8 = 0.0068/\text{bar} = 0.68\%\text{ per 5-min bar}
+      \]
+      Move profile: \(\ddot e_t > 0\) → accelerating. Slow start, fast finish. Scale in over first half of \(\tau_\text{adjusted}\).
+      \[
+      M_\text{reversal} = 0.816 \times 0.02 \times (\sqrt{94}-\sqrt{64}) = 0.816 \times 0.02 \times 1.70 = 0.028 = 2.8\%\text{ recovery}
+      \]
+    </div>
+
+    <div class="replace-box">
+      <div class="label">Trade plan from geometry</div>
+      Entry: short at current bar (all 6 entry conditions satisfied)
+      Direction: down (return deviation sum negative)
+      Target zone: \(-3.4\%\) to \(-6.4\%\) from entry (\(0.7\times\) to \(1.3\times M_t^\text{remaining}\))
+      Time stop: 48 minutes (\(\tau_\text{adjusted}\))
+      Scale-in: add to short in bars 4–7 (accelerating profile — back-loads magnitude)
+      After target: if \(R_t > 0\) still, flip long for \(2.8\%\) reversal
+      Exit early if: \(\dot\lambda_t^\text{price} < 0\) (energy leaving price), dominant channel switches to \(\delta_G\), or \(R_t \to 0\)
+      <div class="io-row">
+        <span class="io-key">Key correction:</span>
+        <span>Naive formula predicted 8.4% — corrected formula gives 4.9%. The difference is \(1 - \lambda_t^\text{price} = 18\%\) of energy sitting in volatility/dispersion, not in price. Trading the naive target would have missed the exit by 3.5%.</span>
+      </div>
+    </div>
+
+    <h3>28.15 — The Intraday Decision Tree</h3>
+
+    <div class="math-block">
+      <div class="label">Per-bar decision logic — executed in order</div>
+      \[
+      \begin{array}{ll}
+      \textbf{Step 1} & \text{Compute }X_t\text{ (update 64 features)} \\[4pt]
+      \textbf{Step 2} & \text{Compute }e_t, g_t, \tilde G_t, \lambda_t^\text{price}, \dot\lambda_t^\text{price}, \psi_t, R_t, P_t \\[4pt]
+      \textbf{Step 3} & \text{If }R_t \leq 0\text{: EXIT ALL, no entries until }R_t > 0 \\[4pt]
+      \textbf{Step 4} & \text{If }\psi_t > \pi/4\text{: HOLD, signal may be false alarm} \\[4pt]
+      \textbf{Step 5} & \text{If }\dot\lambda_t^\text{price} < 0\text{ and }\lambda_t^\text{price} < 0.4\text{: NO NEW ENTRIES, energy leaving price} \\[4pt]
+      \textbf{Step 6} & \text{Compute RSS}_t\text{ and }\tau_\text{adjusted}, M_t^\text{remaining}, I_t, \ddot e_t\text{ sign} \\[4pt]
+      \textbf{Step 7} & \text{Check all 6 entry conditions — enter only if all satisfied} \\[4pt]
+      \textbf{Step 8} & \text{Set size} = \text{size}_\text{base}\times(1-\gamma^*)\times\lambda_t^\text{price} \\[4pt]
+      \textbf{Step 9} & \text{Set time stop at }\tau_\text{adjusted}\text{ bars, target zone at }[0.7,1.3]\times M_t^\text{remaining} \\[4pt]
+      \textbf{Step 10} & \text{Monitor }R_t\text{ for reversal vs cascade classification}
+      \end{array}
+      \]
+    </div>
+
+    <h3>28.16 — What This Gives That Does Not Exist Elsewhere</h3>
+
+    <table>
+      <thead><tr><th>Capability</th><th>Standard tools</th><th>This operator</th></tr></thead>
+      <tbody>
+        <tr><td>Direction</td><td>Momentum, trend-following</td><td>Sign of return deviation sum — geometric</td></tr>
+        <tr><td>Magnitude</td><td>ATR, Fibonacci</td><td>\(\lambda_t^\text{price}\sqrt{\Sigma_0^{(1,1)}}(\sqrt{e^*}-\sqrt{e_t})\) — calibrated</td></tr>
+        <tr><td>Duration</td><td>None</td><td>\(\tau_\text{adjusted} = \tau_\text{quad}/\lambda_t^\text{price}\) — geometric</td></tr>
+        <tr><td>Move shape</td><td>None</td><td>Sign of \(\ddot e_t\) — before visible on chart</td></tr>
+        <tr><td>False alarm filter</td><td>None</td><td>\(\psi_t < \pi/4\) and \(\lambda_t^\text{price} > 0.5\)</td></tr>
+        <tr><td>Cascade vs reversal</td><td>None</td><td>\(R_t\) sign — before threshold crossed</td></tr>
+        <tr><td>Energy rotation</td><td>None</td><td>\(\dot\lambda_t^\text{price}\) — when price will move vs when volatility expands</td></tr>
+        <tr><td>Reversal magnitude</td><td>None</td><td>\(\lambda_t^\text{price}\sqrt{\Sigma_0^{(1,1)}}(\sqrt{e^*}-\sqrt{e_0})\)</td></tr>
+        <tr><td>Position size</td><td>Fixed or vol-scaled</td><td>\(\text{base}\times(1-\gamma^*)\times\lambda_t^\text{price}\times\mathbf{1}[\dot\lambda\geq 0]\) — proved minimal</td></tr>
+        <tr><td>Confidence interval</td><td>None</td><td>Chi-squared calibrated magnitude zone</td></tr>
+      </tbody>
+    </table>
+
+    <p>Charts show the integral of price velocity over time. This operator computes the velocity, its derivative, its feature decomposition, and its geometric relationship to the energy landscape — before the chart shows any of it. The move profile is known before it is visible. That is not a claim about prediction. It is a statement about what the derivative contains that the integral does not.</p>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       XXIX. STATE-DEPENDENT OPTIMAL THRESHOLDS
+  ══════════════════════════════════════════════════ -->
+  <section>
+    <div class="section-label">§ XXIX — Empirical Addendum · April 2026</div>
+    <h2>State-Dependent Optimal Thresholds &amp; the 4-Quadrant Attribution Law</h2>
+
+    <p>This section records the mathematical structure and empirical discoveries that emerged from deploying the BSDT framework on intraday crypto futures (ETH/BTC/SOL, 1-hour bars, 2021–2026). The central result — that <em>optimal classification thresholds are functions of the system state, not constants</em> — generalises to any BSDT instantiation.</p>
+
+    <!-- ── 29.1 ── -->
+    <h3>29.1 — Per-Channel Collapse Attribution</h3>
+
+    <p>Given the k=1 PCA projection of the state matrix, the k-th channel signal is \(\tilde S_k\). The mean-normalised attribution for channel \(k\) at time \(t\) is:</p>
+
+    <div class="math-block">
+      <div class="label">Collapse attribution (k=1 PCA, 4 channels C, G, A, T)</div>
+      \[
+      a_k(t) = \frac{\tilde S_k(t)^2}{\|\tilde S(t)\|^2}, \qquad \tilde S_k = \frac{S_k}{\mu_k^{(\text{normal})}},
+      \qquad \sum_k a_k = 1
+      \]
+    </div>
+
+    <p class="aside">The mean-normalisation \(\mu_k^{(\text{normal})}\) is estimated once on the calibration window and frozen. It converts raw channel magnitudes into the fraction of total anomaly energy carried by each channel. \(a_G \approx 0.45\) means 45% of the current deviation from normal lives in the gap (PCA out-of-plane) channel.</p>
+
+    <div class="def-grid">
+      <span class="sym">a_C</span><span class="desc">Mahalanobis channel attribution — within-ellipsoid crowding</span>
+      <span class="sym">a_G</span><span class="desc">Gap channel attribution — PCA out-of-subspace displacement</span>
+      <span class="sym">a_A</span><span class="desc">Acceleration (velocity) channel attribution — temporal novelty rate</span>
+      <span class="sym">a_T</span><span class="desc">Topological novelty channel attribution — KDE surface departure</span>
+    </div>
+
+    <!-- ── 29.2 ── -->
+    <h3>29.2 — Rolling Memory Operator</h3>
+
+    <p>A single attribution reading is noisy. The <em>rolling maximum over the recent window</em> extracts the peak excitation within a memory horizon \(N\):</p>
+
+    <div class="math-block">
+      <div class="label">Memory operator (shift by 1 bar to eliminate lookahead)</div>
+      \[
+      G_{\text{mem}}(t) = \max_{s \in [t-N, t-1]} a_G(s), \qquad
+      T_{\text{mem}}(t) = \max_{s \in [t-N, t-1]} a_T(s)
+      \]
+    </div>
+
+    <p>Optimal calibration on crypto futures: \(N = 8\) bars (8 hours). Values of \(N \in \{6,\ldots,10\}\) produce Sharpe within 0.05.</p>
+
+    <!-- ── 29.3 ── -->
+    <h3>29.3 — The 4-Quadrant Phase Modulator</h3>
+
+    <p>The attribution pair \((G_{\text{mem}}, T_{\text{mem}})\) partitions the space into four quadrants. An <em>A-channel firing condition</em> gates whether any quadrant is active. The quadrant indicators are:</p>
+
+    <div class="math-block">
+      <div class="label">Quadrant indicators (all shift-1 to prevent lookahead)</div>
+      \[
+      \begin{aligned}
+      \mathbf{1}_{\text{fire}} &= \mathbf{1}[a_A(t-1) > \theta_A] \\[6pt]
+      q_{GH,TH}(t) &= \mathbf{1}_{\text{fire}} \cdot \mathbf{1}[G_{\text{mem}}(t) > \theta_G] \cdot \mathbf{1}[T_{\text{mem}}(t) > \theta_T] \\
+      q_{GH,TL}(t) &= \mathbf{1}_{\text{fire}} \cdot \mathbf{1}[G_{\text{mem}}(t) > \theta_G] \cdot \mathbf{1}[T_{\text{mem}}(t) \le \theta_T] \\
+      q_{GL,TH}(t) &= \mathbf{1}_{\text{fire}} \cdot \mathbf{1}[G_{\text{mem}}(t) \le \theta_G] \cdot \mathbf{1}[T_{\text{mem}}(t) > \theta_T] \\
+      q_{GL,TL}(t) &= \mathbf{1}_{\text{fire}} \cdot \mathbf{1}[G_{\text{mem}}(t) \le \theta_G] \cdot \mathbf{1}[T_{\text{mem}}(t) \le \theta_T]
+      \end{aligned}
+      \]
+    </div>
+
+    <p>The four quadrants are assigned scalar multipliers \(\beta_{GH,TH}, \beta_{GH,TL}, \beta_{GL,TH}, \beta_{GL,TL} \in \mathbb{R}\). The phase modulator clips to \([\phi_{\min}, \phi_{\max}]\):</p>
+
+    <div class="math-block">
+      <div class="label">Phase modulator</div>
+      \[
+      \phi_t = \operatorname{clip}\!\left(1 + \beta_{GH,TH}\,q_{GH,TH}(t) + \beta_{GH,TL}\,q_{GH,TL}(t) + \beta_{GL,TH}\,q_{GL,TH}(t) + \beta_{GL,TL}\,q_{GL,TL}(t),\;\phi_{\min},\;\phi_{\max}\right)
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">θ_A = 0.65</span><span class="desc">A-channel firing threshold — gates all quadrant activity</span>
+      <span class="sym">θ_G = 0.45</span><span class="desc">G-channel memory threshold (static base; adapted in §29.5)</span>
+      <span class="sym">θ_T = 0.41</span><span class="desc">T-channel memory threshold — cliff-sensitive, keep static</span>
+      <span class="sym">β_{GH,TH} = +5.0</span><span class="desc">Both channels high → strong boost (ϕ_max − 1)</span>
+      <span class="sym">β_{GH,TL} = β_{GL,TH} = β_{GL,TL} = −1.0</span><span class="desc">All other quadrants → full kill (ϕ → 0.05)</span>
+      <span class="sym">ϕ_max = 6.0</span><span class="desc">Clip ceiling — confirmed optimal at clip = 6</span>
+      <span class="sym">ϕ_min = 0.05</span><span class="desc">Floor — prevents zero sizing without position flip</span>
+    </div>
+
+    <p>The at-boundary structure \(\beta_{GH,TH} = \phi_{\max} - 1\) means the boost fires at exactly the clip ceiling — a nonlinear gate implicit in the clamp. Boosting above \(\phi_{\max}\) gains nothing while degrading MaxDD.</p>
+
+    <!-- ── 29.4 ── -->
+    <h3>29.4 — The Full Position Sizing Law</h3>
+
+    <p>Let \(\text{base}_t\) be the portfolio base PnL (sum of independent strategies), \(\gamma^*_{t-1}\) the adaptive damping from §VIII, and \(\lambda_{\text{pct}}(t-1)\) the lambda percentile from §XXVIII. The complete position sizing law is:</p>
+
+    <div class="math-block">
+      <div class="label">v54 champion PnL expression — all terms shift-1 to prevent lookahead</div>
+      \[
+      \text{PnL}_t = \text{base}_t \;\cdot\; \underbrace{\operatorname{clip}(1-\gamma^*_{t-1},\,0,\,1)\cdot\left(0.75 + 0.5\,\lambda_{\text{pct}}(t-1)\right)}_{\text{size}_{sym}(t)} \;\cdot\; \underbrace{\left(1 + c_b\,\mathbf{1}[a_G(t-1) > \theta_{GBT}]\right)}_{\text{G-boost}} \;\cdot\; \phi_t
+      \]
+    </div>
+
+    <div class="def-grid">
+      <span class="sym">c_b = 0.65</span><span class="desc">Champion boost amplitude — additional 65% size when G-channel active</span>
+      <span class="sym">θ_{GBT} = 0.45</span><span class="desc">G-boost activation threshold (equals θ_G in v54)</span>
+      <span class="sym">size_{sym}</span><span class="desc">Symmetric sizing: damped by adaptive γ*, enlarged by lambda percentile</span>
+    </div>
+
+    <!-- ── 29.5 ── -->
+    <h3>29.5 — State-Dependent Threshold: The Core Discovery</h3>
+
+    <p class="aside">This is the first result in this document derived from live empirical optimisation rather than from first principles. It generalises: any scalar threshold in §VI–§IX that exists in a system with a measurable volatility / dispersion regime <em>should be treated as a function, not a parameter</em>.</p>
+
+    <p>Regime analysis of the test window (2023–2026) revealed a persistent asymmetry: high-volatility regimes yield Sharpe +4.30 vs +3.43 in low-volatility regimes under the static threshold. This motivates adapting \(\theta_G\) inversely with the normalised realised volatility:</p>
+
+    <div class="math-block">
+      <div class="label">Dynamic G-threshold — v55 law</div>
+      \[
+      \theta_G(t) = \theta_{G,\text{base}} \cdot \bigl(1 + K_G\,\cdot\,(1 - \hat{rv}_t)\bigr)
+      \]
+    </div>
+
+    <div class="math-block">
+      <div class="label">Normalised realised volatility (1-week, shift-1)</div>
+      \[
+      \hat{rv}_t = \frac{\sigma_{168}(r_t)}{\mathbb{E}_{1000}[\sigma_{168}(r_t)]}\Bigg|_{t-1},
+      \qquad \sigma_{168}(r_t) = \sqrt{\frac{1}{168}\sum_{s=t-168}^{t-1} r_s^2 - \bar r^2}
+      \]
+    </div>
+
+    <p>The sign convention is deliberate: \(\hat{rv}_t > 1\) (high vol) lowers \(\theta_G\) — the system trades more readily when the anomaly energy is elevated. \(\hat{rv}_t < 1\) (quiet markets) raises \(\theta_G\) — requiring stronger G-channel evidence before activating the boost regime.</p>
+
+    <div class="def-grid">
+      <span class="sym">K_G = 0.10</span><span class="desc">Identified as optimal via walk-forward fitting on 2023–2024, confirmed on frozen holdout 2025–2026</span>
+      <span class="sym">θ_{G,base} = 0.45</span><span class="desc">Static fallback (K_G = 0 recovers v54)</span>
+      <span class="sym">clip range</span><span class="desc">θ_G(t) clipped to [0.20, 0.70] — prevents degenerate thresholds</span>
+    </div>
+
+    <div class="geometry-box">
+      <p><strong>Generalisation principle:</strong> For any BSDT scalar threshold \(\theta \in \{\theta_G, \theta_T, \theta_A, \theta_C\}\), the state-dependent form is:</p>
+      \[
+      \theta(t) = \theta_{\text{base}} \cdot f(\text{regime}_t, K)
+      \]
+      <p style="margin-top:12px">where \(f\) satisfies: (i) \(f = 1\) at long-run regime average, (ii) \(f\) is monotone in regime signal, (iii) \(K = 0\) recovers the static baseline. The function class that minimises overfitting risk relative to improvement size is the linear form \(f = 1 + K(1 - \text{regime})\), confirmed superior to quadratic and policy-ensemble forms in adversarial testing.</p>
+    </div>
+
+    <!-- ── 29.6 ── -->
+    <h3>29.6 — Threshold Sensitivity Classification</h3>
+
+    <p>Not all thresholds respond equally to adaptation. Empirical Sharpe sensitivity to ±0.01 perturbation classifies each threshold:</p>
+
+    <table>
+      <thead><tr><th>Threshold</th><th>Type</th><th>±0.01 Sharpe Impact</th><th>Adaptation Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>\(\theta_T = 0.41\)</td><td>Cliff</td><td>−0.15 to −0.19</td><td>Keep static. High sensitivity → dynamic adaptation pays most here (v57 target)</td></tr>
+        <tr><td>\(\theta_G = 0.45\)</td><td>Gradual</td><td>−0.06 to −0.09</td><td>Dynamic via \(\hat{rv}_t\). K_G = 0.10, +0.179 Sharpe confirmed OOS</td></tr>
+        <tr><td>\(\theta_A = 0.65\)</td><td>Mild</td><td>−0.04 to −0.10</td><td>Mildly sensitive; not yet addressed</td></tr>
+        <tr><td>\(c_b = 0.65\)</td><td>Flat</td><td>&lt; 0.001</td><td>Completely flat — do not adapt, hold constant</td></tr>
+        <tr><td>CLIP = 6.0</td><td>Flat</td><td>&lt; 0.008</td><td>Confirmed plateau at clip ∈ [5.5, 6.5]</td></tr>
+      </tbody>
+    </table>
+
+    <p>The paradox: the <em>most sensitive</em> threshold (\(\theta_T\)) is also the one where dynamic adaptation is most likely to help — state dependence rescues cliff-parameters by moving the operating point away from the cliff before it is reached.</p>
+
+    <!-- ── 29.7 ── -->
+    <h3>29.7 — Adversarial Validation Methodology (4-Test Kill Suite)</h3>
+
+    <p>Standard backtests conflate in-sample structural fitting with genuine edge discovery. The following four-test suite is designed to <em>falsify</em> a discovered improvement before trusting it. All four tests were applied to the v55 dynamic threshold before promotion:</p>
+
+    <table>
+      <thead><tr><th>#</th><th>Test</th><th>What it kills</th><th>Pass criterion</th><th>v55 result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Walk-Forward OOS</td>
+          <td>In-sample structural fitting</td>
+          <td>K fitted on first half; frozen evaluation on second half beats static baseline</td>
+          <td>OOS Δ = +0.098 Sharpe <strong>STRONG PASS</strong></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Lag Corruption</td>
+          <td>Timing / lookahead artifacts</td>
+          <td>Sharpe at +48h extra lag &gt; baseline − 0.10</td>
+          <td>Sharpe at +48h = +3.986 (&gt; static +3.857) <strong>STRONG PASS</strong></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Shuffle Null Distribution (N = 500)</td>
+          <td>Random alignment of regime signal with PnL</td>
+          <td>p-value &lt; 0.05 (original in top 5% of null)</td>
+          <td>p = 0.024, z = +1.89σ <strong>PASS</strong></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Formula Robustness</td>
+          <td>Fragile coincidence with one specific functional form</td>
+          <td>All 4 forms beat static; peak Sharpe spread &lt; 0.10</td>
+          <td>Spread = 0.11 (driven by quadratic scale mismatch) <strong>FAIL</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Score 3/4: "Likely real — direction structural, functional form not fully resolved." The v56 form-identification experiment (14 runs) subsequently confirmed the linear form is optimal, the direction gap over inversion is +0.158 Sharpe, and the average-form policy ensemble does not improve over linear.</p>
+
+    <div class="math-block">
+      <div class="label">Shuffle test null distribution</div>
+      \[
+      H_0:\; \text{Sharpe}(\hat{rv}^\sigma) \;\overset{d}{=}\; \text{Sharpe}(\hat{rv}), \quad
+      \hat{rv}^\sigma = \text{random permutation of }\hat{rv}\text{ within test window}
+      \]
+      \[
+      p = \frac{1}{B}\sum_{b=1}^{B}\mathbf{1}\!\left[\text{Sharpe}^{(b)} \ge \text{Sharpe}_{\text{observed}}\right], \quad B = 500
+      \]
+    </div>
+
+    <!-- ── 29.8 ── -->
+    <h3>29.8 — Empirical Progression: v34 → v56</h3>
+
+    <table>
+      <thead><tr><th>Version</th><th>Sharpe</th><th>Δ</th><th>Key Structural Change</th><th>CAGR (1× lever)</th><th>MaxDD</th></tr></thead>
+      <tbody>
+        <tr><td>v34</td><td>+2.616</td><td>—</td><td>Base portfolio: 6 daily + 2 intraday strategies</td><td>+11.2%</td><td>−5.1%</td></tr>
+        <tr><td>v48</td><td>+3.616</td><td>+1.000</td><td>4-quadrant phase modulator, clip = 5, β_{GH,TH} = 4</td><td>+16.6%</td><td>−4.1%</td></tr>
+        <tr><td>v49</td><td>+3.674</td><td>+0.058</td><td>GH,TL = −0.60; A-fire threshold = 0.65; champion boost = 0.60</td><td>+17.1%</td><td>−3.8%</td></tr>
+        <tr><td>v50</td><td>+3.717</td><td>+0.044</td><td>GH,TL = −0.80 joint; A-fire = 0.67</td><td>+17.5%</td><td>−3.9%</td></tr>
+        <tr><td>v51</td><td>+3.730</td><td>+0.012</td><td>GH,TL converges to −1.00; all non-GH,TH quadrants = full kill</td><td>+17.1%</td><td>−3.6%</td></tr>
+        <tr><td>v52</td><td>+3.809</td><td><strong>+0.079</strong></td><td>T_THRESH 0.40 → 0.41; clip 5.0 → 6.0 (at-boundary structure β = clip − 1)</td><td>+18.6%</td><td>−3.8%</td></tr>
+        <tr><td>v53</td><td>+3.856</td><td>+0.047</td><td>A-fire = 0.65 at new clip/T_THRESH baseline</td><td>+19.0%</td><td>−3.7%</td></tr>
+        <tr><td>v54</td><td>+3.857</td><td>+0.001</td><td><em>Plateau confirmed</em>: all static parameter axes exhausted</td><td>+19.1%</td><td>−3.7%</td></tr>
+        <tr><td><strong>v55</strong></td><td><strong>+4.036</strong></td><td><strong>+0.179</strong></td><td><strong>Dynamic θ_G: first state-dependent threshold (K_G = 0.10)</strong></td><td>+20.2%</td><td>−3.7%</td></tr>
+        <tr><td>v56</td><td>+4.036</td><td>±0.000</td><td>Form ID: linear confirmed optimal; direction gap +0.158 over inversion</td><td>+20.2%</td><td>−3.7%</td></tr>
+        <tr><td>v57</td><td>+4.036</td><td>±0.000</td><td>3-test validation: OOS ✓, Vol stress (rv×1.10) ✗ FAIL, T-coupling ✓. Identifies one-sided boundary condition.</td><td>+20.2%</td><td>−3.7%</td></tr>
+        <tr><td><strong>v58</strong></td><td><strong>+3.959</strong></td><td><strong>−0.077</strong></td><td><strong>Asymmetric clamp lo=−0.01 + EMA(3): rv×1.10 drop −0.297 → −0.074. All 4 robustness tests PASS. Production lock.</strong></td><td>+19.7%</td><td>−3.7%</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── 29.9 ── -->
+    <h3>29.9 — What Generalises Beyond Crypto</h3>
+
+    <p>The following results hold for any domain where the BSDT framework is instantiated and a measurable volatility/dispersion regime exists:</p>
+
+    <div class="replace-box">
+      <div class="label">Generalisation results</div>
+      <p><strong>G1. Parameter plateau ≠ signal exhaustion.</strong> When all scalar parameter axes are exhausted (Δ &lt; 0.002 Sharpe per perturbation), the correct response is not more parameter search but <em>promotion of parameters to state-dependent policies</em>.</p>
+      <p style="margin-top:10px"><strong>G2. Threshold sensitivity predicts adaptation potential.</strong> A threshold with high two-sided sensitivity (\(|\partial \text{Sharpe}/\partial\theta| \gg 0\)) is a cliff — and a cliff at the right operating point is exactly where a state-dependent threshold provides the largest benefit by dynamically avoiding the cliff.</p>
+      <p style="margin-top:10px"><strong>G3. Linear functional form is prior.</strong> Until proven otherwise, use \(\theta(t) = \theta_{\text{base}}(1 + K(1 - \text{regime}_t))\). Richer forms (quadratic, tanh, exp) introduce scale mismatches that require additional K optimisation without measurable gain. The direction of adaptation (sign of K) is the structural discovery; the form is secondary.</p>
+      <p style="margin-top:10px"><strong>G4. The at-boundary structure (\(\beta = \phi_{\max} - 1\)) is the correct GH,TH boost calibration.</strong> Setting the boost to exactly reach the clip ceiling maximises signal intensity without regime ambiguity. Values \(\beta &gt; \phi_{\max} - 1\) are clipped and waste parameter budget.</p>
+      <p style="margin-top:10px"><strong>G5. Walk-forward OOS + lag corruption are the two non-negotiable tests.</strong> Shuffle confirms significance. Formula robustness confirms form stability. A result that passes tests 1 and 2 but fails 3 and 4 may still be real; a result that fails tests 1 or 2 is not deployable regardless of in-sample Sharpe.</p>
+    </div>
+
+    <!-- ── 29.10 ── -->
+    <h3>29.10 — v58 Stability Patch: Asymmetric Clamp + EMA Smoothing</h3>
+
+    <p><strong>Problem (v57 Test 2 failure).</strong> The v55 formula \(\text{adj} = K_G(1 - \hat{r}v_t)\) has no floor. When \(\hat{r}v_t\) is persistently inflated by +10% (rv×1.10 stress), adj becomes increasingly negative, \(\theta_G(t)\) drops below its optimal value, and the system overtrades. Sharpe drop: −0.297 (FAIL, threshold 0.15).</p>
+
+    <p><strong>Asymmetry of the boundary condition.</strong> The failure is one-sided: rv×0.90 produces only −0.113 (PASS); additive noise (±N(0,0.02)) produces −0.122 (PASS). Only sustained upward rv bias triggers the failure. This identifies a directional boundary, not fragility — the upside path (lower threshold in high-vol) carries structural edge but an unbounded floor.</p>
+
+    <div class="replace-box">
+      <div class="label">v58 patch equations</div>
+      <p>\[ \hat{r}v_t = \text{EWM}(\hat{r}v_t^{\text{raw}},\,\tau=3) \mid_{t-1} \]</p>
+      <p>\[ \text{adj}_t = \text{clip}\!\left(K_G(1 - \hat{r}v_t),\; l_0,\; +0.10\right) \]</p>
+      <p>\[ \theta_G(t) = \text{clip}\!\left(\theta_{\text{base}}\,(1 + \text{adj}_t),\; 0.20,\; 0.70\right) \]</p>
+      <p style="margin-top:8px">Production values: \(K_G = 0.10\) (frozen), \(\tau = 3\), \(l_0 = -0.01\), \(\theta_{\text{base}} = 0.45\).</p>
+      <p>Semantics of \(l_0 = -0.01\): floor on adj → \(\theta_G(t) \geq 0.45 \times 0.99 = 0.4455\) regardless of rv stress. Upper bound \(+0.10\) unchanged (low-vol rise is safe).</p>
+    </div>
+
+    <h4>Clamp sweep (EMA τ=3 fixed)</h4>
+    <table>
+      <thead><tr><th>\(l_0\)</th><th>Full Sharpe</th><th>OOS H2 (25-26)</th><th>rv×1.10 drop</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>−0.05</td><td>+4.016</td><td>+4.800</td><td>−0.180</td><td>FAIL</td></tr>
+        <tr><td>−0.04</td><td>+4.014</td><td>+4.800</td><td>−0.166</td><td>FAIL</td></tr>
+        <tr><td>−0.03</td><td>+4.003</td><td>+4.800</td><td>−0.166</td><td>FAIL</td></tr>
+        <tr><td>−0.02</td><td>+4.035</td><td>+4.861</td><td>−0.185</td><td>FAIL (non-monotonic)</td></tr>
+        <tr><td><strong>−0.01</strong></td><td><strong>+3.959</strong></td><td><strong>+4.740</strong></td><td><strong>−0.074</strong></td><td><strong>PASS ← champion</strong></td></tr>
+        <tr><td>0.00</td><td>+3.917</td><td>+4.690</td><td>−0.105</td><td>PASS</td></tr>
+      </tbody>
+    </table>
+    <p><em>Note: non-monotonic behaviour at \(l_0 = -0.02\) (worse than \(-0.03\)) is a local data interaction. The PASS threshold jumps discontinuously at \(l_0 = -0.01\).</em></p>
+
+    <h4>v58 validation results (all 4 robustness tests)</h4>
+    <table>
+      <thead><tr><th>Config</th><th>Full Sharpe</th><th>OOS H2</th><th>rv×1.10 drop</th><th>OOS ✓</th><th>Stress ✓</th></tr></thead>
+      <tbody>
+        <tr><td>v55_ref (no clamp, no EMA)</td><td>+4.036</td><td>+4.800</td><td>−0.297</td><td>✓</td><td>✗</td></tr>
+        <tr><td>v58_clamp (lo=−0.05, no EMA)</td><td>+4.036</td><td>+4.800</td><td>−0.222</td><td>✓</td><td>✗</td></tr>
+        <tr><td>v58_ema (lo=−0.05, EMA=3)</td><td>+4.016</td><td>+4.800</td><td>−0.180</td><td>✓</td><td>✗</td></tr>
+        <tr><td><strong>v58_tight (lo=−0.01, EMA=3)</strong></td><td><strong>+3.959</strong></td><td><strong>+4.740</strong></td><td><strong>−0.074</strong></td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="replace-box">
+      <div class="label">v58 production specification (locked)</div>
+      <p><strong>rv_norm</strong>: \(\hat{r}v_t = \text{EWM}(\sigma_{1h,\text{168h}} / \bar{\sigma}_{1000h},\;\tau=3)\mid_{t-1}\)</p>
+      <p><strong>adj</strong>: \(\text{clip}(0.10 \times (1 - \hat{r}v_t),\;-0.01,\;+0.10)\)</p>
+      <p><strong>θ_G(t)</strong>: \(\text{clip}(0.45\times(1+\text{adj}),\;0.20,\;0.70)\)</p>
+      <p style="margin-top:8px">Frozen parameters: CLIP=6.0, GH_TH=5.0, GH_TL=GL_TH=GL_TL=−1.0, N=8, T_THRESH=0.41, CB=0.65, AFT=0.65, K_G=0.10</p>
+      <p>Full-period Sharpe: +3.959 | OOS 2025–2026 Sharpe: +4.740 | MaxDD: −3.7% | rv×1.10 drop: −0.074</p>
+    </div>
+
+  </section>
+
+  <footer>
+    Extracted from <code>energy.py</code> (GravityEngine), <code>bsdt.py</code> (Blind-Spot Detection Theory) &amp; <code>network.py</code> (Ledoit-Wolf Correlation Network) ·
+    Unified field: Quadsurf \(S^\top AS\) + Expogate \(\sum e^{\beta_k S_k}\) + Signed LR \(w^\top S\) ·
+    Sections §I–XXIX · Crypto application §XXVIII · State-dependent thresholds §XXIX · Corrected definitions §XXIV · Per-channel Lyapunov §XXV · \(\psi_t\) §XXVI · Domain discoveries §XXVII ·
+    defaults: α=0.10, γ=1.00, σ=1.00, λ=0.10, ε=10⁻⁵, θ=1.00, F_max=100 · CCyB [0,250] bps · v58 champion: clip=6, θ_G(t)=clip(0.45(1+clip(0.10(1−r̂v_t),−0.01,+0.10)),0.20,0.70), τ_EMA=3, Sharpe=+3.959, OOS-H2=+4.740
+  </footer>
+
+</div>
+</body>
+</html>
