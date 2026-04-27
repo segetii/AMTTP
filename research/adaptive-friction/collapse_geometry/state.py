@@ -17,6 +17,7 @@ class CalibrationState:
     Vk: np.ndarray           # (d,k) top-k PCA basis
     v0: float                # 95-percentile velocity
     eig_Sigma0: np.ndarray   # (d,) eigenvalues of Σ0  (for ellipsoid axes)
+    I_minus_VVT: np.ndarray  # (d,d) precomputed I − V_k V_kᵀ  (perf: used by grad_delta_G)
 
     @property
     def d(self) -> int: return int(self.mu0.shape[0])
@@ -57,7 +58,8 @@ class CalibrationState:
             v0 = float(np.percentile(diffs, 95))
         else:
             v0 = 0.0
-        return cls(mu0, Sigma0, Sigma0_inv, Sigma0_inv_sqrt, Vk, v0, w)
+        I_minus_VVT = np.eye(d) - Vk @ Vk.T  # calibration-time constant; reused per snapshot
+        return cls(mu0, Sigma0, Sigma0_inv, Sigma0_inv_sqrt, Vk, v0, w, I_minus_VVT)
 
 
 @dataclass
@@ -72,13 +74,32 @@ class Snapshot:
     @property
     def d(self) -> int: return int(self.X.shape[1])
 
+    # ── per-snapshot memoization (perf: avoids recomputing shared intermediates) ──
+    def memo(self, key, fn):
+        """Return cached value for `key`, computing via `fn()` on first miss.
+
+        Cache lives on self.__dict__['_cache'] so the dataclass __init__
+        signature stays unchanged and a fresh Snapshot starts empty.
+        """
+        c = self.__dict__.get("_cache")
+        if c is None:
+            c = {}
+            self.__dict__["_cache"] = c
+        v = c.get(key)
+        if v is None:
+            v = fn()
+            c[key] = v
+        return v
+
     def centred(self, mu0: np.ndarray) -> np.ndarray:
-        return self.X - mu0  # broadcasts over rows
+        return self.memo(("centred", id(mu0)), lambda: self.X - mu0)
 
     def distance_matrix(self, eps: float = 1e-8) -> np.ndarray:
         """D_ij = ||x_i - x_j||  via D² = q1ᵀ + 1qᵀ - 2XXᵀ."""
-        X = self.X
-        q = (X * X).sum(axis=1)
-        D2 = q[:, None] + q[None, :] - 2.0 * (X @ X.T)
-        np.fill_diagonal(D2, 0.0)
-        return np.sqrt(np.clip(D2, 0.0, None) + eps) - np.sqrt(eps)
+        def _compute():
+            X = self.X
+            q = (X * X).sum(axis=1)
+            D2 = q[:, None] + q[None, :] - 2.0 * (X @ X.T)
+            np.fill_diagonal(D2, 0.0)
+            return np.sqrt(np.clip(D2, 0.0, None) + eps) - np.sqrt(eps)
+        return self.memo(("D", eps), _compute)

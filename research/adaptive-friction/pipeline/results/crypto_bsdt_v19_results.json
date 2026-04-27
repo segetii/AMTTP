@@ -1,0 +1,94 @@
+{
+  "description": "cos_theta_channel collapse invariant as trading signal",
+  "version": "v19",
+  "train": "2021-01-01 to 2022-12-31",
+  "test_start": "2023-01-01",
+  "parameters": {
+    "GCI_LEV_LO": 0.2,
+    "GCI_LEV_HI": 1.15,
+    "GCI_EMA_SPAN": 5,
+    "ALARM_THRESH": 0.9,
+    "ALARM_MIN_STEPS": 2,
+    "CG_HISTORY_WIN": 60,
+    "CG_PCA_K": 2,
+    "engine": "collapse_geometry_exact_MasterOperator"
+  },
+  "costheta_channel_stats": {
+    "mean": -0.7513,
+    "std": 0.2509,
+    "min": -1.0,
+    "max": 0.8525,
+    "frac_below_neg09": 31.65,
+    "frac_below_neg07": 70.17,
+    "alarm_days_pct": 20.25,
+    "rho_mfls_mean": 4.5511,
+    "rho_mfls_frac_over1_pct": 99.09,
+    "formula": "g=nabla_S_E_BS  h_k=<J_k,F>_F  (\u00a7VII/\u00a7XXIV.3)"
+  },
+  "signal_edge": {
+    "IC_spearman": 0.0206,
+    "edge_fwd5": 0.003271
+  },
+  "ablation": {
+    "v14b": {
+      "label": "v14b",
+      "sharpe": 0.3561,
+      "max_dd": -0.0829,
+      "cum_return": 0.0428,
+      "active_days": 236,
+      "total_days": 1210,
+      "hit_rate": 0.4788,
+      "cagr": 0.0088
+    },
+    "v18_smooth": {
+      "label": "v18_smooth",
+      "sharpe": 0.4973,
+      "max_dd": -0.0809,
+      "cum_return": 0.0592,
+      "active_days": 236,
+      "total_days": 1210,
+      "hit_rate": 0.4788,
+      "cagr": 0.0121
+    },
+    "v19_gci_only": {
+      "label": "v19_gci_only",
+      "sharpe": 0.3084,
+      "max_dd": -0.046,
+      "cum_return": 0.0186,
+      "active_days": 236,
+      "total_days": 1210,
+      "hit_rate": 0.4788,
+      "cagr": 0.0038
+    },
+    "v19_alarm_only": {
+      "label": "v19_alarm_only",
+      "sharpe": 0.9622,
+      "max_dd": -0.0799,
+      "cum_return": 0.1003,
+      "active_days": 183,
+      "total_days": 1210,
+      "hit_rate": 0.4645,
+      "cagr": 0.0201
+    },
+    "v19_full": {
+      "label": "v19_full",
+      "sharpe": 0.4954,
+      "max_dd": -0.0457,
+      "cum_return": 0.0255,
+      "active_days": 183,
+      "total_days": 1210,
+      "hit_rate": 0.4645,
+      "cagr": 0.0053
+    }
+  },
+  "verdict": "v19_full does NOT beat v18_smooth \u2014 keep v18_smooth as PROD",
+  "best_variant": "v18_smooth",
+  "best_K": {
+    "K": 5.25,
+    "pnl": -38.47,
+    "sharpe_net": 0.1462,
+    "max_dd": -0.3851,
+    "final": 1161.53,
+    "cagr": -0.0068
+  }
+}

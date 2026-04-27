@@ -30,13 +30,26 @@ class CollapseGeometry:
 
     # §VII original alignment — channel-space (early warning, valid in all regimes)
     def cos_theta_channel(self, snap: Snapshot) -> float:
-        F = self.op.force(snap)
-        Gtilde = self.op.mfls.state_pullback(snap)  # ⟨g, F⟩ via pullback ≡ ⟨G̃, F⟩
-        nF = np.linalg.norm(F, "fro")
-        nG = np.linalg.norm(Gtilde, "fro")
-        if nF < 1e-12 or nG < 1e-12:
+        """Cosine alignment in the 4-dimensional channel space.
+
+        g_k  = [∇_S E_BS(S)]_k          (channel-space gradient, R⁴)
+        h_k  = ⟨∂δ_k/∂X, F⟩_F = ⟨J_k, F⟩_F  (force projected onto each Jacobian)
+
+        cos_θ_channel = (g · h) / (‖g‖₂ · ‖h‖₂)
+
+        Distinct from cos_theta_state which normalises by ‖G̃‖_F · ‖F‖_F in the
+        full N×d state space.  Both share numerator g·h = ⟨G̃, F⟩_F but differ
+        in how the magnitudes are counted — channel space vs state space.
+        """
+        g  = self.op.mfls.channel_gradient(snap)        # (4,)
+        Js = self.op.bsdt.jacobians_stacked(snap)        # (4, N, d)
+        F  = self.op.force(snap)                         # (N, d)
+        h  = np.einsum("knd,nd->k", Js, F)              # (4,) channel-force projection
+        ng = float(np.linalg.norm(g))
+        nh = float(np.linalg.norm(h))
+        if ng < 1e-12 or nh < 1e-12:
             return 0.0
-        return float((Gtilde * F).sum() / (nF * nG))
+        return float(np.dot(g, h) / (ng * nh))
 
     # §XIV.3 curvature-relative tangent  tan θ_curv = (MFLS / λ_max(∇²E_BS)) · tan φ
     def tan_theta_curv(self, snap: Snapshot, phi: float = 0.0) -> float:

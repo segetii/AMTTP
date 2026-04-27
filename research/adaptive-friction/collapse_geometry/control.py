@@ -49,13 +49,17 @@ class MasterOperator:
 
     # ── core: free force, control direction, parallel/perpendicular ─
     def force(self, snap: Snapshot) -> np.ndarray:
-        D = snap.distance_matrix()
-        return self.forces.force(snap.X, self.cal.mu0, D)
+        def _compute():
+            D = snap.distance_matrix()
+            return self.forces.force(snap.X, self.cal.mu0, D)
+        return snap.memo("force", _compute)
 
     def collapse_direction_state(self, snap: Snapshot) -> np.ndarray:
-        Gt = self.mfls.state_pullback(snap)
-        n = np.linalg.norm(Gt, "fro")
-        return Gt / n if n > 1e-12 else np.zeros_like(Gt)
+        def _compute():
+            Gt = self.mfls.state_pullback(snap)
+            n = np.linalg.norm(Gt, "fro")
+            return Gt / n if n > 1e-12 else np.zeros_like(Gt)
+        return snap.memo("collapse_dir", _compute)
 
     def decompose(self, F: np.ndarray, u: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
         proj = float((F * u).sum())   # ⟨F, u⟩ on (N,d) tensors

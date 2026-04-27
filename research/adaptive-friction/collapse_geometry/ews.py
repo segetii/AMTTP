@@ -219,7 +219,6 @@ class EarlyWarning:
         """
         sigs = self.precursor_signals(snap, snap_prev)
         p = np.array([sigs["p1"], sigs["p2"], sigs["p3"], sigs["p4"]])
-        w = self.precursor_weights
         if self.precursor_scale is not None:
             scales = np.array([
                 self.precursor_scale.P_scale,
@@ -229,7 +228,9 @@ class EarlyWarning:
             ])
         else:
             scales = np.ones(4)
-        return float((w * p / scales).sum())
+        # max over channels: alarm when ANY single signal exceeds its P95 normal
+        # baseline — gives earliest possible trigger (vs sum which dilutes spikes)
+        return float(np.max(p / scales))
 
     # ── Combined two-layer decision ──────────────────────────────
 

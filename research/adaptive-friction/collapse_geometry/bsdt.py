@@ -51,19 +51,19 @@ class BSDT:
 
     # ───────── total channel state vector S = (δ_C, δ_G, δ_A, δ_T) summed over agents ─────────
     def channel_state(self, snap: Snapshot) -> np.ndarray:
-        return np.array([self.delta_C(snap).sum(),
-                         self.delta_G(snap).sum(),
-                         self.delta_A(snap).sum(),
-                         self.delta_T(snap).sum()])
+        return snap.memo("channel_state", lambda: np.array([
+            self.delta_C(snap).sum(),
+            self.delta_G(snap).sum(),
+            self.delta_A(snap).sum(),
+            self.delta_T(snap).sum()]))
 
     # ──────── §XXIV.1 spatial Jacobians ∂δ_k/∂X  (each returns (N,d)) ─────────
     def grad_delta_C(self, snap: Snapshot) -> np.ndarray:
         return 2.0 * snap.centred(self.cal.mu0) @ self.cal.Sigma0_inv
 
     def grad_delta_G(self, snap: Snapshot) -> np.ndarray:
-        Vk = self.cal.Vk
-        I_minus_VVT = np.eye(self.cal.d) - Vk @ Vk.T
-        return 2.0 * snap.centred(self.cal.mu0) @ I_minus_VVT
+        # uses precomputed I − V_k V_kᵀ from CalibrationState (perf)
+        return 2.0 * snap.centred(self.cal.mu0) @ self.cal.I_minus_VVT
 
     def grad_delta_A(self, snap: Snapshot) -> np.ndarray:
         if snap.X_prev is None:
@@ -88,12 +88,23 @@ class BSDT:
         return (w[:, :, None] * diffs).sum(axis=0) / (h * h)
 
     def jacobians(self, snap: Snapshot) -> dict[str, np.ndarray]:
-        return {
+        return snap.memo("jacobians", lambda: {
             "C": self.grad_delta_C(snap),
             "G": self.grad_delta_G(snap),
             "A": self.grad_delta_A(snap),
             "T": self.grad_delta_T(snap),
-        }
+        })
+
+    def jacobians_stacked(self, snap: Snapshot) -> np.ndarray:
+        """(4, N, d) tensor stacked along axis 0 in order (C, G, A, T).
+
+        Used by einsum-based pullback (mfls.state_pullback) and Gram
+        contraction (lyapunov._bundle).  Cached per snapshot.
+        """
+        def _stack():
+            J = self.jacobians(snap)
+            return np.stack([J["C"], J["G"], J["A"], J["T"]], axis=0)
+        return snap.memo("jacobians_stacked", _stack)
 
 
 def _logsumexp(a: np.ndarray, axis: int) -> np.ndarray:

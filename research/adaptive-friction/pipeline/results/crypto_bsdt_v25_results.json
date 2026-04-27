@@ -1,0 +1,84 @@
+{
+  "protocol": "v25 stacked filter: v22 physics + Mahal gate",
+  "layer1": "v18_smooth direction",
+  "layer2": "v22 rolling two-layer alarm (geom + precursor)",
+  "layer3": "Mahal hard gate (>2.0sigma -> 0.2x), or exp decay",
+  "variants": {
+    "v22": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.7425,
+        "max_dd": -0.0499,
+        "cum_return": 0.1346,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.0266
+      }
+    },
+    "v25a_hard2s_020": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.5627,
+        "max_dd": -0.0258,
+        "cum_return": 0.0896,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.018
+      }
+    },
+    "v25b_soft15s_035": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.5301,
+        "max_dd": -0.0303,
+        "cum_return": 0.0841,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.0169
+      }
+    },
+    "v25c_soft10s_050": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.4605,
+        "max_dd": -0.0349,
+        "cum_return": 0.0748,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.0151
+      }
+    },
+    "v25d_exp_a0.2": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.5374,
+        "max_dd": -0.0366,
+        "cum_return": 0.0871,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.0175
+      }
+    },
+    "v25e_expgate_a0.2": {
+      "sim": {
+        "label": "",
+        "sharpe": 1.3377,
+        "max_dd": -0.0259,
+        "cum_return": 0.0645,
+        "active_days": 230.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4826,
+        "cagr": 0.0131
+      }
+    }
+  },
+  "best_key": "v22",
+  "best_sharpe": 1.7425,
+  "mahal_gate_days": 67,
+  "v22_sharpe_reproduced": 1.7425
+}

@@ -1,0 +1,74 @@
+{
+  "protocol": "frozen-normal SIAM \u00a77",
+  "train": {
+    "start": "2021-01-01",
+    "end": "2022-12-31",
+    "days": 730
+  },
+  "test": {
+    "start": "2023-01-01",
+    "end": "2026-04-24",
+    "days": 1210
+  },
+  "engine": {
+    "e_star_chi2": 20.090235029663233,
+    "sigma_n": 2.123245627151789,
+    "precursor_scale": {
+      "P": 1e-09,
+      "psi": 0.029180696563610036,
+      "S": 10.903306978174696,
+      "V": 31.444724536635714
+    },
+    "layer_b_threshold": 0.9110626480993613,
+    "layer_b_normal_mu": 0.7579097141251101,
+    "layer_b_normal_sd": 0.07657646698712559
+  },
+  "layer_occupancy_test": {
+    "": 1090,
+    "A": 120,
+    "B": 0,
+    "AB": 0
+  },
+  "alarm_latched_test_days": 51,
+  "sims": {
+    "v18_smooth": {
+      "label": "v18_smooth",
+      "sharpe": 0.4973,
+      "max_dd": -0.0809,
+      "cum_return": 0.0592,
+      "active_days": 236.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.0121
+    },
+    "v19_alarm_only": {
+      "label": "v19_alarm_only",
+      "sharpe": 0.8601,
+      "max_dd": -0.0822,
+      "cum_return": 0.0946,
+      "active_days": 203.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4729,
+      "cagr": 0.019
+    },
+    "v21_full": {
+      "label": "v21_full",
+      "sharpe": 1.061,
+      "max_dd": -0.0469,
+      "cum_return": 0.0818,
+      "active_days": 236.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.0165
+    }
+  },
+  "best_K_net5bp": {
+    "K": 9.25,
+    "final": 1744.6256095525407,
+    "pnl": 544.6256095525407,
+    "sh": 0.394785117910595,
+    "cagr": 0.08105390075080976,
+    "max_dd": -0.39704141045210495,
+    "max_dd_dol": -710.6438828135495
+  }
+}

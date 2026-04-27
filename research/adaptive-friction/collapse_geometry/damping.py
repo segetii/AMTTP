@@ -14,9 +14,13 @@ class AdaptiveDamping:
     theta: float = 1.0   # intervention cost
 
     def e_BSDT(self, snap: Snapshot) -> float:
-        Xt = snap.centred(self.cal.mu0) @ self.cal.Sigma0_inv_sqrt
-        return float(np.linalg.norm(Xt, "fro") ** 2)
+        def _compute():
+            Xt = snap.centred(self.cal.mu0) @ self.cal.Sigma0_inv_sqrt
+            return float(np.linalg.norm(Xt, "fro") ** 2)
+        return snap.memo("e_BSDT", _compute)
 
     def gamma_star(self, snap: Snapshot) -> float:
-        e = self.e_BSDT(snap)
-        return e / (e + self.theta)
+        def _compute():
+            e = self.e_BSDT(snap)
+            return e / (e + self.theta)
+        return snap.memo("gamma_star", _compute)

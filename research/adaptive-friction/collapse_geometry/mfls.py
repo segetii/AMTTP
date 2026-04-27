@@ -41,18 +41,19 @@ class MFLS:
 
     # ── channel-space (R⁴) ───────────────────────────────────────
     def channel_gradient(self, snap: Snapshot) -> np.ndarray:
-        S = self.bsdt.channel_state(snap)
-        return self.energy.grad(S)
+        return snap.memo("mfls_grad",
+                         lambda: self.energy.grad(self.bsdt.channel_state(snap)))
 
     def channel_mfls(self, snap: Snapshot) -> float:
         return float(np.linalg.norm(self.channel_gradient(snap)))
 
     # ── state-space pullback G̃_t (N×d) ─────────────────────────────
     def state_pullback(self, snap: Snapshot) -> np.ndarray:
-        g = self.channel_gradient(snap)             # (4,)
-        J = self.bsdt.jacobians(snap)               # dict of (N,d)
-        return (g[0] * J["C"] + g[1] * J["G"]
-                + g[2] * J["A"] + g[3] * J["T"])
+        def _compute():
+            g = self.channel_gradient(snap)               # (4,)
+            Js = self.bsdt.jacobians_stacked(snap)        # (4, N, d)
+            return np.einsum("k,knd->nd", g, Js)
+        return snap.memo("mfls_pullback", _compute)
 
     def state_mfls(self, snap: Snapshot) -> float:
         return float(np.linalg.norm(self.state_pullback(snap), "fro"))

@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "v54_sharpe": 3.8568,
+    "v55_sharpe": 4.0362,
+    "k_g_frozen": 0.1,
+    "oos_split_date": "2025-01-01"
+  },
+  "test1_oos_split": {
+    "pass": true,
+    "pass_threshold": 3.6,
+    "v55_second_half_sharpe": 4.799465414205025,
+    "v54_second_half_sharpe": 4.701983638274856,
+    "delta_v55_vs_v54_oos": 0.09748177593016827,
+    "detail": {
+      "v54 (K=0.00)": {
+        "sharpe_full": 3.856839449735926,
+        "sharpe_first": 3.341679213699251,
+        "sharpe_second": 4.701983638274856,
+        "maxdd_second": -0.037454466714068824
+      },
+      "v55 (K=0.10)": {
+        "sharpe_full": 4.036199548873064,
+        "sharpe_first": 3.6164300079485714,
+        "sharpe_second": 4.799465414205025,
+        "maxdd_second": -0.03745446671406971
+      }
+    }
+  },
+  "test2_vol_stress": {
+    "pass": false,
+    "pass_threshold_drop": 0.15,
+    "max_absolute_drop": 0.296868932315681,
+    "detail": {
+      "baseline  (K=0.10)": {
+        "sharpe": 4.036199548873064,
+        "delta": 0.0,
+        "maxdd": -0.03745446671406971
+      },
+      "rv \u00d7 0.90": {
+        "sharpe": 3.923373901320778,
+        "delta": -0.11282564755228641,
+        "maxdd": -0.037454466714068935
+      },
+      "rv \u00d7 1.10": {
+        "sharpe": 3.739330616557383,
+        "delta": -0.296868932315681,
+        "maxdd": -0.03745446671406927
+      },
+      "rv + N(0,0.02)": {
+        "sharpe": 3.913907989647148,
+        "delta": -0.12229155922591639,
+        "maxdd": -0.037454466714068824
+      }
+    }
+  },
+  "test3_tth_coupling": {
+    "improves": true,
+    "delta_vs_v55": 0.003641326805195355,
+    "v55_baseline_sharpe": 4.036199548873064,
+    "coupled_full_sharpe": 4.03984087567826,
+    "coupled_second_half_sharpe": 4.807300505102603,
+    "tth_range": [
+      0.4086773023273875,
+      0.4106153002486828
+    ],
+    "verdict": "IMPROVED \u2014 upgrade path exists; run dedicated sweep"
+  },
+  "overall": {
+    "tests_passed": 1,
+    "test3_improves": true,
+    "decision": "KEEP v55, reduce position size \u2014 partial trust"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "strategies": {
+    "v34_baseline": {
+      "sharpe_K5": 2.6157,
+      "max_dd_K5": -16.55,
+      "cagr_K5": 367.04,
+      "final_K5": 438.76
+    },
+    "v38_sym_W100": {
+      "sharpe_K5": 2.687,
+      "max_dd_K5": -12.97,
+      "cagr_K5": 234.73,
+      "final_K5": 318.73
+    },
+    "v39b_aG_boost": {
+      "sharpe_K5": 2.7617,
+      "max_dd_K5": -14.1,
+      "cagr_K5": 288.82,
+      "final_K5": 368.0
+    },
+    "v39c_proposed": {
+      "sharpe_K5": 2.6892,
+      "max_dd_K5": -15.28,
+      "cagr_K5": 263.56,
+      "final_K5": 345.04
+    },
+    "v39c_Gz_only": {
+      "sharpe_K5": 2.6948,
+      "max_dd_K5": -14.29,
+      "cagr_K5": 277.04,
+      "final_K5": 357.3
+    },
+    "v39c_GT_only": {
+      "sharpe_K5": 2.7106,
+      "max_dd_K5": -13.15,
+      "cagr_K5": 239.45,
+      "final_K5": 323.05
+    },
+    "v39c_killA_only": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    },
+    "v39c_cascA_only": {
+      "sharpe_K5": 2.6903,
+      "max_dd_K5": -12.29,
+      "cagr_K5": 229.78,
+      "final_K5": 314.21
+    },
+    "v39c_Gz_killA": {
+      "sharpe_K5": 2.6621,
+      "max_dd_K5": -15.15,
+      "cagr_K5": 257.11,
+      "final_K5": 339.16
+    },
+    "v39c_GT_killA": {
+      "sharpe_K5": 2.6846,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 221.5,
+      "final_K5": 306.64
+    },
+    "v39c_GT_Gz": {
+      "sharpe_K5": 2.7213,
+      "max_dd_K5": -14.42,
+      "cagr_K5": 283.86,
+      "final_K5": 363.5
+    },
+    "v39c_full_chaos": {
+      "sharpe_K5": 2.7212,
+      "max_dd_K5": -14.65,
+      "cagr_K5": 278.19,
+      "final_K5": 358.34
+    }
+  },
+  "signals": {
+    "a_G": {
+      "mean": 0.387415,
+      "std": 0.153943,
+      "p25": 0.338827,
+      "p75": 0.494739,
+      "p95": 0.564054
+    },
+    "a_A": {
+      "mean": 0.108988,
+      "std": 0.270069,
+      "p25": 0.0,
+      "p75": 0.0,
+      "p95": 0.888978
+    },
+    "a_T": {
+      "mean": 0.355453,
+      "std": 0.135816,
+      "p25": 0.313007,
+      "p75": 0.450177,
+      "p95": 0.510452
+    },
+    "a_C": {
+      "mean": 0.148143,
+      "std": 0.132069,
+      "p25": 0.074427,
+      "p75": 0.167863,
+      "p95": 0.437014
+    }
+  },
+  "config": {
+    "PCA_K": 1,
+    "ZSCORE_WINDOW": 500,
+    "BOOST_G_Z": 0.3,
+    "BOOST_GT": 0.4,
+    "A_KILL_THRESH": 0.7,
+    "G_CHAOS_THRESH": 0.5,
+    "KILL_SCALE": 0.2,
+    "CASCADE_SCALE": 0.8
+  }
+}

@@ -25,28 +25,28 @@ class LyapunovCertificate:
 
     # ── building blocks ─────────────────────────────────────────
     def _bundle(self, snap: Snapshot) -> dict:
-        F = self.op.force(snap)
-        g = self.op.mfls.channel_gradient(snap)         # (4,)
-        J = self.op.bsdt.jacobians(snap)
-        Gtilde = g[0]*J["C"] + g[1]*J["G"] + g[2]*J["A"] + g[3]*J["T"]
-        gamma = self.op.damp.gamma_star(snap)
-        # ⟨F, g_channel⟩ — but g lives in R⁴ → use ⟨F, J·g⟩ = ⟨F, Gtilde⟩ in state-space
-        # The §XVI scalars ⟨F, g⟩ and ⟨∂δ_k, g⟩ are interpreted via the pullback:
-        # ⟨F, g⟩ ≡ Σ_k g_k ⟨∂δ_k, F⟩_F = ⟨Gtilde, F⟩_F by linearity.
-        Fg = float((F * Gtilde).sum())                  # ⟨F, g⟩ via pullback
-        # ⟨∂δ_k, g⟩ ≡ Σ_l g_l ⟨∂δ_k, ∂δ_l⟩_F
-        inner = np.zeros((4, 4))
-        keys = ("C", "G", "A", "T")
-        for i, ki in enumerate(keys):
-            for j, kj in enumerate(keys):
-                inner[i, j] = (J[ki] * J[kj]).sum()
-        kg = inner @ g                                  # (4,)
-        Rt = float((g * kg).sum())                      # control coupling sum
-        gnorm2 = float((g * g).sum())                   # ||g||² in R⁴
-        Pt = float((Gtilde * F).sum())                  # ⟨G̃, F⟩_F
-        Qt = Fg * Rt
-        return dict(F=F, g=g, J=J, Gtilde=Gtilde, gamma=gamma,
-                    Fg=Fg, kg=kg, Rt=Rt, gnorm2=gnorm2, Pt=Pt, Qt=Qt)
+        def _compute():
+            F = self.op.force(snap)
+            g = self.op.mfls.channel_gradient(snap)         # (4,)
+            J = self.op.bsdt.jacobians(snap)
+            # state-space pullback: reuse cached/einsum version (logic-equivalent)
+            Gtilde = self.op.mfls.state_pullback(snap)
+            gamma = self.op.damp.gamma_star(snap)
+            # ⟨F, g_channel⟩ — but g lives in R⁴ → use ⟨F, J·g⟩ = ⟨F, Gtilde⟩ in state-space
+            # The §XVI scalars ⟨F, g⟩ and ⟨∂δ_k, g⟩ are interpreted via the pullback:
+            # ⟨F, g⟩ ≡ Σ_k g_k ⟨∂δ_k, F⟩_F = ⟨Gtilde, F⟩_F by linearity.
+            Fg = float((F * Gtilde).sum())                  # ⟨F, g⟩ via pullback
+            # ⟨∂δ_k, g⟩ ≡ Σ_l g_l ⟨∂δ_k, ∂δ_l⟩_F   — Gram matrix via single BLAS call
+            Js = self.op.bsdt.jacobians_stacked(snap)       # (4, N, d)
+            inner = np.einsum("ind,jnd->ij", Js, Js)        # (4, 4)
+            kg = inner @ g                                  # (4,)
+            Rt = float((g * kg).sum())                      # control coupling sum
+            gnorm2 = float((g * g).sum())                   # ||g||² in R⁴
+            Pt = float((Gtilde * F).sum())                  # ⟨G̃, F⟩_F
+            Qt = Fg * Rt
+            return dict(F=F, g=g, J=J, Gtilde=Gtilde, gamma=gamma,
+                        Fg=Fg, kg=kg, Rt=Rt, gnorm2=gnorm2, Pt=Pt, Qt=Qt)
+        return snap.memo("lyap_bundle", _compute)
 
     # ── §XVI dV/dt ─────────────────────────────────────────────
     def dV_dt(self, snap: Snapshot) -> float:

@@ -1,0 +1,169 @@
+{
+  "config": {
+    "mode": "perp futures (long + short)",
+    "venue_assumed": "Binance USDT-perp / Hyperliquid / dYdX",
+    "fees_bps_round_trip": 5.0,
+    "funding_models": {
+      "worst": "always paying side, both legs charged",
+      "neutral": "pairs=0, trend+macro 50% offset",
+      "directional": "trend uses real position sign, pairs=0"
+    },
+    "init_capital_usd": 100.0
+  },
+  "F5_long_short_split": {
+    "eth_up_days_pnl_pct": 8.54384625219678,
+    "eth_down_days_pnl_pct": -2.4891626653581644,
+    "eth_flat_days_pnl_pct": 0.1490654202461976,
+    "n_up_days": 586,
+    "n_down_days": 567,
+    "n_flat_days": 58
+  },
+  "F6_funding_total_bps": {
+    "worst": 856.52485,
+    "neutral": 174.34069563578873,
+    "directional": 125.60804594480344
+  },
+  "sim_100usd": [
+    {
+      "fund": "worst",
+      "K": 1.0,
+      "final": 92.29581210756534,
+      "pnl_dollar": -7.7041878924346605,
+      "cagr": -0.016544677929162033,
+      "sharpe_net": -1.0893476956532915,
+      "max_dd": -0.09220391367779081
+    },
+    {
+      "fund": "worst",
+      "K": 2.0,
+      "final": 89.99128746704957,
+      "pnl_dollar": -10.008712532950426,
+      "cagr": -0.021705840064943582,
+      "sharpe_net": -0.7037554386989724,
+      "max_dd": -0.13297537640982662
+    },
+    {
+      "fund": "worst",
+      "K": 5.0,
+      "final": 82.86370819003291,
+      "pnl_dollar": -17.13629180996709,
+      "cagr": -0.038360624694062206,
+      "sharpe_net": -0.47241747881405394,
+      "max_dd": -0.2626807697113414
+    },
+    {
+      "fund": "worst",
+      "K": 10.0,
+      "final": 70.67445707873048,
+      "pnl_dollar": -29.325542921269516,
+      "cagr": -0.06967936275825504,
+      "sharpe_net": -0.3956213332063967,
+      "max_dd": -0.45039116038684124
+    },
+    {
+      "fund": "worst",
+      "K": 3.5,
+      "best_dd20": true,
+      "final": 86.46097907884405,
+      "pnl_dollar": -13.539020921155952,
+      "cagr": -0.0298190387838817,
+      "sharpe_net": -0.5383977923365151,
+      "max_dd": -0.19632601722989054
+    },
+    {
+      "fund": "neutral",
+      "K": 1.0,
+      "final": 98.81399824591581,
+      "pnl_dollar": -1.186001754084188,
+      "cagr": -0.002479652998294557,
+      "sharpe_net": -0.15873908326687597,
+      "max_dd": -0.03434913392102509
+    },
+    {
+      "fund": "neutral",
+      "K": 2.0,
+      "final": 103.1547731082563,
+      "pnl_dollar": 3.1547731082562933,
+      "cagr": 0.006484353401125187,
+      "sharpe_net": 0.23033819130828181,
+      "max_dd": -0.048069626726194435
+    },
+    {
+      "fund": "neutral",
+      "K": 5.0,
+      "final": 116.60256422843736,
+      "pnl_dollar": 16.60256422843736,
+      "cagr": 0.0324795407327827,
+      "sharpe_net": 0.46100419764058304,
+      "max_dd": -0.09005883591851267
+    },
+    {
+      "fund": "neutral",
+      "K": 10.0,
+      "final": 140.07803929976447,
+      "pnl_dollar": 40.07803929976447,
+      "cagr": 0.07265116403525385,
+      "sharpe_net": 0.5371170301352239,
+      "max_dd": -0.16211058449458207
+    },
+    {
+      "fund": "neutral",
+      "K": 12.5,
+      "best_dd20": true,
+      "final": 152.08923858114287,
+      "pnl_dollar": 52.089238581142865,
+      "cagr": 0.09117228452770698,
+      "sharpe_net": 0.5522847635021417,
+      "max_dd": -0.19874167767029052
+    },
+    {
+      "fund": "directional",
+      "K": 1.0,
+      "final": 99.29702893911674,
+      "pnl_dollar": -0.7029710608832573,
+      "cagr": -0.0014669188340158401,
+      "sharpe_net": -0.09112495475956851,
+      "max_dd": -0.03212758522901486
+    },
+    {
+      "fund": "directional",
+      "K": 2.0,
+      "final": 104.16641571649454,
+      "pnl_dollar": 4.166415716494541,
+      "cagr": 0.008530427480813563,
+      "sharpe_net": 0.29886353177140645,
+      "max_dd": -0.04368510608932082
+    },
+    {
+      "fund": "directional",
+      "K": 5.0,
+      "final": 119.4880676463796,
+      "pnl_dollar": 19.488067646379605,
+      "cagr": 0.03774501362241134,
+      "sharpe_net": 0.5299364410071259,
+      "max_dd": -0.07954840087687608
+    },
+    {
+      "fund": "directional",
+      "K": 10.0,
+      "final": 147.11817329776943,
+      "pnl_dollar": 47.11817329776943,
+      "cagr": 0.08365266172773134,
+      "sharpe_net": 0.6061594000951415,
+      "max_dd": -0.14349338244788554
+    },
+    {
+      "fund": "directional",
+      "K": 14.25,
+      "best_dd20": true,
+      "final": 172.16268100987259,
+      "pnl_dollar": 72.16268100987259,
+      "cagr": 0.11968829062739128,
+      "sharpe_net": 0.6288012425976002,
+      "max_dd": -0.19908851203158823
+    }
+  ],
+  "directional_K2_final_usd": 104.16641571649454,
+  "directional_K2_sharpe_net": 0.29886353177140645,
+  "directional_K2_max_dd": -0.04368510608932082
+}

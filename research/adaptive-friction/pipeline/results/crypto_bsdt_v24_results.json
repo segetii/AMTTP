@@ -1,0 +1,176 @@
+{
+  "protocol": "v24 clean exposure controller",
+  "layer1": "v18_smooth direction signal",
+  "layer2": "Mahalanobis risk scaling (plain d=2 panel, frozen train cov)",
+  "variants": {
+    "A_no_control": {
+      "label": "A: no controller",
+      "alpha": null,
+      "fn": "none",
+      "sim": {
+        "label": "",
+        "sharpe": 0.4973,
+        "max_dd": -0.0809,
+        "cum_return": 0.0592,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.012
+      }
+    },
+    "B_exp_decay": {
+      "label": "B: exp_decay (alpha=0.2)",
+      "alpha": 0.2,
+      "fn": "exp",
+      "sim": {
+        "label": "",
+        "sharpe": 0.5775,
+        "max_dd": -0.0632,
+        "cum_return": 0.0538,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.011
+      }
+    },
+    "C_logistic": {
+      "label": "C: logistic (alpha=0.2)",
+      "alpha": 0.2,
+      "fn": "logistic",
+      "sim": {
+        "label": "",
+        "sharpe": 0.54,
+        "max_dd": -0.0651,
+        "cum_return": 0.052,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.0106
+      }
+    },
+    "D_hard_gate": {
+      "label": "D: hard_gate (>2.0\u03c3 -> 0.2x)",
+      "alpha": null,
+      "fn": "gate",
+      "sim": {
+        "label": "",
+        "sharpe": 0.7264,
+        "max_dd": -0.0689,
+        "cum_return": 0.0705,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.0143
+      }
+    },
+    "E_exp_gate": {
+      "label": "E: exp+gate (alpha=0.2)",
+      "alpha": 0.2,
+      "fn": "exp+gate",
+      "sim": {
+        "label": "",
+        "sharpe": 0.5809,
+        "max_dd": -0.0614,
+        "cum_return": 0.0481,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.0098
+      }
+    },
+    "F_exp_layerB": {
+      "label": "F: exp+LayerB (alpha=0.2, B=40%)",
+      "alpha": 0.2,
+      "fn": "exp+layerB",
+      "sim": {
+        "label": "",
+        "sharpe": 0.4169,
+        "max_dd": -0.0621,
+        "cum_return": 0.0322,
+        "active_days": 236.0,
+        "total_days": 1211.0,
+        "hit_rate": 0.4788,
+        "cagr": 0.0066
+      }
+    }
+  },
+  "best_variant": "D_hard_gate",
+  "best_sharpe": 0.7264,
+  "v22_reference": {
+    "sharpe": 1.7425,
+    "max_dd": -0.0499,
+    "cagr": 0.0266
+  },
+  "alpha_sweep": {
+    "0.2": {
+      "label": "",
+      "sharpe": 0.5775,
+      "max_dd": -0.0632,
+      "cum_return": 0.0538,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.011
+    },
+    "0.5": {
+      "label": "",
+      "sharpe": 0.4239,
+      "max_dd": -0.0536,
+      "cum_return": 0.0306,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.0063
+    },
+    "0.8": {
+      "label": "",
+      "sharpe": 0.1748,
+      "max_dd": -0.0479,
+      "cum_return": 0.0097,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.002
+    },
+    "1.0": {
+      "label": "",
+      "sharpe": 0.0342,
+      "max_dd": -0.0465,
+      "cum_return": -0.0001,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": -0.0
+    },
+    "1.5": {
+      "label": "",
+      "sharpe": -0.1288,
+      "max_dd": -0.0465,
+      "cum_return": -0.0102,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": -0.0021
+    },
+    "2.0": {
+      "label": "",
+      "sharpe": -0.1586,
+      "max_dd": -0.048,
+      "cum_return": -0.0116,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": -0.0024
+    },
+    "3.0": {
+      "label": "",
+      "sharpe": -0.1562,
+      "max_dd": -0.0478,
+      "cum_return": -0.0111,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4788,
+      "cagr": -0.0023
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "protocol": "v28 quality-gated risk-normalized allocator",
+  "design": "3-layer: vol-scale + rolling-Sharpe sigmoid + engine-state gate",
+  "strategies": [
+    "trend",
+    "pairs",
+    "breakout",
+    "macro"
+  ],
+  "mean_rev_status": "DROPPED (v27 contrib Sharpe -2.27)",
+  "params": {
+    "vol_win": 60,
+    "sharpe_win": 120,
+    "sharpe_k": 2.0,
+    "target_vol": 0.01,
+    "scale_cap": 5.0,
+    "G_LO": 0.5,
+    "K_LO": 0.3
+  },
+  "variants": {
+    "v22_baseline": {
+      "label": "",
+      "sharpe": 1.7425,
+      "max_dd": -0.0499,
+      "cum_return": 0.1346,
+      "active_days": 230.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4826,
+      "cagr": 0.0266
+    },
+    "v28_QonlyFlat": {
+      "label": "",
+      "sharpe": -0.3565,
+      "max_dd": -0.1363,
+      "cum_return": -0.0889,
+      "active_days": 960.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4854,
+      "cagr": -0.0192
+    },
+    "v28_QonlyKramers": {
+      "label": "",
+      "sharpe": -0.1452,
+      "max_dd": -0.0927,
+      "cum_return": -0.0304,
+      "active_days": 960.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4854,
+      "cagr": -0.0064
+    },
+    "v28_full": {
+      "label": "",
+      "sharpe": 0.6628,
+      "max_dd": -0.0803,
+      "cum_return": 0.0853,
+      "active_days": 284.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4894,
+      "cagr": 0.0172
+    },
+    "v28_full_flat": {
+      "label": "",
+      "sharpe": 0.7461,
+      "max_dd": -0.0666,
+      "cum_return": 0.0873,
+      "active_days": 284.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4894,
+      "cagr": 0.0176
+    },
+    "v28_loose": {
+      "label": "",
+      "sharpe": 0.4323,
+      "max_dd": -0.0857,
+      "cum_return": 0.0711,
+      "active_days": 436.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4977,
+      "cagr": 0.0144
+    },
+    "v28_loose_flat": {
+      "label": "",
+      "sharpe": 0.2483,
+      "max_dd": -0.0741,
+      "cum_return": 0.0358,
+      "active_days": 436.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4977,
+      "cagr": 0.0073
+    },
+    "v28_no_act": {
+      "label": "",
+      "sharpe": 0.0415,
+      "max_dd": -0.1169,
+      "cum_return": 0.0009,
+      "active_days": 960.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4906,
+      "cagr": 0.0002
+    },
+    "v28_no_act_flat": {
+      "label": "",
+      "sharpe": -0.108,
+      "max_dd": -0.1458,
+      "cum_return": -0.0494,
+      "active_days": 960.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4906,
+      "cagr": -0.0105
+    },
+    "v28_full_no_brk": {
+      "label": "",
+      "sharpe": 2.3375,
+      "max_dd": -0.0308,
+      "cum_return": 0.1201,
+      "active_days": 112.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5179,
+      "cagr": 0.0239
+    },
+    "v28_full_no_Q": {
+      "label": "",
+      "sharpe": 0.8661,
+      "max_dd": -0.1956,
+      "cum_return": 0.247,
+      "active_days": 284.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5141,
+      "cagr": 0.047
+    },
+    "v28_full_Qsharp": {
+      "label": "",
+      "sharpe": 0.4639,
+      "max_dd": -0.1049,
+      "cum_return": 0.0593,
+      "active_days": 284.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4894,
+      "cagr": 0.0121
+    }
+  },
+  "best_variant": "v28_full_no_brk",
+  "best_sharpe": 2.3375,
+  "v22_reference_sharpe": 1.7425,
+  "v22_reference_max_dd": -0.0499
+}

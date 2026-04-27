@@ -1,0 +1,147 @@
+{
+  "strategies": {
+    "v34_baseline": {
+      "sharpe_K5": 2.6157,
+      "max_dd_K5": -16.55,
+      "cagr_K5": 367.04,
+      "final_K5": 438.76
+    },
+    "v38_sym_W100": {
+      "sharpe_K5": 2.687,
+      "max_dd_K5": -12.97,
+      "cagr_K5": 234.73,
+      "final_K5": 318.73
+    },
+    "v39b_aG_boost": {
+      "sharpe_K5": 2.7617,
+      "max_dd_K5": -14.1,
+      "cagr_K5": 288.82,
+      "final_K5": 368.0
+    },
+    "v39c_killA_simple": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    },
+    "v39d_condKill": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    },
+    "v39d_condBoost": {
+      "sharpe_K5": 2.687,
+      "max_dd_K5": -12.97,
+      "cagr_K5": 234.73,
+      "final_K5": 318.73
+    },
+    "v39d_continuous": {
+      "sharpe_K5": 2.6746,
+      "max_dd_K5": -13.78,
+      "cagr_K5": 268.65,
+      "final_K5": 349.67
+    },
+    "v39d_aGboost_condKill": {
+      "sharpe_K5": 2.7313,
+      "max_dd_K5": -14.82,
+      "cagr_K5": 268.26,
+      "final_K5": 349.31
+    },
+    "v39d_aGboost_condBoost": {
+      "sharpe_K5": 2.7617,
+      "max_dd_K5": -14.1,
+      "cagr_K5": 288.82,
+      "final_K5": 368.0
+    },
+    "v39d_aGboost_continuous": {
+      "sharpe_K5": 2.7378,
+      "max_dd_K5": -16.25,
+      "cagr_K5": 337.23,
+      "final_K5": 411.86
+    },
+    "v39d_condKill_condBoost": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    },
+    "v39d_all3": {
+      "sharpe_K5": 2.6435,
+      "max_dd_K5": -14.8,
+      "cagr_K5": 253.15,
+      "final_K5": 335.55
+    },
+    "v39d_champion_plus_all3": {
+      "sharpe_K5": 2.7056,
+      "max_dd_K5": -16.99,
+      "cagr_K5": 318.85,
+      "final_K5": 395.23
+    },
+    "v39d_condKill_glo040": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    },
+    "v39d_condKill_glo050": {
+      "sharpe_K5": 2.6604,
+      "max_dd_K5": -13.16,
+      "cagr_K5": 217.03,
+      "final_K5": 302.55
+    }
+  },
+  "signals": {
+    "a_G": {
+      "mean": 0.387415,
+      "std": 0.153943,
+      "p5": 0.026361,
+      "p25": 0.338827,
+      "p75": 0.494739,
+      "p95": 0.564054
+    },
+    "a_A": {
+      "mean": 0.108988,
+      "std": 0.270069,
+      "p5": 0.0,
+      "p25": 0.0,
+      "p75": 0.0,
+      "p95": 0.888978
+    },
+    "a_T": {
+      "mean": 0.355453,
+      "std": 0.135816,
+      "p5": 0.032085,
+      "p25": 0.313007,
+      "p75": 0.450177,
+      "p95": 0.510452
+    },
+    "a_C": {
+      "mean": 0.148143,
+      "std": 0.132069,
+      "p5": 0.02998,
+      "p25": 0.074427,
+      "p75": 0.167863,
+      "p95": 0.437014
+    }
+  },
+  "regimes": {
+    "condKill_bars": 746,
+    "condKill_pct": 8.876,
+    "condBoost_bars": 0,
+    "condBoost_pct": 0.0,
+    "simpleKill_bars": 746,
+    "simpleKill_pct": 8.876,
+    "aG_mean_when_A_fires": 0.034572
+  },
+  "config": {
+    "PCA_K": 1,
+    "A_KILL_THRESH": 0.7,
+    "G_LOW_THRESH": 0.3,
+    "G_HIGH_THRESH": 0.5,
+    "COND_KILL_FRAC": 0.7,
+    "COND_BOOST_FAC": 0.4,
+    "CONT_G_COEFF": 0.3,
+    "CONT_A_COEFF": 0.2
+  }
+}

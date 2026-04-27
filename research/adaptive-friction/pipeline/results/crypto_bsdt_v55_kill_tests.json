@@ -1,0 +1,88 @@
+{
+  "kill1_wf": {
+    "kg_fitted": 0.1,
+    "first_half_sharpe": 3.6164300079485714,
+    "second_half_v54": 4.701983638274856,
+    "second_half_v55": 4.799465414205025,
+    "oos_delta": 0.09748177593016827,
+    "pass": true,
+    "strong_pass": true
+  },
+  "kill2_lag": {
+    "results": {
+      "rv_lag+0h  (base, shift=1)": {
+        "extra_lag": 0,
+        "sharpe": 4.036199548873064
+      },
+      "rv_lag+24h (shift=25)": {
+        "extra_lag": 24,
+        "sharpe": 4.004782293540667
+      },
+      "rv_lag+48h (shift=49)": {
+        "extra_lag": 48,
+        "sharpe": 3.9861311174956646
+      },
+      "rv_lag+72h (shift=73)": {
+        "extra_lag": 72,
+        "sharpe": 3.918203228352357
+      },
+      "rv_lag+168h (1wk behind)": {
+        "extra_lag": 168,
+        "sharpe": 3.8611240098522264
+      }
+    },
+    "cliff_drop_24h": 0.031417255332397254,
+    "sharpe_lag48h": 3.9861311174956646,
+    "pass": true,
+    "strong_pass": true
+  },
+  "kill3_shuffle": {
+    "n": 500,
+    "null_mean": 3.807456852323934,
+    "null_std": 0.1211302633130335,
+    "null_p50": 3.8096640977218925,
+    "null_p95": 3.9936055906542554,
+    "null_p99": 4.082978257783079,
+    "v55_sharpe": 4.036199548873064,
+    "z_score": 1.8884025370108963,
+    "p_value": 0.024,
+    "pass": true,
+    "strong_pass": false
+  },
+  "kill4_formula": {
+    "peak_spread": 0.1106632940226131,
+    "all_beat_v54": true,
+    "forms": {
+      "linear    (base: 1+K*(1-rv))": {
+        "best_k": 0.1,
+        "peak_sharpe": 4.036199548873064,
+        "at_k010": 4.036199548873064
+      },
+      "quadratic (1+K*(1-rv\u00b2))": {
+        "best_k": 0.02,
+        "peak_sharpe": 3.925536254850451,
+        "at_k010": 3.6317156910980937
+      },
+      "exp       (exp(-K*(rv-1)))": {
+        "best_k": 0.1,
+        "peak_sharpe": 4.036199548873064,
+        "at_k010": 4.036199548873064
+      },
+      "tanh      (1+K*tanh(1-rv))": {
+        "best_k": 0.1,
+        "peak_sharpe": 4.031303684010911,
+        "at_k010": 4.031303684010911
+      }
+    },
+    "pass": false,
+    "strong_pass": false
+  },
+  "summary": {
+    "n_pass": 3,
+    "n_strong": 2,
+    "v54_sharpe": 3.8568,
+    "v55_sharpe": 4.036199548873064,
+    "overall": "LIKELY REAL \u2014 use ensemble of v54 plateau + v55",
+    "strategy": "Deploy ensemble: average(v54_core, v55_K010). Reduces overfit risk."
+  }
+}

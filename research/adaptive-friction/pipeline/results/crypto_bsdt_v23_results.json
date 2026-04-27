@@ -1,0 +1,163 @@
+{
+  "protocol": "v23 tensor representation comparison",
+  "baseline": {
+    "label": "",
+    "sharpe": 0.4973,
+    "max_dd": -0.0809,
+    "cum_return": 0.0592,
+    "active_days": 236,
+    "total_days": 1211,
+    "hit_rate": 0.4788,
+    "cagr": 0.012
+  },
+  "variants": {
+    "plain": {
+      "panel_shape": [
+        2076,
+        4,
+        2
+      ],
+      "diag": {
+        "panel_d": 2,
+        "layer_A_days": 54,
+        "layer_B_days": 135,
+        "latched_days": 64,
+        "mean_lev": 0.6020128672219092,
+        "a_threshold_calib": 0.36398621964912853,
+        "e_star": 20.090235029663233,
+        "sigma_n": 2.123245627151789
+      },
+      "sim": {
+        "label": "",
+        "sharpe": 1.7425,
+        "max_dd": -0.0499,
+        "cum_return": 0.1346,
+        "active_days": 230,
+        "total_days": 1211,
+        "hit_rate": 0.4826,
+        "cagr": 0.0266
+      },
+      "run_time_s": 6.0,
+      "error": null
+    },
+    "udl": {
+      "panel_shape": [
+        2076,
+        4,
+        8
+      ],
+      "diag": {
+        "panel_d": 8,
+        "layer_A_days": 102,
+        "layer_B_days": 183,
+        "latched_days": 88,
+        "mean_lev": 0.8312479183086756,
+        "a_threshold_calib": 0.43177517760637213,
+        "e_star": 53.48577183623535,
+        "sigma_n": 2.1795773519252686
+      },
+      "sim": {
+        "label": "",
+        "sharpe": 1.1681,
+        "max_dd": -0.0626,
+        "cum_return": 0.1285,
+        "active_days": 232,
+        "total_days": 1211,
+        "hit_rate": 0.4871,
+        "cagr": 0.0255
+      },
+      "run_time_s": 3.6,
+      "error": null
+    },
+    "rtd": {
+      "panel_shape": [
+        2076,
+        4,
+        8
+      ],
+      "diag": {
+        "panel_d": 8,
+        "layer_A_days": 51,
+        "layer_B_days": 194,
+        "latched_days": 80,
+        "mean_lev": 0.6559504158292351,
+        "a_threshold_calib": 0.10610350588626424,
+        "e_star": 53.48577183623535,
+        "sigma_n": 3.755105997025169
+      },
+      "sim": {
+        "label": "",
+        "sharpe": 0.7382,
+        "max_dd": -0.0706,
+        "cum_return": 0.0664,
+        "active_days": 233,
+        "total_days": 1211,
+        "hit_rate": 0.4807,
+        "cagr": 0.0135
+      },
+      "run_time_s": 4.2,
+      "error": null
+    },
+    "coverage": {
+      "panel_shape": [
+        2076,
+        4,
+        12
+      ],
+      "diag": {
+        "panel_d": 12,
+        "layer_A_days": 206,
+        "layer_B_days": 139,
+        "latched_days": 119,
+        "mean_lev": 0.961067893484215,
+        "a_threshold_calib": 0.13039629632728308,
+        "e_star": 73.68263852010573,
+        "sigma_n": 2.556200127325704
+      },
+      "sim": {
+        "label": "",
+        "sharpe": 0.8778,
+        "max_dd": -0.0652,
+        "cum_return": 0.1081,
+        "active_days": 236,
+        "total_days": 1211,
+        "hit_rate": 0.4788,
+        "cagr": 0.0216
+      },
+      "run_time_s": 3.2,
+      "error": null
+    },
+    "mdn": {
+      "panel_shape": [
+        2076,
+        4,
+        5
+      ],
+      "diag": {
+        "panel_d": 5,
+        "layer_A_days": 163,
+        "layer_B_days": 141,
+        "latched_days": 112,
+        "mean_lev": 0.9645825641261054,
+        "a_threshold_calib": 0.3319720066993415,
+        "e_star": 37.56623478662507,
+        "sigma_n": 4.397953938911658
+      },
+      "sim": {
+        "label": "",
+        "sharpe": 0.7108,
+        "max_dd": -0.0746,
+        "cum_return": 0.0852,
+        "active_days": 235,
+        "total_days": 1211,
+        "hit_rate": 0.4809,
+        "cagr": 0.0172
+      },
+      "run_time_s": 3.3,
+      "error": null
+    }
+  },
+  "best_repr": "plain",
+  "best_sharpe": 1.7425,
+  "baseline_sharpe": 0.4973
+}

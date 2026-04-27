@@ -1,0 +1,131 @@
+{
+  "protocol": "v27 unsigned-allocator (direction from strategy PnL)",
+  "design": "Engine scalars used as non-negative gates only",
+  "strategies": [
+    "trend",
+    "pairs",
+    "breakout",
+    "mr",
+    "macro"
+  ],
+  "activation_thresholds": {
+    "G_LO": 0.5,
+    "K_LO": 0.3
+  },
+  "variants": {
+    "v22_baseline": {
+      "label": "",
+      "sharpe": 1.7425,
+      "max_dd": -0.0499,
+      "cum_return": 0.1346,
+      "active_days": 230.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4826,
+      "cagr": 0.0266
+    },
+    "v27_no_act": {
+      "label": "",
+      "sharpe": 0.1819,
+      "max_dd": -0.2903,
+      "cum_return": 0.064,
+      "active_days": 995.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5085,
+      "cagr": 0.013
+    },
+    "v27_no_act_flat": {
+      "label": "",
+      "sharpe": 0.261,
+      "max_dd": -0.2239,
+      "cum_return": 0.1146,
+      "active_days": 995.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5085,
+      "cagr": 0.0228
+    },
+    "v27_full": {
+      "label": "",
+      "sharpe": 0.5101,
+      "max_dd": -0.1809,
+      "cum_return": 0.1,
+      "active_days": 295.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5254,
+      "cagr": 0.02
+    },
+    "v27_full_flat": {
+      "label": "",
+      "sharpe": 0.5893,
+      "max_dd": -0.1721,
+      "cum_return": 0.1122,
+      "active_days": 295.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5254,
+      "cagr": 0.0224
+    },
+    "v27_tight": {
+      "label": "",
+      "sharpe": -0.2397,
+      "max_dd": -0.1383,
+      "cum_return": -0.0304,
+      "active_days": 107.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4953,
+      "cagr": -0.0064
+    },
+    "v27_loose": {
+      "label": "",
+      "sharpe": 0.4515,
+      "max_dd": -0.2283,
+      "cum_return": 0.13,
+      "active_days": 452.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5265,
+      "cagr": 0.0258
+    },
+    "v27_full_mgate": {
+      "label": "",
+      "sharpe": 0.1472,
+      "max_dd": -0.1809,
+      "cum_return": 0.0121,
+      "active_days": 295.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5254,
+      "cagr": 0.0025
+    },
+    "v27_tight_mgate": {
+      "label": "",
+      "sharpe": -0.6243,
+      "max_dd": -0.1227,
+      "cum_return": -0.0557,
+      "active_days": 107.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4953,
+      "cagr": -0.0118
+    },
+    "v27_full_no_brk": {
+      "label": "",
+      "sharpe": -0.3896,
+      "max_dd": -0.0618,
+      "cum_return": -0.0201,
+      "active_days": 149.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.557,
+      "cagr": -0.0042
+    },
+    "v27_full_no_mr": {
+      "label": "",
+      "sharpe": 0.7664,
+      "max_dd": -0.1748,
+      "cum_return": 0.1812,
+      "active_days": 284.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5141,
+      "cagr": 0.0353
+    }
+  },
+  "best_variant": "v22_baseline",
+  "best_sharpe": 1.7425,
+  "v22_reference_sharpe": 1.7425,
+  "v22_reference_max_dd": -0.0499
+}

@@ -34,7 +34,7 @@ from collapse_geometry import (              # noqa: E402
     MasterOperator, Snapshot, LedoitWolfNetwork,
     LyapunovCertificate, CollapseGeometry, EarlyWarning,
     EscapeTime, StochasticExtension, AgentSensitivity,
-    InformationGeometry, WelfareCalibration,
+    InformationGeometry, WelfareCalibration, UDLTransform,
 )
 
 
@@ -47,13 +47,34 @@ def run_diagnostics(name: str,
                     network_panel: np.ndarray | None = None,  # (T0, N) leverage feature
                     crisis_panel: np.ndarray | None = None,    # (T_crisis, N, d)
                     sigma_ell: np.ndarray | None = None,      # (T_crisis,)
-                    notes: str = "") -> dict:
+                    notes: str = "",
+                    use_udl_transform: bool = False) -> dict:
     """Apply every §I-XXVII diagnostic and return a dict of scalars."""
     print(f"\n{'═'*72}\n  {name}\n{'═'*72}")
     if notes:
         print(f"  {notes}")
     T0, N, d = X_normal.shape
     print(f"  Calibration panel : T0={T0}, N={N}, d={d}")
+
+    # ── Optional UDL multi-domain transform ─────────────────────────────────
+    if use_udl_transform:
+        print(f"  Applying UDLTransform (stat+chaos+spec+geom → PCA 8) ...")
+        udl = UDLTransform(n_components=8, standardize=True)
+        udl.fit(X_normal)
+        X_normal = udl.transform(X_normal)                     # (T0, N, 8)
+        # Transform the stress snapshot into the same UDL space
+        def _udl_snap(s: Snapshot) -> Snapshot:
+            X_u = udl.transform(s.X[None, :, :])[0]            # (N, 8)
+            Xp = udl.transform(s.X_prev[None, :, :])[0]
+            h  = s.history
+            h_u = udl.transform(h) if h.ndim == 3 and h.shape[0] > 0 else h
+            return Snapshot(X=X_u, X_prev=Xp, history=h_u)
+        snap = _udl_snap(snap)
+        if crisis_panel is not None:
+            crisis_panel = udl.transform(crisis_panel)          # (T_c, N, 8)
+        T0, N, d = X_normal.shape
+        print(f"  UDL output panel  : T0={T0}, N={N}, d={d}")
+
 
     M = MasterOperator.calibrate(X_normal, k=min(4, d), theta=1.0)
     info = InformationGeometry(op=M)
@@ -439,6 +460,8 @@ def main() -> None:
     print("  COLLAPSE-GEOMETRY  §I-XXVII  ON FOUR REAL-WORLD DATASETS")
     print("═"*72)
     t0 = time.perf_counter()
+
+    # ── Pass 1: raw features ─────────────────────────────────────────────
     results = {}
     for name, fn in [("FDIC", run_fdic),
                      ("WORLDBANK", run_worldbank),
@@ -451,11 +474,107 @@ def main() -> None:
             print(f"\n!! {name} FAILED: {type(exc).__name__}: {exc}")
             traceback.print_exc()
             results[name] = dict(error=f"{type(exc).__name__}: {exc}")
-    out_path.write_text(json.dumps(results, indent=2, default=str))
+
+    # ── Pass 2: UDL-transformed features ────────────────────────────────
+    print("\n" + "─"*72)
+    print("  PASS 2 — UDL Multi-Domain Transform (stat+chaos+spec+geom → PCA-8)")
+    print("─"*72)
+    results_udl = {}
+    udl_fns = [
+        ("FDIC",      lambda: run_fdic_udl()),
+        ("WORLDBANK", lambda: run_worldbank_udl()),
+        ("ERCOT",     lambda: run_ercot_udl()),
+        ("PROTEIN",   lambda: run_protein_udl()),
+    ]
+    for name, fn in udl_fns:
+        try:
+            results_udl[name] = fn()
+        except Exception as exc:
+            import traceback
+            print(f"\n!! {name} (UDL) FAILED: {type(exc).__name__}: {exc}")
+            traceback.print_exc()
+            results_udl[name] = dict(error=f"{type(exc).__name__}: {exc}")
+
+    # ── Comparison summary ───────────────────────────────────────────────
+    print("\n" + "═"*72)
+    print("  EWS COMPARISON  —  raw features vs UDL-transformed")
+    print(f"  {'Dataset':<14}  {'EWS (raw)':>10}  {'EWS (UDL)':>10}  {'Δ':>8}")
+    print("  " + "─"*50)
+    for key in ("FDIC", "WORLDBANK", "ERCOT", "PROTEIN"):
+        r   = results.get(key, {})
+        r_u = results_udl.get(key, {})
+        ews_raw = r.get("EWS", float("nan"))
+        ews_udl = r_u.get("EWS", float("nan"))
+        delta = ews_udl - ews_raw if not (np.isnan(ews_raw) or np.isnan(ews_udl)) else float("nan")
+        print(f"  {key:<14}  {ews_raw:>10.4f}  {ews_udl:>10.4f}  {delta:>+8.4f}")
+
+    out_path.write_text(json.dumps({"raw": results, "udl": results_udl}, indent=2, default=str))
     elapsed = time.perf_counter() - t0
-    print(f"\n{'═'*72}\n  All four runs complete in {elapsed:.1f}s")
+    print(f"\n{'═'*72}\n  All runs complete in {elapsed:.1f}s")
     print(f"  Full results written to:\n    {out_path}\n{'═'*72}")
+
+
+# ── UDL-transform dataset runners (called from main Pass 2) ─────────────────
+def run_fdic_udl() -> dict:
+    import pandas as pd
+    Y, dates, fnames = load_fdic()
+    dts = pd.to_datetime(dates)
+    mask_norm = dts < pd.Timestamp("2007-07-01")
+    X_norm = Y[mask_norm]
+    idx_stress = int(np.argmin(np.abs((dts - pd.Timestamp("2008-12-31")).total_seconds())))
+    snap = Snapshot(X=Y[idx_stress], X_prev=Y[idx_stress - 1],
+                    history=Y[max(0, idx_stress - 20): idx_stress])
+    mask_crisis = (dts >= pd.Timestamp("2007-10-01")) & (dts <= pd.Timestamp("2010-03-31"))
+    return run_diagnostics("FDIC (UDL) — US banking (GFC Q4-2008)",
+                           X_norm, snap,
+                           network_panel=X_norm[..., 0],
+                           crisis_panel=Y[mask_crisis],
+                           sigma_ell=Y[mask_crisis][..., 0].std(axis=1),
+                           use_udl_transform=True)
+
+
+def run_worldbank_udl() -> dict:
+    Y, years, countries, ind = load_worldbank()
+    mask_norm = (years < 2007)
+    X_norm = Y[mask_norm] if mask_norm.sum() >= 3 else Y[:max(3, len(years)//2)]
+    idx_s = int(np.argmin(np.abs(years - 2008)))
+    snap = Snapshot(X=Y[idx_s], X_prev=Y[idx_s - 1], history=Y[max(0, idx_s - 5): idx_s])
+    return run_diagnostics("WORLD BANK (UDL) — 8-country panel (2008 GFC)",
+                           X_norm, snap,
+                           use_udl_transform=True)
+
+
+def run_ercot_udl() -> dict:
+    X, dates, fn = load_ercot()
+    T, d = X.shape
+    N = 7
+    n_weeks = T // N
+    X = X[: n_weeks * N]; dates = dates[: n_weeks * N]
+    panel = X.reshape(n_weeks, N, d)
+    week_dates = dates[::N][:n_weeks]
+    mu = panel.mean(axis=(0, 1)); sd = panel.std(axis=(0, 1)) + 1e-8
+    panel = (panel - mu) / sd
+    mask_norm = week_dates < np.datetime64("2021-01-01")
+    X_norm = panel[mask_norm]
+    tw = int(np.argmin(np.abs(week_dates - np.datetime64("2021-02-15"))))
+    snap = Snapshot(X=panel[tw], X_prev=panel[tw - 1], history=panel[max(0, tw - 5): tw])
+    return run_diagnostics("ERCOT (UDL) — Texas grid (Winter Storm Uri)",
+                           X_norm, snap,
+                           network_panel=X_norm[..., 0],
+                           crisis_panel=panel[max(0, tw - 8): tw + 1],
+                           use_udl_transform=True)
+
+
+def run_protein_udl() -> dict:
+    folded, unfolded = load_protein()
+    snap = Snapshot(X=unfolded[-1], X_prev=unfolded[-2], history=unfolded[-20:])
+    return run_diagnostics("PROTEIN (UDL) — β-hairpin (unfolded above T_melt)",
+                           folded, snap,
+                           network_panel=folded[..., 1],
+                           crisis_panel=unfolded,
+                           use_udl_transform=True)
 
 
 if __name__ == "__main__":
     main()
+

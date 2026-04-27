@@ -1,0 +1,91 @@
+{
+  "protocol": "v22 \u2014 Geometric Allocation Engine",
+  "fixes": {
+    "precursor_scale_floors": true,
+    "rolling_layer_b": true,
+    "per_pair_engines": true,
+    "cos_theta_tilt": true
+  },
+  "engine": {
+    "global_e_star_chi2": 20.090235029663233,
+    "global_sigma_n": 2.123245627151789,
+    "precursor_scale": {
+      "P": 10.102313752410787,
+      "psi": 0.3293451898093541,
+      "S": 28.346789697385862,
+      "V": 90.01241534636873
+    }
+  },
+  "layer_occupancy_test": {
+    "": 1027,
+    "A": 48,
+    "B": 119,
+    "AB": 16
+  },
+  "pair_gates_test_mean": {
+    "P1_ETH_BTC": 0.9037492482967082,
+    "P2_ETH_SOL": 0.898180784159603,
+    "P3_ETH_BNB": 0.908218149990211
+  },
+  "sims": {
+    "v18_smooth": {
+      "label": "v18_smooth",
+      "sharpe": 0.4973,
+      "max_dd": -0.0809,
+      "cum_return": 0.0592,
+      "active_days": 236.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4788,
+      "cagr": 0.0121
+    },
+    "v19_alarm_only": {
+      "label": "v19_alarm_only",
+      "sharpe": 0.8601,
+      "max_dd": -0.0822,
+      "cum_return": 0.0946,
+      "active_days": 203.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4729,
+      "cagr": 0.019
+    },
+    "v21_full": {
+      "label": "v21_full",
+      "sharpe": 1.6433,
+      "max_dd": -0.0467,
+      "cum_return": 0.1277,
+      "active_days": 232.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4828,
+      "cagr": 0.0254
+    },
+    "v22_fixes_only": {
+      "label": "v22_fixes_only",
+      "sharpe": 1.4965,
+      "max_dd": -0.0456,
+      "cum_return": 0.1069,
+      "active_days": 232.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4828,
+      "cagr": 0.0214
+    },
+    "v22_alloc_full": {
+      "label": "v22_alloc_full",
+      "sharpe": 1.4822,
+      "max_dd": -0.0446,
+      "cum_return": 0.1058,
+      "active_days": 232.0,
+      "total_days": 1210.0,
+      "hit_rate": 0.4828,
+      "cagr": 0.0212
+    }
+  },
+  "best_K_net5bp": {
+    "K": 9.25,
+    "final": 2593.0648487078447,
+    "pnl": 1393.0648487078447,
+    "sh": 0.6438561622384926,
+    "cagr": 0.17406456659842995,
+    "max_dd": -0.39583277653661164,
+    "max_dd_dol": -861.5175138025265
+  }
+}
