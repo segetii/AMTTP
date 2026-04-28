@@ -23,9 +23,13 @@ Multi-agent encoding:
   This mirrors the crypto approach: multi-agent × multi-feature state.
 
 Datasets used:
-  supply_hourly.npz  (35064 × 5)  — physically correct multi-agent dataset
-                                    wind/solar/gas/coal/nuclear are genuine
-                                    coupled agents via merit-order dispatch
+  combined_hourly.npz  (35064 × 10) — unified supply + demand dataset
+                                       wind_cf, solar_cf, gas_cf, coal_cf,
+                                       nuclear_cf, demand_gw, ramp_rate,
+                                       vol_6h, dev_24h, temp_stress
+                                       All 10 columns are equal co-variates of
+                                       a single multivariate observation; no
+                                       column is privileged over another.
 
 Events tracked:
   COVID_Collapse 2020-03-23
@@ -351,7 +355,7 @@ def main():
     print(Sep)
 
     # ── 1. Load data ─────────────────────────────────────────────────────────
-    npz_path = DATA_DIR / "ercot_supply_hourly.npz"
+    npz_path = DATA_DIR / "ercot_combined_hourly.npz"
     print(f"\n[1/4] Loading {npz_path.name}...")
     data = np.load(str(npz_path), allow_pickle=True)
     X_raw        = data['X']             # (T, 5)
@@ -426,7 +430,7 @@ def main():
     omega_daily = pd.Series(omega, index=dates).resample('D').mean()
 
     out = {
-        "dataset":           "ercot_supply_hourly",
+        "dataset":           "ercot_combined_hourly",
         "agents":            feature_names,
         "n_agents":          N_agents,
         "n_feat_per_agent":  N_FEAT,
