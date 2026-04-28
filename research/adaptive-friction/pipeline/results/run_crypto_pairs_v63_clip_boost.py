@@ -347,8 +347,99 @@ def _build_pnl_v63(
     )
 
 
-def _sharpe(p): return float(_stats(p)['sharpe'])
-def _maxdd(p):  return float(_stats(p)['max_dd'])
+ANN_1H = 365.25 * 24   # annualisation factor for 1h PnL bars
+
+
+def _full_stats(pnl: pd.Series) -> dict:
+    """
+    Extended statistics beyond _stats():
+      sharpe   — annualised Sharpe
+      sortino  — annualised Sortino  (downside std only)
+      calmar   — |CAGR / max_dd|
+      cagr     — compound annual growth rate
+      max_dd   — maximum drawdown (fraction, negative)
+      avg_dd   — mean of underwater periods (fraction)
+      win_rate — fraction of bars with positive PnL
+      avg_win  — mean positive bar return
+      avg_loss — mean negative bar return
+      profit_f — profit factor = sum(wins) / |sum(losses)|
+      final    — terminal equity starting from $100
+      yoy      — {year: return fraction} for each calendar year present
+    """
+    p = pnl.fillna(0.0)
+    n = len(p)
+    if p.std() < 1e-12 or n < 2:
+        return dict(sharpe=0.0, sortino=0.0, calmar=0.0, cagr=0.0,
+                    max_dd=0.0, avg_dd=0.0, win_rate=0.5, avg_win=0.0,
+                    avg_loss=0.0, profit_f=1.0, final=100.0, yoy={})
+
+    mean_r  = float(p.mean())
+    std_r   = float(p.std())
+    sharpe  = mean_r / std_r * np.sqrt(ANN_1H)
+
+    down    = p[p < 0]
+    down_std = float(down.std()) if len(down) > 1 else std_r
+    sortino = mean_r / down_std * np.sqrt(ANN_1H) if down_std > 1e-12 else sharpe
+
+    eq      = 100.0 * (1.0 + p).cumprod()
+    peak    = eq.cummax()
+    dd_ser  = eq / peak - 1.0
+    max_dd  = float(dd_ser.min())
+    avg_dd  = float(dd_ser[dd_ser < 0].mean()) if (dd_ser < 0).any() else 0.0
+
+    yrs     = max((p.index[-1] - p.index[0]).days / 365.25, 0.01)
+    cagr    = float((eq.iloc[-1] / 100.0) ** (1.0 / yrs) - 1.0)
+    calmar  = float(cagr / abs(max_dd)) if abs(max_dd) > 1e-12 else 0.0
+
+    wins    = p[p > 0]; losses = p[p < 0]
+    win_rate = float(len(wins) / n)
+    avg_win  = float(wins.mean())    if len(wins)   > 0 else 0.0
+    avg_loss = float(losses.mean())  if len(losses) > 0 else 0.0
+    profit_f = (float(wins.sum()) / abs(float(losses.sum()))
+                if abs(float(losses.sum())) > 1e-12 else np.inf)
+
+    yoy = {}
+    for yr in sorted(p.index.year.unique()):
+        mask = p.index.year == yr
+        r_yr = float((1.0 + p[mask]).prod() - 1.0)
+        yoy[int(yr)] = r_yr
+
+    return dict(sharpe=sharpe, sortino=sortino, calmar=calmar, cagr=cagr,
+                max_dd=max_dd, avg_dd=avg_dd, win_rate=win_rate,
+                avg_win=avg_win, avg_loss=avg_loss, profit_f=profit_f,
+                final=float(eq.iloc[-1]), yoy=yoy)
+
+
+def _sharpe(p):  return _full_stats(p)['sharpe']
+def _maxdd(p):   return _full_stats(p)['max_dd']
+
+
+def _fmt_stats_header() -> str:
+    return (f"  {'Config':<44} {'Sharpe':>7} {'Sortino':>8} {'Calmar':>7}"
+            f" {'CAGR':>7} {'MaxDD':>7} {'AvgDD':>7}"
+            f" {'WinR':>6} {'PF':>6} {'$100→':>8}")
+
+def _fmt_stats_row(label: str, s: dict) -> str:
+    pf_s = f"{s['profit_f']:>6.2f}" if s['profit_f'] != np.inf else "   ∞  "
+    return (f"  {label:<44} {s['sharpe']:>+7.3f} {s['sortino']:>+8.3f} {s['calmar']:>+7.2f}"
+            f" {s['cagr']:>+6.1%} {s['max_dd']:>+7.1%} {s['avg_dd']:>+7.1%}"
+            f" {s['win_rate']:>5.1%} {pf_s} ${s['final']:>7.2f}")
+
+def _fmt_stats_divider() -> str:
+    return "  " + "-"*44 + " " + "-"*7 + " " + "-"*8 + " " + "-"*7 + " " + "-"*7 + " " + "-"*7 + " " + "-"*7 + " " + "-"*6 + " " + "-"*6 + " " + "-"*8
+
+
+def _fmt_alpha_header() -> str:
+    return (f"  {'α':>6} {'Sharpe':>7} {'Sortino':>8} {'Calmar':>7}"
+            f" {'CAGR':>7} {'MaxDD':>7} {'AvgDD':>7}"
+            f" {'WinR':>6} {'Δ_Sharpe':>9}  Verdict")
+
+def _fmt_alpha_row(al: float, s: dict, drop: float, is_base: bool) -> str:
+    verdict = '—' if is_base else ('PASS' if abs(drop) < 0.15 else 'FAIL')
+    pf_s = f"{s['profit_f']:>6.2f}" if s['profit_f'] != np.inf else "   ∞  "
+    return (f"  {al:>6.2f} {s['sharpe']:>+7.3f} {s['sortino']:>+8.3f} {s['calmar']:>+7.2f}"
+            f" {s['cagr']:>+6.1%} {s['max_dd']:>+7.1%} {s['avg_dd']:>+7.1%}"
+            f" {s['win_rate']:>5.1%} {drop:>+9.4f}  {verdict}")
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -468,29 +559,62 @@ def main():
     print(f'\n{BAR}')
     print('  TEST 1 — OOS SPLIT  (pass: H2 ≥ 3.60  |  stretch goal: H2 ≥ 4.74 = v58)')
     print(f'{BAR}')
-    print(f"\n  {'Config':<44} {'Full':>8} {'23-24':>8} {'25-26':>8} {'DD 25-26':>10}  Pass? Stretch?")
-    print(f"  {'-'*44} {'-'*8} {'-'*8} {'-'*8} {'-'*10}  ----- -------")
 
     oos_results = {}
     for label, (mode, kw) in configs.items():
-        pnl    = _pnl(label, mode, kw)
-        s_full = _sharpe(pnl[test_mask])
-        s_h1   = _sharpe(pnl[first_half])
-        s_h2   = _sharpe(pnl[second_half])
-        dd_h2  = _maxdd(pnl[second_half])
-        ok     = s_h2 >= 3.60
-        stretch = s_h2 >= 4.74
-        print(f"  {label:<44} {s_full:>+8.4f} {s_h1:>+8.4f} {s_h2:>+8.4f}"
-              f" {dd_h2:>+9.1%}  {'✓' if ok else '✗'}     {'✓' if stretch else '✗'}")
+        pnl     = _pnl(label, mode, kw)
+        sf      = _full_stats(pnl[test_mask])
+        sh1     = _full_stats(pnl[first_half])
+        sh2     = _full_stats(pnl[second_half])
+        ok      = sh2['sharpe'] >= 3.60
+        stretch = sh2['sharpe'] >= 4.74
+
+        # ── full-period stats ──────────────────────────────────────────────────
+        print(f'\n  ── {label.strip()} {"← PREV CHAMPION" if label.strip().startswith("v58") else ""}'
+              f'{"  ✓ PASS" if ok else "  ✗ FAIL"}'
+              f'{"  ✓ STRETCH" if stretch else ""}')
+        print(f'  {"Period":<10} {"Sharpe":>7} {"Sortino":>8} {"Calmar":>7}'
+              f' {"CAGR":>7} {"MaxDD":>7} {"AvgDD":>7}'
+              f' {"WinR":>6} {"PF":>6} {"$100→":>8}')
+        print(f'  {"-"*10} {"-"*7} {"-"*8} {"-"*7}'
+              f' {"-"*7} {"-"*7} {"-"*7}'
+              f' {"-"*6} {"-"*6} {"-"*8}')
+        for period_label, st in [('FULL test', sf), ('H1 23-24', sh1), ('H2 25-26', sh2)]:
+            pf_s = f"{st['profit_f']:>6.2f}" if st['profit_f'] != np.inf else "   ∞  "
+            print(f'  {period_label:<10} {st["sharpe"]:>+7.3f} {st["sortino"]:>+8.3f}'
+                  f' {st["calmar"]:>+7.2f} {st["cagr"]:>+6.1%}'
+                  f' {st["max_dd"]:>+7.1%} {st["avg_dd"]:>+7.1%}'
+                  f' {st["win_rate"]:>5.1%} {pf_s} ${st["final"]:>7.2f}')
+
+        # ── year-on-year breakdown (OOS only) ─────────────────────────────────
+        yoy_oos = {yr: r for yr, r in sf['yoy'].items()
+                   if yr >= int(TEST_START[:4])}
+        if yoy_oos:
+            yoy_str = '  '.join(f'{yr}: {r:>+6.1%}' for yr, r in sorted(yoy_oos.items()))
+            print(f'  YoY OOS: {yoy_str}')
+
         oos_results[label.strip()] = {
-            'sharpe_full': float(s_full), 'sharpe_first': float(s_h1),
-            'sharpe_second': float(s_h2), 'maxdd_second': float(dd_h2),
+            'sharpe_full':    float(sf['sharpe']),
+            'sortino_full':   float(sf['sortino']),
+            'calmar_full':    float(sf['calmar']),
+            'cagr_full':      float(sf['cagr']),
+            'maxdd_full':     float(sf['max_dd']),
+            'win_rate_full':  float(sf['win_rate']),
+            'profit_f_full':  float(sf['profit_f']) if sf['profit_f'] != np.inf else 99.0,
+            'final_full':     float(sf['final']),
+            'sharpe_first':   float(sh1['sharpe']),
+            'sharpe_second':  float(sh2['sharpe']),
+            'maxdd_second':   float(sh2['max_dd']),
+            'calmar_second':  float(sh2['calmar']),
+            'sortino_second': float(sh2['sortino']),
+            'cagr_second':    float(sh2['cagr']),
+            'yoy':            {str(k): float(v) for k, v in sf['yoy'].items()},
             'pass': ok, 'stretch': stretch,
         }
 
     # ── TEST 2: ALPHA SENSITIVITY ─────────────────────────────────────────────
     print(f'\n{BAR}')
-    print('  TEST 2 — ALPHA SENSITIVITY  (pass: max |drop| < 0.15)')
+    print('  TEST 2 — ALPHA SENSITIVITY  (pass: max |Δ Sharpe| < 0.15)')
     print('  Analytic bound: Δ E[clip_mod] = CLIP_BOOST × ΔE[g²] ≈ CLIP_BOOST × 0.04')
     print('  CLIP_BOOST=2 → Δclip≈0.08 → expected max drop < 0.05')
     print('  CLIP_BOOST=4 → Δclip≈0.16 → expected max drop < 0.12')
@@ -503,31 +627,39 @@ def main():
     for label in v63_labels:
         _, base_kw = configs[label]
         print(f"\n  ── {label.strip()} ──")
-        print(f"  {'α':>6} {'Sharpe':>8} {'Δ_baseline':>12} {'MaxDD':>8}  Verdict")
-        print(f"  {'-'*6} {'-'*8} {'-'*12} {'-'*8}  -------")
+        print(_fmt_alpha_header())
+        print("  " + "-"*6 + " " + "-"*7 + " " + "-"*8 + " " + "-"*7
+              + " " + "-"*7 + " " + "-"*7 + " " + "-"*7 + " " + "-"*6 + " " + "-"*9 + "  -------")
 
         pnl_base = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch, **base_kw)
-        s_base   = _sharpe(pnl_base[test_mask])
+        s_base   = _full_stats(pnl_base[test_mask])['sharpe']
         row = {}; t2_pass = True
 
         for al in alpha_perturbs:
             pnl_p = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch,
                                     **{**base_kw, 'alpha': al})
-            s_p   = _sharpe(pnl_p[test_mask])
-            drop  = s_p - s_base
-            dd_p  = _maxdd(pnl_p[test_mask])
-            is_b  = (al == ALPHA_FG)
-            verdict = '—' if is_b else ('PASS' if abs(drop) < 0.15 else 'FAIL')
+            st_p   = _full_stats(pnl_p[test_mask])
+            drop   = st_p['sharpe'] - s_base
+            is_b   = (al == ALPHA_FG)
             if not is_b and abs(drop) >= 0.15:
                 t2_pass = False
-            print(f"  {al:>6.2f} {s_p:>+8.4f} {drop:>+12.4f} {dd_p:>+7.1%}  {verdict}")
-            row[f'α={al}'] = {'alpha': float(al), 'sharpe': float(s_p),
-                              'delta': float(drop), 'maxdd': float(dd_p)}
+            print(_fmt_alpha_row(al, st_p, drop, is_b))
+            row[f'α={al}'] = {
+                'alpha':   float(al),
+                'sharpe':  float(st_p['sharpe']),
+                'sortino': float(st_p['sortino']),
+                'calmar':  float(st_p['calmar']),
+                'cagr':    float(st_p['cagr']),
+                'maxdd':   float(st_p['max_dd']),
+                'avgdd':   float(st_p['avg_dd']),
+                'winrate': float(st_p['win_rate']),
+                'delta':   float(drop),
+            }
 
         max_drop = max(abs(v['delta']) for v in row.values() if v['alpha'] != ALPHA_FG)
         prev = '[v59=0.33, v60=0.37, v61_surge=0.076, v62_best=0.024]'
-        print(f"\n  Max drop: {max_drop:.4f}  →  TEST 2: {'✓ PASS' if t2_pass else '✗ FAIL'}"
-              f"  {prev}")
+        print(f"\n  Max |Δ Sharpe|: {max_drop:.4f}  →  TEST 2: "
+              f"{'✓ PASS' if t2_pass else '✗ FAIL'}  {prev}")
         alpha_results[label.strip()] = row
         alpha_summary[label.strip()] = {'pass': t2_pass, 'max_drop': float(max_drop)}
 
@@ -547,27 +679,32 @@ def main():
         'boost − 2  (→0=v58)':  dict(rv_norm=rv_ema, lo=-0.01, clip_boost=0.0, k=4.0, mu=0.0),
     }
 
-    print(f"\n  {'Perturbation':<22} {'Full':>8} {'H2':>8} {'Δ_base':>8}  Verdict")
-    print(f"  {'-'*22} {'-'*8} {'-'*8} {'-'*8}  -------")
+    print(_fmt_stats_header() + f"  {'Δ_H2':>8}  Verdict")
+    print(_fmt_stats_divider() + " " + "-"*8 + "  -------")
 
-    pnl_b3 = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch,
-                              **boost_perturbs['baseline (boost=2)'])
-    s_b3  = _sharpe(pnl_b3[second_half])
+    pnl_b3  = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch,
+                               **boost_perturbs['baseline (boost=2)'])
+    s_b3_h2 = _full_stats(pnl_b3[second_half])['sharpe']
     t3_rows = {}; t3_pass = True
     for pname, pkw in boost_perturbs.items():
         pnl_p  = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch, **pkw)
-        s_full = _sharpe(pnl_p[test_mask])
-        s_h2   = _sharpe(pnl_p[second_half])
-        drop   = s_h2 - s_b3
+        st_f   = _full_stats(pnl_p[test_mask])
+        s_h2   = _full_stats(pnl_p[second_half])['sharpe']
+        drop   = s_h2 - s_b3_h2
         is_b   = pname.startswith('baseline')
         verdict = '—' if is_b else ('PASS' if abs(drop) < 0.30 else 'FAIL')
         if not is_b and abs(drop) >= 0.30: t3_pass = False
-        print(f"  {pname:<22} {s_full:>+8.4f} {s_h2:>+8.4f} {drop:>+8.4f}  {verdict}")
-        t3_rows[pname] = {'sharpe_full': float(s_full), 'sharpe_h2': float(s_h2),
+        pf_s = f"{st_f['profit_f']:>6.2f}" if st_f['profit_f'] != np.inf else "   ∞  "
+        print(f"  {pname:<44} {st_f['sharpe']:>+7.3f} {st_f['sortino']:>+8.3f} {st_f['calmar']:>+7.2f}"
+              f" {st_f['cagr']:>+6.1%} {st_f['max_dd']:>+7.1%} {st_f['avg_dd']:>+7.1%}"
+              f" {st_f['win_rate']:>5.1%} {pf_s} ${st_f['final']:>7.2f}  {drop:>+8.4f}  {verdict}")
+        t3_rows[pname] = {'sharpe_full': float(st_f['sharpe']), 'sharpe_h2': float(s_h2),
+                          'maxdd': float(st_f['max_dd']), 'calmar': float(st_f['calmar']),
+                          'sortino': float(st_f['sortino']), 'cagr': float(st_f['cagr']),
                           'delta_h2': float(drop)}
 
     t3_max = max(abs(v['delta_h2']) for k, v in t3_rows.items() if not k.startswith('baseline'))
-    print(f"\n  Max drop (H2): {t3_max:.4f}  →  TEST 3: {'✓ PASS' if t3_pass else '✗ FAIL'}")
+    print(f"\n  Max |Δ H2 Sharpe|: {t3_max:.4f}  →  TEST 3: {'✓ PASS' if t3_pass else '✗ FAIL'}")
 
     # ── TEST 4: MU / STEEPNESS SENSITIVITY ────────────────────────────────────
     print(f'\n{BAR}')
@@ -584,43 +721,44 @@ def main():
         'k − 2  (→2)':            dict(rv_norm=rv_ema, lo=-0.01, clip_boost=2.0, k=2.0, mu=0.0),
     }
 
-    print(f"\n  {'Perturbation':<22} {'Full':>8} {'H2':>8} {'Δ_base':>8}  Verdict")
-    print(f"  {'-'*22} {'-'*8} {'-'*8} {'-'*8}  -------")
+    print(_fmt_stats_header() + f"  {'Δ_H2':>8}  Verdict")
+    print(_fmt_stats_divider() + " " + "-"*8 + "  -------")
 
-    pnl_b4 = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch,
-                              **mu_perturbs['baseline (b2,k4,μ=0)'])
-    s_b4_h2 = _sharpe(pnl_b4[second_half])
+    pnl_b4  = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch,
+                               **mu_perturbs['baseline (b2,k4,μ=0)'])
+    s_b4_h2 = _full_stats(pnl_b4[second_half])['sharpe']
     t4_rows = {}; t4_pass = True
     for pname, pkw in mu_perturbs.items():
         pnl_p  = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch, **pkw)
-        s_full = _sharpe(pnl_p[test_mask])
-        s_h2   = _sharpe(pnl_p[second_half])
+        st_f   = _full_stats(pnl_p[test_mask])
+        s_h2   = _full_stats(pnl_p[second_half])['sharpe']
         drop   = s_h2 - s_b4_h2
         is_b   = pname.startswith('baseline')
         verdict = '—' if is_b else ('PASS' if abs(drop) < 0.20 else 'FAIL')
         if not is_b and abs(drop) >= 0.20: t4_pass = False
-        print(f"  {pname:<22} {s_full:>+8.4f} {s_h2:>+8.4f} {drop:>+8.4f}  {verdict}")
-        t4_rows[pname] = {'sharpe_full': float(s_full), 'sharpe_h2': float(s_h2),
+        pf_s = f"{st_f['profit_f']:>6.2f}" if st_f['profit_f'] != np.inf else "   ∞  "
+        print(f"  {pname:<44} {st_f['sharpe']:>+7.3f} {st_f['sortino']:>+8.3f} {st_f['calmar']:>+7.2f}"
+              f" {st_f['cagr']:>+6.1%} {st_f['max_dd']:>+7.1%} {st_f['avg_dd']:>+7.1%}"
+              f" {st_f['win_rate']:>5.1%} {pf_s} ${st_f['final']:>7.2f}  {drop:>+8.4f}  {verdict}")
+        t4_rows[pname] = {'sharpe_full': float(st_f['sharpe']), 'sharpe_h2': float(s_h2),
+                          'maxdd': float(st_f['max_dd']), 'calmar': float(st_f['calmar']),
+                          'sortino': float(st_f['sortino']), 'cagr': float(st_f['cagr']),
                           'delta_h2': float(drop)}
 
     t4_max = max(abs(v['delta_h2']) for k, v in t4_rows.items() if not k.startswith('baseline'))
-    print(f"\n  Max drop (H2): {t4_max:.4f}  →  TEST 4: {'✓ PASS' if t4_pass else '✗ FAIL'}")
+    print(f"\n  Max |Δ H2 Sharpe|: {t4_max:.4f}  →  TEST 4: {'✓ PASS' if t4_pass else '✗ FAIL'}")
 
     # ── TEST 5: rv STRESS on v63 best OOS config ──────────────────────────────
     print(f'\n{BAR}')
     print('  TEST 5 — rv STRESS on best v63 config  (pass: max |drop| < 0.20)')
     print(f'{BAR}')
 
-    # find best v63 by OOS H2
     best_v63_lbl = max(
         (l for l in v63_labels),
         key=lambda l: oos_results[l.strip()]['sharpe_second']
     )
     _, best_kw = configs[best_v63_lbl]
     print(f"  Using: {best_v63_lbl.strip()}")
-
-    pnl_best = _build_pnl_v63(base_pnl, sig_v36, lam_feat, sig_4ch, **best_kw)
-    s_best   = _sharpe(pnl_best[test_mask])
 
     rv_perturbs = {
         'baseline':         lambda r: r,
@@ -629,75 +767,108 @@ def main():
         'rv + N(0,0.02)':   lambda r: r + np.random.default_rng(42).normal(0, 0.02, len(r)),
     }
 
-    print(f"\n  {'Perturbation':<22} {'Sharpe':>8} {'Δ_base':>8} {'MaxDD':>8}")
+    # v63 accepts rv_norm via best_kw — apply perturbation by patching rv_ema
+    base_rv = _build_pnl_v58(base_pnl, sig_v36, lam_feat, sig_4ch, rv_norm=rv_ema, lo=-0.01)
+    s_rv_base = _full_stats(base_rv[test_mask])['sharpe']
+
+    print(_fmt_stats_header() + f"  {'Δ_base':>8}  Verdict")
+    print(_fmt_stats_divider() + " " + "-"*8 + "  -------")
     t5_pass = True
     for pname, rv_fn in rv_perturbs.items():
-        # recompute rv with perturbation — for simplicity, perturb is applied inside v63
-        # by building with modified rv_ema (we inject it via the df_1h proxy approach)
-        # Since v63 doesn't accept rv_norm directly, we use clip_boost=0 as proxy for v58
-        # For the rv stress, we re-run v58 (which DOES accept rv_norm) for comparability.
         if pname == 'baseline':
-            pnl_rv = _build_pnl_v58(base_pnl, sig_v36, lam_feat, sig_4ch,
-                                     rv_norm=rv_ema, lo=-0.01)
+            pnl_rv = base_rv
         else:
             rv_perturbed = rv_fn(rv_ema.values)
             rv_s = pd.Series(rv_perturbed, index=rv_ema.index)
             pnl_rv = _build_pnl_v58(base_pnl, sig_v36, lam_feat, sig_4ch,
                                      rv_norm=rv_s, lo=-0.01)
-        s_rv  = _sharpe(pnl_rv[test_mask])
-        drop  = s_rv - _sharpe(_build_pnl_v58(base_pnl, sig_v36, lam_feat, sig_4ch,
-                                               rv_norm=rv_ema, lo=-0.01)[test_mask])
-        dd_rv = _maxdd(pnl_rv[test_mask])
-        is_b  = pname == 'baseline'
+        st   = _full_stats(pnl_rv[test_mask])
+        drop = st['sharpe'] - s_rv_base
+        is_b = pname == 'baseline'
         verdict = '—' if is_b else ('PASS' if abs(drop) < 0.20 else 'FAIL')
         if not is_b and abs(drop) >= 0.20: t5_pass = False
-        print(f"  {pname:<22} {s_rv:>+8.4f} {drop:>+8.4f} {dd_rv:>+7.1%}  {verdict}")
+        pf_s = f"{st['profit_f']:>6.2f}" if st['profit_f'] != np.inf else "   ∞  "
+        print(f"  {pname:<44} {st['sharpe']:>+7.3f} {st['sortino']:>+8.3f} {st['calmar']:>+7.2f}"
+              f" {st['cagr']:>+6.1%} {st['max_dd']:>+7.1%} {st['avg_dd']:>+7.1%}"
+              f" {st['win_rate']:>5.1%} {pf_s} ${st['final']:>7.2f}  {drop:>+8.4f}  {verdict}")
+    print(f"\n  TEST 5: {'✓ PASS' if t5_pass else '✗ FAIL'}")
 
-    # ── PROGRESSION SUMMARY ───────────────────────────────────────────────────
+    # ── GRAND SUMMARY ─────────────────────────────────────────────────────────
     print(f'\n{BAR}')
-    print('  SUMMARY — all configs, all tests')
+    print('  GRAND SUMMARY — Full stats for every config (full test-period)')
     print(f'{BAR}')
 
-    print(f"\n  {'Config':<44} {'OOS':>5} {'α':>5} {'B':>5} {'α max-drop':>11}  {'OOS H2':>8}")
-    print(f"  {'-'*44} {'-'*5} {'-'*5} {'-'*5} {'-'*11}  {'-'*8}")
+    print(_fmt_stats_header() + f"  {'OOS H2 Sharpe':>14}  {'H2 MaxDD':>9}  {'α drop':>7}  Pass?")
+    print(_fmt_stats_divider() + "  " + "-"*14 + "  " + "-"*9 + "  " + "-"*7 + "  -----")
 
     champion_lbl = None; champion_h2 = -999.0
     for label, (mode, kw) in configs.items():
-        s_lbl   = label.strip()
-        oos_r   = oos_results.get(s_lbl, {})
+        pnl   = _pnl(label, mode, kw)
+        st_f  = _full_stats(pnl[test_mask])
+        st_h2 = _full_stats(pnl[second_half])
+        s_lbl = label.strip()
+        oos_r = oos_results.get(s_lbl, {})
         alpha_r = alpha_summary.get(s_lbl, {})
-        oos_ok  = oos_r.get('pass', True)
+        oos_ok   = oos_r.get('pass', True)
         alpha_ok = alpha_r.get('pass', True) if alpha_r else True
-        boost_ok = t3_pass if s_lbl.startswith('v63_b2_k4_mu0') else True
-        max_drop_s = f"{alpha_r['max_drop']:.4f}" if alpha_r else 'N/A'
-        s_h2_v   = oos_r.get('sharpe_second', 0.0)
-        tag      = ''
+        max_drop_s = f"{alpha_r['max_drop']:>7.4f}" if alpha_r else '    N/A'
+        tag = ''
         if s_lbl.startswith('v58'):
             tag = '  ← PREV CHAMPION'
-        elif oos_ok and alpha_ok and s_h2_v > champion_h2:
-            champion_h2 = s_h2_v; champion_lbl = s_lbl
-        print(f"  {s_lbl:<44} {'✓' if oos_ok else '✗':>5} {'✓' if alpha_ok else '✗':>5}"
-              f" {'✓' if boost_ok else '✗':>5}  {max_drop_s:>11}  {s_h2_v:>+8.4f}{tag}")
+        elif oos_ok and alpha_ok and st_h2['sharpe'] > champion_h2:
+            champion_h2 = st_h2['sharpe']; champion_lbl = s_lbl
+        pf_s = f"{st_f['profit_f']:>6.2f}" if st_f['profit_f'] != np.inf else "   ∞  "
+        print(f"  {s_lbl:<44} {st_f['sharpe']:>+7.3f} {st_f['sortino']:>+8.3f} {st_f['calmar']:>+7.2f}"
+              f" {st_f['cagr']:>+6.1%} {st_f['max_dd']:>+7.1%} {st_f['avg_dd']:>+7.1%}"
+              f" {st_f['win_rate']:>5.1%} {pf_s} ${st_f['final']:>7.2f}"
+              f"  {st_h2['sharpe']:>+14.4f}  {st_h2['max_dd']:>+9.1%}  {max_drop_s}"
+              f"  {'✓' if (oos_ok and alpha_ok) else '✗'}{tag}")
 
-    print(f'\n  Alpha sensitivity progression (max drop, lower=better, bar=0.15):')
+    # ── year-on-year table ─────────────────────────────────────────────────────
+    print(f'\n{BAR}')
+    print('  YEAR-ON-YEAR RETURNS  (OOS period, annualised)')
+    print(f'{BAR}')
+
+    test_years = sorted(set(df_1h.index[test_mask].year))
+    col_w = 10
+    hdr   = f"  {'Config':<44}" + ''.join(f" {str(yr):>{col_w}}" for yr in test_years)
+    print(hdr)
+    print("  " + "-"*44 + "".join(" " + "-"*col_w for _ in test_years))
+
+    for label, (mode, kw) in configs.items():
+        pnl  = _pnl(label, mode, kw)
+        st_f = _full_stats(pnl[test_mask])
+        row  = f"  {label.strip():<44}"
+        for yr in test_years:
+            r = st_f['yoy'].get(yr, float('nan'))
+            row += f" {r:>+9.1%} " if not np.isnan(r) else f" {'—':>{col_w}}"
+        print(row)
+
+    print(f'\n  Alpha sensitivity progression (max |Δ Sharpe|, lower=better, bar=0.15):')
     print(f'    v59 Schmitt:    0.3300  ✗')
     print(f'    v60 BSDT:       0.3664  ✗')
     print(f'    v61_loose:      0.3211  ✗')
     print(f'    v61_surge:      0.0764  ✓  (OOS H2=+2.70, below +3.60 bar)')
     print(f'    v62_k4_mu0.5:   0.0241  ✓  (OOS H2=+2.79, below +3.60 bar)')
-    print(f'    v63_b2_k4_mu0:  {alpha_summary.get("v63_b2_k4_mu0", {}).get("max_drop", "---"):.4f}  {"✓" if alpha_summary.get("v63_b2_k4_mu0", {}).get("pass", False) else "✗"}  '
-          f'(OOS H2={oos_results.get("v63_b2_k4_mu0", {}).get("sharpe_second", 0):+.4f})')
-    print(f'    v63_b4_k4_mu0:  {alpha_summary.get("v63_b4_k4_mu0", {}).get("max_drop", "---"):.4f}  {"✓" if alpha_summary.get("v63_b4_k4_mu0", {}).get("pass", False) else "✗"}  '
-          f'(OOS H2={oos_results.get("v63_b4_k4_mu0", {}).get("sharpe_second", 0):+.4f})')
+    _d0 = alpha_summary.get("v63_b2_k4_mu0",  {}).get("max_drop", float("nan"))
+    _d1 = alpha_summary.get("v63_b4_k4_mu0",  {}).get("max_drop", float("nan"))
+    _h0 = oos_results.get("v63_b2_k4_mu0",    {}).get("sharpe_second", float("nan"))
+    _h1 = oos_results.get("v63_b4_k4_mu0",    {}).get("sharpe_second", float("nan"))
+    print(f'    v63_b2_k4_mu0:  {_d0:.4f}  '
+          f'{"✓" if alpha_summary.get("v63_b2_k4_mu0",{}).get("pass", False) else "✗"}'
+          f'  (OOS H2={_h0:+.4f})')
+    print(f'    v63_b4_k4_mu0:  {_d1:.4f}  '
+          f'{"✓" if alpha_summary.get("v63_b4_k4_mu0",{}).get("pass", False) else "✗"}'
+          f'  (OOS H2={_h1:+.4f})')
 
     if champion_lbl:
-        print(f'\n  NEW CHAMPION CANDIDATE: {champion_lbl}')
-        print(f'  OOS H2: {champion_h2:+.4f}')
-        print(f'  vs v58: {champion_h2 - 4.7402:+.4f}')
+        print(f'\n  NEW CHAMPION CANDIDATE : {champion_lbl}')
+        print(f'  OOS H2 Sharpe          : {champion_h2:+.4f}')
+        print(f'  vs v58                 : {champion_h2 - 4.7402:+.4f}')
     else:
-        print(f'\n  No new champion found. v58_tight remains champion at OOS H2=+4.7402.')
+        print(f'\n  No new champion. v58_tight remains champion at OOS H2=+4.7402.')
 
-    # ── persist results ────────────────────────────────────────────────────────
+    # ── persist ────────────────────────────────────────────────────────────────
     results = {
         'version': 'v63',
         'oos':     oos_results,
@@ -707,8 +878,17 @@ def main():
     }
     out_path = OUT_DIR_ / 'crypto_bsdt_v63_results.json'
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    class _NpEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, (np.integer,)):  return int(obj)
+            if isinstance(obj, (np.floating,)): return float(obj)
+            if isinstance(obj, (np.bool_,)):    return bool(obj)
+            if isinstance(obj, np.ndarray):     return obj.tolist()
+            return super().default(obj)
+
     with open(out_path, 'w') as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, cls=_NpEncoder)
     print(f'\n  Results saved → {out_path}')
     print(f'  Total time: {time.time()-t0:.0f}s')
 
