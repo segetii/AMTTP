@@ -1,0 +1,151 @@
+{
+  "version": "v63",
+  "oos": {
+    "v58_tight (ref)": {
+      "sharpe_full": 3.958907354959302,
+      "sharpe_first": 3.5156230103451445,
+      "sharpe_second": 4.740244416133077,
+      "maxdd_second": -0.037454466714068824,
+      "pass": true,
+      "stretch": true
+    },
+    "v63_b2_k4_mu0": {
+      "sharpe_full": 3.940007959523273,
+      "sharpe_first": 3.48360326013801,
+      "sharpe_second": 4.73227897396839,
+      "maxdd_second": -0.03813780237247888,
+      "pass": true,
+      "stretch": false
+    },
+    "v63_b4_k4_mu0": {
+      "sharpe_full": 3.9202992688237277,
+      "sharpe_first": 3.4505504062842327,
+      "sharpe_second": 4.72374112423646,
+      "maxdd_second": -0.03882099817214946,
+      "pass": true,
+      "stretch": false
+    },
+    "v63_b2_k4_mu0.5": {
+      "sharpe_full": 3.9554777464509767,
+      "sharpe_first": 3.509276046513469,
+      "sharpe_second": 4.739533187308872,
+      "maxdd_second": -0.03752554209439407,
+      "pass": true,
+      "stretch": false
+    },
+    "v63_b2_k4_muneg0.5": {
+      "sharpe_full": 3.9241825443463316,
+      "sharpe_first": 3.449085502137421,
+      "sharpe_second": 4.728901209584562,
+      "maxdd_second": -0.039244229134342,
+      "pass": true,
+      "stretch": false
+    },
+    "v63_b2_k6_mu0": {
+      "sharpe_full": 3.936737049192244,
+      "sharpe_first": 3.4804628184093658,
+      "sharpe_second": 4.729069731576994,
+      "maxdd_second": -0.03818904722679983,
+      "pass": true,
+      "stretch": false
+    },
+    "v63_b4_killmod_k4_mu0": {
+      "sharpe_full": 3.9200390891301193,
+      "sharpe_first": 3.4498676120750233,
+      "sharpe_second": 4.72392212883623,
+      "maxdd_second": -0.03883483512643404,
+      "pass": true,
+      "stretch": false
+    }
+  },
+  "alpha": {
+    "v63_b2_k4_mu0": {
+      "pass": true,
+      "max_drop": 0.0113828162175027
+    },
+    "v63_b4_k4_mu0": {
+      "pass": true,
+      "max_drop": 0.02350227697798024
+    },
+    "v63_b2_k4_mu0.5": {
+      "pass": true,
+      "max_drop": 0.008530999105259784
+    },
+    "v63_b2_k4_muneg0.5": {
+      "pass": true,
+      "max_drop": 0.009140224459879054
+    },
+    "v63_b2_k6_mu0": {
+      "pass": true,
+      "max_drop": 0.014904874791427325
+    },
+    "v63_b4_killmod_k4_mu0": {
+      "pass": true,
+      "max_drop": 0.023652184901131523
+    }
+  },
+  "test3_boost_sensitivity": {
+    "baseline (boost=2)": {
+      "sharpe_full": 3.940007959523273,
+      "sharpe_h2": 4.73227897396839,
+      "delta_h2": 0.0
+    },
+    "boost + 1  (\u21923)": {
+      "sharpe_full": 3.9302529230652463,
+      "sharpe_h2": 4.728081062722652,
+      "delta_h2": -0.004197911245737984
+    },
+    "boost \u2212 1  (\u21921)": {
+      "sharpe_full": 3.9495606539205403,
+      "sharpe_h2": 4.7363337743883775,
+      "delta_h2": 0.004054800419987181
+    },
+    "boost + 2  (\u21924)": {
+      "sharpe_full": 3.9202992688237277,
+      "sharpe_h2": 4.72374112423646,
+      "delta_h2": -0.008537849731930613
+    },
+    "boost \u2212 2  (\u21920=v58)": {
+      "sharpe_full": 3.958907354959302,
+      "sharpe_h2": 4.740244416133077,
+      "delta_h2": 0.007965442164686642
+    }
+  },
+  "test4_mu_sensitivity": {
+    "baseline (b2,k4,\u03bc=0)": {
+      "sharpe_full": 3.940007959523273,
+      "sharpe_h2": 4.73227897396839,
+      "delta_h2": 0.0
+    },
+    "\u03bc + 0.25": {
+      "sharpe_full": 3.949537747271353,
+      "sharpe_h2": 4.737272374081378,
+      "delta_h2": 0.004993400112987878
+    },
+    "\u03bc \u2212 0.25": {
+      "sharpe_full": 3.930572089360216,
+      "sharpe_h2": 4.727292391466188,
+      "delta_h2": -0.00498658250220263
+    },
+    "\u03bc + 0.50": {
+      "sharpe_full": 3.9554777464509767,
+      "sharpe_h2": 4.739533187308872,
+      "delta_h2": 0.007254213340481819
+    },
+    "\u03bc \u2212 0.50": {
+      "sharpe_full": 3.9241825443463316,
+      "sharpe_h2": 4.728901209584562,
+      "delta_h2": -0.003377764383828641
+    },
+    "k + 2  (\u21926)": {
+      "sharpe_full": 3.936737049192244,
+      "sharpe_h2": 4.729069731576994,
+      "delta_h2": -0.0032092423913967494
+    },
+    "k \u2212 2  (\u21922)": {
+      "sharpe_full": 3.9457386774367893,
+      "sharpe_h2": 4.739419563788121,
+      "delta_h2": 0.007140589819730536
+    }
+  }
+}
