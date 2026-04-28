@@ -144,10 +144,14 @@ K_G             = 0.10
 
 # ── v59 ST-FGRC constants ──────────────────────────────────────────────────────
 ALPHA_FG        = 0.85     # floating gate decay (0.85^8 ≈ 0.27 → ~8-bar half-life)
-G_SCHMITT_HI    = 0.50     # Q_G SET threshold
-G_SCHMITT_LO    = 0.40     # Q_G RESET threshold
-T_SCHMITT_HI    = 0.44     # Q_T SET threshold
-T_SCHMITT_LO    = 0.38     # Q_T RESET threshold
+# Charge-scale Schmitt thresholds — calibrated to match v58's firing rates:
+#   v58 P(G_mem > 0.45) ≈ 85%  →  Q_G_norm p15 ≈ 0.32  →  G_SCHMITT_HI = 0.32
+#   v58 P(T_mem > 0.41) ≈ 81%  →  Q_T_norm p19 ≈ 0.31  →  T_SCHMITT_HI = 0.31
+# Hysteresis band ≈ 0.06 (prevents cliff oscillation at boundary)
+G_SCHMITT_HI    = 0.32     # Q_G_norm SET threshold   (~ p15 of Q_G_norm)
+G_SCHMITT_LO    = 0.26     # Q_G_norm RESET threshold (~ p5  of Q_G_norm)
+T_SCHMITT_HI    = 0.31     # Q_T_norm SET threshold   (~ p19 of Q_T_norm)
+T_SCHMITT_LO    = 0.25     # Q_T_norm RESET threshold (~ p5  of Q_T_norm)
 PARTIAL_CREDIT  = 0.30     # partial boost multiplier for single-channel events
 
 V58_SHARPE  = 4.0362       # v58 champion full-test Sharpe (baseline to beat)
@@ -285,8 +289,14 @@ def _build_pnl_v59(
     a_T_arr = s4['a_T'].values
 
     # ── floating gate charges (shift(1) built in) ────────────────────────────
-    Q_G = _float_gate_charge(a_G_arr, alpha)   # (T,)
-    Q_T = _float_gate_charge(a_T_arr, alpha)   # (T,)
+    Q_G_raw = _float_gate_charge(a_G_arr, alpha)   # (T,)  steady-state ≈ E[a_G]/(1-α)
+    Q_T_raw = _float_gate_charge(a_T_arr, alpha)   # (T,)
+
+    # Normalise to [0,1] scale so Schmitt thresholds remain comparable to
+    # the original attribution values (G_hi=0.50, T_hi=0.44, etc.).
+    # Without this, Q_G ≈ 0.3/0.15 = 2.0 at steady state → GH always ON.
+    Q_G = Q_G_raw * (1.0 - alpha)   # ≈ E[a_G] at steady state
+    Q_T = Q_T_raw * (1.0 - alpha)   # ≈ E[a_T] at steady state
 
     # ── fire gate (unchanged from v58) ───────────────────────────────────────
     fire = np.zeros(len(a_A_arr), dtype=bool)
@@ -446,6 +456,11 @@ def main():
             'v59', dict(alpha=0.90, schmitt_only=False,
                         g_hi=G_SCHMITT_HI, g_lo=G_SCHMITT_LO,
                         t_hi=T_SCHMITT_HI, t_lo=T_SCHMITT_LO)),
+        # wider band — test Schmitt stability
+        'v59_fgrc (wide band)       ': (
+            'v59', dict(alpha=0.85, schmitt_only=False,
+                        g_hi=G_SCHMITT_HI+0.03, g_lo=G_SCHMITT_LO-0.03,
+                        t_hi=T_SCHMITT_HI+0.03, t_lo=T_SCHMITT_LO-0.03)),
     }
 
     def _pnl(label, mode, kw):
@@ -498,6 +513,11 @@ def main():
                                t_hi=T_SCHMITT_HI, t_lo=T_SCHMITT_LO),
         'alpha - 0.05':   dict(alpha=0.80, g_hi=G_SCHMITT_HI, g_lo=G_SCHMITT_LO,
                                t_hi=T_SCHMITT_HI, t_lo=T_SCHMITT_LO),
+        # wider band stress — Schmitt hysteresis robustness
+        'band * 1.5':     dict(alpha=0.85, g_hi=G_SCHMITT_HI+0.03, g_lo=G_SCHMITT_LO-0.03,
+                               t_hi=T_SCHMITT_HI+0.03, t_lo=T_SCHMITT_LO-0.03),
+        'band * 0.5':     dict(alpha=0.85, g_hi=G_SCHMITT_HI-0.03, g_lo=G_SCHMITT_LO+0.03,
+                               t_hi=T_SCHMITT_HI-0.03, t_lo=T_SCHMITT_LO+0.03),
     }
 
     sensitivity_results = {}
