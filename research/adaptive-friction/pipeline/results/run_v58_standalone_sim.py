@@ -526,6 +526,10 @@ def compute_bsdt_signals(
         e_t = delta_C
 
         # ② γ* — adaptive damping  (§3.4)
+        # Only δ_C (Mahalanobis energy) enters γ*; it is the scalar total-
+        # system anomaly measure.  The other channels (G, A, T) decompose
+        # WHERE the anomaly lives but do not change its overall magnitude —
+        # they feed the attribution vector a_k, not the damping gate.
         # Uses normalised δ̃_C = δ_C / μ_norm_C so that in the calibration
         # period δ̃_C ≈ 1.0  →  γ* ≈ 0.5.  In anomalous regimes δ̃_C > 1
         # →  γ* rises toward 1 (heavier damping).  DAMPING_THETA = 1 is
@@ -751,9 +755,12 @@ def build_pnl_v58(
     T_mem = a_T.rolling(N_OPT, min_periods=1).max().shift(1).fillna(0.0)
 
     # A-channel firing gate (§29.3): 1_fire = 1[a_A(t-1) > θ_A]
-    # Minimum hold = 24 bars (≈ 1 day): on real data the activity anomaly
-    # persists due to market autocorrelation.  24h minimum avoids excessive
-    # churn on synthetic IID noise while staying true to daily rebalancing.
+    # Minimum hold = 24 bars (≈ 1 day).  Mechanism: .rolling(24).max()
+    # propagates any True in fired_raw forward for 24 bars, so once the gate
+    # fires it stays open for at least 24 consecutive bars regardless of
+    # subsequent a_A values.  On real data the activity anomaly persists due
+    # to market autocorrelation; 24h minimum avoids excessive churn on
+    # synthetic IID noise while staying true to daily rebalancing cadence.
     fired_raw = (a_A.shift(1).fillna(0.0) > A_FIRE_THRESH)
     fired = fired_raw.rolling(24, min_periods=1).max().astype(bool)
 
