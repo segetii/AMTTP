@@ -80,7 +80,32 @@ CALIB_BARS  = 500  # normal-window length (≈21 trading days at 1h)
 ALPHA_CONF  = 0.01 # 99th percentile for chi² threshold  (must match v21)
 SIGMA_N_FALLBACK = 1e-3
 
-# RSS operating thresholds (from practitioner's guide)
+# RSS operating thresholds — z-score space (σ above AGC reference).
+# The reference is an asymmetric EMA (slow attack / fast decay) initialized
+# from the calibration mean — equivalent to AGC in electronics:
+#   slow attack: crisis builds → reference barely moves → z spikes → alarm fires
+#   fast decay:  crisis ends  → reference drops quickly → z normalises
+# Normal < 0.5σ → pass-through; Elevated 0.5–1.5σ → damp;
+# Pre-collapse 1.5–2.5σ → halve; Critical ≥2.5σ → flat.
+Z_RSS_NORMAL      = 0.5
+Z_RSS_ELEVATED    = 1.5
+Z_RSS_PRECOLLAPSE = 2.5
+
+# AGC asymmetric time constants (in 1h bars)
+AGC_SPAN_ATTACK = 2160   # 90 days — reference rises very slowly during crises
+AGC_SPAN_DECAY  =  168   #  7 days — reference falls quickly after crisis passes
+
+# Minimum calibration σ for a ξ signal to participate in the per-ξ stretch.
+# Signals constant in the calibration window (σ < MIN_XI_SIG) are skipped;
+# they would always contribute sigmoid(0)=0.5, diluting the product with no info.
+MIN_XI_SIG      = 0.01
+
+# Per-ξ tanh-stretch gain — applied to each signal's z-score before geometric mean.
+# sigmoid(STRETCH_GAMMA · z) maps z=0 (normal) → 0.50, z=+2σ → 0.998, z=−2σ → 0.002.
+# This breaks 5th-root variance compression: dynamic range expands from ~0.055 to ~0.5.
+STRETCH_GAMMA   = 3.0
+
+# Legacy absolute thresholds (kept for signal-report readability)
 RSS_NORMAL      = 0.20
 RSS_ELEVATED    = 0.50
 RSS_PRECOLLAPSE = 0.70
@@ -256,22 +281,95 @@ def calibrate_intraday_engine(X_panel: np.ndarray,
 
     stoch = StochasticExtension(op=M, lyap=lyap, sigma_n=sigma_n)
 
-    # θ = 90th-pctile of e_t over normal period (from pipeline, avoids manual
-    # covariance arithmetic)
-    e_vals = []
+    # Single pass: compute e_t (for θ) and cos_theta_channel (for ξ₄ z-score) together.
+    e_vals    = []
+    cos_calib = []
     for t in range(1, T0):
-        snap = Snapshot(X=X_normal[t], X_prev=X_normal[t-1],
-                        history=X_normal[max(0, t-12):t])
+        snap_c = Snapshot(X=X_normal[t], X_prev=X_normal[t-1],
+                          history=X_normal[max(0, t-12):t])
         try:
-            p = M.pipeline(snap)
+            p = M.pipeline(snap_c, net)
             e_vals.append(float(p['e_t']))
+            cos_calib.append(float(geom.cos_theta_channel(snap_c)))
         except Exception:
             pass
     theta = float(np.percentile(e_vals, 90)) if e_vals else 1.0
     theta = max(theta, 1.0)
     print(f"  [v36] θ (90-pctile normal e_t) = {theta:.3f}")
 
-    return M, net, geom, lyap, ews, stoch, e_star, theta
+    cos_mu  = float(np.mean(cos_calib)) if cos_calib else 0.0
+    cos_sig = max(float(np.std(cos_calib)) if cos_calib else 1.0, 0.01)
+    print(f"  [v36] cos_theta_channel calib: μ={cos_mu:.3f}, σ={cos_sig:.3f}")
+
+    # Combined pass 2+3: collect the 5 raw ξ values over the calibration window,
+    # compute per-ξ (μ, σ) — xi_calib — then derive RSS_stretch distribution.
+    # ξ signals: [γ*, λ_f, W̄_off, z_θ (already z-scored), mfls_f]
+    # Only z_θ is already centred; γ*, λ_f, W̄_off, mfls_f each need their own μ/σ.
+    raw_xi   = [[], [], [], [], []]  # gamma, lam, wbar, z_theta, mfls
+    psi_vals = []
+    for t in range(1, T0):
+        snap_r = Snapshot(X=X_normal[t], X_prev=X_normal[t-1],
+                          history=X_normal[max(0, t-12):t])
+        try:
+            p      = M.pipeline(snap_r, net)
+            gamma  = float(p['gamma_star'])
+            lam_f  = max(0.0, min(float(p.get('lambda_bound', 0.5)), 1.0))
+            W_bar  = float(p.get('W_bar_off', 0.5))
+            cos_ch = float(geom.cos_theta_channel(snap_r))
+            z_th   = (cos_ch - cos_mu) / cos_sig
+            mfls_v = float(p.get('MFLS_state', 1.0))
+            mfls_f = mfls_v / (1.0 + mfls_v)
+            raw_xi[0].append(gamma)
+            raw_xi[1].append(lam_f)
+            raw_xi[2].append(W_bar)
+            raw_xi[3].append(z_th)
+            raw_xi[4].append(mfls_f)
+            psi_vals.append(float(p.get('psi', 0.0)))
+        except Exception:
+            pass
+
+    # Per-ξ calibration: (μ, raw_σ).  σ is NOT floored here so that the
+    # MIN_XI_SIG check below can correctly identify constant signals.
+    xi_calib = []
+    for vals in raw_xi:
+        arr = np.array(vals) if vals else np.array([0.0])
+        xi_calib.append((float(np.mean(arr)), float(np.std(arr))))
+    print("  [v36] ξ calib: " + "  ".join(
+        f"ξ{i+1}(μ={mu:.3f},σ={sig:.3f})" for i, (mu, sig) in enumerate(xi_calib)))
+
+    # Compute RSS_stretch distribution — skip constant-in-calibration signals.
+    def _sig(x: float) -> float:
+        return 1.0 / (1.0 + np.exp(-x))
+
+    def _rss_stretch(xis_raw, psi):
+        """Geometric mean of sigmoid-stretched z-scores for active ξ signals."""
+        stretched = []
+        for xi_v, (xi_mu, xi_sig) in zip(xis_raw, xi_calib):
+            if xi_sig < MIN_XI_SIG:
+                continue   # constant in calibration → skip (no discriminative info)
+            z_i = (xi_v - xi_mu) / xi_sig
+            stretched.append(_sig(STRETCH_GAMMA * z_i))
+        if not stretched:
+            return 0.5
+        inner = 1.0
+        for s in stretched:
+            inner *= s
+        return inner ** (1.0 / len(stretched))  # K-th root (K = active signal count)
+
+    rss_calib = []
+    for i in range(len(psi_vals)):
+        try:
+            xis_raw = [raw_xi[k][i] for k in range(5)]
+            rss_raw = _rss_stretch(xis_raw, psi_vals[i])
+            cos2psi = np.cos(psi_vals[i]) ** 2
+            rss_calib.append(float(np.clip(rss_raw * cos2psi, 0.0, 1.0)))
+        except Exception:
+            pass
+    rss_mu  = float(np.mean(rss_calib)) if rss_calib else 0.5
+    rss_sig = max(float(np.std(rss_calib)) if rss_calib else 0.1, 1e-4)
+    print(f"  [v36] RSS_stretch calib: μ={rss_mu:.3f}, σ={rss_sig:.3f}")
+
+    return M, net, geom, lyap, ews, stoch, e_star, theta, cos_mu, cos_sig, rss_mu, rss_sig, xi_calib
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -283,7 +381,12 @@ def compute_intraday_signals(X_panel: np.ndarray,
                               M,  net,  ews,  stoch,
                               e_star:  float,
                               theta:   float,
-                              history_len: int = 48) -> pd.DataFrame:
+                              history_len: int = 48,
+                              cos_mu: float = 0.0,
+                              cos_sig: float = 1.0,
+                              rss_mu: float = 0.0,
+                              rss_sig: float = 1.0,
+                              xi_calib: list | None = None) -> pd.DataFrame:
     """
     Sweep every 1h bar and compute all 7 BSDT signals via M.pipeline().
 
@@ -299,11 +402,14 @@ def compute_intraday_signals(X_panel: np.ndarray,
 
     # output buffers
     buf = {k: np.full(T, np.nan) for k in [
-        'e_t', 'gamma_star', 'cos_theta', 'psi_t', 'R_t',
+        'e_t', 'gamma_star', 'cos_theta', 'z_theta', 'psi_t', 'R_t',
         'P_t', 'G_norm', 'RSS_t', 'tau_lin', 'dom_ch',
         'delta_C', 'delta_G', 'delta_A', 'delta_T',
         'kramers_p',
     ]}
+
+    # Lyapunov certificate for exact ė_t = P_t − γ* Q_t/||g||\u00b2 (§XVI)
+    _lyap = LyapunovCertificate(op=M)
 
     t0 = time.time()
     for t in range(2, T):
@@ -319,7 +425,7 @@ def compute_intraday_signals(X_panel: np.ndarray,
             e_t       = float(p['e_t'])
             gamma_star= float(p['gamma_star'])
             psi_t     = float(p['psi'])         # false-alarm angle (rad)
-            cos_theta = float(p['cos_theta_state'])
+            cos_theta = float(ews.geom.cos_theta_channel(snap))  # 4D channel space, not 64D state
             W_bar_off = float(p.get('W_bar_off', 0.5))
             mfls_val  = float(p.get('MFLS_state', 1.0))
             lam_bound = float(p.get('lambda_bound', 0.5))
@@ -328,6 +434,7 @@ def compute_intraday_signals(X_panel: np.ndarray,
             buf['gamma_star'][t] = gamma_star
             buf['psi_t'][t]      = psi_t
             buf['cos_theta'][t]  = cos_theta
+            buf['z_theta'][t]    = (cos_theta - cos_mu) / cos_sig
 
             # ── BSDT channel scores δ_C, δ_G, δ_A, δ_T ───────────────────
             dc = float(np.mean(bsdt.delta_C(snap)))
@@ -379,19 +486,44 @@ def compute_intraday_signals(X_panel: np.ndarray,
             except Exception:
                 buf['R_t'][t] = float(P_t)   # conservative fallback
 
-            # ── RSS_t — regime state score ────────────────────────────────
-            # RSS = [γ* × min(λ_bound,1) × W̄_off × max(0,cos_θ) × mfls/(1+mfls)]^(1/5)
-            #       × cos²(ψ)
+            # ── RSS_t — regime state score (per-ξ tanh-stretch) ─────────
+            # ξ signals: [γ*, λ_f, W̄_off, z_θ, mfls_f].  ξ₂ clamped to [0,1]
+            # because λ_bound can be negative (Gershgorin bound only upper).
             mfls_f = mfls_val / (1.0 + mfls_val)
-            lam_f  = min(lam_bound, 1.0)
-            inner  = gamma_star * lam_f * W_bar_off * max(0.0, cos_theta) * mfls_f
-            rss_raw= inner ** (1.0 / 5.0) if inner > 0.0 else 0.0
-            cos2psi= np.cos(psi_t) ** 2
+            lam_f  = max(0.0, min(lam_bound, 1.0))                    # ξ₂ fix
+            z_th   = buf['z_theta'][t]                                 # already stored
+
+            # ── RSS_t — per-ξ tanh-stretch (UDL SubspaceScanScorer pattern) ──
+            # sigmoid(STRETCH_GAMMA · z_i) ∈ [0,1] with z=0→0.50, z=+2→0.998.
+            # Only signals with calibration σ ≥ MIN_XI_SIG participate; constant
+            # calibration signals (σ≈0) are skipped — no discriminative power.
+            if xi_calib is not None:
+                xis_raw  = [gamma_star, lam_f, W_bar_off, z_th, mfls_f]
+                stretched = []
+                for xi_v, (xi_mu, xi_sig) in zip(xis_raw, xi_calib):
+                    if xi_sig < MIN_XI_SIG:
+                        continue
+                    z_i = (xi_v - xi_mu) / xi_sig
+                    stretched.append(1.0 / (1.0 + np.exp(-STRETCH_GAMMA * z_i)))
+                if stretched:
+                    inner = 1.0
+                    for s in stretched:
+                        inner *= s
+                    rss_raw = inner ** (1.0 / len(stretched))
+                else:
+                    rss_raw = 0.5
+            else:
+                # Legacy path: simple sigmoid on z_theta only
+                xi4     = float(1.0 / (1.0 + np.exp(-z_th)))
+                inner   = gamma_star * lam_f * W_bar_off * xi4 * mfls_f
+                rss_raw = inner ** (1.0 / 5.0) if inner > 0.0 else 0.0
+            cos2psi = np.cos(psi_t) ** 2
             buf['RSS_t'][t] = float(np.clip(rss_raw * cos2psi, 0.0, 1.0))
 
             # ── τ_lin — bars to critical manifold ─────────────────────────
-            # τ = (e* - e_t) / ė_t   where ė_t ≈ P_t × (1 − γ*)
-            e_dot = P_t * (1.0 - gamma_star)
+            # τ = (e* - e_t) / ė_t   where ė_t = dV/dt = P_t − γ* Q_t/||g||²  (§XVI)
+            # Use the exact Lyapunov formula instead of the simplified P_t(1−γ*) approximation.
+            e_dot = _lyap.dV_dt(snap)
             if e_dot > 1e-8:
                 buf['tau_lin'][t] = float(np.clip((e_star - e_t) / e_dot, 0.0, 9999.9))
             else:
@@ -420,6 +552,7 @@ def compute_intraday_signals(X_panel: np.ndarray,
     e_t_s   = _ff(buf['e_t'],        0.0)
     gam_s   = _ff(buf['gamma_star'], 0.0)   # pipeline theta=1 (diagnostic only)
     cos_s   = _ff(buf['cos_theta'],  0.0)
+    z_th_s  = _ff(buf['z_theta'],    0.0)
     psi_s   = _ff(buf['psi_t'],      0.0)
     R_s     = _ff(buf['R_t'],        1.0)   # fallback = controllable
     RSS_s   = _ff(buf['RSS_t'],      0.0)
@@ -434,15 +567,37 @@ def compute_intraday_signals(X_panel: np.ndarray,
     # Size multiplier = 1 − γ*_adj (gives 0–50% reduction depending on energy)
     size_mult = np.clip(1.0 - gam_adj, 0.0, 1.0)
 
-    # RSS-based regime sizing (practitioner's guide §7.2):
-    #   Normal (<0.2)       → full size (multiplier = 1.0)
-    #   Elevated (0.2-0.5)  → size × (1-γ*_adj)
-    #   Pre-coll (0.5-0.7)  → size × (1-γ*_adj)/2
-    #   Critical (≥0.7)     → flat
-    rss_size = np.where(RSS_s >= RSS_PRECOLLAPSE, 0.0,
-               np.where(RSS_s >= RSS_ELEVATED,    size_mult * 0.5,
-               np.where(RSS_s >= RSS_NORMAL,       size_mult,
-                                                   1.0)))
+    # ── Method A: fixed z-score — (RSS_t − μ_cal) / σ_cal ───────────────────
+    # Reference is frozen at calibration baseline (AC-coupling analogue).
+    z_rss_fixed = (RSS_s - rss_mu) / max(rss_sig, 1e-8)
+
+    # ── Method B: AGC adaptive reference — asymmetric EMA ────────────────
+    # Initialized from calibration mean; slow attack / fast decay:
+    #   Attack (90d half-life): RSS rises → reference barely follows → z spikes
+    #   Decay  ( 7d half-life): RSS falls → reference drops quickly → z normalises
+    alpha_att = 2.0 / (AGC_SPAN_ATTACK + 1)   # ≈ 0.00093
+    alpha_dec = 2.0 / (AGC_SPAN_DECAY  + 1)   # ≈ 0.01183
+    agc_ref = np.empty(len(RSS_s))
+    agc_ref[0] = rss_mu
+    for i in range(1, len(RSS_s)):
+        if RSS_s[i] > agc_ref[i - 1]:         # rising → slow attack
+            agc_ref[i] = (1.0 - alpha_att) * agc_ref[i - 1] + alpha_att * RSS_s[i]
+        else:                                  # falling → fast decay
+            agc_ref[i] = (1.0 - alpha_dec) * agc_ref[i - 1] + alpha_dec * RSS_s[i]
+    z_rss_agc = (RSS_s - agc_ref) / max(rss_sig, 1e-8)
+
+    # Use fixed as the primary z_rss (backward-compatible); AGC exposed separately
+    z_rss_s = z_rss_fixed
+
+    # RSS-based regime sizing — both methods
+    def _rss_zones(z):
+        return np.where(z >= Z_RSS_PRECOLLAPSE, 0.0,
+               np.where(z >= Z_RSS_ELEVATED,    size_mult * 0.5,
+               np.where(z >= Z_RSS_NORMAL,       size_mult,
+                                                  1.0)))
+
+    rss_size     = _rss_zones(z_rss_fixed)   # Method A: fixed baseline
+    rss_size_agc = _rss_zones(z_rss_agc)     # Method B: AGC adaptive
 
     # Entry gate (relaxed): R_t>0, ψ<π/4, dominant channel ≠ G
     # NOTE: cos_θ<0 filter removed — in 64-dim state cos is ≈0 always;
@@ -451,10 +606,13 @@ def compute_intraday_signals(X_panel: np.ndarray,
                 (psi_s < np.pi / 4.0) &
                 (dom_s.astype(int) != 1)).astype(float)
 
-    # Exit trigger: RSS≥0.7 OR R<0 OR τ<5
-    exit_now = ((RSS_s >= RSS_PRECOLLAPSE) |
-                (R_s < 0.0) |
-                (tau_s < TAU_TIGHT)).astype(float)
+    # Exit trigger: z_RSS ≥ 2.5σ above reference OR R<0 OR τ<5
+    exit_now     = ((z_rss_fixed >= Z_RSS_PRECOLLAPSE) |
+                    (R_s < 0.0) |
+                    (tau_s < TAU_TIGHT)).astype(float)
+    exit_now_agc = ((z_rss_agc   >= Z_RSS_PRECOLLAPSE) |
+                    (R_s < 0.0) |
+                    (tau_s < TAU_TIGHT)).astype(float)
 
     idx = df_1h.index
     return pd.DataFrame({
@@ -462,11 +620,14 @@ def compute_intraday_signals(X_panel: np.ndarray,
         'gamma_star':    gam_s,       # pipeline raw (theta=1 internal)
         'gamma_star_adj':gam_adj,     # calibrated theta (θ=90th pctile)
         'cos_theta':     cos_s,
+        'z_theta':       z_th_s,
         'psi_t':         psi_s,
         'R_t':           R_s,
         'P_t':           _ff(buf['P_t'],       0.0),
         'G_norm':        _ff(buf['G_norm'],    0.0),
         'RSS_t':         RSS_s,
+        'z_rss':         z_rss_fixed,
+        'z_rss_agc':     z_rss_agc,
         'tau_lin':       tau_s,
         'dom_ch':        dom_s,
         'delta_C':       _ff(buf['delta_C'],   0.0),
@@ -474,10 +635,12 @@ def compute_intraday_signals(X_panel: np.ndarray,
         'delta_A':       _ff(buf['delta_A'],   0.0),
         'delta_T':       _ff(buf['delta_T'],   0.0),
         'kramers_p':     _ff(buf['kramers_p'], 0.5),
-        'size_mult':     size_mult,     # 1 − γ*_adj
-        'rss_size':      rss_size,      # RSS-regime-gated version
+        'size_mult':     size_mult,       # 1 − γ*_adj
+        'rss_size':      rss_size,         # fixed z-score sizing
+        'rss_size_agc':  rss_size_agc,     # AGC adaptive sizing
         'entry_ok':      entry_ok,
         'exit_now':      exit_now,
+        'exit_now_agc':  exit_now_agc,
     }, index=idx)
 
 
@@ -489,27 +652,34 @@ def apply_bsdt_decision_tree(base_pnl: pd.Series,
                               sig:      pd.DataFrame,
                               ret_eth:  pd.Series) -> dict[str, pd.Series]:
     """
-    Six variants applying the BSDT engine to the v34 base portfolio:
+    Variants applying the BSDT engine to the v34 base portfolio.
+    Two RSS methods compared side-by-side:
+      _fixed : z-score vs frozen calibration mean (AC-coupling)
+      _agc   : z-score vs asymmetric-EMA adaptive reference (AGC/compressor)
 
-    v34_baseline   : unchanged v34 combined PnL
-    BSDT_scaled    : base × (1−γ*_adj)  — energy damping only
-    BSDT_rss       : base × rss_size    — RSS-regime gating (primary mode)
-    BSDT_filtered  : base × entry/exit gate (stateful, R_t/ψ_t/dom_ch gated)
-    BSDT_combined  : base × rss_size × entry/exit gate (both together)
-    BSDT_tau_guard : BSDT_rss but also exits early when τ_lin < TAU_NORMAL
+    v34_baseline    : unchanged v34 combined PnL
+    BSDT_scaled     : base × (1−γ*_adj)  — energy damping only
+    BSDT_rss_fixed  : base × rss_size_fixed   — fixed z-score thresholds
+    BSDT_rss_agc    : base × rss_size_agc     — AGC adaptive thresholds
+    BSDT_filtered   : base × entry/exit gate (stateful, R_t/ψ_t/dom_ch)
+    BSDT_combined   : BSDT_rss_fixed × entry/exit gate
+    BSDT_comb_agc   : BSDT_rss_agc   × entry/exit gate
+    BSDT_tau_guard  : BSDT_rss_fixed + τ_lin early-exit
     """
     base = base_pnl.fillna(0.0)
     s    = sig.reindex(base.index, method='ffill').fillna(0.0)
     r    = ret_eth.reindex(base.index, fill_value=0.0)
 
     # Lag signals by 1 bar (no lookahead)
-    sm   = s['size_mult'].shift(1).fillna(1.0)
-    rs   = s['rss_size'].shift(1).fillna(1.0)
-    eo   = s['entry_ok'].shift(1).fillna(0.0)
-    en   = s['exit_now'].shift(1).fillna(0.0)
-    Rt   = s['R_t'].shift(1).fillna(1.0)
-    tau  = s['tau_lin'].shift(1).fillna(9999.0)
-    RSS  = s['RSS_t'].shift(1).fillna(0.0)
+    sm    = s['size_mult'].shift(1).fillna(1.0)
+    rs    = s['rss_size'].shift(1).fillna(1.0)
+    rs_agc= s['rss_size_agc'].shift(1).fillna(1.0)
+    eo    = s['entry_ok'].shift(1).fillna(0.0)
+    en    = s['exit_now'].shift(1).fillna(0.0)
+    en_agc= s['exit_now_agc'].shift(1).fillna(0.0)
+    Rt    = s['R_t'].shift(1).fillna(1.0)
+    tau   = s['tau_lin'].shift(1).fillna(9999.0)
+    RSS   = s['RSS_t'].shift(1).fillna(0.0)
 
     # ── 1. Baseline ────────────────────────────────────────────────────────
     pnl_base = base
@@ -519,15 +689,17 @@ def apply_bsdt_decision_tree(base_pnl: pd.Series,
     # e_t exceeds θ. size_mult = 121/(e_t+121) ≈ 0.64 at mean energy.
     pnl_scaled = base * sm
 
-    # ── 3. RSS-regime ──────────────────────────────────────────────────────
-    # Normal (<0.2) → 1.0 × base  (87% of time)
-    # Elevated (0.2-0.5) → size_mult × base  (13%)
-    # Pre-coll/Critical (>0.5/0.7) → 0 (0% in test)
+    # ── 3. RSS fixed z-score ───────────────────────────────────────────────
+    # Zones vs frozen calibration mean (AC-coupling):
+    # z<0.5 → pass-through, z 0.5-1.5 → damp, z 1.5-2.5 → halve, z≥2.5 → flat
     pnl_rss = base * rs
 
-    # ── 4. Filtered  ───────────────────────────────────────────────────────
-    # Stateful: enter when entry_ok=1, exit when exit_now=1
-    # entry_ok requires R_t>0, ψ<π/4, dom≠G  (no cos_θ filter)
+    # ── 4. RSS AGC adaptive ────────────────────────────────────────────────
+    # Same zones but reference is asymmetric EMA (slow attack / fast decay)
+    pnl_rss_agc = base * rs_agc
+
+    # ── 5. Filtered  ───────────────────────────────────────────────────────
+    # Stateful: enter when entry_ok=1, exit when exit_now=1 (fixed z-score gate)
     active = pd.Series(0.0, index=base.index)
     in_pos = False
     for t in range(len(base)):
@@ -536,23 +708,35 @@ def apply_bsdt_decision_tree(base_pnl: pd.Series,
         if in_pos and en.iloc[t] > 0:
             in_pos = False
         active.iloc[t] = 1.0 if in_pos else 0.0
+
+    # AGC-gated stateful filter
+    active_agc = pd.Series(0.0, index=base.index)
+    in_pos_agc = False
+    for t in range(len(base)):
+        if not in_pos_agc and eo.iloc[t] > 0:
+            in_pos_agc = True
+        if in_pos_agc and en_agc.iloc[t] > 0:
+            in_pos_agc = False
+        active_agc.iloc[t] = 1.0 if in_pos_agc else 0.0
+
     pnl_filtered = base * active
 
-    # ── 5. Combined: RSS scale + state filter ─────────────────────────────
-    pnl_combined = base * rs * active
+    # ── 6. Combined ────────────────────────────────────────────────────────
+    pnl_combined     = base * rs     * active
+    pnl_combined_agc = base * rs_agc * active_agc
 
-    # ── 6. τ_lin guard ────────────────────────────────────────────────────
-    # RSS-sized with an additional early-exit when τ_lin < TAU_NORMAL
-    # This reduces exposure as we approach the critical manifold
+    # ── 7. τ_lin guard (fixed z-score base) ───────────────────────────────
     tau_factor = np.clip(tau / (tau + TAU_NORMAL), 0.0, 1.0)
     pnl_tau = pnl_rss * tau_factor
 
     return {
         'v34_baseline':   pnl_base,
         'BSDT_scaled':    pnl_scaled,
-        'BSDT_rss':       pnl_rss,
+        'BSDT_rss_fixed': pnl_rss,
+        'BSDT_rss_agc':   pnl_rss_agc,
         'BSDT_filtered':  pnl_filtered,
         'BSDT_combined':  pnl_combined,
+        'BSDT_comb_agc':  pnl_combined_agc,
         'BSDT_tau_guard': pnl_tau,
     }
 
@@ -613,19 +797,27 @@ def print_signal_report(sig: pd.DataFrame, mask: pd.Series):
     print(f"\n  [Signal report]  test bars={len(s):,}",
           f"  ({s.index[0].date()} → {s.index[-1].date()})")
     print(f"  {'Signal':<16}  {'mean':>9}  {'std':>9}  {'p5':>9}  {'p95':>9}")
-    for col in ['e_t', 'gamma_star', 'gamma_star_adj', 'cos_theta', 'psi_t', 'R_t',
-                'RSS_t', 'tau_lin', 'size_mult', 'rss_size']:
+    for col in ['e_t', 'gamma_star', 'gamma_star_adj', 'cos_theta', 'z_theta', 'psi_t', 'R_t',
+                'RSS_t', 'z_rss', 'z_rss_agc', 'tau_lin', 'size_mult', 'rss_size', 'rss_size_agc']:
         if col not in s.columns:
             continue
         v = s[col].dropna()
         print(f"  {col:<16}  {v.mean():>+9.3f}  {v.std():>9.3f}  "
               f"{v.quantile(0.05):>+9.3f}  {v.quantile(0.95):>+9.3f}")
     rss = s['RSS_t'].fillna(0.0)
-    print(f"\n  RSS regime breakdown:")
-    print(f"    Normal     (<{RSS_NORMAL}):   {100*(rss < RSS_NORMAL).mean():.1f}%")
-    print(f"    Elevated  ({RSS_NORMAL}-{RSS_ELEVATED}):  {100*((rss>=RSS_NORMAL)&(rss<RSS_ELEVATED)).mean():.1f}%")
-    print(f"    Pre-coll  ({RSS_ELEVATED}-{RSS_PRECOLLAPSE}):  {100*((rss>=RSS_ELEVATED)&(rss<RSS_PRECOLLAPSE)).mean():.1f}%")
-    print(f"    Critical   (>{RSS_PRECOLLAPSE}):   {100*(rss >= RSS_PRECOLLAPSE).mean():.1f}%")
+    zr_f = s['z_rss'].fillna(0.0)     if 'z_rss'     in s.columns else pd.Series(0.0, index=s.index)
+    zr_a = s['z_rss_agc'].fillna(0.0) if 'z_rss_agc' in s.columns else zr_f
+    print(f"\n  RSS regime breakdown (fixed z-score vs AGC):")
+    print(f"  {'Zone':<26}  {'Fixed':>8}  {'AGC':>8}")
+    for label, lo, hi in [
+        (f'Normal (z<{Z_RSS_NORMAL})',          -np.inf, Z_RSS_NORMAL),
+        (f'Elevated ({Z_RSS_NORMAL}–{Z_RSS_ELEVATED})', Z_RSS_NORMAL, Z_RSS_ELEVATED),
+        (f'Pre-coll ({Z_RSS_ELEVATED}–{Z_RSS_PRECOLLAPSE})', Z_RSS_ELEVATED, Z_RSS_PRECOLLAPSE),
+        (f'Critical (z≥{Z_RSS_PRECOLLAPSE})',   Z_RSS_PRECOLLAPSE, np.inf),
+    ]:
+        pf = 100 * ((zr_f >= lo) & (zr_f < hi)).mean()
+        pa = 100 * ((zr_a >= lo) & (zr_a < hi)).mean()
+        print(f"  {label:<26}  {pf:>7.1f}%  {pa:>7.1f}%")
     print(f"    Entry OK:  {100*s['entry_ok'].mean():.1f}% of bars")
     print(f"    Exit now:  {100*s['exit_now'].mean():.1f}% of bars")
     dom = s['dom_ch'].round().astype(int).value_counts(normalize=True) * 100
@@ -685,13 +877,16 @@ def main():
     print(f"  Window: {df_1h.index[calib_idx[0]].date()} → "
           f"{df_1h.index[calib_idx[-1]].date()}")
 
-    M, net, geom, lyap, ews, stoch, e_star, theta = \
+    M, net, geom, lyap, ews, stoch, e_star, theta, cos_mu, cos_sig, rss_mu, rss_sig, xi_calib = \
         calibrate_intraday_engine(X_panel, calib_mask)
 
     # ────────────────────────────────────────── SIGNAL SWEEP ──
     print(f"\n[5] Computing 7 BSDT signals over {len(df_1h):,} bars ...")
     sig = compute_intraday_signals(X_panel, df_1h, M, net, ews, stoch,
-                                   e_star, theta, history_len=48)
+                                   e_star, theta, history_len=48,
+                                   cos_mu=cos_mu, cos_sig=cos_sig,
+                                   rss_mu=rss_mu, rss_sig=rss_sig,
+                                   xi_calib=xi_calib)
 
     print_signal_report(sig, test_1h)
 

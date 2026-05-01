@@ -134,13 +134,13 @@ class EarlyWarning:
     def signals(self, snap: Snapshot, network: Optional[LedoitWolfNetwork]) -> dict:
         gamma  = self.op.damp.gamma_star(snap)
         D      = snap.distance_matrix()
-        lamPhi = min(self.op.potential.lambda_max_bound(D), 1.0)
+        lamPhi = max(0.0, min(self.op.potential.lambda_max_bound(D), 1.0))
         Wbar   = network.W_bar_off if network is not None else 0.0
-        # |cos θ|: collapse manifold is approached regardless of sign.
-        # The original max(0, cos θ) zeroed EWS on all real crises (drift is
-        # opposite to calibration mean in every tested dataset). Using |cos θ|
-        # restores the signal without changing the geometric interpretation.
-        cos_t  = abs(self.geom.cos_theta_state(snap))
+        # ξ₄ = (1 + cos θ)/2 ∈ [0,1]: affine map, monotone in alignment.
+        # Use cos_theta_channel (4D BSDT channel space) not cos_theta_state (64D):
+        # in 64D, concentration of measure pins cosθ ≈ 0 always (std ≈ 0.002);
+        # projecting via BSDT Jacobians into R⁴ gives cosθ std ≈ 0.5 → real variance.
+        cos_t  = 0.5 * (1.0 + float(self.geom.cos_theta_channel(snap)))
         mfls_s = self.op.mfls.state_mfls(snap)
         psi    = self.op.mfls.psi(snap)
         return dict(
