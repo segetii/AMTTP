@@ -43,6 +43,13 @@ E_{\text{BS}} &= \sum_{i \in \{C,G,A,T\}} \delta_i^2 & \text{(Total blind-spot e
 
 \noindent\textit{Figure 1: Mathematical formulation of the four-channel BSDT decomposition. Each channel captures an independent failure mode; the composite MFLS enables post-hoc diagnosis and optional correction without retraining the base model.}
 
+\vspace{0.3cm}
+\begin{center}
+\fbox{\includegraphics[width=0.88\textwidth]{images/zenodo_bsdt.png}}
+\end{center}
+\vspace{0.1cm}
+\textit{Figure 2: Zenodo publication record for the BSDT paper --- 135 views and 57 downloads, recorded without institutional promotion, confirming sustained organic interest in the mathematical framework.}
+
 \section*{2. Code Implementation: From Theory to Practice}
 BSDT is not part of the default AMTTP transaction-scoring pipeline. I kept the production AML stack centered on the already high-performing distilled student models to avoid introducing unnecessary regulatory complexity into the core decision path. Instead, BSDT exists in the workspace as a separate research and enterprise analytics capability that customers can integrate into their own workflows where they need post-hoc failure analysis, model diagnostics, or adaptive feature layers.
 
@@ -68,7 +75,7 @@ BSDT is not part of the default AMTTP transaction-scoring pipeline. I kept the p
 \end{minipage}}
 \vspace{0.2cm}
 
-\noindent\textit{Figure 2: BSDT research implementation showing calibration on reference data, computation of blind-spot energy, and MFLS scoring inside the broader research workspace. This framework is maintained as an optional analytical layer rather than a default production scoring dependency.}
+\noindent\textit{Figure 3: BSDT research implementation showing calibration on reference data, computation of blind-spot energy, and MFLS scoring inside the broader research workspace. This framework is maintained as an optional analytical layer rather than a default production scoring dependency.}
 
 \section*{3. Research Impact and Cross-Domain Relevance}
 BSDT should be understood as a complementary research framework, not as evidence that the production AMTTP models required boosting to perform well. The production student models are already sufficiently strong on their own. BSDT instead addresses a different problem: how to analyse hidden failure modes, construct optional post-hoc correction layers, and study instability across domains where customers or researchers may want more diagnostic depth than a regulator-facing default pipeline should carry.
@@ -80,6 +87,6 @@ The BSDT research programme has been validated extensively:
     \item In 10 of 12 dataset-model combinations, at least one BSDT variant achieved \textbf{zero missed fraud}, showing strong value as a second-stage alerting or diagnostic layer.
 \end{itemize}
 
-This research also connects directly to my broader ``Geometry of System Collapse'' work. In the wider workspace, the same analytical family is explored across financial stress, power-grid instability, and collapse dynamics, including ERCOT Texas grid experiments (AUC up to \textbf{0.9996}) and broader collapse case studies such as Terra/Luna-style dislocations. That cross-domain reach is important because it shows BSDT is not a narrow AML trick; it is part of a larger research programme on instability detection, adaptive friction, and system resilience.
+This research also connects directly to my broader ``Geometry of System Collapse'' work. In the wider workspace, the same analytical family is explored across financial stress, power-grid instability, and collapse dynamics, including ERCOT Texas grid experiments (AUC up to \textbf{0.9997}) and broader collapse case studies such as Terra/Luna-style dislocations. That cross-domain reach is important because it shows BSDT is not a narrow AML trick; it is part of a larger research programme on instability detection, adaptive friction, and system resilience.
 
 \end{document}

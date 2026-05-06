@@ -1,120 +1,86 @@
-\documentclass[11pt,a4paper]{article}
+﻿\documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry}
+\usepackage[top=0.65in, bottom=0.65in, left=0.75in, right=0.75in]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{enumitem}
 
 \begin{document}
-\noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\\
+\noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\hfill\textbf{Applicant:} Odeyemi Olusegun Israel\\
 \noindent\textbf{Criteria:} Mandatory Criteria (Innovation and Technical Leadership)\\
-\noindent\textbf{Applicant:} Odeyemi Olusegun Israel\\
 \rule{\textwidth}{0.4pt}
-
-\vspace{0.3cm}
+\vspace{2pt}
 \begin{center}
-    \textbf{\Large MC-1: Design and Development of AMTTP --- A Four-Layer Real-Time Blockchain Compliance System}
+    \textbf{\large MC-1: Design and Development of AMTTP --- A Four-Layer Real-Time Blockchain Compliance System}
 \end{center}
-\vspace{0.3cm}
+\vspace{2pt}
 
-\section*{1. Overview}
-The Anti-Money Laundering Transaction Trust Protocol (AMTTP) is a real-time compliance system that evaluates blockchain transactions \textbf{before settlement}, producing deterministic outcomes (Approve, Review, Escrow, or Block) within Ethereum's 12-second block window. Existing tools --- including Chainalysis, Elliptic, and TRM Labs --- operate post-transaction and cannot prevent risk exposure before execution. AMTTP introduces pre-settlement compliance enforcement as a novel architectural approach.
+\noindent\textbf{Overview:}
+The Anti-Money Laundering Transaction Trust Protocol (AMTTP) evaluates blockchain transactions \textbf{before settlement}, producing deterministic Approve / Review / Escrow / Block outcomes within Ethereum''s 12-second block window. In contrast to conventional blockchain compliance workflows that are largely post-transaction and forensic in nature, AMTTP is designed for execution-time risk control before final settlement. I am the \textbf{sole architect and developer} of all principal components: ML pipeline, Solidity contracts, the orchestrator and 9 specialist microservices, and both Flutter and Next.js frontends.
 
-I am the \textbf{sole architect and developer} of this system, independently designing and implementing all components across machine learning, blockchain infrastructure, compliance logic, and client integration.
+\vspace{5pt}
+\noindent\textbf{Public Testnet Demonstration at amttp.com}
+\vspace{3pt}
 
-\section*{2. Live Demonstration}
-
-\vspace{0.2cm}
 \begin{center}
     \fcolorbox{black}{yellow!10}{
-    \begin{minipage}{0.85\textwidth}
+    \begin{minipage}{0.9\textwidth}
         \centering
-        \vspace{0.4cm}
-        {\large \textbf{\href{https://youtube.com/your-unlisted-video-link}{[CLICK HERE TO VIEW THE 3-MINUTE VIDEO DEMONSTRATION]}}}
-        \vspace{0.3cm}\\
-        \textit{Live deployment: \textbf{amttp.com} | 794 unique visitors, 34.39k total requests, 192 MB served (17 March -- 16 April, Cloudflare analytics)}
+        \vspace{0.2cm}
+        {\large\textbf{\href{https://youtube.com/your-unlisted-video-link}{[CLICK HERE --- 3-MINUTE VIDEO DEMONSTRATION]}}}
+        \vspace{0.15cm}\\
+    \textit{Public demo: \textbf{amttp.com} \enspace|\enspace Sepolia-backed environment \enspace|\enspace 1,220 unique visitors \enspace|\enspace 38,320 requests \enspace|\enspace 5 Apr -- 5 May 2026}
     \end{minipage}}
 \end{center}
-\vspace{0.3cm}
+\vspace{4pt}
 \begin{center}
-    \includegraphics[width=0.95\textwidth]{images/cloudflare_analytics.png}
+    \includegraphics[width=0.97\textwidth]{images/cloudflare_analytics.png}
 \end{center}
-\noindent\textit{Figure 1: Cloudflare dashboard for amttp.com --- 794 unique visitors, 34.39k total requests, 45.93\% cached, 192 MB served over 30 days (17 March -- 16 April 2026). Confirms live public deployment with sustained organic traffic.}
-\vspace{0.15cm}
+  \noindent\textit{\small Figure 1: Cloudflare analytics --- 1,220 unique visitors, 38,320 total requests, 53.54\% cache-hit ratio over the 30-day window (5 April -- 5 May 2026). Confirms sustained public traffic to the Sepolia-backed demonstration at amttp.com.}
 
-\section*{3. Four-Layer System Architecture}
+\vspace{6pt}
+\noindent\textbf{\large Key Technical Innovations}\\[-2pt]
+\rule{\textwidth}{0.5pt}
+\vspace{3pt}
 
-\vspace{0.1cm}
-\noindent\fbox{\begin{minipage}{0.95\textwidth}
-\small
-\texttt{User $\rightarrow$ Flutter Consumer App (port 3010)}\\
-\texttt{User $\rightarrow$ Next.js War Room Dashboard (port 3006)}\\
-\texttt{~~~~~~~~$\downarrow$}\\
-\texttt{Oracle Gateway (Express.js, port 3001)}\\
-\texttt{~~~~~~~~$\downarrow$}\\
-\texttt{Compliance Orchestrator (FastAPI, port 8007)}\\
-\texttt{~~~~~~~~$\downarrow$ parallel fan-out via aiohttp}\\
-\texttt{+-- ML Risk Engine~~~~~~~~(port 8000) -- XGBoost/LightGBM ensemble}\\
-\texttt{+-- Graph Service~~~~~~~~~(port 8001) -- Memgraph/GraphSAGE}\\
-\texttt{+-- FCA Policy Engine~~~~~(port 8003) -- UK regulatory rules}\\
-\texttt{+-- Sanctions Screening~~~(port 8004) -- OFAC/EU/UK lists}\\
-\texttt{+-- Monitoring Service~~~~(port 8005) -- Real-time alerting}\\
-\texttt{+-- GeoRisk Service~~~~~~~(port 8006) -- Jurisdiction scoring}\\
-\texttt{+-- Data Integrity~~~~~~~~(port 8008) -- Merkle proof validation}\\
-\texttt{+-- Explainability~~~~~~~~(port 8009) -- SHAP/LIME explanations}\\
-\texttt{+-- ZK-NAF Verifier~~~~~~(port 8010) -- Groth16 ZK-SNARK proofs}\\
-\texttt{~~~~~~~~$\downarrow$}\\
-\texttt{Solidity Smart Contracts (UUPS Proxy) $\rightarrow$ EVM Settlement}\\
-\texttt{~~~~~~~~$\downarrow$}\\
-\texttt{Infrastructure: MongoDB (27017) | Redis (6379) | Memgraph (7687)}
-\end{minipage}}
-\vspace{0.2cm}
+\noindent\begin{minipage}[t]{0.49\textwidth}
+  \begin{itemize}[leftmargin=1em, itemsep=1pt, parsep=0pt, topsep=0pt]\small
+    \item \textbf{Pre-settlement enforcement:} compliance before EVM execution; unlike conventional forensic workflows, risk is evaluated before settlement.
+    \item \textbf{Hybrid ML\,+\,graph scoring:} XGBoost fused with GraphSAGE GNN over live Memgraph entity graph.
+    \item \textbf{Knowledge distillation:} CPU-portable student model; sub-12\,s inference (Evidence~6).
+  \end{itemize}
+\end{minipage}%
+\hspace{0.02\textwidth}%
+\begin{minipage}[t]{0.49\textwidth}
+  \begin{itemize}[leftmargin=1em, itemsep=1pt, parsep=0pt, topsep=0pt]\small
+    \item \textbf{ZK-SNARK privacy:} Groth16/BN254 proves KYC \& sanctions on-chain without identity disclosure.
+    \item \textbf{Deterministic decisions:} Approve/Review/Escrow/Block; full FCA/MiCA audit trail.
+    \item \textbf{UUPS upgradeable protocol:} 5 contracts on OpenZeppelin proxies; zero-downtime upgrades.
+  \end{itemize}
+\end{minipage}
 
-\noindent\textit{Figure 1: Four-layer service map --- 17 containerised services engineered by a single developer.}
+%% PAGE 2: Architecture
+\clearpage
 
-\section*{4. Key Technical Innovations}
-\begin{itemize}
-    \item \textbf{Pre-settlement enforcement} --- compliance decisions made within the transaction lifecycle, not after
-    \item \textbf{Hybrid ML + graph scoring} --- XGBoost tabular combined with GraphSAGE graph analysis
-    \item \textbf{Knowledge distillation pipeline} --- composite teacher model reduced to a lightweight student for real-time inference (see Evidence~6)
-    \item \textbf{Privacy-preserving compliance} --- Groth16 ZK-SNARKs on BN254 prove compliance facts without exposing personal data
-    \item \textbf{Deterministic decision matrix} --- Approve / Review / Escrow / Block with regulatory reproducibility
-\end{itemize}
+\noindent\includegraphics[width=0.99\textwidth]{images/amttp_architecture.png}
 
-\section*{5. Product Screenshots}
+\vspace{2pt}
+\noindent\textit{\small Figure 2: AMTTP four-layer architecture --- Layer I: Frontends (Flutter :3010, Next.js :3006). Layer II: Oracle Gateway :3001. Layer III: FastAPI orchestrator + 9 specialist microservices + Deterministic Decision Matrix. Layer IV: 5 UUPS contracts, 17 Docker containers. Sole developer.}
 
-\noindent\textbf{War Room Compliance Dashboard:}
-\vspace{0.1cm}
-\begin{center}
-    \includegraphics[width=0.95\textwidth]{images/warroom_alerts.png}
-\end{center}
-\noindent\textit{Figure 2: War Room real-time transaction alerts, risk scores, and compliance decisions --- live on amttp.com.}
+%% PAGE 3: War Room Screenshots (full width)
+\clearpage
 
-\vspace{0.2cm}
-\noindent\textbf{War Room Explainability Panel:}
-\vspace{0.1cm}
-\begin{center}
-    \includegraphics[width=0.95\textwidth]{images/warroom_explainability.png}
-\end{center}
-\noindent\textit{Figure 3: SHAP/LIME explainability panel --- per-transaction feature contributions from the Explainability Service (port 8009).}
+\noindent\textbf{\large War Room Dashboard --- Public Testnet at amttp.com}\\[-2pt]
+\rule{\textwidth}{0.5pt}
+\vspace{4pt}
 
-\section*{6. ZK Enforcement (Implementation Evidence)}
+\noindent\includegraphics[width=\textwidth]{images/warroom_dashboard.png}\\[2pt]
+\noindent\textit{\small Figure 3: Public War Room dashboard in the AMTTP Sepolia testnet environment --- 920,848 transactions processed, 420,848 flagged, compliance rate 54.3\%, and average risk score 62.4. Wallet-format addresses in the flagged queue confirm sustained public operation rather than a static mock-up.}
 
-\noindent\textbf{ZK-SNARK On-Chain Verification} (\texttt{contracts/zknaf/}):
+\vfill
 
-\vspace{0.15cm}
-\noindent\fbox{\begin{minipage}{0.95\textwidth}
-\small
-\texttt{function verifyProof(uint[2] calldata \_pA, uint[2][2] calldata \_pB,}\\
-\texttt{~~~~uint[2] calldata \_pC, uint[4] calldata \_pubSignals) public view returns (bool) \{}\\
-\texttt{~~~~// G1 point multiplication via EVM precompile 7}\\
-\texttt{~~~~success := staticcall(sub(gas(), 2000), 7, mIn, 96, mIn, 64)}\\
-\texttt{~~~~// Groth16 pairing check via precompile 8}\\
-\texttt{~~~~isOk := and(success, mload(\_pPairing))}\\
-\texttt{\}}
-\end{minipage}}
-\vspace{0.15cm}
-
-\noindent\textit{Figure 4: Groth16 ZK-SNARK verifier --- sanctions non-membership proven on-chain via BN254 pairings without revealing user identity.}
+\noindent\includegraphics[width=\textwidth]{images/warroom_reports.png}\\[2pt]
+\noindent\textit{\small Figure 4: Reports Export --- pre-generated Daily AML Compliance PDF (2.4\,MB), Weekly Risk Assessment (5.1\,MB), and Monthly FCA Suspicious Activity Report (8.7\,MB) demonstrating regulator-style reporting outputs generated by the system.}
 
 \end{document}
