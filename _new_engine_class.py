@@ -66,6 +66,15 @@ class BSDTResonanceEngine:
         self._fitted = False
         self._t = 0
 
+        # Curvature-augmented ODE state (Part VII §71)
+        # kappa_ref: cached lambda_max(nabla^2 E_BS) from reference, updated every
+        # _kappa_checkpoint steps during simulation.
+        # beta_curv: the curvature mixing coefficient, auto-calibrated from SNR.
+        # When beta_curv=0 the formula reduces exactly to the original ODE.
+        self._kappa_ref = 0.0      # lambda_max at calibration, updated at checkpoints
+        self._beta_curv = 0.0      # mixing coeff (calibrated in fit_reference)
+        self._kappa_checkpoint = 10  # update kappa every K steps
+
     # ─── Force computation ───────────────────────────────────────────────
 
     def _compute_forces(self, X):
@@ -106,15 +115,42 @@ class BSDTResonanceEngine:
             # Combined physics forces from YOUR multi-scale engines
             F_phys = self._compute_forces(X_sim)
 
-            # BSDT adaptive damping (Theorem C, SIAM eq:bsdamped)
-            # Ẋ = F(X) - γ(E_BS) · ∇E_BS(X)
+            # BSDT adaptive damping — curvature-augmented ODE (Part VII §71)
+            # Ẋ = F_phys - γ_unified(E_unified) · g̃_X
+            # E_unified = E_BS * (1 + β·κ_norm)    [β=0 → original ODE]
+            # γ_unified  = E_unified / (E_unified + θ)
+            # g̃_X        = h · ∇E_BS              [quadratic: ∇κ_norm = 0]
+            # h           = 1 + β·κ_norm
             if self.use_bsdt_damping and self.bsdt._fitted:
                 e_bs = self.bsdt.energy(X_sim)
                 grad_bs = self.bsdt._gradient_vectors(X_sim)
                 mfls_bs = np.linalg.norm(grad_bs, axis=1)
-                e_combined = e_bs + self._beta_mfls * mfls_bs
-                gamma_bs = e_combined / (e_combined + self._theta_bs)
-                F_damp = -gamma_bs[:, None] * grad_bs
+
+                # Checkpoint: refresh kappa_ref from current configuration
+                if step % self._kappa_checkpoint == 0 and self._beta_curv > 0:
+                    try:
+                        cov_g = np.cov(grad_bs.T)
+                        eigs = np.linalg.eigvalsh(cov_g)
+                        self._kappa_ref = float(np.max(np.abs(eigs)))
+                    except Exception:
+                        pass  # keep previous kappa_ref
+
+                if self._beta_curv > 0 and self._kappa_ref > 0:
+                    # κ_norm per point = κ_ref / (||∇E||² / E + ε)
+                    e_bs_safe = e_bs + 1e-10
+                    a_sq = mfls_bs ** 2 / e_bs_safe
+                    kappa_norm = self._kappa_ref / (a_sq + 1e-10)  # (N,)
+                    h = 1.0 + self._beta_curv * kappa_norm          # (N,) scalar amplification
+                    e_unified = e_bs * h                             # E_unified
+                    gamma_unified = e_unified / (e_unified + self._theta_bs)
+                    g_tilde = h[:, None] * grad_bs                   # g̃_X = h · ∇E_BS
+                    F_damp = -gamma_unified[:, None] * g_tilde
+                else:
+                    # β=0: exact original ODE (additive MFLS blend)
+                    e_combined = e_bs + self._beta_mfls * mfls_bs
+                    gamma_bs = e_combined / (e_combined + self._theta_bs)
+                    F_damp = -gamma_bs[:, None] * grad_bs
+
                 F_total = F_phys + F_damp
             else:
                 F_total = F_phys
@@ -258,6 +294,28 @@ class BSDTResonanceEngine:
         self._theta_bs = self.bsdt.theta_bs_
         self._beta_mfls = self.bsdt.beta_mfls_
 
+        # Precompute kappa_ref = lambda_max(nabla^2 E_BS) on converged reference.
+        # For quadratic E_BS, H = 2 * Sigma_0^{-1}.  The Gershgorin bound gives
+        # kappa = max row-sum of |H|, which is O(Nd) and zero-overhead per step.
+        # We use the per-point variance proxy: kappa_ref = max eigenvalue of the
+        # sample covariance of the gradient vectors (stable and cheap).
+        try:
+            grad_ref = self.bsdt._gradient_vectors(X_fit_final)  # (N, d)
+            cov_g = np.cov(grad_ref.T)  # (d, d)
+            eigs = np.linalg.eigvalsh(cov_g)
+            self._kappa_ref = float(np.max(np.abs(eigs)))
+            # beta_curv calibration: proportional to SNR of kappa signal on ref.
+            # kappa_norm per point = kappa_ref / (||grad||^2 / E + eps)
+            e_ref = self.bsdt.energy(X_fit_final) + 1e-10
+            mfls_ref = np.linalg.norm(grad_ref, axis=1)
+            a_sq_ref = mfls_ref ** 2 / e_ref
+            kappa_norm_ref = self._kappa_ref / (a_sq_ref + 1e-10)
+            snr = float(np.std(kappa_norm_ref) / (np.mean(kappa_norm_ref) + 1e-10))
+            self._beta_curv = float(np.clip(snr, 0.0, 1.0))
+        except Exception:
+            self._kappa_ref = 0.0
+            self._beta_curv = 0.0
+
         # (4) Simulate + score calibration set → conformal sorted
         X_cal_final, _ = self._simulate(X_cal)
         cal_scores = self._score_fused(X_cal_final)
@@ -271,6 +329,9 @@ class BSDTResonanceEngine:
         fw = self.bsdt.fisher_w_
         print(f"    BSDT calibrated: θ_BS={self._theta_bs:.6f}, "
               f"β_MFLS={self._beta_mfls:.4f}")
+        print(f"    Curvature ODE:   κ_ref={self._kappa_ref:.4f}, "
+              f"β_curv={self._beta_curv:.4f}  "
+              f"({'active' if self._beta_curv > 0 else 'inactive, β=0 fallback'})")
         print(f"    Simulation: {sim_rep['n_steps']} steps, "
               f"accept={sim_rep['accept_rate']:.1%}")
         print(f"    Fisher VR channels: C={fw[0]:.3f} G={fw[1]:.3f} "

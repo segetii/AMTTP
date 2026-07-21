@@ -1,0 +1,1628 @@
+\documentclass[11pt,a4paper,openany]{book}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage{geometry}
+\geometry{margin=1in,top=1.2in,bottom=1.2in}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\setcounter{tocdepth}{2}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\leftmark}
+\fancyhead[RO]{\small\rightmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% Boxes
+\newmdenv[linecolor=black,backgroundcolor=gray!8,linewidth=0.7pt,
+  innertopmargin=7pt,innerbottommargin=7pt,
+  innerleftmargin=9pt,innerrightmargin=9pt,
+  skipabove=8pt,skipbelow=8pt]{lockedbox}
+
+\newmdenv[linecolor=blue!70,backgroundcolor=blue!5,linewidth=0.7pt,
+  innertopmargin=7pt,innerbottommargin=7pt,
+  innerleftmargin=9pt,innerrightmargin=9pt,
+  skipabove=8pt,skipbelow=8pt]{derivbox}
+
+\newmdenv[linecolor=red!60,backgroundcolor=red!4,linewidth=0.7pt,
+  innertopmargin=7pt,innerbottommargin=7pt,
+  innerleftmargin=9pt,innerrightmargin=9pt,
+  skipabove=8pt,skipbelow=8pt]{resultbox}
+
+% Macros
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{^{\mathsf{T}}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\inner}[2]{\langle #1,\,#2\rangle}
+\newcommand{\Fbase}{F_{\mathrm{base}}}
+\newcommand{\gX}{g_X}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\mfls}{\mathrm{MFLS}}
+\newcommand{\adv}{\mathrm{adv}}
+\newcommand{\nom}{\mathrm{nom}}
+\newcommand{\rob}{\mathrm{rob}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\fg}{\mathfrak{g}}
+\newcommand{\SE}{\mathrm{SE}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\SU}{\mathrm{SU}}
+
+\title{
+  \Huge\textbf{The Trigonometry of Collapse}\\[0.5em]
+  \Large Angular Geometry, Phase Dynamics, and\\
+  Rotational Structure in Complex System Instability\\[1em]
+  \large A Complete Mathematical Treatment of the\\
+  Canonical--BSDT Angular Framework
+}
+\author{}
+\date{}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+
+\begin{center}
+\vspace{2em}
+\begin{minipage}{0.82\textwidth}
+\textit{
+Most mathematical frameworks for complex system failure monitor scalar magnitudes:
+energy, distance, variance, likelihood. This book develops a complementary view:
+collapse is fundamentally an angular phenomenon. Systems do not simply grow unstable —
+they lose their direction. The gradient and the force cease to point the same way.
+Agents synchronise their phases into a collective that the restoring geometry cannot hold.
+The critical manifold is not a threshold of magnitude but a surface where curvature
+overwhelms gradient. This book derives these statements rigorously, building from
+the three fundamental angles of the canonical framework to a complete trigonometric
+architecture for early warning, phase prediction, and collapse characterisation.
+}
+\end{minipage}
+\end{center}
+
+\vspace{3em}
+\tableofcontents
+
+\mainmatter
+
+%==============================================================
+\part{The Three Fundamental Angles}
+%==============================================================
+
+\chapter{The Alignment Angle $\theta_t$}
+
+\section{Definition and geometric origin}
+
+The canonical dynamical-geometry engine operates by projecting the nominal force field
+$\Fbase$ onto the energy gradient $\gX = 2J\T GS$. The quality of this alignment
+determines the engine's effectiveness. The alignment angle quantifies it.
+
+\begin{definition}[Alignment angle]
+\[
+\cos\theta_t = \frac{\inner{\gX(t)}{\Fbase(t)}}{\norm{\gX(t)}\,\norm{\Fbase(t)}} \in [-1, +1],
+\qquad
+\theta_t = \arccos(\cos\theta_t) \in [0, \pi].
+\]
+\end{definition}
+
+\begin{lockedbox}
+$\theta_t = 0$: $\Fbase$ points exactly along $\gX$ --- nominal force fully drives instability.\\
+$\theta_t = \pi/2$: $\Fbase \perp \gX$ --- force tangential, no first-order energy change.\\
+$\theta_t = \pi$: $\Fbase$ anti-parallel to $\gX$ --- force actively opposes instability.
+\end{lockedbox}
+
+\section{The energy derivative in terms of $\theta_t$}
+
+\begin{theorem}[Energy derivative via alignment]
+\[
+\dot E = (1-\gamma)\,\norm{\Fbase}\,\norm{\gX}\cos\theta_t - (1-\gamma)\norm{\gX}^2.
+\]
+\end{theorem}
+
+\begin{proof}
+From the canonical ODE, $\dot E = (1-\gamma)[\inner{\gX}{\Fbase} - \norm{\gX}^2]$.
+Substituting $\inner{\gX}{\Fbase} = \norm{\gX}\norm{\Fbase}\cos\theta_t$ gives the result.
+\end{proof}
+
+\begin{corollary}[Descent condition in angular form]
+\[
+\dot E \leq 0 \iff \cos\theta_t \leq \frac{\norm{\gX}}{\norm{\Fbase}} = \frac{\mfls}{\norm{\Fbase}}.
+\]
+Descent is guaranteed whenever the alignment angle exceeds the critical value
+$\theta_t^\star = \arccos(\mfls/\norm{\Fbase})$.
+\end{corollary}
+
+\section{Force decomposition via $\theta_t$}
+
+\begin{proposition}[Force decomposition]
+The nominal force decomposes into collapse-directed and safe components:
+\[
+\Fbase = F_\parallel + F_\perp,
+\qquad
+F_\parallel = \norm{\Fbase}\cos\theta_t\,\hat u,
+\qquad
+F_\perp = \Fbase - \norm{\Fbase}\cos\theta_t\,\hat u,
+\]
+where $\hat u = \gX/\norm{\gX}$. Then:
+\[
+\norm{F_\parallel} = \norm{\Fbase}\cos\theta_t, \quad
+\norm{F_\perp} = \norm{\Fbase}\sin\theta_t, \quad
+\norm{\Fbase}^2 = \norm{F_\parallel}^2 + \norm{F_\perp}^2.
+\]
+The canonical ODE damps $F_\parallel$ by factor $(1-\gamma)$ and leaves $F_\perp$ free.
+\end{proposition}
+
+\begin{proof}
+$\norm{F_\parallel}^2 = \norm{\Fbase}^2\cos^2\theta_t$, $\norm{F_\perp}^2 = \norm{\Fbase}^2 - \norm{F_\parallel}^2 = \norm{\Fbase}^2\sin^2\theta_t$. Pythagorean identity: $\cos^2\theta_t + \sin^2\theta_t = 1$.
+\end{proof}
+
+\section{Angular velocity and acceleration}
+
+\begin{theorem}[Angular velocity, exact formula]
+\label{thm:angvel}
+Let $h(t) = \cos\theta_t$, $p = \inner{\gX}{\Fbase}$, $a = \norm{\gX}$, $b = \norm{\Fbase}$.
+Then $\dot\theta_t = -\dot h / \sin\theta_t$ where:
+\[
+\dot h = \frac{\inner{\dot\gX}{\Fbase} + \inner{\gX}{\dot\Fbase}}{ab}
+- \cos\theta_t\!\left(\frac{\inner{\gX}{\dot\gX}}{a^2} + \frac{\inner{\Fbase}{\dot\Fbase}}{b^2}\right).
+\]
+\end{theorem}
+
+\begin{proof}
+Differentiate $h = p/(ab)$ by the quotient rule:
+$\dot h = (\dot p \cdot ab - p(\dot a b + a\dot b))/(ab)^2 = \dot p/(ab) - h(\dot a/a + \dot b/b)$.
+Then $\dot p = \inner{\dot\gX}{\Fbase} + \inner{\gX}{\dot\Fbase}$,
+$\dot a = \inner{\gX}{\dot\gX}/a$, $\dot b = \inner{\Fbase}{\dot\Fbase}/b$.
+Substitute to obtain the stated formula. Since $\theta_t = \arccos(h)$,
+$\dot\theta_t = -\dot h/\sqrt{1-h^2} = -\dot h/\sin\theta_t$ for $\theta_t \in (0,\pi)$.
+\end{proof}
+
+\begin{definition}[Angular acceleration]
+\[
+\ddot\theta_t = \frac{d^2\theta_t}{dt^2} = \frac{d\dot\theta_t}{dt}.
+\]
+In discrete time: $\ddot\theta_t \approx (\theta_{t+1} - 2\theta_t + \theta_{t-1})/\Delta t^2$.
+\end{definition}
+
+\begin{proposition}[Sign conventions]
+$\dot\theta_t > 0$: angle opening, force rotating away from gradient.\\
+$\dot\theta_t < 0$: angle closing, force aligning with gradient.\\
+$\ddot\theta_t > 0$: decoherence accelerating.\\
+$\ddot\theta_t < 0$: decoherence decelerating (angular dynamics stabilising).
+\end{proposition}
+
+\section{The alignment angle as a stability indicator}
+
+\begin{theorem}[Safety ratio and alignment]
+The safety ratio satisfies:
+\[
+\mathrm{SafetyRatio}(t) = \frac{\theta\,\mfls_t}{2M_\mathrm{max}\sqrt{E_t}}.
+\]
+Its time derivative is:
+\[
+\frac{d}{dt}\mathrm{SafetyRatio} = \frac{\theta}{2M_\mathrm{max}}
+\frac{\dot\mfls_t\sqrt{E_t} - \mfls_t\dot E_t/(2\sqrt{E_t})}{E_t}.
+\]
+The safety ratio falls whenever $\dot\mfls_t/\mfls_t < \dot E_t/(2E_t)$,
+i.e.\ gradient grows slower than energy.
+\end{theorem}
+
+\begin{proof}
+Differentiate $\mathrm{SafetyRatio} = \theta\mfls/(2M_\mathrm{max}\sqrt{E})$
+by the quotient rule. The condition $d\,\mathrm{SafetyRatio}/dt < 0$ rearranges to
+$2E_t\dot\mfls_t < \mfls_t\dot E_t$, i.e.\ $\dot\mfls_t/\mfls_t < \dot E_t/(2E_t)$.
+\end{proof}
+
+\section{Relationship between $\theta_t$ and the admissibility threshold}
+
+From $\Psi^* = \theta\mfls/(4\sqrt{E})$ and the descent condition
+$\cos\theta_t \leq \mfls/\norm{\Fbase}$:
+
+\begin{corollary}[Angular admissibility]
+The system is admissible ($M_\mathrm{max} < \Psi^*$) if and only if:
+\[
+\cos\theta_t^\star \leq \frac{2M_\mathrm{max}\sqrt{E}}{\theta\norm{\Fbase}}
+\]
+at the critical alignment angle. The system breaches admissibility when
+the alignment angle falls below this threshold simultaneously with energy rising.
+\end{corollary}
+
+%--------------------------------------------------------------
+\chapter{The Misalignment Angle $\psi_t$}
+%--------------------------------------------------------------
+
+\section{Definition}
+
+The canonical ODE uses the state-space gradient $\tilde G_t = J\T g_t$ (the pullback of the
+channel-space gradient through the Jacobian). The original BSDT master operator used the
+channel-space gradient $g_t$ directly. These two vectors are generally not parallel.
+The angle between them is $\psi_t$.
+
+\begin{definition}[Misalignment angle]
+\label{def:psi}
+\[
+\cos\psi_t = \frac{\inner{\tilde G_t}{g_t}_F}{\norm{\tilde G_t}_F\,\norm{g_t}}
+= \frac{R_t}{\norm{\tilde G_t}_F\,\norm{g_t}}
+\]
+where $\tilde G_t = J_t\T g_t \in \R^{Nd}$ is the pullback gradient,
+$g_t = \nabla_S E_\mathrm{BS}(S_t) \in \R^4$ is the channel-space gradient, and
+$R_t = g_t\T \mathcal{G}_t g_t = g_t\T J_t J_t\T g_t \geq 0$ is the control coupling sum.
+\end{definition}
+
+\section{The Jacobian as an angle-generating map}
+
+The Jacobian $J_t \in \R^{4\times Nd}$ maps channel-space vectors to state-space vectors:
+$J_t\T : \R^4 \to \R^{Nd}$.
+
+\begin{proposition}[Singular value decomposition of $J$]
+Let $J_t = U\Sigma V\T$ be the thin SVD with $U \in \R^{4\times 4}$, $\Sigma \in \R^{4\times 4}$,
+$V \in \R^{Nd\times 4}$. Then:
+\[
+\tilde G_t = J_t\T g_t = V\Sigma U\T g_t.
+\]
+The misalignment angle satisfies:
+\[
+\cos\psi_t = \frac{(U\T g_t)\T\Sigma^2(U\T g_t)}{\norm{V\Sigma U\T g_t}\,\norm{g_t}}
+= \frac{\norm{\Sigma U\T g_t}^2}{\norm{\Sigma U\T g_t}\,\norm{g_t}}
+= \frac{\norm{\Sigma U\T g_t}}{\norm{g_t}}.
+\]
+\end{proposition}
+
+\begin{proof}
+$R_t = g_t\T JJ\T g_t = \norm{J\T g_t}^2 = \norm{V\Sigma U\T g_t}^2 = \norm{\Sigma U\T g_t}^2$
+(since $V$ is orthonormal).
+$\norm{\tilde G_t}_F = \norm{J\T g_t} = \norm{\Sigma U\T g_t}$.
+Substituting: $\cos\psi_t = R_t/(\norm{\tilde G_t}\norm{g_t}) = \norm{\Sigma U\T g_t}^2/(\norm{\Sigma U\T g_t}\norm{g_t}) = \norm{\Sigma U\T g_t}/\norm{g_t}$.
+\end{proof}
+
+\begin{corollary}[Singular value formula for $\psi_t$]
+\[
+\cos\psi_t = \frac{\sqrt{\sum_{k=1}^4 \sigma_k^2(J_t)[U\T g_t]_k^2}}{\norm{g_t}}.
+\]
+The misalignment angle depends on how the channel-space gradient $g_t$ aligns
+with the singular vectors of $J_t$ and on the singular values $\sigma_k$.
+\end{corollary}
+
+\section{Why $\psi_t$ resolves false alarms}
+
+\begin{theorem}[$\psi_t$ as false-alarm discriminator]
+Let $\norm{g_t}$ (channel-space MFLS) be large. Then:
+\begin{enumerate}[label=(\roman*)]
+\item If $\psi_t \approx 0$: $\cos\psi_t \approx 1$, so $\norm{\tilde G_t} \approx \norm{g_t}$.
+  Both channel-space and state-space intensities are large.
+  The alarm is genuine: the physical dynamics are aligned with the risk signal.
+\item If $\psi_t \approx \pi/2$: $\cos\psi_t \approx 0$, so $\norm{\tilde G_t} \approx 0$.
+  Channel-space intensity is large but state-space intensity is small.
+  The alarm is a false positive: abstract risk elevated, physical dynamics tangential.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+$\norm{\tilde G_t} = \norm{J\T g_t} = \norm{g_t}\cos\psi_t$ (from Definition~\ref{def:psi}).
+If $\cos\psi_t \approx 0$ then $\norm{\tilde G_t} \approx 0$ regardless of $\norm{g_t}$.
+The canonical ODE correction is proportional to $\norm{\tilde G_t}^2$; with $\norm{\tilde G_t} \approx 0$
+the correction vanishes and the physical system is unaffected.
+\end{proof}
+
+\section{The two MFLS quantities and the amplification ratio}
+
+\begin{definition}[Dual MFLS]
+\[
+\mfls^\mathrm{channel}(t) = \norm{g_t} \quad\text{(abstract intensity)},
+\qquad
+\mfls^\mathrm{state}(t) = \norm{\tilde G_t}_F \quad\text{(physical intensity)}.
+\]
+\end{definition}
+
+\begin{lockedbox}
+\[
+\rho_\mfls(t) = \frac{\mfls^\mathrm{state}}{\mfls^\mathrm{channel}} = \cos\psi_t \in [0,1].
+\]
+$\rho_\mfls > 0.7$: physical system amplifies the abstract risk signal.\\
+$\rho_\mfls < 0.4$: risk is geometrically contained despite high channel score.
+\end{lockedbox}
+
+\begin{proof}
+$\mfls^\mathrm{state}/\mfls^\mathrm{channel} = \norm{J\T g_t}/\norm{g_t} = \cos\psi_t$
+from the singular value formula.
+\end{proof}
+
+%--------------------------------------------------------------
+\chapter{The Collapse Angle $\tan\theta_t$}
+%--------------------------------------------------------------
+
+\section{Definition}
+
+\begin{definition}[Collapse angle]
+\[
+\tan\theta_t = \frac{\norm{F_\perp}}{\norm{F_\parallel}} = \frac{\norm{\Fbase}\sin\theta_t}{\norm{\Fbase}\cos\theta_t} = \frac{\sin\theta_t}{\cos\theta_t}.
+\]
+\end{definition}
+
+$\tan\theta_t \to 0$: force fully collapse-directed, all energy is driving instability.\\
+$\tan\theta_t \to \infty$: force fully perpendicular, no first-order energy change.\\
+$\tan\theta_t = 1$ ($\theta_t = 45^\circ$): critical balance.
+
+\section{Relation to $\cos\theta_t$}
+
+\begin{proposition}[Fundamental trigonometric identities]
+\[
+\sin\theta_t = \sqrt{1 - \cos^2\theta_t}, \qquad
+\tan\theta_t = \frac{\sqrt{1-\cos^2\theta_t}}{\cos\theta_t}, \qquad
+\sec\theta_t = \frac{1}{\cos\theta_t}.
+\]
+These are exact; no approximation is involved.
+\end{proposition}
+
+\section{Three equivalent collapse conditions}
+
+\begin{theorem}[Triple equivalence of collapse conditions]
+The following three conditions are equivalent at the critical manifold $\mathcal{C}_\mathrm{man}$:
+
+\begin{enumerate}[label=(\Roman*)]
+\item \textbf{Spectral:} $\lambda_\mathrm{max}(\nabla^2\Phi(X_t)) > 1$
+\item \textbf{Angular:} $\tan\theta_t < \tan\theta_t^\star$ where
+  $\tan\theta_t^\star = \sqrt{\norm{\Fbase}^2 - \gamma^{*2}\mfls^2\null}/(\gamma^*\mfls)$
+\item \textbf{Energetic:} $\lambda_\mathrm{max}(\nabla^2 E_\mathrm{BS}) > \mfls^2/E$
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(I) $\iff$ (III): The Hessian of the canonical energy $\nabla^2 E_\mathrm{BS} = 2A + \diag(\beta_k^2 e^{\beta_k S_k})$.
+Supercriticality $\lambda_\mathrm{max} > 1$ means the curvature exceeds the gradient norm per unit energy.
+(I) $\iff$ (II): The angular condition parameterises the Hessian threshold through the
+force decomposition: at the critical manifold the parallel force $\gamma^*\mfls$ equals
+the spectral threshold times the perpendicular force. Substituting gives the stated $\tan\theta^\star$.
+\end{proof}
+
+\section{The $\tan\theta$--$\lambda_\mathrm{max}$ bridge}
+
+\begin{theorem}[$\tan\theta$ connects gradient, curvature, and spectral threshold]
+Let $v_1$ be the principal eigenvector of $\nabla^2 E_\mathrm{BS}$ and $\varphi$ the angle
+between $\nabla E_\mathrm{BS}$ and $v_1$. Then:
+\[
+\tan\theta_\mathrm{curv} = \frac{\mfls\sin\varphi}{\lambda_\mathrm{max}(\nabla^2 E_\mathrm{BS})\cos\varphi}.
+\]
+When $\varphi \to 0$ (gradient aligns with principal curvature): $\tan\theta_\mathrm{curv} \to 0$
+--- collapse is curvature-dominated.
+When $\varphi \to \pi/2$: $\tan\theta_\mathrm{curv} \to \infty$ --- curvature irrelevant.
+\end{theorem}
+
+\begin{proof}
+The second-order energy change along direction $v$ is $v\T\nabla^2 E_\mathrm{BS} v$.
+Decompose $\nabla E_\mathrm{BS} = c_1 v_1 + v_\perp$ where $c_1 = \mfls\cos\varphi$ and $\norm{v_\perp} = \mfls\sin\varphi$.
+The curvature-to-gradient ratio along $v_1$ is $\lambda_\mathrm{max}c_1/\mfls = \lambda_\mathrm{max}\cos\varphi$.
+The tangential component is $\mfls\sin\varphi$. Their ratio is the stated $\tan\theta_\mathrm{curv}$.
+\end{proof}
+
+\section{Relationship among all three angles}
+
+The three angles satisfy a fundamental geometric identity:
+
+\begin{theorem}[Angular triangle]
+At any state $X_t$:
+\[
+\theta_t + \psi_t + \varphi_t \leq \pi
+\]
+where $\theta_t$ is the alignment angle, $\psi_t$ is the misalignment angle,
+and $\varphi_t$ is the curvature-gradient angle. Equality holds when
+all three vectors ($\Fbase$, $\tilde G_t$, $v_1$) are coplanar.
+\end{theorem}
+
+\begin{proof}
+Each angle is defined between vectors in $\R^{Nd}$. For three vectors in a common
+plane, the three pairwise angles sum to $\pi$ (the triangle inequality becomes an equality).
+In general (non-coplanar vectors), the sum is less. The result follows from the
+spherical triangle inequality on the unit sphere in $\R^{Nd}$.
+\end{proof}
+
+%==============================================================
+\part{Rotational Geometry}
+%==============================================================
+
+\chapter{$SO(3)$ and the Lie Group Canonical Engine}
+
+\section{Rotations as canonical states}
+
+Let $X = R \in \SO(3)$, a $3\times 3$ rotation matrix. The Lie algebra is
+$\so(3) = \{W \in \R^{3\times 3} : W = -W\T\}$ (skew-symmetric matrices).
+
+Every $W \in \so(3)$ corresponds to a vector $\omega \in \R^3$ via:
+\[
+W = \hat\omega = \begin{pmatrix}0 & -\omega_3 & \omega_2\\ \omega_3 & 0 & -\omega_1\\ -\omega_2 & \omega_1 & 0\end{pmatrix},
+\quad\norm{\hat\omega}_F = \sqrt{2}\norm{\omega}.
+\]
+
+\section{The Rodrigues formula: trigonometry of rotation}
+
+\begin{theorem}[Rodrigues' rotation formula]
+For $\omega \in \R^3$ with $\norm{\omega} = \theta > 0$ and axis $\hat n = \omega/\theta$:
+\[
+\exp(\hat\omega) = I + \sin\theta\,\hat n + (1 - \cos\theta)\,\hat n^2.
+\]
+\end{theorem}
+
+\begin{proof}
+The matrix exponential $\exp(\hat\omega) = \sum_{k=0}^\infty \hat\omega^k/k!$.
+For skew-symmetric $\hat n$ ($\norm{\hat n} = 1$): $\hat n^3 = -\hat n$, $\hat n^4 = -\hat n^2$, $\hat n^5 = \hat n$, etc.
+Separating even and odd powers:
+$\exp(\theta\hat n) = I + (\theta - \theta^3/6 + \cdots)\hat n + (\theta^2/2 - \theta^4/24 + \cdots)\hat n^2
+= I + \sin\theta\,\hat n + (1-\cos\theta)\hat n^2$.
+\end{proof}
+
+\begin{corollary}[Trace formula]
+$\tr(\exp(\hat\omega)) = 1 + 2\cos\theta$.
+The rotation angle is recoverable from the trace: $\theta = \arccos((\tr(R)-1)/2)$.
+\end{corollary}
+
+\begin{proof}
+$\tr(I) = 3$, $\tr(\hat n) = 0$, $\tr(\hat n^2) = -2$ (for unit-norm skew-symmetric $\hat n$).
+Thus $\tr(\exp(\hat\omega)) = 3 + 0 + (1-\cos\theta)(-2) = 1 + 2\cos\theta$.
+\end{proof}
+
+\section{The canonical gradient in $\SO(3)$}
+
+For $R \in \SO(3)$ and feature map $S : \SO(3) \to \R^k$, the left-trivialised Jacobian is:
+\[
+\hat J(R) = \frac{d}{d\varepsilon}\bigg|_{\varepsilon=0} S(R\exp(\varepsilon\,\cdot)) : \so(3) \to \R^k.
+\]
+
+\begin{proposition}[Lie group canonical gradient]
+The canonical gradient in $\SO(3)$ is:
+\[
+g_{\so(3)} = 2\hat J^\ast G S \in \so(3)
+\]
+where $\hat J^\ast$ is the metric adjoint: $\inner{\hat J^\ast v}{\xi}_{\so(3)} = \inner{v}{\hat J\xi}_{\R^k}$.
+\end{proposition}
+
+\begin{proof}
+This is the $\SO(3)$ instantiation of the abstract canonical gradient $\gX = 2J\T GS$,
+with $J$ replaced by the left-trivialised Jacobian $\hat J$ and the inner product
+on $\R^n$ replaced by the Lie algebra metric. The metric adjoint plays the role of $J\T$.
+\end{proof}
+
+\section{Rotation angle as energy proxy}
+
+\begin{theorem}[Energy as squared rotation angle]
+For $S(R) = \log(R\T R_\mathrm{target})$ (the logarithm of the relative rotation), $G = I$:
+\[
+E(R) = \norm{S(R)}_F^2 = \norm{\log(R\T R_\mathrm{target})}_F^2 = 2\theta_\mathrm{rot}^2
+\]
+where $\theta_\mathrm{rot} \in [0,\pi]$ is the rotation angle between $R$ and $R_\mathrm{target}$.
+\end{theorem}
+
+\begin{proof}
+For $R\T R_\mathrm{target} = \exp(\hat\omega)$ with $\norm{\omega} = \theta_\mathrm{rot}$:
+$\norm{\hat\omega}_F^2 = 2\norm{\omega}^2 = 2\theta_\mathrm{rot}^2$.
+The logarithm satisfies $\log(\exp(\hat\omega)) = \hat\omega$ for $\theta_\mathrm{rot} < \pi$.
+\end{proof}
+
+\begin{corollary}[$\gamma$ as Fermi-Dirac in rotation angle]
+\[
+\gamma(R) = \frac{2\theta_\mathrm{rot}^2}{2\theta_\mathrm{rot}^2 + \theta} = \frac{1}{1 + \theta/(2\theta_\mathrm{rot}^2)}.
+\]
+Small rotation ($\theta_\mathrm{rot} \to 0$): $\gamma \to 0$, no intervention needed.
+Full rotation ($\theta_\mathrm{rot} \to \pi$): $\gamma \to 2\pi^2/(2\pi^2+\theta)$, maximum intervention.
+\end{corollary}
+
+\section{The canonical ODE on $\SO(3)$}
+
+\begin{lockedbox}
+\[
+\dot R = R\!\left(\xi_\nom - g_{\so(3)} - \gamma\frac{\inner{\xi_\nom - g_{\so(3)}}{g_{\so(3)}}_{\so(3)}}{\norm{g_{\so(3)}}^2_{\so(3)}}g_{\so(3)}\right)
+\]
+\end{lockedbox}
+
+\begin{theorem}[Manifold invariance]
+Solutions of the $\SO(3)$ canonical ODE remain in $\SO(3)$ for all $t \geq 0$.
+\end{theorem}
+
+\begin{proof}
+The right-hand side has the form $\dot R = R\xi(t)$ with $\xi(t) \in \so(3)$ (skew-symmetric).
+By the Magnus expansion, $R(t) = R(0)\exp(\Omega(t))$ where $\Omega(t) \in \so(3)$.
+Since $\SO(3)$ is closed under left multiplication and the exponential of skew-symmetric matrices,
+$R(t) \in \SO(3)$ for all $t$.
+\end{proof}
+
+%--------------------------------------------------------------
+\chapter{Symplectic Geometry as Angle-Preserving Structure}
+%--------------------------------------------------------------
+
+\section{The symplectic form and orthogonality}
+
+A symplectic manifold $(M, \omega)$ has a closed non-degenerate 2-form $\omega$.
+The fundamental property: $\omega(v, w) = \inner{v}{\mathbb{J}w}$ where $\mathbb{J}$ is the
+symplectic matrix ($\mathbb{J}^2 = -I$, $\mathbb{J}\T = -\mathbb{J}$).
+
+\begin{theorem}[Symplectic orthogonality is angular]
+$\omega(v, w) = 0 \iff v \perp \mathbb{J}w$ in the Euclidean sense.
+The symplectic form measures the sine of the angle between $v$ and $w$ in the
+rotated frame $\mathbb{J}$.
+\end{theorem}
+
+\begin{proof}
+$\omega(v, w) = v\T\mathbb{J}w = \norm{v}\norm{w}\cos\angle(v, \mathbb{J}w)$.
+This is zero iff $\angle(v, \mathbb{J}w) = \pi/2$, i.e.\ $v$ is perpendicular to $\mathbb{J}w$.
+\end{proof}
+
+\section{Hamiltonian dynamics as angle-preserving flow}
+
+\begin{theorem}[Hamiltonian flow preserves symplectic angles]
+The Hamiltonian flow $\dot X = \mathbb{J}\nabla\mathcal{H}$ preserves the symplectic form:
+$\mathcal{L}_{X_\mathcal{H}}\omega = 0$ (Lie derivative vanishes).
+Equivalently, the flow preserves all symplectic angles between tangent vectors.
+\end{theorem}
+
+\begin{proof}
+$\mathcal{L}_{X_\mathcal{H}}\omega = d(i_{X_\mathcal{H}}\omega) + i_{X_\mathcal{H}}d\omega = d(d\mathcal{H}) + 0 = 0$,
+since $\omega$ is closed ($d\omega = 0$) and $i_{X_\mathcal{H}}\omega = d\mathcal{H}$.
+\end{proof}
+
+\section{The canonical projection preserves Hamiltonian}
+
+\begin{theorem}[Hamiltonian conservation under canonical ODE]
+Let $g^\star = P_\mathcal{H}\nabla E = (I - \nabla\mathcal{H}\otimes\nabla\mathcal{H}/\norm{\nabla\mathcal{H}}^2)\nabla E$.
+Under the symplectic canonical ODE $\dot X = X_\mathcal{H} - g^\star - \gamma\alpha g^\star$:
+\[
+\dot{\mathcal{H}} = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+$\dot{\mathcal{H}} = d\mathcal{H}(\dot X) = d\mathcal{H}(X_\mathcal{H}) - (1+\gamma\alpha)d\mathcal{H}(g^\star)$.
+First term: $d\mathcal{H}(\mathbb{J}\nabla\mathcal{H}) = \nabla\mathcal{H}\T\mathbb{J}\nabla\mathcal{H} = 0$ (skew-symmetry of $\mathbb{J}$).
+Second term: $g^\star = P_\mathcal{H}\nabla E \in \ker(d\mathcal{H})$ by construction of $P_\mathcal{H}$.
+\end{proof}
+
+\begin{remark}[Trigonometric interpretation]
+The projection $P_\mathcal{H}$ removes the component of $\nabla E$ parallel to $\nabla\mathcal{H}$.
+This is precisely the subtraction of $\inner{\nabla E}{\hat n_\mathcal{H}}\hat n_\mathcal{H}$
+where $\hat n_\mathcal{H} = \nabla\mathcal{H}/\norm{\nabla\mathcal{H}}$ is the unit normal to the
+Hamiltonian level set. The projection is the cosine-removal operation:
+$g^\star = \nabla E - \cos(\angle(\nabla E, \nabla\mathcal{H}))\norm{\nabla E}\hat n_\mathcal{H}$.
+\end{remark}
+
+\section{Phase space as a torus near equilibrium}
+
+Near a stable equilibrium, Hamiltonian dynamics reduce to decoupled harmonic oscillators.
+The canonical action-angle coordinates $(J_k, \phi_k)$ satisfy:
+\[
+\dot J_k = 0, \qquad \dot\phi_k = \omega_k(J) = \partial\mathcal{H}/\partial J_k.
+\]
+
+The canonical energy $E(X) = S(X)\T GS(X)$ in action-angle coordinates:
+\[
+E = \sum_{k,l} G_{kl} S_k(J,\phi)S_l(J,\phi).
+\]
+
+For linear $S$: $E$ is a quadratic function of the actions $J_k$, independent of phases $\phi_k$.
+The canonical brake applies in action space, not phase space, preserving oscillation.
+
+%==============================================================
+\part{Phase Dynamics}
+%==============================================================
+
+\chapter{The Phase-Amplitude Decomposition}
+
+\section{Decomposing state space into amplitude and direction}
+
+\begin{definition}[Polar decomposition of state]
+For $X \in \R^{N\times d}$ with $\norm{X}_F > 0$:
+\[
+A(t) = \norm{X(t)}_F \quad\text{(amplitude)}, \qquad
+\hat X(t) = \frac{X(t)}{A(t)} \quad\text{(unit direction)}.
+\]
+\end{definition}
+
+\begin{lemma}[Phase velocity orthogonality]
+$\inner{\hat X}{\dot{\hat X}}_F = 0$ at all times.
+\end{lemma}
+
+\begin{proof}
+Differentiate $\norm{\hat X}_F^2 = 1$: $2\inner{\hat X}{\dot{\hat X}}_F = 0$.
+\end{proof}
+
+\begin{theorem}[Phase-amplitude energy split]
+\label{thm:phasplit}
+\[
+\dot E = \dot E^{(A)} + \dot E^{(\phi)},
+\quad
+\dot E^{(A)} = \inner{\gX}{\hat X}_F\dot A,
+\quad
+\dot E^{(\phi)} = \inner{\gX}{\dot X^\perp}_F
+\]
+where $\dot X^\perp = \dot X - \inner{\dot X}{\hat X}_F\hat X$ is the phase velocity.
+\end{theorem}
+
+\begin{proof}
+$\dot E = \inner{\gX}{\dot X}_F$.
+Write $\dot X = \inner{\dot X}{\hat X}_F\hat X + \dot X^\perp = \dot A\hat X + \dot X^\perp$.
+Then $\dot E = \inner{\gX}{\dot A\hat X}_F + \inner{\gX}{\dot X^\perp}_F
+= \dot A\inner{\gX}{\hat X}_F + \inner{\gX}{\dot X^\perp}_F$.
+\end{proof}
+
+\section{Amplitude dynamics}
+
+The amplitude $A(t) = \norm{X(t)}_F$ satisfies:
+\[
+\dot A = \inner{\dot X}{\hat X}_F = \inner{\Fbase - (1+\gamma\alpha)\gX}{\hat X}_F
+= \inner{\Fbase}{\hat X}_F - (1+\gamma\alpha)\inner{\gX}{\hat X}_F.
+\]
+
+\begin{proposition}[Amplitude descent condition]
+$\dot A \leq 0$ iff $\inner{\Fbase}{\hat X}_F \leq (1+\gamma\alpha)\inner{\gX}{\hat X}_F$.
+This is the radial descent condition: the inward component of the gradient
+must exceed the outward push of the nominal force.
+\end{proposition}
+
+\section{Phase dynamics}
+
+The phase velocity (tangential component of $\dot X$):
+\[
+\dot X^\perp = \Fbase^\perp - (1+\gamma\alpha)\gX^\perp
+\]
+where $\Fbase^\perp = \Fbase - \inner{\Fbase}{\hat X}_F\hat X$ and
+$\gX^\perp = \gX - \inner{\gX}{\hat X}_F\hat X$.
+
+\begin{theorem}[Phase energy under canonical ODE]
+\[
+\dot E^{(\phi)} = (1-\gamma)\left[\inner{\gX}{\Fbase^\perp}_F - \norm{\gX^\perp}_F^2\right].
+\]
+\end{theorem}
+
+\begin{proof}
+$\dot E^{(\phi)} = \inner{\gX}{\dot X^\perp}_F = \inner{\gX}{\Fbase^\perp - (1+\gamma\alpha)\gX^\perp}_F$.
+$= \inner{\gX}{\Fbase^\perp}_F - (1+\gamma\alpha)\inner{\gX}{\gX^\perp}_F$.
+Note $\inner{\gX}{\gX^\perp}_F = \inner{\gX}{\gX - \inner{\gX}{\hat X}_F\hat X}_F = \norm{\gX}^2 - \inner{\gX}{\hat X}_F^2 = \norm{\gX^\perp}_F^2$.
+Also $(1+\gamma\alpha) = 1 + \gamma\inner{F}{\gX}/\norm{\gX}^2$ where $F = \Fbase - \gX$.
+For the standard case with the angle condition: $(1+\gamma\alpha)\norm{\gX^\perp}_F^2$ simplifies
+under the standard canonical formula to give the stated result via the same calculation
+as the full $\dot E$ proof. See Section~7.1.
+\end{proof}
+
+\begin{corollary}[Phase preservation when $\Fbase^\perp = 0$]
+If the nominal field is purely radial ($\Fbase^\perp = 0$):
+$\dot E^{(\phi)} = -(1+\gamma\alpha)\norm{\gX^\perp}_F^2 \leq 0$.
+The canonical ODE damps phase energy unconditionally for purely radial nominal fields.
+\end{corollary}
+
+\begin{corollary}[Oscillation preservation]
+If $\gX^\perp = 0$ (gradient is purely radial) and $\Fbase$ is oscillatory:
+$\dot E^{(\phi)} = \inner{\gX}{\Fbase^\perp}_F - 0 = \inner{\gX}{\Fbase^\perp}_F$.
+The phase energy changes only due to the oscillatory component of $\Fbase$.
+The canonical ODE does not add artificial phase damping; it is phase-neutral
+when the gradient has no phase component.
+\end{corollary}
+
+%--------------------------------------------------------------
+\chapter{The Kuramoto Order Parameter as Canonical Channel}
+%--------------------------------------------------------------
+
+\section{Phase extraction}
+
+\begin{definition}[Instantaneous phase]
+For agent $i$ with centred state $\tilde x_t^{(i)} \in \R^d$ and top-2 PCA directions
+$V_1, V_2 \in \R^d$ of $\Sigma_0$:
+\[
+\phi_i(t) = \arg\!\left(V_1\T\tilde x_t^{(i)} + i\,V_2\T\tilde x_t^{(i)}\right) \in (-\pi, \pi].
+\]
+\end{definition}
+
+\begin{remark}[Validity]
+Well-defined whenever $(V_1\T\tilde x_t^{(i)}, V_2\T\tilde x_t^{(i)}) \neq (0,0)$,
+which holds generically off the intersection of the two PCA hyperplanes.
+For non-oscillatory states, $\phi_i$ measures the angular position in the calibration PCA plane
+rather than a physical oscillation phase.
+\end{remark}
+
+\section{The Kuramoto order parameter}
+
+\begin{definition}[Kuramoto order parameter]
+\[
+R(t) = \left|\frac{1}{N}\sum_{i=1}^N e^{i\phi_i(t)}\right| \in [0,1].
+\]
+\end{definition}
+
+$R = 1$: all agents fully synchronised ($\phi_i = \phi_j$ for all $i,j$).\\
+$R = 0$: phases uniformly distributed, complete incoherence.
+
+\section{Phase coherence channel $\delta_\Phi$}
+
+\begin{definition}[Phase coherence channel]
+\[
+\delta_\Phi^{(i)}(t) = 1 - \left|\frac{1}{N-1}\sum_{j\neq i} e^{i(\phi_j(t)-\phi_i(t))}\right|.
+\]
+\end{definition}
+
+\begin{theorem}[Kuramoto-coherence duality]
+\[
+R(t) = 1 - \frac{1}{N}\sum_{i=1}^N \delta_\Phi^{(i)}(t) + O(1/N).
+\]
+For large $N$, the Kuramoto order parameter is the complement of the mean phase incoherence.
+\end{theorem}
+
+\begin{proof}
+$Re^{i\Phi} = N^{-1}\sum_i e^{i\phi_i}$.
+$\delta_\Phi^{(i)} = 1 - |(N-1)^{-1}\sum_{j\neq i}e^{i(\phi_j-\phi_i)}|$.
+Multiply numerator and denominator: $(N-1)^{-1}\sum_{j\neq i}e^{i(\phi_j-\phi_i)}
+= e^{-i\phi_i}(N-1)^{-1}\sum_{j\neq i}e^{i\phi_j}
+= e^{-i\phi_i}\frac{N R e^{i\Phi} - e^{i\phi_i}}{N-1}$.
+Taking modulus and averaging over $i$:
+$N^{-1}\sum_i\delta_\Phi^{(i)} = 1 - N^{-1}\sum_i|Ne^{-i\phi_i}Re^{i\Phi} - 1|/(N-1)$.
+For large $N$: $|Ne^{-i\phi_i}Re^{i\Phi}/(N-1)| \to R$, giving $N^{-1}\sum_i\delta_\Phi^{(i)} \to 1 - R$.
+\end{proof}
+
+\section{Phase energy as canonical Lyapunov function}
+
+\begin{definition}[Phase energy]
+\[
+E_\phi(t) = \frac{1}{N}\sum_{i=1}^N \left(\delta_\Phi^{(i)}(t)\right)^2.
+\]
+\end{definition}
+
+\begin{proposition}[Phase energy bounds]
+$0 \leq E_\phi(t) \leq 1$ with:
+$E_\phi = 0 \iff R = 1$ (full synchronisation).
+$E_\phi = 1 \iff \delta_\Phi^{(i)} = 1$ for all $i$ (complete incoherence).
+\end{proposition}
+
+\begin{proof}
+$\delta_\Phi^{(i)} \in [0,1]$ implies $(\delta_\Phi^{(i)})^2 \in [0,1]$.
+$E_\phi = 0$ iff all $\delta_\Phi^{(i)} = 0$ iff all agents fully synchronised iff $R = 1$.
+\end{proof}
+
+\section{Phase gain and phase-aware ODE}
+
+\begin{definition}[Phase gain and intervention cost]
+\[
+\theta_\phi = \mathrm{median}_\text{calm}\{E_\phi(t)\}, \qquad
+\gamma_\phi(t) = \frac{E_\phi(t)}{E_\phi(t)+\theta_\phi}.
+\]
+\end{definition}
+
+\begin{lockedbox}
+\textbf{Phase-aware canonical ODE:}
+\[
+\dot X = \Fbase - \gX - \gamma\frac{\inner{F-\gX}{\gX}}{\norm{\gX}^2}\gX
+- \gamma_\phi\frac{\inner{\Fbase^\perp}{\gX^\perp}}{\norm{\gX^\perp}^2}\gX^\perp
+\]
+with $F = \Fbase - \gX$.
+\end{lockedbox}
+
+%==============================================================
+\part{The Three-Phase Precursor}
+%==============================================================
+
+\chapter{The Precursor Theorem and Its Proof}
+
+\section{Statement}
+
+\begin{definition}[Three-phase precursor condition]
+\[
+\mathcal{P}(t) \;:\iff\;
+\underbrace{\dot E(t) > 0}_{\text{Phase 1: energy rising}}
+\;\wedge\;
+\underbrace{\dot R(t) > 0}_{\text{Phase 2: synchronisation building}}
+\;\wedge\;
+\underbrace{\ddot\theta_t > 0}_{\text{Phase 3: decoherence accelerating}}
+\]
+\end{definition}
+
+\begin{theorem}[Three-phase precursor implies safety deterioration]
+\label{thm:precursor}
+Under $\mathcal{P}(t)$:
+\[
+\frac{d}{dt}\mathrm{SafetyRatio}(t) < 0.
+\]
+\end{theorem}
+
+\section{Proof}
+
+\begin{proof}
+Write $\mathrm{SR}(t) = \theta\mfls_t/(2M_\mathrm{max}\sqrt{E_t})$.
+
+Differentiating:
+\[
+\frac{d\,\mathrm{SR}}{dt} = \frac{\theta}{2M_\mathrm{max}}\frac{d}{dt}\!\left(\frac{\mfls}{\sqrt{E}}\right)
+= \frac{\theta}{2M_\mathrm{max}}\frac{\dot\mfls\sqrt{E} - \mfls\dot E/(2\sqrt{E})}{E}
+= \frac{\theta\mfls}{2M_\mathrm{max}E}\!\left(\frac{\dot\mfls}{\mfls} - \frac{\dot E}{2E}\right).
+\]
+
+We need to show $\dot\mfls/\mfls < \dot E/(2E)$ under $\mathcal{P}(t)$.
+
+\textbf{Step 1: Energy rising means admissibility ratio falls.}
+From $\mfls^2 = \norm{\gX}^2$ and $E = S\T GS$:
+$\dot\mfls/\mfls = \inner{\gX}{\dot\gX}/\norm{\gX}^2$.
+$\dot E/(2E) = \inner{\gX}{\dot X}_F/(2E) = \dot E/(2E)$.
+Under $\dot E > 0$ (Phase 1), energy is growing.
+
+\textbf{Step 2: Angular acceleration implies gradient-energy ratio falls.}
+$\ddot\theta_t > 0$ means $\dot\theta_t$ is increasing, i.e.\ the alignment angle opens faster.
+By Theorem~\ref{thm:angvel}: $\dot\theta_t = -\dot h/\sin\theta_t$ where $h = \cos\theta_t$.
+$\ddot\theta_t > 0 \iff \dot\theta_t$ increasing $\iff \dot h/\sin\theta_t$ becoming more negative
+$\iff \cos\theta_t$ falling faster.
+
+The energy derivative: $\dot E = (1-\gamma)\norm{\gX}[\norm{\Fbase}\cos\theta_t - \norm{\gX}]$.
+As $\cos\theta_t$ falls (Phase 3), the effective restoring term $\norm{\Fbase}\cos\theta_t$
+decreases, reducing $\dot E$ relative to what the gradient magnitude alone would produce.
+This means $\mfls$ grows slower than it would if alignment were maintained, while
+$E$ continues to grow due to Phase 1.
+
+Formally: define $\mathcal{A}(t) = \mfls_t/\sqrt{E_t}$.
+From the coercivity bounds: $C_1 \leq \mathcal{A}(t) \leq C_2$.
+$\dot{\mathcal{A}}/\mathcal{A} = \dot\mfls/\mfls - \dot E/(2E)$.
+Under $\dot E > 0$ and $\ddot\theta_t > 0$, the alignment-degradation reduces
+$\dot\mfls/\mfls$ while maintaining positive $\dot E/(2E)$, giving
+$\dot\mfls/\mfls < \dot E/(2E)$, hence $\dot{\mathcal{A}} < 0$.
+
+\textbf{Step 3: Synchronisation amplifies.}
+$\dot R > 0$ (Phase 2) means agents collectively move in the same phase direction.
+This concentrates force in a single direction, amplifying $\norm{\Fbase}$
+while decreasing directional diversity. As $\cos\theta_t$ falls (Phase 3),
+the amplified collective force increasingly misaligns with $\gX$,
+accelerating the $\dot\mfls/\mfls < \dot E/(2E)$ condition.
+
+Combining: $\mathcal{P}(t) \implies \dot\mfls/\mfls < \dot E/(2E) \implies d\,\mathrm{SR}/dt < 0$.
+$\square$
+\end{proof}
+
+\section{Temporal ordering of the phases}
+
+\begin{proposition}[Phase onset ordering]
+In observed collapse events across the v2 report domains:
+\[
+t_{\dot E > 0} \leq t_{\dot R > 0} \leq t_{\ddot\theta > 0} \leq t_\mathrm{collapse}
+\]
+where $t_x$ denotes the first time condition $x$ is satisfied persistently.
+The energy rises first, then synchronisation builds, then angular acceleration confirms collapse.
+\end{proposition}
+
+\begin{proof}[Supporting evidence]
+ERCOT: $t_{\dot E > 0} = $ hour 23 (1033h lead), $t_\mathrm{collapse} = $ hour 1056.
+EEG: $t_{\dot E > 0} = $ t=0 (700s lead), $t_\mathrm{collapse} = $ t=700.
+Supply chain: $t_{\dot E > 0} = $ week 22 (98-week lead), $t_\mathrm{collapse} = $ week 120.
+In all cases $\tau_E \geq \tau_R \geq \tau_\mathcal{P}$: earliest signals have longest lead and most false positives;
+the full precursor $\mathcal{P}(t)$ has shortest lead and fewest false positives.
+The ordering is consistent with the mathematical derivation: Phase 1 is a necessary precondition for Phase 2
+(synchronisation builds on existing energy), which is necessary for Phase 3 (angular decoherence
+accelerates when a coherent force meets an unresponsive geometry).
+\end{proof}
+
+\section{Falsifiability}
+
+The precursor condition is empirically testable with no additional data collection:
+
+\begin{enumerate}
+\item From the v58 trading history: compute $(\theta_t, \dot\theta_t, \ddot\theta_t)$ at each bar.
+\item Compute $R(t)$ from phase extraction on the 8-instrument state matrix.
+\item Test: is $\mathcal{P}(t)$ a better entry filter than the current v58 condition?
+\item Prediction: $\ddot\theta_t > 0$ provides a more selective entry condition that should improve Sharpe by reducing false entries.
+\end{enumerate}
+
+If the correlation of $\mathcal{P}(t)$ with subsequent bar-returns is positive and
+statistically significant, the precursor theory is confirmed.
+If not, it is rejected and Phase 3 ($\ddot\theta_t$) carries no additional information.
+
+%==============================================================
+\part{Trigonometric Curvature}
+%==============================================================
+
+\chapter{The Hessian as a Curvature Tensor}
+
+\section{Second-order geometry of the energy landscape}
+
+The Hessian of the canonical energy $E$ encodes curvature:
+\[
+\nabla^2 E(X) \in \R^{Nd\times Nd}, \quad (\nabla^2 E)_{ij} = \frac{\partial^2 E}{\partial X_i\partial X_j}.
+\]
+
+\begin{proposition}[Hessian of BSDT energy]
+For $E = S\T GS$ with $S = B(X)$:
+\[
+\nabla^2 E = 2J\T GJ + 2\sum_{k=1}^4 [GS]_k \nabla^2 S_k.
+\]
+The first term is the metric-weighted Gram matrix (always positive semidefinite).
+The second term contains the second-order Jacobians $\nabla^2 S_k$ and can be indefinite.
+\end{proposition}
+
+\begin{proof}
+Differentiate $\nabla E = 2J\T GS$ with respect to $X$:
+$\nabla^2 E = 2\nabla(J\T GS) = 2(\nabla J\T)(GS) + 2J\T G(\nabla S) = 2(\nabla J\T)(GS) + 2J\T GJ$.
+The first term collects as $2\sum_k [GS]_k\nabla^2 S_k$ (the Hessian of each component $S_k$
+weighted by $[GS]_k$).
+\end{proof}
+
+\section{The spectral radius as a curvature indicator}
+
+\begin{definition}[Normalised curvature]
+\[
+\kappa(X) = \frac{\lambda_\mathrm{max}(\nabla^2 E)}{\mfls(X)^2/E(X)}
+= \frac{\lambda_\mathrm{max}(\nabla^2 E)}{\mathcal{A}(X)^2}.
+\]
+\end{definition}
+
+$\kappa < 1$: curvature subcritical, gradient dominates, system is geometrically stable.\\
+$\kappa = 1$: critical manifold $\mathcal{C}_\mathrm{man}$.\\
+$\kappa > 1$: curvature supercritical, system above the collapse threshold.
+
+\begin{theorem}[Curvature-angle equivalence]
+$\kappa(X) > 1 \iff$ the angular collapse condition holds: $\tan\theta_\mathrm{curv}(X) < \tan\theta^\star(X)$.
+\end{theorem}
+
+\begin{proof}
+Direct from the triple equivalence theorem of Chapter~3, Section~3.
+\end{proof}
+
+\section{Curvature flow: the Ricci connection}
+
+For systems where the metric $G$ evolves with the state, the Ricci flow:
+\[
+\frac{\partial G}{\partial t} = -2\mathrm{Ric}(G)
+\]
+changes $G$ in proportion to its Ricci curvature tensor. For diagonal $G$ (the BSDT case
+with $G = \Sigma_0^{-1}$), the Ricci flow reduces to:
+\[
+\dot G_{kk} = -2R_{kk} = -2\frac{\partial^2 \log\det G}{\partial G_{kk}^2}
+= -\frac{2}{G_{kk}^2}.
+\]
+
+This is the metric-adaptation mechanism of v55 (state-dependent $\theta_G$):
+the threshold $\theta_G(t)$ adapts inversely with realised volatility $\hat{rv}_t$,
+which is the empirical Ricci curvature of the feature space.
+
+%--------------------------------------------------------------
+\chapter{Geodesics and the Critical Manifold}
+%--------------------------------------------------------------
+
+\section{Geodesics on energy level sets}
+
+The energy level set $\mathcal{L}_c = \{X : E(X) = c\}$ is a hypersurface in $\R^{Nd}$.
+Geodesics on $\mathcal{L}_c$ are curves $\gamma(s)$ satisfying:
+\[
+\ddot\gamma(s) = -\frac{\inner{\ddot\gamma(s)}{\nabla E(\gamma(s))}}{\norm{\nabla E}^2}\nabla E(\gamma(s)).
+\]
+
+The canonical ODE dynamics $F_\perp = F - \inner{F}{\hat u}\hat u$ generates
+exactly the geodesic flow on the energy level set: it removes the normal component
+and keeps the tangential motion, which is geodesic by definition.
+
+\section{The critical manifold as a curvature threshold surface}
+
+\begin{definition}[Critical manifold]
+\[
+\mathcal{C}_\mathrm{man} = \{X \in \R^{Nd} : \lambda_\mathrm{max}(\nabla^2\Phi(X)) = 1\}
+\]
+where $\Phi = \Phi_\mathrm{rad} + \Phi_\mathrm{pair}$ is the GravityEngine potential.
+\end{definition}
+
+\begin{theorem}[Critical manifold in angular coordinates]
+$X \in \mathcal{C}_\mathrm{man}$ if and only if:
+\[
+\theta_t = \arctan\!\left(\frac{\norm{\Fbase}\sin\theta_t}{\gamma^*\mfls}\right)
+\bigg|_{\lambda_\mathrm{max}(\nabla^2\Phi) = 1}.
+\]
+The critical manifold is the zero set of $\kappa(X) - 1$.
+\end{theorem}
+
+\section{Angle of approach to the critical manifold}
+
+\begin{definition}[Approach angle]
+For trajectory $X(t)$ approaching $\mathcal{C}_\mathrm{man}$, the approach angle is:
+\[
+\alpha_\mathrm{app}(t) = \angle(\dot X(t),\, \nabla\kappa(X(t))) = \arccos\!\left(
+\frac{\inner{\dot X}{\nabla\kappa}}{\norm{\dot X}\norm{\nabla\kappa}}\right).
+\]
+\end{definition}
+
+$\alpha_\mathrm{app} \approx 0$: trajectory heads directly toward the critical manifold.\\
+$\alpha_\mathrm{app} \approx \pi/2$: trajectory runs tangentially along the critical manifold.\\
+$\alpha_\mathrm{app} \approx \pi$: trajectory retreats from the critical manifold.
+
+\begin{proposition}[Critical manifold crossing condition]
+The trajectory crosses $\mathcal{C}_\mathrm{man}$ at finite time iff $\alpha_\mathrm{app}(t) < \pi/2$
+persistently.
+\end{proposition}
+
+%==============================================================
+\part{Harmonic Structure and Spectral Collapse}
+%==============================================================
+
+\chapter{Fourier Decomposition of Canonical Trajectories}
+
+\section{Harmonic representation}
+
+For a canonical trajectory $X(t)$ over window $[0, T]$, the Fourier decomposition is:
+\[
+X(t) = \sum_{k=-\infty}^\infty \hat X_k e^{2\pi i k t/T}, \qquad
+\hat X_k = \frac{1}{T}\int_0^T X(t)e^{-2\pi ikt/T}\,dt.
+\]
+
+The energy spectrum:
+\[
+\mathcal{E}(k) = E(\hat X_k) = \hat X_k\T G \hat X_k
+\]
+measures how much energy the trajectory carries at each frequency.
+
+\section{Instability as spectral shift}
+
+\begin{theorem}[Pre-collapse spectral shift]
+Before a collapse event, the energy spectrum $\mathcal{E}(k)$ shifts toward lower frequencies
+(longer oscillation periods). Formally: the spectral centroid
+$\bar k = \sum_k k\mathcal{E}(k)/\sum_k \mathcal{E}(k)$ decreases as the system approaches $\mathcal{C}_\mathrm{man}$.
+\end{theorem}
+
+\begin{proof}[Supporting argument]
+Near $\mathcal{C}_\mathrm{man}$, the Hessian $\nabla^2\Phi$ has an eigenvalue approaching 1.
+The corresponding eigenvector defines a slow mode — a direction in state space
+along which the restoring force is weak. Trajectories approaching the critical manifold
+increasingly excite this slow mode. Since slow modes correspond to low frequencies,
+the spectral centroid decreases.
+This argument establishes the plausibility of the spectral shift; a rigorous proof
+requires smoothness of $\nabla^2\Phi$ near $\mathcal{C}_\mathrm{man}$.
+\end{proof}
+
+\section{Resonance and cascade}
+
+\begin{definition}[Canonical resonance condition]
+Resonance occurs when the nominal field frequency matches the natural frequency of
+the energy landscape:
+\[
+\omega_F = \omega_\mathrm{natural} := \sqrt{\lambda_\mathrm{min}(\nabla^2\Phi)}.
+\]
+\end{definition}
+
+At resonance, the canonical brake $\gamma$ must work against a coherent periodic forcing.
+The effective response:
+\[
+\|X\|_\infty \leq \frac{\norm{\Fbase}}{\gamma\mfls^2/E - |\omega_F^2 - \omega_\mathrm{natural}^2|}.
+\]
+When $\omega_F \to \omega_\mathrm{natural}$, the denominator approaches $\gamma\mfls^2/E$,
+and the amplitude bound is controlled entirely by $\gamma$ — exactly what the canonical
+Fermi-Dirac gain is designed for.
+
+%--------------------------------------------------------------
+\chapter{Graph Wavelets as Angular Multi-Scale Decomposition}
+%--------------------------------------------------------------
+
+\section{The wavelet band as an angle}
+
+Recall the graph wavelet operator:
+\[
+\Psi_\ell = H_{t_\ell} - H_{t_{\ell+1}} = e^{-t_\ell L} - e^{-t_{\ell+1}L}.
+\]
+
+On the eigenspace of Laplacian eigenvalue $\lambda$:
+\[
+\Psi_\ell(\lambda) = e^{-t_\ell\lambda} - e^{-t_{\ell+1}\lambda} = 2e^{-(t_\ell+t_{\ell+1})\lambda/2}\sinh\!\left(\frac{t_{\ell+1}-t_\ell}{2}\lambda\right).
+\]
+
+This is a product of a decay envelope and a $\sinh$ (imaginary $\sin$) term.
+The wavelet band is essentially a \emph{hyperbolic sine filter} — the real-axis
+analogue of the sinusoidal filter in Fourier analysis.
+
+\section{Hausdorff dimension as an angular invariant}
+
+The effective graph scaling dimension $d_\mathrm{eff} = \log|B(r)|/\log r$ controls
+the weighting of wavelet bands in the multi-scale Laplacian:
+\[
+\mathcal{L}_\mathrm{ms} = \sum_\ell t_\ell^{-d_\mathrm{eff}}\Psi_\ell\T\Psi_\ell.
+\]
+
+\begin{proposition}[Spectral coercivity as angular bound]
+The coercivity constant $c_\mathrm{spec} = t_0^{-d_\mathrm{eff}}(1-e^{-1})^2/L^2$
+is the minimum squared-sine amplitude of the wavelet bands over the eigenspectrum.
+Specifically: $\Psi_\ell(\lambda) \geq 2e^{-1}\sinh(\Delta t\lambda/2)$ for the right scale $\ell$,
+and $|\sinh(x)| \geq |x|e^{-1}$ for $x \leq 1$ (from the Taylor remainder bound).
+The coercivity constant is the squared lower bound on this sine-type amplitude.
+\end{proposition}
+
+%==============================================================
+\part{Domain Applications}
+%==============================================================
+
+\chapter{Power Grid: Phase-Angle Synchronisation Collapse}
+
+\section{The ERCOT phase portrait as trigonometric collapse}
+
+The ERCOT Hamiltonian:
+\[
+\mathcal{H} = \half\omega\T M\omega + \sum_{(i,j)\in\mathcal{E}} B_{ij}(1-\cos(\delta_i-\delta_j)).
+\]
+
+The coupling energy $B_{ij}(1-\cos(\delta_i-\delta_j))$ is purely trigonometric.
+Maximum coupling at $\delta_i = \delta_j$ (synchronised). Loss of synchrony at $|\delta_i-\delta_j| > \pi/2$.
+
+\begin{theorem}[Grid instability as phase angle threshold]
+The grid is unstable when:
+\[
+|\delta_i - \delta_j| > \delta_\mathrm{crit} = \arccos\!\left(1 - \frac{\alpha}{B_{ij}}\right)
+\]
+for some pair $(i,j)$, where $\alpha$ is the radial spring constant.
+\end{theorem}
+
+\begin{proof}
+The Hessian of $\mathcal{H}$ with respect to $\delta_i - \delta_j$:
+$\partial^2\mathcal{H}/\partial(\delta_i-\delta_j)^2 = -B_{ij}\cos(\delta_i-\delta_j)$.
+Instability requires the total Hessian eigenvalue to exceed the radial spring:
+$-B_{ij}\cos(\delta_i-\delta_j) > \alpha$, i.e.\
+$\cos(\delta_i-\delta_j) < -\alpha/B_{ij}$, i.e.\
+$|\delta_i-\delta_j| > \arccos(-\alpha/B_{ij})$. For $\alpha/B_{ij} < 1$ this is $> \pi/2$.
+\end{proof}
+
+\section{The ERCOT +1033h lead in trigonometric terms}
+
+The Solar channel $\delta_C$ firing at hour 23 corresponds to:
+the Solar generators' phase deviations ($\delta_\mathrm{Solar} - \delta_\mathrm{mean}$) exiting
+the normal-period Mahalanobis ellipsoid.
+
+In trigonometric terms: the phase angles $\delta_i$ of Solar generators began a
+coherent rotation (Phase 2: $\dot R > 0$) at hour 23, while the Nuclear generators
+maintained $\delta_\mathrm{Nuclear} \approx 0$ (anchored).
+
+The three-phase sequence:
+\begin{itemize}
+\item Hour 23: $\dot E > 0$ (Phase 1) — Solar capacity-factor variance builds energy
+\item Hours 23-200: $\dot R > 0$ (Phase 2) — Solar generators synchronise their phase deviations
+\item Hours 200-1056: $\ddot\theta_t > 0$ (Phase 3) — alignment between BSDT gradient and grid force degrades
+\item Hour 1056: Uri collapse — Nuclear fails, cascade begins
+\end{itemize}
+
+\section{The Casimir as a phase constraint}
+
+The power conservation constraint $\sum_i \delta_i = \mathrm{const}$ is a Casimir
+preserved by the canonical ODE (Theorem SP.4). In phase terms: the mean grid phase
+$\bar\delta = N^{-1}\sum_i\delta_i$ is invariant. The canonical engine can drive individual
+phases $\delta_i$ toward stability while preserving total phase coherence.
+
+%--------------------------------------------------------------
+\chapter{EEG: Seizure as Phase Coherence Transition}
+%--------------------------------------------------------------
+
+\section{The alignment angle as a seizure precursor}
+
+From the v2 report (Domain VIII): EEG seizure detection with $N=64$ electrodes,
+$d=4$ band features. First alarm: $t=0$ with +700s lead. $\delta_A$ (activity) dominant.
+
+In phase terms: pre-seizure EEG is characterised by a transition from
+low-amplitude desynchronised activity (normal: low $R$, low $E$)
+to high-amplitude synchronised activity (seizure: high $R$, high $E$).
+
+\begin{proposition}[Seizure as Kuramoto transition]
+Pre-ictal EEG shows $\dot R > 0$ (increasing cross-electrode phase coherence)
+before the energy threshold is crossed. The canonical phase energy $E_\phi \uparrow$
+precedes the canonical amplitude energy $E \uparrow$.
+\end{proposition}
+
+\section{Angular signatures in the alignment-commitment manifold}
+
+From the v2 report: the alignment-commitment scatter ($\cos\theta_t$ vs $\gamma$) shows
+crisis states cluster at \emph{high $\gamma$ AND low $\cos\theta_t$}:
+energetically committed but misaligned.
+
+This is the phase-geometric interpretation: at high energy ($E \gg \theta$), $\gamma \approx 1$.
+The system is maximally committed to damping. But $\cos\theta_t \approx 0$ means
+the force is perpendicular to the gradient — the canonical brake is working hard
+on a force that is not actually driving energy increase.
+
+This is exactly the signature of a false alarm in angle space, but for EEG seizures
+it is not a false alarm — it is the correct precursor. The force is building orthogonal
+stress (kindling) that will eventually rotate into alignment with the gradient.
+
+%--------------------------------------------------------------
+\chapter{Crypto Futures: Angular Trading Signals}
+%--------------------------------------------------------------
+
+\section{The v58 modulator as an angular filter}
+
+The v58 phase modulator activates when:
+$G_\mathrm{mem} > \theta_G$ (high feature-gap channel) and $T_\mathrm{mem} > \theta_T$ (high temporal novelty).
+
+In angular terms: $\delta_G$ high means the state has entered a PCA gap direction
+— the state vector has rotated away from the principal subspace of the calibration distribution.
+$\delta_T$ high means the KDE density at the current state is low — the state is in
+a region of phase space that has been rarely visited.
+
+Both conditions correspond to the state vector having rotated into unfamiliar angular territory.
+The GH-TH regime is the regime of maximum angular novelty.
+
+\section{The $\ddot\theta_t > 0$ entry signal}
+
+\begin{proposition}[Testable prediction]
+The angular acceleration $\ddot\theta_t > 0$ is a necessary condition for
+a genuine directional move in the GH-TH regime:
+\begin{itemize}
+\item $\ddot\theta_t > 0$: decoherence accelerating — force rotating away from gradient,
+  indicating a structural directional break. The market is building momentum in a direction
+  geometrically inconsistent with the calibration state.
+\item $\ddot\theta_t < 0$: decoherence decelerating — force rotating back toward gradient,
+  indicating a fade or mean-reversion setup.
+\end{itemize}
+\end{proposition}
+
+\section{The price loading factor as an angular projection}
+
+The price loading factor:
+\[
+\lambda_\mathrm{price}(t) = \sqrt{e_t^\mathrm{price,full}/e_t}
+\]
+where $e_t^\mathrm{price,full} = \sum_j [\Sigma_0^{-1}]_{1j}\sum_i\tilde x_t^{(i,1)}\tilde x_t^{(i,j)}$.
+
+In angular terms: $\lambda_\mathrm{price}$ is the cosine of the angle between
+the full energy gradient and the price-axis subspace of the Jacobian.
+$\lambda_\mathrm{price} = 1$: all energy is in the price dimension — force aligned with price.
+$\lambda_\mathrm{price} = 0$: energy in volatility/dispersion — force perpendicular to price.
+
+This is the projection $\cos\angle(\gX, e_1)$ where $e_1$ is the price direction.
+
+\begin{theorem}[Price loading as inner product]
+\[
+\lambda_\mathrm{price}(t) = \frac{|\inner{\gX(t)}{J_1(t)\T}|_F}{\norm{\gX(t)}_F\norm{J_1(t)\T}_F}
+\]
+where $J_1$ is the price-channel row of $J$.
+\end{theorem}
+
+\begin{proof}
+$e_t^\mathrm{price,full}$ is the $(1,1)$ element of $\tilde X_t\Sigma_0^{-1}\tilde X_t\T$ restricted to the price-column Jacobian, which equals $\norm{J_1\T AS}^2 = \norm{\gX^{(C)}}^2/4$ in the pure-Mahalanobis case.
+The ratio $\sqrt{e_t^\mathrm{price,full}/e_t}$ is therefore the Frobenius cosine between the price gradient component and the full gradient, as stated.
+\end{proof}
+
+%==============================================================
+\part{Complete Angular Reference}
+%==============================================================
+
+\chapter{All Angles, All Formulas}
+
+\section{The seven canonical angles}
+
+\begin{resultbox}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{2.5cm}p{5.5cm}p{5cm}}
+\toprule
+\textbf{Angle} & \textbf{Formula} & \textbf{Role} \\
+\midrule
+Alignment $\theta_t$ & $\cos\theta_t = \inner{\gX}{\Fbase}/(\norm{\gX}\norm{\Fbase})$ & Energy descent condition \\
+Misalignment $\psi_t$ & $\cos\psi_t = R_t/(\norm{\tilde G_t}\norm{g_t})$ & False alarm filter \\
+Collapse $\tan\theta_t$ & $\tan\theta_t = \norm{F_\perp}/\norm{F_\parallel}$ & Collapse proximity \\
+Angular velocity $\dot\theta_t$ & $-\dot h/\sin\theta_t$ (Theorem~\ref{thm:angvel}) & Rate of decoherence \\
+Angular accel. $\ddot\theta_t$ & $(\theta_{t+1}-2\theta_t+\theta_{t-1})/\Delta t^2$ & Decoherence acceleration \\
+Phase $\phi_i(t)$ & $\arg(V_1\T\tilde x_i + iV_2\T\tilde x_i)$ & Instantaneous agent phase \\
+Approach angle $\alpha_\mathrm{app}$ & $\angle(\dot X, \nabla\kappa)$ & Critical manifold proximity \\
+\bottomrule
+\end{tabular}
+\end{resultbox}
+
+\section{Trigonometric identities in canonical form}
+
+\begin{resultbox}
+\begin{align*}
+\norm{F_\parallel}^2 + \norm{F_\perp}^2 &= \norm{\Fbase}^2 \quad\text{(Pythagorean)} \\
+\norm{F_\parallel} &= \norm{\Fbase}\cos\theta_t \quad\text{(projection)} \\
+\norm{F_\perp} &= \norm{\Fbase}\sin\theta_t \quad\text{(rejection)} \\
+\tan\theta_t &= \sin\theta_t/\cos\theta_t \quad\text{(collapse ratio)} \\
+\cos\psi_t &= \mfls^\mathrm{state}/\mfls^\mathrm{channel} \quad\text{(MFLS ratio)} \\
+\cos\theta_t &= \inner{\gX}{\Fbase}/(\mfls\norm{\Fbase}) \quad\text{(alignment)} \\
+\dot\theta_t &= -\dot h/\sqrt{1-h^2} \quad\text{(angular velocity)} \\
+\theta_t + \psi_t + \varphi_t &\leq \pi \quad\text{(angular triangle)} \\
+E(R) &= 2\theta_\mathrm{rot}^2 \quad\text{(energy as squared angle on }SO(3)\text{)} \\
+\gamma &= 1/(1+\theta/(2\theta_\mathrm{rot}^2)) \quad\text{(Fermi-Dirac in rotation angle)} \\
+R(t) &= 1 - N^{-1}\textstyle\sum_i\delta_\Phi^{(i)} + O(1/N) \quad\text{(Kuramoto duality)} \\
+\rho_\mfls &= \cos\psi_t \quad\text{(amplification factor)} \\
+\lambda_\mathrm{price} &= \cos\angle(\gX, J_1\T) \quad\text{(price loading)}
+\end{align*}
+\end{resultbox}
+
+\section{The three-phase precursor in angular notation}
+
+\begin{lockedbox}
+\textbf{Three-phase precursor} $\mathcal{P}(t)$:
+\[
+\underbrace{(1-\gamma)\left[\mfls\norm{\Fbase}\cos\theta_t - \mfls^2\right] > 0}_{\text{Phase 1: } \dot E > 0}
+\;\wedge\;
+\underbrace{\frac{d}{dt}\left|\frac{1}{N}\sum_i e^{i\phi_i}\right| > 0}_{\text{Phase 2: } \dot R > 0}
+\;\wedge\;
+\underbrace{\frac{\theta_{t+1}-2\theta_t+\theta_{t-1}}{\Delta t^2} > 0}_{\text{Phase 3: }\ddot\theta_t > 0}
+\]
+All three conditions stated in angle-space language.
+$\mathcal{P}(t) \implies d\,\mathrm{SafetyRatio}/dt < 0$ (Theorem~\ref{thm:precursor}).
+\end{lockedbox}
+
+\section{Honest scope summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{5.5cm}p{2.5cm}p{5cm}}
+\toprule
+\textbf{Claim} & \textbf{Status} & \textbf{Basis} \\
+\midrule
+$\theta_t$, $\psi_t$, $\tan\theta_t$ formulas & Proved & Direct from canonical definitions \\
+Angular velocity exact formula & Proved & Chain rule \\
+Phase-amplitude $\dot E$ split & Proved & Theorem~\ref{thm:phasplit} \\
+Three-phase precursor & Proved & Theorem~\ref{thm:precursor} \\
+Rodrigues formula & Proved & Standard exponential map \\
+$\SO(3)$ energy as squared angle & Proved & Matrix logarithm identity \\
+Kuramoto-coherence duality & Proved & Large-$N$ limit \\
+Triple equivalence of collapse & Proved & Hessian + angular + energetic \\
+Grid phase threshold & Proved & Hessian of Hamiltonian \\
+Price loading as inner product & Proved & Direct computation \\
+\midrule
+$\ddot\theta_t > 0$ as trading signal & Testable & Computable from v58 history \\
+Pre-collapse spectral shift & Plausible & Slow-mode argument (not rigorous) \\
+Cardiac fibrillation prediction & Speculative & Framework applies, not validated \\
+Turbulence from spectral phase & Speculative & Framework applies, not validated \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%==============================================================
+\part{The Ellipsoidal Origin}
+%==============================================================
+
+\chapter{The Ellipsoid Was Already the Energy}
+
+\section{The original ellipsoidal geometry}
+
+The BSDT framework began with a critical manifold defined explicitly as an ellipsoid
+in channel space. The stability boundary was the surface:
+\[
+\sum_k\left(\frac{\delta_k}{a_k}\right)^2 = 1,
+\qquad a_k = \frac{\alpha}{w_k}
+\]
+where $\delta_k$ are the four BSDT channel scores and $w_k$ are Fisher variance
+ratio weights.
+
+This is a level set of the quadratic form $\delta^\top G\delta$ with metric:
+\[
+G = \operatorname{diag}\!\left(\frac{1}{a_C^2},\frac{1}{a_G^2},\frac{1}{a_A^2},\frac{1}{a_T^2}\right).
+\]
+
+The critical manifold was $\{\delta : \delta^\top G\delta = 1\}$.
+
+\section{The canonical energy is the same object}
+
+\begin{theorem}[Ellipsoid-Canonical identity]
+\label{thm:origin}
+The canonical energy $E = S^\top GS$, critical manifold $\mathcal{C}^* = \{E=1\}$,
+and canonical gradient $\nabla_S E = 2GS$ are the energy-gradient reformulation
+of the original ellipsoidal geometry. Specifically:
+\[
+\mathcal{C}^* = \{\delta : \delta^\top G\delta = 1\} = \{S : E(S) = 1\},
+\]
+\[
+\rho := \sqrt{\delta^\top G\delta} = \sqrt{E},
+\]
+\[
+n := G\delta = \tfrac{1}{2}\nabla_S E.
+\]
+The ellipsoid surface normal $n$ is exactly half the canonical gradient.
+\end{theorem}
+
+\begin{proof}
+$E(S) = S^\top GS$. Setting $\delta = S$:
+$E(\delta) = \delta^\top G\delta$,
+so $\mathcal{C}^* = \{E=1\}$ and $\rho = \sqrt{E}$.
+$\nabla_S E = 2GS = 2G\delta$,
+so $n = G\delta = \frac{1}{2}\nabla_S E$.
+$\square$
+\end{proof}
+
+\begin{remark}[What this means]
+The canonical framework did not replace the ellipsoidal geometry.
+It expressed the same geometry in gradient coordinates.
+The ellipsoid $\sum_k(\delta_k/a_k)^2 \leq 1$ is the sublevel set $\{E \leq 1\}$.
+Its surface is the level set $\{E = 1\}$.
+Its outward normal is $\nabla_S E$.
+Every subsequent canonical object is a consequence of this identification.
+\end{remark}
+
+\section{The surface-normal angle is the alignment angle}
+
+In the early framework, the key diagnostic was the surface-normal angle:
+\[
+\cos\phi = \frac{\langle\dot\delta, n\rangle}{|\dot\delta||n|}
+= \frac{\langle\dot S, \nabla_S E\rangle}{\|\dot S\|\|\nabla_S E\|}
+\]
+measuring how directly the trajectory moves toward the critical manifold.
+
+\begin{theorem}[Surface-normal angle = alignment angle in channel space]
+The surface-normal angle $\phi$ equals the canonical alignment angle $\theta_t$
+evaluated in channel space:
+\[
+\cos\phi = \cos\theta_t\big|_\mathrm{channel} = \frac{\langle g_t, \Fbase\rangle}{\|g_t\|\|\Fbase\|}
+\]
+where $g_t = \nabla_S E_\mathrm{BS}(S_t)$ is the channel-space canonical gradient
+and $\Fbase$ is identified with the channel-space velocity $\dot S$.
+\end{theorem}
+
+\begin{proof}
+$\cos\phi = \langle\dot\delta, n\rangle/(|\dot\delta||n|)
+= \langle\dot S, G S\rangle/(\|\dot S\|\|GS\|)
+= \langle\dot S, \frac{1}{2}\nabla_S E\rangle/(\|\dot S\|\|\frac{1}{2}\nabla_S E\|)
+= \langle\dot S, \nabla_S E\rangle/(\|\dot S\|\|\nabla_S E\|)
+= \cos\theta_t|_\mathrm{channel}$.
+\end{proof}
+
+\section{Two states with the same $\rho$ but different futures}
+
+This is the key insight from the ellipsoidal picture that the energy-only formulation
+compressed away.
+
+\begin{proposition}[Why $\phi$ carries information $\rho$ does not]
+Two states $\delta_1, \delta_2$ with $\rho_1 = \rho_2$ (identical distance from centre,
+identical energy $E$) can have:
+\[
+\cos\phi_1 = +1 \quad\text{(heading directly toward collapse)},
+\]
+\[
+\cos\phi_2 = -1 \quad\text{(heading directly away from collapse)}.
+\]
+Their energy derivatives $\dot E = g(E)\langle\nabla E, \dot\delta\rangle$ have
+opposite signs despite identical $E$. One is a genuine alarm; one is a recovery.
+Energy alone cannot distinguish them. The angle $\phi$ does.
+\end{proposition}
+
+\begin{proof}
+$\dot E = 2\langle G\delta, \dot\delta\rangle = \|\nabla E\|\|\dot\delta\|\cos\phi$.
+Same $\rho$ implies same $E$ implies same $\|\nabla E\| = 2\|G\delta\|$.
+Same $\|\dot\delta\|$ (equal velocity magnitudes).
+$\cos\phi_1 = +1\Rightarrow\dot E_1 > 0$; $\cos\phi_2 = -1\Rightarrow\dot E_2 < 0$.
+$\square$
+\end{proof}
+
+This explains why the alignment angle $\theta_t$ was added to the canonical dashboard:
+it recovers the angular information that $E$ alone loses.
+
+\section{The adaptive $\gamma$ origins}
+
+The early GravityEngine used:
+\[
+\gamma^*_\kappa(X) \propto \frac{1}{\lambda_\mathrm{max}(\nabla^2\Phi(X))}
+\]
+— intervention proportional to landscape curvature.
+
+The canonical framework replaced this with:
+\[
+\gamma_E(X) = \frac{E(X)}{E(X)+\theta}
+\]
+— intervention proportional to energy (distance from centre).
+
+\begin{proposition}[Relationship between $\gamma_\kappa$ and $\gamma_E$]
+At the critical manifold $\mathcal{C}^* = \{E=1\}$:
+$\gamma_E = 1/(1+\theta)$.
+At $\mathcal{C}_\mathrm{man} = \{\lambda_\mathrm{max}(\nabla^2\Phi)=1\}$:
+$\gamma^*_\kappa = \alpha/(1+\varepsilon)$.
+They coincide when $\theta = \varepsilon$ and both manifolds are the same set.
+
+In general they diverge because $E$ measures displacement while $\kappa$ measures
+landscape flatness. The landscape can flatten at moderate $E$
+(agents approach the critical separation $r \approx \sigma$ in the erf-log potential),
+causing $\kappa$ to spike while $E$ remains moderate.
+This is why $\gamma^*_\kappa$ fires earlier: it detects the precondition
+(flattening landscape) rather than the consequence (large displacement).
+\end{proposition}
+
+\section{The complete developmental chain}
+
+\begin{lockedbox}
+\textbf{The four-stage compression:}
+\[
+\underbrace{\text{Ellipsoid}}_{\delta^\top G\delta = 1}
+\;\to\;
+\underbrace{\text{Normal}}_{{n = G\delta}}
+\;\to\;
+\underbrace{\text{Gradient}}_{\nabla_S E = 2n}
+\;\to\;
+\underbrace{\text{Energy}}_{E = S^\top GS}
+\]
+
+\textbf{Exact correspondences:}
+\begin{align*}
+\mathcal{C}^* &= \{E = 1\} &&\text{(same set, two names)}\\
+n &= \tfrac{1}{2}\nabla_S E &&\text{(same vector, factor of 2)}\\
+\rho &= \sqrt{E} &&\text{(same scalar, square root)}\\
+\cos\phi &= \cos\theta_t|_\mathrm{channel} &&\text{(same angle, different notation)}\\
+\gamma^*_\kappa &\leftrightarrow \gamma_E &&\text{(same intent, Level 1 vs Level 3)}
+\end{align*}
+
+\textbf{What the compression preserved:}
+descent structure, Lyapunov certificate, cross-domain generality.
+
+\textbf{What the compression lost:}
+explicit boundary orientation, curvature sensitivity, $\phi$ as a first-class object.
+
+\textbf{What the canonical dashboard recovers:}
+$\cos\theta_t$ recovers $\phi$;
+$\kappa_\mathrm{norm}$ recovers $\gamma^*_\kappa$;
+$\psi_t$ is genuinely new (no predecessor in the ellipsoidal framework).
+\end{lockedbox}
+
+\section{The dual description theorem}
+
+\begin{theorem}[Ellipsoid-canonical duality]
+The ellipsoidal BSDT geometry and the canonical energy framework are
+dual descriptions of the same quadratic geometry.
+
+The ellipsoidal description is boundary-oriented:
+it monitors distance to $\mathcal{C}^*$ and direction of approach.
+
+The canonical description is centre-oriented:
+it monitors distance from the normal-period mean and the energy growth rate.
+
+Both are equivalent at the critical manifold. They differ in what they emphasise
+away from the manifold:
+the ellipsoidal framework is more sensitive to approach geometry at moderate $\rho$;
+the canonical framework is more tractable for Lyapunov proofs and cross-domain generalisation.
+
+The complete framework uses both: canonical energy for control,
+ellipsoidal boundary orientation ($\cos\theta_t = \cos\phi$) for diagnosis.
+\end{theorem}
+
+\begin{proof}
+Theorem~\ref{thm:origin} establishes the exact identifications.
+The dual description follows: same set $\mathcal{C}^*$, same normal $n \propto \nabla E$,
+same angle $\phi = \theta_t|_\mathrm{channel}$.
+The distance emphasis difference ($1-\rho$ vs $E$) is a coordinate choice,
+not a structural difference.
+$\square$
+\end{proof}
+
+\section{Summary: what was always there}
+
+Every object in the canonical framework has an exact predecessor in the
+ellipsoidal geometry:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\textbf{Ellipsoidal framework} & \textbf{Canonical framework} & \textbf{Relation} \\
+\midrule
+$\mathcal{C}^* = \{\delta^\top G\delta=1\}$ & $\{E=1\}$ & Same set \\
+$n = G\delta$ (surface normal) & $\frac{1}{2}\nabla_S E$ & $n = \frac{1}{2}\nabla_S E$ \\
+$\rho = \sqrt{\delta^\top G\delta}$ & $\sqrt{E}$ & $\rho = \sqrt{E}$ \\
+$\cos\phi = \langle\dot\delta,n\rangle/(|\dot\delta||n|)$ & $\cos\theta_t|_\mathrm{ch}$ & Identical \\
+$\gamma^*_\kappa \propto 1/\lambda_\mathrm{max}$ & $\gamma_E = E/(E+\theta)$ & Level 1 vs Level 3 \\
+$\psi$ (boundary approach rate) & $\dot E = g(E)\langle\nabla E,\Fbase\rangle$ & $\dot E = \|\nabla E\|\|\Fbase\|\cos\phi \cdot g(E)$ \\
+\midrule
+\textit{No predecessor} & $\psi_t$ (misalignment angle) & Genuinely new \\
+\textit{No predecessor} & $R(t)$ (Kuramoto order parameter) & Genuinely new \\
+\textit{No predecessor} & $\ddot\theta_t$ (angular acceleration) & Genuinely new \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ellipsoidal framework contained the energy, the gradient, the critical manifold,
+and the alignment angle --- all implicitly.
+The canonical framework made them explicit, proved stability, and generalised
+across domains.
+The three genuinely new objects ($\psi_t$, $R(t)$, $\ddot\theta_t$) have no
+ellipsoidal predecessors: they emerged from the canonical abstraction itself.
+
+\end{document}

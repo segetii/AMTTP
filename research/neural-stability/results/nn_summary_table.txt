@@ -1,0 +1,33 @@
+
+=========================================================================================================
+  NEURAL NETWORK GRADIENT STABILITY — BSDT UNIVERSALITY RESULTS
+=========================================================================================================
+  Optimiser      Type     Survived  BU Epoch       Loss  Best Acc    Peak γ   Final γ   Peak ∥∇∥
+---------------------------------------------------------------------------------------------------------
+  SGD            std         0/300         0          ∞         —         —         —          ∞
+  SGD+Clip       std       300/300         —     3.5465     0.615   2135.4×   760.81×    2.1e+03
+  Adam           std       300/300         —     0.0175     0.995      1.0×     1.00×    2.5e+02
+  AdamW          std       300/300         —     0.0260     0.995      1.0×     1.00×    2.6e+02
+  RMSProp        std       300/300         —     0.0250     0.993      1.0×     1.00×    5.2e+02
+---------------------------------------------------------------------------------------------------------
+  BSDT           BSDT        0/300         0          ∞         —         —         —          ∞
+  MFLS           BSDT        0/300         0          ∞         —         —         —          ∞
+  Molecular      BSDT      300/300         —     8.1597     0.525      1.9×     1.85×    2.8e+03
+  Gravity        BSDT        0/300         0          ∞         —         —         —          ∞
+  Hybrid         BSDT      300/300         —     0.0256     0.995      2.0×     1.92×    2.5e+03
+  QuadSurf       BSDT        0/300         0          ∞         —         —         —          ∞
+  QuadExpo       BSDT        1/300         1     8.2202     0.525      2.0×     2.00×    6.7e+05
+  SignedLR       BSDT        1/300         1     8.1819         —      1.7×     1.67×    2.7e+02
+---------------------------------------------------------------------------------------------------------
+  ── Canonical Adaptive Friction (direct implementations) ──
+  CanSpectral    canon       0/300         0          ∞         —         —         —          ∞
+  CanFull        canon       0/300         0          ∞         —         —         —          ∞
+=========================================================================================================
+
+  Standard optimisers that BLEW UP: 1/5
+  BSDT variants surviving 300 epochs: 2/8
+  Canonical variants surviving 300 epochs: 0/2
+  Best BSDT train loss: 0.0256
+  Best BSDT test accuracy: 0.995
+  Friction range: peak 2× → final 1.9×
+  SGD+Clip (constant friction) loss: 3.5465

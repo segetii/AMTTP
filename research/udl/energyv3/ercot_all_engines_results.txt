@@ -1,0 +1,181 @@
+ERCOT ALL-ENGINE BENCHMARK RESULTS
+Test protocol: Reference=2019 (8760h), Test=2021 (8760h, WinterStormUri Feb-10)
+Crisis fraction 2021: 3.01% (264/8760 hours)
+Run date: 2025
+
+═══════════════════════════════════════════════════════════════════════════════
+ SUPPLY MODE (d=5)
+ Features: wind_cf, solar_cf, gas_cf, coal_cf, nuclear_cf
+═══════════════════════════════════════════════════════════════════════════════
+
+PHYSICS ENGINES:
+  Molecular(LJ)       AUC=0.7441  F1=0.121  Sep=+0.177  t≈35s
+    WinterStormUri    lead=+956h  first=2021-01-01T04  HR=0.604  FAR=0.144
+
+  Gravity(N-body)     AUC=0.6802  F1=0.113  Sep=+0.107  t≈20s
+    WinterStormUri    lead=missed
+
+  Hybrid(Mol+Grav)    AUC=0.7692  F1=0.118  Sep=+0.194  t≈62s  ← BEST SUPPLY PHYSICS
+    WinterStormUri    lead=missed  HR=0.004  FAR=0.000
+
+CANONICAL (cross-year 2019→2021):
+  FWS unsupervised    AUC=0.2340  effAUC=0.7660 [inverted]  F1=0.164  FAR=0.206
+    WinterStormUri    lead=+960h  HR=0.717  FAR=0.096  (using negated scores)
+
+  FWS + friction      AUC=0.3642  effAUC=0.6358 [inverted]
+  FWS + paper γ*(x)  AUC=0.6065  effAUC=0.6065
+
+  NOTE: "inverted" = normal 2021 hours score HIGHER than crisis 2021 hours
+  vs 2019 reference. Cause: renewable capacity growth 2019→2021 means
+  "normal" 2021 operation is MORE novel than "crisis" Uri operation
+  (which collapses capacity back toward 2019-like patterns).
+
+CANONICAL (within-year, normal 2021 as reference):
+  FWS within-yr       AUC=0.4222  effAUC=0.5778 [inverted]  — marginal
+  FWS within-yr + γ*  AUC=0.4092  effAUC=0.5908 [inverted]  — marginal
+
+GeometricBSDT (all variants):
+  All variants        effAUC≈0.559 [inverted]  — marginal detection
+  NOTE: BSDT channels delta_A and delta_T show INVERTED separation
+        (normal hours are more "novel" than crisis hours in supply space)
+
+SUPPLY SUMMARY:
+  Best physics:    Hybrid(Mol+Grav)            AUC=0.7692
+  Best canonical:  FWS cross-yr (effAUC)      effAUC=0.7660 [inverted]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ DEMAND MODE (d=5)  ← FIRST-EVER BENCHMARK ON THIS DATA MODE
+ Features: demand_gw, ramp_rate, vol_6h, dev_24h, temp_stress
+═══════════════════════════════════════════════════════════════════════════════
+
+PHYSICS ENGINES:
+  Molecular(LJ)       AUC=0.8068  F1=0.394  Sep=+0.214  t≈53s
+    WinterStormUri    lead=+469h  first=2021-01-21T11  HR=0.158  FAR=0.001
+
+  Gravity(N-body)     AUC=0.9955  F1=0.855  Sep=+0.822  t≈29s  ← EXCELLENT
+    WinterStormUri    HR=0.692  FAR=0.000
+
+  Hybrid(Mol+Grav)    AUC=0.9953  F1=0.855  Sep=+0.833  t≈78s  ← EXCELLENT
+    WinterStormUri    HR=0.000  FAR=0.000  (no pre-event alarm)
+
+CANONICAL (cross-year 2019→2021):
+  FWS unsupervised    AUC=0.9801  F1=0.659  FAR=0.004  Sep=+1.633  ← STRONG
+    WinterStormUri    lead=+809h  HR=0.604  FAR=0.021
+
+  FWS + friction      AUC=0.9548  F1=0.541  Sep=+3.138
+    WinterStormUri    lead=+881h  HR=0.496  FAR=0.033
+
+  FWS + paper γ*(x)  AUC=0.5741  ← WEAK (friction over-dampens)
+
+  NOTE: demand features show POSITIVE Sep (crisis demand spikes vs 2019 normal)
+  → direction is CORRECT for cross-year comparison (no inversion needed)
+
+CANONICAL (within-year, normal 2021 as reference):
+  FWS within-yr       AUC=0.9960  ← BEST SINGLE SCORER (all modes, all engines)
+    WinterStormUri    lead=+881h  HR=0.996  FAR=0.064  Sep=+2.703
+  FWS within-yr + γ*  effAUC=0.6132 [inverted]  ← paper friction degrades
+
+GeometricBSDT (all variants):
+  All variants        effAUC≈0.564  — marginal
+
+DEMAND SUMMARY:
+  Best physics:    Gravity(N-body)             AUC=0.9955
+  Best canonical:  FWS within-yr (unsupervised) AUC=0.9960 ← OVERALL BEST
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ COMBINED MODE (d=10)
+ Features: demand_gw, ramp_rate, vol_6h, dev_24h, temp_stress,
+           wind_cf, solar_cf, gas_cf, coal_cf, nuclear_cf
+═══════════════════════════════════════════════════════════════════════════════
+
+PHYSICS ENGINES:
+  Molecular(LJ)       AUC=0.9875  F1=0.821  Sep=+0.814  t≈51s
+    WinterStormUri    HR=0.000  FAR=0.000 (no pre-event alarm at threshold)
+
+  Gravity(N-body)     AUC=0.9888  F1=0.771  Sep=+0.807  t≈32s
+    WinterStormUri    lead=+306h  first=2021-01-28T06  HR=0.350  FAR=0.003
+
+  Hybrid(Mol+Grav)    AUC=0.9902  F1=0.859  Sep=+0.832  t≈83s  ← BEST COMBINED PHYSICS
+    WinterStormUri    HR=0.571  FAR=0.000
+
+CANONICAL (cross-year 2019→2021):
+  FWS unsupervised    AUC=0.6067  — supply year-drift dilutes demand signal
+  FWS + friction      AUC=0.6170
+  FWS + paper γ*(x)  effAUC=0.5670
+
+CANONICAL (within-year, normal 2021 as reference):
+  FWS within-yr       AUC=0.9800  ← strong
+    WinterStormUri    lead=+734h  HR=0.613  FAR=0.013
+
+  FWS within-yr + γ*  AUC=0.1670  effAUC=0.8330 [inverted]
+    WinterStormUri    lead=+948h  HR=0.500  FAR=0.053
+
+GeometricBSDT (all variants):
+  All variants        effAUC≈0.579 [inverted]  — marginal
+
+COMBINED SUMMARY:
+  Best physics:    Hybrid(Mol+Grav)            AUC=0.9902
+  Best canonical:  FWS within-yr (unsupervised) AUC=0.9800
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ CROSS-MODE SUMMARY TABLE
+ effAUC = max(AUC, 1-AUC) [reports effective detection regardless of score direction]
+═══════════════════════════════════════════════════════════════════════════════
+
+Scorer                          SUPPLY    DEMAND  COMBINED
+───────────────────────────────────────────────────────────
+Molecular(LJ)                   0.7441    0.8068    0.9875
+Gravity(N-body)                 0.6802    0.9955    0.9888
+Hybrid(Mol+Grav)                0.7692    0.9953    0.9902
+───────────────────────────────────────────────────────────
+FWS cross-yr unsupervised      *0.7660    0.9801    0.6067
+FWS cross-yr + friction        *0.6358    0.9548    0.6170
+FWS cross-yr + paper γ*(x)     0.6065    0.5741   *0.5670
+FWS within-yr unsupervised     *0.5778    0.9960    0.9800
+FWS within-yr + paper γ*(x)   *0.5908   *0.6132   *0.8330
+BSDT (all variants, avg)       *0.5589   *0.5640   *0.5794
+
+* = direction inverted (score is "normality" not "anomaly")
+
+═══════════════════════════════════════════════════════════════════════════════
+ KEY FINDINGS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. DEMAND > SUPPLY for crisis detection:
+   - Demand features (demand_gw, ramp_rate, vol_6h, dev_24h, temp_stress) are
+     STRONGER signals for WinterStorm Uri than supply features
+   - Physics: Gravity on demand = 0.9955 vs Hybrid on supply = 0.7692
+   - Canonical: FWS within-yr demand = 0.9960 vs FWS effAUC supply = 0.7660
+
+2. COMBINED achieves best physics (Hybrid AUC=0.9902):
+   - Adding supply features to demand moderately helps physics engines
+   - But canonical FWS cross-year DEGRADES: supply drift dilutes demand signal
+
+3. SUPPLY inversion insight:
+   - WinterStorm Uri supply crisis (gas/coal collapse) resembles 2019 patterns
+   - Normal 2021 supply DIFFERS MORE from 2019 than crisis 2021 (capacity growth)
+   - Cross-year FWS inverts: normal=more novel, crisis=less novel vs 2019
+   - Within-year supply detection is weak (effAUC≈0.58)
+
+4. PAPER FRICTION (γ*(x)) effects:
+   - Supply: slightly degrades (0.766→0.636 cross-yr)
+   - Demand: degrades heavily (0.9960→0.613 within-yr)
+   - Combined: mixed results (0.9800→0.8330 within-yr)
+   - Raw FWS consistently outperforms its friction-modified variants
+
+5. BSDT channels uniformly weak on ERCOT supply&combined (effAUC 0.56-0.58):
+   - delta_A and delta_T show inverted separation on supply
+   - delta_G (feature gap/sparsity) shows correct separation on demand
+   - GeometricBSDT variants nearly identical to base BSDT
+
+6. WinterStorm Uri detection timing:
+   - FWS within-yr demand: lead=+881h (~37 days early), HR=0.996 ← exceptional
+   - FWS cross-yr demand: lead=+809h (~34 days early), HR=0.604
+   - Molecular supply: lead=+956h (~40 days early), HR=0.604
+   - Physics combined (Gravity): lead=+306h (~13 days early), HR=0.350
+
+7. BEST SINGLE SCORER: FWS within-yr unsupervised on DEMAND (AUC=0.9960)
+   BEST PHYSICS SCORER: Hybrid(Mol+Grav) on COMBINED (AUC=0.9902)

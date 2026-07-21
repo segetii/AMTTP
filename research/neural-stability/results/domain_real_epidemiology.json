@@ -1,0 +1,70 @@
+{
+  "dataset": "JHU CSSE COVID-19 confirmed (global, daily)",
+  "source_url": "https://github.com/CSSEGISandData/COVID-19",
+  "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+  "presentation": "Odeyemi 2026 paper-style",
+  "countries": [
+    "US",
+    "India",
+    "France",
+    "Germany",
+    "Brazil",
+    "Japan",
+    "Korea, South",
+    "Italy",
+    "United Kingdom",
+    "Russia",
+    "Turkey",
+    "Spain"
+  ],
+  "days": 1142,
+  "reference_days": 60,
+  "crisis_index": 48,
+  "crisis_date": "2020-03-11",
+  "fisher_vr_weights": {
+    "C": 0.29713485333979295,
+    "G": 0.001977325877558525,
+    "A": 0.30889354318064405,
+    "T": 0.39199427760200445
+  },
+  "frozen_v4_threshold_p99": 1.12284895098658,
+  "alpha_alarm_effective": 0.125,
+  "first_alarm_index": 28,
+  "first_alarm_date": "2020-02-20",
+  "lead_days": 20,
+  "pre_crisis_alarms": 1,
+  "post_crisis_alarms": 69,
+  "bsdt_dominance_post_crisis": {
+    "delta_C": 0.5099042955047941,
+    "delta_G": 0.003081551015790594,
+    "delta_A": 0.40235322001208873,
+    "delta_T": 0.08466093346724916
+  },
+  "engine_info": {
+    "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+    "presentation": "Odeyemi 2026 paper-style",
+    "n_ref": 60,
+    "n_cal": 15,
+    "rolling_window": 60,
+    "frozen_p99_ref_v4": 1.12284895098658,
+    "adaptive_p99_ref_v4": 1.12284895098658,
+    "alpha_alarm": 0.01,
+    "alpha_alarm_effective": 0.125,
+    "weights_order": [
+      "delta_C",
+      "delta_G",
+      "delta_A",
+      "delta_T"
+    ],
+    "weights": [
+      0.29713485333979295,
+      0.001977325877558525,
+      0.30889354318064405,
+      0.39199427760200445
+    ]
+  },
+  "outputs": {
+    "figure": "c:\\amttp\\research\\neural-stability\\figures\\domain_real_epidemiology.png",
+    "json": "c:\\amttp\\research\\neural-stability\\results\\domain_real_epidemiology.json"
+  }
+}

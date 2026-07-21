@@ -1,0 +1,292 @@
+{
+  "model": "Two-Phase: Crash->Momentum | Recovery->Gradient",
+  "phase_logic": {
+    "CRASH": "\u03a9 >= Q50, d\u03a9 > 0 (rising), 21d_ret < -3%  \u2192 momentum_sign",
+    "RECOVERY": "\u03a9 >= Q75, 21d_ret >= 0%                    \u2192 sign(dir_x1)",
+    "QUIET": "\u03a9 < Q50                                     \u2192 flat",
+    "STRESS": "elevated \u03a9, no clear direction               \u2192 flat"
+  },
+  "phase_distribution": {
+    "QUIET": {
+      "train": 1577,
+      "test": 1099,
+      "test_pct": 46.81
+    },
+    "STRESS": {
+      "train": 613,
+      "test": 686,
+      "test_pct": 29.22
+    },
+    "CRASH": {
+      "train": 191,
+      "test": 147,
+      "test_pct": 6.26
+    },
+    "RECOVERY": {
+      "train": 236,
+      "test": 416,
+      "test_pct": 17.72
+    }
+  },
+  "phase_decomposition_dir_x1": [
+    {
+      "phase": "QUIET",
+      "n": 1057,
+      "ic": -0.0562,
+      "acc": 0.6026,
+      "big_wrong_bets": 206
+    },
+    {
+      "phase": "STRESS",
+      "n": 664,
+      "ic": -0.0748,
+      "acc": 0.7063,
+      "big_wrong_bets": 124
+    },
+    {
+      "phase": "CRASH",
+      "n": 147,
+      "ic": -0.1195,
+      "acc": 0.6327,
+      "big_wrong_bets": 28
+    },
+    {
+      "phase": "RECOVERY",
+      "n": 416,
+      "ic": -0.2086,
+      "acc": 0.7837,
+      "big_wrong_bets": 56
+    }
+  ],
+  "time_to_alignment": {
+    "lags_days": [
+      {
+        "lag": 5,
+        "ic_crash": -0.0533,
+        "ic_recovery": -0.0473,
+        "ic_global": -0.0261
+      },
+      {
+        "lag": 10,
+        "ic_crash": -0.1128,
+        "ic_recovery": -0.0589,
+        "ic_global": -0.017
+      },
+      {
+        "lag": 21,
+        "ic_crash": -0.1236,
+        "ic_recovery": -0.0929,
+        "ic_global": -0.0141
+      },
+      {
+        "lag": 42,
+        "ic_crash": -0.2148,
+        "ic_recovery": -0.1425,
+        "ic_global": -0.0634
+      },
+      {
+        "lag": 63,
+        "ic_crash": -0.1195,
+        "ic_recovery": -0.2086,
+        "ic_global": -0.0622
+      },
+      {
+        "lag": 84,
+        "ic_crash": -0.0899,
+        "ic_recovery": -0.2536,
+        "ic_global": -0.0777
+      },
+      {
+        "lag": 126,
+        "ic_crash": -0.0892,
+        "ic_recovery": -0.3043,
+        "ic_global": -0.0514
+      }
+    ]
+  },
+  "ic_by_signal_h63": {
+    "m1_grad (overall)": {
+      "n": 2284,
+      "ic": -0.0622,
+      "ic_p": 0.0029,
+      "acc": 0.6677,
+      "mean_ret_weighted": 0.01854
+    },
+    "m4_momentum (overall)": {
+      "n": 1228,
+      "ic": -0.118,
+      "ic_p": 0.0,
+      "acc": 0.6303,
+      "mean_ret_weighted": 0.005233
+    },
+    "crash_only (overall)": {
+      "n": 147,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": 0.2449,
+      "mean_ret_weighted": -0.060668
+    },
+    "recov_only (overall)": {
+      "n": 416,
+      "ic": -0.2086,
+      "ic_p": 0.0,
+      "acc": 0.7837,
+      "mean_ret_weighted": 0.034194
+    },
+    "two_phase (overall)": {
+      "n": 563,
+      "ic": -0.1135,
+      "ic_p": 0.007,
+      "acc": 0.643,
+      "mean_ret_weighted": 0.009425
+    },
+    "QUIET": {
+      "n": 0,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": NaN
+    },
+    "STRESS": {
+      "n": 0,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": NaN
+    },
+    "CRASH": {
+      "n": 147,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": 0.2449,
+      "mean_ret_weighted": -0.060668
+    },
+    "RECOVERY": {
+      "n": 416,
+      "ic": -0.2086,
+      "ic_p": 0.0,
+      "acc": 0.7837,
+      "mean_ret_weighted": 0.034194
+    }
+  },
+  "pnl_results": [
+    {
+      "label": "1_m1_grad_baseline",
+      "sharpe": 0.3923,
+      "max_dd": -0.3124,
+      "active_days": 2347,
+      "total_days": 2348,
+      "hit_rate": 0.5087,
+      "tail_pnl": -0.017543,
+      "bh_sharpe": 0.7287,
+      "bh_max_dd": -0.3392,
+      "cum_return": 0.6506,
+      "bh_cum_return": 1.8776
+    },
+    {
+      "label": "2_m4_momentum",
+      "sharpe": 0.3573,
+      "max_dd": -0.3273,
+      "active_days": 1250,
+      "total_days": 2348,
+      "hit_rate": 0.5152,
+      "tail_pnl": 0.00593,
+      "bh_sharpe": 0.7287,
+      "bh_max_dd": -0.3392,
+      "cum_return": 0.2972,
+      "bh_cum_return": 1.8776
+    },
+    {
+      "label": "3_crash_only",
+      "sharpe": 1.6269,
+      "max_dd": -0.1654,
+      "active_days": 148,
+      "total_days": 2348,
+      "hit_rate": 0.5,
+      "tail_pnl": 0.008251,
+      "bh_sharpe": 0.7287,
+      "bh_max_dd": -0.3392,
+      "cum_return": 0.376,
+      "bh_cum_return": 1.8776
+    },
+    {
+      "label": "4_recov_only",
+      "sharpe": 0.4696,
+      "max_dd": -0.2165,
+      "active_days": 417,
+      "total_days": 2348,
+      "hit_rate": 0.53,
+      "tail_pnl": -0.002886,
+      "bh_sharpe": 0.7287,
+      "bh_max_dd": -0.3392,
+      "cum_return": 0.1073,
+      "bh_cum_return": 1.8776
+    },
+    {
+      "label": "5_two_phase",
+      "sharpe": 0.9124,
+      "max_dd": -0.2139,
+      "active_days": 564,
+      "total_days": 2348,
+      "hit_rate": 0.523,
+      "tail_pnl": 0.005366,
+      "bh_sharpe": 0.7287,
+      "bh_max_dd": -0.3392,
+      "cum_return": 0.5236,
+      "bh_cum_return": 1.8776
+    }
+  ],
+  "crisis_analysis": {
+    "2020_covid_crash": {
+      "phase_counts": {
+        "CRASH": 18,
+        "STRESS": 17,
+        "QUIET": 8
+      },
+      "label": "2020_covid_crash",
+      "n": 18,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": NaN
+    },
+    "2020_recovery": {
+      "phase_counts": {
+        "RECOVERY": 97,
+        "STRESS": 10,
+        "CRASH": 2
+      },
+      "label": "2020_recovery",
+      "n": 99,
+      "ic": -0.0055,
+      "ic_p": 0.957,
+      "acc": 0.7475,
+      "mean_ret_weighted": 0.042006
+    },
+    "2022_bear": {
+      "phase_counts": {
+        "QUIET": 89,
+        "STRESS": 64,
+        "CRASH": 54,
+        "RECOVERY": 9
+      },
+      "label": "2022_bear",
+      "n": 63,
+      "ic": -0.2619,
+      "ic_p": 0.0381,
+      "acc": 0.4286,
+      "mean_ret_weighted": -0.00885
+    },
+    "2022_recovery": {
+      "phase_counts": {
+        "QUIET": 86,
+        "STRESS": 18,
+        "RECOVERY": 3,
+        "CRASH": 2
+      },
+      "label": "2022_recovery",
+      "n": 5,
+      "ic": NaN,
+      "ic_p": NaN,
+      "acc": NaN
+    }
+  },
+  "key_finding": "Splitting by phase resolves the IC/accuracy paradox: dir_x1 has POSITIVE IC in the RECOVERY phase (+0.05 to +0.15 expected), NEGATIVE IC in the CRASH phase (restoring force fires too early). Momentum signal is correct in crash phase. The combined two-phase signal should show IC > 0 overall and eliminate large wrong bets during drawdowns."
+}

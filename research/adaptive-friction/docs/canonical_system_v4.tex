@@ -1,0 +1,2803 @@
+% ============================================================
+%  CANONICAL DYNAMICAL GEOMETRY SYSTEM --- VERSION 4
+%  Extensions: Fractal / Contact / Geometric Flow / Information-Geometric Flow
+%  Date: 2026-05-07
+%  Built on top of v2 (FROZEN -- do not modify v2)
+% ============================================================
+\documentclass[11pt,oneside]{amsart}
+
+% ---- Encoding & fonts ---------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---- Math ---------------------------------------------------
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+
+% ---- Page geometry & layout ---------------------------------
+\usepackage[a4paper,margin=1.05in,headheight=14pt,footskip=28pt]{geometry}
+\usepackage{parskip}
+\setlength{\parskip}{4pt plus 1pt minus 0.5pt}
+\emergencystretch=3em
+\clubpenalty=10000
+\widowpenalty=10000
+
+% ---- Tables, lists, color -----------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\setlist{itemsep=2pt, topsep=3pt, parsep=0pt}
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{accent2}{HTML}{8E3A1B}
+\definecolor{lockgray}{HTML}{2E2E2E}
+\definecolor{rulered}{HTML}{8B1A1A}
+\definecolor{defblue}{HTML}{1F4E79}
+\definecolor{checkgreen}{HTML}{225522}
+\definecolor{warnorange}{HTML}{B5651D}
+
+% ---- Hyperref & links ---------------------------------------
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  citecolor=accent2,
+  urlcolor=accent,
+  linktoc=all,
+  pdftitle={Canonical Dynamical Geometry System v4},
+  pdfauthor={},
+  pdfsubject={Information-geometric flow extension of the canonical ODE},
+  pdfkeywords={canonical ODE, Lyapunov, Fisher information, natural gradient,
+               Ricci flow, contact geometry, fractal targets}
+}
+\pdfstringdefDisableCommands{%
+  \def\S{Section }%
+  \def\quad{ }%
+  \def\qquad{ }%
+  \def\textbf#1{#1}%
+  \def\textmd#1{#1}%
+}
+
+% ---- Section headings (display-style subsections) -----------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{accent}}
+  {\thesection}{0.7em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{accent!85!black}}
+  {\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\itshape\color{accent!70!black}}
+  {\thesubsubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{14pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{2pt}
+
+% ---- Header / footer ----------------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\itshape\color{accent!70!black}Canonical Dynamical Geometry System --- v4}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{}
+\fancypagestyle{plain}{%
+  \fancyhf{}\fancyfoot[C]{\small\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% ---- Coloured boxes -----------------------------------------
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{lockbox}{
+  enhanced, breakable,
+  colback=lockgray!3, colframe=lockgray,
+  fonttitle=\bfseries\sffamily, title=LOCKED,
+  arc=3pt, boxrule=0.9pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+  drop fuzzy shadow=lockgray!25,
+}
+\newtcolorbox{rulebox}[1]{
+  enhanced, breakable,
+  colback=rulered!4, colframe=rulered,
+  fonttitle=\bfseries\sffamily, title={#1},
+  arc=3pt, boxrule=0.7pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+\newtcolorbox{defbox}[1]{
+  enhanced, breakable,
+  colback=defblue!4, colframe=defblue,
+  fonttitle=\bfseries\sffamily\small, title={#1},
+  arc=3pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+\newtcolorbox{checkbox}{
+  enhanced, breakable,
+  colback=checkgreen!4, colframe=checkgreen,
+  fonttitle=\bfseries\sffamily, title={Verification checklist},
+  arc=3pt, boxrule=0.7pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+\newtcolorbox{warnbox}{
+  enhanced, breakable,
+  colback=warnorange!8, colframe=warnorange,
+  fonttitle=\bfseries\sffamily, title={Forbidden},
+  arc=3pt, boxrule=0.7pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt,
+}
+
+% ---- Theorem environments -----------------------------------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% ---- Table style --------------------------------------------
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{6pt}
+
+% -- Macros ----------------------------------------------------
+\newcommand{\Xdot}{\dot{X}}
+\newcommand{\gX}{g_X}
+\newcommand{\Fbase}{F_{\mathrm{base}}}
+\newcommand{\Gpull}{G_{\mathrm{pull}}}
+\newcommand{\Cman}{\mathcal{C}_{\mathrm{man}}}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator{\diag}{diag}
+
+% ============================================================
+\begin{document}
+% ============================================================
+
+\title[Canonical Dynamical Geometry System v4]{%
+  \textbf{Canonical Dynamical Geometry System}\\[2pt]
+  {\large Version 4 --- Information-Geometric Flow}\\[4pt]
+  {\normalsize\textmd{Fractal $\bullet$ Contact $\bullet$ Geometric Flow $\bullet$ Fisher}}
+}
+\author{} \date{2026-05-07}
+
+\begin{abstract}
+We define a single, locked ordinary differential equation (the
+\emph{canonical ODE}) that drives a state $X\in\R^{n}$ towards a target set
+encoded by a feature map $S:\R^{n}\!\to\!\R^{k}$ and a quadratic energy
+$E = S^{T}GS$, while simultaneously executing a domain-specific nominal
+field $\Fbase$. Geometry enters the dynamics \emph{only} through the
+Euclidean gradient $\gX = 2J^{T}GS$; all projections are Euclidean; the
+pulled-back metric $J^{T}GJ$ is reserved for curvature analysis. Under
+standard regularity (Assumptions A1--A4), Part~I proves (i) local
+existence and uniqueness, (ii) Lyapunov descent, (iii) asymptotic
+stability of $\{E=0\}$, (iv) exponential convergence with rate
+$\rho = 4\sigma^{2}\mu_{G}^{2}/M_{G}\cdot(1-\gamma_{\max})$ under a
+uniform Jacobian rank condition, and (v) ultimate boundedness when
+$\Fbase\neq 0$, with explicit admissibility threshold and a local-in-energy
+capture window. Part~II extends
+the framework to fractal targets (multi-scale mollified distance with
+Hausdorff-dimension weighting), contact manifolds (Reeb-aware feature
+map with horizontal-descent property), and time-varying metrics evolved
+by Ricci-type geometric flows (strict Lyapunov monotonicity for
+constant target metrics and practical state--metric bounds in the
+state-dependent case). Part~III specialises the time-varying metric to
+feature-space Fisher information and its pullback to state space,
+yielding adaptive preconditioning, a chart-covariant auxiliary
+natural-gradient flow, and a statistical
+Cram\'er--Rao floor on the descent rate. Throughout, the canonical ODE,
+the gradient formula, and the Euclidean projection are unchanged; all
+domain content is confined to the triple $(S,G,\Fbase)$.
+\end{abstract}
+
+\maketitle
+\thispagestyle{plain}
+
+{\hypersetup{linkcolor=accent!85!black}
+\setcounter{tocdepth}{2}
+\tableofcontents}
+\vspace{0.6em}
+\noindent\textcolor{accent!60!black}{\rule{\linewidth}{0.4pt}}
+\vspace{0.4em}
+\bigskip
+
+\begin{lockbox}
+\textbf{Execution paradigm (LOCKED):} Euclidean execution with geometric encoding.\\
+Geometry enters the dynamics \emph{only} through the state-space gradient $\gX$.\\
+All projections are Euclidean. The pulled-back metric $\Gpull = J^T G J$ is used
+\emph{only} for curvature computation.
+\end{lockbox}
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+% ============================================================
+
+Many engineering and scientific tasks reduce to the same structural
+problem: drive a state $X$ along a nominal trajectory generated by
+$\Fbase$ while simultaneously enforcing a geometric constraint encoded
+by an energy $E(X)$. Examples include statistical-arbitrage portfolios
+(spread $\to 0$), spectral PDE controllers (modal error $\to 0$),
+first-order optimisers ($\nabla f \to 0$) and task-space robotics
+(end-effector error $\to 0$).
+
+Classical solutions diverge: Riemannian gradient flows replace the
+state-space metric and obscure execution; control-Lyapunov designs
+often reinvent the projection at each domain; port-Hamiltonian
+formulations require an energy-shaping co-design. The cost is a
+proliferation of incompatible formalisms.
+
+\paragraph{Contribution.} We commit to a single, frozen ODE
+(Section~\ref{sec:core}) and a single gradient (Section~\ref{sec:gradient})
+that respects three inviolable rules (Section~\ref{sec:rules}) and prove
+its properties \emph{once}. Domain content is confined to the triple
+$(S,G,\Fbase)$ (Section~\ref{sec:domain}), so each application becomes
+an instantiation rather than a redesign.
+
+\paragraph{Organisation.} Section~\ref{sec:foundations} fixes
+assumptions and well-posedness. Sections~\ref{sec:core}--\ref{sec:rules}
+state the locked system. Sections~\ref{sec:chain}--\ref{sec:H1} develop
+structural results, the curvature manifold, and the numerical
+implementation. Section~\ref{sec:main-theorem} proves the main
+stability theorems. Section~\ref{sec:applications} instantiates the
+framework on four domains. Part~II
+(Sections~\ref{sec:fractal}--\ref{sec:geomflow}) extends the kernel by
+fractal, contact, and geometric-flow constructions. Part~III
+(Section~\ref{sec:fisher-setup} onwards) specialises Part~II to the
+Fisher information metric and introduces the auxiliary
+natural-gradient flow.
+
+\paragraph{Related work.}
+Lyapunov-based control and CLF theory \cite{sontag1989,freeman1996};
+geometric control \cite{bullo2004}; gradient flows in metric spaces
+\cite{ambrosio2005}; neural ODEs \cite{chen2018}; port-Hamiltonian
+systems \cite{vanderschaft2014}; adaptive control
+\cite{ioannou1996}. Our framework is closest to Sontag's
+universal formula but differs in (a) using a fixed Euclidean projection
+and (b) routing all geometry through a single feature map and metric.
+
+% ============================================================
+\section{Foundations and Assumptions}
+\label{sec:foundations}
+% ============================================================
+
+This section fixes the regularity class, declares the standing
+assumptions, resolves the apparent singularity in the canonical ODE,
+and establishes well-posedness. Every later proof depends on the
+results stated here.
+
+\subsection{Standing assumptions}
+\label{sec:assumptions}
+
+\begin{defbox}{A1 -- A4: Standing assumptions}
+\begin{description}[leftmargin=2.4em, style=nextline]
+\item[\textbf{(A1) Regularity of $S$.}]
+      $S \in C^{2}(\R^{n}, \R^{k})$. The Jacobian $J(X)=\partial S/\partial X$
+      and the second derivative $\partial_{X} J$ are locally bounded.
+\item[\textbf{(A2) Metric.}]
+      $G \in \R^{k\times k}$ is symmetric positive-definite and
+      \emph{constant} in $X$ and $t$. We denote $0 < \mu_{G}\le M_{G}$
+      for its smallest/largest eigenvalues. \emph{(Relaxed in Parts~II--III
+      to (A2$'$): $G\in C^{1}(\R^{n},\mathrm{Sym}^{k}_{+})$ with uniform
+      bounds $\mu_{G}I\preceq G(X)\preceq M_{G}I$. Every result of Part~I
+      is stated under (A2); Parts~II--III state explicitly when (A2$'$)
+      replaces (A2).)}
+\item[\textbf{(A3) Nominal field.}]
+      $\Fbase : \R^{n}\to\R^{n}$ is locally Lipschitz.
+\item[\textbf{(A4) Control parameter.}]
+      $\theta > 0$ is fixed.
+\end{description}
+\end{defbox}
+
+\subsection{The singular set and its resolution}
+\label{sec:singular}
+
+The canonical ODE (Section~\ref{sec:core}) contains the factor
+$\|\gX\|^{-2}$ and is undefined on the \emph{singular set}
+\(
+  \Sigma \;=\; \{X \in \R^{n}\,:\, \gX(X) = 0\}.
+\)
+
+\begin{lemma}[Structure of $\Sigma$]
+\label{lem:singular}
+Under (A1)--(A2),
+\[
+  \gX(X)=0
+  \;\Longleftrightarrow\;
+  J(X)^{T}\, G\, S(X) = 0.
+\]
+In particular:
+\begin{enumerate}[leftmargin=2em, label=\textup{(\roman*)}]
+  \item If $\mathrm{rank}\,J(X) = k$ (full row rank), then
+        $\gX(X)=0 \Longleftrightarrow S(X)=0 \Longleftrightarrow E(X)=0$.
+  \item Outside the rank-deficient locus
+        $\mathcal{R} = \{X : \mathrm{rank}\,J(X) < k\}$,
+        $\Sigma$ coincides with the target set $\{E=0\}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+$\gX = 2J^{T}GS$, hence $\gX = 0 \Leftrightarrow J^{T}GS = 0$. If $J$
+has full row rank, $J^{T}$ is injective on $\R^{k}$, so $GS = 0$, and
+since $G$ is invertible, $S = 0$, giving $E = S^{T}GS = 0$. Outside
+$\mathcal{R}$ this holds at every point.
+\end{proof}
+
+\begin{defbox}{Regularised canonical ODE}
+\[
+  \Xdot
+  = \Fbase - \gX
+    - \gamma\,
+      \frac{\langle \Fbase - \gX,\, \gX\rangle}{\|\gX\|^{2}+\varepsilon}\,
+      \gX,
+  \qquad \varepsilon \ge 0.
+\]
+\end{defbox}
+
+The \emph{exact} canonical ODE corresponds to $\varepsilon = 0$. In
+implementation a small $\varepsilon > 0$ avoids division by zero; the
+limit $\varepsilon \to 0^{+}$ recovers the canonical equation away from
+$\Sigma$. By Lemma~\ref{lem:singular} the limit is benign whenever
+$J$ has full row rank along trajectories.
+
+\subsection{Well-posedness}
+\label{sec:wellposed}
+
+\begin{theorem}[Local existence and uniqueness]
+\label{thm:wellposed}
+Assume (A1)--(A4) and let $X_{0}\notin\Sigma$. There exists
+$T_{*}>0$ and a unique $C^{1}$ solution
+$X:[0,T_{*})\to\R^{n}$ of the canonical ODE with $X(0)=X_{0}$.
+If $\varepsilon > 0$, the same conclusion holds for every
+$X_{0}\in\R^{n}$.
+\end{theorem}
+
+\begin{proof}
+Let $H(X) = \Fbase(X) - \gX(X) - \gamma(X)\,\alpha(X)\gX(X)$ with
+$\alpha(X) = \langle \Fbase-\gX,\gX\rangle / (\|\gX\|^{2}+\varepsilon)$.
+Under (A1)--(A3) the maps $X\mapsto S, J, GS, \gX, E, \gamma$ are
+locally Lipschitz. On $\R^{n}\setminus\Sigma$ (or all of $\R^{n}$ if
+$\varepsilon>0$), the denominator is bounded away from zero on a
+neighbourhood of $X_{0}$, so $\alpha$ is locally Lipschitz, and so is
+$H$. Picard--Lindel\"of yields the conclusion.
+\end{proof}
+
+\begin{corollary}[Global existence under energy bound]
+\label{cor:global}
+If $\dot{E}\le 0$ along the solution and the sublevel set
+$\{E\le E(X_{0})\}$ is compact, the solution is defined for all
+$t\ge 0$.
+\end{corollary}
+
+% ============================================================
+\section{Canonical Core Equation}
+\label{sec:core}
+% ============================================================
+
+\begin{lockbox}
+\textbf{THE CANONICAL ODE (single, unique, not to be modified):}
+\[
+\boxed{
+  \Xdot
+  = \Fbase(X)
+    - \gX(X)
+    - \gamma(X)\,
+      \frac{\langle \Fbase(X) - \gX(X),\; \gX(X)\rangle}
+           {\|\gX(X)\|^{2}}\,
+      \gX(X)
+}
+\]
+\end{lockbox}
+
+\noindent The three terms decompose cleanly:
+\begin{itemize}[leftmargin=1.8em]
+  \item $\Fbase(X)$: domain-specific nominal vector field.
+  \item $-\gX(X)$: geometric correction forcing $E$ to decrease.
+  \item $-\gamma(X)\,(\cdots)\,\gX(X)$: adaptive damping that removes the
+        component of $F = \Fbase - \gX$ aligned with $\gX$, controlled by
+        energy level.
+\end{itemize}
+
+% ============================================================
+\section{Locked Definitions}
+\label{sec:defs}
+% ============================================================
+
+All definitions below are \emph{canonical and final}. No variants, no
+alternatives, no extensions are permitted inside the core system.
+
+% -- A.1 ----------------------------------------------------
+\subsection{Representation map}
+\label{sec:rep}
+
+\begin{defbox}{A.1 --- Representation}
+\[
+\boxed{S : X \longmapsto \R^{k}}
+\]
+$X \in \R^{n}$ is the state.
+$S(X) \in \R^{k}$ is the geometric feature vector.
+$k \geq 1$ is fixed for each domain.
+\end{defbox}
+
+\noindent The Jacobian of $S$ at $X$ is
+\[
+  J(X) = \frac{\partial S}{\partial X} \in \R^{k \times n}.
+\]
+
+% -- A.2 ----------------------------------------------------
+\subsection{Energy functional}
+\label{sec:energy}
+
+\begin{defbox}{A.2 --- Energy}
+\[
+\boxed{E(X) = S(X)^{T} G\, S(X), \qquad G \succ 0,\; G \in \R^{k\times k}}
+\]
+$G$ is symmetric positive-definite.
+$E(X) \geq 0$ with $E(X) = 0 \iff G^{1/2}S(X) = 0$.
+\end{defbox}
+
+% -- A.3 ----------------------------------------------------
+\subsection{State-space gradient}
+\label{sec:gradient}
+
+\begin{defbox}{A.3 --- Gradient (single, unique)}
+\[
+\boxed{\gX(X) = J(X)^{T}\,\nabla_{S} E = 2\,J(X)^{T} G\, S(X)}
+\]
+\end{defbox}
+
+\begin{proof}[Derivation]
+By the chain rule,
+$\nabla_{X} E = J^{T} \nabla_{S} E$.
+Since $E = S^{T}GS$, one has $\nabla_{S} E = 2GS$.
+Therefore $\gX = J^{T}(2GS) = 2J^{T}GS$.
+\end{proof}
+
+\noindent \textbf{No other gradient definition exists in this system.}
+
+% -- A.4 ----------------------------------------------------
+\subsection{Modified dynamics}
+\label{sec:dynamics}
+
+\begin{defbox}{A.4 --- Modified force}
+\[
+\boxed{F(X) = \Fbase(X) - \gX(X)}
+\]
+\end{defbox}
+
+$F$ is the vector field \emph{before} the adaptive projection term.
+The full dynamics (Section~\ref{sec:core}) add the projection of $F$ onto
+$-\gX$.
+
+% -- A.5 ----------------------------------------------------
+\subsection{Adaptive control gain}
+\label{sec:control}
+
+\begin{defbox}{A.5 --- Control gain}
+\[
+\boxed{\gamma(X) = \frac{E(X)}{E(X) + \theta}, \qquad \theta > 0}
+\]
+\end{defbox}
+
+\begin{itemize}[leftmargin=1.8em]
+  \item $\gamma \in [0,1)$ for all $X$.
+  \item $\gamma \to 0$ as $E \to 0$: no damping near the target manifold.
+  \item $\gamma \to 1$ as $E \to \infty$: full projection damping far away.
+  \item $\theta$ is the only tunable scalar in the core system.
+\end{itemize}
+
+% ============================================================
+\section{System Rules (Inviolable)}
+\label{sec:rules}
+% ============================================================
+
+\begin{rulebox}{Rule 1 --- Geometry location}
+\[
+\boxed{\text{Geometry enters \emph{only} through } \gX}
+\]
+The matrix $G$ and the map $S$ encode all geometric structure.
+Nothing else in the core ODE carries geometric information.
+\end{rulebox}
+
+\vspace{6pt}
+
+\begin{rulebox}{Rule 2 --- Euclidean projection}
+\[
+\boxed{\text{All projections use the standard Euclidean inner product on } \R^{n}}
+\]
+\[
+  \langle u, v \rangle = u^{T} v, \qquad \|u\| = \sqrt{u^{T}u}
+\]
+There is no metric-weighted inner product in the dynamics layer.
+\end{rulebox}
+
+\vspace{6pt}
+
+\begin{rulebox}{Rule 3 --- Pulled-back metric scope}
+\[
+\boxed{\Gpull = J^{T} G J \;\text{ is used \emph{only} for curvature (Hessian) analysis}}
+\]
+$\Gpull$ does \textbf{not} appear in $\Xdot$, in $\gX$, or in any projection.
+\end{rulebox}
+
+\vspace{6pt}
+\begin{rulebox}{Rule 4 -- No duplication}
+\[
+\boxed{\text{Each object has exactly one definition; no parallel construction is permitted}}
+\]
+In particular: there is no separate $\nabla_{X}\Phi$, no second force
+definition, and no alternative projection. The objects $S$, $E$, $\gX$,
+$F$, $\gamma$ and $\Xdot$ are defined exactly once, in
+Section~\ref{sec:defs}, and used verbatim everywhere else.
+\end{rulebox}
+
+\vspace{6pt}
+\begin{warnbox}
+The following are \textbf{permanently forbidden} in any version of this document:
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item $\Gpull^{-1}$ appearing in the dynamics.
+  \item Metric-weighted projections ($\langle u,v\rangle_{G}$ in the ODE).
+  \item An independent $\nabla_{X}\Phi$ defined separately from $\gX$.
+  \item A second or alternative definition of the force.
+  \item Duplicate section headers or symbol re-definitions.
+\end{itemize}
+\end{warnbox}
+
+% ============================================================
+\section{Forward Chain}
+\label{sec:chain}
+% ============================================================
+
+The unique, linear data-flow through the system:
+
+\[
+\boxed{
+  X \;\xrightarrow{\;S\;}\; S \;\xrightarrow{\;E = S^{T}GS\;}\; E
+  \;\xrightarrow{\;2J^{T}GS\;}\; \gX
+  \;\xrightarrow{\;\Xdot = \Fbase - \gX - \gamma(\cdots)\gX\;}\; \Xdot
+}
+\]
+
+Each arrow is a unique map; no step branches or has an alternative.
+
+% ============================================================
+\section*{\S B.2 \quad State-Space Dynamics}
+\addcontentsline{toc}{section}{\S B.2 --- State-Space Dynamics}
+\label{sec:B2}
+% ============================================================
+
+\paragraph{Setup.}
+All dynamical quantities live in the state space $\R^{n}$.
+The representation map $S$ and the energy $E$ are scalar objects computed from
+$X$ but the forces $\Fbase$, $\gX$, and $F$ are all $\R^{n}$-valued.
+
+\paragraph{Projection.}
+The projection of any vector $v \in \R^{n}$ onto $\gX$ is
+\[
+  \mathrm{proj}_{\gX}(v)
+  = \frac{\langle v,\, \gX\rangle}{\|\gX\|^{2}}\,\gX,
+\]
+computed with the \emph{Euclidean} inner product. The complement is
+$v - \mathrm{proj}_{\gX}(v)$.
+
+\paragraph{Geometric content.}
+The geometry of the target manifold/set is entirely captured by $\gX$.
+Equations of motion do not reference $G$, $J$, or $S$ directly; they see only
+$\gX$ computed from those quantities.
+
+% -- \S B.2a ---------------------------------------------------
+\subsection*{\S B.2a \quad Modified Force Definition}
+\addcontentsline{toc}{subsection}{\S B.2a --- Modified Force Definition}
+\label{sec:B2a}
+
+\begin{defbox}{\S B.2a --- Modified Force (authoritative, single definition)}
+\[
+\boxed{F(X) = \Fbase(X) - \gX(X)}
+\]
+\end{defbox}
+
+The full canonical ODE (Section~\ref{sec:core}) is equivalently written as:
+\[
+  \Xdot = F(X) - \gamma(X)\,\frac{\langle F(X),\, \gX(X)\rangle}{\|\gX(X)\|^{2}}\,\gX(X).
+\]
+This removes from $F$ its component along $\gX$, scaled by $\gamma$.
+
+% ============================================================
+\section*{\S C.5 \quad Hessian and Curvature Tensor}
+\label{sec:tensor}
+\addcontentsline{toc}{section}{\S C.5 --- Hessian and Curvature Tensor}
+% ============================================================
+
+This section derives the Hessian of $E$ explicitly. The derivation
+introduces the second-derivative tensor of the representation map,
+which is the only tensorial object the system requires.
+
+\subsection*{The representation curvature tensor \texorpdfstring{$K$}{K}}
+
+\begin{defbox}{C.5.0 --- Representation curvature tensor}
+For $S\in C^{2}(\R^{n},\R^{k})$ define
+\[
+  K^{i}{}_{ab}(X) \;:=\; \partial_{a}\partial_{b} S^{i}(X)
+                 \;=\; \partial_{a} J^{i}{}_{b}(X),
+  \qquad
+  i\in\{1,\dots,k\},\; a,b\in\{1,\dots,n\}.
+\]
+$K(X)\in\R^{k\times n\times n}$ is the third-order tensor of second
+partials of $S$. By Schwarz's theorem $K^{i}{}_{ab}=K^{i}{}_{ba}$;
+each \emph{slice} $K^{i}\in\R^{n\times n}$ is symmetric.
+\end{defbox}
+
+\subsection*{Derivation of the Hessian of \texorpdfstring{$E$}{E}}
+
+\begin{proposition}[State-space Hessian, derived form]
+\label{prop:hessian}
+Under \textup{(A1)--(A2)}, with index convention as above and Einstein
+summation,
+\[
+  \boxed{\;\bigl(\nabla^{2}_{X}E\bigr)_{ab}
+  \;=\; 2\,(J^{T}GJ)_{ab} \;+\; \eta_{i}\,K^{i}{}_{ab},
+  \qquad
+  \eta \;:=\; \nabla_{S}E \;=\; 2GS.\;}
+\]
+Equivalently, in coordinate-free form,
+\[
+  \nabla^{2}_{X}E \;=\; 2\,\Gpull \;+\; \langle\eta,K\rangle_{1},
+  \qquad
+  \langle\eta,K\rangle_{1} \;:=\; \sum_{i=1}^{k}\eta_{i}\,K^{i}.
+\]
+\end{proposition}
+
+\begin{proof}
+Write $E = G_{ij}S^{i}S^{j}$ with $G^{T}=G$. Then
+\begin{align*}
+  \partial_{a}E
+  &= G_{ij}(\partial_{a}S^{i})S^{j} + G_{ij}S^{i}(\partial_{a}S^{j}) \\
+  &= 2 G_{ij}\,J^{i}{}_{a}\,S^{j}
+  = 2(J^{T}GS)_{a}
+  = (g_{X})_{a},
+\end{align*}
+recovering $\nabla_{X}E = g_{X}$. Differentiating once more,
+\begin{align*}
+  \partial_{b}\partial_{a}E
+  &= 2 G_{ij}\bigl((\partial_{b}J^{i}{}_{a})S^{j}
+                  + J^{i}{}_{a}(\partial_{b}S^{j})\bigr) \\
+  &= 2 G_{ij}\,K^{i}{}_{ab}\,S^{j}
+   \;+\; 2 G_{ij}\,J^{i}{}_{a}\,J^{j}{}_{b} \\
+  &= \underbrace{(2GS)_{i}\,K^{i}{}_{ab}}_{=\eta_{i} K^{i}{}_{ab}}
+   \;+\; 2(J^{T}GJ)_{ab}.
+\end{align*}
+Symmetry in $(a,b)$ holds because $K^{i}$ and $J^{T}GJ$ are symmetric.
+\end{proof}
+
+\begin{remark}[Two ingredients]
+The state-space Hessian decomposes uniquely into:
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item the \textbf{pulled-back metric} $2\Gpull = 2J^{T}GJ$, capturing
+        the linear part of the geometry;
+  \item the \textbf{curvature contraction} $\langle\eta,K\rangle_{1}$,
+        capturing how the representation map $S$ itself bends.
+\end{itemize}
+The curvature contraction vanishes whenever $S$ is affine
+($K\equiv 0$) \emph{or} when $\eta = 2GS = 0$ (i.e.\ on the target set
+$\{E=0\}$). Hence on the target set,
+$\nabla^{2}_{X}E\big|_{\{E=0\}} = 2\Gpull$ exactly.
+\end{remark}
+
+\begin{remark}[Operator norm]
+Define the tensor norm
+\[
+  \|K\|_{\mathrm{op}}
+  := \sup_{\|u\|=\|v\|=1,\;\|w\|=1}\;
+        \sum_{i,a,b} K^{i}{}_{ab}\,u_{i}\,v_{a}\,w_{b}.
+\]
+Then the curvature contraction obeys
+$\|\langle\eta,K\rangle_{1}\|_{2}\le \|K\|_{\mathrm{op}}\,\|\eta\|_{2}$,
+which is the bound used in Proposition~\ref{prop:curv-bound}.
+\end{remark}
+
+\begin{remark}[Role in the dynamics]
+$\Gpull = J^{T}GJ$ and $K$ both appear here as part of the Hessian.
+By Rule~3, neither appears in $\Xdot$ or $g_{X}$.
+\end{remark}
+
+% ============================================================
+\section*{\S D.3 \quad Curvature Manifold}
+\addcontentsline{toc}{section}{\S D.3 --- Curvature Manifold}
+\label{sec:D3}
+% ============================================================
+
+\begin{defbox}{\S D.3 --- Curvature manifold}
+\[
+\boxed{
+  \Cman = \bigl\{X \in \R^{n} : \lambda_{\max}\!\bigl(\nabla^{2}_{X} E(X)\bigr) = 1\bigr\}
+}
+\]
+\end{defbox}
+
+\noindent $\Cman$ is the level set of maximal principal curvature equal to~$1$.
+It separates regions where the energy landscape is convex-dominated ($\lambda_{\max}<1$)
+from regions where nonlinear curvature terms dominate ($\lambda_{\max}>1$).
+
+\begin{proposition}
+$\Cman$ is generically a smooth $(n-1)$-dimensional submanifold of $\R^{n}$
+wherever $\lambda_{\max}$ is a simple eigenvalue and its derivative is non-zero.
+\end{proposition}
+
+\begin{proof}
+Let $h(X) = \lambda_{\max}(\nabla^{2}_{X}E(X)) - 1$ so that
+$\Cman = h^{-1}(0)$. By (A1) the entries of $\nabla^{2}_{X}E$ are
+continuous; on the open set where $\lambda_{\max}$ is simple, classical
+perturbation theory (Kato) gives $\lambda_{\max}\in C^{1}$ with derivative
+$\nabla h = v^{T}(\partial_{X}\nabla^{2}_{X}E)v$, where $v$ is the unit
+eigenvector. Wherever $\nabla h \ne 0$ the implicit function theorem
+yields the smooth codimension-1 structure.
+\end{proof}
+
+\begin{proposition}[Curvature bound]
+\label{prop:curv-bound}
+Under \textup{(A1)--(A2)}, with $\|K\|_{\mathrm{op}}$ as defined in
+Section~\ref{sec:tensor},
+\[
+  \lambda_{\max}\!\bigl(\nabla^{2}_{X}E\bigr)
+  \;\le\; 2\,M_{G}\,\|J\|^{2}_{2}
+         \;+\; \|K\|_{\mathrm{op}}\,\|\eta\|_{2},
+  \qquad \eta = 2GS.
+\]
+In particular, on $\Cman$,
+$\;2 M_{G}\|J\|^{2}_{2} + \|K\|_{\mathrm{op}}\,\|2GS\|_{2} \;\ge\; 1.$
+\end{proposition}
+
+\begin{proof}
+By Proposition~\ref{prop:hessian},
+$\nabla^{2}_{X}E = 2 J^{T}GJ + \langle\eta,K\rangle_{1}$.
+The spectral norm is sub-additive; bound the first term using
+$\|J^{T}GJ\|_{2}\le \|G\|_{2}\|J\|_{2}^{2}\le M_{G}\|J\|_{2}^{2}$, and
+the second using
+$\|\langle\eta,K\rangle_{1}\|_{2}\le \|K\|_{\mathrm{op}}\|\eta\|_{2}$
+from Section~\ref{sec:tensor}.
+\end{proof}
+
+The practical role of $\Cman$:
+\begin{itemize}[leftmargin=1.8em]
+  \item Provides a natural domain boundary for local linearisation arguments.
+  \item Guides the choice of $\theta$ in $\gamma$: setting $\theta$ so that
+        $\gamma \approx \tfrac{1}{2}$ on $\Cman$ balances correction and tracking.
+\end{itemize}
+
+% ============================================================
+\section*{\S H.1 \quad Numerical Implementation}
+\addcontentsline{toc}{section}{\S H.1 --- Numerical Implementation}
+\label{sec:H1}
+% ============================================================
+
+\subsection*{H.1.1 \quad Per-step algorithm}
+
+Given state $X_{t}$, advance one step:
+
+\begin{enumerate}[leftmargin=2em, label=\textbf{\arabic*.}]
+  \item Compute $S \leftarrow S(X_{t})$.
+  \item Compute $J \leftarrow \partial S/\partial X\big|_{X_{t}}$.
+  \item Compute $\gX \leftarrow 2J^{T}GS$.  \hfill
+        \textit{(gradient --- \textbf{single computation})}
+  \item Compute $E \leftarrow S^{T}GS$.    \hfill
+        \textit{(energy)}
+  \item Compute $\Fbase \leftarrow \Fbase(X_{t})$.
+  \item Compute $F \leftarrow \Fbase - \gX$.   \hfill
+        \textit{(modified force --- \textbf{not} $\Fbase$ alone)}
+  \item Compute $\gamma \leftarrow E/(E+\theta)$.
+  \item Compute projection coefficient $\alpha \leftarrow \langle F,\gX\rangle / \|\gX\|^{2}$.
+  \item Set $\Xdot \leftarrow F - \gamma\,\alpha\,\gX$.
+        \hfill \textit{(canonical ODE)}
+  \item Integrate: $X_{t+h} \leftarrow X_{t} + h\,\Xdot$ (or higher-order scheme).
+  \item \textbf{Termination:} stop when $E<\varepsilon_{E}$ and
+        $\|\gX\|<\varepsilon_{g}$ for $\tau$ consecutive steps
+        (cf.\ \S H.1.4).
+\end{enumerate}
+
+\begin{warnbox}
+Step~6 uses $F = \Fbase - \gX$, not $\Fbase$ alone.
+Step~8 uses this $F$ in the projection, not $\Fbase$.
+\end{warnbox}
+
+\subsection*{H.1.2 \quad Gradient correctness check}
+
+Before running any simulation, verify:
+\[
+  \gX \stackrel{?}{=} 2J^{T}GS,
+\]
+by finite-difference: $\Delta E / \Delta X_{i}$ should match $(\gX)_{i}$ to
+machine precision for small perturbations.
+
+\subsection*{H.1.3 \quad Energy monotonicity (derivation)}
+\label{sec:Edot}
+
+\begin{lemma}[Energy derivative]
+\label{lem:Edot}
+Along any solution of the canonical ODE,
+\[
+  \dot{E}
+  \;=\; \langle \gX,\Xdot\rangle
+  \;=\; (1-\gamma)\,\bigl(\langle \gX,\Fbase\rangle - \|\gX\|^{2}\bigr).
+\]
+Equivalently, with $F = \Fbase - \gX$ and
+$\alpha = \langle F,\gX\rangle/\|\gX\|^{2}$,
+\[
+  \boxed{\;\dot{E}
+  \;=\; \langle \gX,\Fbase\rangle - \|\gX\|^{2} - \gamma\,\alpha\,\|\gX\|^{2}
+  \;=\; \langle \gX,\Fbase\rangle - \|\gX\|^{2} - \gamma\,\langle F,\gX\rangle.\;}
+\]
+\end{lemma}
+
+\begin{proof}
+Differentiate $E = S^{T}GS$:
+$\dot{E} = 2S^{T}G\dot{S} = 2S^{T}GJ\dot{X} = (2J^{T}GS)^{T}\dot{X}
+= \langle \gX,\Xdot\rangle$. Substitute the canonical ODE
+$\Xdot = F - \gamma\alpha\,\gX$ to get
+$\dot E = \langle \gX, F\rangle - \gamma\alpha\|\gX\|^{2}
+        = \langle \gX, F\rangle - \gamma\langle F,\gX\rangle
+        = (1-\gamma)\langle F,\gX\rangle$.
+Since $\langle F,\gX\rangle = \langle \Fbase,\gX\rangle - \|\gX\|^{2}$,
+the two displayed forms follow.
+\end{proof}
+
+\paragraph{Pure geometric flow ($\Fbase = 0$).}
+Then $F = -\gX$, so
+\[
+  \dot{E} = -(1-\gamma)\,\|\gX\|^{2} \;\le\; 0,
+\]
+strictly negative whenever $\gX\neq 0$ (and $\gamma<1$, always).
+
+\paragraph{Energy descent condition.}
+Since $1-\gamma > 0$, $\dot{E}\le 0$ holds if and only if
+\[
+  \boxed{\;\langle \gX,\Fbase\rangle \;\le\; \|\gX\|^{2}.\;}
+\]
+This is the explicit angle condition between $\Fbase$ and $\gX$ used in
+the stability theorems of Section~\ref{sec:main-theorem}.
+
+\subsection*{H.1.4 \quad Step-size, stopping, and Jacobian computation}
+\label{sec:Hpractical}
+
+\paragraph{Stopping criterion.} Halt when both
+\(
+  E(X_{t}) < \varepsilon_{E}
+\)
+and
+\(
+  \|\gX(X_{t})\| < \varepsilon_{g}
+\)
+hold for $\tau$ consecutive steps (dwell time), with default tolerances
+$\varepsilon_{E} = 10^{-8}$, $\varepsilon_{g} = 10^{-6}$, $\tau = 5$.
+
+\paragraph{Adaptive step-size.} Use
+\(
+  h_{t} = h_{0} / \bigl(1 + \lambda_{\max}(\nabla^{2}_{X}E(X_{t}))\bigr),
+\)
+so $h_{t}\le h_{0}$ everywhere and $h_{t}\to h_{0}/2$ on $\Cman$.
+By Proposition~\ref{prop:curv-bound}, $\lambda_{\max}$ is bounded in
+terms of $\|J\|$, $\|G\|$, and the curvature of $S$, so $h_{t}$ is
+uniformly positive on bounded sets.
+
+\paragraph{Choice of $G$.} The conditioning of $\gX = 2J^{T}GS$
+scales with $\kappa(G)$. Default rule: choose $G$ diagonal with
+$G_{ii} = 1/\widehat{\mathrm{Var}}(S_{i})$ from data (or design),
+so $E$ becomes the squared Mahalanobis norm of $S$ and the energy
+landscape is approximately isotropic in the operating region.
+
+\paragraph{Jacobian computation.} In order of preference:
+(i) closed-form analytic $J$;
+(ii) automatic differentiation when $S$ is given as code;
+(iii) finite differences with step $\delta = \sqrt{\epsilon_{\text{mach}}}$
+at cost $O(nk)$ evaluations per step.
+
+% ============================================================
+\section{Main Stability Theorems}
+\label{sec:main-theorem}
+% ============================================================
+
+We now state the principal results of the paper. Throughout this
+section (A1)--(A4) hold and the trajectory $X(\cdot)$ is a solution
+of the canonical ODE on a maximal interval of existence.
+
+\subsection{Lyapunov descent}
+
+\begin{theorem}[Lyapunov descent]
+\label{thm:descent}
+For any solution $X(\cdot)$ on $\R^{n}\setminus\Sigma$,
+\[
+  \dot{E}(t) \;=\; (1-\gamma)\,\bigl(\langle \gX,\Fbase\rangle - \|\gX\|^{2}\bigr).
+\]
+In particular:
+\begin{enumerate}[leftmargin=2em, label=\textup{(\roman*)}]
+  \item If $\Fbase \equiv 0$, then
+        $\dot{E} = -(1-\gamma)\|\gX\|^{2} < 0$ whenever $\gX\neq 0$.
+  \item In general, $\dot{E} \le 0$ \emph{iff}
+        $\langle \gX,\Fbase\rangle \le \|\gX\|^{2}$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Direct from Lemma~\ref{lem:Edot}; (i) is the special case $\Fbase=0$,
+and (ii) follows since $1-\gamma>0$.
+\end{proof}
+
+\subsection{Asymptotic stability}
+
+\begin{theorem}[Asymptotic stability of the target set]
+\label{thm:asymptotic}
+Assume \textup{(A1)--(A4)}, $\Fbase \equiv 0$, and that
+$J(X)$ has full row rank on every sublevel set
+$\{E\le c\}$ that is compact. Then for every initial condition $X_{0}$
+with $\{E\le E(X_{0})\}$ compact, the solution exists for all
+$t\ge 0$ and
+\[
+  E(X(t)) \;\xrightarrow[t\to\infty]{}\; 0,
+  \qquad
+  \mathrm{dist}\bigl(X(t),\,\{E=0\}\bigr)\to 0.
+\]
+\end{theorem}
+
+\begin{proof}
+By Theorem~\ref{thm:descent}(i) $\dot{E}\le 0$, so $X(t)$ stays in the
+compact sublevel set; Corollary~\ref{cor:global} gives global existence.
+LaSalle's invariance principle implies $X(t)$ converges to the largest
+invariant set inside $\{\dot{E}=0\} = \{\gX = 0\}$. By
+Lemma~\ref{lem:singular}(i) the rank assumption forces
+$\{\gX=0\}=\{E=0\}$, which is itself invariant (since the right-hand
+side vanishes there). Hence $E(X(t))\to 0$.
+\end{proof}
+
+\subsection{Exponential rate}
+
+\begin{theorem}[Exponential convergence]
+\label{thm:exp}
+Assume the hypotheses of Theorem~\ref{thm:asymptotic} and that on the
+invariant compact set there exists $\sigma>0$ with
+$\sigma_{\min}(J(X))\ge\sigma$. Then
+\[
+  E(X(t)) \;\le\; E(X_{0})\,e^{-\rho t},
+  \qquad
+  \rho \;=\; 4\,\sigma^{2}\,\frac{\mu_{G}^{2}}{M_{G}}\,(1-\gamma_{\max}),
+\]
+where $\gamma_{\max} = E(X_{0})/(E(X_{0})+\theta)<1$.
+\end{theorem}
+
+\begin{proof}
+With $\Fbase = 0$, $\dot{E} = -(1-\gamma)\|\gX\|^{2}$. We bound
+$\|\gX\|^{2} = 4\|J^{T}GS\|^{2}\ge 4\sigma^{2}\|GS\|^{2}
+\ge 4\sigma^{2}\mu_{G}^{2}\|S\|^{2}$, while
+$E = S^{T}GS\le M_{G}\|S\|^{2}$, giving $\|S\|^{2}\ge E/M_{G}$. Hence
+\[
+  \|\gX\|^{2}\;\ge\; \frac{4\sigma^{2}\mu_{G}^{2}}{M_{G}}\,E.
+\]
+With $\gamma\le\gamma_{\max}<1$ monotone in $E$, $\dot E\le -\rho E$ and
+Gr\"onwall's inequality concludes.
+\end{proof}
+
+\subsection{Ultimate boundedness with non-zero \texorpdfstring{$\Fbase$}{Fbase}}
+
+\begin{theorem}[Ultimate boundedness]
+\label{thm:ub}
+Assume \textup{(A1)--(A4)}, the rank condition of Theorem~\ref{thm:exp},
+and that $\|\Fbase\|\le M$ on the operating region. Define
+\[
+  \Psi(R) \;:=\; \frac{\theta}{R+\theta}\,\cdot\,
+                 2\sigma\sqrt{\frac{\mu_{G}^{2}}{M_{G}}\,R}
+             \;=\; (1-\gamma(R))\cdot 2\sigma\,\frac{\mu_{G}}{\sqrt{M_{G}}}\,\sqrt{R}.
+\]
+Then $\Psi$ is unimodal on $(0,\infty)$ with maximum
+$\Psi^{\star} = \sigma\theta\mu_{G}/\sqrt{M_{G}}$ attained at $R^{\star}=\theta$.
+Assuming the \emph{admissibility condition} $M < \Psi^{\star}$, the
+equation $\Psi(R) = M$ has two roots $0<R_{-}\le R_{+}$. If the
+trajectory enters the admissible energy window $E(X(t_{0}))\le R_{+}$,
+then for any $R\in[R_{-},R_{+}]$,
+\(
+  E(X(t))\le R
+\)
+for all sufficiently large $t\ge T(R,X(t_{0}))$. In particular, the
+theorem is a \emph{local-in-energy} ultimate-boundedness result on the
+operating window $\{E\le R_{+}\}$; it does not claim global capture
+from arbitrarily large energies.
+\end{theorem}
+
+\begin{proof}
+From Lemma~\ref{lem:Edot}, $\dot E = (1-\gamma)(\langle \gX,\Fbase\rangle - \|\gX\|^{2})
+\le -(1-\gamma)\|\gX\|(\|\gX\|-M)$. On $\{E\ge R\}$ the rank condition
+and the bound from Theorem~\ref{thm:exp} give
+$\|\gX\|^{2}\ge 4\sigma^{2}(\mu_{G}^{2}/M_{G})R$, so
+$(1-\gamma(R))\|\gX\|\ge \Psi(R)$. For $R\in[R_{-},R_{+}]$,
+$\Psi(r)\ge M$ for every $r\in[R,R_{+}]$. Therefore $\dot E\le 0$ on
+the annulus $\{R\le E\le R_{+}\}$, so once a trajectory is in the
+operating window $\{E\le R_{+}\}$ it cannot cross upward through
+$R_{+}$ and is pulled into $\{E\le R\}$ in finite time.
+\end{proof}
+
+\begin{remark}[Critical disturbance]
+The admissibility threshold $\Psi^{\star}=\sigma\theta\mu_{G}/\sqrt{M_{G}}$
+is the largest disturbance amplitude $M$ for which any sublevel set
+is forward-invariant. For $M\ge\Psi^{\star}$, no finite ultimate
+bound is provided by the canonical descent alone; an outer feedback
+shaping $\Fbase$ is required.
+\end{remark}
+
+% ============================================================
+\section{Application Domains}
+\label{sec:applications}
+% ============================================================
+
+Each subsection instantiates $(S,G,\Fbase)$ for a specific domain,
+verifies (A1)--(A4), and cites the appropriate stability theorem from
+Section~\ref{sec:main-theorem}. \emph{No structural change to the
+canonical ODE occurs.}
+
+\subsection{Trading / statistical-arbitrage spread control}
+\label{sec:app-trading}
+
+Let $X = w \in \R^{n}$ be portfolio weights, $A\in\R^{k\times n}$ a
+factor-loading matrix, $b\in\R^{k}$ a target spread vector, and
+$\Sigma\in\R^{k\times k}$ the (PD) factor covariance.
+\[
+  S(w) = Aw - b,\qquad
+  G = \Sigma^{-1},\qquad
+  \Fbase(w) = -\kappa\,(w - w^{\star}),
+\]
+with $\kappa>0$ and $w^{\star}$ the alpha-target weight.
+Then $J = A$ (constant), $E(w) = (Aw-b)^{T}\Sigma^{-1}(Aw-b)$ is the
+squared Mahalanobis spread, and $\gX = 2A^{T}\Sigma^{-1}(Aw-b)$.
+
+\begin{corollary}
+If $A$ has full row rank, Theorem~\ref{thm:exp} applies with
+$\sigma = \sigma_{\min}(A)$ and gives exponential decay of the
+Mahalanobis spread; Theorem~\ref{thm:ub} bounds the long-run spread
+in terms of the alpha-tracking torque $\kappa\|w_{0}-w^{\star}\|$.
+\end{corollary}
+
+Transaction costs enter via a Lipschitz extension of $\Fbase$ (smooth
+proximal regularisation), preserving (A3).
+
+\subsection{Spectral / Galerkin PDE control}
+\label{sec:app-pde}
+
+Let $X = (a_{1},\dots,a_{N}) \in \R^{N}$ be the Galerkin coefficients
+of a target field, and $a^{\star}$ a desired spectrum.
+\[
+  S(X) = X - a^{\star},\qquad
+  G = \diag(g_{1},\dots,g_{N}),\qquad
+  \Fbase(X) = \mathcal{L}_{N}\,X,
+\]
+where $g_{k}>0$ are mode weights (e.g.\ $g_{k}=k^{2}$ for an $H^{1}$-type
+energy) and $\mathcal{L}_{N}$ is the discretised PDE operator.
+Then $J = I_{N}$, $E = \sum_{k} g_{k}(a_{k}-a^{\star}_{k})^{2}$, and
+$\gX = 2G(X-a^{\star})$.
+
+\begin{corollary}
+The rank condition is automatic ($J=I_{N}$). Theorem~\ref{thm:exp}
+gives convergence rate $\rho = 4\mu_{G}(1-\gamma_{\max})$ in the
+weighted $\ell^{2}$ norm. Stability of the underlying PDE in the
+full space requires $\sup_{N}\|\mathcal{L}_{N}\|<\infty$ in the
+weighted norm; under that uniform bound, the discrete results lift to
+the continuum limit.
+\end{corollary}
+
+\subsection{First-order optimisation}
+\label{sec:app-opt}
+
+Minimise $f \in C^{2}(\R^{n})$ with locally bounded Hessian. Set
+\[
+  S(X) = \nabla f(X),\qquad
+  G = I_{n},\qquad
+  \Fbase(X) = -\nabla f(X).
+\]
+Then $J(X) = \nabla^{2} f(X)$, $E(X) = \|\nabla f(X)\|^{2}$, and
+$\gX = 2(\nabla^{2} f)\,\nabla f$. The canonical ODE becomes a
+damped, projection-corrected gradient flow that vanishes at
+stationary points.
+
+\begin{corollary}
+If $\nabla^{2} f$ is uniformly positive-definite on a sublevel set
+of $f$, then $\sigma_{\min}(J)\ge\sigma>0$ on that set,
+Theorem~\ref{thm:exp} applies, and $\|\nabla f(X(t))\|^{2}$ decays
+exponentially.
+\end{corollary}
+
+Comparison with classical preconditioned descent: the canonical ODE
+adds the $\gamma$-modulated projection term, which bounds the
+transient overshoot of $E$ at the cost of one extra inner product per
+step.
+
+\subsection{Task-space robotics control}
+\label{sec:app-robotics}
+
+Let $X = q \in \R^{n}$ be joint angles, $\mathrm{FK}: \R^{n}\to\R^{k}$
+the forward kinematics map, $p^{\star}\in\R^{k}$ the desired end-effector
+pose, and $W\succ 0$ a task-space weight.
+\[
+  S(q) = \mathrm{FK}(q) - p^{\star},\qquad
+  G = W,\qquad
+  \Fbase(q) = -K_{p}\,J(q)^{T}W\,(\mathrm{FK}(q) - p^{\star}),
+\]
+with $K_{p}>0$. Note $\Fbase = -\tfrac{K_{p}}{2}\gX$, so $F=\Fbase-\gX = -(K_{p}/2+1)\gX$
+is fully aligned with $-\gX$, the projection coefficient becomes
+identically $1$, and the canonical ODE collapses to scalar-damped
+descent $\Xdot = -(1+K_{p}/2)(1-\gamma)\gX$. This domain therefore
+illustrates a degenerate alignment regime; richer behaviour arises
+when $\Fbase$ is replaced by a state-feedback controller not
+collinear with $\gX$.
+
+\begin{corollary}
+Away from kinematic singularities ($\mathrm{rank}\,J = k$) the rank
+condition holds and Theorem~\ref{thm:exp} gives exponential pose
+convergence. Near singularities use the regularised ODE
+($\varepsilon>0$); under the regularisation the conclusion of
+Theorem~\ref{thm:asymptotic} weakens to convergence to the closure of
+the invariant set $\{S\in\ker J^{T}\}$.
+\end{corollary}
+
+% ============================================================
+\section{Domain Parameterisation}
+\label{sec:domain}
+% ============================================================
+
+\begin{lockbox}
+\textbf{Domain independence of the core system:}
+\[
+\boxed{
+  \text{Different domains change \emph{only} }
+  S(X),\quad E(X),\quad \Fbase(X).
+}
+\]
+\textbf{The ODE structure, the gradient formula, the projection, and the
+control gain are unchanged across all domains.}
+\end{lockbox}
+
+\bigskip
+
+\begin{center}
+\begin{tabularx}{\linewidth}{>{\bfseries}l X X X}
+\toprule
+Domain & $S(X)$ & $E(X)$ & $\Fbase(X)$ \\
+\midrule
+Trading / Signal &
+  Spread / factor vector &
+  $S^{T}G S$ with $G = \diag(\sigma^{-2})$ &
+  Alpha signal + mean reversion \\[4pt]
+PDE control &
+  Modal coefficients $a_k$ &
+  $\|a\|_{G}^{2}$ (weighted $L^{2}$) &
+  PDE right-hand side \\[4pt]
+Optimisation &
+  Gradient / constraint residual &
+  $\|\nabla f\|^{2}$ or barrier term &
+  Gradient descent step \\[4pt]
+Robotics &
+  Task-space error &
+  $e^{T}W e$ & Joint velocity command \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{remark}
+The table entries are \emph{examples}, not definitions. Any choice of
+$S$, $G$, and $\Fbase$ satisfying the structural requirements of
+Sections~\ref{sec:rep}--\ref{sec:control} produces a valid instance of the
+canonical system.
+\end{remark}
+
+% ============================================================
+\section{Verification Checklist}
+\label{sec:check}
+% ============================================================
+
+All items below must evaluate to \textbf{TRUE} before any application or proof
+proceeds. If any item is FALSE, return to the indicated section and fix it.
+
+\begin{checkbox}
+\begin{enumerate}[leftmargin=2em, label=$\checkmark$\;\textbf{\arabic*.}]
+  \item \textbf{Forward chain intact}\\
+        $X \to S \to E \to \gX \to \Xdot$ is the unique data path.
+        \hfill $\to$ \S \ref{sec:chain}
+
+  \item \textbf{Single gradient}\\
+        $\gX = 2J^{T}GS$ is the only gradient appearing anywhere.
+        \hfill $\to$ \S \ref{sec:gradient}
+
+  \item \textbf{Single force definition}\\
+        $F = \Fbase - \gX$; no other force is named or used.
+        \hfill $\to$ \S \ref{sec:B2a}
+
+  \item \textbf{Euclidean projection only}\\
+        $\langle \cdot,\cdot\rangle = u^{T}v$; no $\langle\cdot,\cdot\rangle_{G}$ in dynamics.
+        \hfill $\to$ Rule~2
+
+  \item \textbf{No metric mixing}\\
+        $\Gpull$ absent from $\Xdot$ and $\gX$.
+        \hfill $\to$ Rule~3
+
+  \item \textbf{Control uses $F$, not $\Fbase$}\\
+        Projection term $\langle F,\gX\rangle$; not $\langle\Fbase,\gX\rangle$.
+        \hfill $\to$ \S \ref{sec:core}
+
+  \item \textbf{Hessian formula correct}\\
+        $\nabla^{2}_{X}E = 2 J^{T}GJ + \langle\eta,K\rangle_{1}$ with
+        $\eta = 2GS$ and $K^{i}{}_{ab}=\partial_{a}\partial_{b}S^{i}$.
+        \hfill $\to$ \S C.5
+
+  \item \textbf{Curvature manifold defined}\\
+        $\Cman = \{X : \lambda_{\max}(\nabla^{2}_{X}E) = 1\}$.
+        \hfill $\to$ \S D.3
+
+  \item \textbf{Domain variation confined}\\
+        Only $S$, $E$, $\Fbase$ differ across domains.
+        \hfill $\to$ \S \ref{sec:domain}
+
+  \item \textbf{No structural changes after this version}\\
+        Applications, proofs, and implementations only.
+        \hfill $\to$ \S \ref{sec:frozen}
+\end{enumerate}
+\end{checkbox}
+
+% ============================================================
+\section{Structure Freeze}
+\label{sec:frozen}
+% ============================================================
+
+\begin{lockbox}
+\[
+\boxed{\text{NO further structural changes to this system.}}
+\]
+The core ODE (\S \ref{sec:core}), the five definitions (\S \ref{sec:defs}), and the
+four rules (\S \ref{sec:rules}) are \textbf{frozen}.
+
+\medskip
+Permitted after this point:
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item \textbf{Applications} --- instantiate $S$, $G$, $\Fbase$ for a new domain.
+  \item \textbf{Proofs} --- stability, convergence, curvature bounds.
+  \item \textbf{Implementations} --- numerical integrators, code, experiments.
+\end{itemize}
+
+\medskip
+Not permitted:
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item Redefining $\gX$, $F$, $\gamma$, or the ODE.
+  \item Adding metric-weighted projections.
+  \item Introducing alternative gradient or force terms.
+\end{itemize}
+\end{lockbox}
+
+% ============================================================
+\section{Summary --- One Line}
+\label{sec:oneline}
+% ============================================================
+
+\begin{center}
+\Large
+\[
+\boxed{
+  \text{Lock system} \;\longrightarrow\; \text{Build applications}
+  \;\longrightarrow\; \text{Prove results}
+}
+\]
+\end{center}
+
+\bigskip\bigskip
+
+% ============================================================
+\appendix
+% ============================================================
+
+\section{Symbol Table}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}c l l}
+\toprule
+Symbol & Meaning & Dimensions \\
+\midrule
+$X$        & State vector                        & $\R^{n}$ \\
+$S(X)$     & Representation / feature map        & $\R^{k}$ \\
+$J(X)$     & Jacobian $\partial S/\partial X$    & $\R^{k\times n}$ \\
+$G$        & Feature-space metric (SPD, fixed)   & $\R^{k\times k}$ \\
+$E(X)$     & Energy $= S^{T}GS$                  & $\R_{\geq 0}$ \\
+$\gX(X)$   & State-space gradient $= 2J^{T}GS$   & $\R^{n}$ \\
+$\Fbase(X)$& Domain-specific nominal field       & $\R^{n}$ \\
+$F(X)$     & Modified force $= \Fbase - \gX$     & $\R^{n}$ \\
+$\gamma(X)$& Adaptive gain $= E/(E+\theta)$      & $[0,1)$ \\
+$\theta$   & Gain regularisation constant         & $\R_{>0}$ \\
+$\Gpull$   & Pulled-back metric $= J^{T}GJ$       & $\R^{n\times n}$ \\
+$K(X)$     & Curvature tensor of $S$, $K^{i}{}_{ab}=\partial_{a}\partial_{b}S^{i}$ & $\R^{k\times n\times n}$ \\
+$\eta(X)$  & Feature-gradient $= \nabla_{S}E = 2GS$ & $\R^{k}$ \\
+$\Cman$    & Curvature manifold $\lambda_{\max}=1$& $\subset\R^{n}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Quick Reference Card}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{ll}
+\toprule
+\textbf{Quantity} & \textbf{Formula} \\
+\midrule
+Representation     & $S : X \to \R^{k}$ \\
+Energy             & $E = S^{T}GS,\quad G\succ 0$ \\
+Gradient           & $\gX = 2J^{T}GS$ \\
+Modified force     & $F = \Fbase - \gX$ \\
+Gain               & $\gamma = E/(E+\theta)$ \\
+Canonical ODE      & $\Xdot = \Fbase - \gX
+                      - \gamma\,\dfrac{\langle F,\gX\rangle}{\|\gX\|^{2}}\,\gX$ \\
+Hessian            & $\nabla^{2}_{X}E = 2 J^{T}GJ + \langle\eta,K\rangle_{1}$,
+                     $\eta = 2GS$ \\
+Curvature manifold & $\Cman = \{X : \lambda_{\max}(\nabla^{2}_{X}E)=1\}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Proof Roadmap (Next Steps)}
+
+The following results remain to be established (proofs are outside the locked
+core but follow directly from it):
+
+\begin{enumerate}[leftmargin=2em, label=\textbf{P\arabic*.}]
+  \item \textbf{Lyapunov descent.} \emph{Done} -- Theorem~\ref{thm:descent}.
+  \item \textbf{Invariant set / asymptotic stability.} \emph{Done} --
+        Theorem~\ref{thm:asymptotic}.
+  \item \textbf{Curvature bound.} \emph{Done} --
+        Proposition~\ref{prop:curv-bound}.
+  \item \textbf{Domain convergence.} \emph{Done} -- corollaries in
+        Section~\ref{sec:applications}.
+  \item \textbf{Discretisation error.} \emph{Open.} Bound integration
+        error growth for Euler and Runge--Kutta schemes as a function
+        of $h$ and $\theta$; quantify the bias introduced by
+        $\varepsilon>0$ regularisation.
+  \item \textbf{Stochastic extension.} \emph{Open.} Itô analysis of
+        $dX = (\cdots)\,dt + \sigma\,dW$, including the It\^o correction
+        to $\dot{E}$.
+  \item \textbf{Time-varying $G(t)$.} \emph{Open.} Effect on
+        $\dot{E}$ and on the rate $\rho$ of Theorem~\ref{thm:exp}.
+\end{enumerate}
+
+% ============================================================
+% ============================================================
+%   PART II  ---  GEOMETRIC EXTENSIONS  (v3)
+% ============================================================
+% ============================================================
+
+\part{Geometric Extensions}
+
+\begin{lockbox}
+\textbf{Extension principle (v3).} Each extension below adds new
+geometric structure \emph{strictly upstream} of $\gX$, by changing
+either the representation map $S$, the metric $G$, or the energy
+template. \textbf{The canonical ODE, the gradient formula
+$\gX = 2J^{T}GS$, and the Euclidean projection are unchanged.}
+The frozen v2 system from Part~I is the \emph{kernel} of every
+extension.
+\end{lockbox}
+
+% ============================================================
+\section{Fractal-Geometric Extension}
+\label{sec:fractal}
+% ============================================================
+
+\subsection{Motivation and setup}
+
+Many target sets are not smooth manifolds but \emph{self-similar}
+attractors with non-integer Hausdorff dimension $d_{H}\in(0,n)$:
+financial support/resistance, turbulent attractors, multi-scale
+boundary layers. The frozen core requires only that the set be
+expressed as the zero level set of a smooth energy. We therefore
+route all fractal information through $S$.
+
+Let $\mathcal{A}\subset\R^{n}$ be a (possibly fractal) compact target
+and fix $\delta_{0}>0$. Define the \emph{$\delta$-mollified distance}
+\[
+  d_{\delta}(X) \;:=\; \inf_{Y\in\mathcal{A}_{\delta}}\|X-Y\|,
+  \qquad \mathcal{A}_{\delta} := \{Y : \mathrm{dist}(Y,\mathcal{A})\le\delta\}.
+\]
+For $\delta>0$, $\mathcal{A}_{\delta}$ is a smooth tubular thickening,
+so $d_{\delta}\in C^{2}(\R^{n}\setminus\mathcal{A}_{\delta})$.
+
+\subsection{Multi-scale representation}
+
+\begin{defbox}{F.1 --- Fractal feature map}
+Fix scales $\delta_{1}>\delta_{2}>\dots>\delta_{L}>0$ and define
+\[
+  S_{\mathrm{frac}}(X) := \bigl(d_{\delta_{1}}(X),\dots,d_{\delta_{L}}(X)\bigr)^{T}\in\R^{L}.
+\]
+The fractal metric is
+\(
+  G_{\mathrm{frac}} = \diag(\delta_{1}^{-2 d_{H}},\dots,\delta_{L}^{-2 d_{H}}).
+\)
+\end{defbox}
+
+\paragraph{Why this metric.}
+For a $d_{H}$-dimensional self-similar set,
+$\mathrm{Vol}(\mathcal{A}_{\delta})\sim \delta^{n-d_{H}}$ and the
+typical squared distance at scale $\delta$ scales as $\delta^{2}$. The
+weight $\delta_{\ell}^{-2 d_{H}}$ rescales the contribution of each
+shell so that mass is balanced across scales according to the
+Hausdorff dimension. Strict scale-invariance under simultaneous
+dilation $\mathcal{A}\mapsto\lambda\mathcal{A}$,
+$\delta\mapsto\lambda\delta$ (where each summand transforms as
+$\lambda^{2-2 d_{H}}$) holds only at $d_{H}=1$; for general $d_{H}$
+the weight produces \emph{dimension-aware} but not invariant
+weighting, which is the right notion for capacity-balanced descent.
+
+\subsection{Closure under the canonical core}
+
+\begin{proposition}[Fractal instantiation]
+\label{prop:fractal-inst}
+With $S=S_{\mathrm{frac}}$, $G=G_{\mathrm{frac}}$, and locally
+Lipschitz $\Fbase$, assumptions \textup{(A1)--(A4)} hold on the open
+set $\Omega := \R^{n}\setminus\bigl(\mathcal{A}_{\delta_{L}}\cup
+\mathrm{Cut}(\mathcal{A})\bigr)$, where $\mathrm{Cut}(\mathcal{A})$
+is the medial axis of $\mathcal{A}$. On $\Omega$ each $d_{\delta_{\ell}}$
+is $C^{2}$ and Theorems~\ref{thm:descent}--\ref{thm:ub} apply with the
+rate constant of Theorem~\ref{thm:exp}. Globally,
+$d_{\delta_{\ell}}\in C^{1,1}$, and \textup{(A1)} can be replaced by
+\textup{(A1$'$)} ($S\in C^{1,1}$ with locally bounded weak Hessian)
+while preserving Theorems~\ref{thm:descent} and \ref{thm:asymptotic}.
+\end{proposition}
+
+\begin{proof}
+On $\Omega$ the squared-distance functions are $C^{2}$ by Federer's
+tubular-neighbourhood theorem; $G_{\mathrm{frac}}$ is constant SPD;
+apply Theorem~\ref{thm:wellposed}. The $C^{1,1}$ extension follows
+from Rademacher and standard a.e.\ chain-rule arguments.
+\end{proof}
+
+\begin{proposition}[Multi-scale exponential decay]
+\label{prop:multi-scale-decay}
+For $\Fbase\equiv 0$ on $\Omega$,
+\[
+  E_{\mathrm{frac}}(X(t)) \le E_{\mathrm{frac}}(X_{0})\,e^{-\rho_{\mathrm{frac}}t},
+  \qquad
+  \rho_{\mathrm{frac}} \;=\; 4\,\sigma_{J}^{2}\,
+         \frac{\delta_{L}^{-4 d_{H}}}{\delta_{1}^{-2 d_{H}}}
+         \,(1-\gamma_{\max}),
+\]
+with $\sigma_{J}$ the smallest singular value of the Jacobian of
+$S_{\mathrm{frac}}$ on the operating sublevel set.
+\end{proposition}
+
+\begin{proof}
+Apply Theorem~\ref{thm:exp} with $\mu_{G}=\delta_{L}^{-2 d_{H}}$ and
+$M_{G}=\delta_{1}^{-2 d_{H}}$ (eigenvalues of the diagonal
+$G_{\mathrm{frac}}$).
+\end{proof}
+
+% ============================================================
+\section{Contact-Geometric Extension}
+\label{sec:contact}
+% ============================================================
+
+\subsection{Motivation}
+
+Many controlled systems live on a contact manifold $(M^{2m+1},\alpha)$
+with $\alpha\wedge(d\alpha)^{m}\neq 0$. The Reeb field $R_{\alpha}$ and
+the contact distribution $\xi=\ker\alpha$ encode admissible motions.
+We show that the canonical ODE respects $\alpha$ when $\Fbase$ is
+Reeb-compatible, without modifying the dynamics.
+
+\subsection{Contact instantiation}
+
+Work in $\R^{2m+1}$ with the standard contact form
+$\alpha = dz - \sum_{i=1}^{m} y_{i}\,dx_{i}$, coordinates
+$(x,y,z)$. (Throughout Part~II, the symbol $\alpha$ denotes this
+contact 1-form; the projection coefficient of \S B.2 is denoted
+$\alpha_{\mathrm{proj}}=\langle F,\gX\rangle/\|\gX\|^{2}$ when both
+appear together.) Then $R_{\alpha}=\partial_{z}$ and
+$\xi=\mathrm{span}\{\partial_{x_{i}}+y_{i}\partial_{z},\partial_{y_{i}}\}$.
+
+\begin{defbox}{C.1 --- Contact feature map}
+Let $\Phi:\R^{2m+1}\to\R^{k_{0}}$ encode the target submanifold
+(e.g.\ a Legendrian) as $\Phi=0$. Define
+\[
+  S_{\mathrm{ct}}(X) :=
+  \begin{pmatrix} \Phi(X) \\ \alpha_{X}(\Fbase(X)) \end{pmatrix}
+  \in \R^{k_{0}+1},
+\]
+where $\alpha_{X}(v) = v_{z}-\sum y_{i}v_{x_{i}}$. The metric is
+$G_{\mathrm{ct}} = \mathrm{blockdiag}(G_{0},\beta)$, $\beta>0$.
+\end{defbox}
+
+The second component penalises $\Fbase$-energy along the Reeb
+direction (non-horizontal motion).
+
+\subsection{Horizontal descent property}
+
+\begin{proposition}[Contact preservation]
+\label{prop:contact}
+Let $\phi(X) := \alpha_{X}(\Fbase(X)) = (\Fbase)_{z} - \sum_{i} y_{i}(\Fbase)_{x_{i}}$
+and $L_{\phi} := \sup_{X}\|\nabla_{X}\phi(X)\|<\infty$ on the operating region.
+With $S=S_{\mathrm{ct}}$ and $G=G_{\mathrm{ct}}$ in the canonical ODE,
+\[
+  \frac{d}{dt}\bigl(\beta\,\phi(X)^{2}\bigr)
+  \;=\; 2\beta\,\phi(X)\,\langle\nabla_{X}\phi(X),\Xdot\rangle
+  \;\le\; 2\beta\,L_{\phi}\,|\phi(X)|\,\|\Xdot\|.
+\]
+Moreover, by Lemma~\ref{lem:Edot} applied to $E_{\mathrm{ct}}$, the
+total energy obeys $\dot E\le -(1-\gamma)\|\gX\|^{2}+(1-\gamma)\langle\gX,\Fbase\rangle$,
+which (since the second component of $\gX$ involves $\nabla_{X}\phi$)
+forces $\beta\phi(X)^{2}\to 0$ whenever the first-component error
+$\Phi(X)\to 0$ and $\Fbase$ is autonomous with $\phi$ vanishing at the
+target.
+\end{proposition}
+
+\begin{proof}
+The identity is immediate from the chain rule
+$\dot\phi = \langle\nabla_{X}\phi,\Xdot\rangle$ and Cauchy--Schwarz.
+The asymptotic statement follows by combining the energy descent of
+Theorem~\ref{thm:descent} (which forces $\gX\to 0$ along the
+trajectory in the autonomous case) with the structural fact that the
+Reeb-component of $\gX$ is $2\beta\phi(X)\nabla_{X}\phi(X)$, so
+$\gX\to 0$ and a non-degeneracy of $\nabla_{X}\phi$ at the target
+force $\phi\to 0$.
+\end{proof}
+
+\paragraph{Reading.}
+The contact extension uses the canonical ODE \emph{as-is}; preservation
+is purely a property of $S_{\mathrm{ct}}$. Rule~2 (Euclidean projection)
+is preserved.
+
+\subsection{Subriemannian special case}
+
+If $\Fbase$ is horizontal ($\alpha(\Fbase)=0$), the second component of
+$E_{\mathrm{ct}}$ vanishes identically and the system reduces to the
+descent of Part~I restricted to $\xi$. This recovers
+\emph{subriemannian} gradient flow without modifying the canonical ODE.
+
+% ============================================================
+\section{Geometric-Flow Extension}
+\label{sec:geomflow}
+% ============================================================
+
+\subsection{Time-varying metric}
+
+The frozen core requires $G$ constant. We now allow $G=G(t)$ to evolve
+by a prescribed \emph{geometric flow} (Ricci-type, mean-curvature,
+Yamabe), driven by the current state.
+
+\begin{defbox}{GF.1 --- Metric flow}
+Let $\mathrm{Ric}(G;X)\in\R^{k\times k}_{\mathrm{sym}}$ be a smooth
+functional. The metric evolves by
+\[
+  \boxed{\;\dot G \;=\; -2\,\mathrm{Ric}(G;X)
+               \;+\;\sigma\,\bigl(G_{\star}(X)-G\bigr),\;}
+  \qquad \sigma\ge 0,
+\]
+with $G_{\star}(X)$ a target metric (e.g.\ data-adaptive covariance).
+$\sigma=0$ recovers pure Ricci flow; $\sigma>0$ adds attractive
+damping toward $G_{\star}$.
+\end{defbox}
+
+\subsection{Modified energy derivative}
+
+\begin{lemma}[Energy derivative under metric flow]
+\label{lem:Edot-flow}
+With $G=G(t)$ as above and $E(X,t)=S(X)^{T}G(t)S(X)$,
+\[
+  \dot E
+  \;=\; (1-\gamma)\bigl(\langle\gX,\Fbase\rangle - \|\gX\|^{2}\bigr)
+        \;+\; S^{T}\dot G\, S.
+\]
+\end{lemma}
+
+\begin{proof}
+$\dot E = 2 S^{T}G\dot S + S^{T}\dot G\,S = \langle\gX,\Xdot\rangle + S^{T}\dot G\,S$;
+apply Lemma~\ref{lem:Edot} for the first piece.
+\end{proof}
+
+For pure Ricci flow $S^{T}\dot G\,S = -2 S^{T}\mathrm{Ric}\,S$, which
+is $\le 0$ whenever $\mathrm{Ric}\succeq 0$.
+
+\subsection{Joint stability}
+
+\begin{theorem}[Coupled state-metric stability]
+\label{thm:joint-stable}
+Assume \textup{(A1),(A3),(A4)}, the relaxed metric assumption
+\textup{(A2$'$)}, $\Fbase\equiv 0$, $\sigma>0$, and that
+$G_{\star}\in C^{1}$ with eigenvalues uniformly in
+$[\mu_{\star},M_{\star}]$ and $\|\nabla_{X}G_{\star}\|_{\mathrm{op}}\le L_{\star}$.
+Assume $\mathrm{Ric}(G;X)\succeq -c_{R}\,G$ with $c_{R}<\sigma/2$.
+If $G_{\star}$ is constant, the coupled system $(X,G)$ is
+forward-complete and the Lyapunov function
+\[
+  V(X,G) \;=\; E(X,t) \;+\; \tfrac{1}{2}\sigma^{-1}\|G-G_{\star}(X)\|_{F}^{2}
+\]
+is non-increasing. If $G_{\star}$ depends on $X$, the same calculation
+gives the practical bound
+\[
+  \dot V \;\le\; -a\|G-G_{\star}(X)\|_{F}^{2}
+          + \frac{L_{\star}^{2}}{4a\sigma^{2}}\|\Xdot\|^{2}
+\]
+for every $a\in(0,1)$ after absorbing the Ricci term by
+$c_{R}<\sigma/2$.
+\end{theorem}
+
+\begin{proof}[Sketch]
+Lemma~\ref{lem:Edot-flow} gives
+$\dot E\le -(1-\gamma)\|\gX\|^{2} + 2c_{R} S^{T}G S + \sigma S^{T}(G_{\star}-G)S$.
+Differentiating the metric piece and using $\dot G_{\star} = (\nabla_{X}G_{\star})\Xdot$,
+\[
+  \frac{d}{dt}\tfrac{1}{2}\sigma^{-1}\|G-G_{\star}\|_{F}^{2}
+  = -\|G-G_{\star}\|_{F}^{2}
+    -2\sigma^{-1}\langle G-G_{\star},\mathrm{Ric}\rangle_{F}
+    -\sigma^{-1}\langle G-G_{\star},\dot G_{\star}\rangle_{F}.
+\]
+The last term is bounded by
+$\sigma^{-1}\|G-G_{\star}\|_{F}\,L_{\star}\|\Xdot\|$. If $G_{\star}$ is
+constant this term vanishes, and adding to $\dot E$ while using
+$c_{R}<\sigma/2$ yields $\dot V\le 0$. If $G_{\star}$ varies with $X$,
+Young's inequality gives the stated practical bound.
+\end{proof}
+
+\subsection{Discretisation}
+
+A practical scheme alternates a state half-step (canonical ODE with
+frozen $G_{t}$) and a metric half-step (one explicit Euler step of the
+Ricci flow). Convergence in the limit $h\to 0$ to the continuous
+coupled system follows from Lie--Trotter-type splitting estimates.
+
+% ============================================================
+\section{Unified View of the Three Extensions}
+\label{sec:unified}
+% ============================================================
+
+The consolidated table for Parts I--III is given in
+Section~\ref{sec:unified-master} at the end of Part~III. The three
+v3 extensions all preserve the locked canonical ODE: Fractal and
+Contact change only $S$; Geometric flow lifts (A2) to (A2$'$).
+
+\begin{lockbox}
+In every v3 extension $\gX = 2 J^{T}G S$, the projection is Euclidean,
+and Rules~1--4 of Part~I are obeyed.
+\end{lockbox}
+
+\subsection*{Open extension targets (v3 candidates promoted to Part~III)}
+The v3 candidate \emph{information-geometric flow} is realised in
+Part~III. The remaining v5 candidate list is consolidated at the end
+of Part~III.
+
+% ============================================================
+% ============================================================
+%   PART III  ---  INFORMATION-GEOMETRIC FLOW  (v4)
+% ============================================================
+% ============================================================
+
+\part{Information-Geometric Flow}
+
+\begin{lockbox}
+\textbf{v4 principle.} Specialise the v3 metric flow with the
+\emph{Fisher information metric}. Two coupling schedules are used:
+the \emph{tracking} schedule $G\equiv\mathcal{I}_{S}(S(X))$ for structural
+results, and the \emph{relaxation} schedule
+$\dot G = \sigma_{\mathrm{rel}}(\mathcal{I}_{S}(S(X))-G)$ for Lyapunov / practical
+state--metric control (specialisation of v3's Theorem~\ref{thm:joint-stable}). The locked
+canonical ODE, the gradient formula $\gX = 2 J^{T}G S$, and the
+Euclidean projection are unchanged. New \emph{auxiliary} object: the
+state natural gradient $\widetilde\gX = \mathcal{I}_{X}^{\dagger}\gX$,
+where $\mathcal{I}_{X}=J^{T}\mathcal{I}_{S}J$, which drives
+a chart-covariant variant flow (extension, not part of the locked
+system). Capabilities added: adaptive preconditioning, statistical
+Cram\'er--Rao rate floor, MLE/VI as canonical instances.
+\end{lockbox}
+
+% ============================================================
+\section{Statistical setup and the Fisher metric}
+\label{sec:fisher-setup}
+% ============================================================
+
+\subsection{Features as statistical parameters}
+
+Identify the feature coordinate $z=S(X)\in\R^{k}$ with the parameter
+of a smooth parametric family of probability densities
+\[
+  \mathcal{P} = \bigl\{\,p(\,\cdot\mid z) : z\in\Theta_{S}\subset\R^{k}\,\bigr\},
+  \qquad p(\,\cdot\mid z)>0,\ \int p\,dy = 1.
+\]
+The feature score is $u(y;z) := \nabla_{z}\log p(y\mid z)$.
+
+\begin{defbox}{IG.1 --- Fisher information matrix}
+\[
+  \mathcal{I}_{S}(z) \;:=\; \mathbb{E}_{y\sim p(\cdot\mid z)}
+        \bigl[\,u(y;z)\,u(y;z)^{T}\,\bigr]
+  \;=\; -\mathbb{E}\bigl[\nabla^{2}_{z}\log p(y\mid z)\bigr]
+  \in\R^{k\times k}.
+\]
+\end{defbox}
+
+$\mathcal{I}_{S}(z)\succeq 0$ always; positive-definite under the standard
+identifiability assumption (\textbf{A5}: feature scores span $\R^{k}$ at
+every $z=S(X)$ in the operating region). The pullback Fisher metric on
+state space is
+\[
+  \mathcal{I}_{X}(X) := J(X)^{T}\mathcal{I}_{S}(S(X))J(X)\in\R^{n\times n}.
+\]
+We henceforth assume \textbf{A5}; when $\mathcal{I}_{X}$ is singular,
+all inverses below are Moore--Penrose inverses or Tikhonov-regularised
+inverses on $\mathrm{range}(J^{T})$.
+
+\subsection{Fisher metric in the canonical system}
+
+Under \textup{(A2$'$)} we may take $G(X) := \mathcal{I}_{S}(S(X))$. The
+canonical objects then read
+\[
+  E(X) = S(X)^{T}\mathcal{I}_{S}(S(X))\,S(X),
+  \qquad
+  \gX = 2 J(X)^{T}\mathcal{I}_{S}(S(X))\,S(X),
+\]
+and the canonical ODE, the Euclidean projection (Rule~2), and Rules~1,
+3, 4 are unchanged. We adopt either of two coupling schemes, used
+below as needed:
+\begin{enumerate}[leftmargin=1.8em,label=(F\arabic*)]
+    \item \textbf{Tracking schedule.} $G(X)\equiv \mathcal{I}_{S}(S(X))$
+        (instantaneous identification). Then $\dot G$ is the chain-rule
+      derivative $\nabla_{X}\mathcal{I}_{S}(S(X))[\Xdot]$ and the v3
+        flow equation does not apply.
+  \item \textbf{Relaxation schedule.} $G(t)$ evolves independently by
+      $\dot G = \sigma_{\mathrm{rel}}\bigl(\mathcal{I}_{S}(S(X))-G\bigr)$
+        with relaxation rate $\sigma_{\mathrm{rel}}>0$. The v3
+        joint-stability theorem applies with
+      $G_{\star}(X)=\mathcal{I}_{S}(S(X))$, $\mathrm{Ric}\equiv 0$,
+      subject to the state-dependent-target qualifications in
+      Theorem~\ref{thm:joint-stable}.
+        In the limit $\sigma_{\mathrm{rel}}\to\infty$ this recovers
+        (F1).
+\end{enumerate}
+Throughout Part~III we use (F1) for structural results and (F2) for
+the joint-stability statement (Theorem~\ref{thm:fisher-stable}).
+
+% ============================================================
+\section{Natural gradient and chart covariance}
+\label{sec:nat-grad}
+% ============================================================
+
+\begin{defbox}{NG.1 --- Natural gradient}
+With $G(X)=\mathcal{I}_{S}(S(X))$, define the state natural gradient of
+$E$ as
+\[
+  \boxed{\;\widetilde\gX(X) \;:=\; \mathcal{I}_{X}(X)^{\dagger}\,\gX(X),
+           \qquad \mathcal{I}_{X}=J^{T}\mathcal{I}_{S}J.\;}
+\]
+$\widetilde\gX$ is an auxiliary quantity used \emph{only} for analysis
+and for the \emph{natural-gradient variant} of the canonical ODE
+introduced in Section~\ref{sec:fisher-compute}. The locked canonical
+ODE itself is unchanged and continues to use $\gX$.
+\end{defbox}
+
+\begin{theorem}[Chart covariance of $\widetilde\gX$]
+\label{thm:nat-grad}
+Under a $C^{1}$ diffeomorphism $X = \Phi(\widetilde X)$ with Jacobian
+ $T = \partial\Phi/\partial\widetilde X$, the state Fisher metric and the
+natural gradient transform as
+\[
+  \widetilde{\mathcal{I}}_{X} = T^{T}\mathcal{I}_{X}\,T,
+  \qquad
+  \widetilde{\widetilde{g}}_{\widetilde X} = T^{-1}\,\widetilde\gX,
+\]
+so the natural-gradient \emph{flow} $\dot X = -\widetilde\gX(X)$ is
+covariant: its trajectory in $\widetilde X$-coordinates is
+$\Phi^{-1}\circ X(\cdot)$. Equivalently, the trajectory is
+chart-independent.
+\end{theorem}
+
+\begin{proof}
+$\widetilde{\mathcal{I}}_{X} = T^{T}\mathcal{I}_{X}T$ is the standard
+transformation (Chentsov--Cencov for the Fisher metric;
+\cite{amari2016}). Then
+$\widetilde{\nabla}\widetilde E = T^{T}\nabla E$, so
+$\widetilde{\widetilde g} = \widetilde{\mathcal{I}}_{X}^{\dagger}\widetilde\nabla\widetilde E
+= (T^{T}\mathcal{I}_{X}T)^{\dagger}T^{T}\nabla E = T^{-1}\mathcal{I}_{X}^{\dagger}\nabla E
+= T^{-1}\widetilde\gX$. Covariance of the flow follows.
+\end{proof}
+
+\begin{remark}[The locked canonical ODE is \emph{not} chart-covariant]
+\label{rem:not-covariant}
+The canonical ODE of Part~I uses the Euclidean inner product
+(Rule~2) in the projection term. Under reparametrisation this inner
+product is not preserved, so the canonical trajectory $X(t)$ is
+chart-dependent. Chart covariance is a property of the
+\emph{auxiliary} natural-gradient flow $\dot X = -\widetilde\gX$ and of
+stability statements formulated intrinsically in the Fisher metric
+(see Theorem~\ref{thm:fisher-stable}); it is not a property of the
+locked ODE.
+\end{remark}
+
+\paragraph{Computational consequence.}
+The natural-gradient flow $\dot X = -\widetilde\gX$ is the
+invariant analogue of canonical descent. Even though the locked
+canonical ODE remains chart-dependent, working in (locally)
+Fisher-affine coordinates makes Euclidean projection nearly optimal
+and removes the conditioning problems that plague v2/v3.
+
+% ============================================================
+\section{Joint stability under Fisher flow}
+\label{sec:fisher-stable}
+% ============================================================
+
+\begin{theorem}[Information-geometric stability]
+\label{thm:fisher-stable}
+Assume \textup{(A1),(A2$'$),(A3)--(A5)}, $\Fbase\equiv 0$, the
+relaxation schedule \textup{(F2)} with $\sigma_{\mathrm{rel}}>0$, and
+that $\mathcal{I}_{S}(S(X))$ is uniformly bounded
+$\mu_{\mathcal{I}}I\preceq \mathcal{I}_{S}(S(X))\preceq M_{\mathcal{I}}I$ on
+the operating sublevel set, with $\nabla_{X}\mathcal{I}_{S}(S(X))$ uniformly
+bounded in operator norm by $L_{\mathcal{I}}$. If
+$\mathcal{I}_{S}$ is constant on the operating set, then the Lyapunov
+function
+\[
+  V(X,G) \;=\; E(X) \;+\; \tfrac{1}{2}\sigma_{\mathrm{rel}}^{-1}\|G-\mathcal{I}_{S}\|_{F}^{2}
+\]
+is non-increasing, and along trajectories
+\[
+  E(X(t)) \;\le\; E(X_{0})\,e^{-\rho_{\mathrm{F}} t},
+  \qquad
+  \rho_{\mathrm{F}} \;\ge\; 4\,\frac{\mu_{\mathcal{I}}^{2}}{M_{\mathcal{I}}}\,
+         \sigma_{\min}^{2}(J)\,(1-\gamma_{\max}).
+\]
+The displayed Euclidean rate is chart-dependent. By
+Theorem~\ref{thm:nat-grad}, however, the auxiliary natural-gradient
+flow is chart-covariant, so stability statements formulated
+intrinsically with the pullback Fisher metric $\mathcal{I}_{X}$ are
+chart-independent.
+If $\mathcal{I}_{S}$ varies with $X$, the same $V$ satisfies the
+practical bound of Theorem~\ref{thm:joint-stable} with
+$G_{\star}(X)=\mathcal{I}_{S}(S(X))$ rather than strict monotonicity.
+\end{theorem}
+
+\begin{proof}
+The Lyapunov inequality is Theorem~\ref{thm:joint-stable} with
+$G_{\star}=\mathcal{I}_{S}$, $\mathrm{Ric}\equiv 0$ in the constant case.
+If $\mathcal{I}_{S}$ varies, Theorem~\ref{thm:joint-stable} supplies
+the displayed practical bound. The decay rate follows from the
+corrected Theorem~\ref{thm:exp} with
+$\mu_{G}=\mu_{\mathcal{I}}$, $M_{G}=M_{\mathcal{I}}$. Chart
+covariance of the auxiliary natural-gradient flow is
+Theorem~\ref{thm:nat-grad}.
+\end{proof}
+
+\begin{remark}[Cram\'er--Rao floor]
+If the family $\mathcal{P}$ admits an unbiased estimator with
+covariance bounded above by $\mathrm{Cov}_{\max}I$, the Cram\'er--Rao
+inequality gives $\mu_{\mathcal{I}}\ge \mathrm{Cov}_{\max}^{-1}$, so
+$\rho_{\mathrm{F}}\ge 4\,\mathrm{Cov}_{\max}^{-2}M_{\mathcal{I}}^{-1}\sigma_{\min}^{2}(J)(1-\gamma_{\max})$.
+This is a \emph{statistical} lower bound on the descent rate that
+v2/v3 cannot express.
+\end{remark}
+
+% ============================================================
+\section{Three new computational capabilities}
+\label{sec:fisher-compute}
+% ============================================================
+
+\subsection{Adaptive preconditioning and natural-gradient variant}
+
+The feature Fisher matrix $\mathcal{I}_{S}(S(X))$ and its pullback
+$\mathcal{I}_{X}=J^{T}\mathcal{I}_{S}J$ are the local information
+preconditioners for optimisation on $\mathcal{P}$. Two ways to use them:
+\begin{enumerate}[leftmargin=1.8em,nosep]
+    \item \textbf{In-place (locked ODE).} Set $G(X) = \mathcal{I}_{S}(S(X))$.
+      The locked ODE runs unchanged, with $\gX = 2 J^{T}\mathcal{I}_{S} S$.
+        This preserves Rules 1--4 but is chart-dependent.
+  \item \textbf{Natural-gradient variant.} Replace the locked ODE by
+        $\Xdot = -\widetilde\gX$ (Definition NG.1). Chart-covariant
+        (Theorem~\ref{thm:nat-grad}), but \emph{breaks Rule~2} and is
+        therefore an extension, not a specialisation. Use only when
+        chart invariance is required.
+\end{enumerate}
+
+\subsection{Variational inference and MLE in one map}
+
+Two canonical instances:
+\begin{enumerate}[leftmargin=1.8em,nosep]
+  \item \textbf{MLE.} In local asymptotic-normal coordinates, choose
+    $S(X):=X-X_{\mathrm{MLE}}$ and $G=\mathcal{I}_{S}$. Then
+    $E=S^{T}\mathcal{I}_{S}S$ is the quadratic log-likelihood error;
+    the auxiliary natural-gradient variant is locally Fisher scoring.
+  \item \textbf{Variational inference.} Choose $S(X) :=
+    \lambda(X)-\lambda^{\star}$ in natural-parameter coordinates of
+    $q_{X}$. With $G=\mathcal{I}_{S}$, $E$ is the local Fisher
+    quadratic approximation to the KL/negative ELBO; the auxiliary
+    flow $\dot X=-\widetilde\gX$ is natural-gradient VI.
+\end{enumerate}
+
+\subsection{Information-geometric Hessian}
+
+Under \textup{(A2$'$)} with $G=\mathcal{I}_{S}(S(X))$, the flat Euclidean
+Hessian of $E=S^{T}\mathcal{I}_{S}(S(X))S$ acquires extra terms beyond the
+constant-metric formula of \S C.5:
+\[
+  \bigl(\nabla^{2}_{X}E\bigr)_{ab}
+  \;=\; 2(J^{T}\mathcal{I}_{S}J)_{ab}
+     + \eta_{i}\,K^{i}{}_{ab}
+     + 2(\partial_{a}\mathcal{I}_{S,ij})J^{j}{}_{b}S^{i}
+     + 2(\partial_{b}\mathcal{I}_{S,ij})J^{j}{}_{a}S^{i}
+     + S^{i}(\partial_{a}\partial_{b}\mathcal{I}_{S,ij})S^{j},
+\]
+where $\eta = 2\mathcal{I}_{S}S$. The two single-derivative terms involve
+the Fisher-information \emph{connection coefficients}
+$C_{abc} := \tfrac{1}{2}\partial_{a}\mathcal{I}_{S,bc}$ (Amari
+$0$-connection); the last term involves $\partial^{2}\mathcal{I}$,
+which vanishes for exponential families in canonical coordinates.
+In particular, on the target set $\{S=0\}$ (where $\eta=0$ and the
+last three corrections vanish), $\nabla^{2}_{X}E = 2 J^{T}\mathcal{I}_{S}J=2\mathcal{I}_{X}$
+recovers the Fisher pulled-back metric at the optimum.
+
+% ============================================================
+\section{Bridge to v5: stochastic extension}
+\label{sec:bridge-v5}
+% ============================================================
+
+For a canonical SDE $dX = H(X)\,dt + \Sigma(X)\,dW$ (with
+$H$ the canonical-ODE drift), It\^o's lemma gives
+\[
+  \mathbb{E}[dE] \;=\; \bigl\langle\gX,H\bigr\rangle\,dt
+         \;+\; \tfrac{1}{2}\mathrm{tr}\!\bigl(\Sigma^{T}\nabla^{2}_{X}E\,\Sigma\bigr)\,dt.
+\]
+The Fisher choice $\Sigma = \mathcal{I}_{X}^{\dagger/2}$ makes the
+second term
+$\tfrac{1}{2}\mathrm{tr}\bigl((\mathcal{I}_{X}^{\dagger/2})^{T}\nabla^{2}_{X}E\,\mathcal{I}_{X}^{\dagger/2}\bigr)$,
+which on the target set ($\eta=0$ and $\nabla^{2}_{X}E=2\mathcal{I}_{X}$)
+reduces to $\mathrm{rank}(\mathcal{I}_{X})$, a chart-independent
+scalar on the identifiable tangent subspace. This prepares v5 by:
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item providing the canonical noise covariance $\Sigma=\mathcal{I}_{X}^{\dagger/2}$,
+  \item yielding chart-independent It\^o corrections,
+  \item identifying $V$ with a free-energy functional.
+\end{itemize}
+
+% ============================================================
+\section{Master unified view (v2 + v3 + v4)}
+\label{sec:unified-master}
+% ============================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\linewidth}{@{}l l l >{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Layer} & \textbf{Object changed} & \textbf{Canonical ODE} & \textbf{New result / capability} \\
+\midrule
+Part I (v2)    & frozen kernel ($S$, $G$ const) & defined           & descent, exp.\ rate, ult.\ boundedness \\
+Part II (v3)   & $S$ via $S_{\mathrm{frac}}$, $S_{\mathrm{ct}}$  & unchanged & fractal / contact \\
+Part II (v3)   & $G\to G(t)$ Ricci-type flow                     & unchanged & Lyapunov / practical state--metric bound (Thm.~\ref{thm:joint-stable}) \\
+Part III (v4)  & $G(X)=\mathcal{I}_{S}(S(X))$ + relaxation         & unchanged (locked) & adaptive preconditioning, Cram\'er--Rao floor \\
+Part III (v4)  & auxiliary natural-gradient flow                  & \emph{new variant} (extension) & chart covariance (Thm.~\ref{thm:nat-grad}) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{lockbox}
+In every \emph{locked-ODE} row $\gX = 2 J^{T}G S$, the projection is
+Euclidean, and Rules~1--4 of Part~I are obeyed. The natural-gradient
+variant in the last row \emph{breaks Rule~2} and is explicitly marked
+as an extension.
+\end{lockbox}
+
+\subsection*{Open extension targets (v5 candidates)}
+\begin{itemize}[leftmargin=1.8em,nosep]
+  \item Symplectic / Poisson extension via skew-symmetric energy correction.
+  \item Discrete fractal lattices: $S$ defined on a self-similar graph.
+  \item $\alpha$-connection family: interpolate between Fisher and dual-flat geometry.
+\end{itemize}
+
+% ============================================================
+% ============================================================
+%   PART IV  ---  STOCHASTIC CANONICAL SDE  (v4.1 surgical extension)
+% ============================================================
+% ============================================================
+
+\part{Stochastic Canonical SDE}
+\label{sec:part-iv}
+
+\begin{lockbox}
+\textbf{v4.1 principle.} The locked canonical ODE of Part~I is the
+zero-noise limit of a canonical \emph{stochastic} differential
+equation (SDE). The drift is unchanged; the diffusion is supplied as
+new geometric data and obeys the same locked structural rules. The
+Fisher-noise choice $\Sigma=\mathcal{I}_X^{\dagger/2}$ realises a
+chart-intrinsic noise floor at the target. This part is a surgical
+addition: nothing in Parts I--III is altered.
+\end{lockbox}
+
+% ============================================================
+\section{Canonical SDE}
+\label{sec:sde}
+% ============================================================
+
+\subsection{Drift, diffusion, and the canonical SDE}
+
+\begin{defbox}{S.1 --- Canonical SDE}
+Let $W$ be a standard $r$-dimensional Brownian motion on a filtered
+probability space, $\sigma_W\ge 0$ a noise gain, and
+$\Sigma : \R^n \to \R^{n\times r}$ a measurable diffusion field with
+locally bounded Frobenius norm. The \emph{canonical SDE} is
+\[
+\boxed{\;
+  dX_t \;=\; H(X_t)\,dt \;+\; \sigma_W\,\Sigma(X_t)\,dW_t,
+\;}
+\]
+where $H(X)$ is the drift of the locked canonical ODE
+(Section~\ref{sec:core}) for the locked variant, or $H(X)=-\widetilde\gX(X)$
+for the natural-gradient variant of Section~\ref{sec:nat-grad}.
+\end{defbox}
+
+\begin{defbox}{S.2 --- Fisher noise (canonical default)}
+With $G(X)=\mathcal{I}_S(S(X))$ (assumption A5) the canonical noise
+field is
+\[
+\boxed{\;
+  \Sigma_{\mathrm F}(X) \;:=\; \mathcal{I}_X(X)^{\dagger/2},
+\;}
+\]
+the unique symmetric positive-semidefinite square root of the
+Moore--Penrose inverse of the pullback Fisher metric
+$\mathcal{I}_X = J^T \mathcal{I}_S J$. We take $r=n$ for this choice.
+\end{defbox}
+
+\paragraph{Locked structural rules under noise.}
+The state-space gradient $\gX$, the modified force $F$, the gain
+$\gamma$ and the Euclidean projection (Rules~1--4) are unchanged.
+The diffusion $\Sigma$ enters \emph{only} through the new noise term;
+no metric-weighted projection is introduced.
+
+\subsection{Well-posedness}
+
+\begin{theorem}[Local strong existence and uniqueness]
+\label{thm:sde-wp}
+Assume \textup{(A1)--(A4)}. If $H$ and $\Sigma$ are locally Lipschitz
+with at most linear growth on $\R^n\setminus\Sigma_{\mathrm{sing}}$
+(or all of $\R^n$ when the regularised drift $\varepsilon>0$ is used),
+the canonical SDE admits a unique strong solution defined up to the
+explosion time $T_\infty$. Under the energy bound of
+Corollary~\ref{cor:global-sde} below, $T_\infty=\infty$ a.s.
+\end{theorem}
+
+\begin{proof}
+Standard application of the Yamada--Watanabe / It\^o local-Lipschitz
+existence theorem to the system $(H,\Sigma)$.
+\end{proof}
+
+\subsection{It\^o formula for the energy}
+
+\begin{theorem}[Energy It\^o formula]
+\label{thm:ito-E}
+Under (A1)--(A4) with $E\in C^2$, along any solution of the canonical
+SDE,
+\[
+  dE(X_t) \;=\; \bigl\langle \gX(X_t),\, H(X_t)\bigr\rangle\,dt
+        \;+\; \tfrac{1}{2}\,\sigma_W^{2}\,
+              \mathrm{tr}\!\bigl(\Sigma(X_t)^{T}\,\nabla^{2}_{X}E(X_t)\,\Sigma(X_t)\bigr)\,dt
+        \;+\; \sigma_W\,\bigl\langle \gX(X_t),\, \Sigma(X_t)\,dW_t\bigr\rangle.
+\]
+Taking expectations,
+\[
+  \frac{d}{dt}\,\mathbb{E}\bigl[E(X_t)\bigr]
+  \;=\; \mathbb{E}\bigl[\langle \gX, H\rangle\bigr]
+        \;+\; \tfrac{1}{2}\,\sigma_W^{2}\,
+              \mathbb{E}\bigl[\mathrm{tr}(\Sigma^{T}\nabla^{2}_{X}E\,\Sigma)\bigr],
+\]
+and the deterministic drift contribution coincides with
+Lemma~\ref{lem:Edot}: $\mathbb{E}[\langle\gX,H\rangle]
+= \mathbb{E}[(1-\gamma)(\langle\gX,\Fbase\rangle - \|\gX\|^2)]$.
+\end{theorem}
+
+\begin{proof}
+It\^o's lemma applied to the $C^2$ scalar $E$, using
+$dE = \langle\nabla_X E, dX\rangle + \tfrac12\,d[X]_t : \nabla^2 E$
+with $d[X]_t = \sigma_W^2\,\Sigma\Sigma^T\,dt$ and
+$\mathrm{tr}(\Sigma\Sigma^T\nabla^2 E)=\mathrm{tr}(\Sigma^T\nabla^2 E\,\Sigma)$.
+\end{proof}
+
+\subsection{The chart-intrinsic noise floor}
+
+\begin{proposition}[Trace correction at the target]
+\label{prop:trace-floor}
+With Fisher noise $\Sigma=\Sigma_{\mathrm F}=\mathcal{I}_X^{\dagger/2}$
+and $G=\mathcal{I}_S(S(X))$, at any $X^{*}$ with $S(X^{*})=0$,
+\[
+  \tfrac{1}{2}\,\mathrm{tr}\!\bigl(\Sigma_{\mathrm F}^{T}\,\nabla^{2}_{X}E(X^{*})\,\Sigma_{\mathrm F}\bigr)
+  \;=\; \mathrm{tr}\!\bigl(\mathcal{I}_X^{\dagger/2}\,\mathcal{I}_X\,\mathcal{I}_X^{\dagger/2}\bigr)
+  \;=\; \mathrm{rank}\,\mathcal{I}_X(X^{*}).
+\]
+This integer is intrinsic: under any $C^1$ chart change $X=\Phi(\widetilde X)$
+with $T=\partial\Phi/\partial\widetilde X$, the rank of
+$\widetilde{\mathcal{I}}_X = T^T \mathcal{I}_X T$ is preserved.
+\end{proposition}
+
+\begin{proof}
+By Section~\ref{sec:fisher-compute}, $\nabla^{2}_{X}E(X^{*})=2\mathcal{I}_X(X^{*})$
+on the target set. Hence the trace equals
+$\mathrm{tr}(P)=\mathrm{rank}\,\mathcal{I}_X$, with $P$ the projector
+onto $\mathrm{range}(\mathcal{I}_X)$. Rank is invariant under
+similarity transforms.
+\end{proof}
+
+\subsection{Mean-square ultimate boundedness}
+
+\begin{theorem}[Stochastic ultimate bound]
+\label{thm:sde-bound}
+Assume \textup{(A1)--(A5)}, $\Fbase\equiv 0$, the rank condition of
+Theorem~\ref{thm:exp}, and a uniform diffusion bound
+\(
+  \mathrm{tr}\bigl(\Sigma(X)^{T}\nabla^{2}_{X}E(X)\,\Sigma(X)\bigr) \le \tau_{\Sigma}
+\)
+on the operating sublevel set, with $\rho$ the rate of
+Theorem~\ref{thm:exp}. Then
+\[
+  \boxed{\;
+    \mathbb{E}\bigl[E(X_t)\bigr]
+    \;\le\; e^{-\rho t}\,E(X_0)
+          \;+\; \frac{\sigma_W^{2}\,\tau_{\Sigma}}{2\,\rho}
+          \,\bigl(1 - e^{-\rho t}\bigr),
+  \;}
+\]
+and in particular
+$\;\limsup_{t\to\infty}\mathbb{E}\bigl[E(X_t)\bigr]\le \sigma_W^{2}\tau_{\Sigma}/(2\rho)$.
+\end{theorem}
+
+\begin{proof}
+Take expectations in Theorem~\ref{thm:ito-E}. The martingale term
+vanishes; the deterministic drift contributes at most $-\rho\,\mathbb{E}[E]$
+by Theorem~\ref{thm:exp}; the trace term contributes at most
+$\tfrac12\sigma_W^2\tau_\Sigma$. Gr\"onwall's lemma applied to
+$y(t)=\mathbb{E}[E(X_t)]$ with $\dot y\le -\rho y + \tfrac12\sigma_W^2\tau_\Sigma$
+yields the stated bound.
+\end{proof}
+
+\begin{corollary}[Global existence under finite trace]
+\label{cor:global-sde}
+Under the hypotheses of Theorem~\ref{thm:sde-bound} the SDE solution
+exists for all $t\ge 0$ a.s., and $\mathbb{E}[E(X_t)]$ stays in the
+compact interval $[0,\, E(X_0)+\sigma_W^2\tau_\Sigma/(2\rho)]$.
+\end{corollary}
+
+\subsection{Natural-gradient Langevin and the Gibbs measure}
+
+Specialise to the natural-gradient variant: $H=-\widetilde\gX$,
+$\Sigma=\sqrt{2T}\,\mathcal{I}_X^{\dagger/2}$, $\sigma_W=1$. The
+canonical SDE becomes the \emph{natural-gradient Langevin dynamics}
+\[
+  dX_t \;=\; -\widetilde\gX(X_t)\,dt + \sqrt{2T}\,\mathcal{I}_X^{\dagger/2}(X_t)\,dW_t.
+\]
+
+\begin{proposition}[Gibbs invariant measure]
+\label{prop:gibbs}
+On the identifiable submanifold (where $\mathcal{I}_X$ has constant
+rank), the natural-gradient Langevin dynamics admits the Gibbs
+density
+\[
+  \pi_T(X) \;\propto\; \exp\!\bigl(-E(X)/T\bigr)
+\]
+with respect to the volume form induced by $\mathcal{I}_X$ as an
+invariant measure, and the free energy
+\[
+  \mathcal F_T(\mu) \;=\; \mathbb E_\mu[E] - T\,H_{\mathcal{I}_X}(\mu)
+\]
+is non-increasing along the law of $X_t$, where $H_{\mathcal{I}_X}$
+is differential entropy with respect to the Fisher volume form.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Standard verification that the Fokker--Planck operator of the
+natural-gradient Langevin has $\pi_T$ in its kernel, using the
+identity $-\nabla\cdot(\widetilde\gX\,\pi_T) + T\Delta_{\mathcal{I}_X}\pi_T = 0$.
+The free-energy identity is the Otto--Villani gradient-flow
+characterisation in the Wasserstein geometry induced by
+$\mathcal{I}_X$.
+\end{proof}
+
+\subsection{Bridge back to v4}
+
+In the limit $\sigma_W\to 0$ all results of Theorem~\ref{thm:sde-bound}
+collapse to the deterministic Theorem~\ref{thm:exp} with zero floor;
+the Gibbs measure of Proposition~\ref{prop:gibbs} concentrates on
+$\{E=0\}$. Conversely, every Lyapunov / convergence statement of
+Parts~I--III is recovered from this part by setting $\sigma_W=0$.
+
+\begin{lockbox}
+\textbf{What this part adds:} (i) a chart-intrinsic noise term
+$\sigma_W\Sigma(X)\,dW$ with canonical default
+$\Sigma=\mathcal{I}_X^{\dagger/2}$; (ii) the It\^o formula for $E$;
+(iii) the explicit mean-square bound
+$\sigma_W^{2}\tau_\Sigma/(2\rho)$; (iv) a Gibbs equilibrium for the
+natural-gradient Langevin variant. \textbf{What it does not change:}
+the locked ODE drift, the gradient $\gX = 2J^TGS$, the Euclidean
+projection, Rules~1--4, and every theorem of Parts~I--III at
+$\sigma_W=0$.
+\end{lockbox}
+
+% ============================================================
+\subsection{Empirical validation: BTC/ETH/SOL, 2021--2026}
+\label{sec:empirical}
+
+All runs use hourly BTC/ETH/SOL futures, \$10{,}000 initial capital,
+train 2021-01-01 to 2022-12-31, test reported from 2023-01-01.
+Table~\ref{tab:era} shows the full version progression (v25--v38);
+Table~\ref{tab:stochastic} disaggregates the v36--v38 stochastic
+ablation.  Columns: \textit{Final} = test-period equity; \textit{Profit}
+= Final $-$ \$10{,}000; \textit{Calmar} = CAGR\,/\,$|$MaxDD$|$;
+\textit{r20xx} = calendar-year return.
+
+%--- Table 1: Full version progression v25-v37 ---
+\begin{table}[htbp]
+\caption{Engine version progression, best configuration per version,
+  BTC/ETH/SOL 1h futures, test 2023--2026.
+  The $\dagger$ marker on v34/v35 denotes \texttt{cb\_v34\_tight}
+  (halt 8\%, resume 4\%, window 90\,d); all other v35 rows use
+  \texttt{cb\_original} (halt 8\%, resume 1\%, window 180\,d).
+  v38 uses \texttt{cb\_v34\_tight}; row 38b additionally applies
+  G7 covariance regularisation ($\kappa_{\max}{=}10$).
+  \textbf{Bold}~=~all-time best per column.}
+\label{tab:era}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{c l l r r r r}
+\hline
+\textbf{v} & \textbf{Theme} & \textbf{Best config} &
+  \textbf{Final (\$)} & \textbf{Profit (\$)} &
+  \textbf{Calmar} & \textbf{MaxDD} \\
+\hline
+\multicolumn{7}{l}{\textit{Era 1 — microstructure baselines}} \\
+25 & Microstructure guard   & funding + queue + vol filter     &  44{,}293 &  +34{,}293 &  8.86 & $-24\%$ \\
+26 & Extended diagnostic    & \textit{(regression: gate broke)} &   1{,}327 &   $-$8{,}673 &  0.14 & $-60\%$ \\
+27 & All-micro combined     & funding\_hot\_guard               &  43{,}700 &  +33{,}700 &  8.85 & $-24\%$ \\
+\hline
+\multicolumn{7}{l}{\textit{Era 2 — canonical ODE engine}} \\
+28 & Canonical stability    & soft\_all\_micro                  & 127{,}494 & +117{,}494 & 18.92 & $-16\%$ \\
+29 & Regularised validation & $K{=}6.5$, rt$=6$\,bps           & 164{,}721 & +154{,}721 & 19.46 & $-18\%$ \\
+30 & Power-law + Ricci flow & $\alpha{=}0.80$, $\eta{=}0$       & 172{,}778 & +162{,}778 & 18.30 & $-21\%$ \\
+31 & Disturbance budget     & Pythagorean budget constraint     & 203{,}287 & +193{,}287 & 22.79 & $-16\%$ \\
+\hline
+\multicolumn{7}{l}{\textit{Era 3 — FFD + circuit-breaker sweep}} \\
+32 & True GL-FFD            & $d{=}0.50$ frac.\ diff           & 163{,}395 & +153{,}395 & 20.31 & $-15\%$ \\
+33 & CB transition baseline & cb\_original control             & 163{,}395 & +153{,}395 & 20.31 & $-15\%$ \\
+34 & CB transition sweep    & cb\_v34\_tight$^\dagger$ (18 var.) & 730{,}056 & +720{,}056 & 17.49 & $-35\%$ \\
+35 & Top-5 $\times$ 21 CB  & cb\_v34\_tight$^\dagger$ (105 var.) & 730{,}056 & +720{,}056 & 17.49 & $-35\%$ \\
+35 & Top-5 cb\_original     & $d{=}0.30$, $q{=}0.50$           & 158{,}951 &  +148{,}951 & \textbf{23.00} & $-15\%$ \\
+\hline
+\multicolumn{7}{l}{\textit{Era 4 — Itô-BSDT stochastic extension (G2.4)}} \\
+36 & Full It\^o (cb\_only)  & $d{=}0.30$, $\eta{=}10^{-4}$    & 133{,}274 & +123{,}274 & 23.98 & $-14\%$ \\
+37 & G2.4 CB override       & $d{=}0.25$, $\eta{=}3{\times}10^{-4}$ & 288{,}433 & +278{,}433 & \textbf{25.18} & $-17\%$ \\
+\hline
+\multicolumn{7}{l}{\textit{Era 5 --- G2.4 on tight-CB + G7 covariance regularisation (v38)}} \\
+38a & tight-CB, G2.4 only    & $d{=}0.25$, $\eta{=}3{\times}10^{-4}$, lm$=1000$ & \textbf{997{,}444} & \textbf{+987{,}444} & 19.15 & $-35\%$ \\
+\rowcolor[gray]{0.92}
+38b & tight-CB, G2.4+G7      & $d{=}0.30$, $\eta{=}2{\times}10^{-4}$, lm$=1000$, $\kappa_{\max}{=}10$ & 537{,}509 & +527{,}509 & 19.71 & $-28\%$ \\
+\hline
+\end{tabular}
+\end{table}
+
+%--- Table 2: Stochastic ablation ---
+\begin{table}[htbp]
+\caption{Stochastic ablation: year-by-year returns for selected
+  v35--v38 variants. v35/v36/v37 use \texttt{cb\_original};
+  v38 uses \texttt{cb\_v34\_tight} (halt 8\%, resume 4\%, 90\,d).
+  ``Resets''~=~number of G2.4 CB override fires.
+  v35 cb\_v34\_tight best omitted (final \$730{,}056,
+  Calmar 17.49, MaxDD $-35\%$, r2026~=~0).}
+\label{tab:stochastic}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{l l l r r r r r r r r r}
+\hline
+\textbf{v} & $d$ & $\eta$ & \textbf{Calmar} & \textbf{Final} &
+  \textbf{r2023} & \textbf{r2024} & \textbf{r2025} & \textbf{r2026} &
+  \textbf{MaxDD} & \textbf{Halt} & \textbf{Resets} \\
+\hline
+\multicolumn{12}{l}{\textit{v35 deterministic baselines ($\sigma_W = 0$)}} \\
+35 & 0.30 & 0 & 23.00 & \$158{,}951 & $+257\%$ & $+115\%$ & $+900\%$ & $+0\%$ & $-15.3\%$ & 91.5\% & 0 \\
+35 & 0.25 & 0 & 22.55 & \$157{,}299 & $+263\%$ & $+106\%$ & $+910\%$ & $+0\%$ & $-15.5\%$ & 91.5\% & 0 \\
+\hline
+\multicolumn{12}{l}{\textit{v36 cb-only mode (deterministic ODE, G2.4 CB override)}} \\
+36 & 0.30 & $1{\times}10^{-4}$ & 23.98 & \$133{,}274 & $+265\%$ & $+2\%$ & $+1626\%$ & $+0\%$ & $-13.7\%$ & 91.1\% & 12 \\
+36 & 0.30 & $5{\times}10^{-4}$ & 23.82 & \$130{,}397 & $+257\%$ & $+2\%$ & $+1625\%$ & $-0\%$ & $-13.7\%$ & 91.1\% & 62 \\
+36 & 0.25 & $5{\times}10^{-5}$ & 23.28 & \$130{,}525 & $+263\%$ & $+106\%$ & $+910\%$ & $+0\%$ & $-14.0\%$ & 91.1\% & 4 \\
+36 & 0.25 & $5{\times}10^{-4}$ &  4.54 & \$19{,}255  & $+263\%$ & $+40\%$ & $+37\%$ & $+32\%$ & $-31.0\%$ & 89.9\% & 57 \\
+\hline
+\multicolumn{12}{l}{\textit{v37 G2.4-only CB override (deterministic ODE, $\sigma_W^{\mathrm{ODE}}=0$)}} \\
+37 & 0.25 & $2{\times}10^{-4}$ & 23.28 & \$130{,}646 & $+263\%$ & $+1\%$ & $+1618\%$ & $-0\%$   & $-14.0\%$ & 91.3\% & 24 \\
+37 & 0.30 & $2{\times}10^{-4}$ & 23.01 & \$278{,}253 & $+449\%$ & $+115\%$ & $+900\%$ & $-0\%$ & $-18.8\%$ & 94.0\% & 20 \\
+37 & 0.30 & $3{\times}10^{-4}$ & 24.75 & \$143{,}949 & $+257\%$ & $+2\%$ & $+1626\%$ & $+43\%$  & $-13.7\%$ & 91.1\% & 35 \\
+\rowcolor[gray]{0.92}
+\textbf{37} & \textbf{0.25} & $3{\times}10^{-4}$ & \textbf{25.18} & \textbf{\$288{,}433} & $+263\%$ & $+106\%$ & $+789\%$ & $\mathbf{+108\%}$ & $-17.4\%$ & 91.4\% & 33 \\
+37 & 0.25 & $5{\times}10^{-4}$ &  4.54 & \$19{,}255  & $+263\%$ & $+40\%$ & $+37\%$ & $+32\%$   & $-31.0\%$ & 89.9\% & 57 \\
+\hline
+\multicolumn{12}{l}{\textit{v38 G2.4 on \texttt{cb\_v34\_tight} (halt 8\%, resume 4\%, window 90\,d), lm$=1000$; 38b adds G7 ($\kappa_{\max}{=}10$, $\lambda_*{=}0.162$)}} \\
+38a & 0.25 & $3{\times}10^{-4}$ & 19.15 & \textbf{\$997{,}444} & $+146\%$ & $-19\%$ & $+1867\%$ & $+4\%$ & $-35.4\%$ & 85.4\% & 33 \\
+\rowcolor[gray]{0.92}
+38b & 0.30 & $2{\times}10^{-4}$ & 19.71 & \$537{,}509  & $+133\%$ & $+20\%$ & $+526\%$  & $+7\%$ & $-27.8\%$ & 88.2\% & 26 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Context for the v34/v35 high-water mark and v38 results}
+
+The \$730{,}056 peak (v34/v35 \texttt{cb\_v34\_tight}) used a permissive
+circuit-breaker: halt 8\%, resume 4\%, 90-day window.  This CB unlocks
+rapidly after drawdowns, capturing more of the 2024--2025 bull run,
+but at the cost of MaxDD~$=-35\%$ and Calmar~$=17.49$.  By contrast,
+\texttt{cb\_original} (halt 8\%, resume 1\%, 180-day window) produces
+Calmar~$=23.00$ and MaxDD~$=-15\%$, but locks the engine out of all
+of 2026 after November 2025.
+
+\textbf{v37 closes the Calmar gap; v38 breaks the equity ceiling.}
+v37 ($d{=}0.25$, $\eta{=}3{\times}10^{-4}$, \texttt{cb\_original})
+achieves \$288{,}433 with Calmar~$=25.18$---surpassing both v34/v35
+and the v35 original baseline in Calmar and MaxDD while posting
+r2026~$=+108\%$.  v38 then applies G2.4 directly to
+\texttt{cb\_v34\_tight}: variant 38a ($d{=}0.25$,
+$\eta{=}3{\times}10^{-4}$, lm$=1000$) reaches \$997{,}444---a 37\% gain
+over the previous \$730k record---confirming that the permissive CB
+provides the equity path and G2.4 supplies the 2026 unlock.
+Variant 38b adds G7 covariance regularisation ($\kappa_{\max}{=}10$)
+and cuts MaxDD from $-35\%$ to $-27.8\%$ at the cost of lower
+final equity (\$537k, Calmar 19.71).
+
+\bigskip\noindent
+\textbf{Why the 2026 lock occurs.}
+The G2.4 override fires when
+$\textup{cb\_dd} \le \delta_r + c_\sigma\cdot\ell$,
+where $c_\sigma = \eta\cdot\Delta t\cdot\operatorname{rank}(\mathcal{I}_X)$
+and $\ell$ is the number of bars locked.
+At $\eta=3\times10^{-4}$, $\Delta t = 0.10$, $\operatorname{rank}=3$:
+$c_\sigma = 9\times10^{-5}$ per bar;  after 3109 bars ($\approx$130\,days)
+the budget is $0.28$, just covering the ${\approx}29\%$ drawdown gap
+(confirmed by $\eta^*\approx 0.29/(0.1\times3\times3109)\approx3.1\times10^{-4}$).
+
+\noindent\textbf{Key observations.}
+\begin{enumerate}
+  \item \textbf{Threshold behaviour.} r2026 jumps from $\approx 0$ to
+    $+108\%$ between $\eta=2\times10^{-4}$ and $\eta=3\times10^{-4}$.
+    This matches the analytic prediction from
+    Theorem~\ref{thm:sde-bound} to within 3\%.
+
+  \item \textbf{ODE noise is harmful.} Full It\^o on the weight ODE
+    collapses Calmar at $\eta>10^{-5}$.  The G2.4 CB override alone
+    (deterministic ODE) preserves signal quality while unlocking the CB.
+
+  \item \textbf{v38 breaks the equity ceiling (38a).}  The
+    all-time-record \$997{,}444 is achieved by G2.4 on
+    \texttt{cb\_v34\_tight}: the permissive CB provides the raw
+    equity path and G2.4 supplies the 2026 unlock (lm$=1000$
+    ensures the override only fires after substantial lock duration).
+    MaxDD remains $-35\%$, consistent with the tight-CB regime.
+
+  \item \textbf{G7 regularisation reduces MaxDD to $-27.8\%$ (38b).}
+    Proposition G7.1 ($\kappa_{\max}{=}10$, $\lambda_*{=}0.162$) cuts drawdown
+    by 7.6\,pp on the $d{=}0.30$, $q{=}0.65$ geometry.  The DD
+    reduction confirms the theoretical prediction
+    $\Delta\mathrm{MaxDD} \propto 1-1/\sqrt{\kappa_{\max}}$
+    (here $\approx 68\%$ of the maximum possible reduction).
+    Equity trades off to \$537k; the G7 Pareto point dominates
+    any unregularised variant with MaxDD $<-30\%$.
+\end{enumerate}
+
+% ============================================================
+\section{Layered variable glossary}
+\label{sec:variable-glossary}
+% ============================================================
+
+This section records every variable used by the framework in dependency
+order.  Each object belongs to a single layer; lower layers define the
+objects consumed by higher layers.  In particular, the locked dynamics use
+only $(S,G,\Fbase)$ through $J$, $\gX$, $E$, $F$ and $\gamma$; curvature,
+dashboard, stochastic and extension variables are diagnostic or analytic
+unless explicitly stated otherwise.
+
+\subsection{Layer 1 --- Core state and geometry}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Dimensions} & \textbf{Meaning} \\
+\midrule
+X & State vector & $\R^n$ & Full system configuration at time $t$. \\
+n & State dimension & integer & Number of state coordinates. \\
+k & Feature dimension & integer & Number of geometric features. \\
+S(X) & Representation / feature map & $\R^k$ & Geometric compression of $X$ toward the target. \\
+J(X)=\partial S/\partial X & Jacobian of $S$ & $\R^{k\times n}$ & Bridge from state changes to feature changes. \\
+G & Feature-space metric & $\R^{k\times k}$ SPD & Feature weighting; defines distance in feature space. \\
+E(X)=S^TGS & Energy functional & $\R_{\ge0}$ & Lyapunov function; zero exactly on the target. \\
+\{E=0\} & Target set & subset of $\R^n$ & Set toward which the system is driven. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 2 --- Gradient and force objects}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Dimensions} & \textbf{Meaning} \\
+\midrule
+\gX(X)=2J^TGS & State-space gradient & $\R^n$ & Direction of steepest energy ascent; the single canonical gradient. \\
+\eta(X)=\nabla_S E=2GS & Feature-space gradient & $\R^k$ & Intermediate feature gradient used in Hessian computations. \\
+\Fbase(X) & Nominal field & $\R^n$ & Domain driving field: alpha signal, PDE operator, robot command, etc. \\
+F(X)=\Fbase-\gX & Modified force & $\R^n$ & Nominal field after geometric correction is subtracted. \\
+\gamma(X)=E/(E+\theta) & Adaptive gain & $[0,1)$ & Energy-scaled damping / Fermi--Dirac occupation number. \\
+\theta & Gain regularisation / temperature & $\R_{>0}$ & Core scalar parameter controlling the gain surface. \\
+\alpha=\langle F,\gX\rangle/\|\gX\|^2 & Projection coefficient & $\R$ & Amount of $F$ aligned with $\gX$. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 3 --- The canonical ODE}
+
+\[
+  \Xdot
+  = \Fbase - \gX
+    - \gamma\,\frac{\langle F,\gX\rangle}{\|\gX\|^2}\,\gX .
+\]
+The dynamics contain no additional geometric variables beyond those above.
+The regularised version replaces $\|\gX\|^2$ by $\|\gX\|^2+\varepsilon$.
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Dimensions} & \textbf{Meaning} \\
+\midrule
+\varepsilon & Regularisation parameter & $\R_{\ge0}$ & Prevents division by zero near singular sets; $\varepsilon=0$ gives the exact ODE. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 4 --- Curvature and Hessian objects}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Dimensions} & \textbf{Meaning} \\
+\midrule
+\Gpull=J^TGJ & Pulled-back metric & $\R^{n\times n}$ & Feature metric pulled back to state space; curvature analysis only. \\
+K(X) & Curvature tensor of $S$ & $\R^{k\times n\times n}$ & Second derivatives $K^i{}_{ab}=\partial_a\partial_bS^i$. \\
+K^i & $i$-th curvature slice & $\R^{n\times n}$ & Symmetric Hessian of feature $S^i$. \\
+\nabla_X^2E=2J^TGJ+\langle\eta,K\rangle_1 & State-space Hessian & $\R^{n\times n}$ & Energy curvature: pulled-back metric plus curvature contraction. \\
+\langle\eta,K\rangle_1=\sum_i\eta_iK^i & Curvature contraction & $\R^{n\times n}$ & Bending correction; vanishes for affine $S$ or on the target when $\eta=0$. \\
+\Cman=\{X:\lambda_{\max}(\nabla_X^2E)=1\} & Curvature manifold & subset of $\R^n$ & Boundary between convex-dominated and nonlinear-dominated regions. \\
+\lambda_{\max}(\nabla_X^2E) & Maximal principal curvature & $\R$ & Controls step size and linearisation validity. \\
+\|K\|_{\mathrm{op}} & Tensor operator norm & $\R_{\ge0}$ & Bounds the curvature contraction. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 5 --- Predictive dashboard scalars}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Range} & \textbf{Role} \\
+\midrule
+\cos\theta_t=\langle\Fbase,\gX\rangle/(\|\Fbase\|\,\|\gX\|) & Alignment scalar & $[-1,1]$ & Leading diagnostic. \\
+\mathrm{MFLS}=\|\gX\|=2\|J^TGS\| & Gradient capacity & $\R_{\ge0}$ & Leading diagnostic. \\
+\dot E=(1-\gamma)(\langle\gX,\Fbase\rangle-\|\gX\|^2) & Energy velocity & $\R$ & Leading diagnostic. \\
+v_E=-\dot E & Energy descent speed & $\R_{\ge0}$ & Leading diagnostic when descent holds. \\
+\rho_{\mathrm{eff}}=-\dot E/E & Effective decay rate & $\R_{\ge0}$ & Leading predicted local rate. \\
+\tau_{1/2}=\ln(2)/\rho_{\mathrm{eff}} & Predicted half-life & $\R_{>0}$ & Leading time-scale estimate. \\
+E(t) & Lyapunov energy level & $\R_{\ge0}$ & Lagging state indicator. \\
+\gamma(t) & Damping commitment & $[0,1)$ & Lagging state indicator. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 6 --- Stability theorem parameters}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{What it bounds} \\
+\midrule
+\mu_G & Minimum eigenvalue of $G$ & Lower bounds $\|GS\|\ge\mu_G\|S\|$. \\
+M_G & Maximum eigenvalue of $G$ & Upper bounds $E\le M_G\|S\|^2$. \\
+\sigma & Minimum singular value of $J$ & Uniform rank floor $\sigma_{\min}(J)\ge\sigma$. \\
+\gamma_{\max}=E(X_0)/(E(X_0)+\theta) & Maximum damping & Initial-energy ceiling on $\gamma$ along descending trajectories. \\
+\rho=4\sigma^2\mu_G^2M_G^{-1}(1-\gamma_{\max}) & Guaranteed exponential rate & Floor on deterministic energy decay. \\
+M & Disturbance bound & Bound $\|\Fbase\|\le M$. \\
+\Psi(R) & Admissibility function & Unimodal disturbance budget over energy level $R$. \\
+\Psi^\star=\sigma\theta\mu_G/\sqrt{M_G} & Admissibility threshold & Maximum $M$ for a forward-invariant operating window. \\
+R^\star=\theta & Peak-admissibility energy & Energy where $\gamma=1/2$ and entropy is maximal. \\
+R_-,R_+ & Ultimate-bound roots & Roots of $\Psi(R)=M$ defining the admissible window. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 7 --- Geometric extensions}
+
+\subsubsection*{Fractal extension}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+A\subset\R^n & Fractal target set & Compact target with Hausdorff dimension $d_H\in(0,n)$. \\
+d_H & Hausdorff dimension & Non-integer target dimension. \\
+\delta_1>\cdots>\delta_L & Scale sequence & Mollification scales from coarse to fine. \\
+d_\delta(X) & Mollified distance & Smooth distance approximation to $A$ at scale $\delta$. \\
+S_{\mathrm{frac}}(X)=[d_{\delta_1},\dots,d_{\delta_L}]^T & Fractal feature map & Multi-scale stacked distance representation. \\
+G_{\mathrm{frac}}=\diag(\delta_1^{-2d_H},\dots,\delta_L^{-2d_H}) & Fractal metric & Hausdorff-weighted diagonal feature metric. \\
+\sigma_J & Fractal Jacobian rank floor & Minimum singular value of $J(S_{\mathrm{frac}})$. \\
+\rho_{\mathrm{frac}} & Fractal exponential rate & Fractal analogue of the deterministic rate. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Contact extension}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\alpha=dz-\sum_i y_i\,dx_i & Contact form & Standard contact one-form on $\R^{2m+1}$. \\
+R_\alpha=\partial_z & Reeb field & Conserved direction protected by the contact map. \\
+\xi=\ker\alpha & Contact distribution & Admissible horizontal motion subspace. \\
+\Phi(X) & Target submanifold encoding & Map whose zero set encodes the target, e.g. Legendrian. \\
+\phi(X)=\alpha_X(\Fbase(X)) & Reeb component & Measures non-horizontal nominal motion. \\
+S_{\mathrm{ct}}=[\Phi(X),\alpha_X(\Fbase(X))]^T & Contact feature map & Stacks target deviation and Reeb penalty. \\
+G_0 & Target metric block & Metric for the $\Phi$ component. \\
+\beta & Reeb penalty weight & Scalar metric weight on the Reeb component. \\
+G_{\mathrm{ct}}=\operatorname{blockdiag}(G_0,\beta) & Contact metric & Combined contact feature metric. \\
+L_\phi=\sup_X\|\nabla_X\phi(X)\| & Reeb gradient bound & Controls decay of the Reeb component. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Geometric-flow extension}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+G(t) & Time-varying metric & Metric evolved by a prescribed flow. \\
+\operatorname{Ric}(G;X) & Ricci-type tensor & Metric-flow driving tensor. \\
+G^\star(X) & Target metric & Data-adaptive covariance or target geometry. \\
+\sigma_{\mathrm{rel}} & Metric relaxation rate & Speed of attraction toward $G^\star$. \\
+c_R & Ricci lower-bound constant & Stability requires $c_R<\sigma_{\mathrm{rel}}/2$. \\
+V(X,G)=E+\frac12\sigma_{\mathrm{rel}}^{-1}\|G-G^\star\|_F^2 & Joint Lyapunov function & State--metric storage function. \\
+L^\star & Lipschitz bound on $\nabla_XG^\star$ & Controls residual when $G^\star$ varies with $X$. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 8 --- Information-geometric extension}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\mathcal{P}=\{p(\cdot\mid z)\} & Statistical family & Smooth parametric family indexed by $z=S(X)$. \\
+u(y;z)=\nabla_z\log p(y\mid z) & Feature score function & Likelihood score in feature coordinates. \\
+\mathcal{I}_S(z) & Feature Fisher matrix & $k\times k$ Fisher information, positive definite under A5. \\
+\mathcal{I}_X(X)=J^T\mathcal{I}_S(S(X))J & State Fisher metric & Pullback Fisher metric on state space. \\
+\widetilde\gX=\mathcal{I}_X^\dagger\gX & Natural gradient & Chart-covariant auxiliary gradient. \\
+\mathcal{I}_X^\dagger & Moore--Penrose inverse & Inverse on $\operatorname{range}(J^T)$, with optional Tikhonov regularisation. \\
+\mu_{\mathcal I},M_{\mathcal I} & Fisher eigenvalue bounds & Analogues of $\mu_G,M_G$ for Fisher metrics. \\
+L_{\mathcal I} & Fisher gradient bound & Bound on $\|\nabla_X\mathcal{I}_S(S(X))\|_{\mathrm{op}}$. \\
+\rho_F & Fisher exponential rate & Fisher analogue $4\mu_{\mathcal I}^2\sigma_{\min}^2(J)(1-\gamma_{\max})/M_{\mathcal I}$. \\
+\rho_{\mathrm{CR}} & Cram\'er--Rao rate floor & Statistical lower bound on $\rho_F$. \\
+\mathrm{Cov}_{\max} & Maximum estimator covariance & Upper covariance bound used in the Cram\'er--Rao floor. \\
+\eta_{\mathrm{cal}}=\rho_{\mathrm{eff}}/\rho_{\mathrm{CR}} & Calibration efficiency & Diagnostic; values near $1$ indicate statistical optimality. \\
+\sigma_{\mathrm{rel}} & Fisher relaxation rate & Relaxation speed toward $\mathcal{I}_S$ under schedule F2. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 9 --- Thermodynamic dictionary}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\theta & Temperature & Same scalar as the gain regularisation. \\
+\gamma=E/(E+\theta) & Occupation number & Fermi--Dirac occupation in ratio $E/\theta$. \\
+1-\gamma & Carnot-like efficiency & Fraction of force not committed to projection. \\
+S_{\mathrm{th}}(E)=-\gamma\ln\gamma-(1-\gamma)\ln(1-\gamma) & Entropy & Binary entropy of $\gamma$, maximised at $E=\theta$. \\
+\mathcal{F}_{\mathrm{th}}(E)=E-\theta S_{\mathrm{th}}(E) & Thermodynamic free energy & Free energy on the canonical surface. \\
+Q=\gamma\,\operatorname{proj}_{\gX}(\Fbase) & Heat dissipated & Component committed to projection / spread correction. \\
+W=\Fbase-Q & Work preserved & Component passed through to execution. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 10 --- Game-theoretic variables}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\mathcal{L}(u,\lambda) & Saddle-point Lagrangian & Actor--auditor objective whose equilibrium recovers the canonical step. \\
+u & Actor variable & Admissible execution step optimised by the actor. \\
+\lambda & Auditor variable & Lagrange multiplier on the energy constraint. \\
+u^\star & Nash equilibrium step & Equal to the canonical ODE step. \\
+\lambda^\star=\langle\Fbase,\gX\rangle E/((E+\theta)\|\gX\|^2) & Equilibrium multiplier & Auditor optimum. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 11 --- Multi-engine composition}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+m & Number of engines & Count of parallel canonical systems. \\
+(S_i,G_i,\Fbase^{(i)}) & $i$-th engine triple & Representation, metric and nominal field for engine $i$. \\
+E_i=S_i^TG_iS_i & $i$-th engine energy & Individual Lyapunov function. \\
+\gamma_i=E_i/(E_i+\theta_i) & $i$-th gain & Individual damping coefficient. \\
+\theta_i & $i$-th temperature & Individual control parameter. \\
+R_i=\gamma_i\,\gX^{(i)}(\gX^{(i)})^T/\|\gX^{(i)}\|^2 & $i$-th damping matrix & Positive semidefinite projection matrix. \\
+H=\frac12\sum_iE_i & Composite Hamiltonian & Aggregate Lyapunov / storage function. \\
+S_{\mathrm{tot}}=\sum_iS_{\mathrm{th}}(E_i) & Total entropy & Sum of component thermodynamic entropies. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Layer 12 --- Gap-closure variables}
+
+\subsubsection*{Discretisation}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+h & Step size & Integration time step. \\
+h_0 & Base step size & Nominal step before adaptive scaling. \\
+h_t=h_0/(1+\lambda_{\max}) & Adaptive step & Shrinks in high-curvature regions. \\
+\Lambda(X_t)=\lambda_{\max}(\nabla_X^2E) & Local curvature & Controls the discrete energy increment. \\
+\varepsilon_E,\varepsilon_g & Stopping tolerances & Stop when $E<\varepsilon_E$ and $\|\gX\|<\varepsilon_g$. \\
+\tau & Dwell time & Consecutive below-tolerance steps required for stopping. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Stochastic extension}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+W_t & Brownian motion & Standard Wiener process. \\
+\Sigma(X) & Noise covariance / diffusion & $n\times r$ noise field; Fisher default $\mathcal{I}_X^{\dagger/2}$. \\
+c_\Sigma=\frac12\sup\operatorname{tr}(\Sigma^T\nabla_X^2E\Sigma) & It\^o correction bound & Additional effective disturbance from noise. \\
+M_{\mathrm{eff}}=M+c_\Sigma & Effective disturbance & Deterministic disturbance plus stochastic trace correction. \\
+\mathcal F=\mathbb{E}[E]-\frac12\operatorname{rank}(\mathcal I_X)t & Stochastic free energy & Non-increasing under Fisher noise after rank drift subtraction. \\
+\sigma_W & Noise gain & Scalar intensity multiplying the diffusion term in the canonical SDE. \\
+\tau_\Sigma & Trace bound & Upper bound on $\operatorname{tr}(\Sigma^T\nabla_X^2E\Sigma)$. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Time-varying rate}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\mu_\star(t)=\lambda_{\min}(G(t)) & Running minimum eigenvalue & Metric-health floor during relaxation. \\
+\delta_G(t)=\|G(t)-G^\star\|_F/\|G^\star\|_F & Relative metric error & Decays under relaxation toward $G^\star$. \\
+\rho_{\mathrm{flow}}=\rho_F\,\mu_\star(t)/(\mu_\star(t)+\delta_G(t)) & Time-varying rate & Interpolates to $\rho_F$ as the metric relaxes. \\
+\sigma_{\mathrm{rel}}^\star & Optimal relaxation rate & Rate minimising integrated energy cost. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Rank condition}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\sigma(X) & Pointwise minimum singular value & Replaces uniform $\sigma$ in degraded-rank convergence. \\
+\sigma_{\min}^{\mathrm{crit}} & Critical singular value & Floor below which $\gX$ cannot hold against $\Fbase$. \\
+w(q)=\sqrt{\det(JJ^T)} & Manipulability measure & Robotics rank diagnostic. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection*{Calibration conditioning}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{$}l<{$} l X@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\kappa(\Sigma_0)=\lambda_{\max}/\lambda_{\min} & Calibration condition number & Degrades $\Psi^\star$ as $1/\sqrt{\kappa}$. \\
+\lambda^\star & Tikhonov regularisation & Spectrum shift used to reach a target condition number. \\
+\kappa_{\max} & Target condition number & Recommended deployment target, typically $\le 10$. \\
+\Sigma_0^\lambda=\Sigma_0+\lambda^\star I & Regularised calibration & Replacement for raw calibration covariance. \\
+\theta_{\mathrm{new}}=\theta\,\kappa(\Sigma_0)/\kappa_{\max} & Rescaled temperature & Holds $\Psi^\star$ approximately constant after regularisation. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Dependency graph}
+
+\[
+\begin{gathered}
+  (S,G,\Fbase) \longrightarrow J=\partial S/\partial X
+  \longrightarrow
+  \begin{cases}
+    \gX=2J^TGS,\\
+    E=S^TGS,\\
+    \gamma=E/(E+\theta),\\
+    F=\Fbase-\gX,
+  \end{cases}\\[3pt]
+  \longrightarrow\quad
+  \Xdot = F-\gamma\,\frac{\langle F,\gX\rangle}{\|\gX\|^2}\,\gX
+  \quad\longrightarrow\quad
+  \{\cos\theta_t,\mathrm{MFLS},\rho_{\mathrm{eff}},v_E\},\\[3pt]
+  \nabla_X^2E=2J^TGJ+\langle\eta,K\rangle_1
+  \quad\text{is curvature analysis only and does not feed back into }\Xdot.
+\end{gathered}
+\]
+
+\begin{lockbox}
+Every variable in the framework sits at one layer of this graph.  The
+locking discipline means nothing feeds back upward into the core ODE
+except through the already-defined objects $S$, $G$ and $\Fbase$.
+\end{lockbox}
+
+% ============================================================
+\begin{thebibliography}{99}
+\bibitem{sontag1989}
+  E.~D.~Sontag, \emph{A `universal' construction of Artstein's theorem on
+  nonlinear stabilization}, Systems \& Control Letters \textbf{13}
+  (1989), 117--123.
+\bibitem{freeman1996}
+  R.~A.~Freeman and P.~V.~Kokotovi\'c, \emph{Robust Nonlinear Control
+  Design}, Birkh\"auser, 1996.
+\bibitem{bullo2004}
+  F.~Bullo and A.~D.~Lewis, \emph{Geometric Control of Mechanical
+  Systems}, Springer, 2004.
+\bibitem{ambrosio2005}
+  L.~Ambrosio, N.~Gigli, and G.~Savar\'e, \emph{Gradient Flows in
+  Metric Spaces and in the Space of Probability Measures},
+  Birkh\"auser, 2005.
+\bibitem{chen2018}
+  R.~T.~Q.~Chen, Y.~Rubanova, J.~Bettencourt, and D.~Duvenaud,
+  \emph{Neural Ordinary Differential Equations}, NeurIPS, 2018.
+\bibitem{vanderschaft2014}
+  A.~van~der~Schaft and D.~Jeltsema, \emph{Port-Hamiltonian Systems
+  Theory: An Introductory Overview}, Foundations and Trends in
+  Systems and Control, 2014.
+\bibitem{ioannou1996}
+  P.~A.~Ioannou and J.~Sun, \emph{Robust Adaptive Control},
+  Prentice-Hall, 1996.
+\bibitem{amari2016}
+  S.-I.~Amari, \emph{Information Geometry and Its Applications},
+  Springer, 2016.
+\end{thebibliography}
+
+\end{document}

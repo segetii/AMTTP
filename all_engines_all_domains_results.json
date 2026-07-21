@@ -1,0 +1,505 @@
+{
+  "meta": {
+    "A: G-SIB Banking": {
+      "domain": "G-SIB Banking",
+      "unit": "quarters",
+      "unit_detail": "2005-Q1 \u2026 2009-Q4 (cross-bank mean per quarter)",
+      "n_banks": 19,
+      "crisis": "2007-Q3",
+      "onset_idx": 10,
+      "total_samples": 20
+    },
+    "B: FDIC US Banks": {
+      "domain": "FDIC US Banks",
+      "unit": "quarters",
+      "unit_detail": "2005-Q1 \u2026 2009-Q4 (cross-bank mean per quarter)",
+      "n_us_banks": 7,
+      "crisis": "2007-Q3",
+      "onset_idx": 10,
+      "total_samples": 20
+    },
+    "C: ERCOT Grid": {
+      "domain": "ERCOT Energy Grid",
+      "unit": "days",
+      "total_days": 1461,
+      "n_event_days": 61,
+      "first_event": "WinterStormUri @ 2021-02-10",
+      "onset_idx": 223
+    },
+    "D: Protein Folding": {
+      "domain": "Protein Folding (Go-model \u03b2-hairpin)",
+      "unit": "MD frames (\u00d750 Langevin steps)",
+      "unit_detail": "y=0: T_low (folded normal), y=1: T_high (unfolded crisis)",
+      "n_ref_frames": 100,
+      "n_test_frames": 100,
+      "Tm_K": 381.6,
+      "T_low_K": 190.8,
+      "T_high_K": 686.9,
+      "onset_idx": 100
+    },
+    "E: CHB-MIT EEG": {
+      "domain": "CHB-MIT EEG Seizures",
+      "unit": "windows (1s stride)",
+      "patient": "chb01",
+      "onset_s": 2996.0,
+      "offset_s": 3036.0,
+      "n_ref_windows": 117,
+      "n_seiz_windows": 3597,
+      "n_ictal_windows": 41,
+      "onset_idx": 3111
+    }
+  },
+  "results": {
+    "A: G-SIB Banking": [
+      {
+        "engine": "Molecular",
+        "lead": 0,
+        "hit": false,
+        "fa_rate": 0.0,
+        "disc_ratio": 2.139,
+        "thresh": 0.248448,
+        "elapsed_s": 6.8,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Gravity",
+        "lead": 10,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 2741.959,
+        "thresh": 0.001006,
+        "elapsed_s": 0.9,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode4",
+        "lead": 10,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 464.547,
+        "thresh": 0.002294,
+        "elapsed_s": 0.4,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode5",
+        "lead": 10,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 635.445,
+        "thresh": 0.001134,
+        "elapsed_s": 0.7,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode6",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 5.222,
+        "thresh": 0.354809,
+        "elapsed_s": 0.7,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode7",
+        "lead": 7,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 0.761,
+        "thresh": 0.840864,
+        "elapsed_s": 0.3,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Hybrid",
+        "lead": 10,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 3014.127,
+        "thresh": 0.000982,
+        "elapsed_s": 2.8,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "CanonicalODE",
+        "lead": 10,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 30.555,
+        "thresh": 0.040862,
+        "elapsed_s": 0.8,
+        "n_samples": 20,
+        "onset_idx": 10
+      }
+    ],
+    "B: FDIC US Banks": [
+      {
+        "engine": "Molecular",
+        "lead": 4,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 0.497,
+        "thresh": 0.485009,
+        "elapsed_s": 1.3,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Gravity",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 4637312.633,
+        "thresh": 0.0,
+        "elapsed_s": 0.9,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode4",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 24.246,
+        "thresh": 0.077647,
+        "elapsed_s": 0.3,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode5",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 25.575,
+        "thresh": 0.076933,
+        "elapsed_s": 0.6,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode6",
+        "lead": 0,
+        "hit": false,
+        "fa_rate": 0.0,
+        "disc_ratio": 4.618,
+        "thresh": 0.290159,
+        "elapsed_s": 0.8,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Mode7",
+        "lead": 8,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 1.219,
+        "thresh": 0.648181,
+        "elapsed_s": 0.3,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "Hybrid",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 5143664.098,
+        "thresh": 0.0,
+        "elapsed_s": 2.6,
+        "n_samples": 20,
+        "onset_idx": 10
+      },
+      {
+        "engine": "CanonicalODE",
+        "lead": 3,
+        "hit": true,
+        "fa_rate": 10.0,
+        "disc_ratio": 28.92,
+        "thresh": 0.03496,
+        "elapsed_s": 0.9,
+        "n_samples": 20,
+        "onset_idx": 10
+      }
+    ],
+    "C: ERCOT Grid": [
+      {
+        "engine": "Molecular",
+        "lead": 205,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.026,
+        "thresh": 0.395871,
+        "elapsed_s": 27.2,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Gravity",
+        "lead": 220,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.018,
+        "thresh": 0.446136,
+        "elapsed_s": 24.1,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Mode4",
+        "lead": 220,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.104,
+        "thresh": 0.212527,
+        "elapsed_s": 12.6,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Mode5",
+        "lead": 220,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.115,
+        "thresh": 0.211595,
+        "elapsed_s": 17.9,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Mode6",
+        "lead": 221,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.073,
+        "thresh": 0.092236,
+        "elapsed_s": 12.7,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Mode7",
+        "lead": 0,
+        "hit": false,
+        "fa_rate": 0.0,
+        "disc_ratio": 0.997,
+        "thresh": 1.028152,
+        "elapsed_s": 3.7,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "Hybrid",
+        "lead": 220,
+        "hit": true,
+        "fa_rate": 1.35,
+        "disc_ratio": 1.018,
+        "thresh": 0.471371,
+        "elapsed_s": 53.9,
+        "n_samples": 1461,
+        "onset_idx": 223
+      },
+      {
+        "engine": "CanonicalODE",
+        "lead": 220,
+        "hit": true,
+        "fa_rate": 2.24,
+        "disc_ratio": 1.099,
+        "thresh": 0.253516,
+        "elapsed_s": 12.8,
+        "n_samples": 1461,
+        "onset_idx": 223
+      }
+    ],
+    "D: Protein Folding": [
+      {
+        "engine": "Molecular",
+        "lead": 92,
+        "hit": true,
+        "fa_rate": 3.0,
+        "disc_ratio": 2777870676.513,
+        "thresh": 0.0,
+        "elapsed_s": 2.7,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Gravity",
+        "lead": 56,
+        "hit": true,
+        "fa_rate": 2.0,
+        "disc_ratio": 2116522078.891,
+        "thresh": 0.0,
+        "elapsed_s": 1.9,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Mode4",
+        "lead": 49,
+        "hit": true,
+        "fa_rate": 2.0,
+        "disc_ratio": 2134.063,
+        "thresh": 0.001411,
+        "elapsed_s": 0.7,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Mode5",
+        "lead": 75,
+        "hit": true,
+        "fa_rate": 3.0,
+        "disc_ratio": 3393.824,
+        "thresh": 0.000841,
+        "elapsed_s": 1.3,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Mode6",
+        "lead": 97,
+        "hit": true,
+        "fa_rate": 4.0,
+        "disc_ratio": 182.704,
+        "thresh": 0.015781,
+        "elapsed_s": 1.0,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Mode7",
+        "lead": 48,
+        "hit": true,
+        "fa_rate": 2.0,
+        "disc_ratio": 3.301,
+        "thresh": 0.415034,
+        "elapsed_s": 0.4,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "Hybrid",
+        "lead": 56,
+        "hit": true,
+        "fa_rate": 2.0,
+        "disc_ratio": 2381487925.443,
+        "thresh": 0.0,
+        "elapsed_s": 4.1,
+        "n_samples": 200,
+        "onset_idx": 100
+      },
+      {
+        "engine": "CanonicalODE",
+        "lead": 14,
+        "hit": true,
+        "fa_rate": 2.0,
+        "disc_ratio": 340.794,
+        "thresh": 0.007214,
+        "elapsed_s": 1.9,
+        "n_samples": 200,
+        "onset_idx": 100
+      }
+    ],
+    "E: CHB-MIT EEG": [
+      {
+        "engine": "Molecular",
+        "lead": 3063,
+        "hit": true,
+        "fa_rate": 0.19,
+        "disc_ratio": 1.269,
+        "thresh": 0.311238,
+        "elapsed_s": 292.9,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Gravity",
+        "lead": 3063,
+        "hit": true,
+        "fa_rate": 0.13,
+        "disc_ratio": 1.144,
+        "thresh": 0.364383,
+        "elapsed_s": 298.2,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Mode4",
+        "lead": 3083,
+        "hit": true,
+        "fa_rate": 0.1,
+        "disc_ratio": 2.217,
+        "thresh": 0.08503,
+        "elapsed_s": 54.2,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Mode5",
+        "lead": 3083,
+        "hit": true,
+        "fa_rate": 0.1,
+        "disc_ratio": 2.227,
+        "thresh": 0.084781,
+        "elapsed_s": 80.9,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Mode6",
+        "lead": 3099,
+        "hit": true,
+        "fa_rate": 0.06,
+        "disc_ratio": 5.909,
+        "thresh": 0.030642,
+        "elapsed_s": 53.8,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Mode7",
+        "lead": 1214,
+        "hit": true,
+        "fa_rate": 0.03,
+        "disc_ratio": 1.067,
+        "thresh": 0.448964,
+        "elapsed_s": 24.9,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "Hybrid",
+        "lead": 3064,
+        "hit": true,
+        "fa_rate": 0.13,
+        "disc_ratio": 1.156,
+        "thresh": 0.41599,
+        "elapsed_s": 517.7,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      },
+      {
+        "engine": "CanonicalODE",
+        "lead": 3084,
+        "hit": true,
+        "fa_rate": 0.1,
+        "disc_ratio": 1.169,
+        "thresh": 0.374516,
+        "elapsed_s": 1216.9,
+        "n_samples": 3714,
+        "onset_idx": 3111
+      }
+    ]
+  },
+  "total_elapsed_s": 3020.6
+}

@@ -1,0 +1,272 @@
+{
+  "SGD": {
+    "name": "SGD",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.09902715682983398,
+    "phases": {}
+  },
+  "SGD+Clip": {
+    "name": "SGD+Clip",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 3.546479677001135,
+    "final_test_acc": 0.5075,
+    "best_test_acc": 0.615,
+    "peak_grad_norm": 2135.408838681708,
+    "peak_friction": 2135.408834121738,
+    "final_friction": 760.8064371718845,
+    "elapsed_s": 23.648561477661133,
+    "phases": {
+      "phase1_end": 6,
+      "phase2_range": [
+        6,
+        299
+      ],
+      "phase3_start": 299,
+      "peak_friction_phase1": 2135.408834121738,
+      "mean_friction_phase2": 918.187294930154,
+      "mean_friction_phase3": 760.8064371718845
+    }
+  },
+  "Adam": {
+    "name": "Adam",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 0.017497690253110525,
+    "final_test_acc": 0.9875,
+    "best_test_acc": 0.995,
+    "peak_grad_norm": 252.53752568085218,
+    "peak_friction": 1.0,
+    "final_friction": 1.0,
+    "elapsed_s": 26.44361138343811,
+    "phases": {
+      "phase1_end": 20,
+      "phase2_range": [
+        20,
+        200
+      ],
+      "phase3_start": 200,
+      "peak_friction_phase1": 1.0,
+      "mean_friction_phase2": 1.0,
+      "mean_friction_phase3": 1.0
+    }
+  },
+  "AdamW": {
+    "name": "AdamW",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 0.02601933684297207,
+    "final_test_acc": 0.985,
+    "best_test_acc": 0.995,
+    "peak_grad_norm": 261.4896604522211,
+    "peak_friction": 1.0,
+    "final_friction": 1.0,
+    "elapsed_s": 44.9384822845459,
+    "phases": {
+      "phase1_end": 20,
+      "phase2_range": [
+        20,
+        200
+      ],
+      "phase3_start": 200,
+      "peak_friction_phase1": 1.0,
+      "mean_friction_phase2": 1.0,
+      "mean_friction_phase3": 1.0
+    }
+  },
+  "RMSProp": {
+    "name": "RMSProp",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 0.025037496261279248,
+    "final_test_acc": 0.99,
+    "best_test_acc": 0.9925,
+    "peak_grad_norm": 521.72323472988,
+    "peak_friction": 1.0,
+    "final_friction": 1.0,
+    "elapsed_s": 37.92645835876465,
+    "phases": {
+      "phase1_end": 20,
+      "phase2_range": [
+        20,
+        200
+      ],
+      "phase3_start": 200,
+      "peak_friction_phase1": 1.0,
+      "mean_friction_phase2": 1.0,
+      "mean_friction_phase3": 1.0
+    }
+  },
+  "BSDT": {
+    "name": "BSDT",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.1181480884552002,
+    "phases": {}
+  },
+  "MFLS": {
+    "name": "MFLS",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.11111569404602051,
+    "phases": {}
+  },
+  "Molecular": {
+    "name": "Molecular",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 8.159706718630101,
+    "final_test_acc": 0.525,
+    "best_test_acc": 0.525,
+    "peak_grad_norm": 2766.398308078534,
+    "peak_friction": 1.8602684482755452,
+    "final_friction": 1.8498142924638201,
+    "elapsed_s": 47.25501322746277,
+    "phases": {
+      "phase1_end": 20,
+      "phase2_range": [
+        20,
+        200
+      ],
+      "phase3_start": 200,
+      "peak_friction_phase1": 1.8591166851430934,
+      "mean_friction_phase2": 1.8447434929537418,
+      "mean_friction_phase3": 1.8443736988314903
+    }
+  },
+  "Gravity": {
+    "name": "Gravity",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.16463804244995117,
+    "phases": {}
+  },
+  "Hybrid": {
+    "name": "Hybrid",
+    "blew_up": false,
+    "blow_up_epoch": -1,
+    "epochs_survived": 300,
+    "final_train_loss": 0.02555594728655506,
+    "final_test_acc": 0.97,
+    "best_test_acc": 0.995,
+    "peak_grad_norm": 2482.9350829017344,
+    "peak_friction": 1.9993983808099922,
+    "final_friction": 1.919407888515094,
+    "elapsed_s": 53.56911516189575,
+    "phases": {
+      "phase1_end": 20,
+      "phase2_range": [
+        20,
+        200
+      ],
+      "phase3_start": 200,
+      "peak_friction_phase1": 1.8157628175461191,
+      "mean_friction_phase2": 1.8526873089505562,
+      "mean_friction_phase3": 1.905097571247494
+    }
+  },
+  "QuadSurf": {
+    "name": "QuadSurf",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.0952458381652832,
+    "phases": {}
+  },
+  "QuadExpo": {
+    "name": "QuadExpo",
+    "blew_up": true,
+    "blow_up_epoch": 1,
+    "epochs_survived": 1,
+    "final_train_loss": 8.220228831084478,
+    "final_test_acc": 0.525,
+    "best_test_acc": 0.525,
+    "peak_grad_norm": 674740.6369959309,
+    "peak_friction": 1.9999414086688845,
+    "final_friction": 1.9999414086688845,
+    "elapsed_s": 0.09800910949707031,
+    "phases": {}
+  },
+  "SignedLR": {
+    "name": "SignedLR",
+    "blew_up": true,
+    "blow_up_epoch": 1,
+    "epochs_survived": 1,
+    "final_train_loss": 8.181925036321621,
+    "final_test_acc": 0.4825,
+    "best_test_acc": 0.4825,
+    "peak_grad_norm": 274.2629952444554,
+    "peak_friction": 1.6725950832040604,
+    "final_friction": 1.6725950832040604,
+    "elapsed_s": 0.1545870304107666,
+    "phases": {}
+  },
+  "CanSpectral": {
+    "name": "CanSpectral",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.05669260025024414,
+    "phases": {}
+  },
+  "CanFull": {
+    "name": "CanFull",
+    "blew_up": true,
+    "blow_up_epoch": 0,
+    "epochs_survived": 0,
+    "final_train_loss": "Inf",
+    "final_test_acc": 0.5,
+    "best_test_acc": 0.5,
+    "peak_grad_norm": "Inf",
+    "peak_friction": 0.0,
+    "final_friction": 0.0,
+    "elapsed_s": 0.07272195816040039,
+    "phases": {}
+  }
+}

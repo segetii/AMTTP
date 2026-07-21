@@ -41,6 +41,113 @@ from typing import Tuple, Dict, List
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'research', 'udl'))
 
+# ══════════════════════════════════════════════════════════════════
+# Canonical framework diagnostics  (CEK-v4 / Gap Addendum G7)
+# Imported from CHB-MIT validation — domain-agnostic functions
+# ══════════════════════════════════════════════════════════════════
+
+def _canonical_calibration(X_ref):
+    """Condition-number check on the reference covariance Σ₀ (Gap Addendum G7).
+
+    κ(Σ₀) > 10 → admissibility threshold Ψ* < 10% of ideal → mandatory
+    regularisation:  λ* = (λ_max − 10·λ_min) / 9,  Σ_reg = Σ₀ + λ*·I
+
+    Protein mapping:
+        X_ref = scaled feature frames from folded ensemble (T_low)
+        d = 12 aggregate features  (mean + std of 6 residue quantities)
+        n_ref ≈ 80–100 frames  →  d << n_ref  →  Σ₀ full-rank in principle
+        but spectral spread may still trigger G7 (genuine geometry)
+    """
+    n, d = X_ref.shape
+    mu   = X_ref.mean(axis=0)
+    Z    = X_ref - mu
+    cov  = (Z.T @ Z) / max(n - 1, 1)
+
+    eigvals  = np.linalg.eigvalsh(cov)[::-1]
+    lam_max  = float(eigvals[0])
+    pos_eig  = eigvals[eigvals > 1e-12 * max(lam_max, 1e-30)]
+    lam_min  = float(pos_eig[-1]) if len(pos_eig) > 0 else 1e-12
+    kappa    = lam_max / max(lam_min, 1e-12)
+
+    g7_flag  = kappa > 10.0
+    lam_star = float((lam_max - 10.0 * lam_min) / 9.0) if g7_flag else 0.0
+    sigma_reg = cov + max(lam_star, 0.0) * np.eye(d)
+
+    return dict(
+        kappa       = float(kappa),
+        lambda_max  = lam_max,
+        lambda_min  = lam_min,
+        g7_flag     = bool(g7_flag),
+        lambda_star = lam_star,
+        sigma_reg   = sigma_reg,
+        mu_ref      = mu,
+    )
+
+
+def _canonical_alignment(X_ref, X_test, mu_ref, sigma_reg):
+    """Per-frame canonical alignment metrics (CEK-v4 / Trigonometry_of_Collapse).
+
+    Protein mapping:
+        X_ref  = folded reference frames (T_low production)
+        X_test = production frames at T_crit or T_high
+        cosθ_t → 0  :  alignment degrades  →  unfolding precursor (Phase 2)
+        tanθ_t → ∞  :  curvature overwhelms gradient  →  collapse (Phase 3)
+        ρ_eff      :  MFLS²(1−γ)/E — instantaneous convergence rate
+
+    Three-phase precursor (Trigonometry_of_Collapse Ch.8, Ch.14):
+        Phase 1: E_BS rises  (MFLS increases with unfolding free energy)
+        Phase 2: cosθ_t drifts toward 0  (alignment commitment breaks)
+        Phase 3: tanθ_t → ∞  (collapse / full unfolding)
+    """
+    try:
+        G = np.linalg.inv(sigma_reg)
+    except np.linalg.LinAlgError:
+        G = np.linalg.pinv(sigma_reg)
+
+    Z_ref    = X_ref - mu_ref
+    E_ref_arr = np.einsum('ni,ij,nj->n', Z_ref, G, Z_ref)
+    theta    = float(np.median(E_ref_arr)) + 1e-10
+
+    eps    = 1e-10
+    n_test = len(X_test)
+    costheta  = np.zeros(n_test)
+    tantheta  = np.zeros(n_test)
+    mfls      = np.zeros(n_test)
+    E_arr     = np.zeros(n_test)
+    gamma_arr = np.zeros(n_test)
+    rho_eff   = np.zeros(n_test)
+
+    for i, x in enumerate(X_test):
+        z    = x - mu_ref
+        Gz   = G @ z
+        E    = float(z @ Gz)
+        nz   = float(np.sqrt(z @ z))
+        nGz  = float(np.sqrt(Gz @ Gz))
+        denom = nz * nGz
+        cos_t = float(np.clip(-E / max(denom, eps), -1.0, 0.0))
+        sin2  = max(1.0 - cos_t ** 2, 0.0)
+        tan_t = float(np.sqrt(sin2) / max(-cos_t, eps))
+        mfls_i  = 2.0 * nGz
+        gam_i   = E / (E + theta)
+        rho_i   = mfls_i ** 2 * (1.0 - gam_i) / max(E, eps)
+        costheta[i]  = cos_t
+        tantheta[i]  = tan_t
+        mfls[i]      = mfls_i
+        E_arr[i]     = E
+        gamma_arr[i] = gam_i
+        rho_eff[i]   = rho_i
+
+    return dict(
+        costheta = costheta,
+        tantheta = tantheta,
+        mfls     = mfls,
+        E        = E_arr,
+        gamma    = gamma_arr,
+        rho_eff  = rho_eff,
+        theta    = theta,
+    )
+
+
 # ═══════════════════════════════════════════════════════════════
 #  1. COARSE-GRAINED PROTEIN MODEL (Cα Go-model)
 # ═══════════════════════════════════════════════════════════════
@@ -443,6 +550,14 @@ def run_protein_simulation(T: float, cfg: ProteinConfig,
     bsdt = BSDTChannels(k=min(10, n_ref_frames - 2))
     bsdt.fit(X_ref_scaled)
 
+    # ── Canonical calibration (Gap Addendum G7) ──────────────────
+    calib = _canonical_calibration(X_ref_scaled)
+    if verbose:
+        g7_str = f"⚠ G7 κ={calib['kappa']:.3e} λ*={calib['lambda_star']:.2e}" \
+                 if calib['g7_flag'] else f"ok  κ={calib['kappa']:.3e}"
+        print(f"  Canonical calib: {g7_str}  "
+              f"(n={n_ref_frames} frames, d={X_ref_scaled.shape[1]} features)")
+
     if verbose:
         print(f"  BSDT reference: {n_ref_frames} frames, "
               f"Fisher weights: {bsdt.fisher_w_}")
@@ -509,8 +624,27 @@ def run_protein_simulation(T: float, cfg: ProteinConfig,
             trajectory['gamma'].append(gamma)
             trajectory['alarm'].append(E_bs > alarm_threshold)
 
-    trajectory['X_frames'] = np.array(X_frames_raw)  # (n_samples, 6)
-    trajectory['X_ref'] = X_ref_agg                    # (n_ref, 6)
+    trajectory['X_frames'] = np.array(X_frames_raw)  # (n_samples, 12)
+    trajectory['X_ref'] = X_ref_agg                    # (n_ref, 12)
+
+    # ── Batch canonical alignment over production frames ──────────
+    trajectory['canonical_kappa']       = calib['kappa']
+    trajectory['canonical_g7']          = calib['g7_flag']
+    trajectory['canonical_lambda_star'] = calib['lambda_star']
+    if len(trajectory['X_frames']) > 0:
+        X_prod_scaled = feat_scaler.transform(trajectory['X_frames'])
+        align = _canonical_alignment(
+            X_ref_scaled, X_prod_scaled, calib['mu_ref'], calib['sigma_reg'])
+        trajectory['canonical_costheta'] = align['costheta'].tolist()
+        trajectory['canonical_tantheta'] = align['tantheta'].tolist()
+        trajectory['canonical_rho_eff']  = align['rho_eff'].tolist()
+        trajectory['canonical_E']        = align['E'].tolist()
+    else:
+        trajectory['canonical_costheta'] = []
+        trajectory['canonical_tantheta'] = []
+        trajectory['canonical_rho_eff']  = []
+        trajectory['canonical_E']        = []
+
     return trajectory
 
 
@@ -1067,6 +1201,89 @@ def main():
     print(f"    RMSD: {mean_rmsd:.2f} Å  |  Q: {mean_Q:.3f}")
     print(f"    E_BS: {mean_ebs:.4f}  |  Alarms: {n_alarms}/{n_samples}")
     print(f"    Mean γ*: {mean_gamma:.2f} (constant γ = {cfg.gamma_const:.1f})")
+
+    # ── Step 3b: Canonical framework diagnostics ─────────────────
+    print("\n" + "=" * 72)
+    print("  CANONICAL FRAMEWORK DIAGNOSTICS (CEK-v4 / Gap Addendum G7)")
+    print("  Trigonometry_of_Collapse three-phase precursor mapping:")
+    print("    Phase 1: E rises  |  Phase 2: cosθ→0  |  Phase 3: tanθ→∞")
+    print("  Protein analogy: cosθ_t alignment = folding commitment")
+    print("=" * 72)
+
+    # Calibration info (from T_low folded reference)
+    kappa   = results['T_low'].get('canonical_kappa', float('nan'))
+    g7      = results['T_low'].get('canonical_g7', False)
+    lam_star = results['T_low'].get('canonical_lambda_star', 0.0)
+    print(f"  Reference calibration (T_low folded ensemble):")
+    print(f"    κ(Σ₀) = {kappa:.3e}")
+    if g7:
+        print(f"    ⚠ G7 FLAG: κ > 10 → Ψ* < 10% ideal → λ* = {lam_star:.3e} regularisation applied")
+    else:
+        print(f"    ✓ No G7: covariance well-conditioned (κ ≤ 10)")
+    print(f"    Interpretation: {'ill-conditioned feature ellipsoid' if g7 else 'healthy feature ellipsoid'}")
+
+    # Per-condition canonical metrics (folded reference = baseline)
+    cos_ref = float(np.mean(results['T_low'].get('canonical_costheta', [-1.0])))
+    tan_ref = float(np.mean(results['T_low'].get('canonical_tantheta', [0.0])))
+    rho_ref = float(np.mean(results['T_low'].get('canonical_rho_eff',  [0.0])))
+    E_ref_can = float(np.mean(results['T_low'].get('canonical_E', [0.0])))
+
+    print(f"\n  {'Condition':<32} {'cosθ':>8} {'Δcosθ':>8} "
+          f"{'tanθ':>8} {'Δtanθ':>8} {'ρ_eff':>8} {'E_can':>8}")
+    print("  " + "-" * 74)
+
+    for key, label in [
+        ('T_low',          f'T={0.5*Tm:.0f}K — folded (baseline)'),
+        ('T_crit',         f'T={1.0*Tm:.0f}K — marginal (at Tm)'),
+        ('T_high',         f'T={1.8*Tm:.0f}K — unfolded'),
+        ('T_high_adaptive',f'T={1.8*Tm:.0f}K — unfolded + γ*(E_BS)'),
+    ]:
+        ct   = results[key].get('canonical_costheta', [cos_ref])
+        tt   = results[key].get('canonical_tantheta', [tan_ref])
+        re   = results[key].get('canonical_rho_eff',  [rho_ref])
+        ec   = results[key].get('canonical_E',         [E_ref_can])
+        cos_m = float(np.mean(ct))
+        tan_m = float(np.mean(tt))
+        rho_m = float(np.mean(re))
+        E_m   = float(np.mean(ec))
+        d_cos = cos_m - cos_ref
+        d_tan = tan_m - tan_ref
+        flags = []
+        if d_cos > 0.01:  flags.append('★P2')
+        if d_tan > 0.5:   flags.append('★P3')
+        flag_str = ' '.join(flags)
+        print(f"  {label:<32} {cos_m:>8.4f} {d_cos:>+8.4f} "
+              f"{tan_m:>8.3f} {d_tan:>+8.3f} {rho_m:>8.4f} {E_m:>8.3f}  {flag_str}")
+
+    # cosθ time-series: check if it precedes RMSD breach at T_crit
+    ct_crit   = np.array(results['T_crit'].get('canonical_costheta', []))
+    rmsd_crit = np.array(results['T_crit']['rmsd'])
+    if len(ct_crit) > 0 and len(rmsd_crit) > 0:
+        rmsd_lo_mean = float(np.mean(results['T_low']['rmsd']))
+        rmsd_lo_std  = float(np.std(results['T_low']['rmsd']))
+        rmsd_breach  = rmsd_lo_mean + 3.0 * rmsd_lo_std
+        cos_alarm_thr = cos_ref + 0.05   # Phase-2: cosθ drifts ≥ 0.05 above baseline
+
+        first_cos_alarm = next((i for i, c in enumerate(ct_crit) if c > cos_alarm_thr), None)
+        first_rmsd_breach = next((i for i, r in enumerate(rmsd_crit) if r > rmsd_breach), None)
+
+        print(f"\n  Phase-2 lead-time at Tm (cosθ before RMSD):")
+        print(f"    cosθ alarm threshold = {cos_alarm_thr:.4f} (baseline + 0.05)")
+        print(f"    RMSD breach threshold = {rmsd_breach:.2f} Å (mean+3σ of folded)")
+        if first_cos_alarm is not None and first_rmsd_breach is not None:
+            lead = first_rmsd_breach - first_cos_alarm
+            lead_ps = lead * results['T_crit']['time'][1] if len(results['T_crit']['time']) > 1 else 0
+            print(f"    First cosθ alarm:   frame {first_cos_alarm}")
+            print(f"    First RMSD breach:  frame {first_rmsd_breach}")
+            if lead > 0:
+                print(f"    ➜ cosθ leads RMSD by {lead} frames — Phase-2 precursor CONFIRMED")
+            else:
+                print(f"    ➜ cosθ and RMSD trigger simultaneously (lead={lead} frames)")
+        elif first_cos_alarm is not None:
+            print(f"    cosθ alarm at frame {first_cos_alarm}, RMSD never breaches threshold")
+            print(f"    ➜ cosθ detects latent instability invisible to global RMSD")
+        else:
+            print(f"    No cosθ alarm at Tm — protein marginally stable in canonical geometry")
 
     # ── Step 4: Full Engine Scoring — BOTH approaches ──
     X_ref = results['T_low']['X_frames']

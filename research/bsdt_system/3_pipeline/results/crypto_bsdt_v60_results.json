@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "version": "v60",
+    "description": "BSDT continuous energy attenuation replacing hard clip",
+    "theta_bsdt": 120.95976536586262,
+    "v58_sharpe": 4.0362,
+    "oos_split_date": "2025-01-01",
+    "pass_bars": {
+      "oos": 3.6,
+      "theta_sensitivity": 0.2,
+      "alpha_sensitivity": 0.15,
+      "threshold_sensitivity": 0.15
+    },
+    "st_fgrc_params": {
+      "alpha": 0.85,
+      "G_schmitt": [
+        0.26,
+        0.32
+      ],
+      "T_schmitt": [
+        0.25,
+        0.31
+      ],
+      "partial_credit": 0.3,
+      "fire_thresh": 0.65,
+      "clip_removed": true,
+      "attenuation_law": "g_E = theta/(e_t + theta)"
+    }
+  },
+  "oos_split": {
+    "v58_tight (reference)": {
+      "sharpe_full": 3.958907354959302,
+      "sharpe_first": 3.5156230103451445,
+      "sharpe_second": 4.740244416133077,
+      "maxdd_second": -0.037454466714068824,
+      "pass": true
+    },
+    "v59_schmitt_only (reference)": {
+      "sharpe_full": 3.3110353991330324,
+      "sharpe_first": 2.631659946949932,
+      "sharpe_second": 4.295763140538396,
+      "maxdd_second": -0.04880535792317042,
+      "pass": true
+    },
+    "v60_fgrc_bsdt (alpha=0.85)": {
+      "sharpe_full": 2.8814187488482803,
+      "sharpe_first": 2.1563873625137484,
+      "sharpe_second": 3.9125723277397717,
+      "maxdd_second": -0.04138011786182372,
+      "pass": true
+    },
+    "v60_fgrc_bsdt (alpha=0.80)": {
+      "sharpe_full": 2.5849508005623,
+      "sharpe_first": 1.9283380192156945,
+      "sharpe_second": 3.5489780339162187,
+      "maxdd_second": -0.040644084556126,
+      "pass": false
+    },
+    "v60_fgrc_bsdt (alpha=0.90)": {
+      "sharpe_full": 2.729542504876154,
+      "sharpe_first": 1.8879147393201587,
+      "sharpe_second": 3.9008092283137072,
+      "maxdd_second": -0.04163782034004615,
+      "pass": true
+    },
+    "v60_schmitt_bsdt": {
+      "sharpe_full": 3.3723184701016744,
+      "sharpe_first": 2.862856076368454,
+      "sharpe_second": 4.158616730059895,
+      "maxdd_second": -0.04232965646618703,
+      "pass": true
+    }
+  },
+  "theta_sensitivity": {
+    "per_perturb": {
+      "\u03b8 \u00d7 0.25": {
+        "theta": 30.239941341465656,
+        "sharpe": 2.947577591486711,
+        "delta": 0.06615884263843075,
+        "maxdd": -0.03979532464107027
+      },
+      "\u03b8 \u00d7 0.50": {
+        "theta": 60.47988268293131,
+        "sharpe": 2.921921351516264,
+        "delta": 0.040502602667983556,
+        "maxdd": -0.04595101929398493
+      },
+      "\u03b8 \u00d7 1.00": {
+        "theta": 120.95976536586262,
+        "sharpe": 2.8814187488482803,
+        "delta": 0.0,
+        "maxdd": -0.05107098739411564
+      },
+      "\u03b8 \u00d7 2.00": {
+        "theta": 241.91953073172525,
+        "sharpe": 2.8404613012812088,
+        "delta": -0.04095744756707154,
+        "maxdd": -0.0545650515956555
+      },
+      "\u03b8 \u00d7 4.00": {
+        "theta": 483.8390614634505,
+        "sharpe": 2.8083917052474687,
+        "delta": -0.07302704360081158,
+        "maxdd": -0.05663516388875045
+      }
+    },
+    "pass": true,
+    "max_drop": 0.07302704360081158
+  },
+  "alpha_sensitivity": {
+    "per_perturb": {
+      "\u03b1 = 0.75": {
+        "alpha": 0.75,
+        "sharpe": 2.586126683519437,
+        "delta": -0.2952920653288431,
+        "maxdd": -0.05378834143199296
+      },
+      "\u03b1 = 0.80": {
+        "alpha": 0.8,
+        "sharpe": 2.5849508005623,
+        "delta": -0.2964679482859802,
+        "maxdd": -0.055099756480170736
+      },
+      "\u03b1 = 0.85": {
+        "alpha": 0.85,
+        "sharpe": 2.8814187488482803,
+        "delta": 0.0,
+        "maxdd": -0.05107098739411564
+      },
+      "\u03b1 = 0.90": {
+        "alpha": 0.9,
+        "sharpe": 2.729542504876154,
+        "delta": -0.15187624397212618,
+        "maxdd": -0.04801680174931999
+      },
+      "\u03b1 = 0.95": {
+        "alpha": 0.95,
+        "sharpe": 2.514981044900309,
+        "delta": -0.36643770394797137,
+        "maxdd": -0.06993340016638705
+      }
+    },
+    "pass": false,
+    "max_drop": 0.36643770394797137
+  },
+  "threshold_sensitivity": {
+    "per_perturb": {
+      "baseline": {
+        "sharpe": 2.8814187488482803,
+        "delta": 0.0,
+        "maxdd": -0.05107098739411564
+      },
+      "T_hi + 0.02": {
+        "sharpe": 2.8937334910022403,
+        "delta": 0.012314742153960001,
+        "maxdd": -0.0510511572029787
+      },
+      "T_hi - 0.02": {
+        "sharpe": 2.852507171434726,
+        "delta": -0.028911577413554213,
+        "maxdd": -0.05109355259756043
+      },
+      "G_hi + 0.02": {
+        "sharpe": 2.8837017246276955,
+        "delta": 0.002282975779415164,
+        "maxdd": -0.050806652906034144
+      },
+      "G_hi - 0.02": {
+        "sharpe": 2.8750124177881897,
+        "delta": -0.0064063310600905865,
+        "maxdd": -0.051071262377973214
+      },
+      "band \u00d7 1.5": {
+        "sharpe": 3.019520769877443,
+        "delta": 0.1381020210291628,
+        "maxdd": -0.04801030522100491
+      },
+      "band \u00d7 0.5": {
+        "sharpe": 2.646956460929523,
+        "delta": -0.23446228791875745,
+        "maxdd": -0.05499013707556888
+      }
+    },
+    "pass": false,
+    "max_drop": 0.23446228791875745
+  },
+  "rv_stress_v58_ref": {
+    "per_perturb": {
+      "baseline": {
+        "sharpe": 3.958907354959302,
+        "delta": 0.0,
+        "maxdd": -0.037454466714070045
+      },
+      "rv \u00d7 0.90": {
+        "sharpe": 3.8922778108647074,
+        "delta": -0.06662954409459454,
+        "maxdd": -0.03745446671407049
+      },
+      "rv \u00d7 1.10": {
+        "sharpe": 3.8845479101805065,
+        "delta": -0.07435944477879541,
+        "maxdd": -0.03745446671406982
+      },
+      "rv + N(0, 0.02)": {
+        "sharpe": 3.850186916352925,
+        "delta": -0.10872043860637692,
+        "maxdd": -0.03745446671406949
+      }
+    },
+    "pass": true,
+    "max_drop": 0.10872043860637692
+  },
+  "summary": {
+    "best_label": "v58_tight (reference)",
+    "best_oos_h2": 4.740244416133077,
+    "vs_v58": 0.704044416133077
+  }
+}

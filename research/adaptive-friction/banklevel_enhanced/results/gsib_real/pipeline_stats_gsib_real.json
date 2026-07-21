@@ -7,12 +7,12 @@
   "n_us_real_fdic": 6,
   "n_nonus_real_worldbank": 14,
   "d_features": 5,
-  "lambda_max_W": 10.487233030340501,
-  "rho_star": 0.11187837898345365,
-  "auroc": 0.5627563576702215,
+  "lambda_max_W": 10.220601894884958,
+  "rho_star": 0.11399624448668765,
+  "auroc": 0.694011484823626,
   "auroc_95ci": [
-    0.1173,
-    0.7232
+    0.2642,
+    0.9242
   ],
   "hit_rate": 1.0,
   "hit_rate_95ci": [
@@ -23,17 +23,17 @@
   "lead_quarters_gfc": 6,
   "gfc_alarm_date": "2007-03-31 00:00:00",
   "causality": {
-    "linear_granger_min_p": 0.0667,
+    "linear_granger_min_p": 0.0638,
     "linear_verdict": "PASS",
-    "threshold_granger_min_p": 0.009,
+    "threshold_granger_min_p": 0.041,
     "threshold_verdict": "PASS (upper-regime predictive)",
-    "quantile_min_p": 0.576,
+    "quantile_min_p": 0.505,
     "quantile_verdict": "FAIL"
   },
   "region_auroc": {
-    "US": 0.397,
-    "EU": 0.6792,
-    "Asia": 0.5808
+    "US": 0.3856,
+    "EU": 0.6833,
+    "Asia": 0.6382
   },
   "bank_meta": [
     {
@@ -231,5 +231,37 @@
       "ecb_cc": null
     }
   ],
-  "runtime_sec": 14.8
+  "runtime_sec": 14.2,
+  "admissibility_analysis": {
+    "lead_window_Q": 4,
+    "theta": 0.1,
+    "M_max": 1.0,
+    "g_ch_names": [
+      "C_contagion",
+      "G_geometry",
+      "A_activity",
+      "T_topology"
+    ],
+    "g_ch_mean": [
+      10.220601894884945,
+      58.29300690918632,
+      4.176487817018009,
+      9.999999999999985e-07
+    ],
+    "mfls_st_range": [
+      29.611517103837627,
+      208.639913753221
+    ],
+    "mfls_ch_range": [
+      29.02411106737119,
+      208.15112024320874
+    ],
+    "admissibility_mean": 5.096129577172008,
+    "admissibility_max": 15.912154731420065,
+    "frac_inadmissible": 1.0,
+    "safety_mean": 0.2548064788586005,
+    "frac_safe": 0.0,
+    "rho_mfls_mean": 0.984032621199933,
+    "psi_deg_mean": 10.425502224991531
+  }
 }

@@ -1,0 +1,1269 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{tocloft}
+\setcounter{tocdepth}{3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% Boxes
+\newmdenv[linecolor=black,backgroundcolor=gray!8,linewidth=0.6pt,
+  innertopmargin=6pt,innerbottommargin=6pt,
+  innerleftmargin=8pt,innerrightmargin=8pt]{lockedbox}
+
+\newmdenv[linecolor=blue!60,backgroundcolor=blue!4,linewidth=0.6pt,
+  innertopmargin=6pt,innerbottommargin=6pt,
+  innerleftmargin=8pt,innerrightmargin=8pt]{derivbox}
+
+\newmdenv[linecolor=red!60,backgroundcolor=red!4,linewidth=0.6pt,
+  innertopmargin=6pt,innerbottommargin=6pt,
+  innerleftmargin=8pt,innerrightmargin=8pt]{resultbox}
+
+% Macros
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\T}{^{\mathsf{T}}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\inner}[2]{\langle #1,\,#2\rangle}
+\newcommand{\Fbase}{F_{\mathrm{base}}}
+\newcommand{\gX}{g_X}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\mfls}{\mathrm{MFLS}}
+\newcommand{\bsdt}{\mathrm{BSDT}}
+
+\title{\textbf{Complete Derivations}\\[0.4em]
+\large Every Object and Variable in the Canonical--BSDT Framework\\[0.2em]
+\normalsize From First Principles to Final Formula}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================
+\section{Primitives: State, Features, Metric}
+%=============================================================
+
+\subsection{State matrix $X$}
+
+\begin{definition}[State]
+The state is a matrix
+\[
+X \in \R^{N \times d}
+\]
+where $N$ is the number of agents and $d$ is the feature dimension per agent.
+Row $i$ is the state of agent $i$: $x_i \in \R^d$.
+In vectorised form: $\mathrm{vec}(X) \in \R^{Nd}$.
+\end{definition}
+
+\textbf{Dimensions.}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Symbol & Meaning & Type \\
+\midrule
+$N$ & number of agents & positive integer \\
+$d$ & features per agent & positive integer \\
+$n = Nd$ & total state dimension & positive integer \\
+$X$ & full state & $\R^{N\times d}$ \\
+$x_i$ & state of agent $i$ & $\R^d$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Feature map $S$}
+
+\begin{definition}[Feature map]
+\[
+S : \R^{N\times d} \to \R^k, \qquad X \mapsto S(X)
+\]
+$S(X)$ encodes the geometric content relevant to the control objective.
+$k \geq 1$ is fixed per domain.
+The Jacobian of $S$ at $X$ is
+\[
+J(X) = \frac{\partial S}{\partial X} \in \R^{k \times n}, \quad n = Nd.
+\]
+\end{definition}
+
+\textbf{Jacobian in index notation.}
+Let $S = (S^1,\dots,S^k)\T$ and $X = (X^1,\dots,X^n)\T$ (vectorised). Then:
+\[
+J_{ab}(X) = \frac{\partial S^a}{\partial X^b}, \quad a \in \{1,\dots,k\},\; b \in \{1,\dots,n\}.
+\]
+
+\textbf{Chain rule.} For any trajectory $X(t)$:
+\[
+\dot S = J(X)\dot X \in \R^k.
+\]
+
+\subsection{Metric $G$}
+
+\begin{definition}[Feature-space metric]
+\[
+G \in \R^{k\times k}, \quad G = G\T \succ 0.
+\]
+Eigenvalue bounds: $0 < \mu_G \leq \lambda(G) \leq M_G$.
+\end{definition}
+
+\textbf{Derivation of eigenvalue bounds.}
+Since $G \succ 0$, all eigenvalues are positive. Order them
+$0 < \lambda_1 \leq \cdots \leq \lambda_k$.
+Define:
+\[
+\mu_G := \lambda_1 = \lambda_{\min}(G), \qquad M_G := \lambda_k = \lambda_{\max}(G).
+\]
+For any $v \in \R^k$:
+\[
+\mu_G \norm{v}^2 \leq v\T G v \leq M_G \norm{v}^2.
+\]
+These bounds are tight: achieved at the eigenvectors of $G$.
+
+\subsection{Derivation of $\mu_G$ and $M_G$ for BSDT}
+
+Under the BSDT instantiation $G = \Sigma_0^{-1}$:
+\[
+\mu_G = \lambda_{\min}(\Sigma_0^{-1}) = \frac{1}{\lambda_{\max}(\Sigma_0)},
+\qquad
+M_G = \lambda_{\max}(\Sigma_0^{-1}) = \frac{1}{\lambda_{\min}(\Sigma_0)}.
+\]
+
+Proof: if $\Sigma_0 v = \lambda v$ then $\Sigma_0^{-1} v = \lambda^{-1} v$, so eigenvalues invert. $\square$
+
+Conditioning:
+\[
+\kappa(G) = \frac{M_G}{\mu_G} = \frac{\lambda_{\max}(\Sigma_0)}{\lambda_{\min}(\Sigma_0)} = \kappa(\Sigma_0).
+\]
+
+%=============================================================
+\section{Energy $E$}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+E(X) = S(X)\T G\, S(X) \in \R_{\geq 0}
+\]
+\end{lockedbox}
+
+\subsection{Properties}
+
+\begin{proposition}[Non-negativity and zero set]
+$E(X) \geq 0$ with equality if and only if $G^{1/2}S(X) = 0$,
+i.e.\ $S(X) = 0$ (since $G \succ 0$).
+\end{proposition}
+
+\begin{proof}
+$E = S\T G S = \norm{G^{1/2}S}^2 \geq 0$.
+Equality holds iff $G^{1/2}S = 0$ iff $S = 0$ since $G^{1/2}$ is invertible.
+\end{proof}
+
+\subsection{Time derivative of $E$}
+
+\begin{proposition}[Energy velocity]
+Along any trajectory $X(t)$:
+\[
+\dot E(t) = \langle \gX(X(t)),\, \dot X(t)\rangle
+\]
+where $\gX = \nabla_X E$ is derived in Section~\ref{sec:gX}.
+\end{proposition}
+
+\begin{proof}
+By the chain rule:
+\[
+\dot E = \frac{d}{dt}[S\T G S] = 2S\T G \dot S = 2S\T G J\dot X = (2J\T G S)\T \dot X = \gX\T \dot X.
+\]
+\end{proof}
+
+\subsection{BSDT instantiation of $E$}
+
+With $S = \tilde X \Sigma_0^{-1/2}$ (vectorised), $G = I$:
+\[
+E_\bsdt = \norm{\tilde X \Sigma_0^{-1/2}}_F^2 = \tr(\tilde X \Sigma_0^{-1} \tilde X\T)
+\]
+where $\tilde X = X - \mathbf{1}\mu_0\T$.
+
+With $S = B(X) = (\delta_C,\delta_G,\delta_A,\delta_T)\T$, $G = A$:
+\[
+E_\bsdt = B(X)\T A\, B(X) = E_\mathrm{BS}(S).
+\]
+
+%=============================================================
+\section{State-Space Gradient $g_X$}
+\label{sec:gX}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\gX(X) = \nabla_X E(X) = 2J(X)\T G\, S(X) \in \R^n
+\]
+\end{lockedbox}
+
+\subsection{Derivation from first principles}
+
+\begin{proof}
+Write $E = \sum_{a,b} G_{ab} S^a S^b$.
+Differentiate with respect to $X^j$:
+\[
+\frac{\partial E}{\partial X^j}
+= \sum_{a,b} G_{ab}\left(\frac{\partial S^a}{\partial X^j} S^b + S^a \frac{\partial S^b}{\partial X^j}\right)
+= 2\sum_{a,b} G_{ab} J_{aj} S^b
+= 2[J\T G S]_j.
+\]
+Hence $\nabla_X E = 2J\T G S$.
+\end{proof}
+
+\subsection{Matrix form}
+
+In matrix notation with $X$ as an $N\times d$ matrix (not vectorised),
+the gradient is an $N\times d$ matrix:
+\[
+\nabla_X E = 2J\T G S \in \R^{N\times d}
+\]
+where $J \in \R^{k\times Nd}$ acts on $\mathrm{vec}(\dot X)$ and the result is reshaped.
+
+\subsection{Norm of $g_X$}
+
+\begin{proposition}[Gradient norm]
+\[
+\norm{\gX}^2 = 4 S\T G J J\T G S = 4 S\T G\, \mathcal{G}\, G S
+\]
+where $\mathcal{G} = JJ\T \in \R^{k\times k}$ is the Gram matrix of $J$.
+\end{proposition}
+
+\begin{proof}
+$\norm{\gX}^2 = (2J\T GS)\T(2J\T GS) = 4 S\T G J J\T G S$.
+\end{proof}
+
+\subsection{Coercivity bounds on $\norm{g_X}$}
+
+\begin{proposition}[Two-sided gradient coercivity]
+Under (A1)--(A2) with $\sigma_{\min}(J) \geq \sigma > 0$ and
+$\norm{J}_\mathrm{op} \leq J_{\max}$:
+\[
+C_1 \sqrt{E} \leq \norm{\gX} \leq C_2\sqrt{E}
+\]
+where
+\[
+C_1 = \frac{2\sigma\mu_G}{\sqrt{M_G}}, \qquad C_2 = \frac{2J_{\max} M_G}{\sqrt{\mu_G}}.
+\]
+\end{proposition}
+
+\begin{proof}
+\textbf{Lower bound.}
+\[
+\norm{\gX}^2 = 4\norm{J\T GS}^2
+\geq 4\sigma_{\min}(J)^2 \norm{GS}^2
+\geq 4\sigma^2 \mu_G^2 \norm{S}^2.
+\]
+Since $E = S\T G S \leq M_G\norm{S}^2$, we have $\norm{S}^2 \geq E/M_G$.
+Therefore $\norm{\gX}^2 \geq 4\sigma^2\mu_G^2 E/M_G = C_1^2 E$.
+
+\textbf{Upper bound.}
+\[
+\norm{\gX} = 2\norm{J\T GS} \leq 2\norm{J}_\mathrm{op}\norm{G}_\mathrm{op}\norm{S}
+\leq 2J_{\max} M_G \norm{S}.
+\]
+Since $E = S\T GS \geq \mu_G\norm{S}^2$, we have $\norm{S} \leq \sqrt{E/\mu_G}$.
+Therefore $\norm{\gX} \leq 2J_{\max}M_G\sqrt{E/\mu_G} = C_2\sqrt{E}$. $\square$
+\end{proof}
+
+\subsection{BSDT pullback gradient $\tilde G_t$}
+
+In the BSDT system, the gradient decomposes per channel:
+\[
+\gX = 2\sum_{k \in \{C,G,A,T\}} [AS]_k \frac{\partial \delta_k}{\partial X} =: \tilde G_t.
+\]
+This is the pullback gradient of Section~XVI.3 of the anatomy document.
+The canonical formula $\gX = 2J\T GS$ recovers this exactly under the identification
+$G = A$, $S = B(X)$, $J = \partial B/\partial X$.
+
+%=============================================================
+\section{MFLS: Mahalanobis Field Line Score}
+%=============================================================
+
+\subsection{BSDT definition}
+
+\[
+\mfls_\bsdt(X) = \norm{\nabla_X E_\bsdt}_F = 2\norm{\tilde X \Sigma_0^{-1}}_F
+\]
+
+\subsection{Canonical derivation}
+
+\begin{lockedbox}
+\[
+\mfls(X) = \norm{\gX} = 2\norm{J\T GS}
+\]
+\end{lockedbox}
+
+\begin{proof}
+By definition $\mfls = \norm{\nabla_X E}_F$.
+The canonical gradient is $\nabla_X E = \gX = 2J\T GS$.
+Therefore $\mfls = \norm{2J\T GS} = \norm{\gX}$.
+\end{proof}
+
+\subsection{Expanded forms}
+
+Three equivalent canonical expressions:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Form & Expression & When to use \\
+\midrule
+Gradient norm & $\norm{\gX}$ & Free — already computed in canonical loop \\
+Explicit & $2\norm{J\T GS}$ & When gradient vector is needed \\
+Gram form & $2\sqrt{S\T G\mathcal{G}GS}$ & When Gram structure is analysed \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{MFLS squared}
+
+\[
+\mfls^2 = \norm{\gX}^2 = 4S\T G\mathcal{G}GS = 4S\T G J J\T G S
+\]
+
+\subsection{MFLS as Fisher information}
+
+Under $G = I_S$ (Fisher metric):
+\[
+\mfls^2 = 4\tr(\Sigma_0^{-1}\tilde X\T \tilde X \Sigma_0^{-1}) = 4\tr(I_\mathrm{Fisher})
+\]
+MFLS squared is four times the trace of the Fisher information matrix at the current state.
+High MFLS means the system is in a region of high log-likelihood curvature.
+
+\subsection{MFLS as leading indicator (proved)}
+
+From the energy derivative with $\Fbase = 0$:
+\[
+\dot E = -(1-\gamma)\norm{\gX}^2 = -(1-\gamma)\cdot\mfls^2.
+\]
+MFLS squared is the instantaneous energy descent rate.
+A spike in MFLS precedes a drop in $E$. This is a theorem, not an empirical observation.
+
+\subsection{Verification against BSDT}
+
+Under $S = B(X)$, $G = \Sigma_0^{-1}$, $J = \partial B/\partial X$ with
+$J_C = 2\tilde X\Sigma_0^{-1}$ (the camouflage Jacobian):
+\[
+\gX = 2J_C\T \Sigma_0^{-1} S = 2\tilde X\Sigma_0^{-1},
+\qquad
+\norm{\gX}_F = 2\norm{\tilde X\Sigma_0^{-1}}_F = \mfls_\bsdt. \;\checkmark
+\]
+
+%=============================================================
+\section{Adaptive Gain $\gamma$}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\gamma(X) = \frac{E(X)}{E(X) + \theta}, \qquad \theta > 0
+\]
+\end{lockedbox}
+
+\subsection{Derivation from the saddle-point game}
+
+Consider the two-player zero-sum game at fixed $X$:
+\begin{itemize}
+\item Controller chooses $\gamma \in [0,1)$
+\item Adversary chooses $u \in \R^n$ with $\norm{u} \leq M_\adv$
+\item Payoff to adversary: $J(\gamma,u) = \dot E(X;\gamma,u)$
+\end{itemize}
+
+The payoff under the canonical ODE is:
+\[
+J(\gamma,u) = (1-\gamma)\left[\inner{\gX}{\Fbase + u} - \norm{\gX}^2\right].
+\]
+
+The adversary maximises: by Cauchy--Schwarz, $u^* = M_\adv \gX/\norm{\gX}$.
+
+The controller minimises:
+\[
+\inf_{\gamma \in [0,1)} (1-\gamma) B, \quad B = \inner{\gX}{\Fbase} + M_\adv\norm{\gX} - \norm{\gX}^2.
+\]
+When $B > 0$: infimum is $0$ as $\gamma \to 1^-$; boundary solution.
+When $B \leq 0$: minimum at $\gamma = 0$.
+
+The Lagrangian formulation (Theorem O.1 of v4):
+\[
+\mathcal{L}(u,\lambda) = \half\norm{u - \Fbase}^2 + \lambda\inner{u}{\gX} - \frac{\theta}{2}\frac{\norm{\gX}^2}{E}\lambda^2
+\]
+has unique saddle point with $\lambda^* = \frac{\inner{\Fbase,\gX}E}{(E+\theta)\norm{\gX}^2}$,
+giving $\gamma = E/(E+\theta)$.
+
+\subsection{Properties}
+
+\begin{proposition}[Gain properties]
+\begin{enumerate}[label=(\roman*)]
+\item $\gamma \in [0,1)$ for all $X$
+\item $\gamma \to 0$ as $E \to 0$: no damping near target
+\item $\gamma \to 1$ as $E \to \infty$: full projection at high energy
+\item $\gamma = 1/2$ when $E = \theta$: maximum-entropy operating point
+\item $\gamma' = \theta/(E+\theta)^2 > 0$: strictly increasing in $E$
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) $E \geq 0$, $\theta > 0$, so $0 \leq E/(E+\theta) < 1$.
+(ii) $\lim_{E\to0} E/(E+\theta) = 0$.
+(iii) $\lim_{E\to\infty} E/(E+\theta) = 1$.
+(iv) $E/(E+\theta) = 1/2 \iff E = \theta$.
+(v) $d\gamma/dE = \theta/(E+\theta)^2 > 0$.
+\end{proof}
+
+\subsection{Fermi-Dirac structure}
+
+Writing $\gamma = 1/(1 + \theta/E)$: this is the Fermi-Dirac occupation function
+with inverse temperature $\beta = 1/\theta$ and energy $E$.
+The thermodynamic dictionary (v4 §N):
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Canonical object & Thermodynamic analogue \\
+\midrule
+$\theta$ & Temperature \\
+$\gamma$ & Occupation number \\
+$1-\gamma$ & Carnot efficiency \\
+$E = \theta$ & Maximum-entropy operating point \\
+$\theta \to 0$ & Zero temperature (full intervention) \\
+$\theta \to \infty$ & Infinite temperature (no intervention) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Formula for $\theta$}
+
+\begin{lockedbox}
+\[
+\theta = \mathrm{median}_{t \in \text{calm}}\{E(t)\}
+= \mathrm{median}_{t \in \text{calm}}\left\{\norm{\tilde X_t \Sigma_0^{-1/2}}_F^2\right\}
+\]
+\end{lockedbox}
+
+\textbf{Derivation.}
+The median of the calm-period energy distribution is the natural temperature because:
+\begin{enumerate}
+\item At $E = \theta$, $\gamma = 1/2$ — half intervention. During normal operation ($E \approx \theta$ by construction), the system applies moderate damping.
+\item The median is robust to outlier spikes in the calibration window. The mean would overstate $\theta$.
+\item Setting $\theta = E_\text{median}$ means the system is at its maximum-entropy operating point on average during the calm regime — it neither over-intervenes nor under-intervenes.
+\end{enumerate}
+
+\textbf{Alternative derivations of $\theta$:}
+
+Route 1 (Maximum entropy): set $\theta = e^*$ (critical manifold energy) so $\gamma = 1/2$ at stability boundary.
+
+Route 2 (Admissibility): choose $\theta > M_\mathrm{max}\sqrt{M_G}/(\sigma\mu_G)$ to guarantee $\Psi^* > M_\mathrm{max}$.
+
+Route 3 (Chi-squared calibration): $e^* = \chi^2_{Nd,0.99}$, set $\theta = e^*/2$ so $\gamma = 1/3$ at the $99\%$ energy quantile.
+
+%=============================================================
+\section{The Canonical ODE}
+%=============================================================
+
+\subsection{Locked form}
+
+\begin{lockedbox}
+\[
+\dot X = \Fbase(X) - \gX(X) - \gamma(X)\,\frac{\inner{\Fbase(X)-\gX(X)}{\gX(X)}}{\norm{\gX(X)}^2}\,\gX(X)
+\]
+\end{lockedbox}
+
+\subsection{Decomposition}
+
+Define the modified force:
+\[
+F(X) = \Fbase(X) - \gX(X).
+\]
+The projection coefficient:
+\[
+\alpha(X) = \frac{\inner{F(X)}{\gX(X)}}{\norm{\gX(X)}^2}.
+\]
+The ODE becomes:
+\[
+\dot X = F(X) - \gamma(X)\alpha(X)\gX(X).
+\]
+
+\textbf{Three-term decomposition:}
+\begin{enumerate}
+\item $\Fbase(X)$: domain-specific nominal field
+\item $-\gX(X)$: gradient correction forcing $E$ to decrease
+\item $-\gamma\alpha\gX$: adaptive projection removing the component of $F$ aligned with $\gX$
+\end{enumerate}
+
+\subsection{Force decomposition}
+
+\[
+\dot X = \underbrace{F - \langle F,\hat u\rangle\hat u}_{F_\perp \text{ (always free)}}
++ \underbrace{(1-\gamma)\langle F,\hat u\rangle\hat u}_{(1-\gamma)F_\parallel \text{ (damped)}}
+\]
+where $\hat u = \gX/\norm{\gX}$.
+
+At $E \to 0$: $\gamma \to 0$, $\dot X \to \Fbase$ (free dynamics).
+At $E \to \infty$: $\gamma \to 1$, $\dot X \to F_\perp$ (only safe motion).
+
+%=============================================================
+\section{Lyapunov Energy Derivative $\dot E$}
+%=============================================================
+
+\subsection{Master identity}
+
+\begin{theorem}[Energy derivative, Lemma 7.7 of v4]
+Along any solution of the canonical ODE:
+\[
+\dot E = (1-\gamma)\left[\inner{\gX}{\Fbase} - \norm{\gX}^2\right]
+\]
+\end{theorem}
+
+\begin{proof}
+\begin{align*}
+\dot E &= \langle\gX, \dot X\rangle \\
+&= \langle\gX, \Fbase - \gX - \gamma\alpha\gX\rangle \\
+&= \langle\gX,\Fbase\rangle - \norm{\gX}^2 - \gamma\alpha\norm{\gX}^2 \\
+&= \langle\gX,\Fbase\rangle - \norm{\gX}^2 - \gamma\langle F,\gX\rangle \\
+&= \langle\gX,\Fbase\rangle - \norm{\gX}^2 - \gamma\langle\Fbase-\gX,\gX\rangle \\
+&= \langle\gX,\Fbase\rangle - \norm{\gX}^2 - \gamma\langle\Fbase,\gX\rangle + \gamma\norm{\gX}^2 \\
+&= (1-\gamma)\langle\gX,\Fbase\rangle - (1-\gamma)\norm{\gX}^2 \\
+&= (1-\gamma)\left[\langle\gX,\Fbase\rangle - \norm{\gX}^2\right]. \quad\square
+\end{align*}
+\end{proof}
+
+\subsection{Special cases}
+
+\textbf{Pure geometric flow} ($\Fbase = 0$):
+\[
+\dot E = -(1-\gamma)\norm{\gX}^2 = -(1-\gamma)\cdot\mfls^2 \leq 0.
+\]
+Strictly negative whenever $\gX \neq 0$ and $\gamma < 1$.
+
+\textbf{Descent condition} (general $\Fbase$):
+\[
+\dot E \leq 0 \iff \langle\gX,\Fbase\rangle \leq \norm{\gX}^2.
+\]
+
+\textbf{At the maximum-entropy point} ($E = \theta$, $\gamma = 1/2$):
+\[
+\dot E = \half\left[\langle\gX,\Fbase\rangle - \norm{\gX}^2\right].
+\]
+
+%=============================================================
+\section{Effective Decay Rate $\rho_\mathrm{eff}$}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\rho_\mathrm{eff}(t) = -\frac{\dot E(t)}{E(t)}
+\]
+\end{lockedbox}
+
+\subsection{Derivation in canonical terms}
+
+From the energy derivative:
+\[
+\rho_\mathrm{eff} = \frac{(1-\gamma)\left[\norm{\gX}^2 - \langle\gX,\Fbase\rangle\right]}{E}.
+\]
+
+Under $\Fbase = 0$:
+\[
+\rho_\mathrm{eff} = \frac{(1-\gamma)\norm{\gX}^2}{E} = \frac{(1-\gamma)\cdot\mfls^2}{E}.
+\]
+
+\subsection{Connection to $\sigma$}
+
+From the coercivity bound $\norm{\gX}^2 \geq C_1^2 E$:
+\[
+\rho_\mathrm{eff} \geq (1-\gamma)C_1^2 = (1-\gamma)\frac{4\sigma^2\mu_G^2}{M_G} = \rho_\text{theoretical}.
+\]
+
+The theoretical rate $\rho$ is the worst-case lower bound.
+The effective rate $\rho_\mathrm{eff}$ is the instantaneous observed rate.
+The ratio $\rho_\mathrm{eff}/\rho \geq 1$ measures how much better the system is
+performing relative to the theoretical guarantee.
+
+\subsection{Half-life prediction}
+
+The local exponential half-life is:
+\[
+\tau_{1/2}(t) = \frac{\ln 2}{\rho_\mathrm{eff}(t)}.
+\]
+This is the time at which $E$ will reach $E(t)/2$ at the current decay rate.
+
+%=============================================================
+\section{Effective Singular Value $\sigma_\mathrm{eff}$}
+%=============================================================
+
+\subsection{Abstract definition}
+
+$\sigma = \sigma_{\min}(J(X))$ from Theorem 9.3 of v4 is the abstract worst-case bound.
+
+\subsection{Derivation in canonical terms}
+
+\begin{lockedbox}
+\[
+\sigma_\mathrm{eff}(t) = \frac{\norm{\gX(t)}\sqrt{M_G}}{2\mu_G\sqrt{E(t)}} = \frac{\mfls_t\sqrt{M_G}}{4\mu_G\sqrt{E_t}}
+\]
+\end{lockedbox}
+
+\begin{proof}
+From the coercivity bound:
+\[
+\norm{\gX}^2 \geq \frac{4\sigma^2\mu_G^2}{M_G}E.
+\]
+Treat this as an equality to define the effective $\sigma$ that is tight at the current state:
+\[
+\norm{\gX}^2 = \frac{4\sigma_\mathrm{eff}^2\mu_G^2}{M_G}E
+\implies
+\sigma_\mathrm{eff}^2 = \frac{\norm{\gX}^2 M_G}{4\mu_G^2 E}
+\implies
+\sigma_\mathrm{eff} = \frac{\norm{\gX}\sqrt{M_G}}{2\mu_G\sqrt{E}}.
+\]
+Since $\mfls = \norm{\gX}$ (Section~4):
+\[
+\sigma_\mathrm{eff} = \frac{\mfls\sqrt{M_G}}{2\mu_G\sqrt{E}}.
+\]
+\end{proof}
+
+\subsection{Properties}
+
+$\sigma_\mathrm{eff}(t) \geq \sigma$ always (effective is at least as good as worst case).
+
+At the coercivity lower bound: $\sigma_\mathrm{eff} = \sigma$ (bound is tight when $J$ is at its worst orientation).
+
+$\sigma_\mathrm{eff}$ is a time-varying signal measuring the current Jacobian rank quality — computable at each step.
+
+%=============================================================
+\section{Theoretical Rate $\rho$}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\rho = \frac{4\sigma^2\mu_G^2}{M_G}(1-\gamma_\mathrm{max}), \qquad
+\gamma_\mathrm{max} = \frac{E(X_0)}{E(X_0)+\theta}
+\]
+\end{lockedbox}
+
+\subsection{Derivation}
+
+From Theorem 9.3 of v4 with $\Fbase = 0$:
+\[
+\dot E = -(1-\gamma)\norm{\gX}^2.
+\]
+Apply the coercivity lower bound:
+\[
+\norm{\gX}^2 \geq \frac{4\sigma^2\mu_G^2}{M_G}E.
+\]
+Since $\gamma \leq \gamma_\mathrm{max} = E_0/(E_0+\theta) < 1$ (monotone in $E$, decreasing, so maximum at $t=0$):
+\[
+\dot E \leq -(1-\gamma_\mathrm{max})\frac{4\sigma^2\mu_G^2}{M_G}E = -\rho E.
+\]
+By Grönwall: $E(t) \leq E_0 e^{-\rho t}$.
+
+\subsection{Expression via $\sigma_\mathrm{eff}$}
+
+Substituting $\sigma = \sigma_\mathrm{eff}$:
+\[
+\rho_\mathrm{eff} = \frac{4\sigma_\mathrm{eff}^2\mu_G^2}{M_G}(1-\gamma)
+= \frac{4\cdot\frac{\norm{\gX}^2 M_G}{4\mu_G^2 E}\cdot\mu_G^2}{M_G}(1-\gamma)
+= \frac{\norm{\gX}^2}{E}(1-\gamma). \checkmark
+\]
+Consistent with the direct definition of $\rho_\mathrm{eff}$.
+
+%=============================================================
+\section{Admissibility Threshold $\Psi^*$}
+%=============================================================
+
+\subsection{Abstract form}
+
+From Theorem 9.4 of v4:
+\[
+\Psi^* = \frac{\sigma\theta\mu_G}{\sqrt{M_G}}.
+\]
+This is unimodal with maximum at $R^* = \theta$.
+
+\subsection{Derivation in canonical terms}
+
+\begin{lockedbox}
+\[
+\Psi^* = \frac{\theta\norm{\gX}}{4\sqrt{E}} = \frac{\theta\cdot\mfls}{4\sqrt{E}}
+\]
+\end{lockedbox}
+
+\begin{proof}
+Substitute $\sigma = \sigma_\mathrm{eff} = \norm{\gX}\sqrt{M_G}/(2\mu_G\sqrt{E})$:
+\[
+\Psi^* = \frac{\sigma_\mathrm{eff}\theta\mu_G}{\sqrt{M_G}}
+= \frac{\norm{\gX}\sqrt{M_G}}{2\mu_G\sqrt{E}}\cdot\frac{\theta\mu_G}{\sqrt{M_G}}
+= \frac{\theta\norm{\gX}}{2\sqrt{E}}.
+\]
+Since $\mfls = \norm{\gX}$:
+\[
+\Psi^* = \frac{\theta\cdot\mfls}{2\sqrt{E}}.
+\]
+\end{proof}
+
+\textbf{Note on the factor.} The formula above uses $\sigma_\mathrm{eff}$ (instantaneous effective singular value). Using the abstract worst-case $\sigma$ gives $\Psi^*_\text{abstract} = \sigma\theta\mu_G/\sqrt{M_G}$, while the canonical instantaneous formula gives $\Psi^*(t) = \theta\mfls_t/(2\sqrt{E_t})$. Both are valid; the canonical form is computable at each step.
+
+\subsection{BSDT instantiation}
+
+With $G = \Sigma_0^{-1}$, $\mu_G = 1/\lambda_\mathrm{max}(\Sigma_0)$, $M_G = 1/\lambda_\mathrm{min}(\Sigma_0)$:
+\[
+\Psi^*_\bsdt = \frac{\sigma\theta/\lambda_\mathrm{max}(\Sigma_0)}{\sqrt{1/\lambda_\mathrm{min}(\Sigma_0)}}
+= \frac{\sigma\theta\sqrt{\lambda_\mathrm{min}(\Sigma_0)}}{\lambda_\mathrm{max}(\Sigma_0)}
+= \frac{\sigma\theta}{\sqrt{\kappa(\Sigma_0)}\cdot\lambda_\mathrm{max}^{1/2}(\Sigma_0)}.
+\]
+The canonical form $\theta\mfls/(2\sqrt{E})$ is metric-free — the $\Sigma_0$ terms cancel. $\square$
+
+\subsection{Sensitivity to calibration conditioning}
+
+From the BSDT formula:
+\[
+\Psi^*_\bsdt \propto \frac{1}{\sqrt{\kappa(\Sigma_0)}}.
+\]
+A $10\times$ increase in calibration conditioning shrinks $\Psi^*$ by $\sqrt{10} \approx 3.16\times$.
+This is the gap closure result G7.2.
+
+%=============================================================
+\section{Admissibility Condition}
+%=============================================================
+
+\subsection{Statement}
+
+\begin{lockedbox}
+\[
+\Psi^* > M_\mathrm{max} \iff \frac{\theta\cdot\mfls_t}{2\sqrt{E_t}} > M_\mathrm{max}
+\iff \frac{\mfls_t}{\sqrt{E_t}} > \frac{2M_\mathrm{max}}{\theta}
+\]
+\end{lockedbox}
+
+\subsection{Derivation}
+
+Starting from the abstract condition:
+\[
+\Psi^* > M_\mathrm{max}
+\]
+Substituting the canonical form:
+\[
+\frac{\theta\cdot\mfls}{2\sqrt{E}} > M_\mathrm{max}
+\]
+Rearranging:
+\[
+\mfls > \frac{2M_\mathrm{max}\sqrt{E}}{\theta}
+\]
+Dividing both sides by $\sqrt{E}$:
+\[
+\frac{\mfls}{\sqrt{E}} > \frac{2M_\mathrm{max}}{\theta}.
+\]
+
+\subsection{The canonical admissibility ratio}
+
+\begin{lockedbox}
+\[
+\mathcal{A}(t) = \frac{\mfls_t}{\sqrt{E_t}} = \frac{\norm{\gX(t)}}{\sqrt{E(t)}}
+\]
+\end{lockedbox}
+
+This ratio is the canonical admissibility signal. It measures gradient strength relative to energy level.
+
+The admissibility condition is then simply:
+\[
+\mathcal{A}(t) > \frac{2M_\mathrm{max}}{\theta}.
+\]
+
+Connection to $\rho_\mathrm{eff}$:
+\[
+\rho_\mathrm{eff}(t) = \mathcal{A}(t)^2(1-\gamma(t)).
+\]
+A system decaying fast is a system that is safe. Fast decay implies admissibility.
+
+%=============================================================
+\section{Safety Ratio}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\mathrm{SafetyRatio}(t) = \frac{\Psi^*(t)}{M_\mathrm{max}} = \frac{\theta\cdot\mfls_t}{2M_\mathrm{max}\sqrt{E_t}}
+\]
+\end{lockedbox}
+
+\subsection{Derivation}
+
+Divide the admissibility condition by $M_\mathrm{max}$:
+\[
+\mathrm{SafetyRatio} = \frac{\Psi^*}{M_\mathrm{max}} = \frac{\theta\mfls}{2M_\mathrm{max}\sqrt{E}}.
+\]
+
+Substituting $\mfls = \norm{\gX}$, $E$, $\theta$ — all already computed in the canonical loop:
+
+\textbf{Zero additional computation.}
+
+\subsection{Regimes}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+SafetyRatio & Regime & Interpretation \\
+\midrule
+$> 1$ & Admissible & $\Psi^* > M_\mathrm{max}$; ultimate boundedness guaranteed \\
+$= 1$ & Boundary & Exactly at the admissibility threshold \\
+$< 1$ & Inadmissible & Disturbance can overcome canonical brake \\
+$\to 0$ & Critical & $\mfls \to 0$ or $E \to \infty$; system losing gradient signal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Connection to effective decay rate}
+
+\[
+\mathrm{SafetyRatio}(t) = \frac{\theta}{2M_\mathrm{max}}\mathcal{A}(t) = \frac{\theta}{2M_\mathrm{max}}\sqrt{\frac{\rho_\mathrm{eff}(t)}{1-\gamma(t)}}.
+\]
+
+This connects the safety guarantee directly to the observable performance metric.
+
+%=============================================================
+\section{Alignment Angle $\cos\theta_t$}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\cos\theta_t = \frac{\inner{\Fbase(X_t)}{\gX(X_t)}}{\norm{\Fbase(X_t)}\cdot\norm{\gX(X_t)}} \in [-1,+1]
+\]
+\end{lockedbox}
+
+\subsection{Derivation from energy descent}
+
+The descent condition $\dot E \leq 0$ requires:
+\[
+\inner{\gX}{\Fbase} \leq \norm{\gX}^2.
+\]
+Writing $\inner{\gX}{\Fbase} = \norm{\gX}\norm{\Fbase}\cos\theta_t$:
+\[
+\norm{\Fbase}\cos\theta_t \leq \norm{\gX}.
+\]
+When $\cos\theta_t \leq 0$: descent is automatic regardless of $\norm{\Fbase}$.
+When $\cos\theta_t > 0$: descent requires $\norm{\Fbase}\cos\theta_t < \norm{\gX}$,
+i.e.\ $\Fbase$ is not pushing into the energy gradient too strongly.
+
+\subsection{Energy derivative in terms of $\cos\theta_t$}
+
+\[
+\dot E = (1-\gamma)\norm{\gX}\left[\norm{\Fbase}\cos\theta_t - \norm{\gX}\right].
+\]
+
+\subsection{Geometric interpretation}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Value & Meaning \\
+\midrule
+$\cos\theta_t \to +1$ & $\Fbase$ co-aligned with $\gX$ — coherent collapse pressure \\
+$\cos\theta_t \approx 0$ & $\Fbase$ tangent to energy level set — no radial progress \\
+$\cos\theta_t \to -1$ & Anti-aligned — restoring competition, $E$ falls without $\Fbase$ help \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Collapse angle $\tan\theta_t$}
+
+From §XIV of the anatomy document:
+\[
+\tan\theta_t = \frac{\norm{F_\perp}}{\norm{F_\parallel}} = \sqrt{\frac{1}{\cos^2\theta_t} - 1} = \frac{\sqrt{1-\cos^2\theta_t}}{\cos\theta_t}.
+\]
+
+$\tan\theta_t \to 0$: trajectory fully collapse-directed.
+$\tan\theta_t \to \infty$: motion fully perpendicular, locally safe.
+$\tan\theta_t = 1$ ($\theta_t = 45°$): critical balance.
+
+%=============================================================
+\section{Misalignment Angle $\psi_t$ (Sixth Signal)}
+%=============================================================
+
+\subsection{Definition}
+
+\begin{lockedbox}
+\[
+\cos\psi_t = \frac{\inner{\tilde G_t}{g_t}_F}{\norm{\tilde G_t}_F\cdot\norm{g_t}}
+\]
+\end{lockedbox}
+
+where $g_t = \nabla_S E_\mathrm{BS}(S_t) \in \R^4$ is the channel-space gradient
+and $\tilde G_t = J_t\T g_t \in \R^{Nd}$ is its state-space pullback.
+
+\subsection{Derivation}
+
+The BSDT master operator uses $g_t$ (channel space) in the projection.
+The canonical ODE uses $\tilde G_t$ (state-space pullback).
+
+These differ by the Jacobian map: $\tilde G_t = J_t\T g_t$.
+
+The angle between them:
+\[
+\cos\psi_t = \frac{\inner{\tilde G_t, g_t}_F}{\norm{\tilde G_t}_F\norm{g_t}}
+= \frac{R_t}{\norm{\tilde G_t}_F\norm{g_t}}
+\]
+where $R_t = \sum_k [g_t]_k\langle\partial_X\delta_k, g_t\rangle_F$ is the control coupling sum.
+
+\subsection{What $\psi_t$ measures}
+
+$\psi_t \approx 0$: channel-space risk and physical dynamics pointing in the same direction.
+Collapse is real. All five prior signals are reliable.
+
+$\psi_t \approx \pi/2$: complete misalignment.
+Abstract risk elevated but physical dynamics not aligned with collapse.
+This is a false alarm.
+
+\subsection{False alarm resolution}
+
+Previously: high MFLS but no actual collapse. Unexplained by any single-space signal.
+
+Now: high channel MFLS ($\norm{g_t}$ large) with $\psi_t$ near $\pi/2$
+means $\tilde G_t \perp g_t$ — physical dynamics are tangential to the collapse direction.
+The alarm is real in channel space but not in state space.
+$\psi_t$ discriminates between the two.
+
+\subsection{Performance gap formula}
+
+The performance difference between BSDT and CEK-v4:
+\[
+\Delta\text{performance}(t) \approx f(\psi_t) + \kappa(\mathcal{R}_t)^{-1}
+\]
+where:
+\begin{itemize}
+\item $\psi_t$ large: BSDT projects using wrong direction, canonical corrects
+\item $\kappa(\mathcal{R}_t)$ large: channels nearly collinear, canonical compression is more robust
+\end{itemize}
+
+%=============================================================
+\section{Channel Recovery Operator $\mathcal{R}$}
+%=============================================================
+
+\subsection{The recovery formula}
+
+\begin{lockedbox}
+\[
+S_t = \mathcal{R}(X_t)\,\gX(t), \qquad \mathcal{R}(X) = \frac{1}{2}A^{-1}(JJ\T)^{-1}J \in \R^{k\times n}
+\]
+\end{lockedbox}
+
+\subsection{Derivation}
+
+From $\gX = 2J\T GS$, left-multiply by $J$:
+\[
+J\gX = 2JJ\T GS.
+\]
+Since $JJ\T \in \R^{k\times k}$ is invertible under the rank condition:
+\[
+GS = \frac{1}{2}(JJ\T)^{-1}J\gX.
+\]
+Since $G = A \succ 0$ is invertible:
+\[
+S = \frac{1}{2}G^{-1}(JJ\T)^{-1}J\gX = \frac{1}{2}A^{-1}(JJ\T)^{-1}J\gX = \mathcal{R}\gX.
+\]
+
+\subsection{Per-channel recovery}
+
+\[
+[\delta_k] = [S]_k = [\mathcal{R}\gX]_k, \quad k \in \{C,G,A,T\}.
+\]
+
+\subsection{Attribution}
+
+\[
+a_k(t) = \frac{\tilde S_k(t)^2}{\norm{\tilde S_t}^2}, \quad \tilde S_k = \frac{S_k}{\mu_k^\text{normal}}, \quad \sum_k a_k = 1.
+\]
+
+\subsection{Stability of recovery}
+
+\begin{proposition}[Lipschitz stability]
+For perturbed gradient $\tilde\gX = \gX + \varepsilon$ with $\norm{\varepsilon} \leq \delta$:
+\[
+\norm{\tilde S - S} \leq \norm{\mathcal{R}}_\mathrm{op}\cdot\delta = \frac{\delta}{2\sigma_{\min}(A)\cdot\sigma_{\min}(JJ\T)^{1/2}\cdot\sigma_{\min}(J)}.
+\]
+\end{proposition}
+
+\begin{proof}
+$\tilde S - S = \mathcal{R}\varepsilon$, so $\norm{\tilde S - S} \leq \norm{\mathcal{R}}_\mathrm{op}\norm{\varepsilon}$.
+Expanding $\norm{\mathcal{R}}_\mathrm{op} \leq \frac{1}{2}\norm{A^{-1}}_\mathrm{op}\norm{(JJ\T)^{-1}}_\mathrm{op}\norm{J}_\mathrm{op}$
+and substituting singular value bounds gives the result.
+\end{proof}
+
+\subsection{Condition number of recovery}
+
+\[
+\kappa(\mathcal{R}) = \frac{\sigma_{\max}(\mathcal{R})}{\sigma_{\min}(\mathcal{R})}.
+\]
+
+Recovery is well-conditioned when $\kappa(\mathcal{R}) \ll 1$.
+
+Recovery fails (ill-conditioned) when:
+\begin{itemize}
+\item Channels nearly collinear: $\sigma_{\min}(JJ\T) \approx 0$
+\item Coupling matrix ill-conditioned: $\kappa(A) \gg 1$
+\item Jacobian rank-deficient: $\sigma_{\min}(J) \approx 0$ (channel has zero sensitivity)
+\end{itemize}
+
+%=============================================================
+\section{Ultimate Boundedness Threshold $\Psi^*_\mathrm{rob}$}
+%=============================================================
+
+\subsection{Standard case}
+
+From Theorem 9.4 of v4:
+\[
+\Psi_\mathrm{std}(R) = (1-\gamma(R))\cdot 2\sigma\sqrt{\frac{\mu_G^2}{M_G}R}
+= \frac{\theta}{R+\theta}\cdot C_1\sqrt{R}.
+\]
+
+Setting $u = \sqrt{R}$:
+\[
+\Psi_\mathrm{std}(u) = \frac{\theta C_1 u}{u^2 + \theta}.
+\]
+
+Maximum at $u = \sqrt{\theta}$ (i.e.\ $R = \theta$):
+\[
+\Psi^*_\mathrm{std} = \frac{C_1\sqrt{\theta}}{2}.
+\]
+
+\subsection{Robust case with adversarial disturbance}
+
+With two-sided coercivity $C_1\sqrt{E} \leq \norm{\gX} \leq C_2\sqrt{E}$:
+\[
+\Psi_\mathrm{rob}(R) = \frac{\theta C_1\sqrt{R}}{R + M_\adv C_2\sqrt{R} + \theta} - M_\adv.
+\]
+
+Setting $u = \sqrt{R}$:
+\[
+\frac{d\Psi_\mathrm{rob}}{du} = \frac{\theta C_1(\theta - u^2)}{(u^2 + M_\adv C_2 u + \theta)^2}.
+\]
+
+Positive for $u < \sqrt{\theta}$, negative for $u > \sqrt{\theta}$: unique maximum at $u = \sqrt{\theta}$, i.e.\ $R = \theta$.
+
+\textbf{Unimodality proved.}
+
+\subsection{Admissibility condition (robust)}
+
+\[
+M_\nom < \Psi^*_\mathrm{rob} = \Psi_\mathrm{rob}(\theta) = \frac{\theta C_1\sqrt{\theta}}{\theta + M_\adv C_2\sqrt{\theta} + \theta} - M_\adv.
+\]
+
+%=============================================================
+\section{The Complete Dashboard}
+%=============================================================
+
+\subsection{All signals from two objects}
+
+Every signal in the canonical dashboard is a function of $\gX$ and $E$:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{llll}
+\toprule
+Signal & Formula & Objects & Section \\
+\midrule
+$\mfls_t$ & $\norm{\gX}$ & $\gX$ & \S4 \\
+$E_t$ & $S\T GS$ & $S, G$ & \S2 \\
+$\gamma_t$ & $E/(E+\theta)$ & $E,\theta$ & \S5 \\
+$\dot E_t$ & $(1-\gamma)(\inner{\gX}{\Fbase}-\norm{\gX}^2)$ & $\gX,E,\theta,\Fbase$ & \S7 \\
+$\rho_\mathrm{eff}(t)$ & $\norm{\gX}^2(1-\gamma)/E$ & $\gX,E,\theta$ & \S8 \\
+$\cos\theta_t$ & $\inner{\Fbase,\gX}/(\norm{\Fbase}\norm{\gX})$ & $\gX,\Fbase$ & \S11 \\
+$\tan\theta_t$ & $\sqrt{1/\cos^2\theta_t - 1}$ & $\cos\theta_t$ & \S11 \\
+$\sigma_\mathrm{eff}(t)$ & $\norm{\gX}\sqrt{M_G}/(2\mu_G\sqrt{E})$ & $\gX,E,\mu_G,M_G$ & \S9 \\
+$\Psi^*(t)$ & $\theta\norm{\gX}/(2\sqrt{E})$ & $\gX,E,\theta$ & \S10 \\
+$\mathcal{A}(t)$ & $\norm{\gX}/\sqrt{E}$ & $\gX,E$ & \S10 \\
+$\mathrm{SafetyRatio}(t)$ & $\theta\norm{\gX}/(2M_\mathrm{max}\sqrt{E})$ & $\gX,E,\theta$ & \S10 \\
+$\tau_{1/2}(t)$ & $\ln 2/\rho_\mathrm{eff}(t)$ & $\rho_\mathrm{eff}$ & \S8 \\
+$\psi_t$ & $\arccos(R_t/(\norm{\tilde G_t}\norm{g_t}))$ & $J,g_t,\gX$ & \S12 \\
+$S_t$ (channels) & $\mathcal{R}(X_t)\gX(t)$ & $J,A,\gX$ & \S13 \\
+$a_k(t)$ & $\tilde S_k^2/\norm{\tilde S}^2$ & $S_t$ & \S13 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Dependency graph}
+
+\begin{verbatim}
+X
+├─ S = B(X)         ──► E = S^T G S
+│                       │
+│                       ├─ γ = E/(E+θ)
+│                       ├─ γ_max = E_0/(E_0+θ)
+│                       └─ ρ = 4σ²μ²_G/M_G · (1-γ_max)
+│
+└─ J = ∂S/∂X        ──► g_X = 2J^T G S = MFLS
+                         │
+                         ├─ MFLS = ||g_X||
+                         ├─ σ_eff = MFLS·√M_G / (2μ_G·√E)
+                         ├─ Ψ* = θ·MFLS / (2√E)
+                         ├─ SafetyRatio = Ψ*/M_max
+                         ├─ ρ_eff = MFLS²·(1-γ)/E
+                         ├─ cos θ_t = <F_base, g_X> / (||F_base||·MFLS)
+                         └─ R = R(X)·g_X → channels S_t → a_k(t)
+\end{verbatim}
+
+\subsection{Computational algorithm (per step $t$)}
+
+\begin{enumerate}
+\item Compute $\tilde X_t = X_t - \mathbf{1}\mu_0\T$
+\item Compute $S_t = B(X_t) = (\delta_C,\delta_G,\delta_A,\delta_T)\T$
+\item Compute $J_t = \partial B/\partial X|_{X_t}$
+\item Compute $\gX(t) = 2J_t\T G S_t$ \hfill \textit{(canonical gradient)}
+\item Compute $E_t = S_t\T G S_t$ \hfill \textit{(energy)}
+\item Compute $\gamma_t = E_t/(E_t+\theta)$ \hfill \textit{(gain)}
+\item Compute $\mfls_t = \norm{\gX(t)}$ \hfill \textit{(free from step 4)}
+\item Compute $\rho_\mathrm{eff}(t) = \mfls_t^2(1-\gamma_t)/E_t$
+\item Compute $\Psi^*(t) = \theta\mfls_t/(2\sqrt{E_t})$
+\item Compute $\mathrm{SafetyRatio}(t) = \Psi^*(t)/M_\mathrm{max}$
+\item Compute $\cos\theta_t = \inner{F_\mathrm{base}(X_t)}{\gX(t)}/(\norm{F_\mathrm{base}}\mfls_t)$
+\item Compute $\mathcal{R}_t = \frac{1}{2}A^{-1}(J_tJ_t\T)^{-1}J_t$ \hfill \textit{($4\times4$ inversion)}
+\item Compute $S_t = \mathcal{R}_t\gX(t)$ \hfill \textit{(channel recovery)}
+\item Compute $a_k(t) = \tilde S_k(t)^2/\norm{\tilde S_t}^2$ \hfill \textit{(attribution)}
+\item Compute $\psi_t = \arccos(R_t/(\norm{\tilde G_t}_F\norm{g_t}))$
+\item Update ODE: $\dot X = \Fbase - \gX - \gamma_t\alpha_t\gX$
+\end{enumerate}
+
+%=============================================================
+\section{BSDT--Canonical Juxtaposition}
+%=============================================================
+
+\subsection{Identity table}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{l X X l}
+\toprule
+Object & BSDT form & Canonical form & Equal? \\
+\midrule
+State & $X \in \R^{N\times d}$ & $X \in \R^{N\times d}$ & Identical \\
+Energy & $e_t = \norm{\tilde X\Sigma_0^{-1/2}}_F^2$ & $E = S\T GS$ & Equal under $G=A$ \\
+Gradient & $\tilde G_t = \sum_k[AS]_k\partial_X\delta_k$ & $\gX = 2J\T GS$ & Identical \\
+Gain & $\gamma^* = e_t/(e_t+\theta)$ & $\gamma = E/(E+\theta)$ & Identical \\
+ODE & $\dot X = F_t - \gamma^*\frac{\inner{F_t,g_t}}{\norm{g_t}^2}g_t$ & locked canonical ODE & Identical \\
+MFLS & $2\norm{\tilde X\Sigma_0^{-1}}_F$ & $\norm{\gX}$ & Identical \\
+Rate $\rho$ & not proved & $4\sigma^2\mu_G^2/M_G(1-\gamma_\mathrm{max})$ & canonical proves BSDT \\
+$\Psi^*$ & not proved & $\theta\mfls/(2\sqrt{E})$ & canonical proves BSDT \\
+Channels & $(\delta_C,\delta_G,\delta_A,\delta_T)$ explicit & recovered via $\mathcal{R}\gX$ & $4\times4$ inversion \\
+$\psi_t$ & not in BSDT & $\arccos(R_t/\norm{\tilde G_t}\norm{g_t})$ & new in canonical \\
+Extensions & none & 7 extensions & canonical adds \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{The master identity}
+
+\[
+\underbrace{S_t}_{\text{BSDT channels}}
+=
+\underbrace{\frac{1}{2}A^{-1}(J_tJ_t\T)^{-1}J_t}_{\text{recovery operator }\mathcal{R}(X_t)}
+\underbrace{\gX(t)}_{\text{canonical gradient}}
+\]
+
+BSDT is on the left. Canonical is on the right.
+The recovery operator in the middle is the bridge.
+The equation says they are the same object, read from different directions.
+
+\subsection{Performance gap}
+
+BSDT uses $g_t$ (channel space) in the projection.
+Canonical uses $\tilde G_t$ (state-space pullback).
+The gap is $\psi_t$:
+
+\[
+\Delta\text{performance}(t) \sim \psi_t + \kappa(\mathcal{R}_t)^{-1}.
+\]
+
+The v34$\to$v58 empirical progression was systematically reducing $\psi_t$
+and $\kappa(\mathcal{R}_t)$ without knowing it:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Version & Implicit improvement & Canonical equivalent \\
+\midrule
+v34 & Base & No channel recovery \\
+v48 & 4-quadrant modulator & Partial recovery via $(G_\mathrm{mem},T_\mathrm{mem})$ \\
+v52 & Clip structure & Excludes high $\kappa(\mathcal{R})$ regimes \\
+v55 & State-dependent $\theta_G(t)$ & Ricci-flow metric adaptation \\
+v58 & Asymmetric clamp & Ill-conditioned recovery region excluded \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%=============================================================
+\section{Summary Reference}
+%=============================================================
+
+\subsection{Every formula}
+
+\begin{resultbox}
+\begin{align*}
+S &= B(X) = (\delta_C,\delta_G,\delta_A,\delta_T)\T &&\text{feature vector} \\[4pt]
+E &= S\T GS &&\text{Lyapunov energy} \\[4pt]
+J &= \partial S/\partial X \in \R^{k\times n} &&\text{Jacobian} \\[4pt]
+\gX &= 2J\T GS &&\text{canonical gradient} \\[4pt]
+\mfls &= \norm{\gX} = 2\norm{J\T GS} &&\text{field line score} \\[4pt]
+\gamma &= \frac{E}{E+\theta} &&\text{adaptive gain} \\[4pt]
+\theta &= \mathrm{median}_{t\in\text{calm}}\{E(t)\} &&\text{intervention cost} \\[4pt]
+\dot E &= (1-\gamma)\left[\inner{\gX}{\Fbase}-\norm{\gX}^2\right] &&\text{energy derivative} \\[4pt]
+\rho_\mathrm{eff} &= \frac{\norm{\gX}^2(1-\gamma)}{E} = \frac{\mfls^2(1-\gamma)}{E} &&\text{instantaneous rate} \\[4pt]
+\sigma_\mathrm{eff} &= \frac{\mfls\sqrt{M_G}}{2\mu_G\sqrt{E}} &&\text{effective singular value} \\[4pt]
+\rho &= \frac{4\sigma^2\mu_G^2}{M_G}(1-\gamma_\mathrm{max}) &&\text{theoretical rate} \\[4pt]
+\Psi^* &= \frac{\theta\cdot\mfls}{2\sqrt{E}} &&\text{admissibility threshold} \\[4pt]
+\mathcal{A} &= \frac{\mfls}{\sqrt{E}} = \frac{\norm{\gX}}{\sqrt{E}} &&\text{admissibility ratio} \\[4pt]
+\text{SafetyRatio} &= \frac{\theta\cdot\mfls}{2M_\mathrm{max}\sqrt{E}} &&\text{real-time safety signal} \\[4pt]
+\cos\theta_t &= \frac{\inner{\Fbase}{\gX}}{\norm{\Fbase}\norm{\gX}} &&\text{alignment} \\[4pt]
+\cos\psi_t &= \frac{\inner{\tilde G_t}{g_t}_F}{\norm{\tilde G_t}_F\norm{g_t}} &&\text{misalignment (sixth signal)} \\[4pt]
+\mathcal{R} &= \frac{1}{2}A^{-1}(JJ\T)^{-1}J &&\text{channel recovery operator} \\[4pt]
+S_t &= \mathcal{R}(X_t)\gX(t) &&\text{channel recovery formula} \\[4pt]
+a_k &= \tilde S_k^2/\norm{\tilde S}^2 &&\text{channel attribution}
+\end{align*}
+\end{resultbox}
+
+\subsection{The two-object reduction}
+
+\textbf{Everything derives from $\gX$ and $E$.}
+
+$\gX$ carries: MFLS, $\sigma_\mathrm{eff}$, $\Psi^*$, SafetyRatio, $\cos\theta_t$, channel recovery.
+
+$E$ carries: $\gamma$, $\rho_\mathrm{eff}$, $\tau_{1/2}$, admissibility condition.
+
+The entire framework is a set of scalar and matrix operations on two vectors computed once per step.
+
+\end{document}

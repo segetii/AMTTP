@@ -716,8 +716,8 @@ class CollapseGeometry:
         min_a2 = float(np.min(a2))
         lam_max = 2.0 * np.maximum(Q, 1.0) / (min_a2 + 1e-12)
 
-        # ── Adaptive friction γ*(x) = α / (λ_max + ε) ──
-        gamma_star = self.alpha / (lam_max + self.epsilon)
+        # ── Adaptive friction γ*(x) = λ_max/(λ_max+α) ∈ [0,1) (canonical guardian) ──
+        gamma_star = lam_max / (lam_max + self.alpha)
 
         # ── Effective potential Φ_eff (gravity, closed-form) ──
         sigma2 = self.sigma_gravity ** 2
@@ -830,7 +830,7 @@ class CollapseGeometry:
         # ── Energy functional + dissipation ──
         E_BS = delta_C**2 + delta_G**2 + delta_A**2 + delta_T**2
 
-        gamma_star = self.alpha / (lam_max + self.epsilon)
+        gamma_star = lam_max / (lam_max + self.alpha)   # canonical guardian ∈ [0,1)
         c0 = 0.1
         grad_E_sq = grad_norm ** 2
         sigma_diss = (c0 + gamma_star) * grad_E_sq

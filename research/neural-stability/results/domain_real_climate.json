@@ -1,0 +1,57 @@
+{
+  "dataset": "NASA GISTEMP GLB.Ts+dSST",
+  "source_url": "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv",
+  "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+  "presentation": "Odeyemi 2026 paper-style",
+  "years": [
+    1880,
+    2025
+  ],
+  "reference_window": "1880-1949",
+  "crisis_epoch_year": 2000,
+  "fisher_vr_weights": {
+    "C": 0.19526048099393137,
+    "G": 0.007410864685658907,
+    "A": 0.3438030956293252,
+    "T": 0.45352555869108446
+  },
+  "frozen_v4_threshold_p99": 1.1218632689009231,
+  "alpha_alarm_effective": 0.10526315789473684,
+  "first_alarm_year": 1917,
+  "lead_years": 83,
+  "pre_crisis_alarms": 7,
+  "post_crisis_alarms": 2,
+  "bsdt_dominance_post_crisis": {
+    "delta_C": 0.3844738601450279,
+    "delta_G": 0.057381701867870324,
+    "delta_A": 0.43413304914539874,
+    "delta_T": 0.12401138884134863
+  },
+  "engine_info": {
+    "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+    "presentation": "Odeyemi 2026 paper-style",
+    "n_ref": 70,
+    "n_cal": 18,
+    "rolling_window": 16,
+    "frozen_p99_ref_v4": 1.1218632689009231,
+    "adaptive_p99_ref_v4": 1.1218632689009231,
+    "alpha_alarm": 0.01,
+    "alpha_alarm_effective": 0.10526315789473684,
+    "weights_order": [
+      "delta_C",
+      "delta_G",
+      "delta_A",
+      "delta_T"
+    ],
+    "weights": [
+      0.19526048099393137,
+      0.007410864685658907,
+      0.3438030956293252,
+      0.45352555869108446
+    ]
+  },
+  "outputs": {
+    "figure": "c:\\amttp\\research\\neural-stability\\figures\\domain_real_climate.png",
+    "json": "c:\\amttp\\research\\neural-stability\\results\\domain_real_climate.json"
+  }
+}

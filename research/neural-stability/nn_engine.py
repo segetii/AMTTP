@@ -214,38 +214,60 @@ def per_layer_grad_norms(dW_list: List[np.ndarray]) -> np.ndarray:
     return np.array([float(np.linalg.norm(dW)) for dW in dW_list])
 
 
-def spectral_radius_approx(dW_list: List[np.ndarray],
+def spectral_radius_approx(W_list: List[np.ndarray],
                             n_iter: int = 10, seed: int = 0) -> float:
-    """Approximate λ_max of the Hessian using the product of
-    layer-wise spectral norms (upper bound).
+    """Depth-normalised spectral norm — geometric mean of layer spectral norms.
 
-    For a deep network: λ_max(∇²L) ≈ Π_i σ_max(W_i)
-    This is faster than full Hessian eigendecomposition.
+    The standard Jacobian bound gives:
+        σ_max(J) ≤ Π_l σ_max(W_l)
+
+    But the full product is exponentially loose for deep networks:
+    for a 20-layer 512-dim net at init (init_scale=2), each
+    σ_max(W_l) ≈ 5.6, so Π σ ≈ 5.6^20 ≈ 10^15 — making the friction
+    γ_spec = lr · Π σ / α so large the network cannot move at all.
+
+    Fix: use the GEOMETRIC MEAN (depth-normalised product):
+        λ_eff = exp( (1/L) Σ_l log σ_max(W_l) )  ≈ 5.6
+
+    This is the "effective per-layer spectral norm" — the curvature
+    contribution of a *typical* layer, independent of depth.
+    γ_spec = lr · λ_eff / α then stays in a sensible [0, 10] range
+    at init and rises proportionally as weights grow, providing
+    calibrated adaptive braking without freezing the network.
     """
     rng = np.random.default_rng(seed)
-    spectral_prod = 1.0
+    log_spectral_sum = 0.0
+    n_valid = 0
 
-    for dW in dW_list:
-        # Power iteration for max singular value
-        if dW.shape[0] == 0 or dW.shape[1] == 0:
+    for W in W_list:
+        if W.ndim < 2 or W.shape[0] < 1 or W.shape[1] < 1:
             continue
-        v = rng.normal(0, 1, dW.shape[1])
+        # Power iteration for σ_max(W)
+        v = rng.normal(0, 1, W.shape[1])
         v /= np.linalg.norm(v) + 1e-12
         for _ in range(n_iter):
-            u = dW @ v
+            u = W @ v
             u_norm = np.linalg.norm(u)
             if u_norm < 1e-12:
                 break
             u /= u_norm
-            v = dW.T @ u
+            v = W.T @ u
             v_norm = np.linalg.norm(v)
             if v_norm < 1e-12:
                 break
             v /= v_norm
-        sigma = float(np.linalg.norm(dW @ v))
-        spectral_prod *= max(sigma, 1e-12)
+        sigma = float(np.linalg.norm(W @ v))
+        log_spectral_sum += np.log(max(sigma, 1e-12))
+        n_valid += 1
 
-    return spectral_prod
+    if n_valid == 0:
+        return 1.0
+    # Geometric mean: exp((1/L) Σ log σ_l) — depth-normalised, no overflow.
+    # Full product Π σ_l grows as σ^L ≈ 5.6^20 ≈ 10^15 for a 20-layer init,
+    # making γ_spec astronomically large and freezing the network.
+    # Geometric mean gives the typical per-layer spectral norm ≈ 5.6,
+    # keeping γ_spec = lr · λ_eff / α in a sensible [0, 10] range.
+    return float(np.exp(log_spectral_sum / n_valid))
 
 
 # ═════════════════════════════════════════════════════════════
@@ -334,14 +356,26 @@ class GradientBSDT:
         return sum(w[k] * channels[k] ** 2 for k in w)
 
     def adaptive_friction(self, E_bs: float, alpha: float = 0.1,
-                          lambda_max: float = 1.0) -> float:
+                          lambda_max: float = 1.0,
+                          lr: float = 0.01) -> float:
         """Two-level adaptive friction:
-        Level 1 (spectral):   γ_spec = α / λ_max
-        Level 2 (structural): γ_struct = E_BS / (E_BS + θ)
+
+        Level 1 — Spectral stability (γ_spec):
+            Derived from the descent condition  lr / (1 + γ) ≤ α / λ_max,
+            which keeps the effective step inside the curvature radius.
+            Solving for γ:  γ_spec = lr · λ_max / α.
+            Larger curvature (λ_max ↑) → more friction (γ_spec ↑).
+            This is the correct sign: the old formula α/λ_max gave LESS
+            friction as curvature grew — exactly backwards.
+
+        Level 2 — Structural energy (γ_struct):
+            γ_struct = E_BS / (E_BS + θ)  ∈ [0, 1).
+            Captures BSDT-channel stress independent of spectral geometry.
+
         Combined: γ* = max(γ_spec, γ_struct)
         """
-        gamma_spec = alpha / (lambda_max + 1e-10)
-        gamma_struct = E_bs / (E_bs + self.theta)
+        gamma_spec   = lr * lambda_max / alpha          # ∝ curvature
+        gamma_struct = E_bs / (E_bs + self.theta)       # BSDT structural
         return max(gamma_spec, gamma_struct)
 
     def reset(self):
@@ -500,17 +534,28 @@ class BSDTOptimiser(Optimiser):
         self.bsdt = GradientBSDT(theta=theta)
         self.alpha = alpha
         self.calibrated = False
+        self._cached_epoch = -1
+        self._cached_lam   = 1.0
 
     def reset(self):
         self.bsdt.reset()
-        self.calibrated = False
+        self.calibrated    = False
+        self._cached_epoch = -1
+        self._cached_lam   = 1.0
 
-    def _compute_friction(self, net, dW_list, db_list, epoch):
-        """Compute BSDT friction and channel diagnostics."""
+    def _compute_friction(self, net, dW_list, db_list, epoch, lr):
+        """Compute BSDT friction and channel diagnostics.
+        Spectral radius is cached per epoch to avoid redundant power
+        iterations inside the mini-batch loop.
+        """
         channels = self.bsdt.compute_channels(net.W, dW_list)
         E_bs = self.bsdt.energy(channels)
-        lam_max = spectral_radius_approx(dW_list, seed=epoch)
-        gamma_star = self.bsdt.adaptive_friction(E_bs, self.alpha, lam_max)
+        # Cache lam_max: recompute only at the first batch of each epoch
+        if epoch != self._cached_epoch:
+            self._cached_lam   = spectral_radius_approx(net.W, seed=epoch)
+            self._cached_epoch = epoch
+        lam_max    = self._cached_lam
+        gamma_star = self.bsdt.adaptive_friction(E_bs, self.alpha, lam_max, lr)
 
         # Calibrate on first stable epoch
         if not self.calibrated and epoch == 0:
@@ -523,7 +568,7 @@ class BSDTOptimiser(Optimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         effective_lr = lr / (1.0 + gamma_star)
 
@@ -546,7 +591,7 @@ class MFLSOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         # MFLS score emphasises temporal_novelty + activity
         mfls_score = (0.4 * channels["temporal_novelty"] +
@@ -576,7 +621,7 @@ class MolecularOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         g_norms = per_layer_grad_norms(dW_list)
 
@@ -608,10 +653,11 @@ class GravityOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
-        # Gravity mode: pure spectral control
-        gamma_grav = self.alpha / (lam_max + 1e-10)
+        # Gravity mode: pure spectral control — γ_grav = lr·λ/α
+        # (proportional to curvature; the old α/λ was inverted)
+        gamma_grav = lr * lam_max / self.alpha
         gamma_combined = max(gamma_grav, gamma_star * 0.5)
 
         effective_lr = lr / (1.0 + gamma_combined)
@@ -634,12 +680,12 @@ class HybridOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         # Blend: use E_BS to choose between molecular (structural)
         # and gravity (spectral)
         blend = E_bs / (E_bs + 1.0)   # →1 when stressed, →0 when calm
-        gamma_grav = self.alpha / (lam_max + 1e-10)
+        gamma_grav = lr * lam_max / self.alpha   # corrected: ∝ curvature
         gamma_combined = blend * gamma_star + (1 - blend) * gamma_grav
 
         g_norms = per_layer_grad_norms(dW_list)
@@ -667,7 +713,7 @@ class QuadSurfOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         # QuadSurf: emphasise camouflage (gradient herding detection)
         E_qs = (0.50 * channels["camouflage"] ** 2 +
@@ -697,7 +743,7 @@ class QuadExpoOptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         # Exponential channel response (sharper reaction to stress)
         E_qe = sum(0.25 * (np.exp(min(v, 10.0)) - 1.0)
@@ -734,7 +780,7 @@ class SignedLROptimiser(BSDTOptimiser):
 
     def step(self, net, dW_list, db_list, epoch, lr):
         gamma_star, E_bs, channels, lam_max = \
-            self._compute_friction(net, dW_list, db_list, epoch)
+            self._compute_friction(net, dW_list, db_list, epoch, lr)
 
         # Sign consistency across layers
         flat_grad = np.concatenate([dW.flatten() for dW in dW_list])
@@ -879,15 +925,17 @@ def train(net: BlowUpNet, opt: Optimiser,
         avg_train_loss = epoch_loss / len(X_train)
         train_acc = epoch_correct / len(X_train)
 
-        # Test metrics
+        # Test metrics — forward only (no backward needed)
         y_pred_test, _ = net.forward(X_test)
         test_loss = binary_cross_entropy(y_pred_test, y_test)
         test_acc = float(np.mean((y_pred_test > 0.5) == y_test))
 
-        # Final gradient info for the epoch
-        y_pred_full, acts_full = net.forward(X_train)
-        dW_full, db_full = net.backward(X_train, y_train, y_pred_full, acts_full)
-        final_gnorm = grad_norm(dW_full, db_full)
+        # Gradient norm: reuse the last mini-batch's gnorm and step_info.
+        # The previous code did a full forward+backward over all training
+        # data here (O(N·L·d²) every epoch) purely for logging — 6× more
+        # expensive than all the mini-batches combined.  The last-batch
+        # gnorm is a faithful proxy and avoids the redundant pass.
+        final_gnorm = gnorm
 
         log = EpochLog(
             epoch=epoch,

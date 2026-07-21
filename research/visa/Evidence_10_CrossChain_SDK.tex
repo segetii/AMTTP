@@ -17,13 +17,15 @@
 \end{center}
 \vspace{0.5cm}
 
-\section*{1. Beyond a Single Chain: Cross-Chain Compliance}
-A critical limitation of existing Web3 compliance tools is that they operate on a single blockchain. I designed AMTTP to be \textbf{chain-agnostic} from inception, with cross-chain bridging capabilities that allow the compliance engine to monitor and enforce policy across Ethereum, Polygon, Arbitrum, and other EVM-compatible networks simultaneously.
+\section*{1. Executive Summary}
+\textbf{I built:} compliance enforcement across seven simultaneous blockchain networks --- closing the cross-chain evasion gap where a blacklisted wallet moves freely to a different chain --- and two developer SDKs that compress third-party integration from weeks of custom infrastructure work to hours, exposing nine specialist AI compliance services behind a single import.
 
-This architectural decision positions AMTTP as an infrastructure-layer protocol rather than a single-chain application, dramatically expanding its addressable market from one blockchain ecosystem to the entire multi-chain DeFi landscape.
+\textbf{The problem:} conventional compliance tools enforce rules on one blockchain. A blacklisted wallet simply moves assets to a different network and transacts freely. I solved this by propagating risk scores and block decisions across seven networks via LayerZero (a cross-blockchain messaging protocol that transmits signed data packets between networks) --- a wallet blocked anywhere is blocked everywhere. EVM (Ethereum Virtual Machine) is the shared code standard across Ethereum, Polygon, Arbitrum, Optimism, Base, BSC, and Avalanche, meaning enforcement code written once applies to all of them.
+
+Two developer SDKs --- TypeScript (\texttt{@amttp/client-sdk}) and Python (\texttt{amttp}) --- accompany the core system, exposing the full compliance stack behind a simple import. Neither wraps an existing library; both were written from scratch.
 
 \vspace{0.3cm}
-\noindent\textbf{Solidity LayerZero Integration} (from \texttt{contracts/AMTTPCrossChain.sol}):
+\noindent\textbf{Cross-Chain Contract Integration} (from \texttt{contracts/AMTTPCrossChain.sol}):
 
 \vspace{0.2cm}
 \noindent\fbox{\begin{minipage}{0.95\textwidth}
@@ -49,17 +51,17 @@ This architectural decision positions AMTTP as an infrastructure-layer protocol 
 \end{minipage}}
 \vspace{0.2cm}
 
-\noindent\textit{Figure 1: Production Solidity code for cross-chain risk score propagation via LayerZero V1, supporting 7 EVM chains (Ethereum, Polygon, Arbitrum, Optimism, Base, BSC, Avalanche) with nonce-based replay protection and per-chain rate limiting.}
+\noindent\textit{Figure 1: \texttt{AMTTPCrossChain.sol} --- upgradeable Solidity contract implementing LayerZero cross-chain message passing. A risk score or block decision on one of 7 EVM networks is encoded, signed, and broadcast to all connected chains. \texttt{nonReentrant} and \texttt{whenNotPaused} guards prevent replay and denial-of-service.}
 
-\section*{2. Developer SDKs: TypeScript \& Python}
-To accelerate third-party adoption, I engineered and published two developer SDKs that abstract the complexity of the AMTTP protocol into simple, importable libraries:
+\section*{2. Developer SDK Distribution}
+Two developer integration kits were designed and released alongside the core system:
 \begin{itemize}
-    \item \textbf{TypeScript SDK} (\texttt{@amttp/client-sdk}): Provides ML-powered risk scoring, smart contract integration (Policy Engine \& Manager), KYC compliance checking, real-time inference, atomic swap creation, and multi-chain support (Ethereum, Polygon, Arbitrum).
-    \item \textbf{Python SDK} (\texttt{amttp}): Mirrors the TypeScript SDK capabilities for data science teams and backend integrators --- transaction risk scoring, policy management, and programmatic access to the compliance engine.
+    \item \textbf{TypeScript SDK} (\texttt{@amttp/client-sdk}): For web and application developers. Provides AI-powered risk scoring, blockchain enforcement integration, identity compliance checks, and support for multiple blockchain networks, accessible in a few lines of code.
+    \item \textbf{Python SDK} (\texttt{amttp}): For data scientists and backend engineers. Provides the same capabilities using the Python programming language, which is standard in financial analytics and data science teams.
 \end{itemize}
 
 \vspace{0.3cm}
-\noindent\textbf{TypeScript SDK --- Quick Start (from \texttt{packages/client-sdk/README.md}):}
+\noindent\textbf{TypeScript SDK Example} (from \texttt{packages/client-sdk/README.md}):
 
 \vspace{0.2cm}
 \noindent\fbox{\begin{minipage}{0.95\textwidth}
@@ -76,7 +78,7 @@ To accelerate third-party adoption, I engineered and published two developer SDK
 \end{minipage}}
 
 \vspace{0.3cm}
-\noindent\textbf{Python SDK --- Quick Start (from \texttt{packages/python-sdk/README.md}):}
+\noindent\textbf{Python SDK Example} (from \texttt{packages/python-sdk/README.md}):
 
 \vspace{0.2cm}
 \noindent\fbox{\begin{minipage}{0.95\textwidth}
@@ -97,9 +99,17 @@ To accelerate third-party adoption, I engineered and published two developer SDK
 \end{minipage}}
 \vspace{0.2cm}
 
-\noindent\textit{Figure 2: Dual-language SDK distribution enabling enterprise integration by third-party developers in under 10 lines of code.}
+\noindent\textit{Figure 2: TypeScript and Python SDK quick-start examples. A third-party developer can score a transaction against AMTTP's full compliance stack --- ML risk, FCA sanctions, policy engine, and cross-chain data --- in under 10 lines of code in their preferred language. The Python SDK targets financial analytics teams; the TypeScript SDK targets web and application developers.}
 
-\section*{3. Commercial Scalability}
-The combination of chain-agnostic architecture and ready-made developer SDKs transforms AMTTP from a personal research project into a commercially licensable B2B infrastructure product. Financial institutions, DeFi protocols, and RegTech companies can integrate AMTTP's compliance capabilities into their existing systems within hours rather than months, using either the TypeScript or Python SDK.
+\vspace{0.3cm}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{images/vscode_sdk_packages.png}
+\end{center}
+\noindent\textit{Figure 3: VS Code workspace showing both SDKs fully structured and ready for distribution. Both packages are sole-authored: no collaborative commits, no fork from an existing open-source SDK. Each wraps the full nine-service AMTTP compliance stack behind a single import.}
+
+\section*{3. Commercial Readiness and UK Ecosystem Value}
+Cross-chain enforcement and distribution-ready SDKs transform AMTTP from a research system into a deployable compliance product. The architectural decision to implement enforcement at the cross-chain messaging layer --- rather than as a post-settlement reporting tool --- means a block decision propagates to all seven networks within the same transaction cycle. A wallet cannot evade by moving chains.
+
+The two SDKs directly address the principal integration barrier for regulated institutions: a bank, payment processor, or fintech operating on any of the seven supported networks can integrate the full nine-service compliance stack within hours, in their preferred language, without rebuilding or understanding the underlying infrastructure. This eliminates a cost and complexity barrier that would otherwise require a dedicated blockchain engineering team. For UK digital-finance institutions operating under FCA digital-asset rules, Travel Rule obligations, or MiCA cross-border requirements, the enforcement layer and its distribution tooling represent production-ready infrastructure they can adopt immediately. I designed, built, and sole-authored every component.
 
 \end{document}

@@ -1,0 +1,200 @@
+{
+  "dataset": "TON-IoT-2020",
+  "data_path": "c:\\amttp\\data\\external_validation\\cyber\\ton_iot_network.csv",
+  "protocol": "frozen normal initial window, future unseen chronological test window",
+  "frozen_reference": {
+    "rows": 4000,
+    "attacks": 0,
+    "ts_start": 1554198460.0,
+    "ts_end": 1554337941.0
+  },
+  "future_test": {
+    "rows": 78052,
+    "attacks": 41052,
+    "normal": 37000,
+    "attack_prevalence": 0.5259570542715113,
+    "ts_start": 1554337947.0,
+    "ts_end": 1556549156.0
+  },
+  "threshold": {
+    "percentile": 99.0,
+    "score_threshold": 2.0722664479896693,
+    "final_threshold": 1.354469492459134,
+    "persistence_k": 1,
+    "primary_scorer": "canonical_v4",
+    "protocol_mode": "hybrid"
+  },
+  "features": [
+    "duration",
+    "dst_bytes",
+    "missed_bytes",
+    "src_pkts",
+    "src_ip_bytes",
+    "dst_pkts",
+    "dst_ip_bytes",
+    "dns_qclass",
+    "dns_qtype",
+    "dns_rcode",
+    "http_request_body_len",
+    "http_response_body_len",
+    "http_status_code"
+  ],
+  "metrics": {
+    "frozen_primary_flow_persistent": {
+      "auc": 0.6224751975740721,
+      "precision": 0.6112450490786981,
+      "recall": 0.5187810581701257,
+      "f1": 0.5612301367697051,
+      "false_alarm_rate": 0.36608108108108106,
+      "miss_rate": 0.4812189418298743,
+      "tp": 21297,
+      "fp": 13545,
+      "tn": 23455,
+      "fn": 19755,
+      "missed_attacks": 19755,
+      "false_alarms": 13545,
+      "threshold": 1.354469492459134,
+      "persistence_k": 1
+    },
+    "frozen_primary_flow_raw": {
+      "auc": 0.6224751975740721,
+      "precision": 0.653316412227987,
+      "recall": 0.4263616876157069,
+      "f1": 0.5159854369647568,
+      "false_alarm_rate": 0.251027027027027,
+      "miss_rate": 0.5736383123842931,
+      "tp": 17503,
+      "fp": 9288,
+      "tn": 27712,
+      "fn": 23549,
+      "missed_attacks": 23549,
+      "false_alarms": 9288,
+      "threshold": 2.0722664479896693,
+      "persistence_k": 1
+    },
+    "frozen_primary_batch": {
+      "auc": 0.7053642736711331,
+      "precision": 0.8106936416184971,
+      "recall": 0.9508474576271186,
+      "f1": 0.875195007800312,
+      "false_alarm_rate": 0.6858638743455497,
+      "miss_rate": 0.04915254237288136,
+      "tp": 561,
+      "fp": 131,
+      "tn": 60,
+      "fn": 29,
+      "missed_attacks": 29,
+      "false_alarms": 131,
+      "threshold": 2.0722664479896693,
+      "persistence_k": 1
+    },
+    "frozen_canonical_flow_persistent": {
+      "auc": 0.6224751975740721,
+      "precision": 0.653316412227987,
+      "recall": 0.4263616876157069,
+      "f1": 0.5159854369647568,
+      "false_alarm_rate": 0.251027027027027,
+      "miss_rate": 0.5736383123842931,
+      "tp": 17503,
+      "fp": 9288,
+      "tn": 27712,
+      "fn": 23549,
+      "missed_attacks": 23549,
+      "false_alarms": 9288,
+      "threshold": 2.0722664479896693,
+      "persistence_k": 1
+    },
+    "q_only_radial_baseline": {
+      "auc": 0.5378195716178031,
+      "precision": 0.6251046901172529,
+      "recall": 0.43634902075416543,
+      "f1": 0.5139438801859184,
+      "false_alarm_rate": 0.29035135135135137,
+      "miss_rate": 0.5636509792458345,
+      "tp": 17913,
+      "fp": 10743,
+      "tn": 26257,
+      "fn": 23139,
+      "missed_attacks": 23139,
+      "false_alarms": 10743,
+      "threshold": 5.023856409310442,
+      "persistence_k": 1
+    }
+  },
+  "channel_dominance": {
+    "delta_C": 5.368310578148013e-08,
+    "delta_A": 5.368176384952639e-08,
+    "delta_T": 2.6591073070081102e-14,
+    "delta_G": 0.9999998926351038
+  },
+  "per_attack": [
+    {
+      "attack_type": "xss",
+      "total": 5000,
+      "detected": 509,
+      "missed": 4491,
+      "recall": 0.1018
+    },
+    {
+      "attack_type": "scanning",
+      "total": 5000,
+      "detected": 989,
+      "missed": 4011,
+      "recall": 0.1978
+    },
+    {
+      "attack_type": "password",
+      "total": 5000,
+      "detected": 997,
+      "missed": 4003,
+      "recall": 0.1994
+    },
+    {
+      "attack_type": "injection",
+      "total": 5000,
+      "detected": 1057,
+      "missed": 3943,
+      "recall": 0.2114
+    },
+    {
+      "attack_type": "ransomware",
+      "total": 5000,
+      "detected": 2997,
+      "missed": 2003,
+      "recall": 0.5994
+    },
+    {
+      "attack_type": "mitm",
+      "total": 1052,
+      "detected": 365,
+      "missed": 687,
+      "recall": 0.34695817490494296
+    },
+    {
+      "attack_type": "ddos",
+      "total": 5000,
+      "detected": 4524,
+      "missed": 476,
+      "recall": 0.9048
+    },
+    {
+      "attack_type": "dos",
+      "total": 5000,
+      "detected": 4861,
+      "missed": 139,
+      "recall": 0.9722
+    },
+    {
+      "attack_type": "backdoor",
+      "total": 5000,
+      "detected": 4998,
+      "missed": 2,
+      "recall": 0.9996
+    }
+  ],
+  "outputs": {
+    "figure": "c:\\amttp\\research\\neural-stability\\figures\\domain_cybersecurity_frozen_validation.png",
+    "json": "c:\\amttp\\research\\neural-stability\\results\\cyber_frozen_window_metrics.json",
+    "per_attack_csv": "c:\\amttp\\research\\neural-stability\\results\\cyber_frozen_window_per_attack.csv"
+  }
+}

@@ -1,0 +1,29 @@
+﻿Evidence Upgrade V2 — Implementation Summary
+===========================================
+
+This is a true structural redesign, not a patch of the previous pack.
+
+What changed:
+1. Rebuilt generated evidence documents around assessor logic: claim -> proof -> significance -> verification -> anti-loophole.
+2. Added a new assessor-facing index mapping criteria, documents, primary proof, and verification anchors.
+3. Reframed Mandatory Criteria away from "I built technology" toward leadership evidence: public deployment, public analytics, authorship, deployment proof, and external validation.
+4. Separated OC3 documents by contribution type:
+   - OC3-1: AI risk engine only.
+   - OC3-2: product interfaces, RBAC, explainability only.
+   - OC3-3: SDK distribution and external pilot validation only.
+   - OC3-4: security, auditability, fuzzing, gas/reliability only.
+5. Made OC4-3 the flagship academic-impact evidence and treated OC4-2 as bounded dissemination evidence rather than overstating preprint status.
+6. Kept the Kleros/dispute layer explicit in MC-3 and security/reliability context.
+7. Preserved Schedule A + signed/sealed signature page together in OC3-3.
+8. Exported all V2 DOCX files to PDF and verified real Word-exported PDF page counts.
+9. Scanned all V2 DOCX files for missing image placeholders: 0 missing placeholders.
+
+Important folders:
+- 00_CURRENT_COPY: snapshot before V2 rebuild.
+- 01_UPGRADED_DOCX: final V2 editable DOCX files.
+- 02_UPGRADED_PDF: final V2 PDFs.
+- 03_PAGE_AUDIT: logs, page counts, placeholder scan.
+
+Validation:
+- All generated evidence documents are <= 3 pages when exported through Microsoft Word.
+- Missing image placeholder scan: 0.

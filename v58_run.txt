@@ -1,0 +1,47 @@
+﻿====================================================================================================
+  v58 ÔÇö STABILITY PATCH  (asymmetric clamp + EMA smoothing)
+  Goal: rv├ù1.10 drop -0.297 ÔåÆ < -0.10.  K=0.10 frozen. No new params.
+====================================================================================================
+
+[1] 1h data
+  ETHUSDT 1h ...   ETHUSDT [CACHE]
+42,542 bars  [2021-01-01 ÔåÆ 2026-05-01]
+  BTCUSDT 1h ... 46,186 bars  [2021-01-01 ÔåÆ 2026-05-01]
+  SOLUSDT 1h ... 21,909 bars  [2021-01-01 ÔåÆ 2026-04-29]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  ÔåÆ  2026-04-29 20:00:00   n=20,502 bars  (1944 days)
+  Train: 12,094   Test: 8,408   SOL: True
+
+[2] Funding  t=89s
+    ETHUSDT: 2168 daily records  2020-06-01 ÔåÆ 2026-05-08
+    BTCUSDT: 2168 daily records  2020-06-01 ÔåÆ 2026-05-08
+
+[3] State panel  t=100s
+
+[4] Engine  t=101s
+  [v36] Normal window: 500 bars ├ù 8 agents ├ù 8 features
+  [v36] e* (¤ç┬▓, df=64) = 93.217
+  [v36] ¤â_n = 23.562022
+  [v36] ╬© (90-pctile normal e_t) = 121.009
+  [v36] cos_theta_channel calib: ╬╝=0.436, ¤â=0.421
+  [v36] ╬¥ calib: ╬¥1(╬╝=0.971,¤â=0.014)  ╬¥2(╬╝=1.000,¤â=0.000)  ╬¥3(╬╝=0.102,¤â=0.000)  ╬¥4(╬╝=-0.000,¤â=1.000)  ╬¥5(╬╝=1.000,¤â=0.000)
+  [v36] RSS_stretch calib: ╬╝=0.459, ¤â=0.333
+py : Traceback (most recent call last):
+At line:1 char:116
++ ... ne\results; py -3 -u run_crypto_pairs_v58_stability_patch.py *>&1 | O ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last) 
+   ::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\amttp\research\adaptive-friction\pipeline\results\run_crypto_pairs_v
+58_stability_patch.py", line 422, in <module>
+    main()
+    ~~~~^^
+  File "C:\amttp\research\adaptive-friction\pipeline\results\run_crypto_pairs_v
+58_stability_patch.py", line 246, in main
+    M, net, geom, lyap, ews, stoch, e_star, theta = 
+calibrate_intraday_engine(X, calib_mask)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 8)

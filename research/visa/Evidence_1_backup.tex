@@ -1,0 +1,87 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=0.65in, bottom=0.65in, left=0.75in, right=0.75in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\begin{document}
+\noindent\textbf{\Large Tech Nation Visa - Exceptional Promise}\hfill\textbf{Applicant:} Odeyemi Olusegun Israel\\
+\noindent\textbf{Criteria:} Mandatory Criteria (Innovation and Technical Leadership)\\
+\rule{\textwidth}{0.4pt}
+\vspace{2pt}
+\begin{center}
+    \textbf{\large MC-1: Design and Development of AMTTP --- A Four-Layer Real-Time Blockchain Compliance System}
+\end{center}
+\vspace{2pt}
+
+\noindent\textbf{Executive Summary:}
+I designed and built a four-layer real-time compliance system for blockchain transactions. Conventional AML tools act after funds have moved; AMTTP acts before, scoring risk, checking sanctions, and enforcing a contract-level decision within one second. In its first public month, the live platform processed \textbf{920,848 transactions} and attracted \textbf{1,220 unique visitors} at amttp.com. Every layer --- consumer app, enterprise dashboard, nine-service AI backend, and blockchain contracts --- was built by me.
+
+\vspace{3pt}
+\noindent\textbf{Live Public Deployment Evidence}
+\vspace{2pt}
+
+\begin{center}
+    \fcolorbox{black}{yellow!10}{
+    \begin{minipage}{0.9\textwidth}
+        \centering
+        \vspace{3pt}
+        {\large\textbf{4-MINUTE VIDEO DEMONSTRATION}}\\[1pt]
+        {\normalsize\texttt{https://youtu.be/I0dXSN\_ScR0}}\\[3pt]
+    \textit{Public demo: \textbf{amttp.com} \enspace|\enspace Sepolia-backed environment \enspace|\enspace 1,220 unique visitors \enspace|\enspace 38,320 requests \enspace|\enspace 5 Apr -- 5 May 2026}\vspace{3pt}
+    \end{minipage}}
+\end{center}
+\vspace{1pt}
+\begin{center}
+    \includegraphics[width=0.97\textwidth]{images/cloudflare_analytics.png}
+\end{center}
+  \noindent\textit{\small Figure 1: Cloudflare analytics for amttp.com --- 1,220 unique visitors, 38,320 total requests, 53.54\% cache-hit ratio (5 Apr -- 5 May 2026). Independently verifiable on the live Sepolia-backed environment.}
+
+\vspace{3pt}
+\noindent\textbf{\large Technical Contributions}\\[-2pt]
+\rule{\textwidth}{0.5pt}
+\vspace{3pt}
+
+\noindent\begin{minipage}[t]{0.49\textwidth}
+  \begin{itemize}[leftmargin=1em, itemsep=1pt, parsep=0pt, topsep=0pt]\small
+    \item \textbf{Pre-settlement enforcement at scale:} 920,848 transactions processed on a live public testnet; decisions issued before funds move, not after.
+    \item \textbf{Dual-model AI scoring:} a gradient-boosted classifier and a Graph Neural Network (wallet relationship analysis); fraud-detection accuracy (ROC-AUC) 0.9999998.
+    \item \textbf{90\%+ cost reduction:} a compact model trained from a larger one runs on standard office-grade CPUs, eliminating specialist GPU hardware.
+  \end{itemize}
+\end{minipage}%
+\hspace{0.02\textwidth}%
+\begin{minipage}[t]{0.49\textwidth}
+  \begin{itemize}[leftmargin=1em, itemsep=1pt, parsep=0pt, topsep=0pt]\small
+    \item \textbf{Privacy-preserving identity:} identity and sanctions verified on-chain without exposing any personal data --- GDPR-compliant on a public ledger.
+    \item \textbf{Regulatory audit trail:} every decision permanently recorded on-chain, meeting UK (FCA) and EU (MiCA) financial regulation requirements.
+    \item \textbf{Zero-downtime upgrades:} an upgradeable contract design lets compliance rules change without taking the live platform offline.
+  \end{itemize}
+\end{minipage}
+
+%% PAGE 2: Architecture
+\clearpage
+
+\noindent\includegraphics[width=0.99\textwidth]{images/amttp_architecture.png}
+
+\vspace{2pt}
+\noindent\textit{\small Figure 2: AMTTP four-layer architecture --- Flutter + Next.js (UI) $\to$ Express Gateway $\to$ Python FastAPI orchestrator (9 microservices) $\to$ 5 upgradeable Solidity contracts, 17 Docker containers. All layers sole-authored.}
+
+%% PAGE 3: War Room Screenshots (full width)
+\clearpage
+
+\noindent\textbf{\large Live Dashboard Evidence}\\[-2pt]
+\rule{\textwidth}{0.5pt}
+\vspace{4pt}
+
+\noindent\includegraphics[width=\textwidth]{images/warroom_dashboard.png}\\[2pt]
+\noindent\textit{\small Figure 3: War Room dashboard on the live public testnet --- 920,848 transactions processed, 54.3\% compliance rate, average risk score 62.4. Real wallet addresses independently verifiable on Etherscan.}
+
+\vfill
+
+\noindent\includegraphics[width=\textwidth]{images/warroom_reports.png}\\[2pt]
+\noindent\textit{\small Figure 4: Automated report generation --- Daily AML Compliance PDF (2.4\,MB), Weekly Risk Assessment (5.1\,MB), Monthly FCA SAR (8.7\,MB) --- all generated programmatically without manual intervention.}
+
+\end{document}
+

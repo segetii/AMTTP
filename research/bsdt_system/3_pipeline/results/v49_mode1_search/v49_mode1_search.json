@@ -1,0 +1,191 @@
+{
+  "version": "v49",
+  "mode1_definition": {
+    "peak_thresh": 0.02,
+    "final_thresh": -0.02
+  },
+  "n_segments": 11,
+  "n_mode1": 2,
+  "univariate_top10": [
+    {
+      "feat": "start_month",
+      "auc": 0.8666666666666667,
+      "thresh": 6.0,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "feat": "start_dow",
+      "auc": 0.8666666666666667,
+      "thresh": 2.0,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.0,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "feat": "btc_24h_ret",
+      "auc": 0.7666666666666667,
+      "thresh": 0.035940476684417466,
+      "tpr": 1.0,
+      "fpr": 0.4,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "feat": "conv_0",
+      "auc": 0.7000000000000001,
+      "thresh": 0.7777767414331338,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "feat": "first4_ret",
+      "auc": 0.7,
+      "thresh": -7.461707599576428e-06,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "feat": "start_year",
+      "auc": 0.6666666666666667,
+      "thresh": 2024.0,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "feat": "cos_theta_0",
+      "auc": 0.6333333333333333,
+      "thresh": -0.7929526243620835,
+      "tpr": 0.5,
+      "fpr": 0.0,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "feat": "prev_seg_ret",
+      "auc": 0.6333333333333333,
+      "thresh": -0.08438511066628562,
+      "tpr": 1.0,
+      "fpr": 0.6,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "feat": "btc_24h_vol",
+      "auc": 0.6333333333333333,
+      "thresh": 0.007126385067630927,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.2,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "feat": "first4_dd",
+      "auc": 0.5999999999999999,
+      "thresh": -5.596285919562405e-06,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.2,
+      "rule": "x \u2265 thr"
+    }
+  ],
+  "combo_top10": [
+    {
+      "combo": "start_month / start_dow",
+      "auc": 0.9333333333333333,
+      "thresh": 3.999999998,
+      "tpr": 1.0,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month - start_dow",
+      "auc": 0.9,
+      "thresh": 6.0,
+      "tpr": 1.0,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month * conv_0",
+      "auc": 0.9,
+      "thresh": 5.664838987773116,
+      "tpr": 1.0,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month + start_year",
+      "auc": 0.9,
+      "thresh": 2032.0,
+      "tpr": 1.0,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_dow - btc_24h_ret",
+      "auc": 0.9,
+      "thresh": 2.158462966914554,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.0,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "combo": "start_dow / start_year",
+      "auc": 0.9,
+      "thresh": 0.0009881422924896304,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.0,
+      "rule": "x \u2265 thr"
+    },
+    {
+      "combo": "start_month + btc_24h_ret",
+      "auc": 0.8666666666666667,
+      "thresh": 5.983495388571992,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month - btc_24h_ret",
+      "auc": 0.8666666666666667,
+      "thresh": 6.016504611428008,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month + conv_0",
+      "auc": 0.8666666666666667,
+      "thresh": 6.766152549023851,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    },
+    {
+      "combo": "start_month - conv_0",
+      "auc": 0.8666666666666667,
+      "thresh": 5.233847450976149,
+      "tpr": 0.8333333333333334,
+      "fpr": 0.2,
+      "rule": "x \u2264 thr"
+    }
+  ],
+  "best_formula": {
+    "combo": "start_month / start_dow",
+    "thresh": 3.999999998,
+    "rule": "x \u2264 thr",
+    "auc": 0.9333333333333333
+  },
+  "filtered_metrics": {
+    "final": 62896.4459821682,
+    "maxdd": -0.3707229685966145,
+    "calmar": 6.529444789455089,
+    "sharpe": 0.5842146527352212
+  },
+  "baseline_metrics": {
+    "final": 617085.8963870216,
+    "maxdd": -0.34572995041848104,
+    "calmar": 16.59970948107629,
+    "sharpe": 0.6597130389649548
+  }
+}

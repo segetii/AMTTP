@@ -1,0 +1,130 @@
+{
+  "domain": "trading_instantiation_FDIC",
+  "canonical_ode_locked": true,
+  "params": {
+    "theta": 1.0,
+    "kappa": 0.05,
+    "dt": 0.0005429063106573822,
+    "T_final": 50.0,
+    "cfl_safety": 0.4,
+    "sigma_reg": 0.01,
+    "k_factors": 3,
+    "d_features": 6,
+    "seed": 0
+  },
+  "in_sample_quarters": 72,
+  "out_sample_quarters": 68,
+  "cond_G": 271.38875901431555,
+  "theorem1_pct_descent_min": 1.0,
+  "theorem2_max_E_ratio": 3.1724180097742254e-27,
+  "theorem3_all_satisfied": true,
+  "theorem4_all_bounded": true,
+  "descent": [
+    {
+      "init": "GFC_2008Q4",
+      "idx": 75,
+      "date": "2008-12-31",
+      "E0": 0.6061171735439582,
+      "E_final": 1.9228570373843027e-27,
+      "E_ratio": 3.1724180097742254e-27,
+      "frac_descent": 1.0,
+      "rho_empirical": 5.4071850309800995,
+      "rho_star": 0.0124567331505932,
+      "sigma_min_A": 1.0,
+      "mu_G": 1.3574168962004063,
+      "M_G": 368.3876869248922,
+      "gamma_max": 0.3773804200141499,
+      "theorem3_satisfied": true
+    },
+    {
+      "init": "Euro_2011Q4",
+      "idx": 87,
+      "date": "2011-12-31",
+      "E0": 0.971489667626962,
+      "E_final": 1.9228301334802955e-27,
+      "E_ratio": 1.979259479081392e-27,
+      "frac_descent": 1.0,
+      "rho_empirical": 5.3923091271986365,
+      "rho_star": 0.010148150085667973,
+      "sigma_min_A": 1.0,
+      "mu_G": 1.3574168962004063,
+      "M_G": 368.3876869248922,
+      "gamma_max": 0.49276934268507855,
+      "theorem3_satisfied": true
+    },
+    {
+      "init": "COVID_2020Q1",
+      "idx": 120,
+      "date": "2020-03-31",
+      "E0": 0.8110827654115638,
+      "E_final": 1.9230793382975303e-27,
+      "E_ratio": 2.3710025909892335e-27,
+      "frac_descent": 1.0,
+      "rho_empirical": 5.417459756192767,
+      "rho_star": 0.011046967825832933,
+      "sigma_min_A": 1.0,
+      "mu_G": 1.3574168962004063,
+      "M_G": 368.3876869248922,
+      "gamma_max": 0.44784411894463994,
+      "theorem3_satisfied": true
+    },
+    {
+      "init": "SVB_2023Q1",
+      "idx": 132,
+      "date": "2023-03-31",
+      "E0": 3.786158642223951,
+      "E_final": 1.9227955427465733e-27,
+      "E_ratio": 5.078486467268426e-28,
+      "frac_descent": 1.0,
+      "rho_empirical": 5.2147210299677145,
+      "rho_star": 0.004180173398958956,
+      "sigma_min_A": 1.0,
+      "mu_G": 1.3574168962004063,
+      "M_G": 368.3876869248922,
+      "gamma_max": 0.7910641759389453,
+      "theorem3_satisfied": true
+    }
+  ],
+  "bounded": [
+    {
+      "init": "GFC_2008Q4",
+      "idx": 75,
+      "E0": 0.6061171735439582,
+      "E_tail": 5.3599148049614635e-31,
+      "F_base_norm0": 0.029028221472847546,
+      "bound_proxy": 0.00024925555138605735,
+      "E_tail_le_proxy": true,
+      "ultimate_bounded": true
+    },
+    {
+      "init": "Euro_2011Q4",
+      "idx": 87,
+      "E0": 0.971489667626962,
+      "E_tail": 6.787905563019648e-31,
+      "F_base_norm0": 0.03655762922553982,
+      "bound_proxy": 0.00048526314769204717,
+      "E_tail_le_proxy": true,
+      "ultimate_bounded": true
+    },
+    {
+      "init": "COVID_2020Q1",
+      "idx": 120,
+      "E0": 0.8110827654115638,
+      "E_tail": 5.950703835782805e-31,
+      "F_base_norm0": 0.022137379829757813,
+      "bound_proxy": 0.00016346225624387487,
+      "E_tail_le_proxy": true,
+      "ultimate_bounded": true
+    },
+    {
+      "init": "SVB_2023Q1",
+      "idx": 132,
+      "E0": 3.786158642223951,
+      "E_tail": 4.945868338533425e-31,
+      "F_base_norm0": 0.07458242478495018,
+      "bound_proxy": 0.004903281705748025,
+      "E_tail_le_proxy": true,
+      "ultimate_bounded": true
+    }
+  ]
+}

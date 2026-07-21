@@ -1,0 +1,254 @@
+{
+  "model": "Two-Phase Refined (confirmation + hysteresis)",
+  "parameters": {
+    "n_persist_days": 3,
+    "recovery_confirm_ret5": 0.01,
+    "crash_confirm_ret5": -0.02,
+    "crash_ret21_thresh": -0.03,
+    "recovery_ret21_thresh": 0.0
+  },
+  "variants_comparison": {
+    "v1_baseline": {
+      "phase_dist": {
+        "QUIET": {
+          "n": 1099,
+          "pct": 46.8
+        },
+        "STRESS": {
+          "n": 686,
+          "pct": 29.2
+        },
+        "CRASH": {
+          "n": 147,
+          "pct": 6.3
+        },
+        "RECOVERY": {
+          "n": 416,
+          "pct": 17.7
+        }
+      },
+      "pnl": {
+        "label": "v1_baseline",
+        "sharpe": 0.9124,
+        "max_dd": -0.2139,
+        "cum_return": 0.5236,
+        "active_days": 564,
+        "total_days": 2348,
+        "hit_rate": 0.523,
+        "tail_crash_acc": 0.6338,
+        "bh_sharpe": 0.7287,
+        "bh_max_dd": -0.3392
+      },
+      "ic": {
+        "label": "v1_baseline",
+        "n": 563,
+        "ic": -0.1135,
+        "acc": 0.643
+      }
+    },
+    "v2_confirmation": {
+      "phase_dist": {
+        "QUIET": {
+          "n": 1099,
+          "pct": 46.8
+        },
+        "STRESS": {
+          "n": 980,
+          "pct": 41.7
+        },
+        "CRASH": {
+          "n": 89,
+          "pct": 3.8
+        },
+        "RECOVERY": {
+          "n": 180,
+          "pct": 7.7
+        }
+      },
+      "pnl": {
+        "label": "v2_confirmation",
+        "sharpe": 0.737,
+        "max_dd": -0.1186,
+        "cum_return": 0.1936,
+        "active_days": 270,
+        "total_days": 2348,
+        "hit_rate": 0.4926,
+        "tail_crash_acc": 0.7,
+        "bh_sharpe": 0.7287,
+        "bh_max_dd": -0.3392
+      },
+      "ic": {
+        "label": "v2_confirmation",
+        "n": 269,
+        "ic": -0.1499,
+        "acc": 0.5985
+      }
+    },
+    "v3_hysteresis": {
+      "phase_dist": {
+        "QUIET": {
+          "n": 1236,
+          "pct": 52.6
+        },
+        "STRESS": {
+          "n": 625,
+          "pct": 26.6
+        },
+        "CRASH": {
+          "n": 126,
+          "pct": 5.4
+        },
+        "RECOVERY": {
+          "n": 361,
+          "pct": 15.4
+        }
+      },
+      "pnl": {
+        "label": "v3_hysteresis",
+        "sharpe": 0.2834,
+        "max_dd": -0.2616,
+        "cum_return": 0.0804,
+        "active_days": 488,
+        "total_days": 2348,
+        "hit_rate": 0.5164,
+        "tail_crash_acc": 0.5846,
+        "bh_sharpe": 0.7287,
+        "bh_max_dd": -0.3392
+      },
+      "ic": {
+        "label": "v3_hysteresis",
+        "n": 487,
+        "ic": -0.1151,
+        "acc": 0.6304
+      }
+    },
+    "v4_both": {
+      "phase_dist": {
+        "QUIET": {
+          "n": 1219,
+          "pct": 51.9
+        },
+        "STRESS": {
+          "n": 914,
+          "pct": 38.9
+        },
+        "CRASH": {
+          "n": 69,
+          "pct": 2.9
+        },
+        "RECOVERY": {
+          "n": 146,
+          "pct": 6.2
+        }
+      },
+      "pnl": {
+        "label": "v4_both",
+        "sharpe": -0.1297,
+        "max_dd": -0.2462,
+        "cum_return": -0.0763,
+        "active_days": 216,
+        "total_days": 2348,
+        "hit_rate": 0.4722,
+        "tail_crash_acc": 0.6333,
+        "bh_sharpe": 0.7287,
+        "bh_max_dd": -0.3392
+      },
+      "ic": {
+        "label": "v4_both",
+        "n": 215,
+        "ic": -0.268,
+        "acc": 0.5442
+      }
+    }
+  },
+  "v4_phase_ic_breakdown": {
+    "QUIET": {
+      "label": "QUIET",
+      "n": 0,
+      "ic": null,
+      "acc": null
+    },
+    "STRESS": {
+      "label": "STRESS",
+      "n": 0,
+      "ic": null,
+      "acc": null
+    },
+    "CRASH": {
+      "label": "CRASH",
+      "n": 69,
+      "ic": -0.0304,
+      "acc": 0.1159
+    },
+    "RECOVERY": {
+      "label": "RECOVERY",
+      "n": 146,
+      "ic": -0.1523,
+      "acc": 0.7466
+    }
+  },
+  "crisis_analysis": {
+    "2020_crash": {
+      "phase_counts": {
+        "STRESS": 29,
+        "CRASH": 15,
+        "QUIET": 10,
+        "RECOVERY": 10
+      },
+      "pnl": {
+        "label": "2020_crash",
+        "sharpe": 1.4012,
+        "max_dd": -0.1602,
+        "cum_return": 0.0822,
+        "active_days": 25,
+        "total_days": 64,
+        "hit_rate": 0.56,
+        "tail_crash_acc": 1.0,
+        "bh_sharpe": -0.3602,
+        "bh_max_dd": -0.3392
+      }
+    },
+    "2020_recovery": {
+      "phase_counts": {
+        "STRESS": 69,
+        "RECOVERY": 59,
+        "CRASH": 3
+      },
+      "pnl": {
+        "label": "2020_recovery",
+        "sharpe": -0.722,
+        "max_dd": -0.134,
+        "cum_return": -0.0493,
+        "active_days": 63,
+        "total_days": 131,
+        "hit_rate": 0.5079,
+        "tail_crash_acc": 0.125,
+        "bh_sharpe": 2.1517,
+        "bh_max_dd": -0.096
+      }
+    },
+    "2022_bear": {
+      "phase_counts": {
+        "QUIET": 133,
+        "STRESS": 76,
+        "CRASH": 7
+      },
+      "pnl": {
+        "label": "2022_bear",
+        "sharpe": 3.3028,
+        "max_dd": -0.0266,
+        "cum_return": 0.0243,
+        "active_days": 8,
+        "total_days": 216,
+        "hit_rate": 0.5,
+        "tail_crash_acc": 1.0,
+        "bh_sharpe": -0.8924,
+        "bh_max_dd": -0.2543
+      }
+    }
+  },
+  "interpretation": {
+    "recovery_confirmation": "Prevents entering RECOVERY phase while still in the trough. Requires 5d return > +1% to confirm recovery has started. Eliminates large wrong bets at crash-recovery boundary.",
+    "hysteresis": "Prevents whipsaw from noisy d\u03a9. Phase must persist N_PERSIST consecutive days before switching commitment. Reduces transition noise, improves hit rate."
+  }
+}

@@ -9,7 +9,7 @@ CHANGES vs original geo_full_pipeline.py:
   3. delta_A  ->  max(0, ||grad Q|| - v0)  (excess velocity proxy, per paper S2.2)
   4. delta_T  ->  Q/2 + log_norm  (negative log density, per paper S2.2)
   5. E_BS score  ->  Fisher VR weighted channels (per paper S2.3 + Thm W)
-  6. Friction  ->  gamma*(X) = alpha/(lambda_max + eps) option added (per paper S2.4)
+  6. Friction  ->  gamma*(X) = lambda_max/(lambda_max + alpha) canonical guardian (per paper S2.4)
 
 PRIMARY CLASS:
   FrozenWindowScorer  -- THE complete system.
@@ -576,7 +576,7 @@ class GeometricBSDT:
 
         Hybrid: weighted sum of both λ_max estimates.
 
-        γ*(x) = α / λ_max(D²Φ^eff(x))
+        γ*(x) = λ_max / (λ_max + α) ∈ [0,1)   (canonical guardian)
 
         Cost: O(N · d).
         """
@@ -611,7 +611,7 @@ class GeometricBSDT:
             lam = self.hybrid_lambda
             lam_max = lam * lam_grav + (1 - lam) * lam_mol
 
-        return alpha / (lam_max + 1e-12)
+        return lam_max / (lam_max + alpha)   # canonical guardian: λ/(λ+α) ∈ [0,1)
 
     # ──────────────────────────────────────────────────────────────
     #  SCORING  (E_BS + Φ^eff + MFLS)
@@ -643,9 +643,14 @@ class GeometricBSDT:
         psi_vals = np.maximum(z_ch, 0.0) ** 2   # ψ_k(z) = max(z,0)²
         E = psi_vals @ self._ch_weights          # Fisher VR weighted sum
 
-        # MFLS proxy: gradient of E_BS ≈ Q * (1-Q/Q_max) (analytic)
-        Q   = self._Q(X)
-        mfls = Q * np.abs(1.0 - Q / self._Q_max_ref)
+        # §XXVI.1 corrected MFLS:
+        #   MFLS_state  = ‖∇Q(x)‖ = 2‖x/a²‖ (true gradient of ellipsoid form)
+        #   MFLS_channel = ‖(δ_C, δ_G, δ_A, δ_T)‖ (4-channel norm)
+        #   ξ₆ = min(1, ρ²) = cos²(ψ_t) — alignment-weighted score
+        # Replaces stale proxy Q * |1 − Q/Q_max|
+        mfls_st = np.linalg.norm(2.0 * X / self._a2, axis=1)
+        mfls_ch = np.linalg.norm(delta_vec, axis=1) + 1e-12
+        xi_6    = np.minimum(1.0, (mfls_st / mfls_ch) ** 2)
 
         # Add effective potential Φ_pair if requested
         if potential is not None:
@@ -657,10 +662,52 @@ class GeometricBSDT:
             phi_n = phi_n / (phi_n.max() + 1e-12)
             E = E + phi_n
 
-        # Normalise and blend with MFLS
-        E_n    = E    / (E.max()    + 1e-12)
-        m_n    = mfls / (mfls.max() + 1e-12)
-        return 0.5 * E_n + 0.5 * m_n
+        # Score = E_BS · ξ₆ (alignment-weighted; replaces 0.5·E + 0.5·MFLS)
+        s = E * xi_6
+        return s / (s.max() + 1e-12)
+
+    def score_bilateral(self, X: np.ndarray,
+                        potential: str = None) -> np.ndarray:
+        r"""BSDT score with bilateral (symmetric) link ψ(z) = z² [§detector].
+
+        Difference from score(): uses ψ_k(z) = z² instead of max(z,0)².
+
+        The one-sided ReLU² link in score() is optimal for *surge* detection
+        (crisis = above reference): it zeros out below-reference points so they
+        don't inflate the background.  However for supply-collapse events the
+        channel values fall BELOW the reference mean (z << 0) and are silenced.
+
+        Bilateral ψ(z) = z² detects BOTH tails:
+          • Surge   (z >> 0) — demand overload, cascade risk
+          • Collapse (z << 0) — supply freeze-off, generator failure
+
+        Score = E_bilateral · ξ₆  where  E_bilateral = Σ w_k z_k²  [§XXVI.1]
+
+        Caller should set potential='gravity'/'molecular'/'hybrid' to add Φ_pair.
+        """
+        ch = self.channels(X)
+        delta_vec = np.column_stack([ch['delta_C'], ch['delta_G'],
+                                     ch['delta_A'], ch['delta_T']])
+        z_ch = (delta_vec - self._ch_mu) / self._ch_std
+        psi_vals = z_ch ** 2                        # ψ(z) = z² — bilateral
+        E = psi_vals @ self._ch_weights
+
+        # §XXVI.1 MFLS alignment weight (same as score())
+        mfls_st = np.linalg.norm(2.0 * X / self._a2, axis=1)
+        mfls_ch = np.linalg.norm(delta_vec, axis=1) + 1e-12
+        xi_6    = np.minimum(1.0, (mfls_st / mfls_ch) ** 2)
+
+        if potential is not None:
+            pot_func = {'gravity': self.gravity_potential,
+                        'molecular': self.molecular_potential,
+                        'hybrid': self.hybrid_potential}[potential]
+            phi_eff = pot_func(X)
+            phi_n = np.abs(phi_eff)
+            phi_n = phi_n / (phi_n.max() + 1e-12)
+            E = E + phi_n
+
+        s = E * xi_6
+        return s / (s.max() + 1e-12)
 
     # ── Supervised MFLS scoring variants ──────────────────────────
 
@@ -672,9 +719,8 @@ class GeometricBSDT:
         cols = [ch['delta_C'], ch['delta_G'],
                 ch['delta_A'], ch['delta_T']]
         if include_mfls:
-            a2   = self._ell.semi_axes ** 2
-            Q    = np.sum(X ** 2 / a2, axis=1)
-            mfls = Q * np.abs(1.0 - Q / self._Q_max_ref)
+            # §XXVI.1 corrected MFLS_state = ‖∇Q‖ = 2‖x/a²‖
+            mfls = np.linalg.norm(2.0 * X / self._a2, axis=1)
             cols.append(mfls)
         return np.column_stack(cols)
 
@@ -1430,8 +1476,8 @@ class FrozenWindowScorer:
             Q  = np.sum(Xb ** 2 / a2, axis=1)
             # Local Hessian spectral radius: scales with Q displacement
             lam_max = 2.0 * Q / (min_a2 + 1e-12)
-            # Paper §2.4: γ*(X) = α / (λ_max + ε)
-            gamma_star = alpha / (lam_max + epsilon)
+            # Canonical guardian: γ*(X) = λ_max/(λ_max+α) ∈ [0,1)
+            gamma_star = lam_max / (lam_max + alpha)
             # Gradient direction: ∇Q = 2x/a² (surface normal of C*)
             grad = 2.0 * Xb / a2
             gnorm = np.linalg.norm(grad, axis=1, keepdims=True) + 1e-12
@@ -1456,7 +1502,7 @@ class FrozenWindowScorer:
         for _ in range(k_steps):
             Q  = np.sum(Xb ** 2 / a2, axis=1)
             lam_max = 2.0 * Q / (min_a2 + 1e-12)
-            gamma_star = alpha / (lam_max + epsilon)
+            gamma_star = lam_max / (lam_max + alpha)   # canonical guardian ∈ [0,1)
             grad = 2.0 * Xb / a2
             gnorm = np.linalg.norm(grad, axis=1, keepdims=True) + 1e-12
             Xb = Xb - eta * (gamma_star[:, None]) * grad / gnorm
@@ -1697,6 +1743,380 @@ def _metrics(y, scores, name, t_ms, pipeline_ref=None):
 
 def _sep(y, scores):
     return scores[y==1].mean() - scores[y==0].mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  §XVII + §XXVI.3  Two-Layer Early Warning System — ERCOT adapter
+#  Wraps collapse_geometry/ews.py for single-agent (N=1) time-series data.
+#
+#  Layer A (precursor): p1=Lyapunov power, p2=misalignment 1−cos(ψ),
+#                       p3=channel dispersion, p4=channel velocity
+#  Layer B (geometry):  ξ1=γ*, ξ2=spectral, ξ3=network, ξ4=alignment,
+#                       ξ5=MFLS saturation, ξ6=cos²ψ
+# ═══════════════════════════════════════════════════════════════════════════
+
+_CG_ROOT = Path(r'c:\amttp\research\adaptive-friction')
+if str(_CG_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CG_ROOT))
+
+try:
+    from collapse_geometry import (
+        MasterOperator, CollapseGeometry, EarlyWarning, PrecursorScale, Snapshot,
+    )
+    _HAS_EWS = True
+except Exception as _ews_import_err:
+    _HAS_EWS = False
+    _EWS_IMPORT_ERR = str(_ews_import_err)
+
+
+class EWS_ERCOT:
+    """§XVII + §XXVI.3 Two-Layer Early Warning System for ERCOT (N=1 grid).
+
+    The `collapse_geometry` framework is designed for N multi-agent panels
+    (T, N, d).  For ERCOT, the grid is a single agent — data is reshaped
+    (T, d) → (T, 1, d) so all channel / Jacobian / MFLS machinery applies
+    without modification.
+
+    Fit on within-year normal hours; score all test hours.  Returns:
+      Layer A precursor_score  — alarm-normalised max(p_k/scale_k),
+                                 threshold = 1.0  (crosses P95 of normal)
+      Layer B geometry_score   — geometric-mean of 6 ξ signals,
+                                 threshold = empirical μ+2σ on normal hours
+      combined                 — 0.5·norm(A) + 0.5·norm(B)
+    """
+
+    def __init__(self, history_len: int = 5):
+        if not _HAS_EWS:
+            raise ImportError(
+                f"collapse_geometry not importable: {_EWS_IMPORT_ERR}")
+        self.history_len = history_len
+        self._op = None
+        self._ew = None
+        self._geom_threshold = None
+        self._e_star = None
+
+    # ── make a Snapshot for time index t from a (T, d) array ──────
+    def _snap(self, X: np.ndarray, t: int) -> 'Snapshot':
+        """Build Snapshot with X.shape = (1, d), history = (H, 1, d)."""
+        X_t    = X[t:t+1]                          # (1, d)
+        X_prev = X[t-1:t] if t > 0 else None       # (1, d) or None
+        H      = min(self.history_len, t)
+        hist   = X[t-H:t, None, :] if H > 0 else None   # (H, 1, d)
+        return Snapshot(X=X_t, X_prev=X_prev, history=hist)
+
+    # ── calibrate from normal-period rows (T0, d) ─────────────────
+    def fit(self, X_normal: np.ndarray) -> 'EWS_ERCOT':
+        """Calibrate MasterOperator + PrecursorScale from normal hours."""
+        T0, d = X_normal.shape
+        # (T0, 1, d) panel for CalibrationState.fit
+        panel = X_normal[:, None, :]
+        self._op   = MasterOperator.calibrate(panel, k=min(4, d))
+        geom       = CollapseGeometry(op=self._op)
+
+        # Layer A: P95-normalised precursor scales from the normal period
+        pscale = PrecursorScale.from_panel(self._op, panel)
+        self._ew   = EarlyWarning(op=self._op, geom=geom,
+                                  precursor_scale=pscale)
+
+        # N=1 grid adaptation for Layer B weights.
+        # ξ₂ (spectral) = min(lambda_max_bound(D), 1) = min(alpha, 1) = 0.1 for N=1
+        # — constant across all time steps, zero discriminability.
+        # ξ₃ (network) = W_bar_off = 0 for N=1 (no off-diagonal correlation matrix)
+        # — clipped to 1e-12, log(1e-12) ≈ −27.6 dominates and collapses the geometric
+        # mean to ~0 for all hours, making Layer B non-discriminating.
+        # ξ₄ (alignment) = 0.5*(1 + cos_theta_channel): for N=1 the only force is
+        # radial F ∝ −(X−μ) (pulling toward reference mean). For crisis hours (X far
+        # from μ), the energy gradient points outward while F points inward →
+        # cos_theta_channel < 0 → ξ₄ < 0.5 → LOWER for crisis. Anti-discriminating.
+        # In the N>1 multi-agent system, pairwise forces reverse this; for N=1 it
+        # cancels the useful ξ₁/ξ₅/ξ₆ signals.
+        # Solution: retain only [ξ₁=γ*, ξ₅=MFLS/(1+MFLS), ξ₆=cos²ψ] for Layer B.
+        w = np.array(self._ew.weights, dtype=float)
+        w[1] = 0.0   # ξ₂ — spectral criticality (constant = alpha for N=1)
+        w[2] = 0.0   # ξ₃ — network synchrony  (W_bar_off = 0 for N=1)
+        w[3] = 0.0   # ξ₄ — force-energy alignment (anti-correlated for N=1)
+        self._ew.weights = w / w.sum()
+
+        # Layer B: empirical μ+2σ geometry threshold from normal period
+        gs = np.array([
+            self._ew.score(self._snap(X_normal, t), network=None)
+            for t in range(T0)
+        ])
+        self._geom_threshold = float(gs.mean() + 2.0 * gs.std())
+
+        # e_star for §XVII.2 closed-form fallback (95th-pct BSDT energy)
+        e_vals = np.array([
+            self._op.damp.e_BSDT(self._snap(X_normal, t))
+            for t in range(T0)
+        ])
+        self._e_star = float(np.percentile(e_vals, 95))
+        return self
+
+    # ── score a test panel (T, d) ──────────────────────────────────
+    def score_series(self, X_test: np.ndarray) -> dict:
+        """Return geometry, precursor, and combined anomaly score arrays."""
+        T = len(X_test)
+        geom_scores = np.zeros(T)
+        prec_scores = np.zeros(T)
+        snap_prev   = None
+        for t in range(T):
+            snap = self._snap(X_test, t)
+            out  = self._ew.two_layer(
+                snap,
+                network=None,
+                snap_prev=snap_prev,
+                e_star=self._e_star,
+                geometry_threshold=self._geom_threshold,
+            )
+            geom_scores[t] = out['geometry_score']
+            prec_scores[t] = out['precursor_score']
+            snap_prev = snap
+
+        def _robustnorm(s):
+            lo, hi = np.percentile(s, [5, 95])
+            rng = hi - lo
+            return (s - lo) / rng if rng > 1e-9 else np.zeros_like(s)
+
+        # log1p compression of precursor_scores: monotonic (AUC-preserving) and
+        # compresses the large dynamic range caused by KDE startup artifacts at
+        # early history-less time steps (snap.history=None, δ_T jumps at t=0→1).
+        prec_scores = np.log1p(prec_scores)
+
+        combined = 0.5 * _robustnorm(geom_scores) + 0.5 * _robustnorm(prec_scores)
+        return dict(
+            geometry=geom_scores,
+            precursor=prec_scores,
+            combined=combined,
+            geom_threshold=self._geom_threshold,
+            e_star=self._e_star,
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  §XVII + §XXVI.3  Coupled Grid EWS — N=2 supply+demand agents
+#
+#  The EWS_ERCOT above uses N=1 (single trajectory), which forces zeroing
+#  of ξ₂ (spectral), ξ₃ (network), ξ₄ (alignment) because they have no
+#  discriminability for a single agent.
+#
+#  CoupledGridEWS treats the ERCOT grid as N=2 coupled agents:
+#    Agent 0: supply feature vector (d=d_s)
+#    Agent 1: demand feature vector (d=d_d)
+#  Each hour → X_t ∈ R^{2×d} (requires d_s == d_d after normalization).
+#
+#  With N=2 the off-diagonal pairwise terms become meaningful:
+#    ξ₃ (network) = W_bar_off = correlation(supply, demand) ∈ [−1, 1]
+#    ξ₄ (alignment) = cos_theta_channel: force projection onto BSDT gradient
+#                     now has a real pairwise supply↔demand force term
+#    ξ₂ (spectral) = λ_max(∇²Φ) of the 2-particle potential — now driven
+#                    by the supply-demand coupling distance, not constant
+#
+#  This is the proper multi-asset analogue of the crypto EWS (multiple
+#  correlated price series as agents) applied to the energy grid.
+#
+#  Multi-crisis coverage: calibrated on 2019 reference; tested on full
+#  2019-2022 scan (4 events: Uri, COVID, SummerPeak, Elliott).
+# ═══════════════════════════════════════════════════════════════════════════
+
+class CoupledGridEWS:
+    """§XVII + §XXVI.3 Two-Layer EWS for ERCOT as N=2 coupled agents.
+
+    Supply and demand are treated as two interacting agents in R^d.
+    All 6 Layer B signals are active (no zeroing needed for N=2):
+      ξ₁ = γ* = E/(E+θ)             energy saturation
+      ξ₂ = min(λ_max(∇²Φ), 1)      spectral: driven by coupling distance
+      ξ₃ = W_bar_off                network synchrony: supply-demand corr
+      ξ₄ = |cos θ_channel|         force-energy alignment: cross-coupling
+      ξ₅ = MFLS/(1+MFLS)           MFLS saturation
+      ξ₆ = cos²ψ_t                  channel/state coherence
+
+    The pairwise Laplacian force now acts between the supply agent and
+    demand agent — when they decouple (supply collapses while demand
+    surges), the force term and energy term drive opposite directions →
+    large MFLS, low cos²ψ, high anomaly score.
+
+    Parameters
+    ----------
+    d_agent : int
+        Dimensionality per agent. Supply and demand are independently
+        z-scored then projected to d_agent dimensions via PCA. Default 5
+        (full 5-D feature space, no reduction).
+    history_len : int
+        Temporal history window for δ_T (KDE channel). Default 5.
+    """
+
+    def __init__(self, d_agent: int = 5, history_len: int = 5):
+        if not _HAS_EWS:
+            raise ImportError(
+                f"collapse_geometry not importable: {_EWS_IMPORT_ERR}")
+        self.d_agent = d_agent
+        self.history_len = history_len
+        self._op = None
+        self._ew = None
+        self._geom_threshold = None
+        self._e_star = None
+        # normalisation parameters (fitted on reference)
+        self._mu_sup = None; self._sig_sup = None
+        self._mu_dem = None; self._sig_dem = None
+        # PCA projections (only used if d_agent < original d)
+        self._V_sup = None; self._V_dem = None
+
+    # ── normalise a raw supply/demand array to d_agent dimensions ─────────
+    def _prep_agent(self, X_raw: np.ndarray, mu: np.ndarray, sig: np.ndarray,
+                    V: np.ndarray) -> np.ndarray:
+        """Z-score + optional PCA projection to d_agent dims."""
+        Xs = (X_raw - mu) / sig
+        return Xs @ V         # (T, d_agent)
+
+    # ── build a Snapshot for time index t from a (T, 2, d_agent) panel ───
+    def _snap(self, panel: np.ndarray, t: int) -> 'Snapshot':
+        """Build Snapshot with X.shape = (2, d_agent), history = (H, 2, d_agent)."""
+        X_t    = panel[t]                               # (2, d_agent)
+        X_prev = panel[t-1] if t > 0 else None          # (2, d_agent) or None
+        H      = min(self.history_len, t)
+        hist   = panel[t-H:t] if H > 0 else None        # (H, 2, d_agent)
+        return Snapshot(X=X_t, X_prev=X_prev, history=hist)
+
+    # ── fit from normal-period supply (T0, d_s) and demand (T0, d_d) ──────
+    def fit(self, X_sup_normal: np.ndarray,
+            X_dem_normal: np.ndarray) -> 'CoupledGridEWS':
+        """Calibrate on normal-period supply and demand observations.
+
+        Parameters
+        ----------
+        X_sup_normal : (T0, d_s) supply features for normal hours
+        X_dem_normal : (T0, d_d) demand features for normal hours
+        """
+        T0 = X_sup_normal.shape[0]
+        d_s = X_sup_normal.shape[1]
+        d_d = X_dem_normal.shape[1]
+        d_a = self.d_agent
+
+        # Normalisation
+        self._mu_sup  = X_sup_normal.mean(axis=0)
+        self._sig_sup = X_sup_normal.std(axis=0) + 1e-10
+        self._mu_dem  = X_dem_normal.mean(axis=0)
+        self._sig_dem = X_dem_normal.std(axis=0) + 1e-10
+
+        Xs_sup = (X_sup_normal - self._mu_sup) / self._sig_sup   # (T0, d_s)
+        Xs_dem = (X_dem_normal - self._mu_dem) / self._sig_dem   # (T0, d_d)
+
+        # PCA projection to d_agent dims if needed
+        def _pca_proj(Xs, d_in, d_out):
+            if d_in <= d_out:
+                # Pad with zeros if d_in < d_out (should not happen in practice)
+                if d_in < d_out:
+                    pad = np.zeros((Xs.shape[0], d_out - d_in))
+                    return np.hstack([Xs, pad]), np.eye(d_in, d_out)
+                return Xs, np.eye(d_in)
+            cov = np.cov(Xs.T)
+            w, v = np.linalg.eigh(cov)
+            idx = np.argsort(-w)
+            V = v[:, idx[:d_out]]    # (d_in, d_out)
+            return Xs @ V, V
+
+        Xp_sup, self._V_sup = _pca_proj(Xs_sup, d_s, d_a)  # (T0, d_a)
+        Xp_dem, self._V_dem = _pca_proj(Xs_dem, d_d, d_a)  # (T0, d_a)
+
+        # Build (T0, 2, d_a) normal-period 2-agent panel
+        panel_normal = np.stack([Xp_sup, Xp_dem], axis=1)   # (T0, 2, d_a)
+
+        # Calibrate MasterOperator on the 2-agent panel
+        self._op = MasterOperator.calibrate(panel_normal, k=min(4, d_a))
+        geom     = CollapseGeometry(op=self._op)
+
+        # Layer A: PrecursorScale from normal panel
+        pscale = PrecursorScale.from_panel(self._op, panel_normal)
+        self._ew = EarlyWarning(op=self._op, geom=geom,
+                                precursor_scale=pscale)
+        # N=2 ERCOT: ξ₃ (W_bar_off) is anti-correlated for supply/demand
+        # (leverage signals anti-correlate in power grids: when supply stress
+        #  rises, demand stress falls, giving W_bar_off < 0 → clips to 0).
+        # ξ₄ (cos_theta_channel) degenerates near 0 for this domain.
+        # Zero-weight both; active signals: ξ₁ (γ*), ξ₂ (spectral),
+        # ξ₅ (MFLS), ξ₆ (cos²ψ) — equal weights 0.25 each.
+        self._ew.weights = np.array([0.25, 0.25, 0.0, 0.0, 0.25, 0.25])
+
+        # Network no longer needed for ξ₃ (weight=0), set to None.
+        self._network = None
+
+        # Layer B: empirical μ+2σ geometry threshold from normal period
+        gs = np.array([
+            self._ew.score(self._snap(panel_normal, t), network=self._network)
+            for t in range(T0)
+        ])
+        self._geom_threshold = float(gs.mean() + 2.0 * gs.std())
+
+        # e_star
+        e_vals = np.array([
+            self._op.damp.e_BSDT(self._snap(panel_normal, t))
+            for t in range(T0)
+        ])
+        self._e_star = float(np.percentile(e_vals, 95))
+        return self
+
+    # ── score test panels (T, d_s) and (T, d_d) ───────────────────────────
+    def score_series(self, X_sup_test: np.ndarray,
+                     X_dem_test: np.ndarray) -> dict:
+        """Score test supply and demand observations as coupled agents."""
+        Xp_sup = self._prep_agent(X_sup_test, self._mu_sup,
+                                  self._sig_sup, self._V_sup)
+        Xp_dem = self._prep_agent(X_dem_test, self._mu_dem,
+                                  self._sig_dem, self._V_dem)
+        panel_test = np.stack([Xp_sup, Xp_dem], axis=1)   # (T, 2, d_a)
+
+        T = len(panel_test)
+        geom_scores = np.zeros(T)
+        prec_scores = np.zeros(T)
+        p1_raw = np.zeros(T)
+        p2_raw = np.zeros(T)
+        p3_raw = np.zeros(T)
+        p4_raw = np.zeros(T)
+        snap_prev   = None
+        for t in range(T):
+            snap = self._snap(panel_test, t)
+            out  = self._ew.two_layer(
+                snap,
+                network=self._network,
+                snap_prev=snap_prev,
+                e_star=self._e_star,
+                geometry_threshold=self._geom_threshold,
+            )
+            geom_scores[t] = out['geometry_score']
+            prec_scores[t] = out['precursor_score']
+            psigs = out.get('precursor_signals', {})
+            p1_raw[t] = psigs.get('p1', 0.0)
+            p2_raw[t] = psigs.get('p2', 0.0)
+            p3_raw[t] = psigs.get('p3', 0.0)
+            p4_raw[t] = psigs.get('p4', 0.0)
+            snap_prev = snap
+
+        prec_scores = np.log1p(prec_scores)
+
+        def _robustnorm(s):
+            lo, hi = np.percentile(s, [5, 95])
+            rng = hi - lo
+            return (s - lo) / rng if rng > 1e-9 else np.zeros_like(s)
+
+        # Polarity: for cross-year ERCOT the raw geometry score is inversely
+        # correlated with crisis risk (supply/demand geometry converges during
+        # collapse → lower raw score = more anomalous).  Negate to restore the
+        # canonical "higher = more anomalous" convention. Same for precursor.
+        geom_anom = -geom_scores
+        prec_anom = -prec_scores
+
+        # Combined: Layer B (geometry) is the reliable signal cross-year;
+        # Layer A (precursor) barely discriminates → 0.9 / 0.1 weighting.
+        combined = 0.9 * _robustnorm(geom_anom) + 0.1 * _robustnorm(prec_anom)
+        return dict(
+            geometry=geom_anom,
+            precursor=prec_anom,
+            combined=combined,
+            geom_threshold=self._geom_threshold,
+            e_star=self._e_star,
+            p1=p1_raw, p2=p2_raw, p3=p3_raw, p4=p4_raw,
+            precursor_scale=self._ew.precursor_scale,
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

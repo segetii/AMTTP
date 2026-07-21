@@ -1,0 +1,63 @@
+{
+  "dataset": "Wikipedia daily pageviews (8 AI-related articles)",
+  "source_url": "https://wikimedia.org/api/rest_v1/metrics/pageviews",
+  "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+  "presentation": "Odeyemi 2026 paper-style",
+  "articles": [
+    "DALL-E",
+    "Machine_learning",
+    "Artificial_intelligence",
+    "OpenAI",
+    "GPT-3"
+  ],
+  "days": 579,
+  "reference_days": 90,
+  "crisis_index": 182,
+  "crisis_date": "2022-11-30",
+  "fisher_vr_weights": {
+    "C": 0.280113587973745,
+    "G": 0.40668315088909396,
+    "A": 0.28381415374092006,
+    "T": 0.02938910739624093
+  },
+  "frozen_v4_threshold_p99": 0.9897502518214886,
+  "alpha_alarm_effective": 0.08695652173913043,
+  "first_alarm_index": 59,
+  "first_alarm_date": "2022-07-30",
+  "lead_days": 123,
+  "pre_crisis_alarms": 5,
+  "post_crisis_alarms": 27,
+  "bsdt_dominance_post_crisis": {
+    "delta_C": 0.18928438746613557,
+    "delta_G": 0.6707060951155168,
+    "delta_A": 0.13808658783204117,
+    "delta_T": 0.0019229295862804828
+  },
+  "engine_info": {
+    "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+    "presentation": "Odeyemi 2026 paper-style",
+    "n_ref": 90,
+    "n_cal": 22,
+    "rolling_window": 30,
+    "frozen_p99_ref_v4": 0.9897502518214886,
+    "adaptive_p99_ref_v4": 0.9897502518214886,
+    "alpha_alarm": 0.01,
+    "alpha_alarm_effective": 0.08695652173913043,
+    "weights_order": [
+      "delta_C",
+      "delta_G",
+      "delta_A",
+      "delta_T"
+    ],
+    "weights": [
+      0.280113587973745,
+      0.40668315088909396,
+      0.28381415374092006,
+      0.02938910739624093
+    ]
+  },
+  "outputs": {
+    "figure": "c:\\amttp\\research\\neural-stability\\figures\\domain_real_social_media.png",
+    "json": "c:\\amttp\\research\\neural-stability\\results\\domain_real_social_media.json"
+  }
+}

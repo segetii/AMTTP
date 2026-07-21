@@ -1,0 +1,298 @@
+========================================================================================================================
+  CRYPTO GODMODE v35 — Top-5 (d,q) × CB transition-zone sweep
+  Locating the MaxDD cliff between cb_original (Calmar=23, 0-2026)
+  and cb_v34_tight (Calmar=17, MaxDD=-35%, r2026=+0.07)
+  Top-5: [(0.3, 0.5), (0.3, 0.65), (0.25, 0.5), (0.25, 0.65), (0.5, 0.65)]
+  CB grid: window∈[90, 105, 120, 150, 180]  resume∈[0.01, 0.02, 0.03, 0.04]  total=21 CB configs
+  Total variants: 5 × 21 = 105
+========================================================================================================================
+
+[0] Preloading microstructure cache ...
+
+  === microstructure BTCUSDT  2022-01-01 -> 2026-06-01 ===
+  BTCUSDT TBR [CACHE ok]  2022-01-01 -> 2026-05-14
+  BTCUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  BTCUSDT DV  [CACHE 29,463 rows]  2023-01-01 -> 2026-05-13
+  BTCUSDT DV  [up-to-date]
+    oi_usd: 23% NaN  (29,929 valid bars)
+    lsr: 23% NaN  (29,929 valid bars)
+    top_lsr: 23% NaN  (29,929 valid bars)
+    taker_ls: 23% NaN  (29,929 valid bars)
+    oi_pct_1h: 23% NaN  (29,921 valid bars)
+    oi_pct_24h: 23% NaN  (29,903 valid bars)
+    oi_z: 23% NaN  (29,849 valid bars)
+    lsr_z: 23% NaN  (29,858 valid bars)
+    top_lsr_z: 23% NaN  (29,858 valid bars)
+    taker_ls_z: 23% NaN  (29,858 valid bars)
+  === BTCUSDT done  shape=(38689, 14) ===
+  BTCUSDT: (38689, 14)
+
+  === microstructure ETHUSDT  2022-01-01 -> 2026-06-01 ===
+  ETHUSDT TBR [CACHE ok]  2022-01-01 -> 2026-05-14
+  ETHUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  ETHUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  ETHUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === ETHUSDT done  shape=(38689, 14) ===
+  ETHUSDT: (38689, 14)
+
+  === microstructure SOLUSDT  2022-01-01 -> 2026-06-01 ===
+  SOLUSDT TBR [CACHE ok]  2022-01-01 -> 2026-05-14
+  SOLUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  SOLUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  SOLUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === SOLUSDT done  shape=(38689, 14) ===
+  SOLUSDT: (38689, 14)
+
+[1] Building shared market inputs ...
+  ETHUSDT 1h ... 42,815 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ... 46,510 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ... 21,943 bars  [2021-01-01 → 2026-05-14]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-14 12:00:00   n=20,531 bars  (1959 days)
+  Train: 12,094   Test: 8,437   SOL: True
+  BTCUSDT futures OHLCV [CACHE]
+  ETHUSDT futures OHLCV [CACHE]
+  SOLUSDT futures OHLCV [CACHE]
+  ETHUSDT 1h ...   ETHUSDT [CACHE]
+42,814 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ...   BTCUSDT [CACHE]
+46,509 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ...   SOLUSDT [CACHE]
+21,945 bars  [2021-01-01 → 2026-05-14]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-14 12:00:00   n=20,533 bars  (1959 days)
+  Train: 12,094   Test: 8,439   SOL: True
+  funding [CACHE]
+  [warn] geometry cache length 20542 > dataframe length 20533; truncating cache arrays
+  [v36] Normal window: 500 bars × 8 agents × 8 features
+  [v36] e* (χ², df=64) = 93.217
+  [v36] σ_n = 23.562022
+  [v36] θ (90-pctile normal e_t) = 121.009
+  [v36] cos_theta_channel calib: μ=0.436, σ=0.421
+  [v36] ξ calib: ξ1(μ=0.971,σ=0.014)  ξ2(μ=1.000,σ=0.000)  ξ3(μ=0.102,σ=0.000)  ξ4(μ=-0.000,σ=1.000)  ξ5(μ=1.000,σ=0.000)
+  [v36] RSS_stretch calib: μ=0.459, σ=0.333
+
+[2] Building FFD Sigma and unit signals for top-5 (d,q) ...
+  FFD d=0.25: lags=2804
+    cond 3.38e+12 → 20.00  rho_cap=0.1304
+  FFD d=0.30: lags=2275
+    cond 3.24e+12 → 20.00  rho_cap=0.1222
+  FFD d=0.50: lags=927
+    cond 2.85e+12 → 20.00  rho_cap=0.1010
+  Rank-1 d=0.30 q=0.50: theta=0.24012    [v35_d0.30_q0.50]   5000/20531  (  3.9s)
+    [v35_d0.30_q0.50]  10000/20531  (  8.1s)
+    [v35_d0.30_q0.50]  15000/20531  ( 12.0s)
+    [v35_d0.30_q0.50]  20000/20531  ( 15.3s)
+  [v35_d0.30_q0.50] sweep done: 20,531 bars  15.6s
+  unit built (n=47028)
+  Rank-2 d=0.30 q=0.65: theta=0.24446    [v35_d0.30_q0.65]   5000/20531  (  4.5s)
+    [v35_d0.30_q0.65]  10000/20531  (  9.0s)
+    [v35_d0.30_q0.65]  15000/20531  ( 12.9s)
+    [v35_d0.30_q0.65]  20000/20531  ( 20.1s)
+  [v35_d0.30_q0.65] sweep done: 20,531 bars  20.7s
+  unit built (n=47028)
+  Rank-3 d=0.25 q=0.50: theta=0.25695    [v35_d0.25_q0.50]   5000/20531  (  5.4s)
+    [v35_d0.25_q0.50]  10000/20531  (  9.1s)
+    [v35_d0.25_q0.50]  15000/20531  ( 13.2s)
+    [v35_d0.25_q0.50]  20000/20531  ( 16.4s)
+  [v35_d0.25_q0.50] sweep done: 20,531 bars  16.8s
+  unit built (n=47028)
+  Rank-4 d=0.25 q=0.65: theta=0.26847    [v35_d0.25_q0.65]   5000/20531  (  3.1s)
+    [v35_d0.25_q0.65]  10000/20531  (  8.7s)
+    [v35_d0.25_q0.65]  15000/20531  ( 11.9s)
+    [v35_d0.25_q0.65]  20000/20531  ( 15.3s)
+  [v35_d0.25_q0.65] sweep done: 20,531 bars  15.6s
+  unit built (n=47028)
+  Rank-5 d=0.50 q=0.65: theta=0.22441    [v35_d0.50_q0.65]   5000/20531  (  3.7s)
+    [v35_d0.50_q0.65]  10000/20531  (  7.0s)
+    [v35_d0.50_q0.65]  15000/20531  ( 11.3s)
+    [v35_d0.50_q0.65]  20000/20531  ( 16.2s)
+  [v35_d0.50_q0.65] sweep done: 20,531 bars  16.5s
+  unit built (n=47028)
+
+[3] Sweeping 21 CB configs across top-5 ...
+  R1 [d0p3_q0p5_w090_r01]  final=$   375,065  Calmar=+13.775  MaxDD=-35.00%  halt=86.8%  r2023=+0.7074  r2024=-0.1958  r2025=+14.8856  r2026=+0.0494
+  R2 [d0p3_q0p65_w090_r01]  final=$   375,195  Calmar=+13.778  MaxDD=-35.00%  halt=86.8%  r2023=+0.7084  r2024=-0.1955  r2025=+14.8795  r2026=+0.0494
+  R3 [d0p25_q0p5_w090_r01]  final=$   411,224  Calmar=+14.257  MaxDD=-34.95%  halt=86.8%  r2023=+0.7206  r2024=-0.1937  r2025=+14.6995  r2026=+0.0381
+  R4 [d0p25_q0p65_w090_r01]  final=$   411,157  Calmar=+14.256  MaxDD=-34.95%  halt=86.8%  r2023=+0.7227  r2024=-0.1930  r2025=+14.6705  r2026=+0.0381
+  R5 [d0p5_q0p65_w090_r01]  final=$   463,726  Calmar=+14.710  MaxDD=-35.35%  halt=86.8%  r2023=+0.6541  r2024=-0.1927  r2025=+17.1401  r2026=+0.0658
+  R1 [d0p3_q0p5_w090_r02]  final=$   375,065  Calmar=+13.775  MaxDD=-35.00%  halt=86.8%  r2023=+0.7074  r2024=-0.1958  r2025=+14.8856  r2026=+0.0494
+  R2 [d0p3_q0p65_w090_r02]  final=$   375,195  Calmar=+13.778  MaxDD=-35.00%  halt=86.8%  r2023=+0.7084  r2024=-0.1955  r2025=+14.8795  r2026=+0.0494
+  R3 [d0p25_q0p5_w090_r02]  final=$   411,224  Calmar=+14.257  MaxDD=-34.95%  halt=86.8%  r2023=+0.7206  r2024=-0.1937  r2025=+14.6995  r2026=+0.0381
+  R4 [d0p25_q0p65_w090_r02]  final=$   411,157  Calmar=+14.256  MaxDD=-34.95%  halt=86.8%  r2023=+0.7227  r2024=-0.1930  r2025=+14.6705  r2026=+0.0381
+  R5 [d0p5_q0p65_w090_r02]  final=$   463,726  Calmar=+14.710  MaxDD=-35.35%  halt=86.8%  r2023=+0.6541  r2024=-0.1927  r2025=+17.1401  r2026=+0.0658
+  R1 [d0p3_q0p5_w090_r03]  final=$   375,047  Calmar=+13.775  MaxDD=-35.00%  halt=86.8%  r2023=+0.7074  r2024=-0.1958  r2025=+14.8850  r2026=+0.0494
+  R2 [d0p3_q0p65_w090_r03]  final=$   375,177  Calmar=+13.778  MaxDD=-35.00%  halt=86.8%  r2023=+0.7084  r2024=-0.1955  r2025=+14.8789  r2026=+0.0494
+  R3 [d0p25_q0p5_w090_r03]  final=$   411,207  Calmar=+14.257  MaxDD=-34.95%  halt=86.8%  r2023=+0.7206  r2024=-0.1937  r2025=+14.6989  r2026=+0.0381
+  R4 [d0p25_q0p65_w090_r03]  final=$   411,140  Calmar=+14.256  MaxDD=-34.95%  halt=86.8%  r2023=+0.7227  r2024=-0.1930  r2025=+14.6699  r2026=+0.0381
+  R5 [d0p5_q0p65_w090_r03]  final=$   463,716  Calmar=+14.710  MaxDD=-35.35%  halt=86.8%  r2023=+0.6541  r2024=-0.1927  r2025=+17.1397  r2026=+0.0658
+  R1 [d0p3_q0p5_w090_r04]  final=$   553,046  Calmar=+16.007  MaxDD=-34.57%  halt=86.5%  r2023=+1.1882  r2024=-0.1905  r2025=+15.1454  r2026=+0.0494
+  R2 [d0p3_q0p65_w090_r04]  final=$   553,667  Calmar=+16.014  MaxDD=-34.57%  halt=86.5%  r2023=+1.1901  r2024=-0.1902  r2025=+15.1458  r2026=+0.0494
+  R3 [d0p25_q0p5_w090_r04]  final=$   617,086  Calmar=+16.630  MaxDD=-34.57%  halt=86.5%  r2023=+1.2332  r2024=-0.1890  r2025=+15.0437  r2026=+0.0381
+  R4 [d0p25_q0p65_w090_r04]  final=$   617,344  Calmar=+16.632  MaxDD=-34.57%  halt=86.5%  r2023=+1.2370  r2024=-0.1884  r2025=+15.0132  r2026=+0.0381
+  R5 [d0p5_q0p65_w090_r04]  final=$   730,056  Calmar=+17.494  MaxDD=-34.84%  halt=86.6%  r2023=+1.2603  r2024=-0.1863  r2025=+17.3814  r2026=+0.0658
+  R1 [d0p3_q0p5_w105_r01]  final=$     4,223  Calmar= +1.213  MaxDD=-44.06%  halt=90.7%  r2023=+0.0226  r2024=-0.1513  r2025=-0.1759  r2026=+0.7508
+  R2 [d0p3_q0p65_w105_r01]  final=$     4,215  Calmar= +1.211  MaxDD=-44.07%  halt=90.7%  r2023=+0.0237  r2024=-0.1515  r2025=-0.1759  r2026=+0.7498
+  R3 [d0p25_q0p5_w105_r01]  final=$     4,413  Calmar= +1.273  MaxDD=-43.56%  halt=90.7%  r2023=+0.0347  r2024=-0.1506  r2025=-0.1712  r2026=+0.7629
+  R4 [d0p25_q0p65_w105_r01]  final=$     4,421  Calmar= +1.277  MaxDD=-43.51%  halt=90.7%  r2023=+0.0371  r2024=-0.1513  r2025=-0.1702  r2026=+0.7660
+  R5 [d0p5_q0p65_w105_r01]  final=$     4,185  Calmar= +1.116  MaxDD=-47.51%  halt=90.7%  r2023=-0.0132  r2024=-0.2189  r2025=-0.1750  r2026=+0.2890
+  R1 [d0p3_q0p5_w105_r02]  final=$     4,223  Calmar= +1.213  MaxDD=-44.06%  halt=90.6%  r2023=+0.0226  r2024=-0.1513  r2025=-0.1759  r2026=+0.7508
+  R2 [d0p3_q0p65_w105_r02]  final=$     4,215  Calmar= +1.211  MaxDD=-44.07%  halt=90.6%  r2023=+0.0237  r2024=-0.1515  r2025=-0.1759  r2026=+0.7498
+  R3 [d0p25_q0p5_w105_r02]  final=$     4,413  Calmar= +1.273  MaxDD=-43.56%  halt=90.6%  r2023=+0.0347  r2024=-0.1506  r2025=-0.1712  r2026=+0.7629
+  R4 [d0p25_q0p65_w105_r02]  final=$     4,421  Calmar= +1.277  MaxDD=-43.51%  halt=90.6%  r2023=+0.0371  r2024=-0.1513  r2025=-0.1702  r2026=+0.7660
+  R5 [d0p5_q0p65_w105_r02]  final=$     4,185  Calmar= +1.116  MaxDD=-47.51%  halt=90.7%  r2023=-0.0132  r2024=-0.2189  r2025=-0.1750  r2026=+0.2890
+  R1 [d0p3_q0p5_w105_r03]  final=$     4,223  Calmar= +1.213  MaxDD=-44.06%  halt=90.6%  r2023=+0.0226  r2024=-0.1513  r2025=-0.1759  r2026=+0.7508
+  R2 [d0p3_q0p65_w105_r03]  final=$     4,215  Calmar= +1.211  MaxDD=-44.07%  halt=90.6%  r2023=+0.0237  r2024=-0.1515  r2025=-0.1759  r2026=+0.7498
+  R3 [d0p25_q0p5_w105_r03]  final=$     4,413  Calmar= +1.273  MaxDD=-43.56%  halt=90.6%  r2023=+0.0347  r2024=-0.1506  r2025=-0.1712  r2026=+0.7629
+  R4 [d0p25_q0p65_w105_r03]  final=$     4,421  Calmar= +1.277  MaxDD=-43.51%  halt=90.6%  r2023=+0.0371  r2024=-0.1513  r2025=-0.1702  r2026=+0.7660
+  R5 [d0p5_q0p65_w105_r03]  final=$     4,185  Calmar= +1.116  MaxDD=-47.51%  halt=90.7%  r2023=-0.0132  r2024=-0.2189  r2025=-0.1750  r2026=+0.2890
+  R1 [d0p3_q0p5_w105_r04]  final=$    10,406  Calmar= +2.820  MaxDD=-35.67%  halt=90.3%  r2023=+0.4851  r2024=-0.1513  r2025=-0.0523  r2026=+1.5838
+  R2 [d0p3_q0p65_w105_r04]  final=$    10,400  Calmar= +2.819  MaxDD=-35.68%  halt=90.3%  r2023=+0.4876  r2024=-0.1515  r2025=-0.0522  r2026=+1.5832
+  R3 [d0p25_q0p5_w105_r04]  final=$     6,479  Calmar= +1.701  MaxDD=-43.65%  halt=90.2%  r2023=+0.5268  r2024=-0.1506  r2025=-0.1725  r2026=+0.7568
+  R4 [d0p25_q0p65_w105_r04]  final=$     6,501  Calmar= +1.707  MaxDD=-43.59%  halt=90.2%  r2023=+0.5321  r2024=-0.1513  r2025=-0.1714  r2026=+0.7602
+  R5 [d0p5_q0p65_w105_r04]  final=$    13,484  Calmar= +3.004  MaxDD=-38.83%  halt=90.3%  r2023=+0.4286  r2024=-0.2077  r2025=-0.0371  r2026=+1.4234
+  R1 [d0p3_q0p5_w120_r01]  final=$     1,154  Calmar= +0.115  MaxDD=-37.90%  halt=90.6%  r2023=-0.1782  r2024=+0.0311  r2025=-0.2346  r2026=+0.5669
+  R2 [d0p3_q0p65_w120_r01]  final=$     1,154  Calmar= +0.115  MaxDD=-37.90%  halt=90.6%  r2023=-0.1781  r2024=+0.0312  r2025=-0.2346  r2026=+0.5668
+  R3 [d0p25_q0p5_w120_r01]  final=$     1,164  Calmar= +0.122  MaxDD=-37.89%  halt=90.6%  r2023=-0.1786  r2024=+0.0256  r2025=-0.2336  r2026=+0.5587
+  R4 [d0p25_q0p65_w120_r01]  final=$     1,165  Calmar= +0.122  MaxDD=-37.90%  halt=90.6%  r2023=-0.1783  r2024=+0.0257  r2025=-0.2336  r2026=+0.5585
+  R5 [d0p5_q0p65_w120_r01]  final=$     1,161  Calmar= +0.119  MaxDD=-38.31%  halt=90.6%  r2023=-0.1829  r2024=+0.0377  r2025=-0.2344  r2026=+0.5770
+  R1 [d0p3_q0p5_w120_r02]  final=$     1,124  Calmar= +0.093  MaxDD=-37.90%  halt=90.6%  r2023=-0.1782  r2024=+0.0311  r2025=-0.2346  r2026=+0.5669
+  R2 [d0p3_q0p65_w120_r02]  final=$     1,124  Calmar= +0.093  MaxDD=-37.90%  halt=90.6%  r2023=-0.1781  r2024=+0.0312  r2025=-0.2346  r2026=+0.5668
+  R3 [d0p25_q0p5_w120_r02]  final=$     1,132  Calmar= +0.099  MaxDD=-37.89%  halt=90.6%  r2023=-0.1786  r2024=+0.0256  r2025=-0.2336  r2026=+0.5587
+  R4 [d0p25_q0p65_w120_r02]  final=$     1,133  Calmar= +0.099  MaxDD=-37.90%  halt=90.6%  r2023=-0.1783  r2024=+0.0257  r2025=-0.2336  r2026=+0.5585
+  R5 [d0p5_q0p65_w120_r02]  final=$     1,161  Calmar= +0.119  MaxDD=-38.31%  halt=90.6%  r2023=-0.1829  r2024=+0.0377  r2025=-0.2344  r2026=+0.5770
+  R1 [d0p3_q0p5_w120_r03]  final=$     1,123  Calmar= +0.092  MaxDD=-37.90%  halt=90.6%  r2023=-0.1782  r2024=+0.0311  r2025=-0.2346  r2026=+0.5669
+  R2 [d0p3_q0p65_w120_r03]  final=$     1,123  Calmar= +0.092  MaxDD=-37.90%  halt=90.6%  r2023=-0.1781  r2024=+0.0312  r2025=-0.2346  r2026=+0.5668
+  R3 [d0p25_q0p5_w120_r03]  final=$     1,131  Calmar= +0.098  MaxDD=-37.89%  halt=90.6%  r2023=-0.1786  r2024=+0.0256  r2025=-0.2336  r2026=+0.5587
+  R4 [d0p25_q0p65_w120_r03]  final=$     1,131  Calmar= +0.099  MaxDD=-37.90%  halt=90.6%  r2023=-0.1783  r2024=+0.0257  r2025=-0.2336  r2026=+0.5585
+  R5 [d0p5_q0p65_w120_r03]  final=$     1,246  Calmar= +0.176  MaxDD=-38.31%  halt=90.6%  r2023=-0.1829  r2024=+0.0377  r2025=-0.2344  r2026=+0.5770
+  R1 [d0p3_q0p5_w120_r04]  final=$     1,116  Calmar= +0.087  MaxDD=-37.92%  halt=90.4%  r2023=-0.1830  r2024=+0.0311  r2025=-0.2347  r2026=+0.5669
+  R2 [d0p3_q0p65_w120_r04]  final=$     1,116  Calmar= +0.088  MaxDD=-37.91%  halt=90.4%  r2023=-0.1829  r2024=+0.0312  r2025=-0.2347  r2026=+0.5668
+  R3 [d0p25_q0p5_w120_r04]  final=$     1,125  Calmar= +0.094  MaxDD=-37.95%  halt=90.4%  r2023=-0.1826  r2024=+0.0256  r2025=-0.2336  r2026=+0.5587
+  R4 [d0p25_q0p65_w120_r04]  final=$     1,126  Calmar= +0.095  MaxDD=-37.93%  halt=90.4%  r2023=-0.1822  r2024=+0.0257  r2025=-0.2336  r2026=+0.5585
+  R5 [d0p5_q0p65_w120_r04]  final=$     1,246  Calmar= +0.176  MaxDD=-38.31%  halt=90.4%  r2023=-0.1829  r2024=+0.0377  r2025=-0.2345  r2026=+0.5770
+  R1 [d0p3_q0p5_w150_r01]  final=$     4,952  Calmar= +1.308  MaxDD=-46.54%  halt=91.8%  r2023=-0.2320  r2024=-0.2334  r2025=+0.6056  r2026=-0.0307
+  R2 [d0p3_q0p65_w150_r01]  final=$     4,948  Calmar= +1.307  MaxDD=-46.55%  halt=91.8%  r2023=-0.2321  r2024=-0.2334  r2025=+0.6056  r2026=-0.0306
+  R3 [d0p25_q0p5_w150_r01]  final=$     5,990  Calmar= +1.513  MaxDD=-46.42%  halt=91.8%  r2023=-0.2365  r2024=-0.2321  r2025=+0.6044  r2026=-0.0279
+  R4 [d0p25_q0p65_w150_r01]  final=$     5,990  Calmar= +1.512  MaxDD=-46.46%  halt=91.8%  r2023=-0.2367  r2024=-0.2319  r2025=+0.6044  r2026=-0.0279
+  R5 [d0p5_q0p65_w150_r01]  final=$     4,879  Calmar= +1.204  MaxDD=-49.97%  halt=91.8%  r2023=-0.2167  r2024=-0.2297  r2025=-0.0711  r2026=-0.0013
+  R1 [d0p3_q0p5_w150_r02]  final=$     4,950  Calmar= +1.308  MaxDD=-46.54%  halt=91.8%  r2023=-0.2320  r2024=-0.2335  r2025=+0.6056  r2026=-0.0306
+  R2 [d0p3_q0p65_w150_r02]  final=$     4,946  Calmar= +1.306  MaxDD=-46.56%  halt=91.8%  r2023=-0.2321  r2024=-0.2335  r2025=+0.6055  r2026=-0.0306
+  R3 [d0p25_q0p5_w150_r02]  final=$     5,989  Calmar= +1.513  MaxDD=-46.43%  halt=91.8%  r2023=-0.2365  r2024=-0.2322  r2025=+0.6043  r2026=-0.0279
+  R4 [d0p25_q0p65_w150_r02]  final=$     5,989  Calmar= +1.511  MaxDD=-46.47%  halt=91.8%  r2023=-0.2367  r2024=-0.2320  r2025=+0.6044  r2026=-0.0278
+  R5 [d0p5_q0p65_w150_r02]  final=$     6,499  Calmar= +1.489  MaxDD=-49.98%  halt=91.7%  r2023=-0.2167  r2024=-0.2298  r2025=-0.0711  r2026=-0.0013
+  R1 [d0p3_q0p5_w150_r03]  final=$     2,931  Calmar= +0.750  MaxDD=-50.21%  halt=91.3%  r2023=-0.2320  r2024=-0.2415  r2025=-0.0663  r2026=-0.0025
+  R2 [d0p3_q0p65_w150_r03]  final=$     2,929  Calmar= +0.749  MaxDD=-50.21%  halt=91.3%  r2023=-0.2321  r2024=-0.2415  r2025=-0.0662  r2026=-0.0024
+  R3 [d0p25_q0p5_w150_r03]  final=$     3,570  Calmar= +0.928  MaxDD=-49.56%  halt=91.3%  r2023=-0.2365  r2024=-0.2396  r2025=-0.0594  r2026=-0.0018
+  R4 [d0p25_q0p65_w150_r03]  final=$     3,575  Calmar= +0.929  MaxDD=-49.53%  halt=91.3%  r2023=-0.2367  r2024=-0.2394  r2025=-0.0581  r2026=-0.0018
+  R5 [d0p5_q0p65_w150_r03]  final=$     7,672  Calmar= +2.004  MaxDD=-41.52%  halt=91.5%  r2023=-0.2167  r2024=-0.1729  r2025=+0.0212  r2026=-0.0013
+  R1 [d0p3_q0p5_w150_r04]  final=$     3,131  Calmar= +0.888  MaxDD=-45.49%  halt=91.0%  r2023=-0.2320  r2024=-0.2415  r2025=+0.0248  r2026=-0.0025
+  R2 [d0p3_q0p65_w150_r04]  final=$     3,129  Calmar= +0.887  MaxDD=-45.50%  halt=91.0%  r2023=-0.2321  r2024=-0.2415  r2025=+0.0248  r2026=-0.0024
+  R3 [d0p25_q0p5_w150_r04]  final=$     6,880  Calmar= +1.711  MaxDD=-45.24%  halt=90.6%  r2023=-0.2365  r2024=-0.2396  r2025=+0.0317  r2026=-0.0018
+  R4 [d0p25_q0p65_w150_r04]  final=$     6,907  Calmar= +1.714  MaxDD=-45.28%  halt=90.6%  r2023=-0.2367  r2024=-0.2394  r2025=+0.0332  r2026=-0.0018
+  R5 [d0p5_q0p65_w150_r04]  final=$     7,672  Calmar= +2.004  MaxDD=-41.52%  halt=91.5%  r2023=-0.2167  r2024=-0.1729  r2025=+0.0212  r2026=-0.0013
+  R1 [d0p3_q0p5_w180_r01]  final=$   158,951  Calmar=+23.003  MaxDD=-15.26%  halt=91.5%  r2023=+2.5746  r2024=+1.1452  r2025=+8.9996  r2026=+0.0000
+  R2 [d0p3_q0p65_w180_r01]  final=$   158,884  Calmar=+22.999  MaxDD=-15.26%  halt=91.5%  r2023=+2.5761  r2024=+1.1433  r2025=+9.0004  r2026=+0.0000
+  R3 [d0p25_q0p5_w180_r01]  final=$   157,299  Calmar=+22.555  MaxDD=-15.50%  halt=91.5%  r2023=+2.6281  r2024=+1.0600  r2025=+9.0955  r2026=+0.0000
+  R4 [d0p25_q0p65_w180_r01]  final=$   157,563  Calmar=+22.438  MaxDD=-15.59%  halt=91.5%  r2023=+2.6263  r2024=+1.0544  r2025=+9.1448  r2026=+0.0000
+  R5 [d0p5_q0p65_w180_r01]  final=$   163,395  Calmar=+20.277  MaxDD=-17.49%  halt=91.5%  r2023=+2.4172  r2024=+1.0401  r2025=+10.0274  r2026=+0.0000
+  R1 [d0p3_q0p5_w180_r02]  final=$   158,951  Calmar=+23.003  MaxDD=-15.26%  halt=91.5%  r2023=+2.5746  r2024=+1.1452  r2025=+8.9996  r2026=+0.0000
+  R2 [d0p3_q0p65_w180_r02]  final=$   158,884  Calmar=+22.999  MaxDD=-15.26%  halt=91.5%  r2023=+2.5761  r2024=+1.1433  r2025=+9.0004  r2026=+0.0000
+  R3 [d0p25_q0p5_w180_r02]  final=$   157,299  Calmar=+22.555  MaxDD=-15.50%  halt=91.5%  r2023=+2.6281  r2024=+1.0600  r2025=+9.0955  r2026=+0.0000
+  R4 [d0p25_q0p65_w180_r02]  final=$   157,563  Calmar=+22.438  MaxDD=-15.59%  halt=91.5%  r2023=+2.6263  r2024=+1.0544  r2025=+9.1448  r2026=+0.0000
+  R5 [d0p5_q0p65_w180_r02]  final=$   163,395  Calmar=+20.277  MaxDD=-17.49%  halt=91.5%  r2023=+2.4172  r2024=+1.0401  r2025=+10.0274  r2026=+0.0000
+  R1 [d0p3_q0p5_w180_r03]  final=$   130,565  Calmar=+23.831  MaxDD=-13.65%  halt=91.5%  r2023=+2.5746  r2024=+0.0205  r2025=+16.2660  r2026=+0.0000
+  R2 [d0p3_q0p65_w180_r03]  final=$   130,548  Calmar=+23.791  MaxDD=-13.68%  halt=91.5%  r2023=+2.5761  r2024=+0.0199  r2025=+16.2672  r2026=+0.0000
+  R3 [d0p25_q0p5_w180_r03]  final=$   130,753  Calmar=+23.292  MaxDD=-13.98%  halt=91.5%  r2023=+2.6281  r2024=+0.0064  r2025=+16.1776  r2026=+0.0000
+  R4 [d0p25_q0p65_w180_r03]  final=$   130,823  Calmar=+23.209  MaxDD=-14.03%  halt=91.5%  r2023=+2.6263  r2024=+0.0055  r2025=+16.2100  r2026=+0.0000
+  R5 [d0p5_q0p65_w180_r03]  final=$   163,395  Calmar=+20.277  MaxDD=-17.49%  halt=91.5%  r2023=+2.4172  r2024=+1.0401  r2025=+10.0274  r2026=+0.0000
+  R1 [d0p3_q0p5_w180_r04]  final=$   130,484  Calmar=+23.826  MaxDD=-13.65%  halt=91.3%  r2023=+2.5724  r2024=+0.0205  r2025=+16.2660  r2026=+0.0000
+  R2 [d0p3_q0p65_w180_r04]  final=$   130,468  Calmar=+23.785  MaxDD=-13.68%  halt=91.3%  r2023=+2.5739  r2024=+0.0199  r2025=+16.2672  r2026=+0.0000
+  R3 [d0p25_q0p5_w180_r04]  final=$   130,672  Calmar=+23.286  MaxDD=-13.98%  halt=91.3%  r2023=+2.6259  r2024=+0.0064  r2025=+16.1776  r2026=+0.0000
+  R4 [d0p25_q0p65_w180_r04]  final=$   130,743  Calmar=+23.204  MaxDD=-14.03%  halt=91.3%  r2023=+2.6241  r2024=+0.0055  r2025=+16.2100  r2026=+0.0000
+  R5 [d0p5_q0p65_w180_r04]  final=$   163,395  Calmar=+20.277  MaxDD=-17.49%  halt=91.5%  r2023=+2.4172  r2024=+1.0401  r2025=+10.0274  r2026=+0.0000
+  R1 [d0p3_q0p5_cb_original]  final=$   158,951  Calmar=+23.003  MaxDD=-15.26%  halt=91.5%  r2023=+2.5746  r2024=+1.1452  r2025=+8.9996  r2026=+0.0000 [DUP]
+  R2 [d0p3_q0p65_cb_original]  final=$   158,884  Calmar=+22.999  MaxDD=-15.26%  halt=91.5%  r2023=+2.5761  r2024=+1.1433  r2025=+9.0004  r2026=+0.0000 [DUP]
+  R3 [d0p25_q0p5_cb_original]  final=$   157,299  Calmar=+22.555  MaxDD=-15.50%  halt=91.5%  r2023=+2.6281  r2024=+1.0600  r2025=+9.0955  r2026=+0.0000 [DUP]
+  R4 [d0p25_q0p65_cb_original]  final=$   157,563  Calmar=+22.438  MaxDD=-15.59%  halt=91.5%  r2023=+2.6263  r2024=+1.0544  r2025=+9.1448  r2026=+0.0000 [DUP]
+  R5 [d0p5_q0p65_cb_original]  final=$   163,395  Calmar=+20.277  MaxDD=-17.49%  halt=91.5%  r2023=+2.4172  r2024=+1.0401  r2025=+10.0274  r2026=+0.0000 [DUP]
+
+========================================================================================================================
+  v35 TOP-5 × CB TRANSITION — sorted by Calmar (non-duplicate)
+========================================================================================================================
+  Name                                         R    d    q window resume  Final_k  Calmar  MaxDD%   r2025   r2026  halt%
+  --------------------------------------------------------------------------------------------------------------------------
+  d0p3_q0p5_w180_r03                           1 0.30 0.50    180   0.03    130.6   23.83  -13.65 16.2660  0.0000   91.5
+  d0p3_q0p5_w180_r04                           1 0.30 0.50    180   0.04    130.5   23.83  -13.65 16.2660  0.0000   91.3
+  d0p3_q0p65_w180_r03                          2 0.30 0.65    180   0.03    130.5   23.79  -13.68 16.2672  0.0000   91.5
+  d0p3_q0p65_w180_r04                          2 0.30 0.65    180   0.04    130.5   23.79  -13.68 16.2672  0.0000   91.3
+  d0p25_q0p5_w180_r03                          3 0.25 0.50    180   0.03    130.8   23.29  -13.98 16.1776  0.0000   91.5
+  d0p25_q0p5_w180_r04                          3 0.25 0.50    180   0.04    130.7   23.29  -13.98 16.1776  0.0000   91.3
+  d0p25_q0p65_w180_r03                         4 0.25 0.65    180   0.03    130.8   23.21  -14.03 16.2100  0.0000   91.5
+  d0p25_q0p65_w180_r04                         4 0.25 0.65    180   0.04    130.7   23.20  -14.03 16.2100  0.0000   91.3
+  d0p3_q0p5_w180_r01                           1 0.30 0.50    180   0.01    159.0   23.00  -15.26  8.9996  0.0000   91.5
+  d0p3_q0p5_w180_r02                           1 0.30 0.50    180   0.02    159.0   23.00  -15.26  8.9996  0.0000   91.5
+  d0p3_q0p65_w180_r01                          2 0.30 0.65    180   0.01    158.9   23.00  -15.26  9.0004  0.0000   91.5
+  d0p3_q0p65_w180_r02                          2 0.30 0.65    180   0.02    158.9   23.00  -15.26  9.0004  0.0000   91.5
+  d0p25_q0p5_w180_r01                          3 0.25 0.50    180   0.01    157.3   22.55  -15.50  9.0955  0.0000   91.5
+  d0p25_q0p5_w180_r02                          3 0.25 0.50    180   0.02    157.3   22.55  -15.50  9.0955  0.0000   91.5
+  d0p25_q0p65_w180_r01                         4 0.25 0.65    180   0.01    157.6   22.44  -15.59  9.1448  0.0000   91.5
+  d0p25_q0p65_w180_r02                         4 0.25 0.65    180   0.02    157.6   22.44  -15.59  9.1448  0.0000   91.5
+  d0p5_q0p65_w180_r01                          5 0.50 0.65    180   0.01    163.4   20.28  -17.49 10.0274  0.0000   91.5
+  d0p5_q0p65_w180_r02                          5 0.50 0.65    180   0.02    163.4   20.28  -17.49 10.0274  0.0000   91.5
+  d0p5_q0p65_w180_r03                          5 0.50 0.65    180   0.03    163.4   20.28  -17.49 10.0274  0.0000   91.5
+  d0p5_q0p65_w180_r04                          5 0.50 0.65    180   0.04    163.4   20.28  -17.49 10.0274  0.0000   91.5
+  d0p5_q0p65_w090_r04                          5 0.50 0.65     90   0.04    730.1   17.49  -34.84 17.3814  0.0658   86.6
+  d0p25_q0p65_w090_r04                         4 0.25 0.65     90   0.04    617.3   16.63  -34.57 15.0132  0.0381   86.5
+  d0p25_q0p5_w090_r04                          3 0.25 0.50     90   0.04    617.1   16.63  -34.57 15.0437  0.0381   86.5
+  d0p3_q0p65_w090_r04                          2 0.30 0.65     90   0.04    553.7   16.01  -34.57 15.1458  0.0494   86.5
+  d0p3_q0p5_w090_r04                           1 0.30 0.50     90   0.04    553.0   16.01  -34.57 15.1454  0.0494   86.5
+  d0p5_q0p65_w090_r01                          5 0.50 0.65     90   0.01    463.7   14.71  -35.35 17.1401  0.0658   86.8
+  d0p5_q0p65_w090_r02                          5 0.50 0.65     90   0.02    463.7   14.71  -35.35 17.1401  0.0658   86.8
+  d0p5_q0p65_w090_r03                          5 0.50 0.65     90   0.03    463.7   14.71  -35.35 17.1397  0.0658   86.8
+  d0p25_q0p5_w090_r01                          3 0.25 0.50     90   0.01    411.2   14.26  -34.95 14.6995  0.0381   86.8
+  d0p25_q0p5_w090_r02                          3 0.25 0.50     90   0.02    411.2   14.26  -34.95 14.6995  0.0381   86.8
+
+  ★ Best Calmar : d0p3_q0p5_w180_r03  final=$130,565  Calmar=+23.831  MaxDD=-13.65%  r2026=+0.0000
+  ★ Best Final  : d0p5_q0p65_w090_r04  final=$730,056  Calmar=+17.494  r2026=+0.0658
+
+  No sweet-spot candidates found (MaxDD>-28%, r2026>0, Calmar>15). Cliff is sharp.
+
+  Best new CB config per rank:
+   Rank-1 d=0.3 q=0.5: w180_r03        window=180  resume=0.03  Calmar=23.83  MaxDD=-13.7%  r2026=+0.0000  final=$130,565
+   Rank-2 d=0.3 q=0.65: w180_r03        window=180  resume=0.03  Calmar=23.79  MaxDD=-13.7%  r2026=+0.0000  final=$130,548
+   Rank-3 d=0.25 q=0.5: w180_r03        window=180  resume=0.03  Calmar=23.29  MaxDD=-14.0%  r2026=+0.0000  final=$130,753
+   Rank-4 d=0.25 q=0.65: w180_r03        window=180  resume=0.03  Calmar=23.21  MaxDD=-14.0%  r2026=+0.0000  final=$130,823
+   Rank-5 d=0.5 q=0.65: w180_r01        window=180  resume=0.01  Calmar=20.28  MaxDD=-17.5%  r2026=+0.0000  final=$163,395
+
+[4] Generating plots ...
+  calmar surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_surface_rank1_d0p3_q0p5.png
+  calmar surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_surface_rank2_d0p3_q0p65.png
+  calmar surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_surface_rank3_d0p25_q0p5.png
+  calmar surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_surface_rank4_d0p25_q0p65.png
+  calmar surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_surface_rank5_d0p5_q0p65.png
+  r2026 surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_r2026_rank1_d0p3_q0p5.png
+  r2026 surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_r2026_rank2_d0p3_q0p65.png
+  r2026 surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_r2026_rank3_d0p25_q0p5.png
+  r2026 surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_r2026_rank4_d0p25_q0p65.png
+  r2026 surface: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_r2026_rank5_d0p5_q0p65.png
+  equity curves: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_equity_top5_best_vs_orig.png
+  cliff profile: C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\plots\v35_cliff_profile_rank1.png
+
+  Saved → C:\amttp\research\adaptive-friction\pipeline\results\v35_top5_cb_transition\crypto_godmode_v35_top5_cb_transition.json
+  Elapsed: 526.8s
+========================================================================================================================

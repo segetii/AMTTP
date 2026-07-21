@@ -1,0 +1,50 @@
+{
+  "schema": "cgs_deploy_v1",
+  "name": "tiered_structural_v70_slr",
+  "version": "2026-07-09",
+  "source": "v69 + modular signed BSDT direction slot",
+  "init_capital_usd": 1000,
+  "direction_slot": {
+    "enabled": false,
+    "readout": "slr_14d_raw_signed",
+    "type": "signed_bsdt_slr_quad",
+    "channels": [
+      "B1",
+      "delta_C",
+      "delta_A",
+      "delta_G"
+    ],
+    "horizon": "14d",
+    "mode": "strict",
+    "description": "|geo_flip| magnitude \u00d7 sign(D_walkforward), causal shift(1)",
+    "deploy_status": "research_only"
+  },
+  "tiers": [
+    {
+      "engine": "geo_flip_K16",
+      "weight": 0.8,
+      "note": "keep v69 structural core"
+    },
+    {
+      "engine": "V55_Final",
+      "weight": 0.2
+    }
+  ],
+  "overlay": {
+    "enabled": true,
+    "gain_thresh_monthly": 0.5,
+    "derisk_k": 0.5,
+    "cooldown_days": 90
+  },
+  "comparison_vs_v69": {
+    "baseline_final_oos": 289378.5565645182,
+    "slr_final_oos": 1147291.2147463663,
+    "baseline_ex_best_1": 5704.720800543072,
+    "slr_ex_best_1": 797.9491105419063,
+    "baseline_overlay_final": 98576.47367776319,
+    "slr_overlay_final": 1147291.2147463665,
+    "baseline_top_month_pct": 0.8407135073525653,
+    "slr_top_month_pct": 0.2115027530663493
+  },
+  "recommendation": "KEEP v69 geo_flip_K16"
+}

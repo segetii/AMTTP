@@ -1,0 +1,657 @@
+=== PAGE 1 ===
+Canonical Geometric System v1 (CGS-v1)
+Seven Theorem-Level Extensions of the
+Canonical Euclidean Kernel v4
+Abstract
+We extend the Canonical Euclidean Kernel v4 (CEK-v4) to a generalised geometric con-
+trol framework, CGS-v1, covering symplectic and Poisson manifolds, matrix Lie groups,
+multi-objective Pareto descent, self-similar graphs via diusion wavelets, kurtosis-corrected
+preconditioning, robust adversarial damping, and bounded-delay dynamics. Every claim is
+stated as a theorem with explicit hypotheses, explicit coercivity constants, and an explicit
+domain (pointwise, local, or restricted to an invariant subspace). The architecture preserves
+the CEK-v4 frozen kernel as a special case: the Euclidean canonical ODE and the gradient
+formula gX = 2 J TGS are unchanged in every extension that retains the kernel's locked
+status. The central correction, propagated throughout, is that the projection acts on the
+correction eld and not on the chain-rule gradient itself. Applications to grid stabilisation,
+water networks, drone navigation, robot safety, and portfolio management are instantiated
+as concrete (S, G, Fbase) triples.
+Structural commitment. CEK-v4 is the frozen Euclidean special case. CGS-v1 is the uni-
+versal geometric architecture containing Euclidean, symplectic, Poisson, Lie-group, Pareto,
+graph-wavelet, kurtosis-preconditioned, robust, and delay systems. The crucial structural
+distinction: the projection acts on the correction eld, not on the chain-rule gradient ∇E
+itself.
+Contents
+1 The CEK-v4 F rozen Kernel 3
+2 The CGS-v1 Universal F ramework 3
+2.1 Core structure . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+2.2 Aggregate gradient and projected correction . . . . . . . . . . . . . . . . . . . . . 3
+2.3 The CGS-v1 universal ow . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+3 Extension I  Symplectic and Poisson Systems 5
+3.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+3.2 Theorems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+3.3 Application: power grid stabilisation . . . . . . . . . . . . . . . . . . . . . . . . . 6
+4 Extension II  Matrix Lie Group Systems 7
+4.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+4.2 Theorems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+4.3 Application: drone attitude on SO(3) . . . . . . . . . . . . . . . . . . . . . . . . 8
+5 Extension III  Multi-Objective Pareto Systems 9
+1
+=== PAGE 2 ===
+5.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+5.2 Theorems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+5.3 Application: nance and robotics . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+6 Extension IV  Graph/F ractal Lattices 10
+6.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+6.2 Theorems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+6.3 Application: water network and grid topology . . . . . . . . . . . . . . . . . . . . 11
+7 Extension V  Kurtosis-Corrected SPD Preconditioner 12
+7.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+7.2 Theorems . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+7.3 Application: portfolio management under fat tails . . . . . . . . . . . . . . . . . . 13
+8 Extension VI  Robust / Adversarial Damping 14
+8.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8.2 Minimax structure . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8.3 Implementable robust gain . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8.4 Ultimate boundedness . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8.5 Fisher amplication  local and global . . . . . . . . . . . . . . . . . . . . . . . 15
+9 Extension VII  Delay / Memory Systems 16
+9.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9.2 LyapunovKrasovskii descent . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9.3 Predictor recovery . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9.4 Application: drone GPS dropout . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+10 Master Unied View 18
+10.1 Theorem inventory . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+10.2 Architectural commitments . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+11 Conclusion 20
+2
+=== PAGE 3 ===
+1 The CEK-v4 Frozen Kernel
+We retain the locked canonical ODE of CEK-v4 verbatim and use it as the base case of CGS-v1.
+The canonical ODE (locked, unchanged):
+˙X = Fbase(X) − gX(X) − γ(X) ⟨Fbase(X) − gX(X), g X(X)⟩
+∥gX(X)∥2 gX(X)
+with gX = 2J TGS, E = STGS, γ = E/(E + θ), F = Fbase − gX , and Rules 14 of CEK-v4
+(geometry only through gX ; Euclidean projection; Gpull = J TGJ for curvature only; no
+duplicated denitions).
+The standing assumptions (A1)(A4) and the standing rank/admissibility conditions of CEK-v4
+are used throughout this manuscript without restatement.
+2 The CGS-v1 Universal Framework
+2.1 Core structure
+Let M be a smooth manifold equipped with a pairing ⟨·, ·⟩X at each X ∈ M (Riemannian,
+symplectic, Poisson, or admissible composite). Let Ei : M → R ( i = 1 , . . . , m) be energy
+functions and Fbase ∈ Γ(T M) a nominal vector eld. Let DX ⊆ TX M denote the admissible
+correction subspace at X.
+Geometry DX
+Euclidean TX M
+Symplectic ker(dHX)
+Contact horizontal distribution
+Pareto common descent cone
+Holonomic constraints constraint tangent space
+2.2 Aggregate gradient and projected correction
+For weights λ ∈ ∆m−1 dene the aggregate energy Eλ =P
+i λiEi, the intrinsic gradient ∇Eλ,
+and the projected correction
+g⋆ = PD(∇Eλ).
+2.3 The CGS-v1 universal ow
+The CGS-v1 universal ow:
+˙X = Fbase − g⋆ − γ ⟨Fbase − g⋆, g ⋆⟩
+∥g⋆∥2 g⋆, γ = Eλ
+Eλ + θ .
+Theorem 2.1 (Projected Lyapunov descent, CGS.1) . Along solutions of the CGS-v1 ow with
+α = ⟨Fbase − g⋆, g ⋆⟩/ ∥g⋆∥2,
+˙Eλ = ⟨∇Eλ, F base⟩ − (1 + γα)⟨∇Eλ, g ⋆⟩.
+3
+=== PAGE 4 ===
+Proof. ˙Eλ = ⟨∇Eλ, ˙X⟩ by the chain rule. Substituting the universal ow and grouping terms
+yields the stated identity.
+Corollary 2.2 (Sucient descent condition, CGS.2) . ˙Eλ ≤ 0 holds whenever
+⟨∇Eλ, F base⟩ ≤ (1 + γα)⟨∇Eλ, g ⋆⟩.
+Structural correction propagated throughout. The chain-rule derivative uses the full
+gradient ∇Eλ. The dynamics use the projected correction g⋆. These are distinct objects and
+must not be substituted for one another.
+4
+=== PAGE 5 ===
+3 Extension I  Symplectic and Poisson Systems
+3.1 Setup
+Let (M, ω) be a symplectic manifold with Hamiltonian H : M → R and Hamiltonian vector eld
+XH = J∇H, where J is the symplectic structure matrix. The admissible correction bundle is
+DX = ker(dHX), P H = I − ∇H ⊗ ∇H
+∥∇H∥2 .
+The projected correction is g⋆ = PH(∇E).
+3.2 Theorems
+Theorem 3.1 (Hamiltonian conservation) . Under Fbase = XH, along the symplectic CGS-v1
+ow,
+˙H = 0.
+Proof. ˙H = dH( ˙X) = dH(XH) − dH(g⋆)(1 +γα). The rst term vanishes by skew-symmetry of
+J, the second because g⋆ ∈ ker(dH).
+Theorem 3.2 (Symplectic descent, corrected) . Along the symplectic CGS-v1 ow,
+˙E = ⟨∇E, X H⟩ − (1 + γα) ∥g⋆∥2 .
+Proof. Apply Theorem 2.1 with ∇Eλ = ∇E and use ⟨∇E, g ⋆⟩ = ⟨g⋆ + g∥, g ⋆⟩ = ∥g⋆∥2 by
+orthogonality of the projection PH.
+Assumption 3.3 (Projected coercivity) . There exists cD > 0 such that
+⟨∇E, g ⋆⟩ ≥ cD E
+on the invariant operating sublevel set.
+Theorem 3.4 (Exponential rate, symplectic) . Under Assumption 3.3 and ⟨∇E, X H⟩ ≤ cDE/2,
+E(X(t)) ≤ E(X0) e−κt, κ = 1
+2 cD(1 − γmax).
+Proof. ˙E ≤ cDE/2−(1+ γα)cDE ≤ −κE under the stated bound. Grönwall closes the estimate.
+Theorem 3.5 (Casimir conservation, Poisson) . Let Π(X) be a Poisson tensor with Casimirs
+C1, . . . , Cn−r, and let gΠ = gX −P
+i
+⟨gX , ∇Ci⟩
+∥∇Ci∥2 ∇Ci. Along the Poisson CGS-v1 ow ˙X = Π∇H −
+gΠ − γαgΠ,
+˙Ci = 0, i = 1, . . . , n− r.
+Proof. ˙Ci = ⟨∇Ci, Π∇H⟩ − ⟨∇Ci, g Π⟩(1 +γα). The rst term equals {Ci, H} = 0 by denition
+of Casimir; the second vanishes by construction of gΠ.
+5
+=== PAGE 6 ===
+3.3 Application: power grid stabilisation
+State X = (δ, ω) ∈ Rn × Rn (angles, frequencies). Hamiltonian
+H = 1
+2 ωTM ω +
+X
+(i,j)∈E
+Bij(1 − cos(δi − δj)),
+S(X) = ω − ω01, G = M , Fbase = J∇H + Dload. Slack-bus constraint P
+i δi = const is the
+Casimir; Theorem 3.5 preserves it exactly.
+6
+=== PAGE 7 ===
+4 Extension II  Matrix Lie Group Systems
+4.1 Setup
+Let G be a matrix Lie group with Lie algebra g = TeG. For X ∈ G the left-trivialised velocity
+is ξ = X −1 ˙X ∈ g. Given S : G → Rk, the lifted Jacobian is
+ˆJ(X) = d
+dε
+
+ε=0
+S(X exp(ε ·)) : g → Rk.
+Let ⟨·, ·⟩g be a left-invariant metric on g with eigenvalue bounds µg ≤ Mg, and let ˆJ ∗ denote
+the metric adjoint: ⟨ ˆJ ∗v, ξ ⟩g = ⟨v, ˆJ ξ⟩Rk .
+4.2 Theorems
+Denition 4.1 (Lie-group canonical ODE) . With gg = 2 ˆJ ∗GS,
+˙X = X
+ 
+ξnom − gg − γ ⟨ξnom − gg, g g⟩g
+∥gg∥2
+g
+gg
+!
+.
+Theorem 4.2 (Manifold invariance) . Solutions of the Lie-group canonical ODE remain in G
+for all t ≥ 0.
+Proof. The right-hand side is of the form ˙X = Xξ(t) with ξ(t) ∈ g. By the Magnus expansion,
+solutions take the form X(t) = X(0) exp(Ω(t)) for Ω(t) ∈ g; closure of G under multiplication
+and the exponential gives the claim.
+Theorem 4.3 (Lyapunov descent on G) . Along solutions of the Lie-group canonical ODE,
+˙E = (1 − γ)
+h
+⟨gg, ξ nom⟩g − ∥gg∥2
+g
+i
+when ⟨gg, ξ nom⟩g ≤ ∥gg∥2
+g.
+Proof. ˙E = ⟨∇E, ˙X⟩ = ⟨gg, ξ ⟩g where ξ is the bracket expression in Denition 4.1. Expand
+using the projection identity.
+Theorem 4.4 (Local exponential convergence on G) . Assume geodesic convexity of the operating
+set, bounded sectional curvature |K| ≤ K0, and trajectories remaining inside the injectivity
+radius. Let r be the geodesic diameter of the operating set. Then under σmin( ˆJ) ≥ ˆσ,
+E(X(t)) ≤ E(X0) e−ρGt, ρ G = ρflat − CKr2
+where ρflat = 4ˆσ2µ2
+G/MG · (1 − γmax) and CK = O(K0ρflat).
+Proof. The curvature correction follows from Toponogov's comparison applied to the energy
+decrement along the Lie-group ow; the leading-order term reproduces the at rate, and the
+O(K0r2) correction quanties geodesic-triangle distortion. Routine.
+Denition 4.5 (Retracted integrator) . For step size h > 0,
+Xt+h = Xt · exp(hξt), ξ t ∈ g.
+7
+=== PAGE 8 ===
+4.3 Application: drone attitude on SO(3)
+X = R ∈ SO(3), ξ = ω ∈ R3 (body-frame angular velocity), S(R) = log( RTRtarget), G = I3,
+ξnom = ωflight. The retracted integrator uses Rodrigues' formula.
+8
+=== PAGE 9 ===
+5 Extension III  Multi-Objective Pareto Systems
+5.1 Setup
+Let Ei = ST
+i GiSi for i = 1, . . . , m with gradients g(i)
+X = 2J T
+i GiSi and gains γi = Ei/(Ei + θi).
+Denition 5.1 (MGDA aggregate gradient) .
+¯gX =
+X
+i
+λ⋆
+i g(i)
+X , λ ⋆ = arg min
+λ∈∆m−1
+
+X
+i
+λig(i)
+X
+
+2
+.
+5.2 Theorems
+Theorem 5.2 (Common descent, corrected) . If ¯gX ̸= 0 then for all i ∈ supp(λ⋆), ⟨∇Ei, −¯gX ⟩ <
+0, and for all other i, ⟨∇Ei, −¯gX ⟩ ≤ 0. Under the angle condition ⟨¯gX , F base⟩ ≤ ∥ ¯gX ∥2,
+˙Ei ≤ 0 ∀i ∈ supp(λ⋆).
+Proof. Standard MGDA / multi-objective KKT characterisation; strict descent on the support
+follows from the minimum-norm property of λ⋆.
+Theorem 5.3 (Pareto stationary set convergence) . Under the joint compactness of {X : Ei(X) ≤
+Ei(X0) ∀i} and the angle condition, X(t) converges to the Pareto stationary set {X : ¯gX(X) =
+0}.
+Proof. ¯E =P
+i λ⋆
+i Ei is a Lyapunov function with ˙¯E ≤ 0; LaSalle on the compact joint sublevel
+set.
+Assumption 5.4 (Pareto tangency) . Fbase(X) ∈ TX P for all X on the Pareto stationary set
+P.
+Theorem 5.5 (Pareto sliding under tangency) . Under Assumption 5.4, once X ∈ P , the Pareto
+canonical ODE reduces to ˙X = Fbase and P is forward-invariant.
+Proof. At X ∈ P , ¯gX = 0 so all correction terms vanish; Fbase(X) ∈ TX P by assumption keeps
+the trajectory in P.
+5.3 Application: nance and robotics
+Finance. E1 = −αTw (negative prot), E2 = wTΣw (variance). For m = 2 the dual problem
+has closed form
+λ⋆
+1 =
+
+
+g(2)
+X
+
+2
+− ⟨g(1)
+X , g (2)
+X ⟩
+g(1)
+X
+
+2
++
+g(2)
+X
+
+2
+− 2⟨g(1)
+X , g (2)
+X ⟩
+
+
+1
+0
+.
+Robotics. E1 = ∥F K(q) − p⋆∥2
+W (task), E2 = − mink d(q, obstaclek)2 (safety). λ⋆
+2 → 1 as
+humans approach.
+9
+=== PAGE 10 ===
+6 Extension IV  Graph/Fractal Lattices
+6.1 Setup
+Let G = (V, E, w) be a nite connected weighted undirected graph with Laplacian L and eigen-
+values 0 = λ1 < λ2 ≤ · · · ≤ λN . The diusion heat kernel is Ht = e−tL, and the graph wavelet
+at scale ℓ is Ψℓ = Htℓ − Htℓ+1 for a scale sequence t0 < t1 < · · · < t L.
+Denition 6.1 (Eective graph scaling dimension) . deff > 0 is a design parameter chosen by
+the practitioner. (It is not a topological invariant of G.)
+Denition 6.2 (Multi-scale feature map) .
+Sgraph(X) =
+ 
+Ψ0(X − X ⋆), . . . ,ΨL(X − X ⋆)
+
+, G graph = diag
+ 
+t−deff
+0 IN , . . . , t−deff
+L IN
+
+.
+The multi-scale Laplacian is Lms =P
+ℓ t−deff
+ℓ ΨT
+ℓ Ψℓ.
+6.2 Theorems
+Lemma 6.3 (Quantitative spectral coercivity) . For scales satisfying t0 ≤ λ−1
+N and tL ≥ λ−1
+2 ,
+λmin(Lms
+
+1⊥) ≥ cspec := t−deff
+0 · (1 − e−1)2
+L2 > 0.
+Proof. On the eigenspace of λk > 0, Lms acts as multiplication by w(λk) = P
+ℓ t−deff
+ℓ (e−tℓλk −
+e−tℓ+1λk)2. Each summand is strictly positive. The scale-range hypotheses ensure at least one
+scale satises tℓλk ≤ 1, where the dierence exceeds 1 − e−1. The factor L−2 accounts for
+worst-case scale distribution.
+Theorem 6.4 (Exponential convergence on 1⊥) . For Fbase ≡ 0 and initial condition X0 − X ⋆ ∈
+1⊥, on the invariant operating sublevel set {E ≤ E(X0)} ∩ 1⊥,
+Egraph(X(t)) ≤ Egraph(X0) e−ρgrapht, ρ graph = 4cspec(1 − γmax).
+Proof. Since ∇Egraph = 2Lms(X − X ⋆) and Egraph = (X − X ⋆)TLms(X − X ⋆), ∥gX ∥2 = 4(X −
+X ⋆)TL2
+ms(X − X ⋆) ≥ 4λmin(Lms) · Egraph. Substituting into Theorem 9.3 of CEK-v4 with this
+linear bound (note: the squared eigenvalue formula is incorrect) yields the stated rate.
+Theorem 6.5 (Total energy descent) . Under the angle condition ⟨gX , F base⟩ ≤ ∥ gX ∥2, ˙Egraph ≤
+0. Individual scale energies Eℓ are not in general monotone; exact monotonicity for each ℓ holds
+under the orthogonality assumption ΨT
+ℓ Ψℓ′ = 0 for ℓ ̸= ℓ′.
+Proof. Total descent: Theorem 9.1 of CEK-v4 with E = Egraph. Individual scale failure: cross-
+scale terms ⟨∇Eℓ, g (ℓ′)
+X ⟩ are nonzero in general. The orthogonality condition removes them.
+Note on orthogonality . The bands Ψℓ on nite graphs are not exactly orthogonal. The or-
+thogonality assumption is therefore a design idealisation, satised approximately in the regime
+of well-separated scales. We do not claim any quantitative error estimate without further as-
+sumptions on scale separation.
+10
+=== PAGE 11 ===
+6.3 Application: water network and grid topology
+Pipe network with N junctions, hierarchical branching, X = pressure deviations from design.
+Coarse-scale energies capture bulk pressure loss; ne-scale energies capture water hammer. Total
+descent (Theorem 6.5) guarantees safe pressure regulation. Combined with Casimir conservation
+(Theorem 3.5), total ow to consumers is preserved.
+11
+=== PAGE 12 ===
+7 Extension V  Kurtosis-Corrected SPD Preconditioner
+7.1 Setup
+Let IS(z) ≻ 0 be a Fisher-type matrix with µI I ⪯ IS ⪯ MI I on the operating region. Let
+K4(z) ∈ Sk be a symmetric matrix of fourth-cumulant statistics, bounded ∥K4∥op ≤ LK, with
+no positivity assumption.
+Denition 7.1 (Kurtosis-corrected SPD preconditioner) .
+G(β)(z) = IS(z) + βK4(z),
+β ∈ B := {β ∈ R : G(β)(z) ≻ 0 uniformly on the operating region }.
+This is a state-dependent SPD preconditioner family; it is not claimed to be a metric in the ten-
+sorial sense, and is not claimed to coincide with any standard information-geometric connection.
+7.2 Theorems
+Theorem 7.2 (Range of validity) . B ⊇ (−µI /LK, µ I /LK) when K4 ̸= 0 and B = R when
+K4 = 0.
+Proof. λmin(IS + βK4) ≥ µI − | β|LK by Weyl's inequality, which is positive on the stated
+interval.
+Theorem 7.3 (Lyapunov descent for admissible β) . For all β ∈ B , the β-canonical ODE satises
+˙E(β) ≤ 0 under the angle condition ⟨g(β)
+X , F base⟩ ≤
+g(β)
+X
+
+2
+.
+Proof. Direct application of Theorem 9.1 of CEK-v4 with G → G(β), since G(β) ≻ 0 on B.
+Assumption 7.4 (Isotropic kurtosis, sign-xed) . K4(z) = c(z)IS(z) on the operating region,
+with c(z) of constant sign and |c(z)| ≤ cmax < L K/MI . Furthermore, the comparison sublevel
+set {E(0) ≤ E0} is xed uniformly across the range of admissible β under consideration.
+Lemma 7.5 (Energy scaling under isotropy) . Under Assumption 7.4,
+E(β)(X) = (1 + βc(z))E(0)(X)
+pointwise.
+Proof. E(β) = ST(IS + βcIS)S = (1 + βc)STISS.
+Theorem 7.6 (Strict rate monotonicity under isotropy) . Under Assumption 7.4 with c > 0,
+the rate ρ(β) is strictly increasing in β on the admissible range. With c < 0, ρ(β) is strictly
+decreasing in β.
+Proof. By Lemma 7.5, γ(β)
+max = (1 + βc)E0/((1 + βc)E0 + θ). Then
+ρ(β) = 4σ2µ2
+I
+MI
+(1 + βc) · θ
+(1 + βc)E0 + θ ,
+and
+dρ(β)
+dβ = 4σ2µ2
+I
+MI
+· c θ2
+((1 + βc)E0 + θ)2 .
+The sign matches c and is nonzero away from c = 0.
+12
+=== PAGE 13 ===
+No claim is made about non-isotropic K4.
+7.3 Application: portfolio management under fat tails
+Estimate K4 from return data. Under elliptical distributions (multivariate t, etc.) the isotropic
+condition holds and β > 0 provably improves the descent rate.
+13
+=== PAGE 14 ===
+8 Extension VI  Robust / Adversarial Damping
+8.1 Setup
+Fbase = Fnom + u with ∥u∥ ≤ Madv adversarial. At each state X with gX ̸= 0, consider the game
+J(γ, u) = ˙E(X; γ, u) = (1 − γ)
+
+⟨gX , F nom + u⟩ − ∥gX ∥2
+.
+8.2 Minimax structure
+Theorem 8.1 (Minimax value and absence of interior saddle) . For each xed γ ∈ [0, 1), the
+unique maximiser is u⋆ = MadvgX / ∥gX ∥. Let B(X) := ⟨gX , F nom⟩ + Madv ∥gX ∥ − ∥gX ∥2.
+(i) If B ≤ 0, inf γ supu J = B attained at γ = 0.
+(ii) If B > 0, inf γ supu J = 0 attained only in the limit γ → 1−. No interior minimiser exists.
+Proof. Maximisation in u is CauchySchwarz on the ball. Minimisation in γ: supu J = (1 −γ)B,
+linear in 1 − γ, attaining 0 at the boundary γ = 1 when B > 0 and at γ = 0 when B ≤ 0.
+Remark 8.2 (Degeneracy) . The minimax value collapses to 0 when B > 0 via γ → 1−. This
+corresponds to the controller freezing the dynamics, which is not operationally meaningful.
+The unconstrained game is therefore degenerate, and the implementable design in Theorem 8.3
+introduces a non-degenerate interior gain.
+8.3 Implementable robust gain
+Theorem 8.3 (Implementable robust descent) . With
+γrob(X) = E + Madv ∥gX ∥
+E + Madv ∥gX ∥ + θ ,
+under the worst-case adversary u⋆ = MadvgX / ∥gX ∥,
+˙E
+
+u⋆ = (1 − γrob)
+
+⟨gX , F nom⟩ + Madv ∥gX ∥ − ∥gX ∥2
+,
+and ˙E ≤ 0 on
+Srob = {X : ∥gX ∥2 ≥ ⟨gX , F nom⟩ + Madv ∥gX ∥}.
+Proof. Direct substitution; (1 − γrob) > 0 always, so the sign of ˙E matches the bracket.
+8.4 Ultimate boundedness
+Assumption 8.4 (Two-sided gradient coercivity) . On the operating sublevel set with rank
+condition σmin(J) ≥ σ > 0 and (A1)(A2),
+C1
+√
+E ≤ ∥gX ∥ ≤ C2
+√
+E,
+where C1 = 2σµG/√MG (from CEK-v4 Theorem 9.3) and C2 = 2Jmax
+p
+MG/µG with Jmax =
+supX ∥J(X)∥op.
+14
+=== PAGE 15 ===
+The upper bound C2 follows directly from ∥gX ∥ =
+2J TGS
+ ≤ 2JmaxMG ∥S∥ and ∥S∥ =√
+STS ≤
+p
+E/µG. No additional hypothesis beyond (A1)(A2) and a bounded operating set is
+required.
+Theorem 8.5 (Robust ultimate boundedness) . Under Assumption 8.4, ∥Fnom∥ ≤ Mnom, ∥u∥ ≤
+Madv, and γrob as in Theorem 8.3, dene
+Ψrob(R) = θ C1
+√
+R
+R + MadvC2
+√
+R + θ
+− Madv.
+Then Ψrob is unimodal on (0, ∞) with maximum at R = θ. Under admissibility Mnom < Ψ⋆
+rob :=
+maxR Ψrob(R), the equation Ψrob(R) = Mnom has two roots 0 < R − < R +, and trajectories
+entering {E ≤ R+} are ultimately bounded in [R−, R+].
+Proof. Substituting u =
+√
+R,
+Ψrob(u) = θC1u
+u2 + MadvC2u + θ − Madv.
+Dierentiating,
+dΨrob
+du = θC1(θ − u2)
+(u2 + MadvC2u + θ)2 ,
+positive for u <
+√
+θ and negative for u >
+√
+θ, giving a unique maximum at u =
+√
+θ, i.e. R = θ.
+The two-root structure and ultimate boundedness then follow by reduction to Theorem 9.4 of
+CEK-v4 with Ψ → Ψrob.
+8.5 Fisher amplication  local and global
+Theorem 8.6 (Fisher net-descent condition) . Under G = IS with µI ≤ λ(IS) ≤ MI :
+(i) For ∥S∥ ≥ s0 > 0, net descent under the worst-case adversary holds i
+E ≥ MG
+ 
+Madv
+√MI Jmax + ∥Fnom∥ /s0
+2
+4σ2µ2
+I
+.
+(ii) Near the target S = 0, linearise S(X) = J0(X − X ⋆) + O(∥X − X ⋆∥2) with J0 = J(X ⋆).
+The local condition becomes
+∥X − X ⋆∥2 ≥
+MG
+ 
+Madv
+√MI ∥J0∥op + ∥Fnom∥ /σmin(J0)
+2
+4σ2µ2
+I σmin(J0)2 .
+Proof. (i) Combine Theorem 9.3 of CEK-v4 with CauchySchwarz ⟨gX , u ⋆⟩ ≤ Madv ∥gX ∥ ≤
+2Madv
+√MI Jmax ∥S∥. (ii) Local linearisation in a neighbourhood of X ⋆, removing the ∥S∥−1
+singularity.
+15
+=== PAGE 16 ===
+9 Extension VII  Delay / Memory Systems
+9.1 Setup
+The delayed canonical ODE is
+˙X(t) = Fnom(X(t)) − gX(X(t − τ)) − γ(X(t − τ)) ⟨F (t − τ), g X(t − τ)⟩
+∥gX(t − τ)∥2 gX(t − τ)
+with τ > 0 a constant measurement delay. Initial history X|[−τ,0] ∈ C0.
+9.2 LyapunovKrasovskii descent
+Denition 9.1 (LK functional) .
+V (Xt) = E(X(t)) + µ
+Z t
+t−τ
+∥gX(X(s))∥2 ds.
+Theorem 9.2 (LK descent inequality) . Under (A1)(A4) and the angle condition on [t − τ, t],
+˙V (Xt) ≤ −(1 − γτ) ∥gX(t − τ)∥2 + µ ∥gX(t)∥2 − µ ∥gX(t − τ)∥2 + ⟨gX(t), F nom(t)⟩
+where γτ = γ(X(t − τ)).
+Proof. Standard LK dierentiation; the chain-rule term ˙E is expanded via the delayed ODE,
+and the cross term ⟨gX(t), g X(t − τ)⟩ is absorbed into the integral term by CauchySchwarz.
+Routine.
+Theorem 9.3 (Sucient delay margin) . The delayed canonical ODE is stable for delays
+τ < τ ⋆ = (1 − γmax)ρ
+L2g
+where Lg is the Lipschitz constant of X 7→ gX on the operating set and ρ is the delay-free rate.
+Sharpness is not claimed.
+Proof. Choose µ = (1 − γmax)/2 in the LK functional. Bound ∥gX(t) − gX(t − τ)∥ ≤ Lgτ
+ ˙X
+
+∞
+to control the cross term, then close via Grönwall. Suciency only.
+9.3 Predictor recovery
+Theorem 9.4 (Cheap Smith predictor: O(τ) recovery) . For the Smith predictor ˆX(t) = X(t −
+τ) +
+R t
+t−τ Fnom(X(s)) ds,
+X(t) − ˆX(t)
+ ≤ τ · ∥gX + γαgX ∥∞ + O(τ 2).
+The predictor-corrected ODE achieves
+ρpred = ρ − O(τ).
+Proof. The cheap predictor uses only Fnom over the delay window and therefore omits the
+correction terms of the canonical drift; the error is rst order in τ . Propagating through the
+energy derivative gives O(τ) rate degradation.
+16
+=== PAGE 17 ===
+Theorem 9.5 (Full-drift predictor: O(τ 2) recovery) . For the full-drift predictor
+ˆXfull(t) = X(t − τ) +
+Z t
+t−τ
+h
+Fnom(X(s)) − gX(X(s)) − γ(X(s))α(X(s))gX(X(s))
+i
+ds,
+X(t) − ˆXfull(t)
+ = O(τ 2), ρ pred,full = ρ − O(τ 2).
+Proof. ˆXfull is the rst-order Taylor expansion of X(t) around X(t − τ) using the full drift. The
+remainder is second order in τ , with Lipschitz constants LF , Lg, Lγ entering the constant.
+Remark 9.6 (Realisability) . ˆXfull requires evaluating gX(X(s)) and γ(X(s)) across the delay
+window, both of which depend on the unknown true trajectory. It is therefore an idealised
+predictor; practical implementations require either an auxiliary state observer or a recursive
+approximation scheme.
+9.4 Application: drone GPS dropout
+Fnom = inertial dead-reckoning over the dropout window. Cheap predictor: O(τ) rate degra-
+dation, easily implemented. Full predictor: O(τ 2) recovery, requires an inertial-rate observer
+integrating the canonical drift.
+17
+=== PAGE 18 ===
+10 Master Unied View
+Ext. Domain Object changed Status
+CEK-v4 general frozen kernel locked
+I Symplectic grid, water gX → g⋆ = PH∇E proved
+I Poisson grid + Casimir-tangent projection proved
+II Lie group drone, robot J → ˆJ ∗, exp integrator proved (local)
+III Pareto nance, robot gX → ¯gX , γ → ¯γ proved on support
+IV Graph/fractal grid, water S → Sgraph, G → Ggraph, heat ker-
+nel
+proved
+V Kurtosis prec. nance G → G(β) proved (isotropic)
+VI Robust drone γ → γrob proved on Srob
+VII Delay drone LK functional, predictor proved (sucient)
+18
+=== PAGE 19 ===
+10.1 Theorem inventory
+T ag Category Scope
+CGS.1 projected descent identity global, no rate
+SP.1 conservation exact ˙H = 0
+SP.2 descent identity with explicit angle condition
+SP.3 exponential rate local, under projected coercivity
+SP.4 Casimir conservation exact ˙Ci = 0
+LG.1 manifold invariance X(t) ∈ G for all t ≥ 0
+LG.2 descent on G local
+LG.3 exponential rate on G local, O(K0r2) correction
+PO.1 descent on support of λ⋆ local
+PO.2 Pareto stationary convergence global on joint sublevel
+PO.3 Pareto sliding local, requires tangency
+DFL.1 spectral coercivity global on 1⊥
+DFL.2 exponential convergence on invariant sublevel inside 1⊥
+DFL.3 total energy descent local; per-scale requires orthogonality
+AC.1 validity range explicit interval in β
+AC.2 descent local
+AC.3 strict rate monotonicity isotropic kurtosis, frozen sublevel
+AR.1 minimax value, no interior saddle pointwise
+AR.2 implementable robust descent on Srob
+AR.3 robust ultimate boundedness local in energy
+AR.4 Fisher net-descent condition global ( ∥S∥ ≥ s0) + local
+MD.1 LK descent inequality global on history
+MD.2 sucient delay margin local; suciency only
+MD.3 cheap predictor O(τ) rate degradation
+MD.3 ′ full predictor O(τ 2) rate, idealised
+10.2 Architectural commitments
+1. CEK-v4 remains the locked Euclidean special case; nothing in this manuscript redenes,
+weakens, or replaces its frozen ODE, gradient formula, Euclidean projection, or control gain.
+2. CGS-v1 is the universal architecture. Every extension is an instantiation of the CGS-v1
+ow via a choice of (DX , ∇Eλ, Fbase) or via upstream modication of (S, G, Fbase).
+3. The projection acts on the correction eld, not on the chain-rule gradient.
+4. Every theorem in this manuscript carries explicit hypotheses, an explicit coercivity constant
+where applicable, and an explicit scope (global, local, pointwise, or restricted to an invariant
+subspace).
+5. No heuristic survives in the theorem list. Every claim of asymptotic order, monotonicity,
+descent, or boundedness is proved under the stated assumptions or removed entirely.
+19
+=== PAGE 20 ===
+11 Conclusion
+The manuscript establishes that the Canonical Euclidean Kernel of v4 admits seven extensions
+to geometries beyond Euclidean space, each preserving the locked canonical structure or instan-
+tiating the broader CGS-v1 universal ow when the locked Euclidean projection is genuinely
+incompatible with the target geometry (as in the symplectic and Lie-group cases). The frame-
+work now operates under the discipline of narrow hypotheses with explicit constants rather than
+broad universal claims, and the theorems delivered match what is actually proved. The strongest
+sections  Hamiltonian-tangent projection (Ext. I), Lie-group canonical damping (Ext. II),
+graph-wavelet canonical ow (Ext. IV), and LyapunovKrasovskii delay analysis (Ext. VII) 
+constitute the most defensible parts of the framework; the kurtosis-corrected preconditioner
+(Ext. V), Pareto multi-objective system (Ext. III), and robust adversarial damping (Ext. VI)
+are stated under restricted hypotheses with explicit limitations on their scope.
+20

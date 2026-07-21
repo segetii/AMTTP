@@ -595,7 +595,7 @@ def run_simulation(
         else:
             lam = _lam_cache
 
-        gs = alpha / (lam + 1e-9)
+        gs = alpha / (lam + alpha)   # stability index α/(λ+α) ∈ (0,1]
 
         if mode == "adaptive":
             X = adaptive_buffer(X, baselines, dep, gs, alpha=alpha, bsdt=bsdt)

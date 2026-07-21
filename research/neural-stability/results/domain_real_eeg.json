@@ -1,0 +1,70 @@
+{
+  "dataset": "UCI EEG Eye State (Emotiv 14-ch)",
+  "source_url": "https://archive.ics.uci.edu/ml/datasets/EEG+Eye+State",
+  "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+  "presentation": "Odeyemi 2026 paper-style",
+  "samples": 14060,
+  "channels": [
+    "AF3",
+    "F7",
+    "F3",
+    "FC5",
+    "T7",
+    "P7",
+    "O1",
+    "O2",
+    "P8",
+    "T8",
+    "FC6",
+    "F4",
+    "F8",
+    "AF4"
+  ],
+  "reference_size": 1500,
+  "crisis_index": 155,
+  "fisher_vr_weights": {
+    "C": 0.1846315132658763,
+    "G": 0.0051518310914715724,
+    "A": 0.2905383450145768,
+    "T": 0.5196783106280752
+  },
+  "frozen_v4_threshold_p99": 1.1896383571211586,
+  "alpha_alarm_effective": 0.01,
+  "first_alarm_index": 153,
+  "lead_samples": 2,
+  "alarm_rate_eye_closed": 0.04035664007508212,
+  "alarm_rate_eye_open": 0.023085952784661537,
+  "bsdt_dominance_eye_closed": {
+    "delta_C": 0.2829660277165158,
+    "delta_G": 0.0033990221981650298,
+    "delta_A": 0.34448905507772953,
+    "delta_T": 0.36914589500719996
+  },
+  "engine_info": {
+    "engine": "FrozenCanonicalV4 (canonical-v4 ODE)",
+    "presentation": "Odeyemi 2026 paper-style",
+    "n_ref": 1500,
+    "n_cal": 375,
+    "rolling_window": 200,
+    "frozen_p99_ref_v4": 1.1896383571211586,
+    "adaptive_p99_ref_v4": 1.1896383571211586,
+    "alpha_alarm": 0.01,
+    "alpha_alarm_effective": 0.01,
+    "weights_order": [
+      "delta_C",
+      "delta_G",
+      "delta_A",
+      "delta_T"
+    ],
+    "weights": [
+      0.1846315132658763,
+      0.0051518310914715724,
+      0.2905383450145768,
+      0.5196783106280752
+    ]
+  },
+  "outputs": {
+    "figure": "c:\\amttp\\research\\neural-stability\\figures\\domain_real_eeg.png",
+    "json": "c:\\amttp\\research\\neural-stability\\results\\domain_real_eeg.json"
+  }
+}

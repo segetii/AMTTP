@@ -101,6 +101,19 @@ def spectral_radius(W: np.ndarray) -> float:
     return float(np.max(np.abs(eigvals)))
 
 
+def leading_eigenvec(W: np.ndarray) -> np.ndarray:
+    """
+    Leading eigenvector of symmetric W (associated with lambda_max).
+
+    Used as the contagion-channel Jacobian direction J_C in the 4-channel
+    BSDT decomposition (section XXIV.4):  J_C = v_W[:,None] / sqrt(d).
+
+    Returns (N,) unit vector.
+    """
+    _, eigvecs = np.linalg.eigh(W)   # sorted ascending; symmetric -> real
+    return eigvecs[:, -1]            # last column = largest eigenvalue
+
+
 def describe_network(W: np.ndarray, sector_names: list[str]) -> str:
     """Return a human-readable summary of the network."""
     N = W.shape[0]

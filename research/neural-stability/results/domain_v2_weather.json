@@ -1,0 +1,55 @@
+{
+  "domain": "climate_weather",
+  "version": "v2",
+  "engine": "FrozenCanonicalV4",
+  "gateway": "tbr0p47_ConfidenceGate + DomainCircuitBreaker",
+  "data_source": "NASA GISTEMP v4 (GLB.Ts+dSST)",
+  "T": 1756,
+  "year_range": [
+    1880.0416666666667,
+    2026.2916666666667
+  ],
+  "base_period": [
+    1951,
+    1980
+  ],
+  "crisis_year": 2000,
+  "crisis_months": 282,
+  "v1_alarms": 73,
+  "v2_alarms": 44,
+  "lead_time_v1": 1380,
+  "lead_time_v2": 1364,
+  "conf_veto_pct": 0.3972602739726027,
+  "cb_suppress_pct": 0.0,
+  "improvement": {
+    "v1": {
+      "precision": 0.3561643835616438,
+      "recall": 0.09219858156028368,
+      "f1": 0.14647887323943662,
+      "first_alarm": 61,
+      "lead_steps": 1380,
+      "n_alarms": 73
+    },
+    "v2": {
+      "precision": 0.45454545454545453,
+      "recall": 0.07092198581560284,
+      "f1": 0.12269938650306748,
+      "first_alarm": 77,
+      "lead_steps": 1364,
+      "n_alarms": 44
+    },
+    "precision_delta": 0.09838107098381071,
+    "recall_delta": -0.02127659574468084,
+    "f1_delta": -0.023779486736369135,
+    "lead_improvement": -16,
+    "false_alarm_reduction": 29
+  },
+  "channel_dominance": {
+    "delta_C": 0.10372075893913678,
+    "delta_G": 0.6707052261634691,
+    "delta_A": 0.22502220408602924,
+    "delta_T": 0.000551810810619448
+  },
+  "mean_anomaly": 0.08473234624145785,
+  "max_anomaly": 1.48
+}

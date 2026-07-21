@@ -1,0 +1,142 @@
+{
+  "protocol": "Gap Closure G5: lead + false positives per 1,000 non-crisis steps",
+  "benchmark": {
+    "deployment_grade": "FP/1000 < 5",
+    "research_grade": "FP/1000 < 20"
+  },
+  "domains": {
+    "ercot_demand_supply_hourly": {
+      "n_events": 4,
+      "n_detected": 3,
+      "n_early": 3,
+      "median_lead": 707.0,
+      "unit": "h",
+      "mean_hit_rate": 0.26458333333333334,
+      "fp_per_1000": 238.37432744043045,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Demand+supply concatenation gives long apparent lead but FP/1000 is too high; needs stricter seasonal/weather baseline before deployment."
+    },
+    "fdic": {
+      "n_events": 4,
+      "n_detected": 4,
+      "n_early": 4,
+      "median_lead": 6.5,
+      "unit": "q",
+      "mean_hit_rate": 0.9375,
+      "fp_per_1000": 234.04255319148936,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Best real financial panel: detects banking stress with moderate FAR, but still above G5 research-grade threshold."
+    },
+    "gsib": {
+      "n_events": 4,
+      "n_detected": 4,
+      "n_early": 4,
+      "median_lead": 8.0,
+      "unit": "q",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 800.0,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Banking stress remains elevated after GFC; high FAR means early alarms are not actionable without regime reset."
+    },
+    "protein_1UBQ": {
+      "n_events": 1,
+      "n_detected": 1,
+      "n_early": 1,
+      "median_lead": 20.0,
+      "unit": "residue",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 431.3725490196079,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Structural proxy only: labels are B-factor hot residues derived from same profile; not independent prediction."
+    },
+    "protein_1VII": {
+      "n_events": 1,
+      "n_detected": 1,
+      "n_early": 1,
+      "median_lead": 20.0,
+      "unit": "residue",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 466.6666666666667,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Structural proxy only: labels are B-factor hot residues derived from same profile; not independent prediction."
+    },
+    "protein_2CI2": {
+      "n_events": 2,
+      "n_detected": 2,
+      "n_early": 1,
+      "median_lead": 18.0,
+      "unit": "residue",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 375.0,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Structural proxy only: labels are B-factor hot residues derived from same profile; not independent prediction."
+    },
+    "supply_covid_semiconductor": {
+      "n_events": 3,
+      "n_detected": 3,
+      "n_early": 3,
+      "median_lead": 23.0,
+      "unit": "step",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 800.0,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Simulation contains engineered precursors; early leads are expected, but high FAR means raw canonical E is too sensitive."
+    },
+    "supply_fukushima": {
+      "n_events": 3,
+      "n_detected": 3,
+      "n_early": 3,
+      "median_lead": 16.0,
+      "unit": "step",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 925.925925925926,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Simulation contains engineered precursors; early leads are expected, but high FAR means raw canonical E is too sensitive."
+    },
+    "supply_suez_canal": {
+      "n_events": 2,
+      "n_detected": 2,
+      "n_early": 2,
+      "median_lead": 18.0,
+      "unit": "step",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 779.6610169491526,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Simulation contains engineered precursors; early leads are expected, but high FAR means raw canonical E is too sensitive."
+    },
+    "supply_texas_winter_storm": {
+      "n_events": 3,
+      "n_detected": 3,
+      "n_early": 3,
+      "median_lead": 26.0,
+      "unit": "step",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 853.6585365853658,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Simulation contains engineered precursors; early leads are expected, but high FAR means raw canonical E is too sensitive."
+    },
+    "supply_thai_floods": {
+      "n_events": 3,
+      "n_detected": 3,
+      "n_early": 3,
+      "median_lead": 17.0,
+      "unit": "step",
+      "mean_hit_rate": 1.0,
+      "fp_per_1000": 850.0,
+      "grade": "too noisy",
+      "usable": false,
+      "interpretation": "Simulation contains engineered precursors; early leads are expected, but high FAR means raw canonical E is too sensitive."
+    }
+  },
+  "warning": "High lead time is not meaningful when FP/1000 is high; grade must be reported with lead."
+}

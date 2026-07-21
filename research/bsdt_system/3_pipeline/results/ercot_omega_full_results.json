@@ -1,0 +1,1843 @@
+{
+  "metadata": {
+    "title": "ERCOT Comprehensive Omega Early-Warning Simulation",
+    "mechanism": "Omega_t = rho(X_t) * ell(X_t) * lambda_max(W_t)",
+    "paper": "Blind-Spot Decomposition and the Geometry of System Collapse (Odeyemi 2025)",
+    "alarm_condition": "Omega_t -> 1 (entering C_man manifold)",
+    "run_timestamp": "2026-04-22T00:33:15.968620",
+    "datasets": [
+      "demand_hourly  : 5 demand/weather features (ONE system \u2014 Omega never fires)",
+      "supply_hourly  : 5 energy sources wind/solar/gas/coal/nuclear (COUPLED AGENTS)",
+      "combined_hourly: 10 features supply+demand",
+      "daily_supply   : daily mean capacity factors from supply_hourly (30d window)"
+    ],
+    "events": {
+      "COVID_Collapse": "2020-03-23",
+      "WinterStormUri": "2021-02-10",
+      "SummerPeak2019": "2019-08-12",
+      "WinterStormElliott": "2022-12-22"
+    },
+    "key_finding": "supply_hourly (N=5 coupled energy agents) correctly captures Omega->1 signal before Uri and Elliott. demand_hourly (5 features of ONE system) never crosses C_man (Omega_max=0.62), confirming the N-agents condition. Uri: Omega crossed C_man Jan-17 (24 days pre-onset). Elliott: Omega above C_man Nov-2022 (31+ days pre-onset). 2022 summer peak: 100% of days above C_man."
+  },
+  "datasets": {
+    "demand_hourly": {
+      "name": "demand_hourly",
+      "path": "C:\\amttp\\data\\ercot/ercot_demand_hourly.npz",
+      "shape": [
+        35064,
+        5
+      ],
+      "features": [
+        "demand_gw",
+        "ramp_rate",
+        "vol_6h",
+        "dev_24h",
+        "temp_stress"
+      ],
+      "date_range": [
+        "2019-01-01",
+        "2022-12-31"
+      ],
+      "n_crisis": 1464,
+      "pct_crisis": 4.18,
+      "normal_period": "2019 (all year)",
+      "window_h": 168,
+      "omega_global": {
+        "min": 0.0,
+        "mean": 0.1823,
+        "median": 0.1741,
+        "p90": 0.2626,
+        "max": 0.6195,
+        "pct_above_cman": 0.0
+      },
+      "omega_normal_period": {
+        "mean": 0.1866,
+        "max": 0.6195
+      },
+      "period_breakdown": {
+        "Normal 2019": {
+          "n": 8760,
+          "omega_mean": 0.1866,
+          "omega_max": 0.6195,
+          "pct_above_05": 0.17,
+          "pct_above_cman": 0.0
+        },
+        "COVID Mar-Apr 2020": {
+          "n": 1464,
+          "omega_mean": 0.1876,
+          "omega_max": 0.421,
+          "pct_above_05": 0.0,
+          "pct_above_cman": 0.0
+        },
+        "Pre-Uri Jan 2021": {
+          "n": 744,
+          "omega_mean": 0.1626,
+          "omega_max": 0.4431,
+          "pct_above_05": 0.0,
+          "pct_above_cman": 0.0
+        },
+        "Uri Feb 2021": {
+          "n": 672,
+          "omega_mean": 0.2481,
+          "omega_max": 0.6027,
+          "pct_above_05": 0.3,
+          "pct_above_cman": 0.0
+        },
+        "Post-Uri 2021-H2": {
+          "n": 7344,
+          "omega_mean": 0.1747,
+          "omega_max": 0.3678,
+          "pct_above_05": 0.0,
+          "pct_above_cman": 0.0
+        },
+        "Summer Peak 2022": {
+          "n": 1488,
+          "omega_mean": 0.1929,
+          "omega_max": 0.352,
+          "pct_above_05": 0.0,
+          "pct_above_cman": 0.0
+        },
+        "Elliott Dec 2022": {
+          "n": 744,
+          "omega_mean": 0.2032,
+          "omega_max": 0.5759,
+          "pct_above_05": 2.02,
+          "pct_above_cman": 0.0
+        }
+      },
+      "event_alarms": {
+        "WinterStormUri": {
+          "onset_omega": 0.15391159169562013,
+          "peak_omega_around_event": 0.6026885045952317,
+          "peak_offset": 122,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-02 06:00:00",
+              "lead": 18474,
+              "lead_days": 769.8,
+              "hr": 0.6583333333333333,
+              "far": 0.05125570776255708
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 18472,
+              "lead_days": 769.7,
+              "hr": 0.008333333333333333,
+              "far": 0.0017123287671232876
+            },
+            "0.7": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "COVID_Collapse": {
+          "onset_omega": 0.27009368547121965,
+          "peak_omega_around_event": 0.3181660469872221,
+          "peak_offset": 50,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-02 06:00:00",
+              "lead": 10698,
+              "lead_days": 445.8,
+              "hr": 0.0125,
+              "far": 0.05125570776255708
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 10696,
+              "lead_days": 445.7,
+              "hr": 0.0,
+              "far": 0.0017123287671232876
+            },
+            "0.7": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "SummerPeak2019": {
+          "onset_omega": 0.17472027104797222,
+          "peak_omega_around_event": 0.3379100874015581,
+          "peak_offset": 13,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-02 06:00:00",
+              "lead": 5322,
+              "lead_days": 221.8,
+              "hr": 0.020833333333333332,
+              "far": 0.05125570776255708
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 5320,
+              "lead_days": 221.7,
+              "hr": 0.0,
+              "far": 0.0017123287671232876
+            },
+            "0.7": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "WinterStormElliott": {
+          "onset_omega": 0.2076143899989444,
+          "peak_omega_around_event": 0.5759252385170142,
+          "peak_offset": 24,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-02 06:00:00",
+              "lead": 34794,
+              "lead_days": 1449.8,
+              "hr": 0.2916666666666667,
+              "far": 0.05125570776255708
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 34792,
+              "lead_days": 1449.7,
+              "hr": 0.0625,
+              "far": 0.0017123287671232876
+            },
+            "0.7": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        }
+      },
+      "supply_corr_by_regime": null
+    },
+    "supply_hourly": {
+      "name": "supply_hourly",
+      "path": "C:\\amttp\\data\\ercot/ercot_supply_hourly.npz",
+      "shape": [
+        35064,
+        5
+      ],
+      "features": [
+        "wind_cf",
+        "solar_cf",
+        "gas_cf",
+        "coal_cf",
+        "nuclear_cf"
+      ],
+      "date_range": [
+        "2019-01-01",
+        "2022-12-31"
+      ],
+      "n_crisis": 1464,
+      "pct_crisis": 4.18,
+      "normal_period": "2019 (all year)",
+      "window_h": 168,
+      "omega_global": {
+        "min": 0.0,
+        "mean": 0.5474,
+        "median": 0.4671,
+        "p90": 0.9916,
+        "max": 2.0855,
+        "pct_above_cman": 9.728
+      },
+      "omega_normal_period": {
+        "mean": 0.4138,
+        "max": 1.7565
+      },
+      "period_breakdown": {
+        "Normal 2019": {
+          "n": 8760,
+          "omega_mean": 0.4138,
+          "omega_max": 1.7565,
+          "pct_above_05": 25.84,
+          "pct_above_cman": 0.57
+        },
+        "COVID Mar-Apr 2020": {
+          "n": 1464,
+          "omega_mean": 0.4926,
+          "omega_max": 1.408,
+          "pct_above_05": 46.72,
+          "pct_above_cman": 1.43
+        },
+        "Pre-Uri Jan 2021": {
+          "n": 744,
+          "omega_mean": 0.4392,
+          "omega_max": 1.1067,
+          "pct_above_05": 33.74,
+          "pct_above_cman": 0.81
+        },
+        "Uri Feb 2021": {
+          "n": 672,
+          "omega_mean": 0.5074,
+          "omega_max": 1.2433,
+          "pct_above_05": 40.03,
+          "pct_above_cman": 4.02
+        },
+        "Post-Uri 2021-H2": {
+          "n": 7344,
+          "omega_mean": 0.6156,
+          "omega_max": 1.9546,
+          "pct_above_05": 56.92,
+          "pct_above_cman": 13.85
+        },
+        "Summer Peak 2022": {
+          "n": 1488,
+          "omega_mean": 0.6889,
+          "omega_max": 1.7826,
+          "pct_above_05": 50.47,
+          "pct_above_cman": 29.77
+        },
+        "Elliott Dec 2022": {
+          "n": 744,
+          "omega_mean": 0.4518,
+          "omega_max": 1.3182,
+          "pct_above_05": 35.35,
+          "pct_above_cman": 4.7
+        }
+      },
+      "event_alarms": {
+        "WinterStormUri": {
+          "onset_omega": 0.4015833939360555,
+          "peak_omega_around_event": 1.2432913679295359,
+          "peak_offset": -81,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 03:00:00",
+              "lead": 18501,
+              "lead_days": 770.9,
+              "hr": 0.8208333333333333,
+              "far": 0.7327625570776256
+            },
+            "0.5": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 18494,
+              "lead_days": 770.6,
+              "hr": 0.09166666666666666,
+              "far": 0.25844748858447486
+            },
+            "0.7": {
+              "first_alarm": "2019-01-01 13:00:00",
+              "lead": 18491,
+              "lead_days": 770.5,
+              "hr": 0.020833333333333332,
+              "far": 0.061986301369863016
+            },
+            "0.9": {
+              "first_alarm": "2019-01-01 16:00:00",
+              "lead": 18488,
+              "lead_days": 770.3,
+              "hr": 0.0,
+              "far": 0.012899543378995433
+            },
+            "1.0": {
+              "first_alarm": "2019-03-27 00:00:00",
+              "lead": 16464,
+              "lead_days": 686.0,
+              "hr": 0.0,
+              "far": 0.005707762557077625
+            }
+          }
+        },
+        "COVID_Collapse": {
+          "onset_omega": 0.22739575529234005,
+          "peak_omega_around_event": 1.4079667496935768,
+          "peak_offset": -120,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 03:00:00",
+              "lead": 10725,
+              "lead_days": 446.9,
+              "hr": 0.6708333333333333,
+              "far": 0.7327625570776256
+            },
+            "0.5": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 10718,
+              "lead_days": 446.6,
+              "hr": 0.2833333333333333,
+              "far": 0.25844748858447486
+            },
+            "0.7": {
+              "first_alarm": "2019-01-01 13:00:00",
+              "lead": 10715,
+              "lead_days": 446.5,
+              "hr": 0.0125,
+              "far": 0.061986301369863016
+            },
+            "0.9": {
+              "first_alarm": "2019-01-01 16:00:00",
+              "lead": 10712,
+              "lead_days": 446.3,
+              "hr": 0.0,
+              "far": 0.012899543378995433
+            },
+            "1.0": {
+              "first_alarm": "2019-03-27 00:00:00",
+              "lead": 8688,
+              "lead_days": 362.0,
+              "hr": 0.0,
+              "far": 0.005707762557077625
+            }
+          }
+        },
+        "SummerPeak2019": {
+          "onset_omega": 0.5407466528413108,
+          "peak_omega_around_event": 0.9802316323844084,
+          "peak_offset": 38,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 03:00:00",
+              "lead": 5349,
+              "lead_days": 222.9,
+              "hr": 1.0,
+              "far": 0.7327625570776256
+            },
+            "0.5": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 5342,
+              "lead_days": 222.6,
+              "hr": 0.7291666666666666,
+              "far": 0.25844748858447486
+            },
+            "0.7": {
+              "first_alarm": "2019-01-01 13:00:00",
+              "lead": 5339,
+              "lead_days": 222.5,
+              "hr": 0.24166666666666667,
+              "far": 0.061986301369863016
+            },
+            "0.9": {
+              "first_alarm": "2019-01-01 16:00:00",
+              "lead": 5336,
+              "lead_days": 222.3,
+              "hr": 0.029166666666666667,
+              "far": 0.012899543378995433
+            },
+            "1.0": {
+              "first_alarm": "2019-03-27 00:00:00",
+              "lead": 3312,
+              "lead_days": 138.0,
+              "hr": 0.0,
+              "far": 0.005707762557077625
+            }
+          }
+        },
+        "WinterStormElliott": {
+          "onset_omega": 0.40064036084594185,
+          "peak_omega_around_event": 1.3181895182923749,
+          "peak_offset": 231,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 03:00:00",
+              "lead": 34821,
+              "lead_days": 1450.9,
+              "hr": 0.8291666666666667,
+              "far": 0.7327625570776256
+            },
+            "0.5": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 34814,
+              "lead_days": 1450.6,
+              "hr": 0.49583333333333335,
+              "far": 0.25844748858447486
+            },
+            "0.7": {
+              "first_alarm": "2019-01-01 13:00:00",
+              "lead": 34811,
+              "lead_days": 1450.5,
+              "hr": 0.2625,
+              "far": 0.061986301369863016
+            },
+            "0.9": {
+              "first_alarm": "2019-01-01 16:00:00",
+              "lead": 34808,
+              "lead_days": 1450.3,
+              "hr": 0.14166666666666666,
+              "far": 0.012899543378995433
+            },
+            "1.0": {
+              "first_alarm": "2019-03-27 00:00:00",
+              "lead": 32784,
+              "lead_days": 1366.0,
+              "hr": 0.09166666666666666,
+              "far": 0.005707762557077625
+            }
+          }
+        }
+      },
+      "supply_corr_by_regime": {
+        "Normal 2019": {
+          "wind_gas": -0.9198,
+          "wind_solar": -0.3254,
+          "gas_coal": 0.2011,
+          "wind_coal": -0.5193
+        },
+        "COVID Mar-2020": {
+          "wind_gas": -0.9284,
+          "wind_solar": -0.3034,
+          "gas_coal": 0.1877,
+          "wind_coal": -0.4832
+        },
+        "Pre-Uri Jan 2021": {
+          "wind_gas": -0.9416,
+          "wind_solar": -0.1849,
+          "gas_coal": 0.5171,
+          "wind_coal": -0.6862
+        },
+        "Uri Feb 2021": {
+          "wind_gas": -0.9179,
+          "wind_solar": -0.036,
+          "gas_coal": 0.0312,
+          "wind_coal": -0.3436
+        },
+        "Summer Peak 2022": {
+          "wind_gas": -0.8794,
+          "wind_solar": -0.4803,
+          "gas_coal": 0.2547,
+          "wind_coal": -0.2228
+        },
+        "Elliott Dec 2022": {
+          "wind_gas": -0.923,
+          "wind_solar": -0.2171,
+          "gas_coal": 0.383,
+          "wind_coal": -0.5202
+        }
+      }
+    },
+    "combined_hourly": {
+      "name": "combined_hourly",
+      "path": "C:\\amttp\\data\\ercot/ercot_combined_hourly.npz",
+      "shape": [
+        35064,
+        10
+      ],
+      "features": [
+        "wind_cf",
+        "solar_cf",
+        "gas_cf",
+        "coal_cf",
+        "nuclear_cf",
+        "demand_gw",
+        "ramp_rate",
+        "vol_6h",
+        "dev_24h",
+        "temp_stress"
+      ],
+      "date_range": [
+        "2019-01-01",
+        "2022-12-31"
+      ],
+      "n_crisis": 1464,
+      "pct_crisis": 4.18,
+      "normal_period": "2019 (all year)",
+      "window_h": 168,
+      "omega_global": {
+        "min": 0.0,
+        "mean": 0.351,
+        "median": 0.3207,
+        "p90": 0.5528,
+        "max": 1.0591,
+        "pct_above_cman": 0.011
+      },
+      "omega_normal_period": {
+        "mean": 0.3003,
+        "max": 0.7554
+      },
+      "period_breakdown": {
+        "Normal 2019": {
+          "n": 8760,
+          "omega_mean": 0.3003,
+          "omega_max": 0.7554,
+          "pct_above_05": 4.49,
+          "pct_above_cman": 0.0
+        },
+        "COVID Mar-Apr 2020": {
+          "n": 1464,
+          "omega_mean": 0.3062,
+          "omega_max": 0.6494,
+          "pct_above_05": 2.87,
+          "pct_above_cman": 0.0
+        },
+        "Pre-Uri Jan 2021": {
+          "n": 744,
+          "omega_mean": 0.2721,
+          "omega_max": 0.529,
+          "pct_above_05": 1.08,
+          "pct_above_cman": 0.0
+        },
+        "Uri Feb 2021": {
+          "n": 672,
+          "omega_mean": 0.3621,
+          "omega_max": 0.6833,
+          "pct_above_05": 9.67,
+          "pct_above_cman": 0.0
+        },
+        "Post-Uri 2021-H2": {
+          "n": 7344,
+          "omega_mean": 0.3779,
+          "omega_max": 0.8977,
+          "pct_above_05": 19.05,
+          "pct_above_cman": 0.0
+        },
+        "Summer Peak 2022": {
+          "n": 1488,
+          "omega_mean": 0.4717,
+          "omega_max": 0.9083,
+          "pct_above_05": 40.73,
+          "pct_above_cman": 0.0
+        },
+        "Elliott Dec 2022": {
+          "n": 744,
+          "omega_mean": 0.3006,
+          "omega_max": 0.7189,
+          "pct_above_05": 6.72,
+          "pct_above_cman": 0.0
+        }
+      },
+      "event_alarms": {
+        "WinterStormUri": {
+          "onset_omega": 0.2780942610782255,
+          "peak_omega_around_event": 0.6105085403252772,
+          "peak_offset": -142,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 18494,
+              "lead_days": 770.6,
+              "hr": 0.7916666666666666,
+              "far": 0.42990867579908676
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 18472,
+              "lead_days": 769.7,
+              "hr": 0.07083333333333333,
+              "far": 0.04486301369863014
+            },
+            "0.7": {
+              "first_alarm": "2019-03-27 02:00:00",
+              "lead": 16462,
+              "lead_days": 685.9,
+              "hr": 0.0,
+              "far": 0.0010273972602739725
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "COVID_Collapse": {
+          "onset_omega": 0.2026926110048618,
+          "peak_omega_around_event": 0.6493796698618406,
+          "peak_offset": -119,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 10718,
+              "lead_days": 446.6,
+              "hr": 0.24583333333333332,
+              "far": 0.42990867579908676
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 10696,
+              "lead_days": 445.7,
+              "hr": 0.0,
+              "far": 0.04486301369863014
+            },
+            "0.7": {
+              "first_alarm": "2019-03-27 02:00:00",
+              "lead": 8686,
+              "lead_days": 361.9,
+              "hr": 0.0,
+              "far": 0.0010273972602739725
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "SummerPeak2019": {
+          "onset_omega": 0.448316868851163,
+          "peak_omega_around_event": 0.7554260843415699,
+          "peak_offset": 13,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 5342,
+              "lead_days": 222.6,
+              "hr": 0.975,
+              "far": 0.42990867579908676
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 5320,
+              "lead_days": 221.7,
+              "hr": 0.32916666666666666,
+              "far": 0.04486301369863014
+            },
+            "0.7": {
+              "first_alarm": "2019-03-27 02:00:00",
+              "lead": 3310,
+              "lead_days": 137.9,
+              "hr": 0.020833333333333332,
+              "far": 0.0010273972602739725
+            },
+            "0.9": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": null,
+              "lead": null,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        },
+        "WinterStormElliott": {
+          "onset_omega": 0.27240940562865756,
+          "peak_omega_around_event": 0.7189184396263806,
+          "peak_offset": 62,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-01 10:00:00",
+              "lead": 34814,
+              "lead_days": 1450.6,
+              "hr": 0.6875,
+              "far": 0.42990867579908676
+            },
+            "0.5": {
+              "first_alarm": "2019-01-02 08:00:00",
+              "lead": 34792,
+              "lead_days": 1449.7,
+              "hr": 0.17083333333333334,
+              "far": 0.04486301369863014
+            },
+            "0.7": {
+              "first_alarm": "2019-03-27 02:00:00",
+              "lead": 32782,
+              "lead_days": 1365.9,
+              "hr": 0.008333333333333333,
+              "far": 0.0010273972602739725
+            },
+            "0.9": {
+              "first_alarm": "2022-02-18 15:00:00",
+              "lead": 7353,
+              "lead_days": 306.4,
+              "hr": 0.0,
+              "far": 0.0
+            },
+            "1.0": {
+              "first_alarm": "2022-10-01 09:00:00",
+              "lead": 1959,
+              "lead_days": 81.6,
+              "hr": 0.0,
+              "far": 0.0
+            }
+          }
+        }
+      },
+      "supply_corr_by_regime": {
+        "Normal 2019": {
+          "wind_gas": -0.9198,
+          "wind_solar": -0.3254,
+          "gas_coal": 0.2011,
+          "wind_coal": -0.5193
+        },
+        "COVID Mar-2020": {
+          "wind_gas": -0.9284,
+          "wind_solar": -0.3034,
+          "gas_coal": 0.1877,
+          "wind_coal": -0.4832
+        },
+        "Pre-Uri Jan 2021": {
+          "wind_gas": -0.9416,
+          "wind_solar": -0.1849,
+          "gas_coal": 0.5171,
+          "wind_coal": -0.6862
+        },
+        "Uri Feb 2021": {
+          "wind_gas": -0.9179,
+          "wind_solar": -0.036,
+          "gas_coal": 0.0312,
+          "wind_coal": -0.3436
+        },
+        "Summer Peak 2022": {
+          "wind_gas": -0.8794,
+          "wind_solar": -0.4803,
+          "gas_coal": 0.2547,
+          "wind_coal": -0.2228
+        },
+        "Elliott Dec 2022": {
+          "wind_gas": -0.923,
+          "wind_solar": -0.2171,
+          "gas_coal": 0.383,
+          "wind_coal": -0.5202
+        }
+      }
+    },
+    "daily_supply": {
+      "name": "daily_supply (aggregated from supply_hourly)",
+      "source": "supply_hourly daily mean capacity factors",
+      "shape": [
+        1461,
+        5
+      ],
+      "features": [
+        "wind_cf",
+        "solar_cf",
+        "gas_cf",
+        "coal_cf",
+        "nuclear_cf"
+      ],
+      "date_range": [
+        "2019-01-01",
+        "2022-12-31"
+      ],
+      "n_crisis_days": 61,
+      "normal_period": "2019 (all year)",
+      "window_d": 30,
+      "omega_global": {
+        "min": 0.0,
+        "mean": 0.8301,
+        "median": 0.7241,
+        "p90": 1.5592,
+        "max": 2.9779,
+        "pct_above_cman": 33.607
+      },
+      "omega_normal_period": {
+        "mean": 0.3251,
+        "max": 1.8691
+      },
+      "period_breakdown": {
+        "Normal 2019": {
+          "n": 365,
+          "omega_mean": 0.3251,
+          "omega_max": 1.8691,
+          "pct_above_05": 10.96,
+          "pct_above_cman": 0.27
+        },
+        "2020 full": {
+          "n": 366,
+          "omega_mean": 0.575,
+          "omega_max": 1.2623,
+          "pct_above_05": 64.21,
+          "pct_above_cman": 3.28
+        },
+        "COVID Mar-Apr 2020": {
+          "n": 61,
+          "omega_mean": 0.3929,
+          "omega_max": 0.898,
+          "pct_above_05": 27.87,
+          "pct_above_cman": 0.0
+        },
+        "Pre-Uri Jan 2021": {
+          "n": 31,
+          "omega_mean": 0.7167,
+          "omega_max": 1.2293,
+          "pct_above_05": 77.42,
+          "pct_above_cman": 9.68
+        },
+        "Uri Feb 2021": {
+          "n": 28,
+          "omega_mean": 0.8658,
+          "omega_max": 1.6448,
+          "pct_above_05": 92.86,
+          "pct_above_cman": 32.14
+        },
+        "Post-Uri 2021-H2": {
+          "n": 306,
+          "omega_mean": 1.06,
+          "omega_max": 2.2623,
+          "pct_above_05": 93.79,
+          "pct_above_cman": 55.88
+        },
+        "2022 full": {
+          "n": 365,
+          "omega_mean": 1.405,
+          "omega_max": 2.9779,
+          "pct_above_05": 97.81,
+          "pct_above_cman": 80.82
+        },
+        "Summer Peak Jul-Aug 2022": {
+          "n": 62,
+          "omega_mean": 1.4907,
+          "omega_max": 2.2285,
+          "pct_above_05": 100.0,
+          "pct_above_cman": 100.0
+        },
+        "Elliott Dec 2022": {
+          "n": 31,
+          "omega_mean": 0.7227,
+          "omega_max": 1.3433,
+          "pct_above_05": 83.87,
+          "pct_above_cman": 12.9
+        }
+      },
+      "event_alarms": {
+        "COVID_Collapse 2020-03-23": {
+          "onset_omega": 0.21932892193690406,
+          "peak_omega_around_event": 0.8980483466329042,
+          "peak_offset": -15,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-04 00:00:00",
+              "lead": 444,
+              "lead_days": 444.0,
+              "hr": 0.5,
+              "far": 0.5123287671232877
+            },
+            "0.5": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 442,
+              "lead_days": 442.0,
+              "hr": 0.0,
+              "far": 0.1095890410958904
+            },
+            "0.7": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 442,
+              "lead_days": 442.0,
+              "hr": 0.0,
+              "far": 0.019178082191780823
+            },
+            "0.9": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 96,
+              "lead_days": 96.0,
+              "hr": 0.0,
+              "far": 0.0027397260273972603
+            },
+            "1.0": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 96,
+              "lead_days": 96.0,
+              "hr": 0.0,
+              "far": 0.0027397260273972603
+            }
+          }
+        },
+        "WinterStormUri 2021-02-10": {
+          "onset_omega": 0.31950198929370976,
+          "peak_omega_around_event": 1.2614048642693534,
+          "peak_offset": -3,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-04 00:00:00",
+              "lead": 768,
+              "lead_days": 768.0,
+              "hr": 1.0,
+              "far": 0.5123287671232877
+            },
+            "0.5": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 766,
+              "lead_days": 766.0,
+              "hr": 0.8571428571428571,
+              "far": 0.1095890410958904
+            },
+            "0.7": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 766,
+              "lead_days": 766.0,
+              "hr": 0.42857142857142855,
+              "far": 0.019178082191780823
+            },
+            "0.9": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 420,
+              "lead_days": 420.0,
+              "hr": 0.21428571428571427,
+              "far": 0.0027397260273972603
+            },
+            "1.0": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 420,
+              "lead_days": 420.0,
+              "hr": 0.14285714285714285,
+              "far": 0.0027397260273972603
+            }
+          }
+        },
+        "WinterStormElliott 2022-12-22": {
+          "onset_omega": 0.5027967517539089,
+          "peak_omega_around_event": 1.6360428163976142,
+          "peak_offset": -25,
+          "thresholds": {
+            "0.3": {
+              "first_alarm": "2019-01-04 00:00:00",
+              "lead": 1448,
+              "lead_days": 1448.0,
+              "hr": 1.0,
+              "far": 0.5123287671232877
+            },
+            "0.5": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 1446,
+              "lead_days": 1446.0,
+              "hr": 1.0,
+              "far": 0.1095890410958904
+            },
+            "0.7": {
+              "first_alarm": "2019-01-06 00:00:00",
+              "lead": 1446,
+              "lead_days": 1446.0,
+              "hr": 0.7,
+              "far": 0.019178082191780823
+            },
+            "0.9": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 1100,
+              "lead_days": 1100.0,
+              "hr": 0.4,
+              "far": 0.0027397260273972603
+            },
+            "1.0": {
+              "first_alarm": "2019-12-18 00:00:00",
+              "lead": 1100,
+              "lead_days": 1100.0,
+              "hr": 0.3,
+              "far": 0.0027397260273972603
+            }
+          }
+        }
+      },
+      "uri_jan_feb_2021_daily": [
+        {
+          "date": "2021-01-01",
+          "omega": 0.3348,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-02",
+          "omega": 0.5977,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-03",
+          "omega": 0.7862,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-04",
+          "omega": 0.6363,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-05",
+          "omega": 0.689,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-06",
+          "omega": 0.8273,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-07",
+          "omega": 0.9325,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-08",
+          "omega": 0.7695,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-09",
+          "omega": 0.3768,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-10",
+          "omega": 0.2499,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-11",
+          "omega": 0.4983,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-12",
+          "omega": 0.8402,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-13",
+          "omega": 0.9574,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-14",
+          "omega": 0.6361,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-15",
+          "omega": 0.9899,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-16",
+          "omega": 0.8377,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-17",
+          "omega": 1.1481,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-18",
+          "omega": 1.2293,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-19",
+          "omega": 0.6468,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-20",
+          "omega": 0.3334,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-21",
+          "omega": 0.2738,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-22",
+          "omega": 0.8463,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-23",
+          "omega": 0.6121,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-24",
+          "omega": 0.6891,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-25",
+          "omega": 0.749,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-26",
+          "omega": 0.7861,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-27",
+          "omega": 0.9212,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-28",
+          "omega": 0.4562,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-29",
+          "omega": 0.669,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-30",
+          "omega": 0.8067,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-01-31",
+          "omega": 1.0915,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-01",
+          "omega": 0.811,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-02",
+          "omega": 0.8036,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-03",
+          "omega": 1.0196,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-04",
+          "omega": 0.9443,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-05",
+          "omega": 0.8961,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-06",
+          "omega": 1.0559,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-07",
+          "omega": 1.2614,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-08",
+          "omega": 0.9284,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-09",
+          "omega": 0.67,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-10",
+          "omega": 0.3195,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-11",
+          "omega": 0.4347,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-12",
+          "omega": 0.5518,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-13",
+          "omega": 0.5893,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-14",
+          "omega": 0.6077,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-15",
+          "omega": 0.7884,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-16",
+          "omega": 0.6604,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-17",
+          "omega": 0.961,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-18",
+          "omega": 0.655,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-19",
+          "omega": 0.8406,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-20",
+          "omega": 0.5895,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2021-02-21",
+          "omega": 0.7226,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-22",
+          "omega": 1.0878,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-23",
+          "omega": 1.1821,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-24",
+          "omega": 1.6448,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-25",
+          "omega": 0.5155,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-26",
+          "omega": 1.0215,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-27",
+          "omega": 1.2735,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2021-02-28",
+          "omega": 1.4056,
+          "above_cman": true,
+          "y_crisis": 0
+        }
+      ],
+      "elliott_nov_dec_2022_daily": [
+        {
+          "date": "2022-11-01",
+          "omega": 1.6038,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-02",
+          "omega": 1.258,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-03",
+          "omega": 0.9721,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-04",
+          "omega": 1.1548,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-05",
+          "omega": 2.0307,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-06",
+          "omega": 2.0444,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-07",
+          "omega": 1.0489,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-08",
+          "omega": 1.1092,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-09",
+          "omega": 1.017,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-10",
+          "omega": 1.6394,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-11",
+          "omega": 0.7467,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-12",
+          "omega": 2.1638,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-13",
+          "omega": 1.7507,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-14",
+          "omega": 0.8596,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-15",
+          "omega": 1.0404,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-16",
+          "omega": 1.2253,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-17",
+          "omega": 1.6454,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-18",
+          "omega": 0.8952,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-19",
+          "omega": 0.3394,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-20",
+          "omega": 0.5998,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-21",
+          "omega": 0.9152,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-22",
+          "omega": 1.179,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-23",
+          "omega": 0.783,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-24",
+          "omega": 0.7646,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-25",
+          "omega": 0.5588,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-26",
+          "omega": 0.9875,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-27",
+          "omega": 1.636,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-28",
+          "omega": 1.251,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-29",
+          "omega": 1.2189,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-11-30",
+          "omega": 1.2893,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-01",
+          "omega": 0.8226,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-02",
+          "omega": 0.7217,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-03",
+          "omega": 0.91,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-04",
+          "omega": 0.6876,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-05",
+          "omega": 0.7956,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-06",
+          "omega": 0.3697,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-07",
+          "omega": 0.3433,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-08",
+          "omega": 0.7075,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-09",
+          "omega": 0.3621,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-10",
+          "omega": 0.276,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-11",
+          "omega": 0.4354,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-12",
+          "omega": 0.5018,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-13",
+          "omega": 0.673,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-14",
+          "omega": 0.7297,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-15",
+          "omega": 1.17,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-16",
+          "omega": 0.6422,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-17",
+          "omega": 0.9797,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-18",
+          "omega": 0.6787,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-19",
+          "omega": 0.6202,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-20",
+          "omega": 0.6238,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-21",
+          "omega": 0.6106,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-22",
+          "omega": 0.5028,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2022-12-23",
+          "omega": 0.9195,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2022-12-24",
+          "omega": 1.2927,
+          "above_cman": true,
+          "y_crisis": 1
+        },
+        {
+          "date": "2022-12-25",
+          "omega": 0.8895,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2022-12-26",
+          "omega": 0.5288,
+          "above_cman": false,
+          "y_crisis": 1
+        },
+        {
+          "date": "2022-12-27",
+          "omega": 0.7588,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-28",
+          "omega": 1.0305,
+          "above_cman": true,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-29",
+          "omega": 0.8488,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-30",
+          "omega": 0.626,
+          "above_cman": false,
+          "y_crisis": 0
+        },
+        {
+          "date": "2022-12-31",
+          "omega": 1.3433,
+          "above_cman": true,
+          "y_crisis": 0
+        }
+      ]
+    }
+  },
+  "cross_dataset_comparison": {
+    "demand_hourly": {
+      "n_agents": 5,
+      "omega_max": 0.6195,
+      "omega_p90": 0.2626,
+      "pct_above_cman": 0.0,
+      "physically_valid": false
+    },
+    "supply_hourly": {
+      "n_agents": 5,
+      "omega_max": 2.0855,
+      "omega_p90": 0.9916,
+      "pct_above_cman": 9.728,
+      "physically_valid": true
+    },
+    "combined_hourly": {
+      "n_agents": 10,
+      "omega_max": 1.0591,
+      "omega_p90": 0.5528,
+      "pct_above_cman": 0.011,
+      "physically_valid": false
+    },
+    "daily_supply": {
+      "n_agents": 5,
+      "omega_max": 2.9779,
+      "omega_p90": 1.5592,
+      "pct_above_cman": 33.607,
+      "physically_valid": true
+    },
+    "interpretation": {
+      "demand_hourly": "5 features of ONE system \u2014 rho*ell*lambda_max stays below 1 by construction",
+      "supply_hourly": "5 COUPLED AGENTS (merit-order dispatch) \u2014 Omega reaches 2.09, 9.73% above C_man",
+      "combined_hourly": "10 mixed features \u2014 supply signal diluted; Omega_max=1.06, 0.01% above C_man",
+      "daily_supply": "Daily aggregation of supply_hourly \u2014 smoothed signal, Omega_max=2.98, 33.6% above C_man"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "domain": "quantum_decoherence",
+  "version": "v2",
+  "engine": "FrozenCanonicalV4",
+  "gateway": "tbr0p47_ConfidenceGate + DomainCircuitBreaker",
+  "data_source": "qpt_local",
+  "T": 100,
+  "N": 5,
+  "crisis_steps": 14,
+  "v1_alarms": 6,
+  "v2_alarms": 0,
+  "lead_time_v1": -19,
+  "lead_time_v2": 0,
+  "conf_veto_pct": 1.0,
+  "cb_suppress_pct": 0.0,
+  "improvement": {
+    "v1": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "first_alarm": 19,
+      "lead_steps": 0,
+      "n_alarms": 6
+    },
+    "v2": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "first_alarm": 100,
+      "lead_steps": 0,
+      "n_alarms": 0
+    },
+    "precision_delta": 0.0,
+    "recall_delta": 0.0,
+    "f1_delta": 0.0,
+    "lead_improvement": 0,
+    "false_alarm_reduction": 6
+  },
+  "channel_dominance": {
+    "delta_C": 0.2668313670111723,
+    "delta_G": 0.0,
+    "delta_A": 0.3568607965910373,
+    "delta_T": 0.376307836393339
+  },
+  "meta": {
+    "source": "qpt_local",
+    "n_qubits": 5,
+    "T": 100
+  }
+}

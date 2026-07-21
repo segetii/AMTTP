@@ -1,0 +1,244 @@
+================================================================================
+  DIAGNOSTICS: v32 best config (d=0.30, q=0.50, cb_original) 2025-2026
+================================================================================
+
+[1] Building inputs ...
+
+  === microstructure BTCUSDT  2022-01-01 -> 2026-06-01 ===
+  BTCUSDT TBR [extending: 2026-05-14 -> 2026-06-01]
+  BTCUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,269
+  BTCUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  BTCUSDT DV  [CACHE 29,463 rows]  2023-01-01 -> 2026-05-13
+  BTCUSDT DV  [up-to-date]
+    oi_usd: 23% NaN  (29,929 valid bars)
+    lsr: 23% NaN  (29,929 valid bars)
+    top_lsr: 23% NaN  (29,929 valid bars)
+    taker_ls: 23% NaN  (29,929 valid bars)
+    oi_pct_1h: 23% NaN  (29,921 valid bars)
+    oi_pct_24h: 23% NaN  (29,903 valid bars)
+    oi_z: 23% NaN  (29,849 valid bars)
+    lsr_z: 23% NaN  (29,858 valid bars)
+    top_lsr_z: 23% NaN  (29,858 valid bars)
+    taker_ls_z: 23% NaN  (29,858 valid bars)
+  === BTCUSDT done  shape=(38689, 14) ===
+
+  === microstructure ETHUSDT  2022-01-01 -> 2026-06-01 ===
+  ETHUSDT TBR [extending: 2026-05-14 -> 2026-06-01]
+  ETHUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,269
+  ETHUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  ETHUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  ETHUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === ETHUSDT done  shape=(38689, 14) ===
+
+  === microstructure SOLUSDT  2022-01-01 -> 2026-06-01 ===
+  SOLUSDT TBR [extending: 2026-05-14 -> 2026-06-01]
+  SOLUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,269
+  SOLUSDT FR  [CACHE ok]  2022-01-01 -> 2026-05-14
+  SOLUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  SOLUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === SOLUSDT done  shape=(38689, 14) ===
+  ETHUSDT 1h ... 42,814 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ... 46,509 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ... 21,942 bars  [2021-01-01 → 2026-05-14]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-14 09:00:00   n=20,530 bars  (1959 days)
+  Train: 12,094   Test: 8,436   SOL: True
+  BTCUSDT futures OHLCV [STALE max=2026-05-14 09:00:00 expected>=2026-05-14 10:00:00]
+  BTCUSDT futures OHLCV [FETCH]
+  ETHUSDT futures OHLCV [STALE max=2026-05-14 09:00:00 expected>=2026-05-14 10:00:00]
+  ETHUSDT futures OHLCV [FETCH]
+  SOLUSDT futures OHLCV [STALE max=2026-05-14 09:00:00 expected>=2026-05-14 10:00:00]
+  SOLUSDT futures OHLCV [FETCH]
+  ETHUSDT 1h ...   ETHUSDT [STALE max=2026-05-14 08:00:00 expected>=2026-05-14 10:00:00; re-fetching]
+  ETHUSDT [FETCH from Binance]
+42,814 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ...   BTCUSDT [STALE max=2026-05-14 09:00:00 expected>=2026-05-14 10:00:00; re-fetching]
+  BTCUSDT [FETCH from Binance]
+46,509 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ...   SOLUSDT [STALE max=2026-05-14 09:00:00 expected>=2026-05-14 10:00:00; re-fetching]
+  SOLUSDT [FETCH from Binance]
+  SOLUSDT [ffill +3h → 2026-05-14 12:00:00 (last real candle: 2026-05-14 09:00:00)]
+21,945 bars  [2021-01-01 → 2026-05-14]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-14 12:00:00   n=20,533 bars  (1959 days)
+  Train: 12,094   Test: 8,439   SOL: True
+  funding [CACHE]
+  [warn] geometry cache length 20542 > dataframe length 20533; truncating cache arrays
+  [v36] Normal window: 500 bars × 8 agents × 8 features
+  [v36] e* (χ², df=64) = 93.217
+  [v36] σ_n = 23.562022
+  [v36] θ (90-pctile normal e_t) = 121.009
+  [v36] cos_theta_channel calib: μ=0.436, σ=0.421
+  [v36] ξ calib: ξ1(μ=0.971,σ=0.014)  ξ2(μ=1.000,σ=0.000)  ξ3(μ=0.102,σ=0.000)  ξ4(μ=-0.000,σ=1.000)  ξ5(μ=1.000,σ=0.000)
+  [v36] RSS_stretch calib: μ=0.459, σ=0.333
+
+[2] Building Sigma (d=0.30) ...
+  cond_before=3.240e+12  cond_after=20.000
+
+[3] Computing Fisher energy E_t = b_t^T G b_t over full timeline ...
+  theta = 0.240121  (quantile(0.5) of train energy * budget 1.0074)
+  Train energy: min=0.0000  median=0.2383  max=1.0759  q50=0.2383
+
+  Energy > theta globally: 34.14% of all hours
+  Energy > theta in 2025-06-01-2026-05-14: 32.77% of hours  (598 bars of 1825)
+
+  Monthly energy-above-theta fraction (Jun 2025 – May 2026):
+    2025-06: 56.10% above-theta  mean_E=0.2762  n=82
+    2025-07: 51.03% above-theta  mean_E=0.3060  n=145
+    2025-08: 72.05% above-theta  mean_E=0.5850  n=229
+    2025-09: 41.89% above-theta  mean_E=0.2832  n=339
+    2025-10: 44.14% above-theta  mean_E=0.3340  n=256
+    2025-11: 0.00% above-theta  mean_E=0.2397  n=98
+    2025-12: 7.53% above-theta  mean_E=0.2389  n=146
+    2026-01: 16.25% above-theta  mean_E=0.1602  n=80
+    2026-02: 0.00% above-theta  mean_E=0.2274  n=213
+    2026-03: 0.00% above-theta  mean_E=0.0834  n=124
+    2026-04: 35.29% above-theta  mean_E=0.2135  n=85
+    2026-05: 14.29% above-theta  mean_E=0.2057  n=28
+
+[4] Running godmode sweep to get log_ann (rho_eff, w_btc, etc.) ...
+    [diag_d0p30_q0p50]   5000/20530  (  5.0s)
+    [diag_d0p30_q0p50]  10000/20530  (  9.8s)
+    [diag_d0p30_q0p50]  15000/20530  ( 15.1s)
+    [diag_d0p30_q0p50]  20000/20530  ( 20.7s)
+  [diag_d0p30_q0p50] sweep done: 20,530 bars  21.2s
+  log_ann columns: ['E', 'gamma', 'dE_dt', 'cos_theta', 'mfls', 'v_E', 'rho_eff', 'rhs_norm', 'w_btc', 'w_eth', 'w_sol', 'pnl', 'pnl_long_only', 'stop_flag', 'stale_flag', 'drift_flag', 'conviction', 'theta_t']
+
+  log_ann focus (2025-06-01–2026-05-14): 1825 rows
+    rho_eff         : mean=8.6206  min=0.0665  max=20.5235  nonzero=1825
+    w_btc           : mean=-0.0167  min=-0.3366  max=0.4407  nonzero=1825
+    w_eth           : mean=-0.0048  min=-0.3638  max=0.3779  nonzero=1825
+    w_sol           : mean=-0.0295  min=-0.3551  max=0.3625  nonzero=1825
+
+  Monthly rho_eff / in_signal (Jun 2025 – May 2026):
+    2025-06: rho_eff=8.2457  in_signal=nan  n=82
+    2025-07: rho_eff=8.1887  in_signal=nan  n=145
+    2025-08: rho_eff=9.9224  in_signal=nan  n=229
+    2025-09: rho_eff=10.6897  in_signal=nan  n=339
+    2025-10: rho_eff=8.0056  in_signal=nan  n=256
+    2025-11: rho_eff=8.3695  in_signal=nan  n=98
+    2025-12: rho_eff=10.1853  in_signal=nan  n=146
+    2026-01: rho_eff=6.6490  in_signal=nan  n=80
+    2026-02: rho_eff=6.8121  in_signal=nan  n=213
+    2026-03: rho_eff=6.4167  in_signal=nan  n=124
+    2026-04: rho_eff=6.9112  in_signal=nan  n=85
+    2026-05: rho_eff=8.9437  in_signal=nan  n=28
+
+[5] Building unit signal (v28 variant) ...
+  unit focus bars: 8338
+  unit nonzero bars in focus: 6154
+  unit mean (nonzero): 0.000091
+
+  Monthly unit activity (Jun 2025 – May 2026):
+    2025-06: n=720  nonzero=491  cum_return=-0.054001
+    2025-07: n=744  nonzero=653  cum_return=-0.019069
+    2025-08: n=744  nonzero=720  cum_return=+0.125279
+    2025-09: n=720  nonzero=701  cum_return=-0.059765
+    2025-10: n=744  nonzero=732  cum_return=-0.061609
+    2025-11: n=720  nonzero=720  cum_return=+0.385964
+    2025-12: n=744  nonzero=744  cum_return=+0.032448
+    2026-01: n=744  nonzero=133  cum_return=-0.067197
+    2026-02: n=672  nonzero=623  cum_return=+0.276657
+    2026-03: n=744  nonzero=0  cum_return=+0.000000
+    2026-04: n=720  nonzero=315  cum_return=-0.004361
+    2026-05: n=322  nonzero=322  cum_return=+0.004704
+
+  Per-asset unit nonzero bars in focus:
+  (see log_ann for full per-asset breakdown)
+
+[6] Running simulation — tracking CB state ...
+
+  CB triggered at (first 5 state=1 starts):
+    2021-01-04 09:00:00  eq=$1,276  roll_peak=$1,815  roll_dd=0.2972
+    2021-07-21 15:00:00  eq=$1,440  roll_peak=$1,566  roll_dd=0.0807
+    2022-01-22 14:00:00  eq=$2,127  roll_peak=$2,635  roll_dd=0.1928
+    2022-07-30 23:00:00  eq=$2,073  roll_peak=$2,381  roll_dd=0.1295
+    2023-03-20 09:00:00  eq=$1,927  roll_peak=$2,110  roll_dd=0.0868
+    2023-11-02 00:00:00  eq=$7,410  roll_peak=$8,581  roll_dd=0.1365
+    2024-05-03 03:00:00  eq=$7,956  roll_peak=$8,669  roll_dd=0.0823
+    2024-11-13 05:00:00  eq=$15,896  roll_peak=$18,752  roll_dd=0.1523
+    2025-05-15 08:00:00  eq=$16,118  roll_peak=$18,349  roll_dd=0.1216
+    2025-11-21 15:00:00  eq=$158,951  roll_peak=$175,126  roll_dd=0.0924
+
+  CB resumed at:
+    2021-07-03 08:00:00  eq=$1,276  roll_peak=$1,276  roll_dd=0.0000
+    2022-01-17 14:00:00  eq=$1,440  roll_peak=$1,440  roll_dd=0.0000
+    2022-07-21 13:00:00  eq=$2,127  roll_peak=$2,127  roll_dd=0.0000
+    2023-01-26 22:00:00  eq=$2,073  roll_peak=$2,073  roll_dd=0.0000
+    2023-09-16 08:00:00  eq=$1,927  roll_peak=$1,927  roll_dd=0.0000
+    2024-04-29 23:00:00  eq=$7,410  roll_peak=$7,410  roll_dd=0.0000
+    2024-10-30 02:00:00  eq=$7,956  roll_peak=$7,956  roll_dd=0.0000
+    2025-05-12 04:00:00  eq=$15,896  roll_peak=$15,896  roll_dd=0.0000
+    2025-11-11 07:00:00  eq=$16,118  roll_peak=$16,118  roll_dd=0.0000
+
+  CB state at end of 2025: 2025-12-31 00:00:00    1
+2025-12-31 01:00:00    1
+2025-12-31 02:00:00    1
+2025-12-31 03:00:00    1
+2025-12-31 04:00:00    1
+2025-12-31 05:00:00    1
+2025-12-31 06:00:00    1
+2025-12-31 07:00:00    1
+2025-12-31 08:00:00    1
+2025-12-31 09:00:00    1
+2025-12-31 10:00:00    1
+2025-12-31 11:00:00    1
+2025-12-31 12:00:00    1
+2025-12-31 13:00:00    1
+2025-12-31 14:00:00    1
+2025-12-31 15:00:00    1
+2025-12-31 16:00:00    1
+2025-12-31 17:00:00    1
+2025-12-31 18:00:00    1
+2025-12-31 19:00:00    1
+2025-12-31 20:00:00    1
+2025-12-31 21:00:00    1
+2025-12-31 22:00:00    1
+2025-12-31 23:00:00    1
+Name: cb_halted, dtype: int64
+  Dec 2025 halted fraction: 100.00%
+  End of Dec 2025 CB state: 1
+  Jan 2026 halted fraction: 100.00%
+
+  Monthly CB and roll-DD (Jun 2025 – May 2026):
+    2025-06: cb=100.00%  roll_dd_mean=0.1216  roll_dd_max=0.1216  eq_end=$16,118  roll_peak=$18,349
+    2025-07: cb=100.00%  roll_dd_mean=0.1216  roll_dd_max=0.1216  eq_end=$16,118  roll_peak=$18,349
+    2025-08: cb=100.00%  roll_dd_mean=0.1216  roll_dd_max=0.1216  eq_end=$16,118  roll_peak=$18,349
+    2025-09: cb=100.00%  roll_dd_mean=0.1216  roll_dd_max=0.1216  eq_end=$16,118  roll_peak=$18,349
+    2025-10: cb=100.00%  roll_dd_mean=0.1216  roll_dd_max=0.1216  eq_end=$16,118  roll_peak=$18,349
+    2025-11: cb=65.56%  roll_dd_mean=0.0707  roll_dd_max=0.1216  eq_end=$158,951  roll_peak=$76,086
+    2025-12: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+    2026-01: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+    2026-02: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+    2026-03: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+    2026-04: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+    2026-05: cb=100.00%  roll_dd_mean=0.0924  roll_dd_max=0.0924  eq_end=$158,951  roll_peak=$175,126
+
+  As of data end:
+    equity         = $158,951
+    rolling peak   = $175,126
+    rolling DD     = 0.0924
+    CB halted?     = True
+    To release CB  : equity must reach $173,375 (= roll_peak × 0.99)
+    Equity gap     : need +9.07% gain
+
+[7] Checking energy signal in 2026 ...
+  2026 bars:            530
+  Above-theta bars:     47 (8.87%)
+  Energy range:         min=0.0064  mean=0.1802  max=0.4136
+  Theta:                0.240121
+  Max energy vs theta:  1.72×

@@ -1,0 +1,1396 @@
+=== PAGE 1 ===
+CANONICAL DYNAMICAL GEOMETRY SYSTEM
+VERSION 4 — INFORMATION-GEOMETRIC FLOW
+FRACTAL•CONTACT•GEOMETRIC FLOW•FISHER
+Abstract. We define a single, locked ordinary differential equation (thecanonical ODE)
+that drives a state X∈Rn towards a target set encoded by a feature mapS:R n→
+Rk and a quadratic energyE=S TGS, while simultaneously executing a domain-specific
+nominal fieldFbase. Geometry enters the dynamicsonlythrough the Euclidean gradient
+gX = 2J TGS; all projections are Euclidean; the pulled-back metricJTGJ is reserved for
+curvature analysis. Under standard regularity (Assumptions A1–A4), Part I proves (i) local
+existence and uniqueness, (ii) Lyapunov descent, (iii) asymptotic stability of{E= 0}, (iv)
+exponential convergence with rateρ= 4σ2µ2
+G/MG·(1−γmax) under a uniform Jacobian
+rank condition, and (v) ultimate boundedness whenFbase̸= 0, with explicit admissibility
+threshold and a local-in-energy capture window. Part II extends the framework to fractal
+targets (multi-scale mollified distance with Hausdorff-dimension weighting), contact manifolds
+(Reeb-aware feature map with horizontal-descent property), and time-varying metrics evolved
+by Ricci-type geometric flows (strict Lyapunov monotonicity for constant target metrics and
+practical state–metric bounds in the state-dependent case). Part III specialises the time-
+varying metric to feature-space Fisher information and its pullback to state space, yielding
+adaptive preconditioning, a chart-covariant auxiliary natural-gradient flow, and a statistical
+Cramér–Rao floor on the descent rate. Throughout, the canonical ODE, the gradient formula,
+and the Euclidean projection are unchanged; all domain content is confined to the triple
+(S,G,F base).
+Contents
+1 Introduction 3
+2 Origin: from BSDT to the canonical kernel 4
+2.1 The BSDT pipeline in one paragraph 4
+2.2 Recognising the (S,G,F base) triple 4
+2.3 What the canonicalisation buys 5
+2.4 Where the v3 / v4 extensions enter the BSDT story 5
+3 Foundations and Assumptions 6
+3.1 Standing assumptions 6
+3.2 The singular set and its resolution 6
+3.3 Well-posedness 6
+4 Canonical Core Equation 7
+5 Locked Definitions 7
+5.1 Representation map 7
+5.2 Energy functional 7
+5.3 State-space gradient 8
+5.4 Modified dynamics 8
+5.5 Adaptive control gain 8
+6 System Rules (Inviolable) 8
+Date: 2026-05-07.
+1
+=== PAGE 2 ===
+Canonical Dynamical Geometry System — v42
+7 Forward Chain 9
+§B.2 — State-Space Dynamics 9
+§B.2a — Modified Force Definition 10
+§C.5 — Hessian and Curvature Tensor 10
+§D.3 — Curvature Manifold 11
+§H.1 — Numerical Implementation 11
+8 Predictive scalars: direction and momentum 13
+8.1 Direction predictor: alignmentcosθ t 13
+8.2 Momentum predictors: ˙E,ρeff, MFLS,γ13
+8.3 Compact dashboard 14
+8.4 Predictive use of the main theorems 14
+8.5 Information-geometric upgrade (preview of Part III) 14
+9 Main Stability Theorems 14
+9.1 Lyapunov descent 14
+9.2 Asymptotic stability 15
+9.3 Exponential rate 15
+9.4 Ultimate boundedness with non-zeroF base 15
+9.5 Long–short symmetry of the locked ODE 16
+10 Application Domains 16
+10.1 Trading / statistical-arbitrage spread control 16
+10.2 Spectral / Galerkin PDE control 17
+10.3 First-order optimisation 17
+10.4 Task-space robotics control 17
+11 Domain Parameterisation 17
+12 Verification Checklist 18
+13 Structure Freeze 18
+14 Summary — One Line 19
+A Symbol Table 19
+B Quick Reference Card 20
+C Proof Roadmap (Next Steps) 20
+Part 1. Geometric Extensions20
+D Fractal-Geometric Extension 20
+D.1 Motivation and setup 20
+D.2 Multi-scale representation 21
+D.3 Closure under the canonical core 21
+E Contact-Geometric Extension 21
+E.1 Motivation 21
+E.2 Contact instantiation 22
+E.3 Horizontal descent property 22
+E.4 Subriemannian special case 22
+=== PAGE 3 ===
+Canonical Dynamical Geometry System — v43
+F Geometric-Flow Extension 22
+F.1 Time-varying metric 22
+F.2 Modified energy derivative 23
+F.3 Joint stability 23
+F.4 Discretisation 23
+G Unified View of the Three Extensions 23
+Part 2. Information-Geometric Flow24
+H Statistical setup and the Fisher metric 24
+H.1 Features as statistical parameters 24
+H.2 Fisher metric in the canonical system 24
+I Natural gradient and chart covariance 25
+J Joint stability under Fisher flow 25
+K Three new computational capabilities 26
+K.1 Adaptive preconditioning and natural-gradient variant 26
+K.2 Variational inference and MLE in one map 26
+K.3 Information-geometric Hessian 26
+L Bridge to v5: stochastic extension 26
+M Master unified view (v2 + v3 + v4) 27
+N Thermodynamic dictionary 27
+O Game-theoretic derivation ofγ⋆ 28
+P Multi-engine composition (port-Hamiltonian) 29
+LOCKED
+Execution paradigm (LOCKED):Euclidean execution with geometric encoding.
+Geometry enters the dynamicsonlythrough the state-space gradientgX.
+All projections are Euclidean. The pulled-back metricGpull = JTGJ is usedonlyfor
+curvature computation.
+1 Introduction
+Many engineering and scientific tasks reduce to the same structural problem: drive a state
+X along a nominal trajectory generated byFbase while simultaneously enforcing a geometric
+constraint encoded by an energyE(X). Examples include statistical-arbitrage portfolios
+(spread→0), spectral PDE controllers (modal error→0), first-order optimisers (∇f→0) and
+task-space robotics (end-effector error→0).
+Classical solutions diverge: Riemannian gradient flows replace the state-space metric and
+obscure execution; control-Lyapunov designs often reinvent the projection at each domain;
+port-Hamiltonian formulations require an energy-shaping co-design. The cost is a proliferation
+of incompatible formalisms.
+=== PAGE 4 ===
+Canonical Dynamical Geometry System — v44
+Contribution. We commit to a single, frozen ODE (Section 4) and a single gradient (Section 5.3)
+that respects three inviolable rules (Section 6) and prove its propertiesonce. Domain content
+is confined to the triple(S,G,F base)(Section 11), so each application becomes an instantiation
+rather than a redesign.
+Organisation. Section 2 records the historical origin of the kernel in the GravityEngine + BSDT
+pipeline and fixes the dictionary that maps every BSDT object onto a canonical symbol.
+Section 3 fixes assumptions and well-posedness. Sections 4–6 state the locked system. Sections 7–
+7 develop structural results, the curvature manifold, and the numerical implementation.
+Section 9 proves the main stability theorems. Section 10 instantiates the framework on four
+domains. Part II (Sections D–F) extends the kernel by fractal, contact, and geometric-flow
+constructions. Part III (Section H onwards) specialises Part II to the Fisher information metric
+and introduces the auxiliary natural-gradient flow.
+Related work. Lyapunov-based control and CLF theory [1, 2]; geometric control [3]; gradient
+flows in metric spaces [4]; neural ODEs [5]; port-Hamiltonian systems [6]; adaptive control
+[7]. Our framework is closest to Sontag’s universal formula but differs in (a) using a fixed
+Euclidean projection and (b) routing all geometry through a single feature map and metric.
+2 Origin: from BSDT to the canonical kernel
+The canonical system was not invented in the abstract. It was extracted from a concrete
+pipeline — theGravityEnginesystemic-risk simulator and itsBlind-Spot Detection Theory
+(BSDT) calibration layer — by identifying the structural skeleton common to every component
+and then locking that skeleton. This section records the dictionary, so the historical content
+remains attached to the abstract framework.
+2.1 The BSDT pipeline in one paragraph
+BSDT models N institutions with stateX∈RN×d, calibrates a normal-period Gaussian
+N (µ0, Σ 0), and at each step computes (i) a Mahalanobis camouflage energyEBSDT, (ii) its
+Frobenius gradient norm (theMFLSsignal), (iii) the alignment between this gradient and a
+physical restoring forceF =−α˜Xµ−LX(centred drift plus Laplacian coupling), and (iv) an
+adaptive dampingγ⋆trading detected blind-spot energy against an intervention costθ.
+2.2 Recognising the (S,G,F base) triple
+Reading off BSDT structurally:
+•the centred state˜X=X−1µ⊤
+0 plays the role of a feature map,
+•the inverse calibration covarianceΣ−1
+0 plays the role of a positive-definite metric,
+•the centred drift plus Laplacian force is a domain-specific nominal field.
+With the identifications
+S(X) := vec( ˜X), G:=I d⊗Σ−1
+0 , F base(X) :=−α˜Xµ−LX,
+the BSDT objects line up with the canonical objects exactly:
+=== PAGE 5 ===
+Canonical Dynamical Geometry System — v45
+BSDT object Canonical symbol Identification
+Calibration meanµ0 target set{E= 0}S(X) = 0⇐⇒X=1µ⊤
+0
+Centred state ˜Xfeature mapS(X)affine, so JacobianJ≡I
+Inverse covarianceΣ−1
+0 metricGconstant in Part I
+Camouflage energyE BSDT E=S TGS∥ ˜XΣ−1/2
+0 ∥2
+F
+Energy gradient2 ˜XΣ−1
+0 gX = 2JTGSequal becauseJ=I
+MFLS signal∥∇E∥F ∥gX∥locked Euclidean norm
+Alignmentcosθt ⟨F,gX⟩/∥gX∥2 projection coefficient
+Adaptive dampingγ⋆= EBSDT
+EBSDT +θ γ= E
+E+θ identical formula
+Friction step onF ˙X=F−γprojgX(F)locked canonical ODE
+2.3 What the canonicalisation buys
+Once the dictionary above is fixed, every theorem proved in Part I about the canonical ODE is
+automatically a theorem about the GravityEngine + BSDT loop:
+•Lyapunov descent ofEBSDT (Theorem 9.1),
+•asymptotic stability of the calibration centroid (Theorem 9.2),
+•explicit exponential rateρ= 4σ2µ2
+G/MG·(1−γmax)(Theorem 9.3),
+•local-in-energy ultimate boundedness with admissibility threshold (Theorem 9.4).
+2.4 Where the v3 / v4 extensions enter the BSDT story
+The three extensions are not departures from BSDT — they are the mathematical resolution
+of three concrete limitations of the original pipeline:
+•Multi-scale BSDT (Part II, fractalS).BSDT’s four channels(δC,δG,δA,δT )live at
+a single calibration scale; the fractal feature mapSfrac stacks them across resolutions with
+Hausdorff-dimension weighting, recovering contagion modes between the single-windowδC
+and the PCA-residualδG.
+•Conserved-directionBSDT(PartII,contact S).Whenthesystemcarriesaconserved
+Reeb direction (calendar time, total assets), the contact feature map preventsγ⋆from
+damping the conserved flow.
+•Time-varying calibration (Part II, Ricci-flowG).Σ 0 in BSDT is fixed at calibra-
+tion. LettingG(t)evolve by a Ricci-type flow models a drifting normal-period geometry;
+Theorem F.2 states when re-calibration during stress is safe.
+•Fisher-optimal calibration (Part III).ReplacingΣ −1
+0 by the feature-space Fisher
+informationIS yields the statistically optimal preconditioner; the Cramér–Rao remark
+makes precise the ceiling on any BSDT calibration’s descent rate.
+LOCKED
+Historical anchor.Throughout the rest of this paper, every time a result is proved for
+the canonical kernel ˙X =F−γprojgX(F)with γ=E/(E +θ), that result specialises —
+under the dictionary of this section — to a statement about the GravityEngine + BSDT
+pipeline. The locked ODE is the abstract form of the BSDT damping law; nothing of the
+original is lost.
+=== PAGE 6 ===
+Canonical Dynamical Geometry System — v46
+3 Foundations and Assumptions
+This section fixes the regularity class, declares the standing assumptions, resolves the apparent
+singularity in the canonical ODE, and establishes well-posedness. Every later proof depends
+on the results stated here.
+3.1 Standing assumptions
+A1 – A4: Standing assumptions
+(A1) Regularity ofS.:
+S∈C2(Rn,Rk). The JacobianJ(X) =∂S/∂Xand the second derivative∂XJ are
+locally bounded.
+(A2) Metric.:
+G∈Rk×kis symmetric positive-definite andconstantin X and t. We denote
+0<µG≤MG for its smallest/largest eigenvalues.(Relaxed in Parts II–III to (A2′):
+G∈C1(Rn,Symk
++)with uniform bounds µGI⪯G(X)⪯MGI. Every result of
+Part I is stated under (A2); Parts II–III state explicitly when (A2′) replaces (A2).)
+(A3) Nominal field.:
+Fbase :R n→Rn is locally Lipschitz.
+(A4) Control parameter.:
+θ>0is fixed.
+3.2 The singular set and its resolution
+The canonical ODE (Section 4) contains the factor∥gX∥−2and is undefined on thesingular
+setΣ ={X∈Rn :g X(X) = 0}.
+Lemma 3.1(Structure ofΣ).Under (A1)–(A2),
+gX(X) = 0⇐⇒J(X)TGS(X) = 0.
+In particular:
+(i)IfrankJ(X) =k(full row rank), theng X(X) = 0⇐⇒S(X) = 0⇐⇒E(X) = 0.
+(ii) Outside the rank-deficient locusR ={X: rankJ (X)<k},Σcoincides with the target set
+{E= 0}.
+Proof.g X = 2JTGS, hencegX = 0⇔JTGS = 0. If J has full row rank,JT is injective on
+Rk, soGS = 0, and sinceG is invertible,S = 0, givingE =STGS = 0. OutsideR this holds
+at every point. □
+Regularised canonical ODE
+˙X=F base−gX−γ⟨Fbase−gX, gX⟩
+∥gX∥2 +ε gX, ε≥0.
+Theexactcanonical ODE corresponds to ε= 0. In implementation a small ε >0avoids
+division by zero; the limitε→0+ recovers the canonical equation away fromΣ. By Lemma 3.1
+the limit is benign wheneverJhas full row rank along trajectories.
+3.3 Well-posedness
+Theorem 3.2(Local existence and uniqueness).Assume (A1)–(A4) and letX0 /∈Σ. There
+exists T∗> 0and a uniqueC1 solution X : [0,T∗)→Rn of the canonical ODE withX(0) =X0.
+Ifε>0, the same conclusion holds for everyX0∈Rn.
+=== PAGE 7 ===
+Canonical Dynamical Geometry System — v47
+Proof. Let H(X) = Fbase(X)−gX(X)−γ(X)α(X)gX(X)with α(X) = ⟨Fbase −
+gX,gX⟩/(∥gX∥2 +ε). Under (A1)–(A3) the mapsX↦→S,J,GS,gX,E,γare locally Lipschitz.
+On Rn\ Σ(or all of Rn if ε >0), the denominator is bounded away from zero on a
+neighbourhood of X0, so αis locally Lipschitz, and so isH. Picard–Lindelöf yields the
+conclusion. □
+Corollary 3.3(Global existence under energy bound).If ˙E≤0along the solution and the
+sublevel set{E≤E(X0)}is compact, the solution is defined for allt≥0.
+4 Canonical Core Equation
+LOCKED
+THE CANONICAL ODE (single, unique, not to be modified):
+˙X=F base(X)−gX(X)−γ(X)⟨Fbase(X)−gX(X), gX(X)⟩
+∥gX(X)∥2 gX(X)
+The three terms decompose cleanly:
+•Fbase(X): domain-specific nominal vector field.
+•−gX(X): geometric correction forcingEto decrease.
+•−γ(X) (···)gX(X): adaptive damping that removes the component ofF = Fbase−gX
+aligned withgX, controlled by energy level.
+5 Locked Definitions
+All definitions below arecanonical and final. No variants, no alternatives, no extensions are
+permitted inside the core system.
+5.1 Representation map
+A.1 — Representation
+S:X↦−→Rk
+X∈Rn is the state.S(X)∈Rk is the geometric feature vector.k≥1is fixed for each
+domain.
+The Jacobian ofSatXis
+J(X) = ∂S
+∂X∈Rk×n.
+5.2 Energy functional
+A.2 — Energy
+E(X) =S(X) TGS(X), G≻0, G∈Rk×k
+Gis symmetric positive-definite.E(X)≥0withE(X) = 0⇐⇒G1/2S(X) = 0.
+=== PAGE 8 ===
+Canonical Dynamical Geometry System — v48
+5.3 State-space gradient
+A.3 — Gradient (single, unique)
+gX(X) =J(X) T∇SE= 2J(X) TGS(X)
+Derivation. By the chain rule,∇XE = JT∇SE. Since E = STGS, one has∇SE = 2GS.
+Thereforeg X =J T (2GS) = 2JTGS.□
+No other gradient definition exists in this system.
+5.4 Modified dynamics
+A.4 — Modified force
+F(X) =F base(X)−gX(X)
+F is the vector fieldbeforethe adaptive projection term. The full dynamics (Section 4) add
+the projection ofFonto−gX.
+5.5 Adaptive control gain
+A.5 — Control gain
+γ(X) = E(X)
+E(X) +θ, θ>0
+•γ∈[0,1)for allX.
+•γ→0asE→0: no damping near the target manifold.
+•γ→1asE→∞: full projection damping far away.
+•θis the only tunable scalar in the core system.
+6 System Rules (Inviolable)
+Rule 1 — Geometry location
+Geometry entersonlythroughg X
+The matrixG and the mapS encode all geometric structure. Nothing else in the core
+ODE carries geometric information.
+Rule 2 — Euclidean projection
+All projections use the standard Euclidean inner product onRn
+⟨u,v⟩=uTv,∥u∥=
+√
+uTu
+There is no metric-weighted inner product in the dynamics layer.
+=== PAGE 9 ===
+Canonical Dynamical Geometry System — v49
+Rule 3 — Pulled-back metric scope
+Gpull =J TGJis usedonlyfor curvature (Hessian) analysis
+Gpull doesnotappear in ˙X, ingX, or in any projection.
+Rule 4 – No duplication
+Each object has exactly one definition; no parallel construction is permitted
+In particular: there is no separate∇XΦ, no second force definition, and no alternative
+projection. The objectsS, E, gX, F, γand ˙X are defined exactly once, in Section 5, and
+used verbatim everywhere else.
+Forbidden
+The following arepermanently forbiddenin any version of this document:
+•G−1
+pull appearing in the dynamics.
+•Metric-weighted projections (⟨u,v⟩G in the ODE).
+•An independent∇XΦdefined separately fromg X.
+•A second or alternative definition of the force.
+•Duplicate section headers or symbol re-definitions.
+7 Forward Chain
+The unique, linear data-flow through the system:
+X S−→SE=STGS−−−−−−−→E2JTGS−−−−−→gX
+˙X=F base−gX−γ(···)gX
+−−−−−−−−−−−−−−−→˙X
+Each arrow is a unique map; no step branches or has an alternative.
+§B.2 State-Space Dynamics
+Setup. All dynamical quantities live in the state spaceRn. The representation mapS and
+the energyE are scalar objects computed fromX but the forcesFbase, gX, andF are all
+Rn-valued.
+Projection. The projection of any vectorv∈Rn ontog X is
+projgX(v) =⟨v, gX⟩
+∥gX∥2 gX,
+computed with theEuclideaninner product. The complement isv−projgX(v).
+Geometric content. The geometry of the target manifold/set is entirely captured bygX.
+Equations of motion do not referenceG, J, orS directly; they see onlygX computed from
+those quantities.
+=== PAGE 10 ===
+Canonical Dynamical Geometry System — v410
+§B.2a Modified Force Definition
+§B.2a — Modified Force (authoritative, single definition)
+F(X) =F base(X)−gX(X)
+The full canonical ODE (Section 4) is equivalently written as:
+˙X=F(X)−γ(X)⟨F(X), gX(X)⟩
+∥gX(X)∥2 gX(X).
+This removes fromFits component alongg X, scaled byγ.
+§C.5 Hessian and Curvature Tensor
+This section derives the Hessian ofE explicitly. The derivation introduces the second-derivative
+tensor of the representation map, which is the only tensorial object the system requires.
+The representation curvature tensorK
+C.5.0 — Representation curvature tensor
+ForS∈C2(Rn,Rk)define
+Kiab(X) :=∂a∂bSi(X) =∂aJib(X), i∈{1,...,k}, a,b∈{1,...,n}.
+K(X)∈Rk×n×nis the third-order tensor of second partials ofS. By Schwarz’s theorem
+Kiab =K iba; eachsliceK i∈Rn×nis symmetric.
+Derivation of the Hessian ofE
+Proposition 7.1(State-space Hessian, derived form).Under(A1)–(A2), with index convention
+as above and Einstein summation,
+(
+∇2
+XE
+)
+ab = 2 (J TGJ)ab +ηiKiab, η:=∇ SE= 2GS.
+Equivalently, in coordinate-free form,
+∇2
+XE= 2G pull +⟨η,K⟩1,⟨η,K⟩1 :=
+k∑
+i=1
+ηiKi.
+Proof.WriteE=G ijSiSj withG T =G. Then
+∂aE=G ij(∂aSi)Sj +GijSi(∂aSj)
+= 2GijJiaSj = 2(JTGS)a = (gX)a,
+recovering∇XE=g X. Differentiating once more,
+∂b∂aE= 2G ij
+(
+(∂bJia)Sj +J ia(∂bSj)
+)
+= 2GijKiabSj + 2GijJiaJjb
+= (2GS)iKiab  
+=ηiKiab
++ 2(JTGJ)ab.
+Symmetry in(a,b)holds becauseK i andJ TGJare symmetric.□
+Remark 7.2(Two ingredients).The state-space Hessian decomposes uniquely into:
+•thepulled-back metric2Gpull = 2JTGJ, capturing the linear part of the geometry;
+•thecurvature contraction⟨η,K⟩1, capturing how the representation mapS itself bends.
+=== PAGE 11 ===
+Canonical Dynamical Geometry System — v411
+The curvature contraction vanishes wheneverS is affine (K≡0)orwhen η= 2GS = 0(i.e.
+on the target set{E= 0}). Hence on the target set,∇2
+XE
+⏐⏐
+{E=0}= 2Gpull exactly.
+Remark 7.3(Operator norm).Define the tensor norm
+∥K∥op := sup
+∥u∥=∥v∥=1,∥w∥=1
+∑
+i,a,b
+Kiabuivawb.
+Then the curvature contraction obeys∥⟨η,K⟩1∥2≤∥K∥op∥η∥2, which is the bound used in
+Proposition 7.6.
+Remark 7.4(Role in the dynamics).Gpull =JTGJ and K both appear here as part of the
+Hessian. By Rule 3, neither appears in˙Xorg X.
+§D.3 Curvature Manifold
+§D.3 — Curvature manifold
+Cman =
+{
+X∈Rn :λmax
+(
+∇2
+XE(X)
+)
+= 1
+}
+Cman is the level set of maximal principal curvature equal to1. It separates regions where
+the energy landscape is convex-dominated (λmax < 1) from regions where nonlinear curvature
+terms dominate (λmax >1).
+Proposition 7.5.Cman is generically a smooth(n−1)-dimensional submanifold ofRn wherever
+λmax is a simple eigenvalue and its derivative is non-zero.
+Proof. Let h(X) =λmax(∇2
+XE(X))−1so that Cman =h−1(0). By (A1) the entries of∇2
+XE
+are continuous; on the open set whereλmax is simple, classical perturbation theory (Kato) gives
+λmax∈C1 with derivative∇h= vT (∂X∇2
+XE)v, wherev is the unit eigenvector. Wherever
+∇h̸= 0the implicit function theorem yields the smooth codimension-1 structure.□
+Proposition 7.6(Curvature bound).Under(A1)–(A2), with ∥K∥op as defined in Section 7,
+λmax
+(
+∇2
+XE
+)
+≤2MG∥J∥2
+2 +∥K∥op∥η∥2, η= 2GS.
+In particular, onCman,2M G∥J∥2
+2 +∥K∥op∥2GS∥2 ≥1.
+Proof. By Proposition 7.1,∇2
+XE = 2JTGJ +⟨η,K⟩1. The spectral norm is sub-additive; bound
+the first term using∥JTGJ∥2≤∥G∥2∥J∥2
+2≤MG∥J∥2
+2, and the second using∥⟨η,K⟩1∥2≤
+∥K∥op∥η∥2 from Section 7.□
+The practical role ofCman:
+•Provides a natural domain boundary for local linearisation arguments.
+•Guides the choice ofθin γ: setting θso thatγ≈1
+2 onCman balances correction and
+tracking.
+§H.1 Numerical Implementation
+H.1.1 Per-step algorithm
+Given stateXt, advance one step:
+1.ComputeS←S(X t).
+2.ComputeJ←∂S/∂X
+⏐⏐
+Xt
+.
+=== PAGE 12 ===
+Canonical Dynamical Geometry System — v412
+3.Computeg X←2JTGS.(gradient —single computation)
+4.ComputeE←S TGS.(energy)
+5.ComputeF base←Fbase(Xt).
+6.ComputeF←F base−gX.(modified force —notF base alone)
+7.Computeγ←E/(E+θ).
+8.Compute projection coefficientα←⟨F,gX⟩/∥gX∥2.
+9.Set ˙X←F−γαgX.(canonical ODE)
+10.Integrate:X t+h←Xt +h ˙X(or higher-order scheme).
+11. Termination:stop whenE <εE and∥gX∥<εg forτconsecutive steps (cf. §H.1.4).
+Forbidden
+Step 6 usesF =Fbase−gX, notFbase alone. Step 8 uses thisF in the projection, not
+Fbase.
+H.1.2 Gradient correctness check
+Before running any simulation, verify:
+gX
+?= 2JTGS,
+by finite-difference:∆ E/∆Xi should match(gX)i to machine precision for small perturbations.
+H.1.3 Energy monotonicity (derivation)
+Lemma 7.7(Energy derivative).Along any solution of the canonical ODE,
+˙E=⟨gX, ˙X⟩= (1−γ)
+(
+⟨gX,F base⟩−∥gX∥2)
+.
+Equivalently, withF=F base−gX andα=⟨F,gX⟩/∥gX∥2,
+˙E=⟨gX,F base⟩−∥gX∥2−γα∥gX∥2 =⟨gX,F base⟩−∥gX∥2−γ⟨F,gX⟩.
+Proof. DifferentiateE =STGS: ˙E = 2STG ˙S = 2STGJ ˙X = (2JTGS)T ˙X =⟨gX, ˙X⟩. Substi-
+tute the canonical ODE˙X =F−γαgX to get ˙E =⟨gX,F⟩−γα∥gX∥2 =⟨gX,F⟩−γ⟨F,gX⟩=
+(1−γ)⟨F,gX⟩. Since⟨F,gX⟩=⟨Fbase,gX⟩−∥gX∥2, the two displayed forms follow.□
+Pure geometric flow (Fbase = 0). ThenF=−gX, so
+˙E=−(1−γ)∥gX∥2 ≤0,
+strictly negative whenevergX̸= 0(andγ <1, always).
+Energy descent condition. Since1−γ >0,˙E≤0holds if and only if
+⟨gX,F base⟩ ≤ ∥gX∥2.
+This is the explicit angle condition betweenFbase and gX used in the stability theorems of
+Section 9.
+H.1.4 Step-size, stopping, and Jacobian computation
+Stopping criterion. Halt when bothE(Xt) < εE and∥gX(Xt)∥< εg hold forτconsecutive
+steps (dwell time), with default tolerancesεE = 10−8,εg = 10−6,τ= 5.
+Adaptive step-size. Useht =h0/
+(
+1 +λmax(∇2
+XE(Xt))
+)
+, so ht≤h0 everywhere andht→h0/2
+onCman. By Proposition 7.6,λmax is bounded in terms of∥J∥,∥G∥, and the curvature ofS,
+soh t is uniformly positive on bounded sets.
+Choice ofG. The conditioning ofgX = 2JTGS scales withκ(G). Default rule: choose G
+diagonal withGii = 1/ ˆVar(Si)from data (or design), soE becomes the squared Mahalanobis
+norm ofSand the energy landscape is approximately isotropic in the operating region.
+=== PAGE 13 ===
+Canonical Dynamical Geometry System — v413
+Jacobian computation. In order of preference: (i) closed-form analytic J; (ii) automatic
+differentiation whenS is given as code; (iii) finite differences with stepδ=√ϵmach at cost
+O(nk)evaluations per step.
+8 Predictive scalars: direction and momentum
+The locked ODE is first-order, so the system has no inertial state˙X that could be tracked.
+Directionandmomentummust therefore be read off scalar observables built from the same
+quantities(S,gX,F base,E,γ)that already drive the dynamics. This section collects the canoni-
+cal predictors. They are all chart-dependent in Part I; their Fisher (chart-covariant) version
+appears in Part III.
+8.1 Direction predictor: alignmentcosθt
+Alignment scalar
+cosθt :=
+⟨
+Fbase(Xt), gX(Xt)
+⟩
+∥Fbase(Xt)∥∥gX(Xt)∥∈[−1,+1].
+Thesignof cosθt is the binary direction indicator (toward target / away); themagnitude
+measures how much ofFbase acts radially on the energy.
+•cosθt→+1: nominal field and energy gradient are co-aligned — coherent collapse pressure.
+•cosθt→0: Fbase is tangent to the level set{E= const}— circulation, no radial progress;
+direction undetermined by energy alone.
+•cosθt→−1: anti-aligned — restoring competition,Efalls without help fromFbase.
+8.2 Momentum predictors: ˙E,ρeff, MFLS,γ
+DifferentiatingE =STGS along the canonical ODE and usinggX = 2JTGS gives the closed
+expression
+(1) ˙E(t) =
+⟨
+gX, Fbase
+⟩
+−γ(Xt)
+⟨
+Fbase, gX
+⟩2
+∥gX∥2 .
+Equation (1) is the master momentum identity: it is the quantity Theorems 9.1–9.3 bound
+from above. Four scalars are read off it.
+Momentum scalars
+(a) Energy velocity vE(t) := −˙E(t). Positive vE means the system is contracting
+toward the target; magnitude is the instantaneous descent rate.
+(b) Effective decay rate ρeff(t) := −˙E(t)
+E(t) . Predicts the local exponential half-life
+τ1/2(t) = ln 2/ρeff(t).
+(c) Gradient capacity (MFLS)∥gX∥= 2∥JTGS∥. Upper-bounds|˙E|via Cauchy–
+Schwarz and equals it when|cosθt|= 1andγ= 0.
+(d) Damping commitment γ=E/(E +θ)∈[0, 1). γ→1flags maximum projection
+load.
+Leading vs. lagging.cosθt and ρeff(t)areleading— they move before the state visibly does,
+because they depend ongX andFbase, not justX. E(t)and γ(Xt)arelagging— they integrate
+the leading signals.
+=== PAGE 14 ===
+Canonical Dynamical Geometry System — v414
+8.3 Compact dashboard
+The minimal predictive log per step is the quintuple
+(
+cosθt,∥gX(Xt)∥, E(Xt), γ(Xt), ρeff(t)
+)
+.
+Their roles:
+Symbol Reads as Dir. Mom. Lead / lag
+cosθt alignment✓sign+tilt — leading
+∥gX∥(MFLS) gradient capacity —✓cap. leading
+ELyapunov energy✓closeness via ˙Elagging
+γdamping commitment —✓lagging
+ρeff local decay rate —✓predictedτ 1/2 leading
+8.4 Predictive use of the main theorems
+The stability theorems of Section 9 convert the above scalars intoguaranteedbounds:
+•Theorem 9.1 guarantees ˙E≤0along the canonical ODE, soρeff(t)≥0whenever Fbase≡0.
+•Theorem 9.3 furnishes a lower boundρeff(t)≥ρ= 4σ2µ2
+G/MG (1−γmax)under the uniform
+Jacobian rank condition. The ratioρeff(t)/ρis therefore a runningefficiency score: values
+≫1indicate the instantaneous regime is far better than the worst-case guarantee; values
+→1signal saturation of the bound.
+•Theorem 9.4 caps how largeE may settle whenFbase̸= 0: a sustained drift ofE above
+the admissibility thresholdΨ⋆is the early-warning signal that the local-in-energy capture
+window has been exited.
+8.5 Information-geometric upgrade (preview of Part III)
+Under the Fisher choiceG(X) =IS(S(X))(Section H) the predictors cosθt and ρeff become
+chart-covariant in the auxiliary natural-gradient flow (Theorem I.1), and the Cramér–Rao
+remark places a statistical ceiling onρeff. The ratio
+ηcal(t) := ρeff(t)
+ρCR
+is then acalibration-efficiencysignal: values close to1mean the current G is statistically
+optimal; values≪1flag that the metric should be re-estimated. This is the v4 meta-momentum
+indicator.
+Forbidden
+None of the scalars in this section may be substituted into the locked ODE: the dynamics
+use gX, γ, Fbase exactly as defined in Sections 4–6. The predictive scalars areobservables,
+not control inputs.
+9 Main Stability Theorems
+We now state the principal results of the paper. Throughout this section (A1)–(A4) hold and
+the trajectoryX(·)is a solution of the canonical ODE on a maximal interval of existence.
+9.1 Lyapunov descent
+Theorem 9.1(Lyapunov descent).For any solutionX(·)onRn\Σ,
+˙E(t) = (1−γ)
+(
+⟨gX,F base⟩−∥gX∥2)
+.
+=== PAGE 15 ===
+Canonical Dynamical Geometry System — v415
+In particular:
+(i)IfF base≡0, then˙E=−(1−γ)∥gX∥2<0wheneverg X̸= 0.
+(ii)In general, ˙E≤0iff⟨gX,F base⟩≤∥gX∥2.
+Proof. Direct from Lemma 7.7; (i) is the special caseFbase = 0, and (ii) follows since1−γ >
+0. □
+9.2 Asymptotic stability
+Theorem 9.2(Asymptotic stability of the target set).Assume(A1)–(A4),Fbase≡0, and
+that J(X)has full row rank on every sublevel set{E≤c}that is compact. Then for every
+initial conditionX 0 with{E≤E(X0)}compact, the solution exists for allt≥0and
+E(X(t))−−−→
+t→∞
+0,dist
+(
+X(t),{E= 0}
+)
+→0.
+Proof. By Theorem 9.1(i) ˙E≤0, soX(t)stays in the compact sublevel set; Corollary 3.3
+gives global existence. LaSalle’s invariance principle impliesX(t)converges to the largest
+invariant set inside{˙E = 0}={gX = 0}. By Lemma 3.1(i) the rank assumption forces
+{gX = 0}={E= 0}, which is itself invariant (since the right-hand side vanishes there). Hence
+E(X(t))→0. □
+9.3 Exponential rate
+Theorem 9.3(Exponential convergence).Assume the hypotheses of Theorem 9.2 and that on
+the invariant compact set there existsσ >0withσmin(J(X))≥σ. Then
+E(X(t))≤E(X0)e−ρt, ρ= 4σ 2 µ2
+G
+MG
+(1−γmax),
+whereγmax =E(X 0)/(E(X0) +θ)<1.
+Proof. With Fbase = 0, ˙E =−(1−γ)∥gX∥2. We bound∥gX∥2 = 4∥JTGS∥2≥4σ2∥GS∥2≥
+4σ2µ2
+G∥S∥2, whileE=S TGS≤MG∥S∥2, giving∥S∥2≥E/MG. Hence
+∥gX∥2 ≥4σ2µ2
+G
+MG
+E.
+Withγ≤γmax <1monotone inE, ˙E≤−ρEand Grönwall’s inequality concludes.□
+9.4 Ultimate boundedness with non-zeroFbase
+Theorem 9.4(Ultimate boundedness).Assume(A1)–(A4), the rank condition of Theorem 9.3,
+and that∥Fbase∥≤Mon the operating region. Define
+Ψ(R) := θ
+R+θ·2σ
+√
+µ2
+G
+MG
+R= (1−γ(R))·2σµG√MG
+√
+R.
+ThenΨis unimodal on(0 ,∞)with maximumΨ ⋆=σθµG/√MG attained atR⋆=θ. Assuming
+theadmissibility condition M <Ψ⋆, the equationΨ(R) =M has two roots0<R−≤R+. If
+the trajectory enters the admissible energy windowE(X(t0))≤R+, then for anyR∈[R−,R +],
+E(X(t))≤Rfor all sufficiently larget≥T(R,X (t0)). In particular, the theorem is alocal-
+in-energyultimate-boundedness result on the operating window{E≤R+}; it does not claim
+global capture from arbitrarily large energies.
+Proof. From Lemma 7.7, ˙E = (1−γ)(⟨gX,F base⟩−∥gX∥2)≤−(1−γ)∥gX∥(∥gX∥−M). On
+{E≥R}the rank condition and the bound from Theorem 9.3 give∥gX∥2≥4σ2(µ2
+G/MG)R, so
+(1−γ(R))∥gX∥≥Ψ(R). ForR∈[R−,R +],Ψ( r)≥Mfor everyr∈[R,R +]. Therefore ˙E≤0
+=== PAGE 16 ===
+Canonical Dynamical Geometry System — v416
+on the annulus{R≤E≤R+}, so once a trajectory is in the operating window{E≤R+}it
+cannot cross upward throughR+ and is pulled into{E≤R}in finite time.□
+Remark 9.5(Critical disturbance).The admissibility thresholdΨ ⋆= σθµG/√MG is the
+largest disturbance amplitudeM for which any sublevel set is forward-invariant. ForM≥Ψ⋆,
+no finite ultimate bound is provided by the canonical descent alone; an outer feedback shaping
+Fbase is required.
+9.5 Long–short symmetry of the locked ODE
+The Lyapunov functionE = STGS is even in the featureS. The canonical ODE inherits
+an exact Z2 symmetry that formalises the long/short equivalence used in futures trading
+(Section 10).
+Theorem 9.6( Z2 symmetry).Suppose S admits an involutive liftX↦→X♯with S(X♯) =
+−S(X),J(X♯) =−J(X) dX♯/dX, andF base(X♯) =−Fbase(X). Then underX(t)↦→X♯(t):
+E→E, g X→−gX, γ→γ, ˙X→−˙X.
+In particular, every trajectory of the canonical ODE has a mirror trajectory under sign reversal,
+and the two converge to{E= 0}at the same rateρeff(t).
+Proof. Direct: E is quadratic inS, soE(X♯) =STGS =E(X). For the gradient,gX(X♯) =
+2J(X♯)TGS (X♯) = 2(−J)TG(−S) = 2JTGS =gX(X)when the lift acts trivially on the state,
+and−gX(X)when it inverts the state coordinate; the latter is the operative case for futures
+(see §10). The dampingγ=E/(E +θ)depends on E only, hence invariant. Substituting into
+the canonical ODE gives ˙X♯=−˙X.□
+Remark 9.7(Operational reading for futures).For signed futures positionsX∈Rn with
+Fbase a forecast field, the canonical sizing∆X =Fbase−γ⟨Fbase,gX⟩/∥gX∥2gX is automatically
+long/short symmetric: the sign of the trade issgn⟨Fbase,−gX⟩and reverses withS. A single
+calibration of(G,θ)serves both directions. The two-sided admissibility band−
+√
+Ψ⋆/λmin(G)≤
+S≤
+√
+Ψ⋆/λmin(G)is the canonical stop-out, symmetric in long and short.
+10 Application Domains
+Each subsection instantiates(S,G,F base)for a specific domain, verifies (A1)–(A4), and cites
+the appropriate stability theorem from Section 9.No structural change to the canonical ODE
+occurs.
+10.1 Trading / statistical-arbitrage spread control
+Let X = w∈Rn be portfolio weights,A∈Rk×na factor-loading matrix,b∈Rk a target
+spread vector, andΣ∈Rk×kthe (PD) factor covariance.
+S(w) =Aw−b, G= Σ −1, F base(w) =−κ(w−w⋆),
+with κ >0and w⋆the alpha-target weight. Then J = A (constant), E(w) = ( Aw−
+b)T Σ−1(Aw−b)is the squared Mahalanobis spread, andgX = 2AT Σ−1(Aw−b).
+Corollary 10.1.If A has full row rank, Theorem 9.3 applies withσ= σmin(A)and gives
+exponential decay of the Mahalanobis spread; Theorem 9.4 bounds the long-run spread in terms
+of the alpha-tracking torqueκ∥w0−w⋆∥.
+Transaction costs enter via a Lipschitz extension ofFbase (smooth proximal regularisation),
+preserving (A3).
+=== PAGE 17 ===
+Canonical Dynamical Geometry System — v417
+10.2 Spectral / Galerkin PDE control
+Let X = (a1,...,aN)∈RN be the Galerkin coefficients of a target field, anda⋆a desired
+spectrum.
+S(X) =X−a⋆, G= diag(g 1,...,gN), F base(X) =L NX,
+where gk > 0are mode weights (e.g.gk =k2 for anH1-type energy) andLN is the discretised
+PDE operator. ThenJ=I N,E= ∑
+kgk(ak−a⋆
+k)2, andgX = 2G(X−a⋆).
+Corollary 10.2.The rank condition is automatic (J =IN). Theorem 9.3 gives convergence
+rateρ= 4µG(1−γmax)in the weighted ℓ2 norm. Stability of the underlying PDE in the full
+space requiressupN∥LN∥<∞in the weighted norm; under that uniform bound, the discrete
+results lift to the continuum limit.
+10.3 First-order optimisation
+Minimisef∈C2(Rn)with locally bounded Hessian. Set
+S(X) =∇f(X), G=I n, F base(X) =−∇f(X).
+Then J(X) = ∇2f(X), E(X) = ∥∇f(X)∥2, and gX = 2(∇2f)∇f. The canonical ODE
+becomes a damped, projection-corrected gradient flow that vanishes at stationary points.
+Corollary 10.3.If ∇2f is uniformly positive-definite on a sublevel set off, thenσmin(J)≥
+σ >0on that set, Theorem 9.3 applies, and∥∇f(X(t))∥2 decays exponentially.
+Comparison with classical preconditioned descent: the canonical ODE adds theγ-modulated
+projection term, which bounds the transient overshoot ofE at the cost of one extra inner
+product per step.
+10.4 Task-space robotics control
+Let X = q∈Rn be joint angles, FK : Rn→Rk the forward kinematics map,p⋆∈Rk the
+desired end-effector pose, andW≻0a task-space weight.
+S(q) = FK(q)−p⋆, G=W, F base(q) =−KpJ(q)TW(FK(q)−p⋆),
+with Kp > 0. Note Fbase =−Kp
+2 gX, soF = Fbase−gX =−(Kp/2 + 1)gX is fully aligned
+with−gX, the projection coefficient becomes identically1, and the canonical ODE collapses
+to scalar-damped descent ˙X =−(1 +Kp/2)(1−γ)gX. This domain therefore illustrates a
+degenerate alignment regime; richer behaviour arises whenFbase is replaced by a state-feedback
+controller not collinear withgX.
+Corollary 10.4.Away from kinematic singularities (rankJ =k) the rank condition holds and
+Theorem 9.3 gives exponential pose convergence. Near singularities use the regularised ODE
+(ε>0); under the regularisation the conclusion of Theorem 9.2 weakens to convergence to the
+closure of the invariant set{S∈kerJT}.
+11 Domain Parameterisation
+LOCKED
+Domain independence of the core system:
+Different domains changeonlyS(X), E(X), F base(X).
+The ODE structure, the gradient formula, the projection, and the control gain
+are unchanged across all domains.
+=== PAGE 18 ===
+Canonical Dynamical Geometry System — v418
+DomainS(X)E(X)F base(X)
+Trading / Signal Spread / factor vector STGS with G =
+diag(σ−2)
+Alpha signal + mean
+reversion
+PDE controlModal coefficientsa k ∥a∥2
+G (weightedL 2) PDE right-hand side
+Optimisation Gradient / constraint
+residual
+∥∇f∥2 orbarrierterm Gradient descent step
+RoboticsTask-space errore TWe Joint velocity com-
+mand
+Remark 11.1.The table entries areexamples, not definitions. Any choice ofS, G, andFbase
+satisfying the structural requirements of Sections 5.1–5.5 produces a valid instance of the
+canonical system.
+12 Verification Checklist
+All items below must evaluate toTRUEbefore any application or proof proceeds. If any item
+is FALSE, return to the indicated section and fix it.
+Verification checklist
+✓1. Forward chain intact
+X→S→E→gX→˙Xis the unique data path.→§7
+✓2. Single gradient
+gX = 2JTGSis the only gradient appearing anywhere.→§5.3
+✓3. Single force definition
+F=F base−gX; no other force is named or used.→§7
+✓4. Euclidean projection only
+⟨·,·⟩=uTv; no⟨·,·⟩G in dynamics.→Rule 2
+✓5. No metric mixing
+Gpull absent from ˙Xandg X.→Rule 3
+✓6. Control usesF, notF base
+Projection term⟨F,gX⟩; not⟨Fbase,gX⟩.→§4
+✓7. Hessian formula correct
+∇2
+XE= 2J TGJ+⟨η,K⟩1 withη= 2GSandK iab =∂a∂bSi.→§C.5
+✓8. Curvature manifold defined
+Cman ={X:λmax(∇2
+XE) = 1}.→§D.3
+✓9. Domain variation confined
+OnlyS,E,F base differ across domains.→§11
+✓10. No structural changes after this version
+Applications, proofs, and implementations only.→§13
+13 Structure Freeze
+LOCKED
+NO further structural changes to this system.
+The core ODE (§4), the five definitions (§5), and the four rules (§6) arefrozen.
+Permitted after this point:
+=== PAGE 19 ===
+Canonical Dynamical Geometry System — v419
+•Applications— instantiateS,G,F base for a new domain.
+•Proofs— stability, convergence, curvature bounds.
+•Implementations— numerical integrators, code, experiments.
+Not permitted:
+•RedefininggX,F,γ, or the ODE.
+•Adding metric-weighted projections.
+•Introducing alternative gradient or force terms.
+14 Summary — One Line
+Lock system−→Build applications−→Prove results
+A Symbol Table
+SymbolMeaning Dimensions
+XState vectorR n
+S(X)Representation / feature mapR k
+J(X)Jacobian∂S/∂XR k×n
+GFeature-space metric (SPD, fixed)R k×k
+E(X)Energy=S TGSR ≥0
+gX(X)State-space gradient= 2J TGSR n
+Fbase(X)Domain-specific nominal fieldR n
+F(X)Modified force=F base−gX Rn
+γ(X)Adaptive gain=E/(E+θ) [0,1)
+θGain regularisation constantR >0
+Gpull Pulled-back metric=J TGJR n×n
+K(X)Curvature tensor ofS,K iab =∂a∂bSi Rk×n×n
+η(X)Feature-gradient=∇ SE= 2GSR k
+Cman Curvature manifoldλmax = 1⊂R n
+=== PAGE 20 ===
+Canonical Dynamical Geometry System — v420
+B Quick Reference Card
+Quantity Formula
+RepresentationS:X→R k
+EnergyE=S TGS, G≻0
+Gradientg X = 2JTGS
+Modified forceF=F base−gX
+Gainγ=E/(E+θ)
+Canonical ODE ˙X=F base−gX−γ⟨F,gX⟩
+∥gX∥2 gX
+Hessian∇ 2
+XE= 2J TGJ+⟨η,K⟩1,η= 2GS
+Curvature manifoldC man ={X:λmax(∇2
+XE) = 1}
+C Proof Roadmap (Next Steps)
+The following results remain to be established (proofs are outside the locked core but follow
+directly from it):
+P1. Lyapunov descent.Done– Theorem 9.1.
+P2. Invariant set / asymptotic stability.Done– Theorem 9.2.
+P3. Curvature bound.Done– Proposition 7.6.
+P4. Domain convergence.Done– corollaries in Section 10.
+P5. Discretisation error.Open.Bound integration error growth for Euler and Runge–Kutta
+schemes as a function ofhandθ; quantify the bias introduced byε>0regularisation.
+P6. Stochastic extension.Open.Itô analysis of dX = (···)dt +σdW, including the Itô
+correction to ˙E.
+P7. Time-varyingG(t).Open.Effect on ˙Eand on the rateρof Theorem 9.3.
+Part1.Geometric Extensions
+LOCKED
+Extension principle (v3).Each extension below adds new geometric structurestrictly
+upstreamof gX, by changing either the representation mapS, the metricG, or the energy
+template.The canonical ODE, the gradient formula gX = 2JTGS, and the
+Euclidean projection are unchanged.The frozen v2 system from Part I is thekernel
+of every extension.
+D Fractal-Geometric Extension
+D.1 Motivation and setup
+Manytarget setsare not smooth manifoldsbutself-similarattractors withnon-integer Hausdorff
+dimension dH∈(0,n ): financial support/resistance, turbulent attractors, multi-scale boundary
+=== PAGE 21 ===
+Canonical Dynamical Geometry System — v421
+layers. The frozen core requires only that the set be expressed as the zero level set of a smooth
+energy. We therefore route all fractal information throughS.
+LetA⊂Rn be a (possibly fractal) compact target and fixδ0 > 0. Define the δ-mollified
+distance
+dδ(X) := inf
+Y∈Aδ
+∥X−Y∥,Aδ:={Y: dist(Y,A)≤δ}.
+Forδ >0,Aδis a smooth tubular thickening, sodδ∈C2(Rn\Aδ).
+D.2 Multi-scale representation
+F.1 — Fractal feature map
+Fix scalesδ1>δ2>···>δL>0and define
+Sfrac(X) :=
+(
+dδ1(X),...,dδL(X)
+)T∈RL.
+The fractal metric isGfrac = diag(δ−2dH
+1 ,...,δ−2dH
+L ).
+Why this metric. For adH-dimensional self-similar set, Vol(Aδ)∼δn−dH and the typical
+squared distance at scaleδscales asδ2. The weightδ−2dH
+ℓ rescales the contribution of each
+shell so that mass is balanced across scales according to the Hausdorff dimension. Strict scale-
+invariance under simultaneous dilationA↦→λA, δ↦→λδ(where each summand transforms as
+λ2−2dH) holds only atdH = 1; for generaldH the weight producesdimension-awarebut not
+invariant weighting, which is the right notion for capacity-balanced descent.
+D.3 Closure under the canonical core
+Proposition D.1(Fractal instantiation).With S =Sfrac, G =Gfrac, and locally Lipschitz
+Fbase, assumptions(A1)–(A4)hold on the open setΩ :=Rn\
+(
+AδL∪Cut(A)
+)
+, whereCut(A)is
+the medial axis ofA. OnΩeach dδℓis C2 and Theorems 9.1–9.4 apply with the rate constant
+of Theorem 9.3. Globally,dδℓ∈C1,1, and(A1)can be replaced by(A1′)( S∈C1,1 with locally
+bounded weak Hessian) while preserving Theorems 9.1 and 9.2.
+Proof. OnΩthe squared-distance functions areC2 by Federer’s tubular-neighbourhood theorem;
+Gfrac is constant SPD; apply Theorem 3.2. TheC1,1 extension follows from Rademacher and
+standard a.e. chain-rule arguments.□
+Proposition D.2(Multi-scale exponential decay).ForF base≡0onΩ,
+Efrac(X(t))≤Efrac(X0)e−ρfract, ρ frac = 4σ2
+J
+δ−4dH
+L
+δ−2dH
+1
+(1−γmax),
+withσJ the smallest singular value of the Jacobian ofSfrac on the operating sublevel set.
+Proof. Apply Theorem 9.3 withµG = δ−2dH
+L and MG = δ−2dH
+1 (eigenvalues of the diagonal
+Gfrac). □
+E Contact-Geometric Extension
+E.1 Motivation
+Many controlled systems live on a contact manifold(M 2m+1,α)with α∧(dα)m̸= 0. The Reeb
+fieldRαand the contact distributionξ= kerαencode admissible motions. We show that the
+canonical ODE respectsαwhenFbase is Reeb-compatible, without modifying the dynamics.
+=== PAGE 22 ===
+Canonical Dynamical Geometry System — v422
+E.2 Contact instantiation
+Work in R2m+1 with the standard contact formα= dz−∑m
+i=1yidxi, coordinates(x,y,z ).
+(Throughout Part II, the symbolαdenotes this contact 1-form; the projection coefficient
+of §B.2 is denotedαproj =⟨F,gX⟩/∥gX∥2 when both appear together.) ThenRα= ∂z and
+ξ= span{∂xi +yi∂z,∂yi}.
+C.1 — Contact feature map
+LetΦ : R2m+1→Rk0 encode the target submanifold (e.g. a Legendrian) asΦ = 0. Define
+Sct(X) :=
+(
+Φ(X)
+αX(Fbase(X))
+)
+∈Rk0+1,
+whereαX(v) =v z−∑yivxi. The metric isGct = blockdiag(G0,β),β >0.
+The second component penalisesFbase-energy along the Reeb direction (non-horizontal motion).
+E.3 Horizontal descent property
+Proposition E.1(Contact preservation).Let ϕ(X) := αX(Fbase(X)) = ( Fbase)z −∑
+iyi(Fbase)xi and Lϕ:= supX∥∇Xϕ(X)∥<∞on the operating region. WithS = Sct and
+G=G ct in the canonical ODE,
+d
+dt
+(
+βϕ(X)2)
+= 2βϕ(X)⟨∇Xϕ(X),˙X⟩ ≤2βLϕ|ϕ(X)|∥˙X∥.
+Moreover, by Lemma 7.7 applied toEct, the total energy obeys ˙E≤−(1−γ)∥gX∥2 + (1−
+γ)⟨gX,F base⟩, which (since the second component ofgX involves∇Xϕ) forcesβϕ(X)2→0
+whenever the first-component errorΦ(X)→0and Fbase is autonomous withϕvanishing at
+the target.
+Proof. The identity is immediate from the chain rule˙ϕ=⟨∇Xϕ,˙X⟩and Cauchy–Schwarz.
+The asymptotic statement follows by combining the energy descent of Theorem 9.1 (which
+forces gX→0along the trajectory in the autonomous case) with the structural fact that the
+Reeb-component ofgX is2 βϕ(X)∇Xϕ(X), sogX→0and a non-degeneracy of∇Xϕat the
+target forceϕ→0.□
+Reading. The contact extension uses the canonical ODEas-is; preservation is purely a property
+ofS ct. Rule 2 (Euclidean projection) is preserved.
+E.4 Subriemannian special case
+If Fbase is horizontal (α(Fbase) = 0), the second component ofEct vanishes identically and the
+system reduces to the descent of Part I restricted toξ. This recoverssubriemanniangradient
+flow without modifying the canonical ODE.
+F Geometric-Flow Extension
+F.1 Time-varying metric
+The frozen core requiresG constant. We now allow G = G(t)to evolve by a prescribed
+geometric flow(Ricci-type, mean-curvature, Yamabe), driven by the current state.
+=== PAGE 23 ===
+Canonical Dynamical Geometry System — v423
+GF.1 — Metric flow
+LetRic(G;X)∈Rk×k
+sym be a smooth functional. The metric evolves by
+˙G=−2 Ric(G;X) +σ
+(
+G⋆(X)−G
+)
+, σ≥0,
+with G⋆(X)a target metric (e.g. data-adaptive covariance).σ= 0recovers pure Ricci
+flow;σ >0adds attractive damping towardG⋆.
+F.2 Modified energy derivative
+Lemma F.1(Energy derivative under metric flow).WithG =G(t)as above and E(X,t ) =
+S(X)TG(t)S(X),
+˙E= (1−γ)
+(
+⟨gX,F base⟩−∥gX∥2)
++S T ˙GS.
+Proof. ˙E= 2S TG ˙S+S T ˙GS=⟨gX, ˙X⟩+ST ˙GS; apply Lemma 7.7 for the first piece.□
+For pure Ricci flowST ˙GS=−2ST RicS, which is≤0wheneverRic⪰0.
+F.3 Joint stability
+Theorem F.2(Coupled state-metric stability).Assume(A1),(A3),(A4), the relaxed metric
+assumption(A2 ′), Fbase≡0, σ >0, and thatG⋆∈C1 with eigenvalues uniformly in[µ⋆,M⋆]
+and∥∇XG⋆∥op≤L⋆. Assume Ric(G;X)⪰−cRG with cR < σ/2. If G⋆is constant, the
+coupled system(X,G)is forward-complete and the Lyapunov function
+V(X,G) =E(X,t) + 1
+2σ−1∥G−G⋆(X)∥2
+F
+is non-increasing. IfG⋆depends onX, the same calculation gives the practical bound
+˙V≤ −a∥G−G⋆(X)∥2
+F + L2
+⋆
+4aσ2∥˙X∥2
+for everya∈(0,1)after absorbing the Ricci term bycR <σ/2.
+Sketch. Lemma F.1 gives ˙E≤−(1−γ)∥gX∥2 + 2cRSTGS +σST (G⋆−G)S. Differentiating
+the metric piece and using˙G⋆= (∇XG⋆) ˙X,
+d
+dt
+1
+2σ−1∥G−G⋆∥2
+F =−∥G−G⋆∥2
+F−2σ−1⟨G−G⋆,Ric⟩F−σ−1⟨G−G⋆, ˙G⋆⟩F.
+The last term is bounded byσ−1∥G−G⋆∥FL⋆∥˙X∥. IfG⋆is constant this term vanishes, and
+adding to ˙E while usingcR <σ/2yields ˙V≤0. IfG⋆varies withX, Young’s inequality gives
+the stated practical bound.□
+F.4 Discretisation
+A practical scheme alternates a state half-step (canonical ODE with frozenGt) and a metric
+half-step (one explicit Euler step of the Ricci flow). Convergence in the limith→0to the
+continuous coupled system follows from Lie–Trotter-type splitting estimates.
+G Unified View of the Three Extensions
+The consolidated table for Parts I–III is given in Section M at the end of Part III. The three
+v3 extensions all preserve the locked canonical ODE: Fractal and Contact change onlyS;
+Geometric flow lifts (A2) to (A2′).
+=== PAGE 24 ===
+Canonical Dynamical Geometry System — v424
+LOCKED
+In every v3 extensiongX = 2JTGS, the projection is Euclidean, and Rules 1–4 of Part I
+are obeyed.
+Open extension targets (v3 candidates promoted to Part III)
+The v3 candidateinformation-geometric flowis realised in Part III. The remaining v5 candidate
+list is consolidated at the end of Part III.
+Part2.Information-Geometric Flow
+LOCKED
+v4 principle.Specialise the v3 metric flow with theFisher information metric. Two
+coupling schedules are used: thetrackingschedule G≡IS(S(X))for structural results,
+and therelaxationschedule ˙G =σrel(IS(S(X))−G)for Lyapunov / practical state–metric
+control (specialisation of v3’s Theorem F.2). The locked canonical ODE, the gradient
+formulagX = 2JTGS, and the Euclidean projection are unchanged. Newauxiliaryobject:
+the state natural gradient˜gX =I†
+XgX, whereIX =JTISJ, which drives a chart-covariant
+variant flow (extension, not part of the locked system). Capabilities added: adaptive
+preconditioning, statistical Cramér–Rao rate floor, MLE/VI as canonical instances.
+H Statistical setup and the Fisher metric
+H.1 Features as statistical parameters
+Identify the feature coordinatez =S(X)∈Rk with the parameter of a smooth parametric
+family of probability densities
+P=
+{
+p(·|z) :z∈ΘS⊂Rk }
+, p(·|z)>0,
+∫
+pdy= 1.
+The feature score isu(y;z) :=∇z logp(y|z).
+IG.1 — Fisher information matrix
+IS(z) :=E y∼p(·|z)
+[
+u(y;z)u(y;z) T ]
+=−E
+[
+∇2
+z logp(y|z)
+]
+∈Rk×k.
+IS(z)⪰0always; positive-definite under the standard identifiability assumption (A5: feature
+scores span Rk at everyz =S(X)in the operating region). The pullback Fisher metric on
+state space is
+IX(X) :=J(X) TIS(S(X))J(X)∈Rn×n.
+We henceforth assumeA5; whenIX is singular, all inverses below are Moore–Penrose inverses
+or Tikhonov-regularised inverses onrange(JT ).
+H.2 Fisher metric in the canonical system
+Under (A2′) we may takeG(X) :=IS(S(X)). The canonical objects then read
+E(X) =S(X) TIS(S(X))S(X), g X = 2J(X)TIS(S(X))S(X),
+and the canonical ODE, the Euclidean projection (Rule 2), and Rules 1, 3, 4 are unchanged.
+We adopt either of two coupling schemes, used below as needed:
+(F1) Tracking schedule.G(X)≡IS(S(X))(instantaneous identification). Then ˙G is the
+chain-rule derivative∇XIS(S(X))[ ˙X]and the v3 flow equation does not apply.
+=== PAGE 25 ===
+Canonical Dynamical Geometry System — v425
+(F2) Relaxation schedule. G(t)evolves independently by ˙G = σrel
+(
+IS(S(X))−G
+)
+with
+relaxation rateσrel> 0. The v3 joint-stability theorem applies withG⋆(X) =IS(S(X)),
+Ric≡0, subject to the state-dependent-target qualifications in Theorem F.2. In the limit
+σrel→∞this recovers (F1).
+Throughout Part III we use (F1) for structural results and (F2) for the joint-stability statement
+(Theorem J.1).
+I Natural gradient and chart covariance
+NG.1 — Natural gradient
+WithG(X) =I S(S(X)), define the state natural gradient ofEas
+˜gX(X) :=I X(X)†gX(X),I X =J TISJ.
+˜gX is an auxiliary quantity usedonlyfor analysis and for thenatural-gradient variantof
+the canonical ODE introduced in Section K. The locked canonical ODE itself is unchanged
+and continues to usegX.
+Theorem I.1(Chart covariance of ˜gX).Under a C1 diffeomorphismX = Φ( ˜X)with Jacobian
+T=∂Φ/∂˜X, the state Fisher metric and the natural gradient transform as
+˜IX =T TIXT, ˜˜g ˜X =T −1˜gX,
+so the natural-gradientflow ˙X =−˜gX(X)is covariant: its trajectory in ˜X-coordinates is
+Φ−1◦X(·). Equivalently, the trajectory is chart-independent.
+Proof. ˜IX = TTIXT is the standard transformation (Chentsov–Cencov for the Fisher met-
+ric; [8]). Then ˜∇˜E = TT∇E, so ˜˜g = ˜I†
+X
+˜∇˜E = (TTIXT )†TT∇E= T−1I†
+X∇E= T−1˜gX.
+Covariance of the flow follows.□
+Remark I.2(The locked canonical ODE isnotchart-covariant).The canonical ODE of Part I
+uses the Euclidean inner product (Rule 2) in the projection term. Under reparametrisation
+this inner product is not preserved, so the canonical trajectoryX(t)is chart-dependent. Chart
+covariance is a property of theauxiliarynatural-gradient flow ˙X =−˜gX and of stability
+statements formulated intrinsically in the Fisher metric (see Theorem J.1); it is not a property
+of the locked ODE.
+Computational consequence. The natural-gradient flow˙X =−˜gX is the invariant analogue of
+canonical descent. Even though the locked canonical ODE remains chart-dependent, working
+in (locally) Fisher-affine coordinates makes Euclidean projection nearly optimal and removes
+the conditioning problems that plague v2/v3.
+J Joint stability under Fisher flow
+Theorem J.1(Information-geometric stability).Assume(A1),(A2 ′),(A3)–(A5),Fbase≡0,
+the relaxation schedule(F2)with σrel > 0, and thatIS(S(X))is uniformly bounded µII⪯
+IS(S(X))⪯MII on the operating sublevel set, with∇XIS(S(X))uniformly bounded in
+operator norm byLI. IfI S is constant on the operating set, then the Lyapunov function
+V(X,G) =E(X) + 1
+2σ−1
+rel∥G−IS∥2
+F
+is non-increasing, and along trajectories
+E(X(t))≤E(X0)e−ρFt, ρ F ≥4µ2
+I
+MI
+σ2
+min(J) (1−γmax).
+=== PAGE 26 ===
+Canonical Dynamical Geometry System — v426
+The displayed Euclidean rate is chart-dependent. By Theorem I.1, however, the auxiliary
+natural-gradient flow is chart-covariant, so stability statements formulated intrinsically with
+the pullback Fisher metricIX are chart-independent. IfIS varies withX, the sameV satisfies
+the practical bound of Theorem F.2 withG⋆(X) =I S(S(X))rather than strict monotonicity.
+Proof. The Lyapunov inequality is Theorem F.2 withG⋆=IS, Ric≡0in the constant case.
+IfIS varies, Theorem F.2 supplies the displayed practical bound. The decay rate follows
+from the corrected Theorem 9.3 withµG =µI, MG =MI. Chart covariance of the auxiliary
+natural-gradient flow is Theorem I.1.□
+Remark J.2(Cramér–Rao floor).If the familyP admits an unbiased estimator with co-
+variance bounded above by CovmaxI, the Cramér–Rao inequality givesµI ≥Cov−1
+max, so
+ρF≥4 Cov−2
+maxM−1
+I σ2
+min(J)(1−γmax). This is astatisticallower bound on the descent rate
+that v2/v3 cannot express.
+K Three new computational capabilities
+K.1 Adaptive preconditioning and natural-gradient variant
+The feature Fisher matrixIS(S(X))and its pullbackIX =JTISJ are the local information
+preconditioners for optimisation onP. Two ways to use them:
+(1) In-place (locked ODE).SetG(X) =IS(S(X)). The locked ODE runs unchanged, with
+gX = 2JTISS. This preserves Rules 1–4 but is chart-dependent.
+(2) Natural-gradient variant.Replace the locked ODE by ˙X =−˜gX (Definition NG.1).
+Chart-covariant (Theorem I.1), butbreaks Rule 2and is therefore an extension, not a
+specialisation. Use only when chart invariance is required.
+K.2 Variational inference and MLE in one map
+Two canonical instances:
+(1) MLE.In local asymptotic-normal coordinates, chooseS(X) :=X−XMLE and G =IS.
+Then E = STISS is the quadratic log-likelihood error; the auxiliary natural-gradient
+variant is locally Fisher scoring.
+(2) Variational inference.Choose S(X) := λ(X)−λ⋆in natural-parameter coordinates
+of qX. WithG =IS, E is the local Fisher quadratic approximation to the KL/negative
+ELBO; the auxiliary flow ˙X=−˜gX is natural-gradient VI.
+K.3 Information-geometric Hessian
+Under (A2′) withG =IS(S(X)), the flat Euclidean Hessian ofE =STIS(S(X))S acquires
+extra terms beyond the constant-metric formula of §C.5:
+(
+∇2
+XE
+)
+ab = 2(J TISJ)ab +ηiKiab + 2(∂aIS,ij)JjbSi + 2(∂bIS,ij)JjaSi +S i(∂a∂bIS,ij)Sj,
+where η= 2ISS. The two single-derivative terms involve the Fisher-informationconnection
+coefficientsCabc := 1
+2∂aIS,bc (Amari0-connection); the last term involves∂2I, which vanishes
+for exponential families in canonical coordinates. In particular, on the target set{S= 0}
+(whereη= 0and the last three corrections vanish),∇2
+XE = 2JTISJ = 2IX recovers the Fisher
+pulled-back metric at the optimum.
+L Bridge to v5: stochastic extension
+For a canonical SDEdX =H(X)dt+Σ(X)dW (withH the canonical-ODE drift), Itô’s lemma
+gives
+E[dE] =
+⟨
+gX,H
+⟩
+dt+ 1
+2tr
+(
+ΣT∇2
+XEΣ
+)
+dt.
+=== PAGE 27 ===
+Canonical Dynamical Geometry System — v427
+The Fisher choiceΣ =I†/2
+X makes the second term1
+2tr
+(
+(I†/2
+X )T∇2
+XEI†/2
+X
+)
+, which on the target
+set (η= 0and ∇2
+XE = 2IX) reduces torank(IX), a chart-independent scalar on the identifiable
+tangent subspace. This prepares v5 by:
+•providing the canonical noise covarianceΣ =I†/2
+X ,
+•yielding chart-independent Itô corrections,
+•identifyingVwith a free-energy functional.
+M Master unified view (v2 + v3 + v4)
+Layer Object changed Canonical ODE New result /
+capability
+Part I (v2) frozen kernel (S,Gconst) defined descent, exp.
+rate, ult. bound-
+edness
+Part II (v3)SviaS frac,S ct unchanged fractal / contact
+Part II (v3)G→G(t)Ricci-type flow unchanged Lyapunov /
+practical state–
+metric bound
+(Thm. F.2)
+Part III (v4)G(X) =I S(S(X))+ relaxation unchanged (locked) adaptive pre-
+conditioning,
+Cramér–Rao
+floor
+Part III (v4) auxiliary natural-gradient flownew variant(extension) chart covariance
+(Thm. I.1)
+LOCKED
+In everylocked-ODErow gX = 2JTGS, the projection is Euclidean, and Rules 1–4 of
+Part I are obeyed. The natural-gradient variant in the last rowbreaks Rule 2and is
+explicitly marked as an extension.
+Open extension targets (v5 candidates)
+•Stochastic canonical SDE with Fisher-noiseΣ =I†/2
+X .
+•Symplectic / Poisson extension via skew-symmetric energy correction.
+•Discrete fractal lattices:Sdefined on a self-similar graph.
+•α-connection family: interpolate between Fisher and dual-flat geometry.
+N Thermodynamic dictionary
+The damping lawγ=E/(E +θ)is structurally a Fermi–Dirac occupation in the dimensionless
+ratioE/θ:
+γ= 1
+1 +θ/E,1−γ= 1
+1 +E/θ.
+Hence θplays the role of atemperature(units of energy) and the canonical loop has an exact
+thermodynamic reading.
+=== PAGE 28 ===
+Canonical Dynamical Geometry System — v428
+Canonical thermodynamic quantities
+Temperature:θ.
+Occupation:γ=E/(E+θ).
+Free energy:F(E) =E−θS(E).
+Entropy:S(E) =−γlnγ−(1−γ) ln(1−γ).
+Carnot-like efficiency:ηC = 1−γ.
+Heat dissipated:Q=γproj gXFbase.
+Work preserved:W=F base−Q.
+Proposition N.1(Maximum-entropy operating point).S(E)is strictly concave on(0,∞)
+with maximum atE=θ, whereγ= 1/2andS= ln 2.
+Proof.Sis the binary entropy ofγ∈(0,1);γ= 1/2⇐⇒E=θ.□
+Remark N.2(Annealing).Decreasing θover time issimulated annealingon the canonical
+surface: γ→1, the engine commits more strongly to projection, andρeff saturates Theorem 9.3.
+Increasingθrelaxes the brake and exposes more ofFbase.
+Proposition N.3(de Bruijn-type identity, Fisher case).Under the Fisher choiceG =IS and
+the regularity of Section H,
+˙E(t) =−ρeff(t)E(t), ρ eff(t)≤ρCR,
+so the engine trades Lyapunov energy for Fisher information at a rate bounded by the Cramér–
+Rao floor.
+O Game-theoretic derivation ofγ⋆
+The damping coefficient is the Nash equilibrium of a two-player saddle-point problem between
+anactor(executingF base) and anauditor(enforcingS→0).
+Theorem O.1(Saddle-point characterisation).FixF base andg X with∥gX∥>0. Consider
+L(u,λ) =1
+2∥u−Fbase∥2 +λ⟨u,gX⟩−θ
+2
+∥gX∥2
+E λ2.
+ThenLhas a unique saddle point(u ⋆,λ⋆)with
+u⋆=F base−γ⟨Fbase,gX⟩
+∥gX∥2 gX, γ= E
+E+θ,
+which coincides exactly with the canonical step.
+Proof. Stationarity in u gives u⋆= Fbase−λ⋆gX. Stationarity in λgives ⟨u⋆,gX⟩=
+(θ∥gX∥2/E)λ⋆, and substituting yieldsλ⋆=⟨Fbase,gX⟩E/((E +θ)∥gX∥2), sou⋆matches the
+canonical step withγ=E/(E +θ). The Hessian ofL inu isI≻0and in λis−θ∥gX∥2/E <0,
+so the stationary point is a saddle.□
+Remark O.2(No-regret reading).Because u⋆is a saddle ofL, the canonical step isminimax-
+optimal: among admissible perturbations ofFbase, none yields a worst-case energy increase
+greater than zero. The canonical engine is therefore an adversarial robustifier: any input field
+Fbase is converted into a no-regret update against the energy-projection auditor.
+=== PAGE 29 ===
+Canonical Dynamical Geometry System — v429
+P Multi-engine composition (port-Hamiltonian)
+Multiple canonical engines, each defined by its own triple(Si,Gi,F (i)
+base)with energy Ei =
+ST
+i GiSi and dampingγi =Ei/(Ei+θi), can be aggregated into a single passive port-Hamiltonian
+system on the common stateX∈Rn.
+DefinitionP.1(Compositeengine).Foreach i = 1,...,m letRi(X) =γi(X)g(i)
+X (g(i)
+X )T/∥g(i)
+X∥2⪰
+0andH(X) = 1
+2
+∑
+iEi(X). Define
+˙X=
+m∑
+i=1
+F (i)
+base(X)−2
+(m∑
+i=1
+Ri(X)
+)
+∇H(X).
+Theorem P.2(Aggregate passivity).Under Assumptions A1–A3 applied component-wise, the
+composite engine of Definition P.1 satisfies
+˙H≤
+m∑
+i=1
+⟨
+∇H,F(i)
+base
+⟩
+,
+i.e. it is passive with inputu = ∑
+iF (i)
+base and storageH. In particular, if everyF (i)
+base≡0then
+˙H≤0and eachEi is non-increasing along the joint flow.
+Proof. ˙H = ∑
+i ˙Ei/2. From ˙Ei = ⟨g(i)
+X, ˙X⟩and the substitution of the composite ODE,
+˙Ei =⟨g(i)
+X, ∑
+jF (j)
+base⟩−2 ∑
+j⟨g(i)
+X,Rj∇H⟩. Each Rj⪰0contributes a non-positive term to
+∑
+i ˙Ei, hence ˙H≤⟨∇H,∑
+jF (j)
+base⟩.□
+Remark P.3(Strategy aggregation).Theorem P.2 states that running several canonical
+engines in parallel on the same state is automatically stability-preserving: no portfolio-level
+Lyapunov function is needed, and individual energiesEi remain non-increasing in the free-flow
+regime. This is the canonical justification for combining multiple(S,G,F base)instantiations
+(e.g. several trading strategies, or coupled control objectives) without redesign.
+Remark P.4(Single-temperature limit).If all θi≡θand theg(i)
+X are mutually orthogonal,
+thenR = ∑
+iRi has rankm and the composite engine acts asm independent canonical engines
+sharing one temperature; the total entropy isStot = ∑
+iS(Ei).
+References
+[1] E. D. Sontag,A ‘universal’ construction of Artstein’s theorem on nonlinear stabilization, Systems & Control
+Letters13(1989), 117–123.
+[2] R. A. Freeman and P. V. Kokotović,Robust Nonlinear Control Design, Birkhäuser, 1996.
+[3] F. Bullo and A. D. Lewis,Geometric Control of Mechanical Systems, Springer, 2004.
+[4] L. Ambrosio, N. Gigli, and G. Savaré,Gradient Flows in Metric Spaces and in the Space of Probability
+Measures, Birkhäuser, 2005.
+[5] R. T. Q. Chen, Y. Rubanova, J. Bettencourt, and D. Duvenaud,Neural Ordinary Differential Equations,
+NeurIPS, 2018.
+[6] A. van der Schaft and D. Jeltsema,Port-Hamiltonian Systems Theory: An Introductory Overview, Founda-
+tions and Trends in Systems and Control, 2014.
+[7] P. A. Ioannou and J. Sun,Robust Adaptive Control, Prentice-Hall, 1996.
+[8] S.-I. Amari,Information Geometry and Its Applications, Springer, 2016.

@@ -23,8 +23,161 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from nn_engine import (
     BlowUpNet, make_spiral_data, get_all_optimisers,
-    train, EpochLog, grad_norm, per_layer_grad_norms
+    train, EpochLog, grad_norm, per_layer_grad_norms,
+    spectral_radius_approx, GradientBSDT,
 )
+
+
+# ═════════════════════════════════════════════════════════════
+#  CANONICAL ADAPTIVE FRICTION — DIRECT IMPLEMENTATION
+# ═════════════════════════════════════════════════════════════
+#
+# These classes implement the canonical formula directly in this
+# script, independent of the BSDT optimiser family, so the math
+# is fully auditable here without tracing into nn_engine.py.
+#
+# The stability condition for gradient descent is:
+#
+#   ‖θ_{t+1} − θ*‖ ≤ ‖θ_t − θ*‖  iff  lr_eff ≤ 2 / λ_max(∇²L)
+#
+# Setting a safety margin α (0 < α ≤ 2):
+#
+#   lr / (1 + γ*) = α / λ_max  →  γ* = lr · λ_max / α
+#
+# Level 1 (spectral):   γ_spec  = lr · λ_eff(W) / α
+#   where λ_eff = geometric mean of layer spectral norms
+#         = exp((1/L) Σ log σ_max(W_l))  ≈ typical per-layer σ
+#   (Full product Π σ_l ≈ 5.6^20 ≈ 10^15 is too loose for deep nets)
+# Level 2 (structural): γ_struct = E_BS / (E_BS + θ)
+# Combined:             γ*       = max(γ_spec, γ_struct)
+# ─────────────────────────────────────────────────────────────
+
+class CanonicalSpectralOptimiser:
+    """ʜ Level-1 only: pure spectral canonical adaptive friction.
+
+    γ*(t) = lr · λ_eff(W, t) / α
+
+    λ_eff is the GEOMETRIC MEAN of per-layer weight spectral norms:
+        λ_eff = exp((1/L) Σ log σ_max(W_l))
+
+    The full Jacobian product Π σ_l grows as σ^L ≈ 5.6^20 ≈ 10^15
+    for a 20-layer init, making γ_spec astronomically large and
+    freezing the network.  The geometric mean gives the typical
+    per-layer spectral norm ≈ 5.6, keeping γ_spec in [0, 10].
+
+    When λ_eff is small (flat landscape):  γ* ≈ 0 → full lr.
+    When λ_eff is large (near blow-up):    γ* ≫ 1 → near-zero step.
+
+    Spectral computation is cached once per epoch (not per batch) to
+    avoid redundant power iterations inside the mini-batch loop.
+    """
+    name = "CanSpectral"
+
+    def __init__(self, alpha: float = 0.1):
+        self.alpha = alpha
+        self._cached_epoch  = -1
+        self._cached_lam    = 1.0
+
+    def reset(self):
+        self._cached_epoch = -1
+        self._cached_lam   = 1.0
+
+    def step(self, net, dW_list, db_list, epoch, lr):
+        # Recompute spectral bound only once per epoch
+        if epoch != self._cached_epoch:
+            self._cached_lam   = spectral_radius_approx(net.W, seed=epoch)
+            self._cached_epoch = epoch
+        lam_max    = self._cached_lam
+        gamma_star = lr * lam_max / self.alpha
+        effective_lr = lr / (1.0 + gamma_star)
+
+        for i in range(net.n_layers):
+            net.W[i] -= effective_lr * dW_list[i]
+            net.b[i] -= effective_lr * db_list[i]
+
+        return {
+            "friction":    1.0 + gamma_star,
+            "gamma_star":  gamma_star,
+            "lambda_max":  lam_max,
+            "E_bs":        0.0,
+            "channels":    None,
+        }
+
+
+class CanonicalFullOptimiser:
+    """Two-level canonical adaptive friction (spectral + structural).
+
+    Level 1 — spectral:   γ_spec   = lr · λ_max(W) / α
+    Level 2 — structural: γ_struct  = E_BS / (E_BS + θ)
+    Combined:             γ*        = max(γ_spec, γ_struct)
+
+    This is the complete canonical formula from the grand-unification
+    paper, implemented here as a standalone reference optimiser so the
+    derivation is directly auditable in the runner script.
+
+    Spectral computation is cached once per epoch (not per batch) to
+    avoid redundant power iterations inside the mini-batch loop.
+    """
+    name = "CanFull"
+
+    def __init__(self, alpha: float = 0.1, theta: float = 1.0):
+        self.alpha = alpha
+        self.bsdt  = GradientBSDT(theta=theta)
+        self.calibrated    = False
+        self._cached_epoch = -1
+        self._cached_lam   = 1.0
+
+    def reset(self):
+        self.bsdt.reset()
+        self.calibrated    = False
+        self._cached_epoch = -1
+        self._cached_lam   = 1.0
+
+    def step(self, net, dW_list, db_list, epoch, lr):
+        # ── Level 1: spectral (cached per epoch) ──────────────
+        if epoch != self._cached_epoch:
+            self._cached_lam   = spectral_radius_approx(net.W, seed=epoch)
+            self._cached_epoch = epoch
+        lam_max    = self._cached_lam
+        gamma_spec = lr * lam_max / self.alpha
+
+        # ── Level 2: structural (BSDT energy) ───────────────
+        channels   = self.bsdt.compute_channels(net.W, dW_list)
+        E_bs       = self.bsdt.energy(channels)
+        gamma_struct = E_bs / (E_bs + self.bsdt.theta)
+
+        # Calibrate on first epoch
+        if not self.calibrated and epoch == 0:
+            g_norms = per_layer_grad_norms(dW_list)
+            if all(np.isfinite(g) for g in g_norms):
+                self.bsdt.calibrate(g_norms)
+                self.calibrated = True
+
+        # ── Combined: canonical formula ──────────────────────
+        gamma_star  = max(gamma_spec, gamma_struct)
+        effective_lr = lr / (1.0 + gamma_star)
+
+        for i in range(net.n_layers):
+            net.W[i] -= effective_lr * dW_list[i]
+            net.b[i] -= effective_lr * db_list[i]
+
+        return {
+            "friction":    1.0 + gamma_star,
+            "gamma_star":  gamma_star,
+            "gamma_spec":  gamma_spec,
+            "gamma_struct": gamma_struct,
+            "lambda_max":  lam_max,
+            "E_bs":        E_bs,
+            "channels":    channels,
+        }
+
+
+def get_canonical_optimisers() -> dict:
+    """Return the two canonical reference optimisers."""
+    return {
+        "CanSpectral": CanonicalSpectralOptimiser(alpha=0.1),
+        "CanFull":     CanonicalFullOptimiser(alpha=0.1, theta=1.0),
+    }
 
 
 # ═════════════════════════════════════════════════════════════
@@ -32,9 +185,15 @@ from nn_engine import (
 # ═════════════════════════════════════════════════════════════
 
 def run_experiment(n_epochs: int = 300, lr: float = 0.01,
-                   seed: int = 42, verbose: bool = True
+                   seed: int = 42, verbose: bool = True,
+                   hidden_dim: int = 64, n_layers: int = 10
                    ) -> dict:
-    """Run all 13 optimisers on the BlowUpNet."""
+    """Run all 15 optimisers on the BlowUpNet.
+
+    hidden_dim / n_layers control network width and depth.
+    defaults are 64 / 10 for practical runtimes on CPU;
+    set 512 / 20 to reproduce the full pathological experiment.
+    """
 
     # Generate data
     X, y = make_spiral_data(n_samples=2000, noise=0.3, seed=seed)
@@ -44,16 +203,16 @@ def run_experiment(n_epochs: int = 300, lr: float = 0.01,
 
     if verbose:
         print(f"Data: {len(X_train)} train, {len(X_test)} test, {X.shape[1]}D")
-        print(f"BlowUpNet: 20 layers, d=512, init_scale=2.0 (pathological)")
+        print(f"BlowUpNet: {n_layers} layers, d={hidden_dim}, init_scale=2.0 (pathological)")
         print(f"Training: lr={lr}, epochs={n_epochs}, batch=256")
         print()
 
-    optimisers = get_all_optimisers()
+    optimisers = {**get_all_optimisers(), **get_canonical_optimisers()}
     results = {}
 
     for opt_name, opt in optimisers.items():
         # Fresh network for each optimiser (same init)
-        net = BlowUpNet()
+        net = BlowUpNet(hidden_dim=hidden_dim, n_layers=n_layers)
         net.init_weights(seed=seed)
         opt.reset()
 
@@ -185,6 +344,7 @@ def print_summary_table(results: dict) -> str:
     standard = ["SGD", "SGD+Clip", "Adam", "AdamW", "RMSProp"]
     bsdt_names = ["BSDT", "MFLS", "Molecular", "Gravity", "Hybrid",
                   "QuadSurf", "QuadExpo", "SignedLR"]
+    canonical_names = ["CanSpectral", "CanFull"]
 
     def format_row(name, r):
         survived = f"{r['epochs_survived']}/{300}"
@@ -194,7 +354,7 @@ def print_summary_table(results: dict) -> str:
         pk = f"{r['peak_friction']:.1f}×" if r['peak_friction'] > 0 else "—"
         fn = f"{r['final_friction']:.2f}×" if r['final_friction'] > 0 else "—"
         gn = f"{r['peak_grad_norm']:.1e}" if np.isfinite(r['peak_grad_norm']) else "∞"
-        typ = "std" if name in standard else "BSDT"
+        typ = "std" if name in standard else ("canon" if name in canonical_names else "BSDT")
         return f"  {name:<14s} {typ:<8s} {survived:>8s} {bu:>9s} {loss:>10s} {acc:>9s} {pk:>9s} {fn:>9s} {gn:>10s}"
 
     for name in standard:
@@ -204,6 +364,11 @@ def print_summary_table(results: dict) -> str:
     for name in bsdt_names:
         if name in results:
             lines.append(format_row(name, results[name]))
+    lines.append("-" * 105)
+    lines.append("  ── Canonical Adaptive Friction (direct implementations) ──")
+    for name in canonical_names:
+        if name in results:
+            lines.append(format_row(name, results[name]))
 
     lines.append("=" * 105)
     lines.append("")
@@ -211,6 +376,7 @@ def print_summary_table(results: dict) -> str:
     # Key statistics
     bsdt_survived = sum(1 for n in bsdt_names if n in results and not results[n]["blew_up"])
     std_blew_up = sum(1 for n in standard if n in results and results[n]["blew_up"])
+    canon_survived = sum(1 for n in canonical_names if n in results and not results[n]["blew_up"])
 
     bsdt_losses = [results[n]["final_train_loss"] for n in bsdt_names
                    if n in results and np.isfinite(results[n]["final_train_loss"])]
@@ -219,6 +385,7 @@ def print_summary_table(results: dict) -> str:
 
     lines.append(f"  Standard optimisers that BLEW UP: {std_blew_up}/{len(standard)}")
     lines.append(f"  BSDT variants surviving 300 epochs: {bsdt_survived}/{len(bsdt_names)}")
+    lines.append(f"  Canonical variants surviving 300 epochs: {canon_survived}/{len(canonical_names)}")
     if bsdt_losses:
         lines.append(f"  Best BSDT train loss: {min(bsdt_losses):.4f}")
     if bsdt_accs:
@@ -272,7 +439,12 @@ def generate_figures(results: dict, figdir: str = None):
         "Gravity": "#16a085", "Hybrid": "#2ecc71", "QuadSurf": "#1dd1a1",
         "QuadExpo": "#10ac84", "SignedLR": "#0a8f6c"
     }
-    all_colors = {**std_colors, **bsdt_colors}
+    # Canonical optimisers: purple family — distinct from both standard and BSDT
+    canonical_colors = {
+        "CanSpectral": "#9b59b6",   # violet — Level 1 only
+        "CanFull":     "#6c3483",   # deep purple — both levels
+    }
+    all_colors = {**std_colors, **bsdt_colors, **canonical_colors}
 
     # ── Figure 1: Training Loss Comparison ──────────────────
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -327,19 +499,22 @@ def generate_figures(results: dict, figdir: str = None):
         print(f"  Saved: {path}")
     plt.close(fig)
 
-    # ── Figure 2: Friction Dynamics (BSDT only) ─────────────
+    # ── Figure 2: Friction Dynamics (BSDT + Canonical) ──────
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
     ax = axes[0]
     bsdt_names = ["BSDT", "MFLS", "Molecular", "Gravity", "Hybrid",
                   "QuadSurf", "QuadExpo", "SignedLR"]
-    for name in bsdt_names:
+    canonical_names_fig = ["CanSpectral", "CanFull"]
+    all_canonical = bsdt_names + canonical_names_fig
+    for name in all_canonical:
         if name in results and not results[name]["blew_up"]:
             logs = results[name]["logs"]
             epochs = [log.epoch for log in logs if not log.blew_up]
             frictions = [log.friction for log in logs if not log.blew_up]
+            lw = 2.5 if name in canonical_names_fig else 1.8
             ax.plot(epochs, frictions, label=name,
-                    color=bsdt_colors.get(name, '#999'), linewidth=1.8, alpha=0.85)
+                    color=all_colors.get(name, '#999'), linewidth=lw, alpha=0.9)
 
     ax.set_xlabel('Epoch', fontsize=11)
     ax.set_ylabel('Friction Multiplier $1 + \\gamma^*$', fontsize=11)
@@ -402,12 +577,28 @@ def generate_figures(results: dict, figdir: str = None):
                 peak_log = max(valid, key=lambda l: l.friction)
                 bar_data[name] = peak_log.channels
 
+    # Include canonical optimisers in channel chart
+    for name in canonical_names_fig:
+        if name in results and not results[name]["blew_up"]:
+            logs = results[name]["logs"]
+            valid = [log for log in logs if log.channels is not None]
+            if valid:
+                peak_log = max(valid, key=lambda l: l.friction)
+                bar_data[name] = peak_log.channels
+
     if bar_data:
         x = np.arange(len(bar_data))
         width = 0.18
         for j, (ch_name, ch_label) in enumerate(zip(channel_names, channel_labels)):
             vals = [bar_data[n].get(ch_name, 0.0) for n in bar_data]
             ax.bar(x + j * width, vals, width, label=ch_label, alpha=0.8)
+
+        # Highlight canonical bars with a border
+        for xi, name in enumerate(bar_data):
+            if name in canonical_names_fig:
+                for j in range(len(channel_names)):
+                    ax.patches[xi + j * len(bar_data)].set_edgecolor("#6c3483")
+                    ax.patches[xi + j * len(bar_data)].set_linewidth(1.5)
 
         ax.set_xticks(x + 1.5 * width)
         ax.set_xticklabels(list(bar_data.keys()), rotation=30, ha='right')
@@ -512,11 +703,18 @@ def save_results(results: dict, outdir: str = None):
 if __name__ == "__main__":
     print("=" * 70)
     print("  Domain IV: Neural Network Gradient Stability")
-    print("  BlowUpNet (20-layer MLP) × 13 Optimisers")
+    print("  BlowUpNet × 15 Optimisers  (13 standard/BSDT + 2 Canonical)")
     print("=" * 70)
     print()
 
-    results = run_experiment(n_epochs=300, lr=0.01, seed=42, verbose=True)
+    # hidden_dim=64, n_layers=10: retains blow-up pathology (init_scale=2.0)
+    # while keeping per-optimiser runtime to ~5-15 s on CPU.
+    # For the full 512/20 experiment (research quality) set:
+    #   hidden_dim=512, n_layers=20  (~40 min total on CPU)
+    results = run_experiment(
+        n_epochs=300, lr=0.01, seed=42, verbose=True,
+        hidden_dim=64, n_layers=10,
+    )
 
     print()
     table = print_summary_table(results)

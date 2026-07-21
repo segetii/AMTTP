@@ -1,0 +1,54 @@
+{
+  "domain": "cybersecurity",
+  "version": "v2",
+  "engine": "FrozenCanonicalV4",
+  "gateway": "tbr0p47_ConfidenceGate + DomainCircuitBreaker",
+  "data_source": "TON-IoT 2020 network traffic",
+  "T": 500,
+  "window_size": 200,
+  "step_size": 50,
+  "n_agents_per_window": 20,
+  "features": [
+    "src_bytes",
+    "dst_bytes",
+    "src_pkts",
+    "dst_pkts",
+    "duration"
+  ],
+  "crisis_windows": 296,
+  "v1_alarms": 37,
+  "v2_alarms": 26,
+  "lead_time_v1": -7,
+  "lead_time_v2": -22,
+  "conf_veto_pct": 0.2972972972972973,
+  "cb_suppress_pct": 0.0,
+  "improvement": {
+    "v1": {
+      "precision": 0.6486486486486487,
+      "recall": 0.08108108108108109,
+      "f1": 0.14414414414414414,
+      "first_alarm": 7,
+      "lead_steps": 0,
+      "n_alarms": 37
+    },
+    "v2": {
+      "precision": 0.6538461538461539,
+      "recall": 0.057432432432432436,
+      "f1": 0.10559006211180125,
+      "first_alarm": 22,
+      "lead_steps": 0,
+      "n_alarms": 26
+    },
+    "precision_delta": 0.00519750519750517,
+    "recall_delta": -0.02364864864864865,
+    "f1_delta": -0.038554082032342896,
+    "lead_improvement": 0,
+    "false_alarm_reduction": 11
+  },
+  "channel_dominance": {
+    "delta_C": 0.6942910050133476,
+    "delta_G": 3.274247868042876e-05,
+    "delta_A": 0.3049839489792955,
+    "delta_T": 0.0006923035286764321
+  }
+}

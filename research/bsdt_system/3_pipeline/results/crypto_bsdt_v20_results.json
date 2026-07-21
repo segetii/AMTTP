@@ -1,0 +1,133 @@
+{
+  "description": "GSDA-Arsenal \u2014 \u00a7I-XXVII closed-form dynamic allocator",
+  "version": "v20",
+  "train": "2021-01-01 to 2022-12-31",
+  "test_start": "2023-01-01",
+  "parameters": {
+    "CHI2_CONF": 0.99,
+    "e_star": 20.0902,
+    "EWS_W6_PSI": 0.3,
+    "EWS_PCT_TRAIN": 99.0,
+    "PSI_COS_FLOOR": 0.3,
+    "V20_ALARM_MIN_STEPS": 2,
+    "KRAMERS_TAU": 5.0,
+    "LEV_LO": 0.2,
+    "LEV_HI": 1.15,
+    "GMM_K": 3,
+    "GMM_SEEDS": 5,
+    "GMM_EMA_SPAN": 5,
+    "PERF_WIN": 126,
+    "PERF_TAU": 2.0,
+    "PERF_LAG": 5,
+    "CG_HISTORY_WIN": 60,
+    "CG_PCA_K": 2,
+    "engine": "collapse_geometry_v1.3.0_arsenal"
+  },
+  "arsenal_diagnostics": {
+    "e_BS_mean": 306.292,
+    "e_BS_frac_above_estar_pct": 100.0,
+    "rho_mfls_mean": 4.551,
+    "rho_mfls_frac_over1_pct": 99.09,
+    "cos_theta_channel_mean": -0.7513,
+    "cos_theta_state_mean": -0.4279,
+    "cos_psi_mean": 0.9986,
+    "cos_psi_frac_below_floor_pct": 0.0,
+    "ews6_mean": 0.8019,
+    "ews6_threshold": 4504.1674,
+    "kramers_p_mean": 0.4531,
+    "attr_mean": {
+      "C": 0.356,
+      "G": 0.0,
+      "A": 0.001,
+      "T": 0.619
+    },
+    "alarm_v20_days_pct": 94.3,
+    "kramers_lev_mean": 0.6,
+    "regime_occupancy": {
+      "R0_calm": 0.367,
+      "R1_stress": 0.393,
+      "R2_collapse": 0.24
+    }
+  },
+  "ablation": {
+    "v18_smooth": {
+      "label": "v18_smooth",
+      "sharpe": 0.4973,
+      "max_dd": -0.0809,
+      "cum_return": 0.0592,
+      "active_days": 236,
+      "total_days": 1210,
+      "hit_rate": 0.4788,
+      "cagr": 0.0121
+    },
+    "v19_alarm_only": {
+      "label": "v19_alarm_only",
+      "sharpe": 0.9622,
+      "max_dd": -0.0799,
+      "cum_return": 0.1003,
+      "active_days": 183,
+      "total_days": 1210,
+      "hit_rate": 0.4645,
+      "cagr": 0.0201
+    },
+    "v20_geom_alarm_only": {
+      "label": "v20_geom_alarm_only",
+      "sharpe": 0.3252,
+      "max_dd": -0.0534,
+      "cum_return": 0.0043,
+      "active_days": 24,
+      "total_days": 1210,
+      "hit_rate": 0.5833,
+      "cagr": 0.0009
+    },
+    "v20_soft_route": {
+      "label": "v20_soft_route",
+      "sharpe": 0.4283,
+      "max_dd": -0.0352,
+      "cum_return": 0.0243,
+      "active_days": 287,
+      "total_days": 1210,
+      "hit_rate": 0.5052,
+      "cagr": 0.005
+    },
+    "v20_geom_lev_only": {
+      "label": "v20_geom_lev_only",
+      "sharpe": 0.5571,
+      "max_dd": -0.0495,
+      "cum_return": 0.0447,
+      "active_days": 236,
+      "total_days": 1210,
+      "hit_rate": 0.4788,
+      "cagr": 0.0092
+    },
+    "v20_attribution_only": {
+      "label": "v20_attribution_only",
+      "sharpe": 0.3918,
+      "max_dd": -0.0336,
+      "cum_return": 0.0204,
+      "active_days": 287,
+      "total_days": 1210,
+      "hit_rate": 0.5122,
+      "cagr": 0.0042
+    },
+    "v20_full": {
+      "label": "v20_full",
+      "sharpe": 1.6009,
+      "max_dd": -0.0012,
+      "cum_return": 0.0011,
+      "active_days": 27,
+      "total_days": 1210,
+      "hit_rate": 0.6667,
+      "cagr": 0.0002
+    }
+  },
+  "verdict": "v20_full does NOT meet all criteria \u2014 keep v19_alarm_only",
+  "best_variant": "v20_full",
+  "best_K": {
+    "K": 20.0,
+    "pnl": 8.17,
+    "sharpe_net": 0.086,
+    "max_dd": -0.0262,
+    "final": 1208.17
+  }
+}

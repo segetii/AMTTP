@@ -1,0 +1,116 @@
+{
+  "section1_direction": {
+    "direction_gap": 0.15772508038346444,
+    "direction_confirmed": true,
+    "inv_best_sharpe": 3.8784749196165356,
+    "runs": {
+      "K=0.00, flat (v54)": {
+        "form": "flat",
+        "k": 0.0,
+        "sharpe": 3.856839449735926,
+        "maxdd": -0.03745446671406971
+      },
+      "K=0.10, linear (v55)": {
+        "form": "linear",
+        "k": 0.1,
+        "sharpe": 4.036199548873064,
+        "maxdd": -0.03745446671406971
+      },
+      "K=0.10, exp (\u2261linear@K=0.1)": {
+        "form": "exp",
+        "k": 0.1,
+        "sharpe": 3.937751052120079,
+        "maxdd": -0.03745446671406949
+      },
+      "K=0.10, inverted linear": {
+        "form": "inv_linear",
+        "k": 0.1,
+        "sharpe": 3.802812289861721,
+        "maxdd": -0.03435202141854199
+      },
+      "K=0.05, inverted linear": {
+        "form": "inv_linear",
+        "k": 0.05,
+        "sharpe": 3.8784749196165356,
+        "maxdd": -0.03745446671406982
+      },
+      "K=0.20, inverted linear": {
+        "form": "inv_linear",
+        "k": 0.2,
+        "sharpe": 3.585564929511911,
+        "maxdd": -0.03514412559002744
+      },
+      "K=0.10, neutral (f=0)": {
+        "form": "neutral",
+        "k": 0.1,
+        "sharpe": 3.856839449735926,
+        "maxdd": -0.03745446671406971
+      }
+    }
+  },
+  "section2_forms": {
+    "form_spread_k010": 0.39958799291281766,
+    "best_form": "K=0.10, tanh",
+    "ensemble_vs_linear": -0.27972218538719273,
+    "runs": {
+      "K=0.02, quadratic (opt-K)": {
+        "form": "quadratic",
+        "k": 0.02,
+        "sharpe": 3.925536254850451,
+        "maxdd": -0.03745446671406916
+      },
+      "K=0.10, quadratic": {
+        "form": "quadratic",
+        "k": 0.1,
+        "sharpe": 3.6317156910980937,
+        "maxdd": -0.03745446671406982
+      },
+      "K=0.10, tanh": {
+        "form": "tanh",
+        "k": 0.1,
+        "sharpe": 4.031303684010911,
+        "maxdd": -0.03745446671406971
+      },
+      "K=0.10, avg_form (ensemble)": {
+        "form": "avg_form",
+        "k": 0.1,
+        "sharpe": 3.7564778146128073,
+        "maxdd": -0.03745446671406949
+      }
+    }
+  },
+  "section3_k_plateau": {
+    "avg_form_spread_k007_013": 0.26831741756185234,
+    "linear_spread_ref": 0.19,
+    "plateau_wider": false,
+    "runs": {
+      "0.07": {
+        "k": 0.07,
+        "sharpe": 3.9129449354111663,
+        "maxdd": -0.03745446671406971
+      },
+      "0.1": {
+        "k": 0.1,
+        "sharpe": 3.7564778146128073,
+        "maxdd": -0.03745446671406949
+      },
+      "0.13": {
+        "k": 0.13,
+        "sharpe": 3.644627517849314,
+        "maxdd": -0.037454466714068935
+      }
+    }
+  },
+  "verdict": {
+    "q1_direction": true,
+    "q2_ensemble": false,
+    "q3_plateau": false,
+    "champion_form": "linear",
+    "champion_k": 0.1,
+    "champion_sharpe": 4.036199548873064,
+    "verdict": "Use linear K=0.10 (v55 champion). Direction structural, avg_form doesn't improve further. Lock v55 config as production.",
+    "v54_sharpe": 3.8568,
+    "v55_sharpe": 4.0362,
+    "delta_v55": -4.51126935807622e-07
+  }
+}

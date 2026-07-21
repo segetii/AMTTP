@@ -1,0 +1,271 @@
+================================================================================================================
+  CRYPTO GODMODE v33 — GL-FFD FRACTIONAL + CB FIX
+================================================================================================================
+
+[0] Preloading microstructure cache ...
+
+  === microstructure BTCUSDT  2022-01-01 -> 2026-06-01 ===
+  BTCUSDT TBR [extending: 2026-05-13 -> 2026-06-01]
+  BTCUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,266
+  BTCUSDT FR  [extending 1 range(s)]
+  BTCUSDT FR  [saved]  8h bars: 4,784
+  BTCUSDT DV  [CACHE 29,463 rows]  2023-01-01 -> 2026-05-13
+  BTCUSDT DV  [up-to-date]
+    oi_usd: 23% NaN  (29,929 valid bars)
+    lsr: 23% NaN  (29,929 valid bars)
+    top_lsr: 23% NaN  (29,929 valid bars)
+    taker_ls: 23% NaN  (29,929 valid bars)
+    oi_pct_1h: 23% NaN  (29,921 valid bars)
+    oi_pct_24h: 23% NaN  (29,903 valid bars)
+    oi_z: 23% NaN  (29,849 valid bars)
+    lsr_z: 23% NaN  (29,858 valid bars)
+    top_lsr_z: 23% NaN  (29,858 valid bars)
+    taker_ls_z: 23% NaN  (29,858 valid bars)
+  === BTCUSDT done  shape=(38689, 14) ===
+  BTCUSDT: (38689, 14)
+
+  === microstructure ETHUSDT  2022-01-01 -> 2026-06-01 ===
+  ETHUSDT TBR [extending: 2026-05-13 -> 2026-06-01]
+  ETHUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,266
+  ETHUSDT FR  [extending 1 range(s)]
+  ETHUSDT FR  [saved]  8h bars: 4,784
+  ETHUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  ETHUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === ETHUSDT done  shape=(38689, 14) ===
+  ETHUSDT: (38689, 14)
+
+  === microstructure SOLUSDT  2022-01-01 -> 2026-06-01 ===
+  SOLUSDT TBR [extending: 2026-05-13 -> 2026-06-01]
+  SOLUSDT TBR [saved]  2022-01-01 -> 2026-05-14  n=38,266
+  SOLUSDT FR  [extending 1 range(s)]
+  SOLUSDT FR  [saved]  8h bars: 4,859
+  SOLUSDT DV  [CACHE 38,223 rows]  2022-01-01 -> 2026-05-13
+  SOLUSDT DV  [up-to-date]
+    lsr: 1% NaN  (38,244 valid bars)
+    top_lsr: 20% NaN  (31,047 valid bars)
+    taker_ls: 8% NaN  (35,621 valid bars)
+    lsr_z: 1% NaN  (38,173 valid bars)
+    top_lsr_z: 20% NaN  (30,878 valid bars)
+    taker_ls_z: 8% NaN  (35,526 valid bars)
+  === SOLUSDT done  shape=(38689, 14) ===
+  SOLUSDT: (38689, 14)
+
+[1] Building shared market inputs ...
+  ETHUSDT 1h ... 42,811 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ... 46,506 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ... 21,941 bars  [2021-01-01 → 2026-05-13]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-13 17:00:00   n=20,529 bars  (1958 days)
+  Train: 12,094   Test: 8,435   SOL: True
+  BTCUSDT futures OHLCV [STALE max=2026-05-13 21:00:00 expected>=2026-05-14 07:00:00]
+  BTCUSDT futures OHLCV [FETCH]
+  ETHUSDT futures OHLCV [STALE max=2026-05-13 21:00:00 expected>=2026-05-14 07:00:00]
+  ETHUSDT futures OHLCV [FETCH]
+  SOLUSDT futures OHLCV [STALE max=2026-05-13 21:00:00 expected>=2026-05-14 07:00:00]
+  SOLUSDT futures OHLCV [FETCH]
+  ETHUSDT 1h ...   ETHUSDT [STALE max=2026-05-13 21:00:00 expected>=2026-05-14 07:00:00; re-fetching]
+  ETHUSDT [FETCH from Binance]
+42,810 bars  [2021-01-01 → 2026-05-14]
+  BTCUSDT 1h ...   BTCUSDT [STALE max=2026-05-13 21:00:00 expected>=2026-05-14 07:00:00; re-fetching]
+  BTCUSDT [FETCH from Binance]
+46,506 bars  [2021-01-01 → 2026-05-14]
+  SOLUSDT 1h ...   SOLUSDT [STALE max=2026-05-13 23:00:00 expected>=2026-05-14 07:00:00; re-fetching]
+  SOLUSDT [FETCH from Binance]
+  SOLUSDT [ffill +16h → 2026-05-14 09:00:00 (last real candle: 2026-05-13 17:00:00)]
+21,957 bars  [2021-01-01 → 2026-05-14]
+  SOL included (data from 2021-01-01)
+
+  1h DataFrame: 2021-01-01 01:00:00  →  2026-05-14 08:00:00   n=20,542 bars  (1959 days)
+  Train: 12,094   Test: 8,448   SOL: True
+  funding [CACHE]
+  [refresh] geometry cache 20533 -> 20542; computing 9 new bars
+  [v36] Normal window: 500 bars × 8 agents × 8 features
+  [v36] e* (χ², df=64) = 93.217
+  [v36] σ_n = 23.562022
+  [v36] θ (90-pctile normal e_t) = 121.009
+  [v36] cos_theta_channel calib: μ=0.436, σ=0.421
+  [v36] ξ calib: ξ1(μ=0.971,σ=0.014)  ξ2(μ=1.000,σ=0.000)  ξ3(μ=0.102,σ=0.000)  ξ4(μ=-0.000,σ=1.000)  ξ5(μ=1.000,σ=0.000)
+  [v36] RSS_stretch calib: μ=0.459, σ=0.333
+  [refresh] saved C:\amttp\data\geometric_extractor_engine_arrays_funded_v58_fg.npz new_valid=9
+  [v36] Normal window: 500 bars × 8 agents × 8 features
+  [v36] e* (χ², df=64) = 93.217
+  [v36] σ_n = 23.562022
+  [v36] θ (90-pctile normal e_t) = 121.009
+  [v36] cos_theta_channel calib: μ=0.436, σ=0.421
+  [v36] ξ calib: ξ1(μ=0.971,σ=0.014)  ξ2(μ=1.000,σ=0.000)  ξ3(μ=0.102,σ=0.000)  ξ4(μ=-0.000,σ=1.000)  ξ5(μ=1.000,σ=0.000)
+  [v36] RSS_stretch calib: μ=0.459, σ=0.333
+
+[2] FFD weight diagnostics ...
+  d=0.20: lags=3382  w_1=-0.20000  w_last=-1.00e-05
+  d=0.30: lags=2275  w_1=-0.30000  w_last=-1.00e-05
+  d=0.40: lags=1458  w_1=-0.40000  w_last=-1.00e-05
+  d=0.50: lags= 927  w_1=-0.50000  w_last=-1.00e-05
+  d=0.70: lags= 372  w_1=-0.70000  w_last=-1.00e-05
+
+[3] Building FFD covariances ...
+  d=0.20: cond 3.58e+12 → 20.00  rho_cap=0.1412  budget=1.0099
+  d=0.30: cond 3.24e+12 → 20.00  rho_cap=0.1222  budget=1.0074
+  d=0.40: cond 2.98e+12 → 20.00  rho_cap=0.1077  budget=1.0058
+  d=0.50: cond 2.85e+12 → 20.00  rho_cap=0.1010  budget=1.0051
+  d=0.70: cond 2.84e+12 → 20.00  rho_cap=0.1009  budget=1.0051
+
+[4] Building unit signals (d × q) ...
+  d=0.20 q=0.50: theta=0.26962    [v33_d0.20_q0.50]   5000/20529  (  5.9s)
+    [v33_d0.20_q0.50]  10000/20529  ( 12.8s)
+    [v33_d0.20_q0.50]  15000/20529  ( 15.8s)
+    [v33_d0.20_q0.50]  20000/20529  ( 18.7s)
+  [v33_d0.20_q0.50] sweep done: 20,529 bars  19.7s
+  unit built (n=47009)
+  d=0.20 q=0.65: theta=0.29439    [v33_d0.20_q0.65]   5000/20529  (  2.7s)
+    [v33_d0.20_q0.65]  10000/20529  (  6.3s)
+    [v33_d0.20_q0.65]  15000/20529  ( 10.7s)
+    [v33_d0.20_q0.65]  20000/20529  ( 14.2s)
+  [v33_d0.20_q0.65] sweep done: 20,529 bars  14.6s
+  unit built (n=47009)
+  d=0.30 q=0.50: theta=0.24012    [v33_d0.30_q0.50]   5000/20529  (  4.9s)
+    [v33_d0.30_q0.50]  10000/20529  (  9.8s)
+    [v33_d0.30_q0.50]  15000/20529  ( 13.7s)
+    [v33_d0.30_q0.50]  20000/20529  ( 18.3s)
+  [v33_d0.30_q0.50] sweep done: 20,529 bars  18.8s
+  unit built (n=47009)
+  d=0.30 q=0.65: theta=0.24446    [v33_d0.30_q0.65]   5000/20529  (  4.0s)
+    [v33_d0.30_q0.65]  10000/20529  (  6.7s)
+    [v33_d0.30_q0.65]  15000/20529  ( 11.3s)
+    [v33_d0.30_q0.65]  20000/20529  ( 14.2s)
+  [v33_d0.30_q0.65] sweep done: 20,529 bars  14.5s
+  unit built (n=47009)
+  d=0.40 q=0.50: theta=0.22376    [v33_d0.40_q0.50]   5000/20529  (  3.0s)
+    [v33_d0.40_q0.50]  10000/20529  (  6.1s)
+    [v33_d0.40_q0.50]  15000/20529  (  8.9s)
+    [v33_d0.40_q0.50]  20000/20529  ( 13.9s)
+  [v33_d0.40_q0.50] sweep done: 20,529 bars  14.4s
+  unit built (n=47009)
+  d=0.40 q=0.65: theta=0.22666    [v33_d0.40_q0.65]   5000/20529  (  4.8s)
+    [v33_d0.40_q0.65]  10000/20529  (  9.8s)
+    [v33_d0.40_q0.65]  15000/20529  ( 14.6s)
+    [v33_d0.40_q0.65]  20000/20529  ( 18.7s)
+  [v33_d0.40_q0.65] sweep done: 20,529 bars  19.1s
+  unit built (n=47009)
+  d=0.50 q=0.50: theta=0.22083    [v33_d0.50_q0.50]   5000/20529  (  2.8s)
+    [v33_d0.50_q0.50]  10000/20529  (  7.6s)
+    [v33_d0.50_q0.50]  15000/20529  ( 10.4s)
+    [v33_d0.50_q0.50]  20000/20529  ( 13.2s)
+  [v33_d0.50_q0.50] sweep done: 20,529 bars  13.5s
+  unit built (n=47009)
+  d=0.50 q=0.65: theta=0.22441    [v33_d0.50_q0.65]   5000/20529  (  3.5s)
+    [v33_d0.50_q0.65]  10000/20529  (  6.3s)
+    [v33_d0.50_q0.65]  15000/20529  ( 10.7s)
+    [v33_d0.50_q0.65]  20000/20529  ( 15.2s)
+  [v33_d0.50_q0.65] sweep done: 20,529 bars  15.5s
+  unit built (n=47009)
+  d=0.70 q=0.50: theta=0.21786    [v33_d0.70_q0.50]   5000/20529  (  3.6s)
+    [v33_d0.70_q0.50]  10000/20529  (  7.8s)
+    [v33_d0.70_q0.50]  15000/20529  ( 12.3s)
+    [v33_d0.70_q0.50]  20000/20529  ( 17.7s)
+  [v33_d0.70_q0.50] sweep done: 20,529 bars  19.1s
+  unit built (n=47009)
+  d=0.70 q=0.65: theta=0.22130    [v33_d0.70_q0.65]   5000/20529  (  3.8s)
+    [v33_d0.70_q0.65]  10000/20529  (  8.2s)
+    [v33_d0.70_q0.65]  15000/20529  ( 10.7s)
+    [v33_d0.70_q0.65]  20000/20529  ( 13.5s)
+  [v33_d0.70_q0.65] sweep done: 20,529 bars  13.9s
+  unit built (n=47009)
+
+[5] Sweeping CB configs ['cb_original', 'cb_balanced', 'cb_loose'] ...
+
+  CB [cb_original]: halt=0.08 resume=0.01 window=180d
+    [d0p20_q0p50_cb_original] final=$   134,616  Calmar=+18.199  MaxDD=-18.12%  halted=91.5%  r2026=+0.0000
+    [d0p20_q0p65_cb_original] final=$   133,813  Calmar=+18.033  MaxDD=-18.25%  halted=91.5%  r2026=+0.0000
+    [d0p30_q0p50_cb_original] final=$   158,951  Calmar=+23.039  MaxDD=-15.26%  halted=91.5%  r2026=+0.0000
+    [d0p30_q0p65_cb_original] final=$   158,884  Calmar=+23.035  MaxDD=-15.26%  halted=91.5%  r2026=+0.0000
+    [d0p40_q0p50_cb_original] final=$   157,074  Calmar=+19.943  MaxDD=-17.55%  halted=91.5%  r2026=+0.0000
+    [d0p40_q0p65_cb_original] final=$   157,099  Calmar=+19.944  MaxDD=-17.55%  halted=91.5%  r2026=+0.0000
+    [d0p50_q0p50_cb_original] final=$   163,348  Calmar=+20.307  MaxDD=-17.49%  halted=91.5%  r2026=+0.0000
+    [d0p50_q0p65_cb_original] final=$   163,395  Calmar=+20.309  MaxDD=-17.49%  halted=91.5%  r2026=+0.0000
+    [d0p70_q0p50_cb_original] final=$   159,617  Calmar=+20.286  MaxDD=-17.36%  halted=91.5%  r2026=+0.0000
+    [d0p70_q0p65_cb_original] final=$   159,688  Calmar=+20.289  MaxDD=-17.36%  halted=91.5%  r2026=+0.0000
+
+  CB [cb_balanced]: halt=0.15 resume=0.1 window=90d
+    [d0p20_q0p50_cb_balanced] final=$     7,900  Calmar=+1.568  MaxDD=-54.16%  halted=72.3%  r2026=+0.2929
+    [d0p20_q0p65_cb_balanced] final=$     7,671  Calmar=+1.464  MaxDD=-56.91%  halted=72.2%  r2026=+0.2926
+    [d0p30_q0p50_cb_balanced] final=$     1,547  Calmar=+0.198  MaxDD=-69.93%  halted=74.5%  r2026=+0.3002
+    [d0p30_q0p65_cb_balanced] final=$    21,678  Calmar=+2.842  MaxDD=-52.67%  halted=80.3%  r2026=+0.2595
+    [d0p40_q0p50_cb_balanced] final=$     1,295  Calmar=+0.114  MaxDD=-70.27%  halted=74.8%  r2026=+0.3012
+    [d0p40_q0p65_cb_balanced] final=$     1,294  Calmar=+0.114  MaxDD=-70.28%  halted=74.8%  r2026=+0.3012
+    [d0p50_q0p50_cb_balanced] final=$    30,367  Calmar=+3.411  MaxDD=-51.60%  halted=80.6%  r2026=+0.2908
+    [d0p50_q0p65_cb_balanced] final=$    30,465  Calmar=+3.415  MaxDD=-51.62%  halted=80.6%  r2026=+0.2917
+    [d0p70_q0p50_cb_balanced] final=$    28,736  Calmar=+3.339  MaxDD=-51.36%  halted=80.6%  r2026=+0.2841
+    [d0p70_q0p65_cb_balanced] final=$    28,811  Calmar=+3.342  MaxDD=-51.38%  halted=80.6%  r2026=+0.2848
+
+  CB [cb_loose]: halt=0.18 resume=0.13 window=90d
+    [d0p20_q0p50_cb_loose] final=$     1,030  Calmar=+0.012  MaxDD=-69.93%  halted=73.8%  r2026=+0.2455
+    [d0p20_q0p65_cb_loose] final=$       997  Calmar=-0.001  MaxDD=-69.94%  halted=73.7%  r2026=+0.2452
+    [d0p30_q0p50_cb_loose] final=$     1,123  Calmar=+0.050  MaxDD=-70.37%  halted=73.8%  r2026=+0.2525
+    [d0p30_q0p65_cb_loose] final=$     1,121  Calmar=+0.049  MaxDD=-70.37%  halted=73.8%  r2026=+0.2525
+    [d0p40_q0p50_cb_loose] final=$       901  Calmar=-0.044  MaxDD=-69.53%  halted=74.3%  r2026=+0.2535
+    [d0p40_q0p65_cb_loose] final=$       901  Calmar=-0.044  MaxDD=-69.53%  halted=74.3%  r2026=+0.2535
+    [d0p50_q0p50_cb_loose] final=$     1,266  Calmar=+0.104  MaxDD=-69.81%  halted=74.4%  r2026=+0.2530
+    [d0p50_q0p65_cb_loose] final=$     1,266  Calmar=+0.104  MaxDD=-69.81%  halted=74.4%  r2026=+0.2530
+    [d0p70_q0p50_cb_loose] final=$     1,217  Calmar=+0.086  MaxDD=-69.80%  halted=74.4%  r2026=+0.2522
+    [d0p70_q0p65_cb_loose] final=$     1,217  Calmar=+0.086  MaxDD=-69.80%  halted=74.4%  r2026=+0.2522
+
+================================================================================================================
+  v33 RESULTS — sorted by Calmar
+================================================================================================================
+  Name                                d    q           CB  Final_k  Calmar  MaxDD% Sharpe  Halt%  2023x  2024x  2025x  2026x
+  --------------------------------------------------------------------------------------------------------------
+  d0p30_q0p50_cb_original          0.30 0.50  cb_original    159.0   23.04  -15.26  1.862   91.5 2.5746 1.1452 8.9996 0.0000
+  d0p30_q0p65_cb_original          0.30 0.65  cb_original    158.9   23.04  -15.26  1.862   91.5 2.5761 1.1433 9.0004 0.0000
+  d0p50_q0p65_cb_original          0.50 0.65  cb_original    163.4   20.31  -17.49  1.820   91.5 2.4172 1.0401 10.0274 0.0000
+  d0p50_q0p50_cb_original          0.50 0.50  cb_original    163.3   20.31  -17.49  1.820   91.5 2.4149 1.0411 10.0259 0.0000
+  d0p70_q0p65_cb_original          0.70 0.65  cb_original    159.7   20.29  -17.36  1.827   91.5 2.3924 1.0566 9.8385 0.0000
+  d0p70_q0p50_cb_original          0.70 0.50  cb_original    159.6   20.29  -17.36  1.827   91.5 2.3898 1.0579 9.8351 0.0000
+  d0p40_q0p65_cb_original          0.40 0.65  cb_original    157.1   19.94  -17.55  1.822   91.5 2.4181 1.0199 9.8038 0.0000
+  d0p40_q0p50_cb_original          0.40 0.50  cb_original    157.1   19.94  -17.55  1.822   91.5 2.4164 1.0208 9.8027 0.0000
+  d0p20_q0p50_cb_original          0.20 0.50  cb_original    134.6   18.20  -18.12  1.821   91.5 2.3179 0.8676 9.4683 0.0000
+  d0p20_q0p65_cb_original          0.20 0.65  cb_original    133.8   18.03  -18.25  1.818   91.5 2.3066 0.8552 9.5046 0.0000
+  d0p50_q0p65_cb_balanced          0.50 0.65  cb_balanced     30.5    3.41  -51.62  0.632   80.6 0.1523 0.4554 0.4063 0.2917
+  d0p50_q0p50_cb_balanced          0.50 0.50  cb_balanced     30.4    3.41  -51.60  0.632   80.6 0.1518 0.4552 0.4032 0.2908
+  d0p70_q0p65_cb_balanced          0.70 0.65  cb_balanced     28.8    3.34  -51.38  0.635   80.6 0.1471 0.4446 0.4108 0.2848
+  d0p70_q0p50_cb_balanced          0.70 0.50  cb_balanced     28.7    3.34  -51.36  0.635   80.6 0.1466 0.4445 0.4085 0.2841
+  d0p30_q0p65_cb_balanced          0.30 0.65  cb_balanced     21.7    2.84  -52.67  0.641   80.3 0.0906 0.4576 0.3187 0.2595
+  d0p20_q0p50_cb_balanced          0.20 0.50  cb_balanced      7.9    1.57  -54.16  0.559   72.3 -0.2490 0.3193 -0.1967 0.2929
+  d0p20_q0p65_cb_balanced          0.20 0.65  cb_balanced      7.7    1.46  -56.91  0.554   72.2 -0.2935 0.3185 -0.1959 0.2926
+  d0p30_q0p50_cb_balanced          0.30 0.50  cb_balanced      1.5    0.20  -69.93  0.442   74.5 -0.3746 0.2644 -0.2304 0.3002
+  d0p40_q0p50_cb_balanced          0.40 0.50  cb_balanced      1.3    0.11  -70.27  0.366   74.8 -0.4014 0.2608 -0.2305 0.3012
+  d0p40_q0p65_cb_balanced          0.40 0.65  cb_balanced      1.3    0.11  -70.28  0.366   74.8 -0.4014 0.2606 -0.2306 0.3012
+  d0p50_q0p50_cb_loose             0.50 0.50     cb_loose      1.3    0.10  -69.81  0.353   74.4 -0.4480 0.3502 -0.2927 0.2530
+  d0p50_q0p65_cb_loose             0.50 0.65     cb_loose      1.3    0.10  -69.81  0.353   74.4 -0.4480 0.3501 -0.2928 0.2530
+  d0p70_q0p65_cb_loose             0.70 0.65     cb_loose      1.2    0.09  -69.80  0.334   74.4 -0.4458 0.3484 -0.2899 0.2522
+  d0p70_q0p50_cb_loose             0.70 0.50     cb_loose      1.2    0.09  -69.80  0.334   74.4 -0.4458 0.3485 -0.2898 0.2522
+  d0p30_q0p50_cb_loose             0.30 0.50     cb_loose      1.1    0.05  -70.37  0.290   73.8 -0.4205 0.3729 -0.2809 0.2525
+  d0p30_q0p65_cb_loose             0.30 0.65     cb_loose      1.1    0.05  -70.37  0.289   73.8 -0.4206 0.3724 -0.2810 0.2525
+  d0p20_q0p50_cb_loose             0.20 0.50     cb_loose      1.0    0.01  -69.93  0.233   73.8 -0.4540 0.2857 -0.2468 0.2455
+  d0p20_q0p65_cb_loose             0.20 0.65     cb_loose      1.0   -0.00  -69.94  0.213   73.7 -0.4535 0.2828 -0.2615 0.2452
+  d0p40_q0p50_cb_loose             0.40 0.50     cb_loose      0.9   -0.04  -69.53  0.137   74.3 -0.4915 0.3553 -0.2845 0.2535
+  d0p40_q0p65_cb_loose             0.40 0.65     cb_loose      0.9   -0.04  -69.53  0.137   74.3 -0.4914 0.3551 -0.2846 0.2535
+
+  ★ Best Calmar : d0p30_q0p50_cb_original  final=$158,951  Calmar=+23.039  MaxDD=-15.26%
+  ★ Best Final  : d0p50_q0p65_cb_original  final=$163,395  Calmar=+20.309
+
+[6] Saving plots ...
+  saved: C:\amttp\research\adaptive-friction\pipeline\results\v33_cb_fix\plots\v33_ffd_weights.png
+  saved: C:\amttp\research\adaptive-friction\pipeline\results\v33_cb_fix\plots\v33_cb_comparison.png
+  saved: C:\amttp\research\adaptive-friction\pipeline\results\v33_cb_fix\plots\v33_annual_returns.png
+  saved: C:\amttp\research\adaptive-friction\pipeline\results\v33_cb_fix\plots\v33_equity_curves.png
+
+[7] Per-CB-config summary:
+     cb_original: avg_halt=91.5%  2026_active=0%  best_calmar=23.039  best_final=$158,951  (d0p30_q0p50_cb_original)
+     cb_balanced: avg_halt=77.1%  2026_active=100%  best_calmar=3.415  best_final=$30,465  (d0p50_q0p65_cb_balanced)
+        cb_loose: avg_halt=74.1%  2026_active=100%  best_calmar=0.104  best_final=$1,266  (d0p50_q0p50_cb_loose)
+
+  Saved -> C:\amttp\research\adaptive-friction\pipeline\results\v33_cb_fix\crypto_godmode_v33_cb_fix.json
+  Elapsed: 1414.8s
+================================================================================================================

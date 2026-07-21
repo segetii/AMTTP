@@ -1,0 +1,171 @@
+{
+  "case_study": "Texas_ERCOT_2021",
+  "timeline_hours": 240,
+  "n_agents": 65,
+  "agent_types": [
+    "Gas_Gen",
+    "Wind",
+    "Thermal",
+    "Consumer",
+    "Gas_Supply"
+  ],
+  "detection_timeline": [
+    [
+      24,
+      "A: Mahalanobis E_BS",
+      72
+    ],
+    [
+      24,
+      "A: Mahalanobis MFLS",
+      72
+    ],
+    [
+      24,
+      "B: 4-ch combined",
+      72
+    ],
+    [
+      24,
+      "B: delta_C (camouflage)",
+      72
+    ],
+    [
+      24,
+      "C: Energy E_BS",
+      72
+    ],
+    [
+      24,
+      "C: Energy MFLS",
+      72
+    ],
+    [
+      24,
+      "D: NS E_BS",
+      72
+    ],
+    [
+      24,
+      "D: NS enstrophy",
+      72
+    ],
+    [
+      24,
+      "D: NS \u03b4_C (enstrophy)",
+      72
+    ],
+    [
+      24,
+      "D: NS \u2016\u03c9\u2016_\u221e (BKM)",
+      72
+    ],
+    [
+      24,
+      "E-Raw: A",
+      72
+    ],
+    [
+      24,
+      "E-Raw: T",
+      72
+    ],
+    [
+      24,
+      "E-Raw: composite",
+      72
+    ],
+    [
+      24,
+      "F: SDK delta_C",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_conformal",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_equal",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_mi",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_quadratic",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_quadratic_smooth",
+      72
+    ],
+    [
+      24,
+      "MFLS:UDL_variance",
+      72
+    ],
+    [
+      25,
+      "D: NS \u03b4_G (spectral)",
+      71
+    ],
+    [
+      27,
+      "B: delta_A (activity)",
+      69
+    ],
+    [
+      28,
+      "B: delta_G (feature gap)",
+      68
+    ],
+    [
+      28,
+      "F: SDK delta_G",
+      68
+    ],
+    [
+      35,
+      "D: NS \u03b4_T (temporal)",
+      61
+    ]
+  ],
+  "dpd_scenarios": {
+    "A_no_friction": {
+      "name": "Historical (\u03b3=0)",
+      "desc": "ERCOT 2021: no winterisation mandate, no reserve requirements",
+      "max_cap_loss": 0.7560321827292105,
+      "collapsed": true
+    },
+    "B_minimal": {
+      "name": "Minimal (\u03b3=0.05)",
+      "desc": "Voluntary weatherisation guidelines + basic insulation",
+      "max_cap_loss": 0.6061254740168113,
+      "collapsed": true
+    },
+    "C_moderate": {
+      "name": "Moderate (\u03b3=0.3)",
+      "desc": "Mandatory winterisation + 12h fuel reserves",
+      "max_cap_loss": 0.37542988156234436,
+      "collapsed": false
+    },
+    "D_adaptive": {
+      "name": "Adaptive \u03b3*(t)",
+      "desc": "AMTTP adaptive: winterisation + dynamic demand response + load shed",
+      "max_cap_loss": 0.21896387493163802,
+      "collapsed": false
+    },
+    "E_circuit_breaker": {
+      "name": "Interstate + Emergency",
+      "desc": "Full package: winterisation + interstate DC ties + gas curtailment",
+      "max_cap_loss": 0.10025254209634292,
+      "collapsed": false
+    }
+  }
+}

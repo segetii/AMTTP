@@ -1,0 +1,149 @@
+MANDATORY CRITERIA MC-1: AMTTP LIVE DEMONSTRATION
+(Evidence Template for Word Document)
+
+================================================================================
+
+TITLE: AMTTP Platform: Live Technical Demonstration & System Innovation
+
+APPLICANT: Olusegun Israel Odeyemi
+DATE: [Date of evidence]
+EVIDENCE CODE: MC-1
+
+================================================================================
+1. SYSTEM OVERVIEW
+================================================================================
+
+What is AMTTP?
+AMTTP (Anti-Money Laundering Transaction Trust Protocol) is a blockchain-native 
+compliance system designed to make compliance decisions before transaction 
+settlement.
+
+Key Innovation:
+- Traditional compliance tools operate AFTER funds move
+- AMTTP operates IN THE CONFIRMATION WINDOW (before settlement)
+- Enables real-time approve/escrow/review/block decisions
+- Privacy-preserving (zero-knowledge verification)
+- Deployed on Ethereum Sepolia testnet (live, publicly accessible)
+
+Core Capability:
+Combines ML risk scoring, sanctions screening, relationship analysis, and policy 
+evaluation to enable pre-settlement compliance decisions at scale.
+
+================================================================================
+2. TECHNICAL ARCHITECTURE
+================================================================================
+
+Infrastructure Components:
+- Flutter Consumer Application (wallet integration, user-facing)
+- Next.js Enterprise Dashboard (War Room, monitoring, RBAC)
+- FastAPI Compliance Orchestrator (central decision engine)
+- 9 Specialist Microservices (ML, sanctions, policy, monitoring, integrity, etc.)
+- TypeScript Express Oracle Gateway (on-chain/off-chain bridge)
+- Solidity Smart Contracts (38 files, UUPS proxies)
+- Python & TypeScript SDKs (developer access)
+
+Deployment Status:
+✓ Publicly deployed on Ethereum Sepolia testnet
+✓ Live instance: [URL/deployment address]
+✓ Public GitHub repository: [GitHub URL]
+✓ Production-ready code (tested, audited, documented)
+
+================================================================================
+3. INNOVATION CLAIMS
+================================================================================
+
+Pre-Settlement Decisioning:
+[Explain why this is novel - most tools operate post-settlement]
+[Show technical advantage - confirmation window timing]
+
+Privacy-Preserving Verification:
+- Zero-knowledge proofs (Groth16 SNARKs)
+- zkNAF implementation for sanctions non-membership
+- KYC confirmation without data exposure
+- [Add technical differentiation]
+
+Risk Scoring Methodology:
+- ML-based fraud detection (XGBoost/LightGBM)
+- Graph-based relationship analysis
+- Multi-factor risk aggregation
+- Explainable AI output (factors contributing to decisions)
+
+================================================================================
+4. DEPLOYMENT & VERIFICATION
+================================================================================
+
+Live Access:
+- Platform URL: [Sepolia deployment]
+- Public repository access: [GitHub]
+- Transaction examples: [Provide txn hashes if possible]
+
+How to Verify:
+1. Visit live deployment at [URL]
+2. Review public GitHub repository (full codebase visible)
+3. Check Ethereum Sepolia transactions (immutable record)
+4. Test API endpoints (live, accessible)
+
+================================================================================
+5. ENGINEERING SCOPE
+================================================================================
+
+Full-Stack Development (Solo Founder):
+Frontend: [Flutter + Next.js component list]
+Backend: [FastAPI services list]
+Smart Contracts: [Solidity files and contracts]
+DevOps: [Deployment, orchestration, monitoring]
+
+Code Quality Evidence:
+✓ GitHub commit history (361+ commits, attributable to applicant)
+✓ Consistent coding style and architecture
+✓ Comprehensive test coverage
+✓ Security audits passed
+
+================================================================================
+6. BUSINESS/COMMERCIAL CONTEXT
+================================================================================
+
+Use Case:
+Compliance-as-a-Service (CaaS) infrastructure for regulated digital finance
+
+Market Relevance:
+- FCA digital asset agenda requires compliance tooling
+- Growing fintech/regtech sector in UK
+- Demand for real-time compliance decisioning
+- Privacy-preserving verification increasingly required
+
+Path to Deployment:
+[Include patent filing, regulatory engagement, pilot plans, etc.]
+
+================================================================================
+7. SUPPORTING EVIDENCE ATTACHED
+================================================================================
+
+[ ] GitHub repository link (full codebase)
+[ ] Live deployment URL
+[ ] Architecture diagrams
+[ ] Smart contract audit reports
+[ ] ML benchmark documentation
+[ ] API documentation
+[ ] User/admin guides
+
+================================================================================
+SUMMARY FOR ASSESSOR
+================================================================================
+
+Why this demonstrates technical leadership:
+- Full end-to-end system design and implementation
+- Non-trivial technical challenges solved
+- Production-ready infrastructure
+- Independent, original work
+- Clear innovation over existing solutions
+- Demonstrated ability to execute at scale
+
+Why this supports Exceptional Promise:
+- Shows sustained technical capacity across multiple domains
+- Deployed to production (not just prototype)
+- Technically sound and security-hardened
+- Positioned for commercial relevance in UK market
+- Clear trajectory toward industry contribution
+
+================================================================================

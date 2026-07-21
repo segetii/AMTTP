@@ -1,0 +1,97 @@
+{
+  "protocol": "v26 continuous-allocator multi-strategy",
+  "design": "Engine state -> sigmoid+product weight functions -> EWM(3) smoothed",
+  "strategies": [
+    "trend",
+    "pairs",
+    "breakout",
+    "mr",
+    "macro"
+  ],
+  "variants": {
+    "v22_baseline": {
+      "label": "",
+      "sharpe": 1.7425,
+      "max_dd": -0.0499,
+      "cum_return": 0.1346,
+      "active_days": 230.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.4826,
+      "cagr": 0.0266
+    },
+    "v26_full": {
+      "label": "",
+      "sharpe": -0.297,
+      "max_dd": -0.3541,
+      "cum_return": -0.2276,
+      "active_days": 995.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5095,
+      "cagr": -0.0523
+    },
+    "v26_no_smooth": {
+      "label": "",
+      "sharpe": -0.3529,
+      "max_dd": -0.4466,
+      "cum_return": -0.3089,
+      "active_days": 966.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5021,
+      "cagr": -0.074
+    },
+    "v26_no_breakout": {
+      "label": "",
+      "sharpe": -0.7345,
+      "max_dd": -0.0952,
+      "cum_return": -0.0782,
+      "active_days": 394.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5051,
+      "cagr": -0.0168
+    },
+    "v26_no_meanrev": {
+      "label": "",
+      "sharpe": -0.2722,
+      "max_dd": -0.3395,
+      "cum_return": -0.1923,
+      "active_days": 960.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.501,
+      "cagr": -0.0435
+    },
+    "v26_no_pairs": {
+      "label": "",
+      "sharpe": -0.3066,
+      "max_dd": -0.3485,
+      "cum_return": -0.2308,
+      "active_days": 993.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5035,
+      "cagr": -0.0531
+    },
+    "v26_trend_only": {
+      "label": "",
+      "sharpe": -0.6104,
+      "max_dd": -0.1348,
+      "cum_return": -0.0736,
+      "active_days": 236.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5127,
+      "cagr": -0.0158
+    },
+    "v26_full_mgate": {
+      "label": "",
+      "sharpe": -0.2665,
+      "max_dd": -0.3139,
+      "cum_return": -0.1633,
+      "active_days": 995.0,
+      "total_days": 1211.0,
+      "hit_rate": 0.5095,
+      "cagr": -0.0364
+    }
+  },
+  "best_variant": "v22_baseline",
+  "best_sharpe": 1.7425,
+  "v22_reference_sharpe": 1.7425,
+  "v22_reference_max_dd": -0.0499
+}

@@ -1,0 +1,213 @@
+{
+  "model": "Crypto BSDT v6 \u2014 UDL MDN Pair Classifier",
+  "version": "v6",
+  "architecture": {
+    "classifier": {
+      "method": "UDL Magnitude-Direction-Novelty (MDN) decomposition",
+      "operators": "Stat(5) + Chaos(3) + Freq(3) + Recon(3) = 14-dim feature vector",
+      "EQUILIBRIUM": "normal magnitude AND known direction \u2192 full reversion",
+      "DEGENERATE": "spread var<p10 OR feature magnitude<p10 \u2192 no trade",
+      "STRUCTURAL": "direction novelty>p85 (unprecedented in training) \u2192 half-size reversion"
+    },
+    "geometry_metric": "POA = rolling 60d |corr(ret_a, ret_b)| scales position 0\u21921",
+    "thresholds": {
+      "var_low": "p10 of training window variance (DEGENERATE gate)",
+      "mag_low": "p10 of training MDN magnitude (DEGENERATE gate)",
+      "novelty_high": "p85 of training direction novelty (STRUCTURAL gate)",
+      "POA_LOW": 0.3,
+      "POA_HIGH": 0.8,
+      "STRUCT_SIZE": 0.5
+    },
+    "continuation_removed": true,
+    "key_fix": "AR(1) \u03c6\u22480\u2192hl=2403d artefact eliminated; flat spread detected by low variance (Stat operator)"
+  },
+  "v5_vs_v6_class_dist": {
+    "P1_ETH_BTC": {
+      "equil_pct": 62.5,
+      "degen_pct": 30.2,
+      "struct_pct": 7.3,
+      "mag_median": 1.1387,
+      "novelty_median": 0.4768,
+      "poa_median": 0.8522
+    },
+    "P2_ETH_SOL": {
+      "equil_pct": 56.8,
+      "degen_pct": 32.1,
+      "struct_pct": 11.1,
+      "mag_median": 1.1467,
+      "novelty_median": 0.4911,
+      "poa_median": 0.7437
+    },
+    "P3_ETH_BNB": {
+      "equil_pct": 71.4,
+      "degen_pct": 21.7,
+      "struct_pct": 6.9,
+      "mag_median": 1.2259,
+      "novelty_median": 0.3674,
+      "poa_median": 0.7367
+    }
+  },
+  "pnl_results": {
+    "A_directional": {
+      "label": "A_directional",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.782,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1208,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.0789,
+      "bh_sharpe": 0.271,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.014
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "sharpe": 0.641,
+      "sharpe_per_lev": 4.121,
+      "max_dd": -0.117,
+      "cum_return": 0.107,
+      "active_days": 240,
+      "total_days": 1208,
+      "hit_rate": 0.5,
+      "tail_acc": 0.425,
+      "tail_pnl": -0.00255,
+      "leverage": 0.1556,
+      "bh_sharpe": -0.242,
+      "bh_max_dd": -0.571,
+      "bh_cum": -0.279
+    },
+    "P2_ETH_SOL": {
+      "label": "P2_ETH_SOL",
+      "sharpe": 0.927,
+      "sharpe_per_lev": 6.574,
+      "max_dd": -0.099,
+      "cum_return": 0.152,
+      "active_days": 259,
+      "total_days": 1208,
+      "hit_rate": 0.498,
+      "tail_acc": 0.63,
+      "tail_pnl": 0.00608,
+      "leverage": 0.141,
+      "bh_sharpe": 0.405,
+      "bh_max_dd": -0.497,
+      "bh_cum": 0.401
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "sharpe": -1.248,
+      "sharpe_per_lev": -7.814,
+      "max_dd": -0.273,
+      "cum_return": -0.24,
+      "active_days": 264,
+      "total_days": 1208,
+      "hit_rate": 0.481,
+      "tail_acc": 0.103,
+      "tail_pnl": -0.01632,
+      "leverage": 0.1597,
+      "bh_sharpe": -0.303,
+      "bh_max_dd": -0.617,
+      "bh_cum": -0.365
+    },
+    "M1_BTC_macro": {
+      "label": "M1_BTC_macro",
+      "sharpe": 0.156,
+      "sharpe_per_lev": 2.367,
+      "max_dd": -0.236,
+      "cum_return": -0.006,
+      "active_days": 129,
+      "total_days": 1208,
+      "hit_rate": 0.496,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.03113,
+      "leverage": 0.0658,
+      "bh_sharpe": 0.821,
+      "bh_max_dd": -0.519,
+      "bh_cum": 2.255
+    },
+    "M1_ALT_macro": {
+      "label": "M1_ALT_macro",
+      "sharpe": 1.387,
+      "sharpe_per_lev": 39.901,
+      "max_dd": -0.184,
+      "cum_return": 0.13,
+      "active_days": 54,
+      "total_days": 1208,
+      "hit_rate": 0.574,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.07584,
+      "leverage": 0.0348,
+      "bh_sharpe": 0.271,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.014
+    },
+    "COMBINED_4way": {
+      "label": "COMBINED_4way",
+      "sharpe": 0.818,
+      "sharpe_per_lev": 10.642,
+      "max_dd": -0.176,
+      "cum_return": 0.221,
+      "active_days": 381,
+      "total_days": 1208,
+      "hit_rate": 0.52,
+      "tail_acc": 0.327,
+      "tail_pnl": -0.00572,
+      "leverage": 0.0769,
+      "bh_sharpe": 0.271,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.014
+    }
+  },
+  "ic_results": {
+    "A_directional": {
+      "label": "A_dir",
+      "n": 152,
+      "ic": 0.0921,
+      "acc": 0.507
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "n": 239,
+      "ic": -0.1141,
+      "acc": 0.423
+    },
+    "P2_ETH_SOL": {
+      "label": "P2_ETH_SOL",
+      "n": 243,
+      "ic": -0.154,
+      "acc": 0.387
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "n": 247,
+      "ic": -0.3929,
+      "acc": 0.336
+    }
+  },
+  "crisis_sharpe": {
+    "2022_winter": {
+      "P1_ETH_BTC": -0.562,
+      "P2_ETH_SOL": -0.973,
+      "P3_ETH_BNB": 2.069
+    },
+    "2023_recovery": {
+      "P1_ETH_BTC": 3.797,
+      "P2_ETH_SOL": 3.545,
+      "P3_ETH_BNB": -3.766
+    },
+    "2024_bull": {
+      "P1_ETH_BTC": 1.075,
+      "P2_ETH_SOL": 0.823,
+      "P3_ETH_BNB": -1.171
+    },
+    "2025_bear": {
+      "P1_ETH_BTC": 0.522,
+      "P2_ETH_SOL": -0.167,
+      "P3_ETH_BNB": 0.187
+    }
+  },
+  "method_note": "UDL MDN: each 20-day spread window is embedded as a 14-dim feature vector via 4 spectral operators (Stat, Chaos, Freq, Recon). Training centroid + SVD reference directions fit on 2021-2022 data. Classification uses magnitude (distance from centroid) and novelty (1 - max cosine similarity with reference directions)."
+}

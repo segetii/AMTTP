@@ -1,0 +1,777 @@
+{
+  "meta": {
+    "version": "godmode_v8_multiasset_shell",
+    "assets": [
+      "btc",
+      "eth",
+      "sol"
+    ],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "W_TARGET_A1": 0.3,
+    "KAPPA_A": 0.15,
+    "theta": 4.353138641192445,
+    "ze7_min_force": 0.1,
+    "cb_halt": 0.08,
+    "cb_resume": 0.01,
+    "cb_window_days": 180,
+    "DYN_K": 3.0
+  },
+  "continuous_reference": {
+    "sharpe": 1.8070596452396428,
+    "cagr": 0.46874425720179547,
+    "max_dd": -0.3289461830077721,
+    "final": 358.828982555935
+  },
+  "execution_results": {
+    "star_eq_CB": {
+      "full": {
+        "label": "star_eq_CB",
+        "final": 3749.4607064157085,
+        "profit": 2749.4607064157085,
+        "return_pct": 2.7494607064157086,
+        "cagr": 0.2818599825552772,
+        "sharpe": 1.0569280576489257,
+        "maxdd": -0.2514001541264551,
+        "calmar": 1.1211607388812528,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "star_eq_CB",
+        "final": 3749.4607064157085,
+        "profit": 2749.4607064157085,
+        "return_pct": 2.7494607064157086,
+        "cagr": 0.48828831846445353,
+        "sharpe": 1.3390743237734697,
+        "maxdd": -0.18172218236059987,
+        "calmar": 2.687004481904802,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 2244,
+        "vetoed_force": 0,
+        "tp": 859,
+        "stop": 1239,
+        "trail_exit": 113,
+        "signal_exit": 31
+      },
+      "allocation_scale": 0.3333333333333333,
+      "pct_halted": 0.912031879338418,
+      "n_trips": 10,
+      "avg_y": 0.04151771635647284,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 754,
+            "exits": 754,
+            "flips": 9,
+            "longs": 334,
+            "shorts": 420,
+            "stop": 428,
+            "tp": 286,
+            "signal_exit": 9,
+            "close_end": 1,
+            "trail_exit": 30,
+            "skipped_daily_filter": 1,
+            "psi_blocked": 0,
+            "active_hours": 33437,
+            "vetoed_force": 0,
+            "avg_psi_y": 0.2723877687662391
+          },
+          "unit_stats": {
+            "sharpe": 0.216459897337213,
+            "cagr": 0.027640675429805972,
+            "max_dd": -0.23791877903488445,
+            "final": 109.48572137164668
+          },
+          "active_pct": 0.534407404233439,
+          "avg_psi": 0.3409595481954109,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 752,
+            "exits": 752,
+            "flips": 13,
+            "longs": 295,
+            "shorts": 457,
+            "stop": 411,
+            "tp": 289,
+            "signal_exit": 13,
+            "close_end": 1,
+            "trail_exit": 38,
+            "skipped_daily_filter": 0,
+            "psi_blocked": 0,
+            "active_hours": 31593,
+            "vetoed_force": 0,
+            "avg_psi_y": 0.25834117692885794
+          },
+          "unit_stats": {
+            "sharpe": -0.011730707235818217,
+            "cagr": -0.018775557189951053,
+            "max_dd": -0.47351955131980084,
+            "final": 93.89448266347966
+          },
+          "active_pct": 0.4764332847716171,
+          "avg_psi": 0.32361430237641176,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 738,
+            "exits": 738,
+            "flips": 9,
+            "longs": 365,
+            "shorts": 373,
+            "stop": 400,
+            "tp": 284,
+            "signal_exit": 9,
+            "close_end": 0,
+            "trail_exit": 45,
+            "skipped_daily_filter": 10,
+            "psi_blocked": 0,
+            "active_hours": 31824,
+            "vetoed_force": 0,
+            "avg_psi_y": 0.2603865399849146
+          },
+          "unit_stats": {
+            "sharpe": 0.10932879550644145,
+            "cagr": 0.0007902517729201364,
+            "max_dd": -0.48264289279575834,
+            "final": 100.26290125235091
+          },
+          "active_pct": 0.5028494301139772,
+          "avg_psi": 0.32562940681463287,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    },
+    "star_eq_ZE7_CB": {
+      "full": {
+        "label": "star_eq_ZE7_CB",
+        "final": 3527.745658922633,
+        "profit": 2527.745658922633,
+        "return_pct": 2.5277456589226333,
+        "cagr": 0.2672636073467751,
+        "sharpe": 1.0377906089950415,
+        "maxdd": -0.2598490509852545,
+        "calmar": 1.0285340905937785,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "star_eq_ZE7_CB",
+        "final": 3527.745658922633,
+        "profit": 2527.745658922633,
+        "return_pct": 2.5277456589226333,
+        "cagr": 0.4612439139966549,
+        "sharpe": 1.3177912276632084,
+        "maxdd": -0.18172218236059975,
+        "calmar": 2.5381816793361374,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 2175,
+        "vetoed_force": 846,
+        "tp": 829,
+        "stop": 1198,
+        "trail_exit": 115,
+        "signal_exit": 31
+      },
+      "allocation_scale": 0.3333333333333333,
+      "pct_halted": 0.912031879338418,
+      "n_trips": 10,
+      "avg_y": 0.041040801772658425,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 729,
+            "exits": 729,
+            "flips": 8,
+            "longs": 318,
+            "shorts": 411,
+            "stop": 415,
+            "tp": 273,
+            "signal_exit": 8,
+            "close_end": 1,
+            "trail_exit": 32,
+            "skipped_daily_filter": 1,
+            "psi_blocked": 0,
+            "active_hours": 32845,
+            "vetoed_force": 341,
+            "avg_psi_y": 0.2747035492416318
+          },
+          "unit_stats": {
+            "sharpe": 0.10574451909946798,
+            "cagr": 0.0081187333331032,
+            "max_dd": -0.24082343671433493,
+            "final": 102.7240104348174
+          },
+          "active_pct": 0.534407404233439,
+          "avg_psi": 0.3409595481954109,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 720,
+            "exits": 720,
+            "flips": 13,
+            "longs": 282,
+            "shorts": 438,
+            "stop": 393,
+            "tp": 274,
+            "signal_exit": 13,
+            "close_end": 1,
+            "trail_exit": 39,
+            "skipped_daily_filter": 0,
+            "psi_blocked": 0,
+            "active_hours": 31061,
+            "vetoed_force": 300,
+            "avg_psi_y": 0.2564862548588723
+          },
+          "unit_stats": {
+            "sharpe": 0.12836651672449964,
+            "cagr": 0.011880349627571896,
+            "max_dd": -0.4043060891600053,
+            "final": 104.00352450260382
+          },
+          "active_pct": 0.4764332847716171,
+          "avg_psi": 0.32361430237641176,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 726,
+            "exits": 726,
+            "flips": 10,
+            "longs": 364,
+            "shorts": 362,
+            "stop": 390,
+            "tp": 282,
+            "signal_exit": 10,
+            "close_end": 0,
+            "trail_exit": 44,
+            "skipped_daily_filter": 10,
+            "psi_blocked": 0,
+            "active_hours": 31527,
+            "vetoed_force": 205,
+            "avg_psi_y": 0.2647527195452238
+          },
+          "unit_stats": {
+            "sharpe": 0.0739232469788802,
+            "cagr": -0.010490295295086827,
+            "max_dd": -0.49159841123174464,
+            "final": 96.55558816381755
+          },
+          "active_pct": 0.5028494301139772,
+          "avg_psi": 0.32562940681463287,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    },
+    "star_eq_Q_ZE7_CB": {
+      "full": {
+        "label": "star_eq_Q_ZE7_CB",
+        "final": 1108.9533720954805,
+        "profit": 108.95337209548052,
+        "return_pct": 0.1089533720954805,
+        "cagr": 0.01962052383672175,
+        "sharpe": 0.19848451211068385,
+        "maxdd": -0.4287273627532988,
+        "calmar": 0.04576457101015949,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "star_eq_Q_ZE7_CB",
+        "final": 1108.9533720954805,
+        "profit": 108.95337209548052,
+        "return_pct": 0.1089533720954805,
+        "cagr": 0.03160355878152865,
+        "sharpe": 0.21998734000712275,
+        "maxdd": -0.3504784724403737,
+        "calmar": 0.09017261049294635,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 2175,
+        "vetoed_force": 846,
+        "tp": 829,
+        "stop": 1198,
+        "trail_exit": 115,
+        "signal_exit": 31
+      },
+      "allocation_scale": 0.3333333333333333,
+      "pct_halted": 0.9193161367726455,
+      "n_trips": 10,
+      "avg_y": 0.031095227696943586,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 729,
+            "exits": 729,
+            "flips": 8,
+            "longs": 318,
+            "shorts": 411,
+            "stop": 415,
+            "tp": 273,
+            "signal_exit": 8,
+            "close_end": 1,
+            "trail_exit": 32,
+            "skipped_daily_filter": 1,
+            "psi_blocked": 0,
+            "active_hours": 32845,
+            "vetoed_force": 341,
+            "avg_psi_y": 0.28225772136368354
+          },
+          "unit_stats": {
+            "sharpe": 0.10397150354662595,
+            "cagr": 0.007786037338365581,
+            "max_dd": -0.24873858936317295,
+            "final": 102.61137636337747
+          },
+          "active_pct": 0.534407404233439,
+          "avg_psi": 0.3432679208718136,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 720,
+            "exits": 720,
+            "flips": 13,
+            "longs": 282,
+            "shorts": 438,
+            "stop": 393,
+            "tp": 274,
+            "signal_exit": 13,
+            "close_end": 1,
+            "trail_exit": 39,
+            "skipped_daily_filter": 0,
+            "psi_blocked": 0,
+            "active_hours": 31061,
+            "vetoed_force": 300,
+            "avg_psi_y": 0.2643146653911121
+          },
+          "unit_stats": {
+            "sharpe": 0.14459097995792808,
+            "cagr": 0.015405112380157737,
+            "max_dd": -0.40797562995799685,
+            "final": 105.21254618945991
+          },
+          "active_pct": 0.4764332847716171,
+          "avg_psi": 0.32590706685065235,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 726,
+            "exits": 726,
+            "flips": 10,
+            "longs": 364,
+            "shorts": 362,
+            "stop": 390,
+            "tp": 282,
+            "signal_exit": 10,
+            "close_end": 0,
+            "trail_exit": 44,
+            "skipped_daily_filter": 10,
+            "psi_blocked": 0,
+            "active_hours": 31527,
+            "vetoed_force": 205,
+            "avg_psi_y": 0.2726539843538305
+          },
+          "unit_stats": {
+            "sharpe": 0.08284034318586275,
+            "cagr": -0.008123224356900716,
+            "max_dd": -0.4949235727955106,
+            "final": 97.3254339997802
+          },
+          "active_pct": 0.5028494301139772,
+          "avg_psi": 0.3276780593279314,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    },
+    "star_half_Q_ZE7_CB": {
+      "full": {
+        "label": "star_half_Q_ZE7_CB",
+        "final": 2358.949378886959,
+        "profit": 1358.949378886959,
+        "return_pct": 1.358949378886959,
+        "cagr": 0.17497475940835638,
+        "sharpe": 0.675445703851148,
+        "maxdd": -0.4824083174664803,
+        "calmar": 0.3627109091470305,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "star_half_Q_ZE7_CB",
+        "final": 2358.949378886959,
+        "profit": 1358.949378886959,
+        "return_pct": 1.358949378886959,
+        "cagr": 0.2946070098728202,
+        "sharpe": 0.5684240351665231,
+        "maxdd": -0.4824083174664803,
+        "calmar": 0.6107005190541531,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 2175,
+        "vetoed_force": 846,
+        "tp": 829,
+        "stop": 1198,
+        "trail_exit": 115,
+        "signal_exit": 31
+      },
+      "allocation_scale": 0.5,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.02913510651116726,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 729,
+            "exits": 729,
+            "flips": 8,
+            "longs": 318,
+            "shorts": 411,
+            "stop": 415,
+            "tp": 273,
+            "signal_exit": 8,
+            "close_end": 1,
+            "trail_exit": 32,
+            "skipped_daily_filter": 1,
+            "psi_blocked": 0,
+            "active_hours": 32845,
+            "vetoed_force": 341,
+            "avg_psi_y": 0.4233865820455254
+          },
+          "unit_stats": {
+            "sharpe": 0.10397150354662613,
+            "cagr": 0.004133102693618884,
+            "max_dd": -0.3607185106924472,
+            "final": 101.3803493043391
+          },
+          "active_pct": 0.534407404233439,
+          "avg_psi": 0.5149018813077205,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 720,
+            "exits": 720,
+            "flips": 13,
+            "longs": 282,
+            "shorts": 438,
+            "stop": 393,
+            "tp": 274,
+            "signal_exit": 13,
+            "close_end": 1,
+            "trail_exit": 39,
+            "skipped_daily_filter": 0,
+            "psi_blocked": 0,
+            "active_hours": 31061,
+            "vetoed_force": 300,
+            "avg_psi_y": 0.39647199808666816
+          },
+          "unit_stats": {
+            "sharpe": 0.14459097995792855,
+            "cagr": 0.01089327977562693,
+            "max_dd": -0.5512870418004164,
+            "final": 103.6667005610989
+          },
+          "active_pct": 0.4764332847716171,
+          "avg_psi": 0.4888606002759785,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 726,
+            "exits": 726,
+            "flips": 10,
+            "longs": 364,
+            "shorts": 362,
+            "stop": 390,
+            "tp": 282,
+            "signal_exit": 10,
+            "close_end": 0,
+            "trail_exit": 44,
+            "skipped_daily_filter": 10,
+            "psi_blocked": 0,
+            "active_hours": 31527,
+            "vetoed_force": 205,
+            "avg_psi_y": 0.4089809765307457
+          },
+          "unit_stats": {
+            "sharpe": 0.08284034318586311,
+            "cagr": -0.037082478806961805,
+            "max_dd": -0.645373163737653,
+            "final": 88.19708288703895
+          },
+          "active_pct": 0.5028494301139772,
+          "avg_psi": 0.4915170889918971,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    },
+    "star_full_Q_ZE7_CB": {
+      "full": {
+        "label": "star_full_Q_ZE7_CB",
+        "final": 9472.188010038462,
+        "profit": 8472.188010038462,
+        "return_pct": 8.472188010038462,
+        "cagr": 0.5256719090436348,
+        "sharpe": 1.0020787824169317,
+        "maxdd": -0.6578040845040858,
+        "calmar": 0.799131415305722,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "star_full_Q_ZE7_CB",
+        "final": 9472.188010038462,
+        "profit": 8472.188010038462,
+        "return_pct": 8.472188010038462,
+        "cagr": 0.966888014600497,
+        "sharpe": 0.6510733107245331,
+        "maxdd": -0.6578040845040858,
+        "calmar": 1.4698723181833502,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 2175,
+        "vetoed_force": 846,
+        "tp": 829,
+        "stop": 1198,
+        "trail_exit": 115,
+        "signal_exit": 31
+      },
+      "allocation_scale": 1.0,
+      "pct_halted": 0.9635572885422915,
+      "n_trips": 11,
+      "avg_y": 0.01959886426119752,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 729,
+            "exits": 729,
+            "flips": 8,
+            "longs": 318,
+            "shorts": 411,
+            "stop": 415,
+            "tp": 273,
+            "signal_exit": 8,
+            "close_end": 1,
+            "trail_exit": 32,
+            "skipped_daily_filter": 1,
+            "psi_blocked": 0,
+            "active_hours": 32845,
+            "vetoed_force": 341,
+            "avg_psi_y": 0.8467731640910507
+          },
+          "unit_stats": {
+            "sharpe": 0.10397150354662613,
+            "cagr": -0.035685226968838246,
+            "max_dd": -0.6338144151472894,
+            "final": 88.62317189910547
+          },
+          "active_pct": 0.534407404233439,
+          "avg_psi": 1.029803762615441,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 720,
+            "exits": 720,
+            "flips": 13,
+            "longs": 282,
+            "shorts": 438,
+            "stop": 393,
+            "tp": 274,
+            "signal_exit": 13,
+            "close_end": 1,
+            "trail_exit": 39,
+            "skipped_daily_filter": 0,
+            "psi_blocked": 0,
+            "active_hours": 31061,
+            "vetoed_force": 300,
+            "avg_psi_y": 0.7929439961733363
+          },
+          "unit_stats": {
+            "sharpe": 0.14459097995792855,
+            "cagr": -0.04870683242545759,
+            "max_dd": -0.8161689403286232,
+            "final": 84.7076032497254
+          },
+          "active_pct": 0.4764332847716171,
+          "avg_psi": 0.977721200551957,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 726,
+            "exits": 726,
+            "flips": 10,
+            "longs": 364,
+            "shorts": 362,
+            "stop": 390,
+            "tp": 282,
+            "signal_exit": 10,
+            "close_end": 0,
+            "trail_exit": 44,
+            "skipped_daily_filter": 10,
+            "psi_blocked": 0,
+            "active_hours": 31527,
+            "vetoed_force": 205,
+            "avg_psi_y": 0.8179619530614914
+          },
+          "unit_stats": {
+            "sharpe": 0.08284034318586311,
+            "cagr": -0.20342811154023777,
+            "max_dd": -0.8835153905650731,
+            "final": 46.95657681248944
+          },
+          "active_pct": 0.5028494301139772,
+          "avg_psi": 0.9830341779837942,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    },
+    "ode_eq_Q_ZE7_CB": {
+      "full": {
+        "label": "ode_eq_Q_ZE7_CB",
+        "final": 1364.5103666179173,
+        "profit": 364.51036661791727,
+        "return_pct": 0.36451036661791725,
+        "cagr": 0.060132702900221435,
+        "sharpe": 0.4006974611575689,
+        "maxdd": -0.35915470586285225,
+        "calmar": 0.16742841432567465,
+        "start": "2021-01-01 01:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "test": {
+        "label": "ode_eq_Q_ZE7_CB",
+        "final": 1364.5103666179173,
+        "profit": 364.51036661791727,
+        "return_pct": 0.36451036661791725,
+        "cagr": 0.09801884683751338,
+        "sharpe": 0.5600723065259596,
+        "maxdd": -0.35915470586285225,
+        "calmar": 0.27291539060313225,
+        "start": "2023-01-01 00:00:00",
+        "end": "2026-04-29 20:00:00"
+      },
+      "counts": {
+        "entries": 13179,
+        "vetoed_force": 4532,
+        "tp": 571,
+        "stop": 1159,
+        "trail_exit": 71,
+        "signal_exit": 11376
+      },
+      "allocation_scale": 0.3333333333333333,
+      "pct_halted": 0.9574942154426258,
+      "n_trips": 11,
+      "avg_y": 0.02065369984977387,
+      "per_asset": {
+        "btc": {
+          "counts": {
+            "entries": 4411,
+            "exits": 4411,
+            "flips": 3785,
+            "longs": 2191,
+            "shorts": 2220,
+            "stop": 406,
+            "tp": 202,
+            "signal_exit": 3785,
+            "close_end": 0,
+            "trail_exit": 18,
+            "skipped_daily_filter": 2516,
+            "psi_blocked": 0,
+            "active_hours": 40238,
+            "vetoed_force": 1494,
+            "avg_psi_y": 0.4693272574473235
+          },
+          "unit_stats": {
+            "sharpe": -1.1920870140312072,
+            "cagr": -0.17954030252006892,
+            "max_dd": -0.5218473110858437,
+            "final": 51.802142191432424
+          },
+          "active_pct": 0.48395320935812836,
+          "avg_psi": 0.36632351505940935,
+          "daily_vol": 0.03823356301063671
+        },
+        "eth": {
+          "counts": {
+            "entries": 4418,
+            "exits": 4418,
+            "flips": 3792,
+            "longs": 2196,
+            "shorts": 2222,
+            "stop": 398,
+            "tp": 201,
+            "signal_exit": 3792,
+            "close_end": 1,
+            "trail_exit": 26,
+            "skipped_daily_filter": 2516,
+            "psi_blocked": 0,
+            "active_hours": 40021,
+            "vetoed_force": 1583,
+            "avg_psi_y": 0.4711627239009646
+          },
+          "unit_stats": {
+            "sharpe": -0.9134473432419206,
+            "cagr": -0.1888693180810267,
+            "max_dd": -0.5928071041039942,
+            "final": 49.87013758511195
+          },
+          "active_pct": 0.48395320935812836,
+          "avg_psi": 0.3640093525042522,
+          "daily_vol": 0.05141550130392452
+        },
+        "sol": {
+          "counts": {
+            "entries": 4350,
+            "exits": 4350,
+            "flips": 3799,
+            "longs": 2159,
+            "shorts": 2191,
+            "stop": 355,
+            "tp": 168,
+            "signal_exit": 3799,
+            "close_end": 1,
+            "trail_exit": 27,
+            "skipped_daily_filter": 2516,
+            "psi_blocked": 0,
+            "active_hours": 40689,
+            "vetoed_force": 1455,
+            "avg_psi_y": 0.4638065492208019
+          },
+          "unit_stats": {
+            "sharpe": -0.04334094045154658,
+            "cagr": -0.049758416626941915,
+            "max_dd": -0.6876792445733413,
+            "final": 84.39677344792304
+          },
+          "active_pct": 0.48395320935812836,
+          "avg_psi": 0.3627234876270806,
+          "daily_vol": 0.07803689942007896
+        }
+      }
+    }
+  },
+  "best_by_oos_calmar": "star_eq_CB",
+  "elapsed": 384.5780384540558
+}

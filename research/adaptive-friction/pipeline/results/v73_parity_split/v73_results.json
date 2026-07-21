@@ -1,0 +1,213 @@
+{
+  "champion": {
+    "horizon": "14d",
+    "model": "parity_split",
+    "ic_score": 0.0652934029147083,
+    "ic_sign": 0.03811617330755947,
+    "hit": 0.5190776832281087,
+    "beats_null": false,
+    "C": 0.009292165021987344
+  },
+  "results": {
+    "theory": {
+      "E_definition": "E = ||S_scaled||^2 (even)",
+      "gamma": "gamma = E/(E+theta)",
+      "D": "D = Phi_odd(S) @ beta (odd deg 1+3)",
+      "final": "signal = gamma(E) * sign(D)",
+      "do_not": "Never make E odd \u2014 breaks Lyapunov magnitude role"
+    },
+    "by_horizon": {
+      "24h": {
+        "parity_split": {
+          "n_oos": 8433,
+          "hit_rate": {
+            "n": 18527,
+            "hit_rate": 0.5095806120796675,
+            "base_rate": 0.5210233712959464
+          },
+          "ic_sign": -0.002485072160280895,
+          "ic_score": 0.0179120795551425,
+          "capacity": {
+            "C": 0.0025592278143625265,
+            "null_mean": 0.0024083517940767054,
+            "null_p95": 0.0034643448053579824,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5112796139071812,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.49572713604824215
+        },
+        "odd_only": {
+          "n_oos": 8433,
+          "hit_rate": {
+            "n": 18527,
+            "hit_rate": 0.5095806120796675,
+            "base_rate": 0.5210233712959464
+          },
+          "ic_sign": -0.002485072160280895,
+          "ic_score": 0.009315882585335966,
+          "capacity": {
+            "C": 0.0020638346937436086,
+            "null_mean": 0.0023898560870579547,
+            "null_p95": 0.0033763927622514783,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5110319173468718,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.49572713604824215
+        },
+        "sign_preserving_SabsS": {
+          "n_oos": 8433,
+          "hit_rate": {
+            "n": 18527,
+            "hit_rate": 0.512279376045771,
+            "base_rate": 0.5210233712959464
+          },
+          "ic_sign": 0.008748741886042957,
+          "ic_score": 0.028045128089762176,
+          "capacity": {
+            "C": 0.002686556258379055,
+            "null_mean": 0.0026709918128891685,
+            "null_p95": 0.00395572654448317,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5113432781291896,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.5031599126833096
+        },
+        "gamma_E_magnitude_ic": 0.033235025276727975
+      },
+      "7d": {
+        "parity_split": {
+          "n_oos": 8289,
+          "hit_rate": {
+            "n": 18383,
+            "hit_rate": 0.5215144426916173,
+            "base_rate": 0.5265190665288582
+          },
+          "ic_sign": 0.008317569295524184,
+          "ic_score": 0.02997834720147685,
+          "capacity": {
+            "C": 0.004548842875144773,
+            "null_mean": 0.0035219311103692,
+            "null_p95": 0.005961886013910299,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5122744214375724,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.5678703746726781
+        },
+        "odd_only": {
+          "n_oos": 8289,
+          "hit_rate": {
+            "n": 18383,
+            "hit_rate": 0.5215144426916173,
+            "base_rate": 0.5265190665288582
+          },
+          "ic_sign": 0.008317569295524184,
+          "ic_score": 0.02912825527623773,
+          "capacity": {
+            "C": 0.0016713971477643726,
+            "null_mean": 0.00400876205475223,
+            "null_p95": 0.008291806704933362,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5108356985738822,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.5678703746726781
+        },
+        "sign_preserving_SabsS": {
+          "n_oos": 8289,
+          "hit_rate": {
+            "n": 18383,
+            "hit_rate": 0.517543382472937,
+            "base_rate": 0.5265190665288582
+          },
+          "ic_sign": 0.018929304822077747,
+          "ic_score": 0.037556402625310306,
+          "capacity": {
+            "C": 0.00334178265355796,
+            "null_mean": 0.0037546933497073246,
+            "null_p95": 0.008179827825907152,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.511670891326779,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.5584082367870591
+        },
+        "gamma_E_magnitude_ic": -0.03476703282861994
+      },
+      "14d": {
+        "parity_split": {
+          "n_oos": 8121,
+          "hit_rate": {
+            "n": 18215,
+            "hit_rate": 0.5190776832281087,
+            "base_rate": 0.5063958276146033
+          },
+          "ic_sign": 0.03811617330755947,
+          "ic_score": 0.0652934029147083,
+          "capacity": {
+            "C": 0.009292165021987344,
+            "null_mean": 0.004043771487611979,
+            "null_p95": 0.009476398534418229,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5146460825109936,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.6193311868252785
+        },
+        "odd_only": {
+          "n_oos": 8121,
+          "hit_rate": {
+            "n": 18215,
+            "hit_rate": 0.5190776832281087,
+            "base_rate": 0.5063958276146033
+          },
+          "ic_sign": 0.03811617330755947,
+          "ic_score": 0.013372846188398796,
+          "capacity": {
+            "C": 0.014257105674247494,
+            "null_mean": 0.005414801687678581,
+            "null_p95": 0.013596073000628506,
+            "beats_null": true,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5171285528371238,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.6193311868252785
+        },
+        "sign_preserving_SabsS": {
+          "n_oos": 8121,
+          "hit_rate": {
+            "n": 18215,
+            "hit_rate": 0.5317046390337634,
+            "base_rate": 0.5063958276146033
+          },
+          "ic_sign": 0.04351132339789141,
+          "ic_score": 0.002202377928964853,
+          "capacity": {
+            "C": 0.010868658495247293,
+            "null_mean": 0.00480988191181311,
+            "null_p95": 0.013637810867419152,
+            "beats_null": false,
+            "n_perm": 120
+          },
+          "fano_ceiling": 0.5154343292476237,
+          "fee_breakeven": 0.5004,
+          "quarterly_hit_mean": 0.6090650841006083
+        },
+        "gamma_E_magnitude_ic": -0.03797254038424354
+      }
+    }
+  },
+  "recommendation": "use_parity_split_research",
+  "elapsed_s": 241.2
+}

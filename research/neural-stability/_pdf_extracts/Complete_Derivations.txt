@@ -1,0 +1,2870 @@
+=== PAGE 1 ===
+Complete Derivations
+Every Object and Variable in the CanonicalBSDT Framework
+From First Principles to Final Formula
+Contents
+1 Primitives: State, F eatures, Metric 6
+1.1 State matrix X . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.2 Feature map S . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.3 Metric G . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.4 Derivation of µG and MG for BSDT . . . . . . . . . . . . . . . . . . . . . . . . . 7
+2 Energy E 7
+2.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+2.2 Properties . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+2.3 Time derivative of E . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+2.4 BSDT instantiation of E . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+3 State-Space Gradient gX 8
+3.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.2 Derivation from rst principles . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.3 Matrix form . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.4 Norm of gX . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.5 Coercivity bounds on ∥gX ∥ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.6 BSDT pullback gradient ˜Gt . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4 MFLS: Mahalanobis Field Line Score 9
+4.1 BSDT denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.2 Canonical derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.3 Expanded forms . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.4 MFLS squared . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.5 MFLS as Fisher information . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.6 MFLS as leading indicator (proved) . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+4.7 Verication against BSDT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+5 Adaptive Gain γ 10
+5.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+5.2 Derivation from the saddle-point game . . . . . . . . . . . . . . . . . . . . . . . . 10
+5.3 Properties . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+5.4 Fermi-Dirac structure . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+5.5 Formula for θ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+6 The Canonical ODE 12
+6.1 Locked form . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+1
+=== PAGE 2 ===
+6.2 Decomposition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+6.3 Force decomposition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+7 Lyapunov Energy Derivative ˙E 12
+7.1 Master identity . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+7.2 Special cases . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+8 Eective Decay Rate ρeff 13
+8.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+8.2 Derivation in canonical terms . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+8.3 Connection to σ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8.4 Half-life prediction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+9 Eective Singular V alue σeff 14
+9.1 Abstract denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+9.2 Derivation in canonical terms . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+9.3 Properties . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+10 Theoretical Rate ρ 15
+10.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+10.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+10.3 Expression via σeff . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+11 Admissibility Threshold Ψ∗ 15
+11.1 Abstract form . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+11.2 Derivation in canonical terms . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+11.3 BSDT instantiation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+11.4 Sensitivity to calibration conditioning . . . . . . . . . . . . . . . . . . . . . . . . 16
+12 Admissibility Condition 16
+12.1 Statement . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+12.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+12.3 The canonical admissibility ratio . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+13 Safety Ratio 17
+13.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+13.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+13.3 Regimes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+13.4 Connection to eective decay rate . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+14 Alignment Angle cos θt 18
+14.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+14.2 Derivation from energy descent . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+14.3 Energy derivative in terms of cos θt . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+14.4 Geometric interpretation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+14.5 Collapse angle tan θt . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+15 Misalignment Angle ψt (Sixth Signal) 19
+15.1 Denition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+15.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+15.3 What ψt measures . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+15.4 False alarm resolution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+15.5 Performance gap formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+2
+=== PAGE 3 ===
+16 Channel Recovery Operator R 20
+16.1 The recovery formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+16.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+16.3 Per-channel recovery . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+16.4 Attribution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+16.5 Stability of recovery . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+16.6 Condition number of recovery . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+17 Ultimate Boundedness Threshold Ψ∗
+rob 21
+17.1 Standard case . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+17.2 Robust case with adversarial disturbance . . . . . . . . . . . . . . . . . . . . . . . 21
+17.3 Admissibility condition (robust) . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+18 The Complete Dashboard 21
+18.1 All signals from two objects . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+18.2 Dependency graph . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+18.3 Computational algorithm (per step t) . . . . . . . . . . . . . . . . . . . . . . . . . 22
+19 BSDTCanonical Juxtaposition 23
+19.1 Identity table . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+19.2 The master identity . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+19.3 Performance gap . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+20 Summary Reference 24
+20.1 Every formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+20.2 The two-object reduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+Part II: Per-Channel Derivations 27
+21 Calibration Objects 27
+21.1 Normal-period statistics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+22 Channel 1: Camouage δC 27
+22.1 Formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+22.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+22.3 Jacobian ∂δ(i)
+C /∂x(i)
+t . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+22.4 Full row 1 of J . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+22.5 Geometric interpretation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+22.6 Statistical interpretation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+22.7 Domain instantiations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+23 Channel 2: F eature Gap δG 29
+23.1 Formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+23.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+23.3 Angle of deviation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+23.4 Jacobian ∂δ(i)
+G /∂x(i)
+t . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+23.5 Full row 2 of J . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+23.6 Why δG is the most powerful channel . . . . . . . . . . . . . . . . . . . . . . . . . 30
+23.7 Relation to δC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+24 Channel 3: Activity Anomaly δA 30
+24.1 Formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+3
+=== PAGE 4 ===
+24.2 Derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+24.3 Jacobian ∂δ(i)
+A /∂x(i)
+t . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+24.4 Full row 3 of J . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+24.5 Geometric meaning of JA . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+24.6 Requirement: two consecutive snapshots . . . . . . . . . . . . . . . . . . . . . . . 32
+24.7 Domain instantiations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+25 Channel 4: T emporal Novelty δT 32
+25.1 Formula . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+25.2 KDE density estimate . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+25.3 Step-by-step derivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+25.4 Kernel weights . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+25.5 Jacobian ∂δ(i)
+T /∂x(i)
+t . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+25.6 Full row 4 of J . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+25.7 Interpretation: δT vs δC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+25.8 Domain instantiations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+26 The Assembled Jacobian J 34
+26.1 Full matrix . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+26.2 Gram matrix . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+26.3 When channels are orthogonal . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+27 Per-Channel Canonical Gradient 36
+27.1 Decomposition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+27.2 Per-channel gradient vectors . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+27.3 MFLS per channel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+28 Per-Channel Energy Contributions 37
+28.1 Energy decomposition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+29 Per-Channel Lyapunov Contributions ˙Vk 37
+29.1 Decomposition theorem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+29.2 Drift and control components . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+29.3 Channel stability attribution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+29.4 Control eciency per channel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+30 Per-Channel Attribution ak 38
+30.1 Energy attribution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+30.2 MFLS attribution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+30.3 Dominant channel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+31 Control Coupling Sum Rt 39
+32 Complete Per-Step Algorithm 39
+32.1 All objects from raw data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+33 Complete F ormula Reference 41
+Part III: Game-Theoretic Architecture 43
+34 The Projection Game 43
+34.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+4
+=== PAGE 5 ===
+34.2 Saddle-point theorem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+34.3 Interpretation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+35 The Adversarial Disturbance Game 44
+35.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+35.2 No interior saddle . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+36 The Regularised Adversarial Game 45
+36.1 Motivating the regulariser . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+36.2 Regularised game . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+37 The Multi-Engine Cooperative Game 45
+37.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+37.2 Required assumption . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+37.3 Conditional superadditivity . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+38 Channel Attribution as Shapley V alue 46
+38.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+38.2 Shapley axioms . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+38.3 Coalitional value . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+38.4 Shapley attribution theorem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+38.5 Shapley-to-channel inversion (conditional) . . . . . . . . . . . . . . . . . . . . . . 47
+39 The θ Mechanism Design Problem 48
+39.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+39.2 Admissibility-binding solution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+40 The Information Game 49
+40.1 Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+40.2 Information ordering . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+40.3 Decision-theoretic consequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+41 The Channel-Regime Phase Modulator (Heuristic Interpretation) 49
+41.1 Honest framing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+41.2 The phase modulator . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 50
+41.3 Interpretation (not theorem) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 50
+42 Architecture Summary 50
+42.1 What is proved at theorem level . . . . . . . . . . . . . . . . . . . . . . . . . . . . 50
+42.2 What is NOT claimed . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+42.3 What the architecture says . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+5
+=== PAGE 6 ===
+1 Primitives: State, Features, Metric
+1.1 State matrix X
+Denition 1.1 (State) . The state is a matrix
+X ∈ RN ×d
+where N is the number of agents and d is the feature dimension per agent. Row i is the state of
+agent i: xi ∈ Rd. In vectorised form: vec(X) ∈ RN d.
+Dimensions.
+Symbol Meaning Type
+N number of agents positive integer
+d features per agent positive integer
+n = N d total state dimension positive integer
+X full state RN ×d
+xi state of agent i Rd
+1.2 Feature map S
+Denition 1.2 (Feature map) .
+S : RN ×d → Rk, X 7→ S(X)
+S(X) encodes the geometric content relevant to the control objective. k ≥ 1 is xed per domain.
+The Jacobian of S at X is
+J(X) = ∂S
+∂X ∈ Rk×n, n = N d.
+Jacobian in index notation. Let S = ( S1, . . . , Sk)T and X = ( X1, . . . , Xn)T (vectorised).
+Then:
+Jab(X) = ∂S a
+∂X b , a ∈ {1, . . . , k}, b ∈ {1, . . . , n}.
+Chain rule. For any trajectory X(t):
+˙S = J(X) ˙X ∈ Rk.
+1.3 Metric G
+Denition 1.3 (Feature-space metric) .
+G ∈ Rk×k, G = GT ≻ 0.
+Eigenvalue bounds: 0 < µ G ≤ λ(G) ≤ MG.
+Derivation of eigenvalue bounds. Since G ≻ 0, all eigenvalues are positive. Order them
+0 < λ1 ≤ · · · ≤ λk. Dene:
+µG := λ1 = λmin(G), M G := λk = λmax(G).
+For any v ∈ Rk:
+µG ∥v∥2 ≤ vTGv ≤ MG ∥v∥2 .
+These bounds are tight: achieved at the eigenvectors of G.
+6
+=== PAGE 7 ===
+1.4 Derivation of µG and MG for BSDT
+Under the BSDT instantiation G = Σ−1
+0 :
+µG = λmin(Σ−1
+0 ) = 1
+λmax(Σ0) , M G = λmax(Σ−1
+0 ) = 1
+λmin(Σ0) .
+Proof: if Σ0v = λv then Σ−1
+0 v = λ−1v, so eigenvalues invert. □
+Conditioning:
+κ(G) = MG
+µG
+= λmax(Σ0)
+λmin(Σ0) = κ(Σ0).
+2 Energy E
+2.1 Denition
+E(X) = S(X)TG S(X) ∈ R≥0
+2.2 Properties
+Proposition 2.1 (Non-negativity and zero set) . E(X) ≥ 0 with equality if and only if G1/2S(X) =
+0, i.e. S(X) = 0 (since G ≻ 0).
+Proof. E = STGS =
+G1/2S
+2
+≥ 0. Equality holds i G1/2S = 0 i S = 0 since G1/2 is
+invertible.
+2.3 Time derivative of E
+Proposition 2.2 (Energy velocity) . Along any trajectory X(t):
+˙E(t) = ⟨gX(X(t)), ˙X(t)⟩
+where gX = ∇X E is derived in Section 3.
+Proof. By the chain rule:
+˙E = d
+dt[STGS] = 2STG ˙S = 2STGJ ˙X = (2J TGS)T ˙X = gT
+X ˙X.
+2.4 BSDT instantiation of E
+With S = ˜XΣ−1/2
+0 (vectorised), G = I:
+EBSDT =
+ ˜XΣ−1/2
+0
+
+2
+F
+= tr( ˜XΣ−1
+0 ˜X T)
+where ˜X = X − 1µT
+0 .
+With S = B(X) = (δC, δG, δA, δT )T, G = A:
+EBSDT = B(X)TA B(X) = EBS(S).
+7
+=== PAGE 8 ===
+3 State-Space Gradient gX
+3.1 Denition
+gX(X) = ∇X E(X) = 2J(X)TG S(X) ∈ Rn
+3.2 Derivation from rst principles
+Proof. Write E =P
+a,b GabSaSb. Dierentiate with respect to X j:
+∂E
+∂X j =
+X
+a,b
+Gab
+ ∂S a
+∂X j Sb + Sa ∂S b
+∂X j
+
+= 2
+X
+a,b
+GabJajSb = 2[J TGS]j.
+Hence ∇X E = 2J TGS.
+3.3 Matrix form
+In matrix notation with X as an N × d matrix (not vectorised), the gradient is an N × d matrix:
+∇X E = 2J TGS ∈ RN ×d
+where J ∈ Rk×N d acts on vec( ˙X) and the result is reshaped.
+3.4 Norm of gX
+Proposition 3.1 (Gradient norm) .
+∥gX ∥2 = 4STGJ JTGS = 4STG G GS
+where G = J JT ∈ Rk×k is the Gram matrix of J.
+Proof. ∥gX ∥2 = (2J TGS)T(2J TGS) = 4STGJ JTGS.
+3.5 Coercivity bounds on ∥gX∥
+Proposition 3.2 (Two-sided gradient coercivity) . Under (A1)(A2) with σmin(J) ≥ σ > 0 and
+∥J∥op ≤ Jmax:
+C1
+√
+E ≤ ∥gX ∥ ≤ C2
+√
+E
+where
+C1 = 2σµG√MG
+, C 2 = 2JmaxMG
+√µG
+.
+Proof. Lower bound.
+∥gX ∥2 = 4
+J TGS
+
+2
+≥ 4σmin(J)2 ∥GS∥2 ≥ 4σ2µ2
+G ∥S∥2 .
+Since E = STGS ≤ MG ∥S∥2, we have ∥S∥2 ≥ E/MG. Therefore ∥gX ∥2 ≥ 4σ2µ2
+GE/MG = C2
+1 E.
+Upper bound.
+∥gX ∥ = 2
+J TGS
+ ≤ 2 ∥J∥op ∥G∥op ∥S∥ ≤ 2JmaxMG ∥S∥ .
+Since E = STGS ≥ µG ∥S∥2, we have ∥S∥ ≤
+p
+E/µG. Therefore ∥gX ∥ ≤ 2JmaxMG
+p
+E/µG =
+C2
+√
+E. □
+8
+=== PAGE 9 ===
+3.6 BSDT pullback gradient ˜Gt
+In the BSDT system, the gradient decomposes per channel:
+gX = 2
+X
+k∈{C,G,A,T }
+[AS]k
+∂δk
+∂X =: ˜Gt.
+This is the pullback gradient of Section XVI.3 of the anatomy document. The canonical formula
+gX = 2J TGS recovers this exactly under the identication G = A, S = B(X), J = ∂B/∂X .
+4 MFLS: Mahalanobis Field Line Score
+4.1 BSDT denition
+MFLSBSDT(X) = ∥∇X EBSDT∥F = 2
+ ˜XΣ−1
+0
+
+F
+4.2 Canonical derivation
+MFLS(X) = ∥gX ∥ = 2
+J TGS
+
+Proof. By denition MFLS = ∥∇X E∥F . The canonical gradient is ∇X E = gX = 2 J TGS.
+Therefore MFLS =
+2J TGS
+ = ∥gX ∥.
+4.3 Expanded forms
+Three equivalent canonical expressions:
+Form Expression When to use
+Gradient norm ∥gX ∥ Free  already computed in canonical loop
+Explicit 2
+J TGS
+ When gradient vector is needed
+Gram form 2
+√
+STGGGS When Gram structure is analysed
+4.4 MFLS squared
+MFLS2 = ∥gX ∥2 = 4STGGGS = 4STGJ JTGS
+4.5 MFLS as Fisher information
+Under G = IS (Fisher metric):
+MFLS2 = 4tr(Σ−1
+0 ˜X T ˜XΣ−1
+0 ) = 4tr(IFisher)
+MFLS squared is four times the trace of the Fisher information matrix at the current state.
+High MFLS means the system is in a region of high log-likelihood curvature.
+9
+=== PAGE 10 ===
+4.6 MFLS as leading indicator (proved)
+From the energy derivative with Fbase = 0:
+˙E = −(1 − γ) ∥gX ∥2 = −(1 − γ) · MFLS2.
+MFLS squared is the instantaneous energy descent rate. A spike in MFLS precedes a drop in
+E. This is a theorem, not an empirical observation.
+4.7 Verication against BSDT
+Under S = B(X), G = Σ−1
+0 , J = ∂B/∂X with JC = 2 ˜XΣ−1
+0 (the camouage Jacobian):
+gX = 2J T
+CΣ−1
+0 S = 2 ˜XΣ−1
+0 , ∥gX ∥F = 2
+ ˜XΣ−1
+0
+
+F
+= MFLSBSDT. ✓
+5 Adaptive Gain γ
+5.1 Denition
+γ(X) = E(X)
+E(X) + θ , θ > 0
+5.2 Derivation from the saddle-point game
+Consider the two-player zero-sum game at xed X:
+ Controller chooses γ ∈ [0, 1)
+ Adversary chooses u ∈ Rn with ∥u∥ ≤ M
+ Payo to adversary: J(γ, u) = ˙E(X; γ, u)
+The payo under the canonical ODE is:
+J(γ, u) = (1 − γ)
+h
+⟨gX , F base + u⟩ − ∥gX ∥2
+i
+.
+The adversary maximises: by CauchySchwarz, u∗ = MgX / ∥gX ∥.
+The controller minimises:
+inf
+γ∈[0,1)
+(1 − γ)B, B = ⟨gX , F base⟩ + M∥gX ∥−∥gX ∥2.
+When B > 0: inmum is 0 as γ → 1−; boundary solution. When B ≤ 0: minimum at γ = 0.
+The Lagrangian formulation (Theorem O.1 of v4):
+L(u, λ) = 1
+2 ∥u − Fbase∥2 + λ⟨u, g X ⟩ − θ
+2
+∥gX ∥2
+E λ2
+has unique saddle point with λ∗ = ⟨Fbase,gX , E⟩
+(E+θ)∥gX ∥2 , giving γ = E/(E + θ).
+10
+=== PAGE 11 ===
+5.3 Properties
+Proposition 5.1 (Gain properties) . (i) γ ∈ [0, 1) for all X
+(ii) γ → 0 as E → 0: no damping near target
+(iii) γ → 1 as E → ∞: full projection at high energy
+(iv) γ = 1/2 when E = θ: maximum-entropy operating point
+(v) γ′ = θ/(E + θ)2 > 0: strictly increasing in E
+Proof. (i) E ≥ 0, θ > 0, so 0 ≤ E/(E + θ) < 1. (ii) limE→0 E/(E + θ) = 0. (iii) limE→∞ E/(E +
+θ) = 1. (iv) E/(E + θ) = 1/2 ⇐ ⇒ E = θ. (v) dγ/dE = θ/(E + θ)2 > 0.
+5.4 Fermi-Dirac structure
+Writing γ = 1/(1 + θ/E): this is the Fermi-Dirac occupation function with inverse temperature
+β = 1/θ and energy E. The thermodynamic dictionary (v4 N):
+Canonical object Thermodynamic analogue
+θ Temperature
+γ Occupation number
+1 − γ Carnot eciency
+E = θ Maximum-entropy operating point
+θ → 0 Zero temperature (full intervention)
+θ → ∞ Innite temperature (no intervention)
+5.5 Formula for θ
+θ = mediant∈calm {E(t)} = mediant∈calm
+ ˜XtΣ−1/2
+0
+
+2
+F
+
+Derivation. The median of the calm-period energy distribution is the natural temperature
+because:
+1. At E = θ, γ = 1/2  half intervention. During normal operation ( E ≈ θ by construction),
+the system applies moderate damping.
+2. The median is robust to outlier spikes in the calibration window. The mean would overstate
+θ.
+3. Setting θ = Emedian means the system is at its maximum-entropy operating point on
+average during the calm regime  it neither over-intervenes nor under-intervenes.
+Alternative derivations of θ:
+Route 1 (Maximum entropy): set θ = e∗ (critical manifold energy) so γ = 1 /2 at stability
+boundary.
+Route 2 (Admissibility): choose θ > M max
+√MG/(σµG) to guarantee Ψ∗ > Mmax.
+Route 3 (Chi-squared calibration): e∗ = χ2
+N d,0.99, set θ = e∗/2 so γ = 1/3 at the 99% energy
+quantile.
+11
+=== PAGE 12 ===
+6 The Canonical ODE
+6.1 Locked form
+˙X = Fbase(X) − gX(X) − γ(X) ⟨Fbase(X) − gX(X), g X(X)⟩
+∥gX(X)∥2 gX(X)
+6.2 Decomposition
+Dene the modied force:
+F (X) = Fbase(X) − gX(X).
+The projection coecient:
+α(X) = ⟨F (X), g X(X)⟩
+∥gX(X)∥2 .
+The ODE becomes:
+˙X = F (X) − γ(X)α(X)gX(X).
+Three-term decomposition:
+1. Fbase(X): domain-specic nominal eld
+2. −gX(X): gradient correction forcing E to decrease
+3. −γαgX : adaptive projection removing the component of F aligned with gX
+6.3 Force decomposition
+˙X = F − ⟨F, ˆu⟩ˆu| {z }
+F⊥ (always free)
++ (1 − γ)⟨F, ˆu⟩ˆu| {z }
+(1−γ)F∥ (damped)
+where ˆu = gX / ∥gX ∥.
+At E → 0: γ → 0, ˙X → Fbase (free dynamics). At E → ∞: γ → 1, ˙X → F⊥ (only safe motion).
+7 Lyapunov Energy Derivative ˙E
+7.1 Master identity
+Theorem 7.1 (Energy derivative, Lemma 7.7 of v4) . Along any solution of the canonical ODE:
+˙E = (1 − γ)
+h
+⟨gX , F base⟩ − ∥gX ∥2
+i
+12
+=== PAGE 13 ===
+Proof.
+˙E = ⟨gX , ˙X⟩
+= ⟨gX , Fbase − gX − γαgX ⟩
+= ⟨gX , Fbase⟩ − ∥gX ∥2 − γα ∥gX ∥2
+= ⟨gX , Fbase⟩ − ∥gX ∥2 − γ⟨F, gX ⟩
+= ⟨gX , Fbase⟩ − ∥gX ∥2 − γ⟨Fbase − gX , gX ⟩
+= ⟨gX , Fbase⟩ − ∥gX ∥2 − γ⟨Fbase, gX ⟩ + γ ∥gX ∥2
+= (1 − γ)⟨gX , Fbase⟩ − (1 − γ) ∥gX ∥2
+= (1 − γ)
+h
+⟨gX , Fbase⟩ − ∥gX ∥2
+i
+. □
+7.2 Special cases
+Pure geometric ow ( Fbase = 0):
+˙E = −(1 − γ) ∥gX ∥2 = −(1 − γ) · MFLS2 ≤ 0.
+Strictly negative whenever gX ̸= 0 and γ < 1.
+Descent condition (general Fbase):
+˙E ≤ 0 ⇐ ⇒ ⟨gX , Fbase⟩ ≤ ∥ gX ∥2 .
+At the maximum-entropy point ( E = θ, γ = 1/2):
+˙E = 1
+2
+h
+⟨gX , Fbase⟩ − ∥gX ∥2
+i
+.
+8 Eective Decay Rate ρeff
+8.1 Denition
+ρeff(t) = −
+˙E(t)
+E(t)
+8.2 Derivation in canonical terms
+From the energy derivative:
+ρeff =
+(1 − γ)
+h
+∥gX ∥2 − ⟨gX , Fbase⟩
+i
+E .
+Under Fbase = 0:
+ρeff = (1 − γ) ∥gX ∥2
+E = (1 − γ) · MFLS2
+E .
+13
+=== PAGE 14 ===
+8.3 Connection to σ
+From the coercivity bound ∥gX ∥2 ≥ C2
+1 E:
+ρeff ≥ (1 − γ)C2
+1 = (1 − γ)4σ2µ2
+G
+MG
+= ρtheoretical .
+The theoretical rate ρ is the worst-case lower bound. The eective rate ρeff is the instantaneous
+observed rate. The ratio ρeff/ρ ≥ 1 measures how much better the system is performing relative
+to the theoretical guarantee.
+8.4 Half-life prediction
+The local exponential half-life is:
+τ1/2(t) = ln 2
+ρeff(t) .
+This is the time at which E will reach E(t)/2 at the current decay rate.
+9 Eective Singular Value σeff
+9.1 Abstract denition
+σ = σmin(J(X)) from Theorem 9.3 of v4 is the abstract worst-case bound.
+9.2 Derivation in canonical terms
+σeff(t) = ∥gX(t)∥ √MG
+2µG
+p
+E(t)
+= MFLSt
+√MG
+4µG
+√Et
+Proof. From the coercivity bound:
+∥gX ∥2 ≥ 4σ2µ2
+G
+MG
+E.
+Treat this as an equality to dene the eective σ that is tight at the current state:
+∥gX ∥2 = 4σ2
+effµ2
+G
+MG
+E =⇒ σ2
+eff = ∥gX ∥2 MG
+4µ2
+GE =⇒ σeff = ∥gX ∥ √MG
+2µG
+√
+E
+.
+Since MFLS = ∥gX ∥ (Section 4):
+σeff = MFLS√MG
+2µG
+√
+E
+.
+9.3 Properties
+σeff(t) ≥ σ always (eective is at least as good as worst case).
+At the coercivity lower bound: σeff = σ (bound is tight when J is at its worst orientation).
+σeff is a time-varying signal measuring the current Jacobian rank quality  computable at each
+step.
+14
+=== PAGE 15 ===
+10 Theoretical Rate ρ
+10.1 Denition
+ρ = 4σ2µ2
+G
+MG
+(1 − γmax), γ max = E(X0)
+E(X0) + θ
+10.2 Derivation
+From Theorem 9.3 of v4 with Fbase = 0:
+˙E = −(1 − γ) ∥gX ∥2 .
+Apply the coercivity lower bound:
+∥gX ∥2 ≥ 4σ2µ2
+G
+MG
+E.
+Since γ ≤ γmax = E0/(E0 + θ) < 1 (monotone in E, decreasing, so maximum at t = 0):
+˙E ≤ −(1 − γmax)4σ2µ2
+G
+MG
+E = −ρE.
+By Grönwall: E(t) ≤ E0e−ρt.
+10.3 Expression via σeff
+Substituting σ = σeff:
+ρeff = 4σ2
+effµ2
+G
+MG
+(1 − γ) =
+4 · ∥gX ∥2MG
+4µ2
+GE · µ2
+G
+MG
+(1 − γ) = ∥gX ∥2
+E (1 − γ).✓
+Consistent with the direct denition of ρeff.
+11 Admissibility Threshold Ψ∗
+11.1 Abstract form
+From Theorem 9.4 of v4:
+Ψ∗ = σθµG√MG
+.
+This is unimodal with maximum at R∗ = θ.
+11.2 Derivation in canonical terms
+Ψ∗ = θ ∥gX ∥
+4
+√
+E
+= θ · MFLS
+4
+√
+E
+15
+=== PAGE 16 ===
+Proof. Substitute σ = σeff = ∥gX ∥ √MG/(2µG
+√
+E):
+Ψ∗ = σeffθµG√MG
+= ∥gX ∥ √MG
+2µG
+√
+E
+· θµG√MG
+= θ ∥gX ∥
+2
+√
+E
+.
+Since MFLS = ∥gX ∥:
+Ψ∗ = θ · MFLS
+2
+√
+E
+.
+Note on the factor. The formula above uses σeff (instantaneous eective singular value).
+Using the abstract worst-case σ gives Ψ∗
+abstract = σθµG/√MG, while the canonical instantaneous
+formula gives Ψ∗(t) = θMFLSt/(2√Et). Both are valid; the canonical form is computable at
+each step.
+11.3 BSDT instantiation
+With G = Σ−1
+0 , µG = 1/λmax(Σ0), MG = 1/λmin(Σ0):
+Ψ∗
+BSDT = σθ/λmax(Σ0)p
+1/λmin(Σ0)
+= σθ
+p
+λmin(Σ0)
+λmax(Σ0) = σθp
+κ(Σ0) · λ1/2
+max(Σ0)
+.
+The canonical form θMFLS/(2
+√
+E) is metric-free  the Σ0 terms cancel. □
+11.4 Sensitivity to calibration conditioning
+From the BSDT formula:
+Ψ∗
+BSDT ∝ 1p
+κ(Σ0)
+.
+A 10× increase in calibration conditioning shrinks Ψ∗ by
+√
+10 ≈ 3.16×. This is the gap closure
+result G7.2.
+12 Admissibility Condition
+12.1 Statement
+Ψ∗ > Mmax ⇐ ⇒ θ · MFLSt
+2√Et
+> Mmax ⇐ ⇒ MFLSt√Et
+> 2Mmax
+θ
+12.2 Derivation
+Starting from the abstract condition:
+Ψ∗ > Mmax
+Substituting the canonical form:
+θ · MFLS
+2
+√
+E
+> Mmax
+Rearranging:
+MFLS > 2Mmax
+√
+E
+θ
+16
+=== PAGE 17 ===
+Dividing both sides by
+√
+E:
+MFLS√
+E
+> 2Mmax
+θ .
+12.3 The canonical admissibility ratio
+A(t) = MFLSt√Et
+= ∥gX(t)∥p
+E(t)
+This ratio is the canonical admissibility signal. It measures gradient strength relative to energy
+level.
+The admissibility condition is then simply:
+A(t) > 2Mmax
+θ .
+Connection to ρeff:
+ρeff(t) = A(t)2(1 − γ(t)).
+A system decaying fast is a system that is safe. Fast decay implies admissibility.
+13 Safety Ratio
+13.1 Denition
+SafetyRatio(t) = Ψ∗(t)
+Mmax
+= θ · MFLSt
+2Mmax
+√Et
+13.2 Derivation
+Divide the admissibility condition by Mmax:
+SafetyRatio = Ψ∗
+Mmax
+= θMFLS
+2Mmax
+√
+E
+.
+Substituting MFLS = ∥gX ∥, E, θ  all already computed in the canonical loop:
+Zero additional computation.
+13.3 Regimes
+SafetyRatio Regime Interpretation
+> 1 Admissible Ψ∗ > Mmax; ultimate boundedness guaranteed
+= 1 Boundary Exactly at the admissibility threshold
+< 1 Inadmissible Disturbance can overcome canonical brake
+→ 0 Critical MFLS → 0 or E → ∞; system losing gradient signal
+17
+=== PAGE 18 ===
+13.4 Connection to eective decay rate
+SafetyRatio(t) = θ
+2Mmax
+A(t) = θ
+2Mmax
+s
+ρeff(t)
+1 − γ(t) .
+This connects the safety guarantee directly to the observable performance metric.
+14 Alignment Angle cos θt
+14.1 Denition
+cos θt = ⟨Fbase(Xt), g X(Xt)⟩
+∥Fbase(Xt)∥ · ∥gX(Xt)∥ ∈ [−1, +1]
+14.2 Derivation from energy descent
+The descent condition ˙E ≤ 0 requires:
+⟨gX , F base⟩ ≤ ∥ gX ∥2 .
+Writing ⟨gX , F base⟩ = ∥gX ∥ ∥Fbase∥ cos θt:
+∥Fbase∥ cos θt ≤ ∥gX ∥ .
+When cos θt ≤ 0: descent is automatic regardless of ∥Fbase∥. When cos θt > 0: descent requires
+∥Fbase∥ cos θt < ∥gX ∥, i.e. Fbase is not pushing into the energy gradient too strongly.
+14.3 Energy derivative in terms of cos θt
+˙E = (1 − γ) ∥gX ∥ [∥Fbase∥ cos θt − ∥gX ∥] .
+14.4 Geometric interpretation
+Value Meaning
+cos θt → +1 Fbase co-aligned with gX  coherent collapse pressure
+cos θt ≈ 0 Fbase tangent to energy level set  no radial progress
+cos θt → −1 Anti-aligned  restoring competition, E falls without Fbase help
+14.5 Collapse angle tan θt
+From XIV of the anatomy document:
+tan θt = ∥F⊥∥F∥
+ =
+r
+1
+cos2 θt
+− 1 =
+√
+1 − cos2 θt
+cos θt
+.
+tan θt → 0: trajectory fully collapse-directed. tan θt → ∞ : motion fully perpendicular, locally
+safe. tan θt = 1 ( θt = 45): critical balance.
+18
+=== PAGE 19 ===
+15 Misalignment Angle ψt (Sixth Signal)
+15.1 Denition
+cos ψt = ⟨ ˜Gt, g t⟩F ˜Gt
+
+F
+· ∥gt∥
+where gt = ∇SEBS(St) ∈ R4 is the channel-space gradient and ˜Gt = J T
+t gt ∈ RN d is its state-
+space pullback.
+15.2 Derivation
+The BSDT master operator uses gt (channel space) in the projection. The canonical ODE uses
+˜Gt (state-space pullback).
+These dier by the Jacobian map: ˜Gt = J T
+t gt.
+The angle between them:
+cos ψt = ⟨ ˜Gt, gt, ⟩F ˜Gt
+
+F
+∥gt∥
+= Rt ˜Gt
+
+F
+∥gt∥
+where Rt =P
+k[gt]k⟨∂X δk, gt⟩F is the control coupling sum.
+15.3 What ψt measures
+ψt ≈ 0: channel-space risk and physical dynamics pointing in the same direction. Collapse is
+real. All ve prior signals are reliable.
+ψt ≈ π/2: complete misalignment. Abstract risk elevated but physical dynamics not aligned
+with collapse. This is a false alarm.
+15.4 False alarm resolution
+Previously: high MFLS but no actual collapse. Unexplained by any single-space signal.
+Now: high channel MFLS ( ∥gt∥ large) with ψt near π/2 means ˜Gt ⊥ gt  physical dynamics are
+tangential to the collapse direction. The alarm is real in channel space but not in state space.
+ψt discriminates between the two.
+15.5 Performance gap formula
+The performance dierence between BSDT and CEK-v4:
+∆performance (t) ≈ f(ψt) + κ(Rt)−1
+where:
+ ψt large: BSDT projects using wrong direction, canonical corrects
+ κ(Rt) large: channels nearly collinear, canonical compression is more robust
+19
+=== PAGE 20 ===
+16 Channel Recovery Operator R
+16.1 The recovery formula
+St = R(Xt) gX(t), R(X) = 1
+2 A−1(J JT)−1J ∈ Rk×n
+16.2 Derivation
+From gX = 2J TGS, left-multiply by J:
+J gX = 2J JTGS.
+Since J JT ∈ Rk×k is invertible under the rank condition:
+GS = 1
+2(J JT)−1J gX .
+Since G = A ≻ 0 is invertible:
+S = 1
+2 G−1(J JT)−1J gX = 1
+2 A−1(J JT)−1J gX = RgX .
+16.3 Per-channel recovery
+[δk] = [S]k = [RgX]k, k ∈ {C, G, A, T}.
+16.4 Attribution
+ak(t) =
+˜Sk(t)2
+ ˜St
+
+2 , ˜Sk = Sk
+µnormal
+k
+,
+X
+k
+ak = 1.
+16.5 Stability of recovery
+Proposition 16.1 (Lipschitz stability) . For perturbed gradient ˜gX = gX + ε with ∥ε∥ ≤ δ:
+ ˜S − S
+ ≤ ∥R∥op · δ = δ
+2σmin(A) · σmin(J JT)1/2 · σmin(J) .
+Proof. ˜S−S = Rε, so
+ ˜S − S
+ ≤ ∥R∥op ∥ε∥. Expanding ∥R∥op ≤ 1
+2
+A−1
+op
+(J JT)−1
+op ∥J∥op
+and substituting singular value bounds gives the result.
+16.6 Condition number of recovery
+κ(R) = σmax(R)
+σmin(R) .
+Recovery is well-conditioned when κ(R) ≪ 1.
+Recovery fails (ill-conditioned) when:
+ Channels nearly collinear: σmin(J JT) ≈ 0
+ Coupling matrix ill-conditioned: κ(A) ≫ 1
+ Jacobian rank-decient: σmin(J) ≈ 0 (channel has zero sensitivity)
+20
+=== PAGE 21 ===
+17 Ultimate Boundedness Threshold Ψ∗
+rob
+17.1 Standard case
+From Theorem 9.4 of v4:
+Ψstd(R) = (1 − γ(R)) · 2σ
+s
+µ2
+G
+MG
+R = θ
+R + θ · C1
+√
+R.
+Setting u =
+√
+R:
+Ψstd(u) = θC1u
+u2 + θ .
+Maximum at u =
+√
+θ (i.e. R = θ):
+Ψ∗
+std = C1
+√
+θ
+2 .
+17.2 Robust case with adversarial disturbance
+With two-sided coercivity C1
+√
+E ≤ ∥gX ∥ ≤ C2
+√
+E:
+Ψrob(R) = θC1
+√
+R
+R + MC2
+√
+R + θ
+− M.
+Setting u =
+√
+R:
+dΨrob
+du = θC1(θ − u2)
+(u2 + MC2u + θ)2 .
+Positive for u <
+√
+θ, negative for u >
+√
+θ: unique maximum at u =
+√
+θ, i.e. R = θ.
+Unimodality proved.
+17.3 Admissibility condition (robust)
+M<Ψ∗
+rob = Ψrob(θ) = θC1
+√
+θ
+θ + MC2
+√
+θ + θ
+− M.
+18 The Complete Dashboard
+18.1 All signals from two objects
+Every signal in the canonical dashboard is a function of gX and E:
+21
+=== PAGE 22 ===
+Signal Formula Objects Section
+MFLSt ∥gX ∥ gX 4
+Et STGS S, G 2
+γt E/(E + θ) E, θ 5
+˙Et (1 − γ)(⟨gX , F base⟩ − ∥gX ∥2) gX , E, θ, Fbase 7
+ρeff(t) ∥gX ∥2 (1 − γ)/E g X , E, θ 8
+cos θt ⟨Fbase, gX , / ⟩(∥Fbase∥ ∥gX ∥) gX , Fbase 11
+tan θt
+p
+1/ cos2 θt − 1 cos θt 11
+σeff(t) ∥gX ∥ √MG/(2µG
+√
+E) gX , E, µG, MG 9
+Ψ∗(t) θ ∥gX ∥ /(2
+√
+E) gX , E, θ 10
+A(t) ∥gX ∥ /
+√
+E g X , E 10
+SafetyRatio(t) θ ∥gX ∥ /(2Mmax
+√
+E) gX , E, θ 10
+τ1/2(t) ln 2 /ρeff(t) ρeff 8
+ψt arccos(Rt/(
+ ˜Gt
+ ∥gt∥)) J, gt, gX 12
+St (channels) R(Xt)gX(t) J, A, gX 13
+ak(t) ˜S2
+k/
+ ˜S
+
+2
+St 13
+18.2 Dependency graph
+X
+S = B(X) E = S^T G S
+= E/(E+)
+_max = E_0/(E_0+)
+= 4 ²² _G/M_G · (1-_max)
+J = S/X g_X = 2J^T G S = MFLS
+MFLS = ||g_X||
+_eff = MFLS · M_G / (2_G · E)
+* = · MFLS / (2E)
+SafetyRatio = */M_max
+_eff = MFLS ²· (1-)/E
+cos _t = <F_base, g_X> / (||F_base|| · MFLS)
+R = R(X) · g_X  channels S_t  a_k(t)
+18.3 Computational algorithm (per step t)
+1. Compute ˜Xt = Xt − 1µT
+0
+2. Compute St = B(Xt) = (δC, δG, δA, δT )T
+3. Compute Jt = ∂B/∂X |Xt
+22
+=== PAGE 23 ===
+4. Compute gX(t) = 2J T
+t GSt (canonical gradient)
+5. Compute Et = ST
+t GSt (energy)
+6. Compute γt = Et/(Et + θ) (gain)
+7. Compute MFLSt = ∥gX(t)∥ (free from step 4)
+8. Compute ρeff(t) = MFLS2
+t (1 − γt)/Et
+9. Compute Ψ∗(t) = θMFLSt/(2√Et)
+10. Compute SafetyRatio(t) = Ψ∗(t)/Mmax
+11. Compute cos θt = ⟨Fbase(Xt), g X(t)⟩/(∥Fbase∥ MFLSt)
+12. Compute Rt = 1
+2 A−1(JtJ T
+t )−1Jt ( 4 × 4 inversion)
+13. Compute St = RtgX(t) (channel recovery)
+14. Compute ak(t) = ˜Sk(t)2/
+ ˜St
+
+2
+(attribution)
+15. Compute ψt = arccos(Rt/(
+ ˜Gt
+
+F
+∥gt∥))
+16. Update ODE: ˙X = Fbase − gX − γtαtgX
+19 BSDTCanonical Juxtaposition
+19.1 Identity table
+Object BSDT form Canonical form Equal?
+State X ∈ RN ×d X ∈ RN ×d Identical
+Energy et =
+ ˜XΣ−1/2
+0
+
+2
+F
+E = STGS Equal under G = A
+Gradient ˜Gt =P
+k[AS]k∂X δk gX = 2J TGS Identical
+Gain γ∗ = et/(et + θ) γ = E/(E + θ) Identical
+ODE ˙X = Ft − γ∗ ⟨Ft,gt, ⟩
+∥gt∥2 gt locked canonical ODE Identical
+MFLS 2
+ ˜XΣ−1
+0
+
+F
+∥gX ∥ Identical
+Rate ρ not proved 4σ2µ2
+G/MG(1 − γmax) canonical proves BSDT
+Ψ∗ not proved θMFLS/(2
+√
+E) canonical proves BSDT
+Channels (δC, δG, δA, δT ) explicit recovered via RgX 4 × 4 inversion
+ψt not in BSDT arccos(Rt/
+ ˜Gt
+ ∥gt∥) new in canonical
+Extensions none 7 extensions canonical adds
+19.2 The master identity
+St|{z}
+BSDT channels
+= 1
+2 A−1(JtJ T
+t )−1Jt
+| {z }
+recovery operator R(Xt)
+gX(t)|{z}
+canonical gradient
+23
+=== PAGE 24 ===
+BSDT is on the left. Canonical is on the right. The recovery operator in the middle is the
+bridge. The equation says they are the same object, read from dierent directions.
+19.3 Performance gap
+BSDT uses gt (channel space) in the projection. Canonical uses ˜Gt (state-space pullback). The
+gap is ψt:
+∆performance (t) ∼ ψt + κ(Rt)−1.
+The v34 →v58 empirical progression was systematically reducing ψt and κ(Rt) without knowing
+it:
+Version Implicit improvement Canonical equivalent
+v34 Base No channel recovery
+v48 4-quadrant modulator Partial recovery via (Gmem, Tmem)
+v52 Clip structure Excludes high κ(R) regimes
+v55 State-dependent θG(t) Ricci-ow metric adaptation
+v58 Asymmetric clamp Ill-conditioned recovery region excluded
+20 Summary Reference
+20.1 Every formula
+24
+=== PAGE 25 ===
+S = B(X) = (δC, δG, δA, δT )T feature vector
+E = STGS Lyapunov energy
+J = ∂S/∂X ∈ Rk×n Jacobian
+gX = 2J TGS canonical gradient
+MFLS = ∥gX ∥ = 2
+J TGS
+ eld line score
+γ = E
+E + θ adaptive gain
+θ = mediant∈calm {E(t)} intervention cost
+˙E = (1 − γ)
+h
+⟨gX , F base⟩ − ∥gX ∥2
+i
+energy derivative
+ρeff = ∥gX ∥2 (1 − γ)
+E = MFLS2(1 − γ)
+E instantaneous rate
+σeff = MFLS√MG
+2µG
+√
+E
+eective singular value
+ρ = 4σ2µ2
+G
+MG
+(1 − γmax) theoretical rate
+Ψ∗ = θ · MFLS
+2
+√
+E
+admissibility threshold
+A = MFLS√
+E
+= ∥gX ∥√
+E
+admissibility ratio
+SafetyRatio = θ · MFLS
+2Mmax
+√
+E
+real-time safety signal
+cos θt = ⟨Fbase, g X ⟩
+∥Fbase∥ ∥gX ∥ alignment
+cos ψt = ⟨ ˜Gt, g t⟩F ˜Gt
+
+F
+∥gt∥
+misalignment (sixth signal)
+R = 1
+2 A−1(J JT)−1J channel recovery operator
+St = R(Xt)gX(t) channel recovery formula
+ak = ˜S2
+k/
+ ˜S
+
+2
+channel attribution
+20.2 The two-object reduction
+Everything derives from gX and E.
+gX carries: MFLS, σeff, Ψ∗, SafetyRatio, cos θt, channel recovery.
+E carries: γ, ρeff, τ1/2, admissibility condition.
+The entire framework is a set of scalar and matrix operations on two vectors computed once per
+25
+=== PAGE 26 ===
+step.
+26
+=== PAGE 27 ===
+Part II: Per-Channel Derivations
+This part derives every BSDT channel formula from rst principles: the channel scalar, its
+Jacobian row, its contribution to the assembled Jacobian J, its per-channel energy, MFLS,
+Lyapunov contribution, attribution, and domain instantiations.
+21 Calibration Objects
+21.1 Normal-period statistics
+All channels are measured as deviations from a calibrated normal period. The calibration objects
+are tted once on T0 steps of normal-period data {Xt}T0
+t=1 and then frozen.
+Denition 21.1 (Global calibration mean) .
+µ0 = 1
+T0N
+T0X
+t=1
+NX
+i=1
+x(i)
+t ∈ Rd
+Denition 21.2 (Normal-period covariance) .
+Σ0 = 1
+T0N
+T0X
+t=1
+NX
+i=1
+(x(i)
+t − µ0)(x(i)
+t − µ0)T ∈ Rd×d
+Denition 21.3 (Centred state matrix) .
+˜Xt = Xt − 1N µT
+0 ∈ RN ×d
+Row i: ˜x(i)
+t = x(i)
+t − µ0.
+Denition 21.4 (PCA basis) . Let Vk ∈ Rd×k be the matrix of top- k eigenvectors of Σ0, i.e.
+Σ0Vk = VkΛk where Λk = diag(λ1, . . . , λk) with λ1 ≥ · · · ≥ λk. Default: k = 4.
+Denition 21.5 (Normal-period velocity threshold) .
+v0 = Pctl95
+nx(i)
+t − x(i)
+t−1
+ : t = 1, . . . , T0, i = 1, . . . , N
+o
+The 95th-percentile bar-to-bar velocity during normal period.
+22 Channel 1: Camouage δC
+22.1 Formula
+δ(i)
+C = (x(i)
+t − µ0)TΣ−1
+0 (x(i)
+t − µ0) =
+˜x(i)
+t
+
+2
+Σ−1
+0
+22.2 Derivation
+The Mahalanobis distance from agent i's state to the normal-period centroid µ0, measured in
+the metric Σ−1
+0 .
+27
+=== PAGE 28 ===
+Step 1: Scalar form.
+δ(i)
+C = ˜x(i)T
+t Σ−1
+0 ˜x(i)
+t =
+X
+a,b
+[Σ−1
+0 ]ab˜x(i)
+t,a˜x(i)
+t,b.
+Step 2: Matrix form over all agents.
+X
+i
+δ(i)
+C = tr( ˜XtΣ−1
+0 ˜X T
+t ) =
+ ˜XtΣ−1/2
+0
+
+2
+F
+.
+Step 3: BSDT energy from camouage only . With G = Σ −1
+0 , S = vec( ˜Xt), J = IN d
+(ane map, constant Jacobian):
+EC = STGS =
+ ˜XtΣ−1/2
+0
+
+2
+F
+=
+X
+i
+δ(i)
+C .✓
+22.3 Jacobian ∂δ(i)
+C /∂x(i)
+t
+∂δ(i)
+C
+∂x(i)
+t
+= 2Σ−1
+0 (x(i)
+t − µ0) = 2Σ−1
+0 ˜x(i)
+t ∈ Rd
+Proof. δ(i)
+C = ˜xTΣ−1
+0 ˜x with ˜x = x(i)
+t − µ0. By the quadratic form gradient: ∇x[˜xTA˜x] = 2A˜x for
+symmetric A. Here A = Σ−1
+0 is symmetric. □
+22.4 Full row 1 of J
+The camouage Jacobian row in RN ×d (one row per agent, d columns):
+JC = 2 ˜XtΣ−1
+0 ∈ RN ×d
+In index form: [JC]ij = 2[Σ−1
+0 ˜x(i)
+t ]j. Agents decouple: row i depends only on agent i's state.
+22.5 Geometric interpretation
+The iso- δC surfaces are ellipsoids in Rd:
+Ec = {x ∈ Rd : (x − µ0)TΣ−1
+0 (x − µ0) = c2}
+Semi-axis k has length c
+p
+λk(Σ0) aligned with eigenvector vk.
+Large δC: agent has moved far from the calibration centroid in Mahalanobis metric. δC = 0:
+agent is exactly at µ0.
+22.6 Statistical interpretation
+Under the normal-period model p0(x) = N (µ0, Σ0):
+δ(i)
+C = −2 log p0(x(i)
+t )
+p0(µ0) .
+δC is twice the negative log-likelihood ratio. Under H0 (normal regime): δ(i)
+C ∼ χ2
+d. Total:P
+i δ(i)
+C ∼ χ2
+N d.
+28
+=== PAGE 29 ===
+22.7 Domain instantiations
+Domain What δC detects
+ERCOT Generator capacity-factor vector outside calibration ellipsoid
+FDIC Bank balance-sheet ratios deviating jointly in calibrated metric
+Crypto Joint price+volume+OI+funding outside normal-period covariance
+EEG Electrode activity pattern outside normal-period brain state
+Protein Residue contact conguration outside folded-state covariance
+23 Channel 2: Feature Gap δG
+23.1 Formula
+δ(i)
+G =
+(I − VkV T
+k )(x(i)
+t − µ0)
+
+2
+=
+˜x(i)
+t
+
+2
+−
+V T
+k ˜x(i)
+t
+
+2
+23.2 Derivation
+Step 1: PCA projection decomposition. Any vector ˜x ∈ Rd decomposes orthogonally:
+˜x = VkV T
+k ˜x| {z }
+principal subspace
++ (I − VkV T
+k )˜x| {z }
+residual (gap)
+.
+Pythagorean identity:
+∥˜x∥2 =
+V T
+k ˜x
+
+2
++
+(I − VkV T
+k )˜x
+
+2
+.
+Step 2: Dene the gap. δ(i)
+G is the squared norm of the residual component  the part of
+the deviation that lies outside the k-dimensional principal subspace of Σ0:
+δ(i)
+G =
+(I − VkV T
+k )˜x(i)
+t
+
+2
+.
+Step 3: Alternative form.
+δ(i)
+G =
+˜x(i)
+t
+
+2
+−
+V T
+k ˜x(i)
+t
+
+2
+= ˜x(i)T
+t (I − VkV T
+k )˜x(i)
+t .
+The matrix P⊥ = I − VkV T
+k is the orthogonal projector onto the complement of the principal
+subspace.
+23.3 Angle of deviation
+sin2 ϕi = δ(i)
+G˜x(i)
+t
+
+2 = 1 −
+V T
+k ˜x(i)
+t
+
+2
+˜x(i)
+t
+
+2
+ϕi = 0: agent stays within the principal subspace (historically observed directions). ϕi = π/2:
+deviation entirely orthogonal to the principal subspace (unprecedented direction).
+23.4 Jacobian ∂δ(i)
+G /∂x(i)
+t
+29
+=== PAGE 30 ===
+∂δ(i)
+G
+∂x(i)
+t
+= 2(I − VkV T
+k )˜x(i)
+t ∈ Rd
+Proof. δ(i)
+G = ˜xTP⊥˜x with P⊥ = I − VkV T
+k symmetric and idempotent. ∇x[˜xTP⊥˜x] = 2 P⊥˜x.
+□
+23.5 Full row 2 of J
+JG = 2 ˜Xt(I − VkV T
+k ) ∈ RN ×d
+23.6 Why δG is the most powerful channel
+From the FDIC result (Fisher- w = 0 .835, the highest across all domains): δG detects motion
+into PCA residual directions  the low-variance directions that Σ0 barely covers.
+Novel risk always enters through these directions:
+ Quantum: rarely-excited decoherence modes
+ Banks: novel asset categories (SVB held-to-maturity bonds)
+ Supply chain: non-primary supplier routes (semiconductor 2021)
+ Cyber: LOLBin patterns (living-o-the-land binaries)
+ Crypto: new funding-rate + basis combination not in calibration
+The principal subspace captures what the system normally does. δG captures what the system
+has never done before.
+23.7 Relation to δC
+δ(i)
+C =
+˜x(i)
+t
+
+2
+Σ−1
+0
+=
+dX
+k=1
+[˜x(i)
+t · vk]2
+λk(Σ0) .
+This weights the principal directions heavily (large λk) and the gap directions lightly (small λk).
+δ(i)
+G =P
+k′>k[˜x(i)
+t · vk′]2: unweighted sum over residual directions.
+So δC is blind to motion in low-variance gap directions (small λk′ suppresses the weight). δG is
+specically sensitive to exactly those directions. They are complementary detectors.
+24 Channel 3: Activity Anomaly δA
+24.1 Formula
+δ(i)
+A = max
+
+0,
+x(i)
+t − x(i)
+t−1
+ − v0
+
+30
+=== PAGE 31 ===
+24.2 Derivation
+Step 1: Bar-to-bar velocity .
+v(i)
+t =
+x(i)
+t − x(i)
+t−1
+ ∈ R≥0.
+This is the Euclidean speed of agent i from step t − 1 to step t.
+Step 2: Threshold. v0 = Pctl95{v(i)
+t } over the calibration window. During normal operation,
+95% of velocities are at or below v0.
+Step 3: Excess velocity .
+δ(i)
+A = max(0, v(i)
+t − v0) = (v(i)
+t − v0)+.
+Zero below threshold. Linear above threshold.
+Step 4: T otal activity score.
+δA = ∥max(0, ∥Xt − Xt−1∥row − v0)∥1 =
+X
+i
+δ(i)
+A .
+In matrix form: compute row-wise norms of (Xt − Xt−1), subtract v0, clamp, sum.
+24.3 Jacobian ∂δ(i)
+A /∂x(i)
+t
+∂δ(i)
+A
+∂x(i)
+t
+= x(i)
+t − x(i)
+t−1x(i)
+t − x(i)
+t−1
+
+· 1
+hx(i)
+t − x(i)
+t−1
+ > v0
+i
+∈ Rd
+Proof. Let v =
+x(i)
+t − x(i)
+t−1
+. When v > v 0: δ(i)
+A = v − v0, so ∂δ(i)
+A /∂x(i)
+t = ∂v/∂x (i)
+t =
+(x(i)
+t − x(i)
+t−1)/v. When v ≤ v0: δ(i)
+A = 0, gradient is zero.
+24.4 Full row 3 of J
+JA = Xt − Xt−1
+∥Xt − Xt−1∥row
+⊙ 1[∥Xt − Xt−1∥row > v0] ∈ RN ×d
+where division and the indicator are row-wise, and ⊙ broadcasts over columns.
+In index form:
+[JA]ij = [x(i)
+t − x(i)
+t−1]jx(i)
+t − x(i)
+t−1
+
+· 1[
+x(i)
+t − x(i)
+t−1
+ > v0].
+24.5 Geometric meaning of JA
+The gradient of δ(i)
+A is the unit velocity vector when above threshold, zero otherwise. It points in
+the direction of motion  the direction the agent is currently moving. The canonical correction
+g(A)
+X = 2[AS]AJ T
+A therefore brakes motion in the current movement direction when velocity is
+anomalous.
+31
+=== PAGE 32 ===
+24.6 Requirement: two consecutive snapshots
+δA requires Xt−1 as well as Xt. All other channels require only the current snapshot. At t = 1
+(rst step): set δA = 0 (no velocity estimate available).
+24.7 Domain instantiations
+Domain What δA detects
+ERCOT Sudden generation ramp: capacity factor changing too fast
+FDIC Bank metric jumping between quarters (balance-sheet shock)
+Crypto Price/OI/liquidation velocity spiking simultaneously
+EEG Electrode voltage changing faster than normal brain activity
+Epidemiology Infection rate changing faster than reproductive dynamics
+Social media Virality metric accelerating above normal spread rate
+25 Channel 4: Temporal Novelty δT
+25.1 Formula
+δ(i)
+T = max
+
+0, − log ˆph(x(i)
+t )
+
+25.2 KDE density estimate
+ˆph(x) = 1
+H
+HX
+s=1
+1
+(2πh2)d/2 exp
+
+−
+x − x(i)
+t−s
+
+2
+2h2
+
+
+Parameters:
+ H: history window length (default: last 50200 steps)
+ h: bandwidth via Scott's rule: h = H −1/(d+4)
+ x(i)
+t−s: agent i's own state s steps ago
+25.3 Step-by-step derivation
+Step 1: Build the self-history kernel. At time t, agent i's recent history is {x(i)
+t−1, . . . , x(i)
+t−H }.
+The KDE places a Gaussian kernel of bandwidth h at each historical state. The density at the
+current state is the average kernel value.
+Step 2: Negative log density .
+− log ˆph(x(i)
+t ) = − log
+
+ 1
+H
+HX
+s=1
+e−
+x(i)
+t −x(i)
+t−s
+
+2
+/(2h2)
+(2πh2)d/2
+
+ .
+High value: current state has low density under recent history = temporally novel. Low value:
+current state is in a dense region of recent history = familiar.
+32
+=== PAGE 33 ===
+Step 3: Max clamp. When ˆph > 1: − log ˆph < 0  hyper-familiar state. Clamped to zero:
+no novelty signal when state is over-represented.
+Step 4: Bandwidth via Scott's rule.
+h = H −1/(d+4).
+Derivation: Scott's rule minimises the asymptotic mean integrated squared error of a Gaussian
+KDE with H samples in d dimensions. As H → ∞ : h → 0 (ner resolution with more data).
+As d increases: h decreases slower (curse of dimensionality compensation).
+25.4 Kernel weights
+Dene the normalised kernel weights:
+w(i)
+s =
+exp
+
+−
+x(i)
+t − x(i)
+t−s
+
+2
+/(2h2)
+
+PH
+s′=1 exp
+
+−
+x(i)
+t − x(i)
+t−s′
+
+2
+/(2h2)
+
+These are softmax weights over the history. w(i)
+s ∈ (0, 1), P
+s w(i)
+s = 1. w(i)
+s is large when x(i)
+t−s
+is close to x(i)
+t  recent visits to nearby states get high weight.
+25.5 Jacobian ∂δ(i)
+T /∂x(i)
+t
+∂δ(i)
+T
+∂x(i)
+t
+= 1
+h2
+HX
+s=1
+w(i)
+s
+
+x(i)
+t − x(i)
+t−s
+
+· 1[δ(i)
+T > 0] ∈ Rd
+Proof. When δ(i)
+T > 0 (i.e. ˆph < 1):
+δ(i)
+T = − log ˆph(x(i)
+t ).
+∂δ(i)
+T
+∂x(i)
+t
+= − 1
+ˆph
+∂ ˆph
+∂x(i)
+t
+.
+Compute the KDE gradient:
+∂ ˆph
+∂x(i)
+t
+= 1
+H
+HX
+s=1
+1
+(2πh2)d/2 e−
+x(i)
+t −x(i)
+t−s
+
+2
+/(2h2) · −(x(i)
+t − x(i)
+t−s)
+h2 .
+Factor out ˆph:
+∂ ˆph
+∂x(i)
+t
+= − ˆph
+h2
+HX
+s=1
+w(i)
+s (x(i)
+t − x(i)
+t−s).
+Therefore:
+∂δ(i)
+T
+∂x(i)
+t
+= − 1
+ˆph
+·
+
+− ˆph
+h2
+X
+s
+w(i)
+s (x(i)
+t − x(i)
+t−s) = 1
+h2
+X
+s
+w(i)
+s (x(i)
+t − x(i)
+t−s). □
+Geometric meaning. The gradient is the weighted average displacement from current state
+to all recent history states, pointing away from the centroid of recent history. It points in the
+direction of maximum temporal novelty: away from where the agent has recently been.
+33
+=== PAGE 34 ===
+25.6 Full row 4 of J
+JT = 1
+h2
+HX
+s=1
+Ws ⊙ (Xt − Xt−s) · 1[δT > 0] ∈ RN ×d
+where Ws ∈ RN ×1 contains the per-agent kernel weights w(i)
+s , broadcast over the d columns via
+⊙.
+In index form:
+[JT ]ij = 1
+h2
+HX
+s=1
+w(i)
+s
+h
+x(i)
+t − x(i)
+t−s
+i
+j
+· 1[δ(i)
+T > 0].
+25.7 Interpretation: δT vs δC
+δC measures: how far from the calibration mean µ0.
+δT measures: how far from anything recently visited .
+A state can be near µ0 (low δC) but temporally novel (high δT ) if the agent has been away
+from that region for longer than the KDE window. This is the return-to-calm-but-unfamiliar
+regime  dangerous because δC gives no alarm while δT correctly ags that the dynamics are
+in uncharted territory.
+25.8 Domain instantiations
+Domain What δT detects
+Supply chain Lead-time at historically unprecedented combination (+98 wk lead)
+Quantum Fidelity drift at unseen coherence level (dominant channel, Fisher- w=0.584)
+ERCOT Grid at frequency+generation mix not seen in KDE history
+Crypto Price+funding+OI at jointly novel state (new regime entry)
+Social media Virality at speed+content combination outside recent history
+Climate AMOC at temperature+CO2+albedo combination beyond prior envelope
+26 The Assembled Jacobian J
+26.1 Full matrix
+J(Xt) =
+
+
+JC
+JG
+JA
+JT
+
+ ∈ R4×N d
+where each row block is RN ×d reshaped to R1×N d:
+34
+=== PAGE 35 ===
+JC = 2 ˜XtΣ−1
+0
+JG = 2 ˜Xt(I − VkV T
+k )
+JA = Xt − Xt−1
+∥Xt − Xt−1∥row
+⊙ 1[v > v 0]
+JT = 1
+h2
+HX
+s=1
+Ws ⊙ (Xt − Xt−s) · 1[δT > 0]
+26.2 Gram matrix
+G = J JT =
+
+
+⟨JC, JC⟩F ⟨JC, JG⟩F ⟨JC, JA⟩F ⟨JC, JT ⟩F
+⟨JG, JC⟩F ⟨JG, JG⟩F ⟨JG, JA⟩F ⟨JG, JT ⟩F
+⟨JA, JC⟩F ⟨JA, JG⟩F ⟨JA, JA⟩F ⟨JA, JT ⟩F
+⟨JT , JC⟩F ⟨JT , JG⟩F ⟨JT , JA⟩F ⟨JT , JT ⟩F
+
+ ∈ R4×4
+where ⟨Ja, Jb⟩F = tr(JaJ T
+b ).
+Diagonal entries (self-inner-products):
+[J JT]CC = 4tr( ˜XtΣ−1
+0 Σ−1
+0 ˜X T
+t ) = 4
+ ˜XtΣ−1
+0
+
+2
+F
+[J JT]GG = 4tr( ˜Xt(I − VkV T
+k )2 ˜X T
+t ) = 4
+ ˜Xt(I − VkV T
+k )
+
+2
+F
+[J JT]AA = tr
+ 
+(Xt − Xt−1)(Xt − Xt−1)T
+∥Xt − Xt−1∥2
+row
+· 1[v > v 0]
+!
+[J JT]T T = 1
+h4
+
+X
+s
+Ws ⊙ (Xt − Xt−s) · 1[δT > 0]
+
+2
+F
+Cross terms ( C G):
+[J JT]CG = 4tr( ˜XtΣ−1
+0 (I − VkV T
+k ) ˜X T
+t ).
+Note: (I − VkV T
+k ) projects onto the PCA gap; Σ−1
+0 weights by inverse variance. These are not
+orthogonal in general  channels δC and δG share information unless Σ0 has uniform spectrum.
+26.3 When channels are orthogonal
+[J JT]CG = 0 i tr( ˜XtΣ−1
+0 (I − VkV T
+k ) ˜X T
+t ) = 0, which holds when the state deviation ˜Xt has no
+overlap between the Σ−1
+0 -weighted direction and the gap-projected direction.
+In the case k = d (all PCA components retained): I − VkV T
+k = 0, so JG = 0 and δG = 0  the
+gap channel vanishes when all directions are principal.
+In the case k = 0: I − VkV T
+k = I, so JG = 2 ˜Xt  the gap channel measures total Euclidean
+deviation, unweighted.
+The identiability condition (Theorem R.1): J JT ≻ 0 requires all four channels to be linearly
+independent in RN d. This is generically satised when: k < d (PCA is a strict subspace),
+v(i)
+t > v 0 for at least one agent (activity active), and δ(i)
+T > 0 for at least one agent (novelty
+active).
+35
+=== PAGE 36 ===
+27 Per-Channel Canonical Gradient
+27.1 Decomposition
+The canonical gradient decomposes exactly over channels:
+gX = 2J TGS = 2
+X
+k∈{C,G,A,T }
+[AS]kJ T
+k
+where [AS]k is the k-th component of AS ∈ R4.
+Proof. gX = 2J TGS = 2
+ 
+J T
+C J T
+G J T
+A J T
+T
+
+
+
+[GS]C
+[GS]G
+[GS]A
+[GS]T
+
+ = 2P
+k[GS]kJ T
+k .
+27.2 Per-channel gradient vectors
+g(C)
+X = 2[AS]C · J T
+C = 4[AS]C Σ−1
+0 ˜X T
+t ∈ RN d
+g(G)
+X = 2[AS]G · J T
+G = 4[AS]G (I − VkV T
+k ) ˜X T
+t ∈ RN d
+g(A)
+X = 2[AS]A · J T
+A ∈ RN d
+g(T )
+X = 2[AS]T · J T
+T ∈ RN d
+27.3 MFLS per channel
+MFLS(k) =
+g(k)
+X
+ = 2|[AS]k| · ∥Jk∥F
+Proof.
+g(k)
+X
+ =
+2[AS]kJ T
+k
+ = 2|[AS]k| ∥Jk∥F .
+Expanded per channel:
+MFLS(C) = 4|[AS]C| ·
+ ˜XtΣ−1
+0
+
+F
+MFLS(G) = 4|[AS]G| ·
+ ˜Xt(I − VkV T
+k )
+
+F
+MFLS(A) = 2|[AS]A| · ∥JA∥F
+MFLS(T ) = 2|[AS]T | · ∥JT ∥F
+Note: MFLS ̸=P
+k MFLS(k) in general (triangle inequality); the correct relationship is:
+MFLS2 =
+
+X
+k
+g(k)
+X
+
+2
+=
+X
+k,k′
+⟨g(k)
+X , g(k′)
+X ⟩.
+36
+=== PAGE 37 ===
+28 Per-Channel Energy Contributions
+28.1 Energy decomposition
+The total energy under coupling matrix A:
+E = STAS =
+X
+k,k′
+Akk′SkSk′.
+The diagonal contribution of channel k:
+E(k) = AkkS2
+k.
+The cross-channel coupling:
+E(k,k′) = 2Akk′SkSk′, k ̸= k′.
+Total:
+E =
+X
+k
+E(k) +
+X
+k<k′
+E(k,k′).
+When A = I (identity coupling): channels decouple, E =P
+k S2
+k = δ2
+C + δ2
+G + δ2
+A + δ2
+T .
+When A = diag(aC, aG, aA, aT ): channels still decouple, E = aCδ2
+C + aGδ2
+G + aAδ2
+A + aT δ2
+T .
+29 Per-Channel Lyapunov Contributions ˙Vk
+29.1 Decomposition theorem
+Theorem 29.1 (Per-channel Lyapunov, XXV of anatomy document) .
+˙V = dE
+dt =
+X
+k∈{C,G,A,T }
+˙Vk
+where
+˙Vk = [gt]k
+
+⟨∂X δk, Ft⟩F − γ∗
+t
+⟨Ft, gt⟩
+∥gt∥2 ⟨∂X δk, gt⟩F
+
+= ˙V drift
+k + ˙V control
+k
+Proof. ˙V = ⟨ ˜Gt, ˙X⟩F where ˜Gt = J Tgt = P
+k[gt]kJ T
+k . Substituting the canonical ODE ˙X =
+Ft − γ∗
+t αtgt:
+˙V = ⟨ ˜Gt, Ft⟩F − γ∗
+t αt⟨ ˜Gt, gt⟩F .
+Expanding ˜Gt =P
+k[gt]kJ T
+k :
+˙V =
+X
+k
+[gt]k⟨J T
+k , Ft⟩F − γ∗
+t αt
+X
+k
+[gt]k⟨J T
+k , gt⟩F =
+X
+k
+˙Vk. □
+29.2 Drift and control components
+˙V drift
+k = [gt]k⟨J T
+k , Ft⟩F = [gt]k⟨∂X δk, Ft⟩F
+˙V control
+k = −[gt]kγ∗
+t
+⟨Ft, gt⟩
+∥gt∥2 ⟨J T
+k , gt⟩F
+37
+=== PAGE 38 ===
+29.3 Channel stability attribution
+astab
+k = max(0, ˙Vk)P
+k′ max(0, ˙Vk′)
+,
+X
+k
+astab
+k = 1
+astab
+k is the fraction of total instability rate driven by channel k. This is dierent from the
+energy attribution ak = ˜S2
+k/
+ ˜S
+
+2
+: a channel can have high deviation score but contribute little
+to instability if its spatial gradient is perpendicular to the force eld.
+29.4 Control eciency per channel
+ηk = − ˙V control
+k
+˙V drift
+k
+= γ∗
+t
+⟨Ft, gt⟩⟨J T
+k , gt⟩F
+∥gt∥2 ⟨J T
+k , Ft⟩F
+ηk ∈ (0, 1): control partially osets channel k's drift.
+ηk > 1: control overcorrects channel k.
+ηk < 0: the control is making channel k worse  the projection direction is misaligned with
+channel k's spatial gradient. This is the per-channel manifestation of the uncontrollable regime.
+30 Per-Channel Attribution ak
+30.1 Energy attribution
+ak(t) =
+˜Sk(t)2
+ ˜S(t)
+
+2 , ˜Sk = Sk
+µnormal
+k
+,
+X
+k
+ak = 1
+The mean-normalisation µnormal
+k = Ecalm[Sk] is computed once on the calibration window and
+frozen.
+Derivation. Raw channel scores Sk have dierent scales ( δC is chi-squared, δT is log-density,
+etc.). Mean-normalisation converts each to a dimensionless multiple of its normal-period average.
+The squared normalised score is then the fraction of total anomaly energy carried by channel k.
+30.2 MFLS attribution
+The fraction of total MFLS squared driven by channel k:
+ck = [∇SEBS]2
+k
+∥∇SEBS∥2 = [gt]2
+k
+∥gt∥2 .
+This is the channel-space attribution  dierent from ak (energy attribution) and astab
+k (stability
+attribution).
+The three attributions agree only when channels are orthogonal and the coupling matrix A is
+diagonal.
+38
+=== PAGE 39 ===
+30.3 Dominant channel
+k∗ = arg max
+k
+ak(t)
+identies the primary driver of current risk.
+Empirical dominant channels across domains:
+Domain Dominant k∗ Fisher- w
+ERCOT δC (camouage) 0.623
+FDIC δG (feature gap) 0.835
+World Bank δG (capital gap) 0.320
+Supply chain δT (lead-time novelty) 0.433
+Quantum δT (delity drift) 0.584
+EEG δA (activity) 0.327
+Climate δA (activity) 0.407
+Epidemiology δA (activity) 0.518
+Social media δA (activity) 0.510
+Pattern: δA dominates cascade-saturation systems; δG dominates structural-exhaustion systems;
+δT dominates regime-shift systems.
+31 Control Coupling Sum Rt
+Rt =
+X
+k∈{C,G,A,T }
+[gt]k⟨J T
+k , gt⟩F = ⟨ ˜Gt, gt⟩F =
+ ˜Gt
+
+F
+∥gt∥ cos ψt
+Derivation. Rt = ⟨J Tgt, gt⟩F = gT
+t J JTgt = gT
+t Ggt ≥ 0 when G ≻ 0.
+Rt > 0: control direction positively coupled to all channel spatial gradients. Rt ≤ 0: uncontrol-
+lable regime  control direction orthogonal to or opposed by channel gradients.
+Per-channel expansion:
+R(C)
+t = [gt]C⟨J T
+C , gt⟩F = 4[gt]C⟨ ˜XtΣ−1
+0 , gt⟩F
+R(G)
+t = [gt]G⟨J T
+G, gt⟩F = 4[gt]G⟨ ˜Xt(I − VkV T
+k ), gt⟩F
+R(A)
+t = [gt]A⟨J T
+A, gt⟩F
+R(T )
+t = [gt]T ⟨J T
+T , gt⟩F
+Rt =P
+k R(k)
+t .
+32 Complete Per-Step Algorithm
+32.1 All objects from raw data
+Given Xt, Xt−1, {Xt−s}H
+s=1 and calibration (µ0, Σ−1
+0 , Σ−1/2
+0 , Vk, v0, A, θ):
+1. ˜Xt = Xt − 1µT
+0
+39
+=== PAGE 40 ===
+2. Channel scalars:
+δ(i)
+C = ˜x(i)T
+t Σ−1
+0 ˜x(i)
+t ∀i
+δ(i)
+G =
+(I − VkV T
+k )˜x(i)
+t
+
+2
+∀i
+δ(i)
+A = max(0,
+x(i)
+t − x(i)
+t−1
+ − v0) ∀i
+δ(i)
+T = max(0, − log ˆph(x(i)
+t )) ∀i
+3. St = (¯δC, ¯δG, ¯δA, ¯δT )T ∈ R4 where ¯δk =P
+i δ(i)
+k /N (mean over agents)
+4. Jacobian rows:
+JC = 2 ˜XtΣ−1
+0
+JG = 2 ˜Xt(I − VkV T
+k )
+JA = Xt − Xt−1
+∥Xt − Xt−1∥row
+⊙ 1[v > v 0]
+JT = 1
+h2
+X
+s
+Ws ⊙ (Xt − Xt−s) · 1[δT > 0]
+5. J = [JC; JG; JA; JT ] ∈ R4×N d
+6. G = J JT ∈ R4×4
+7. Et = ST
+t ASt
+8. gX = 2J TASt ∈ RN d (canonical gradient = MFLS direction)
+9. MFLSt = ∥gX ∥
+10. γt = Et/(Et + θ)
+11. ρeff(t) = MFLS2
+t (1 − γt)/Et
+12. Ψ∗(t) = θ · MFLSt/(2√Et)
+13. SafetyRatio (t) = Ψ∗(t)/Mmax
+14. Ft = −α ˜Xt − LtXt (GravityEngine force)
+15. cos θt = ⟨Ft, g X ⟩/(∥Ft∥ MFLSt)
+16. Rt = 1
+2 A−1G−1J ( 4 × 4 inversion)
+17. ˆSt = RtgX (channel recovery check)
+18. ak(t) = ˜Sk(t)2/
+ ˜St
+
+2
+(energy attribution)
+19. gt = 2ASt + (βkeβkSk)k + w (full channel gradient)
+20. ˜Gt = J Tgt (pullback gradient)
+21. Rt = ⟨ ˜Gt, gt⟩F = gT
+t Ggt (control coupling)
+22. cos ψt = Rt/(
+ ˜Gt
+
+F
+∥gt∥) (misalignment angle)
+40
+=== PAGE 41 ===
+23. ˙Vk = [gt]k[⟨J T
+k , Ft⟩F − γ∗
+t αt⟨J T
+k , gt⟩F ] (per-channel Lyapunov)
+24. astab
+k (t) = max(0, ˙Vk)/P
+k′ max(0, ˙Vk′) (stability attribution)
+25. ηk = − ˙V control
+k / ˙V drift
+k (control eciency)
+26. ODE step: ˙X = Ft − γtαtgX
+27. Xt+1 = Xt + h ˙X
+33 Complete Formula Reference
+Channels
+δ(i)
+C = (x(i)
+t − µ0)TΣ−1
+0 (x(i)
+t − µ0)
+δ(i)
+G =
+(I − VkV T
+k )(x(i)
+t − µ0)
+
+2
+δ(i)
+A = max(0,
+x(i)
+t − x(i)
+t−1
+ − v0)
+δ(i)
+T = max(0, − log ˆph(x(i)
+t ))
+Jacobian rows
+JC = 2 ˜XtΣ−1
+0
+JG = 2 ˜Xt(I − VkV T
+k )
+JA = Xt − Xt−1
+∥Xt − Xt−1∥row
+⊙ 1[v > v 0]
+JT = 1
+h2
+HX
+s=1
+Ws ⊙ (Xt − Xt−s) · 1[δT > 0]
+Assembled objects
+J = [JC; JG; JA; JT ] ∈ R4×N d
+G = J JT ∈ R4×4
+gX = 2J TGS (= MFLS direction )
+MFLS = ∥gX ∥
+R = 1
+2 A−1G−1J (4 × 4 inversion only )
+41
+=== PAGE 42 ===
+Per-channel
+g(k)
+X = 2[AS]kJ T
+k
+MFLS(k) = 2|[AS]k| · ∥Jk∥F
+˙Vk = [gt]k⟨J T
+k , Ft⟩F − γ∗α[gt]k⟨J T
+k , gt⟩F
+ak = ˜S2
+k/
+ ˜S
+
+2
+(energy)
+astab
+k = max(0, ˙Vk)/P
+k′ max(0, ˙Vk′) (stability)
+ηk = − ˙V control
+k / ˙V drift
+k (eciency)
+R(k)
+t = [gt]k⟨J T
+k , gt⟩F (coupling)
+Aggregate
+Rt =
+X
+k
+R(k)
+t = gT
+t Ggt
+cos ψt = Rt/(
+ ˜Gt
+
+F
+∥gt∥)
+Ψ∗ = θ · MFLS/(2
+√
+E)
+SafetyRatio = θ · MFLS/(2Mmax
+√
+E)
+42
+=== PAGE 43 ===
+Part III: Game-Theoretic Architecture
+This part derives the game-theoretic foundations of the canonical engine. Every claim is stated
+as a theorem with explicit hypotheses, explicit equilibrium concept, and explicit scope. Heuristic
+interpretations are clearly labelled as such.
+34 The Projection Game
+34.1 Setup
+Fix state X with gX ̸= 0. Two players in a zero-sum game :
+ Controller chooses update direction u ∈ Rn, minimises payo
+ Auditor chooses penalty multiplier λ ∈ R, maximises payo
+The Lagrangian:
+L(u, λ) = 1
+2 ∥u − Fbase∥2 + λ⟨u, g X ⟩ − θ ∥gX ∥2
+2E λ2
+Sign convention. Controller minimises (deviation from Fbase is costly). Auditor maximises
+(greater penalty extracts more from energy-injecting updates, at quadratic cost). The game is
+zero-sum: Controller's loss = Auditor's gain = L.
+34.2 Saddle-point theorem
+Theorem 34.1 (Unique saddle point, GT.1) . The Lagrangian L(u, λ) has a unique saddle point
+(u⋆, λ⋆) with:
+u⋆ = Fbase − γ ⟨Fbase, g X ⟩
+∥gX ∥2 gX , λ ⋆ = ⟨Fbase, g X ⟩E
+(E + θ) ∥gX ∥2 , γ = E
+E + θ .
+Existence and uniqueness. ∂2
+uL = In ≻ 0: strictly convex in u. ∂2
+λL = −θ ∥gX ∥2 /E < 0:
+strictly concave in λ. By the Sion minimax theorem (Sion, 1958), a unique saddle point exists
+for convex-concave problems.
+Formula. Controller's rst-order condition:
+∂uL = (u − Fbase) + λgX = 0 = ⇒ u⋆ = Fbase − λgX .
+Auditor's rst-order condition:
+∂λL = ⟨u, g X ⟩ − θ ∥gX ∥2 λ/E = 0 = ⇒ λ⋆ = ⟨u⋆, g X ⟩E
+θ ∥gX ∥2 .
+Substituting u⋆:
+λ⋆θ ∥gX ∥2 /E = ⟨Fbase, g X ⟩ − λ⋆ ∥gX ∥2 =⇒ λ⋆ = ⟨Fbase, g X ⟩E
+(E + θ) ∥gX ∥2 .
+Substituting back gives u⋆ = Fbase − γ⟨Fbase, g X ⟩gX / ∥gX ∥2 with γ = E/(E + θ). □
+43
+=== PAGE 44 ===
+34.3 Interpretation
+The saddle-point game derives the canonical step from a variational principle:
+ The Fermi-Dirac gain γ = E/(E + θ) is not a chosen damping rule. It is the equilibrium
+penalty intensity in the projection game.
+ θ is the Auditor's quadratic intervention cost. Small θ: aggressive intervention. Large θ:
+mild intervention.
+ The locked canonical ODE step is the unique Nash equilibrium of a well-posed convex-
+concave zero-sum game.
+35 The Adversarial Disturbance Game
+35.1 Setup
+Fbase = F+F where adversary chooses F with ∥F∥ ≤ M.
+ Controller chooses γ ∈ [0, 1), minimises ˙E
+ Adversary chooses F with ∥F∥ ≤ M, maximises ˙E
+Payo (to Adversary):
+J(γ, F) = ˙E = (1 − γ)
+h
+⟨gX , F +F⟩ − ∥gX ∥2
+i
+.
+35.2 No interior saddle
+Theorem 35.1 (Minimax value, no interior saddle, GT.2) . The minimax value is:
+V ⋆ = inf
+γ∈[0,1)
+sup
+∥F∥≤MJ (γ,F)=
+
+⟨gX , F⟩+M∥gX ∥−∥gX ∥2
++
+with the adversary's unique maximiser:
+F⋆=M gX
+∥gX ∥
+.
+The Controller's minimiser is boundary:
+ If B ≤ 0: γ⋆ = 0 attains the value
+ If B > 0: inmum V ⋆ = 0 approached as γ → 1−, not attained in [0, 1)
+where B = ⟨gX , F ⟩ + M∥gX ∥−∥gX ∥2.
+Proof. Adversary's maximisation by CauchySchwarz: supF⟨gX , F⟩=M∥gX ∥ at F⋆ unique on the
+sphere.
+Inner maximum: supFJ =(1−γ)B.
+Outer minimisation: linear in (1 − γ). If B ≤ 0: minimum at γ = 0 . If B > 0: inmum at
+γ → 1−, not attained in the open interval [0, 1).
+44
+=== PAGE 45 ===
+Remark 35.2 (Operational degeneracy) . The minimax value collapses to 0 via γ → 1−. This
+corresponds to the Controller freezing dynamics, which is not operationally meaningful. The
+unconstrained adversarial game is therefore degenerate as a control-design principle. This mo-
+tivates the regularised formulation of 35.
+36 The Regularised Adversarial Game
+36.1 Motivating the regulariser
+Pure minimax has no interior solution. Add a regulariser −µγ2 penalising large gain values
+(operationally extreme intervention). The coecient µ = θ ∥gX ∥2 /(2E) is chosen so that the
+equilibrium reduces to the canonical Fermi-Dirac form when M=0, recovering Theorem GT.1 as
+a special case.
+36.2 Regularised game
+Lreg (γ, F) = (1 − γ)
+h
+⟨gX , F +F⟩ − ∥gX ∥2
+i
+− µγ2
+Theorem 36.1 (Interior equilibrium, GT.3) . With µ = θ ∥gX ∥2 /(2E), the regularised game has
+a unique interior Nash equilibrium at:
+γ=
+E + M∥gX ∥
+E + M∥gX ∥+θ, F ⋆=M gX
+∥gX ∥
+.
+Proof. Adversary's maximiser: F⋆=Mg X /∥gX ∥ by CauchySchwarz.
+Dene eective energy ˜E = E + M∥gX ∥. Controller's rst-order condition in γ (with the distur-
+bance absorbed):
+∂γLreg = 0 = ⇒ γ=
+˜E
+˜E + θ
+= E + M∥gX ∥
+E + M∥gX ∥+θ.
+Verication: M=0 = ⇒ ˜E = E =⇒ γ=γcanonical . □
+Remark 36.2. The regulariser converts the degenerate minimax problem into a well-posed
+mechanism-design problem with an interior solution. The robust gain γ is the equilibrium of
+this regularised game.
+37 The Multi-Engine Cooperative Game
+37.1 Setup
+m canonical engines with energies E1, . . . , Em, gains γi = Ei/(Ei + θi), gradients g(i)
+X , damping
+matrices Ri = γig(i)
+X g(i)T
+X /
+g(i)
+X
+
+2
+⪰ 0.
+Composite Hamiltonian: H(X) = 1
+2
+P
+i Ei.
+Composite dynamics (Denition P.1 of v4):
+˙X =
+X
+i
+F(i)−2P
+i Ri∇H.
+45
+=== PAGE 46 ===
+37.2 Required assumption
+Assumption GT.4 (Non-positive cross-coupling). For all i ̸= j:
+⟨g(i)
+X , g (j)
+X ⟩ ≤ 0 or g(i)
+X ⊥ g(j)
+X .
+Equivalently: the gradient interaction matrix Kij = ⟨g(i)
+X , g (j)
+X ⟩ has non-positive o-diagonal
+entries, or is diagonal (orthogonal engines).
+37.3 Conditional superadditivity
+Theorem 37.1 (Coalition superadditivity, conditional, GT.4) . Under Assumption GT.4 , for
+any partition Π of {1, . . . , m}:
+v({1, . . . , m}) ≥
+X
+S∈Π
+v(S).
+Proof. P
+i ˙Ei = −2⟨∇H,P
+j Rj∇H⟩ + drift terms.
+Each ⟨∇H, R j∇H⟩ = γj⟨∇H, g (j)
+X ⟩2/
+g(j)
+X
+
+2
+≥ 0.
+Under Assumption GT.4, cross-coupling terms ⟨g(i)
+X , g (j)
+X ⟩ ≤ 0 contribute negatively to P
+i ˙Ei,
+adding to the dissipation. Hence:
+X
+i
+˙Ei ≤
+X
+i
+˙Ei
+
+isolated − (non-negative cross terms) .
+The grand coalition strictly improves (or matches) the partitioned outcome. □
+Remark 37.2 (When Assumption GT.4 holds) . Assumption GT.4 holds in three important
+cases:
+1. Orthogonal engines: distinct asset classes, distinct sensor channels, distinct control axes
+2. Mean-reverting engines: all F (i)
+base = −κi(X − X ⋆
+i ) with non-conicting equilibria
+3. Hierarchical engines: outer engine's gradient is in the kernel of inner engine's gradient
+It can fail when engines have directly competing objectives. The theorem is conditional, not
+universal.
+38 Channel Attribution as Shapley Value
+38.1 Setup
+The canonical gradient decomposes by channel:
+gX =
+X
+k∈{C,G,A,T }
+g(k)
+X , g (k)
+X = 2[AS]kJ T
+k .
+Each channel is a player contributing to the coalitional value (gradient magnitude).
+46
+=== PAGE 47 ===
+38.2 Shapley axioms
+A channel attribution ϕ : {C, G, A, T} → R satises:
+(SH1) Eciency: P
+k ϕk = ∥gX ∥2
+(SH2) Symmetry: channels with identical marginal contributions get identical attribution
+(SH3) Null: if g(k)
+X = 0, then ϕk = 0
+(SH4) Linearity: ϕ is linear in the underlying gradient
+38.3 Coalitional value
+v(S) =
+
+X
+k∈S
+g(k)
+X
+
+2
+=
+X
+k,k′∈S
+⟨g(k)
+X , g (k′)
+X ⟩.
+38.4 Shapley attribution theorem
+Theorem 38.1 (Shapley attribution, GT.5) . The unique attribution satisfying (SH1)(SH4) is
+the Shapley value:
+ϕk =
+X
+S⊆{C,G,A,T }\{k}
+|S|!(m − |S| − 1)!
+m! [v(S ∪ { k}) − v(S)]
+with m = 4.
+For orthogonal channels:
+ϕk =
+g(k)
+X
+
+2
+= 4[AS]2
+k ∥Jk∥2
+F .
+The Shapley value reduces to per-channel MFLS squared. Attribution by ak = ˜S2
+k/
+ ˜S
+
+2
+is the
+normalised Shapley value.
+For non-orthogonal channels:
+ϕk =
+g(k)
+X
+
+2
++ 1
+2
+X
+k′̸=k
+⟨g(k)
+X , g (k′)
+X ⟩.
+Cross-terms split equally between channels (Shapley symmetry).
+Proof. Standard Shapley axiomatisation (Shapley, 1953). The four axioms uniquely determine
+ϕk. Explicit formulas follow by direct computation using v(S) =P
+k,k′∈S⟨g(k)
+X , g (k′)
+X ⟩.
+38.5 Shapley-to-channel inversion (conditional)
+Theorem 38.2 (Shapley inversion, conditional, GT.6) . Assume the Gram matrix G = J JT ∈
+R4×4 is invertible. Then the recovery operator
+R(X) = 1
+2 A−1G−1J
+inverts the Shapley attribution: given {ϕk} and state X,
+S = R(X)gX = 1
+2 A−1G−1J gX .
+47
+=== PAGE 48 ===
+Proof. gX = 2J TAS implies J gX = 2GAS. Under invertibility of G and A: S = 1
+2 A−1G−1J gX .
+□
+Remark 38.3 (When the assumption holds) . G is invertible i {JC, JG, JA, JT } are linearly
+independent in RN d. This generically holds when: PCA basis is strict subspace ( k < d ), activity
+threshold is active for some agent ( vt > v0), temporal novelty is positive for some agent ( δT > 0).
+When G is singular, recovery fails. The condition number κ(G) measures recovery stability.
+39 The θ Mechanism Design Problem
+39.1 Setup
+Designer chooses θ > 0 before operation to minimise long-run cost subject to admissibility:
+θ⋆ = arg min
+θ>0
+Jdesigner (θ), subject to M < Ψ∗(θ)
+where:
+Jdesigner (θ) = α1 ¯E(θ) + α2
+ ˙X − Fbase
+
+2
+tracking
+with weights α1, α2 > 0.
+39.2 Admissibility-binding solution
+Theorem 39.1 (Admissibility-binding θ, GT.7) . In the regime where the admissibility con-
+straint is binding , the optimal θ satises:
+θ⋆
+admissibility = M √MG
+σµG
+.
+Proof. The admissibility constraint: M < Ψ∗ = σθµG/√MG.
+The Lagrangian:
+Ldesigner (θ, λ) = Jdesigner (θ) + λ[M − σθµG/
+p
+MG].
+When the constraint is binding: M = σθµG/√MG, giving:
+θ⋆
+admissibility = M √MG
+σµG
+.□
+This is the constraint-binding solution, not the global optimum. The global optimum
+of Jdesigner may be at larger θ depending on α1, α2.
+Remark 39.2 (Empirical θ from median) . The empirical choice θ = median calm {E(t)} is the
+data-driven approximation to θ⋆
+admissibility in the following sense: under the normal regime, E(t)
+uctuates around a typical scale, and the median captures that scale. Admissibility is satised
+as long as the calibration-period disturbances are bounded by Ψ∗(θmedian ). The median formula
+is a practical estimator that approximates θ⋆ when the calibration data is representative of the
+operating regime; it is not derived from the designer's optimisation directly.
+48
+=== PAGE 49 ===
+40 The Information Game
+40.1 Setup
+Two players observe dierent sigma-algebras of the system state Xt:
+ BSDT player: FBSDT = σ(δC, δG, δA, δT )  four channel scalars
+ Canonical-with-state player: Fcan+ = σ(E, gX , γ, cos θt, ψt, Xt)  canonical scalars
+plus state
+40.2 Information ordering
+Theorem 40.1 (Information dominance, GT.8) . (a) FBSDT ⊆ F can+ : every BSDT-observable
+is recoverable from canonical-with-state observables.
+(b) FBSDT ̸⊇ F can+ : canonical-with-state contains ψt, which is not in BSDT's information
+set.
+(c) Strict information dominance: Fcan+ ⊋ FBSDT.
+Proof. (a) Given Xt ∈ F can+ , compute Jt = ∂B/∂X |Xt, St = B(Xt), all channel scalars. Hence
+FBSDT ⊆ σ(Xt) ⊆ F can+ .
+(b) ψt = arccos( Rt/(
+ ˜Gt
+
+F
+∥gt∥)) requires ˜Gt = J T
+t gt. While gt is computable from St, ˜Gt
+requires Jt which requires Xt /∈ FBSDT in general. Therefore ψt /∈ FBSDT but ψt ∈ F can+ .
+(c) Direct from (a) and (b).
+40.3 Decision-theoretic consequence
+Corollary 40.2 (Decision dominance, GT.8) . Under any decision rule with payo measurable
+with respect to the larger sigma-algebra, the canonical-with-state player achieves weakly higher
+expected payo than the BSDT player.
+This is the information-theoretic explanation for why canonical later iterations outperform
+BSDT: not because the canonical update is intrinsically better, but because the canonical-
+with-state information set strictly contains the BSDT information set. The additional signal ψt
+is the false-alarm lter that resolves cases BSDT cannot.
+41 The Channel-Regime Phase Modulator (Heuristic Interpre-
+tation)
+41.1 Honest framing
+The v58 4-quadrant modulator can be interpreted as a regime-dependent mechanism. The full
+game-theoretic formalisation (with proper priors, utilities, incentive compatibility) is not yet
+developed. This section presents the interpretation honestly, not as a theorem .
+49
+=== PAGE 50 ===
+41.2 The phase modulator
+For attributions (Gmem, Tmem) dened over a memory window N = 8:
+ϕt = clip(1 + βGH,T HqGH,T H + βGH,T LqGH,T L
++ βGL,T HqGL,T H + βGL,T LqGL,T L, ϕ min, ϕmax)
+with v58 production parameters: βGH,T H = +5.0, βothers = −1.0, ϕmax = 6.0, ϕmin = 0.05.
+41.3 Interpretation (not theorem)
+Heuristic Reading GT.9. The phase modulator implements a regime-dependent position
+sizing rule where:
+ GH- T H quadrant (high G-channel, high T-channel): maximum size, ϕ = ϕmax
+ All other quadrants: minimum size, ϕ → ϕmin
+This can be interpreted as a strategy that distinguishes high-information regimes (both channels
+active) from low-information regimes. The empirical superiority of this rule over uniform sizing
+is documented in v52v58.
+The at-boundary structure βGH,T H = ϕmax − 1 ensures the boost exactly saturates the clip
+ceiling. Values β > ϕ max − 1 are clipped and waste parameter budget.
+What is NOT claimed. No formal separating equilibrium is proved. No incentive-compatibility
+argument is provided. No utility-theoretic foundation is given. The phase modulator is presented
+as an empirically validated heuristic with structural justication (clip saturation matches boost
+amplitude), not as a game-theoretic theorem . Formalisation into a proper signalling game with
+priors, utilities, and equilibrium correspondence remains open.
+42 Architecture Summary
+42.1 What is proved at theorem level
+The canonical engine admits multiple game-theoretic interpretations:
+1. Saddle-point structure (Theorem GT.1): The canonical step is the unique saddle
+point of a zero-sum convex-concave game between Controller and Auditor. The gain
+γ = E/(E + θ) is the equilibrium penalty intensity.
+2. Adversarial structure (Theorems GT.2, GT.3): The pure adversarial game has no
+interior saddle. The regularised adversarial game has a unique interior equilibrium at
+γ= ˜E/( ˜E + θ) with ˜E = E + M∥gX ∥.
+3. Cooperative structure (Theorem GT.4, conditional): Under Assumption GT.4
+(non-positive cross-coupling), the multi-engine grand coalition is superadditive.
+4. Shapley attribution (Theorems GT.5, GT.6): Channel attribution satises the four
+Shapley axioms uniquely. The recovery operator R inverts the Shapley attribution under
+invertibility of G.
+5. Admissibility-binding mechanism (Theorem GT.7): Under the binding admissibil-
+ity constraint, θ⋆
+admissibility = M √MG/(σµG).
+50
+=== PAGE 51 ===
+6. Information dominance (Theorem GT.8): The canonical-with-state information set
+strictly contains the BSDT information set. The additional signal is ψt.
+42.2 What is NOT claimed
+ Universal simultaneous optimality across all criteria
+ Theorem-level signalling equilibrium for the phase modulator (heuristic interpretation
+only)
+ Global mechanism optimality for θ (only admissibility-binding solution)
+ Unconditional coalition superadditivity (requires Assumption GT.4)
+42.3 What the architecture says
+The canonical engine admits multiple game-theoretic interpretations.
+Each interpretation:
+ States explicit hypotheses
+ Identies the equilibrium concept used (saddle, Nash, Shapley, etc.)
+ Holds under its own assumptions, not universally
+The strongest pieces are GT.1, GT.2, GT.3, GT.5, GT.6, GT.8 (theorem-level). The weakest
+piece is GT.9 (heuristic interpretation pending formalisation).
+51

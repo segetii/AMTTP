@@ -1,0 +1,208 @@
+{
+  "version": "v62_cgs_extensions_v1",
+  "modes": [
+    "wstar",
+    "ext1_reeb_hybrid",
+    "ext2_frac_sigma",
+    "ext3_fiber_sizing",
+    "ext5_fisher_dir",
+    "ext6_dtop_sizing",
+    "ext7_ctrl_cb"
+  ],
+  "alpha": 0.7,
+  "ext7_calibration": {
+    "cb_halt": 0.07729480994224312,
+    "cb_resume": 0.03864740497112156,
+    "rho": 0.006403513538936861,
+    "c_sigma": 59769.917936149024,
+    "beta": 0.0032017567694684304
+  },
+  "theta_v36": 120.95976536586262,
+  "e_bar": 191.36876924759667,
+  "engines": [
+    {
+      "engine": "V55_Final",
+      "mode": "wstar",
+      "final": 1410244.4490392713,
+      "maxdd": -0.31560529139319715,
+      "calmar": 23.379601954595856,
+      "sharpe": 0.6752929418483709,
+      "halted_pct": 0.8683841218925421
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext1_reeb_hybrid",
+      "final": 4964.178048029862,
+      "maxdd": -0.35268315142432877,
+      "calmar": 1.699774701271013,
+      "sharpe": 0.512432699966912,
+      "halted_pct": 0.8327653033948142
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext2_frac_sigma",
+      "final": 1410244.4490392713,
+      "maxdd": -0.31560529139319715,
+      "calmar": 23.379601954595856,
+      "sharpe": 0.6752929418483709,
+      "halted_pct": 0.8683841218925421
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext3_fiber_sizing",
+      "final": 75396.18011142904,
+      "maxdd": -0.43523231339624274,
+      "calmar": 5.8607085492019895,
+      "sharpe": 0.5834619440787213,
+      "halted_pct": 0.8711240310077519
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext5_fisher_dir",
+      "final": 14394.995603300982,
+      "maxdd": -0.4564530856235118,
+      "calmar": 2.5968148099925195,
+      "sharpe": 0.586027478454471,
+      "halted_pct": 0.908714247527399
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext6_dtop_sizing",
+      "final": 287460.94395374245,
+      "maxdd": -0.339848330822983,
+      "calmar": 12.5249298261481,
+      "sharpe": 0.6962096390394706,
+      "halted_pct": 0.8972868217054264
+    },
+    {
+      "engine": "V55_Final",
+      "mode": "ext7_ctrl_cb",
+      "final": 12631.687322937118,
+      "maxdd": -0.47083991573944245,
+      "calmar": 2.3430433412990093,
+      "sharpe": 0.5315823663089339,
+      "halted_pct": 0.892809409248864
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "wstar",
+      "final": 1298093.305782324,
+      "maxdd": -0.29459506733182383,
+      "calmar": 24.36445315957043,
+      "sharpe": 0.5553855639461478,
+      "halted_pct": 0.7759957230686982
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext1_reeb_hybrid",
+      "final": 11459.299272345526,
+      "maxdd": -0.32688717453924004,
+      "calmar": 3.193742755720692,
+      "sharpe": 0.7032881344784147,
+      "halted_pct": 0.7714848970863406
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext2_frac_sigma",
+      "final": 209104.497973868,
+      "maxdd": -0.27622638965512564,
+      "calmar": 13.714691785208977,
+      "sharpe": 0.5639726095376386,
+      "halted_pct": 0.769613739641807
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext3_fiber_sizing",
+      "final": 1266098.9860725568,
+      "maxdd": -0.2945355022403089,
+      "calmar": 24.167008597996603,
+      "sharpe": 0.5552352737543557,
+      "halted_pct": 0.7760291365944935
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext5_fisher_dir",
+      "final": 20863.570844298814,
+      "maxdd": -0.42745157325680605,
+      "calmar": 3.360569806699096,
+      "sharpe": 0.6493473546589218,
+      "halted_pct": 0.7919005613472334
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext6_dtop_sizing",
+      "final": 481617.89983883826,
+      "maxdd": -0.29727903247214416,
+      "calmar": 17.206328523633964,
+      "sharpe": 0.5678721278841042,
+      "halted_pct": 0.7486968724939855
+    },
+    {
+      "engine": "V55_Calmar",
+      "mode": "ext7_ctrl_cb",
+      "final": 2858.117421335959,
+      "maxdd": -0.364503010415537,
+      "calmar": 0.9889824143571253,
+      "sharpe": 0.7014117941545132,
+      "halted_pct": 0.6910585404971933
+    }
+  ],
+  "blends": [
+    {
+      "mode": "wstar",
+      "final": 1376599.106062187,
+      "maxdd": -0.20633212191296174,
+      "calmar": 35.47497781197627,
+      "sharpe": 0.5855721406367869,
+      "big_win": true
+    },
+    {
+      "mode": "ext1_reeb_hybrid",
+      "final": 6912.714415324562,
+      "maxdd": -0.25941859999637196,
+      "calmar": 2.9393247968595007,
+      "sharpe": 0.5551536441330938,
+      "big_win": false
+    },
+    {
+      "mode": "ext2_frac_sigma",
+      "final": 1049902.4637196502,
+      "maxdd": -0.24044555898227643,
+      "calmar": 27.800330104038995,
+      "sharpe": 0.6244910450157791,
+      "big_win": true
+    },
+    {
+      "mode": "ext3_fiber_sizing",
+      "final": 432607.0218997674,
+      "maxdd": -0.20803762272432524,
+      "calmar": 23.676944037039195,
+      "sharpe": 0.5697105533280692,
+      "big_win": false
+    },
+    {
+      "mode": "ext5_fisher_dir",
+      "final": 16335.568175600332,
+      "maxdd": -0.39370987248852113,
+      "calmar": 3.220284195224255,
+      "sharpe": 0.5970472727968744,
+      "big_win": false
+    },
+    {
+      "mode": "ext6_dtop_sizing",
+      "final": 345708.03071927116,
+      "maxdd": -0.24614851260370885,
+      "calmar": 18.479550081717115,
+      "sharpe": 0.6073185116584107,
+      "big_win": false
+    },
+    {
+      "mode": "ext7_ctrl_cb",
+      "final": 9699.616352456771,
+      "maxdd": -0.4650060979976214,
+      "calmar": 2.0354657608007005,
+      "sharpe": 0.5295519701250275,
+      "big_win": false
+    }
+  ]
+}

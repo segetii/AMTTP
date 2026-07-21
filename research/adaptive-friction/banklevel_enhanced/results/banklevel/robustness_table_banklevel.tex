@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\caption{Robustness checks: alternate normal period, rolling refit, and leave-one-crisis-out (LOCO) threshold calibration. Baseline HR = 71.4\%, FAR ? 35\% (Table~\ref{tab:oos}).}
+\label{tab:robustness}
+\begin{tabular}{lcccc}
+\toprule
+Check & HR & FAR & AUROC & GFC lead (Q) \\
+\midrule
+Alt-normal: baseline 1994 2003 & 87.0% & 52.1% & 0.805 & 66.3 \\
+Alt-normal: short 1994 2001 & 82.6% & 51.3% & 0.785 & 66.3 \\
+Alt-normal: early 1990 1999 & 82.6% & 52.1% & 0.770 & 66.3 \\
+Rolling refit (40Q window) & 100.0% & 56.4% & 0.792 & 27.3 \\
+LOCO: GFC & 87.0% & 52.1% & 0.805 & 66.3 \\
+LOCO: COVID & 65.2% & 21.4% & 0.805 & 66.3 \\
+LOCO: RateShock & 56.5% & 16.2% & 0.805 & 66.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

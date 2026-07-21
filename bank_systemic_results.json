@@ -1,0 +1,207 @@
+{
+  "cv1": [
+    {
+      "milestone": "BNP MMF freeze",
+      "quarter": "2007-Q3",
+      "E_sys": 4.493062907512185,
+      "MFLS": 24.077513215914983,
+      "R": 0.5216539733898448,
+      "costh": -0.801043119347365,
+      "SBF": 0.0,
+      "violation": true,
+      "fires": "....V",
+      "lead": null
+    },
+    {
+      "milestone": "Bear Stearns rescue",
+      "quarter": "2008-Q1",
+      "E_sys": 5.00546726579758,
+      "MFLS": 25.310627647661345,
+      "R": 0.3262030403511381,
+      "costh": -0.8368464940761082,
+      "SBF": 0.0,
+      "violation": false,
+      "fires": ".....",
+      "lead": null
+    },
+    {
+      "milestone": "Lehman collapse",
+      "quarter": "2008-Q3",
+      "E_sys": 4.488364281867454,
+      "MFLS": 22.777789421185492,
+      "R": 0.26015308228133466,
+      "costh": -0.8643939765738743,
+      "SBF": 0.15,
+      "violation": false,
+      "fires": "...S.",
+      "lead": null
+    },
+    {
+      "milestone": "WaMu/Wachovia",
+      "quarter": "2008-Q3",
+      "E_sys": 4.488364281867454,
+      "MFLS": 22.777789421185492,
+      "R": 0.26015308228133466,
+      "costh": -0.8643939765738743,
+      "SBF": 0.15,
+      "violation": false,
+      "fires": "...S.",
+      "lead": null
+    },
+    {
+      "milestone": "TARP enacted",
+      "quarter": "2008-Q4",
+      "E_sys": 4.87804254694014,
+      "MFLS": 24.520002997422978,
+      "R": 0.15977879363500955,
+      "costh": -0.855942783069291,
+      "SBF": 0.15,
+      "violation": true,
+      "fires": "...SV",
+      "lead": null
+    },
+    {
+      "milestone": "Stress test peak",
+      "quarter": "2009-Q1",
+      "E_sys": 6.36139686647363,
+      "MFLS": 32.00378815511164,
+      "R": 0.21607924966663059,
+      "costh": -0.8087384596209357,
+      "SBF": 0.25,
+      "violation": true,
+      "fires": "M..SV",
+      "lead": null
+    },
+    {
+      "milestone": "Italian yield >7%",
+      "quarter": "2011-Q4",
+      "E_sys": 6.053283316695515,
+      "MFLS": 32.093826603049756,
+      "R": 0.2499702069224086,
+      "costh": -0.796441122720476,
+      "SBF": 0.0,
+      "violation": false,
+      "fires": "M....",
+      "lead": 8
+    },
+    {
+      "milestone": "Draghi 'whatever'",
+      "quarter": "2012-Q2",
+      "E_sys": 6.6148767441877725,
+      "MFLS": 34.1862282321991,
+      "R": 0.2830542512796677,
+      "costh": -0.7924166803136664,
+      "SBF": 0.0,
+      "violation": false,
+      "fires": "M....",
+      "lead": 8
+    },
+    {
+      "milestone": "WHO pandemic",
+      "quarter": "2020-Q1",
+      "E_sys": 6.393478928667009,
+      "MFLS": 29.702927168001,
+      "R": 0.4187938065444891,
+      "costh": -0.826655965127719,
+      "SBF": 0.0,
+      "violation": false,
+      "fires": "M....",
+      "lead": 2
+    },
+    {
+      "milestone": "COVID recovery",
+      "quarter": "2020-Q2",
+      "E_sys": 6.8674948639191395,
+      "MFLS": 31.088591712182,
+      "R": 0.4021881855316299,
+      "costh": -0.8294047641994536,
+      "SBF": 0.1,
+      "violation": true,
+      "fires": "M..SV",
+      "lead": 3
+    }
+  ],
+  "cv2": [
+    {
+      "label": "GFC  (calib \u22642007Q2)",
+      "n_crisis": 7,
+      "n_normal": 5,
+      "exp_fp": 0.06,
+      "hit_MFLS_rz": 0.57,
+      "fa_MFLS_rz": 0.2,
+      "hit_violation": 0.57,
+      "fa_violation": 0.6,
+      "hit_R": 0.0,
+      "fa_R": 0.0,
+      "verdict": "CONFIRMED \u2713"
+    },
+    {
+      "label": "Euro (calib \u22642011Q2)",
+      "n_crisis": 4,
+      "n_normal": 5,
+      "exp_fp": 0.06,
+      "hit_MFLS_rz": 0.0,
+      "fa_MFLS_rz": 0.0,
+      "hit_violation": 0.25,
+      "fa_violation": 0.2,
+      "hit_SBF": 0.0,
+      "fa_SBF": 0.0,
+      "verdict": "MARGINAL ~"
+    },
+    {
+      "label": "COVID(calib \u22642019Q4)",
+      "n_crisis": 2,
+      "n_normal": 6,
+      "exp_fp": 0.07,
+      "hit_MFLS_rz": 0.0,
+      "fa_MFLS_rz": 0.33,
+      "hit_violation": 0.5,
+      "fa_violation": 0.83,
+      "hit_R": 0.0,
+      "fa_R": 0.0,
+      "verdict": "CONFIRMED \u2713"
+    }
+  ],
+  "cv3": {
+    "spearman": {
+      "delta_G_frac_abs": {
+        "rho": -0.5678,
+        "p": 0.009
+      },
+      "delta_G_frac_rel": {
+        "rho": -0.133,
+        "p": 0.5761
+      },
+      "MFLS_abs": {
+        "rho": -0.7405,
+        "p": 0.0002
+      },
+      "MFLS_rel": {
+        "rho": -0.2069,
+        "p": 0.3814
+      },
+      "delta_phi": {
+        "rho": -0.5831,
+        "p": 0.007
+      },
+      "costheta": {
+        "rho": 0.0513,
+        "p": 0.8298
+      },
+      "z_rank": {
+        "rho": -0.4005,
+        "p": 0.0801
+      }
+    },
+    "concordance_compound": 6,
+    "N": 20
+  },
+  "diagnostics": {
+    "rho_CR": 0.044046,
+    "Psi_star": 1.588605,
+    "Psi_star_eff": 1.588395,
+    "kappa_raw_GFC": 16.26,
+    "theta_GFC": 8.0046,
+    "alpha_GFC": 0.3022
+  }
+}

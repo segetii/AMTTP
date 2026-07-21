@@ -1,0 +1,193 @@
+{
+  "model": "Crypto BSDT v3 \u2014 Spread + \u03a9/A Regime-Conditional Pairs",
+  "version": "v3",
+  "key_fix": "v2 pairs traded \u0394A\u2192direction (volatility asymmetry). v3 trades spread z-score with A-regime gate: low A\u2192revert, high A\u2192continue. Correct architecture.",
+  "cointegration": {
+    "P1_ETH_BTC": {
+      "beta": 0.8203,
+      "half_life_days": 4.8,
+      "zero_crossings": 0.043,
+      "n_train": 730
+    },
+    "P2_ETH_SOL": {
+      "beta": 0.3361,
+      "half_life_days": 8.1,
+      "zero_crossings": 0.041,
+      "n_train": 730
+    },
+    "P3_ETH_BNB": {
+      "beta": 0.5393,
+      "half_life_days": 14.0,
+      "zero_crossings": 0.012,
+      "n_train": 730
+    },
+    "P4_BTC_ALT": {
+      "beta": 0.3314,
+      "half_life_days": 16.4,
+      "zero_crossings": 0.034,
+      "n_train": 730
+    }
+  },
+  "pnl_results": {
+    "A_v2_baseline": {
+      "label": "A_v2_baseline",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.777,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1207,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.079,
+      "bh_sharpe": 0.259,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.017
+    },
+    "D_delta_a_sized": {
+      "label": "D_delta_a_sized",
+      "sharpe": -0.077,
+      "sharpe_per_lev": -0.958,
+      "max_dd": -0.369,
+      "cum_return": -0.088,
+      "active_days": 158,
+      "total_days": 1207,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01426,
+      "leverage": 0.0805,
+      "bh_sharpe": 0.259,
+      "bh_max_dd": -0.727,
+      "bh_cum": -0.017
+    },
+    "P1_ETH_BTC": {
+      "label": "ETH/BTC",
+      "sharpe": 0.656,
+      "sharpe_per_lev": 3.77,
+      "max_dd": -0.107,
+      "cum_return": 0.106,
+      "active_days": 248,
+      "total_days": 1207,
+      "hit_rate": 0.504,
+      "tail_acc": 0.615,
+      "tail_pnl": 0.00502,
+      "leverage": 0.1741,
+      "bh_sharpe": -0.378,
+      "bh_max_dd": -0.497,
+      "bh_cum": -0.331
+    },
+    "P2_ETH_SOL": {
+      "label": "ETH/SOL",
+      "sharpe": -0.9,
+      "sharpe_per_lev": -13.868,
+      "max_dd": -0.152,
+      "cum_return": -0.102,
+      "active_days": 114,
+      "total_days": 1207,
+      "hit_rate": 0.465,
+      "tail_acc": 0.571,
+      "tail_pnl": 0.00756,
+      "leverage": 0.0649,
+      "bh_sharpe": -0.034,
+      "bh_max_dd": -0.543,
+      "bh_cum": -0.229
+    },
+    "P3_ETH_BNB": {
+      "label": "ETH/BNB",
+      "sharpe": -1.194,
+      "sharpe_per_lev": -26.447,
+      "max_dd": -0.171,
+      "cum_return": -0.092,
+      "active_days": 80,
+      "total_days": 1207,
+      "hit_rate": 0.487,
+      "tail_acc": 0.7,
+      "tail_pnl": 0.00956,
+      "leverage": 0.0451,
+      "bh_sharpe": 0.078,
+      "bh_max_dd": -0.541,
+      "bh_cum": -0.067
+    },
+    "P4_BTC_ALT": {
+      "label": "BTC/ALT",
+      "sharpe": 0.685,
+      "sharpe_per_lev": 3.173,
+      "max_dd": -0.105,
+      "cum_return": 0.133,
+      "active_days": 317,
+      "total_days": 1207,
+      "hit_rate": 0.536,
+      "tail_acc": 0.296,
+      "tail_pnl": -0.00959,
+      "leverage": 0.2159,
+      "bh_sharpe": 0.855,
+      "bh_max_dd": -0.319,
+      "bh_cum": 1.086
+    }
+  },
+  "ic_results": {
+    "A_v2_baseline": {
+      "label": "A_baseline",
+      "n": 152,
+      "ic": 0.0921,
+      "acc": 0.507
+    },
+    "D_delta_a_sized": {
+      "label": "D_enhanced",
+      "n": 152,
+      "ic": 0.0614,
+      "acc": 0.507
+    },
+    "P1_ETH_BTC": {
+      "label": "ETH/BTC",
+      "n": 241,
+      "ic": 0.2516,
+      "acc": 0.61
+    },
+    "P2_ETH_SOL": {
+      "label": "ETH/SOL",
+      "n": 112,
+      "ic": 0.3795,
+      "acc": 0.661
+    },
+    "P3_ETH_BNB": {
+      "label": "ETH/BNB",
+      "n": 74,
+      "ic": 0.3209,
+      "acc": 0.662
+    },
+    "P4_BTC_ALT": {
+      "label": "BTC/ALT",
+      "n": 310,
+      "ic": -0.0412,
+      "acc": 0.506
+    }
+  },
+  "crisis_breakdown": {
+    "2022_winter": {
+      "v2_A": 1.991,
+      "D_enh": 1.76,
+      "P2_ETH_SOL": -0.043,
+      "P4_BTC_ALT": 2.213
+    },
+    "2023_recovery": {
+      "v2_A": 3.749,
+      "D_enh": 4.629,
+      "P2_ETH_SOL": 0.0,
+      "P4_BTC_ALT": 4.048
+    },
+    "2024_bull": {
+      "v2_A": 1.151,
+      "D_enh": 0.75,
+      "P2_ETH_SOL": -1.329,
+      "P4_BTC_ALT": -0.097
+    },
+    "2025_bear": {
+      "v2_A": -1.074,
+      "D_enh": -2.321,
+      "P2_ETH_SOL": -0.446,
+      "P4_BTC_ALT": 1.043
+    }
+  }
+}

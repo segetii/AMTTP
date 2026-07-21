@@ -1,0 +1,406 @@
+{
+  "model": "Crypto BSDT v11 \u2014 Fast \u03b3 + Weight Tilt",
+  "version": "v8",
+  "architecture": {
+    "layer_1": "\u03a9 (BSDT spectral order) \u2014 timing gate \u2265 Q50",
+    "layer_2": "A = MFLS/\u03b3 \u2014 intensity gate \u2265 Q33",
+    "layer_3_udl_mdn": {
+      "method": "UDL Magnitude-Direction-Novelty decomposition",
+      "operators": "Stat(5) + Chaos(3) + Freq(3) + Recon(3) = 14-dim feature vector",
+      "EQUILIBRIUM": "normal magnitude AND known direction \u2192 revert",
+      "DEGENERATE": "spread var<p10 OR magnitude<p10 \u2192 skip",
+      "STRUCTURAL": "novelty>p85 \u2192 half-size revert"
+    },
+    "layer_4_validity": {
+      "drift_test": "|rolling_mean(z, 60d)| < 1.0 (1\u03c3 threshold; anchored z makes this meaningful)",
+      "effectiveness_test": "rolling_mean(sign(-z_prev)*sret, 60d) > 0.0",
+      "action_if_invalid": "skip (pair auto-disabled)"
+    },
+    "layer_5_sizing": "min(|z|,2)/2 \u00d7 POA_scale (EQUIL) or \u00d7 0.5 (STRUCT)"
+  },
+  "class_dist_and_validity": {
+    "P1_ETH_BTC": {
+      "equil_pct": 62.4,
+      "degen_pct": 30.3,
+      "struct_pct": 7.3,
+      "valid_pct": 47.8,
+      "mag_median": 1.1387,
+      "novelty_median": 0.4773,
+      "z_drift_median": 1.0218,
+      "rev_eff_median": -0.000198,
+      "poa_median": 0.8522
+    },
+    "P2_ETH_SOL": {
+      "equil_pct": 56.8,
+      "degen_pct": 32.1,
+      "struct_pct": 11.1,
+      "valid_pct": 53.6,
+      "mag_median": 1.1467,
+      "novelty_median": 0.4911,
+      "z_drift_median": 0.9317,
+      "rev_eff_median": -2.3e-05,
+      "poa_median": 0.7437
+    },
+    "P3_ETH_BNB": {
+      "equil_pct": 71.4,
+      "degen_pct": 21.7,
+      "struct_pct": 6.9,
+      "valid_pct": 60.8,
+      "mag_median": 1.2259,
+      "novelty_median": 0.3674,
+      "z_drift_median": 0.8333,
+      "rev_eff_median": -0.000309,
+      "poa_median": 0.7367
+    }
+  },
+  "ablation_v6_vs_v7": {
+    "P1_ETH_BTC": {
+      "v6_sharpe": -0.254,
+      "v7_sharpe": -1.248,
+      "delta": -0.994
+    },
+    "P2_ETH_SOL": {
+      "v6_sharpe": 1.288,
+      "v7_sharpe": 1.357,
+      "delta": 0.069
+    },
+    "P3_ETH_BNB": {
+      "v6_sharpe": 0.772,
+      "v7_sharpe": -0.463,
+      "delta": -1.235
+    }
+  },
+  "pnl_results": {
+    "A_directional": {
+      "label": "A_directional",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.782,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1208,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.0789,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "sharpe": -1.248,
+      "sharpe_per_lev": -50.104,
+      "max_dd": -0.064,
+      "cum_return": -0.03,
+      "active_days": 47,
+      "total_days": 1208,
+      "hit_rate": 0.426,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.01193,
+      "leverage": 0.0249,
+      "bh_sharpe": -0.24,
+      "bh_max_dd": -0.571,
+      "bh_cum": -0.278
+    },
+    "P2_ETH_SOL": {
+      "label": "P2_ETH_SOL",
+      "sharpe": 1.357,
+      "sharpe_per_lev": 36.778,
+      "max_dd": -0.078,
+      "cum_return": 0.074,
+      "active_days": 79,
+      "total_days": 1208,
+      "hit_rate": 0.494,
+      "tail_acc": 0.538,
+      "tail_pnl": 0.00342,
+      "leverage": 0.0369,
+      "bh_sharpe": 0.407,
+      "bh_max_dd": -0.497,
+      "bh_cum": 0.405
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "sharpe": -0.463,
+      "sharpe_per_lev": -9.627,
+      "max_dd": -0.085,
+      "cum_return": -0.044,
+      "active_days": 98,
+      "total_days": 1208,
+      "hit_rate": 0.469,
+      "tail_acc": 0.053,
+      "tail_pnl": -0.01564,
+      "leverage": 0.048,
+      "bh_sharpe": -0.3,
+      "bh_max_dd": -0.617,
+      "bh_cum": -0.363
+    },
+    "M1_BTC_macro": {
+      "label": "M1_BTC_macro",
+      "sharpe": 0.156,
+      "sharpe_per_lev": 2.367,
+      "max_dd": -0.236,
+      "cum_return": -0.006,
+      "active_days": 129,
+      "total_days": 1208,
+      "hit_rate": 0.496,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.03113,
+      "leverage": 0.0658,
+      "bh_sharpe": 0.823,
+      "bh_max_dd": -0.519,
+      "bh_cum": 2.264
+    },
+    "M1_ALT_macro": {
+      "label": "M1_ALT_macro",
+      "sharpe": 1.387,
+      "sharpe_per_lev": 39.901,
+      "max_dd": -0.184,
+      "cum_return": 0.13,
+      "active_days": 54,
+      "total_days": 1208,
+      "hit_rate": 0.574,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.07584,
+      "leverage": 0.0348,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    },
+    "COMBINED_4way": {
+      "label": "COMBINED_4way",
+      "sharpe": -0.02,
+      "sharpe_per_lev": -0.583,
+      "max_dd": -0.092,
+      "cum_return": -0.009,
+      "active_days": 267,
+      "total_days": 1208,
+      "hit_rate": 0.509,
+      "tail_acc": 0.171,
+      "tail_pnl": -0.00716,
+      "leverage": 0.035,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    }
+  },
+  "ic_results": {
+    "A_directional": {
+      "label": "A_dir",
+      "n": 152,
+      "ic": 0.0921,
+      "acc": 0.507
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "n": 47,
+      "ic": 0.0373,
+      "acc": 0.426
+    },
+    "P2_ETH_SOL": {
+      "label": "P2_ETH_SOL",
+      "n": 79,
+      "ic": -0.0527,
+      "acc": 0.354
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "n": 98,
+      "ic": -0.0153,
+      "acc": 0.286
+    }
+  },
+  "crisis_sharpe": {
+    "2022_winter": {
+      "P1_ETH_BTC": 4.799,
+      "P2_ETH_SOL": 2.479,
+      "P3_ETH_BNB": 7.122
+    },
+    "2023_recovery": {
+      "P1_ETH_BTC": -0.726,
+      "P2_ETH_SOL": 0.0,
+      "P3_ETH_BNB": -6.229
+    },
+    "2024_bull": {
+      "P1_ETH_BTC": -0.862,
+      "P2_ETH_SOL": 0.423,
+      "P3_ETH_BNB": -0.367
+    },
+    "2025_bear": {
+      "P1_ETH_BTC": -73.657,
+      "P2_ETH_SOL": 2.298,
+      "P3_ETH_BNB": 0.748
+    }
+  },
+  "v11_results": {
+    "A_directional": {
+      "label": "A_directional",
+      "sharpe": 0.535,
+      "sharpe_per_lev": 6.782,
+      "max_dd": -0.328,
+      "cum_return": 0.09,
+      "active_days": 158,
+      "total_days": 1208,
+      "hit_rate": 0.5,
+      "tail_acc": 0.65,
+      "tail_pnl": 0.01736,
+      "leverage": 0.0789,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    },
+    "P1_ETH_BTC": {
+      "label": "P1_ETH_BTC",
+      "sharpe": -1.248,
+      "sharpe_per_lev": -50.104,
+      "max_dd": -0.064,
+      "cum_return": -0.03,
+      "active_days": 47,
+      "total_days": 1208,
+      "hit_rate": 0.426,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.01193,
+      "leverage": 0.0249,
+      "bh_sharpe": -0.24,
+      "bh_max_dd": -0.571,
+      "bh_cum": -0.278
+    },
+    "P2_ETH_SOL": {
+      "label": "P2_ETH_SOL",
+      "sharpe": 1.357,
+      "sharpe_per_lev": 36.778,
+      "max_dd": -0.078,
+      "cum_return": 0.074,
+      "active_days": 79,
+      "total_days": 1208,
+      "hit_rate": 0.494,
+      "tail_acc": 0.538,
+      "tail_pnl": 0.00342,
+      "leverage": 0.0369,
+      "bh_sharpe": 0.407,
+      "bh_max_dd": -0.497,
+      "bh_cum": 0.405
+    },
+    "P3_ETH_BNB": {
+      "label": "P3_ETH_BNB",
+      "sharpe": -0.463,
+      "sharpe_per_lev": -9.627,
+      "max_dd": -0.085,
+      "cum_return": -0.044,
+      "active_days": 98,
+      "total_days": 1208,
+      "hit_rate": 0.469,
+      "tail_acc": 0.053,
+      "tail_pnl": -0.01564,
+      "leverage": 0.048,
+      "bh_sharpe": -0.3,
+      "bh_max_dd": -0.617,
+      "bh_cum": -0.363
+    },
+    "M1_BTC_macro": {
+      "label": "M1_BTC_macro",
+      "sharpe": 0.156,
+      "sharpe_per_lev": 2.367,
+      "max_dd": -0.236,
+      "cum_return": -0.006,
+      "active_days": 129,
+      "total_days": 1208,
+      "hit_rate": 0.496,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.03113,
+      "leverage": 0.0658,
+      "bh_sharpe": 0.823,
+      "bh_max_dd": -0.519,
+      "bh_cum": 2.264
+    },
+    "M1_ALT_macro": {
+      "label": "M1_ALT_macro",
+      "sharpe": 1.387,
+      "sharpe_per_lev": 39.901,
+      "max_dd": -0.184,
+      "cum_return": 0.13,
+      "active_days": 54,
+      "total_days": 1208,
+      "hit_rate": 0.574,
+      "tail_acc": 0.0,
+      "tail_pnl": -0.07584,
+      "leverage": 0.0348,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    },
+    "COMBINED_4way": {
+      "label": "COMBINED_4way",
+      "sharpe": -0.02,
+      "sharpe_per_lev": -0.583,
+      "max_dd": -0.092,
+      "cum_return": -0.009,
+      "active_days": 267,
+      "total_days": 1208,
+      "hit_rate": 0.509,
+      "tail_acc": 0.171,
+      "tail_pnl": -0.00716,
+      "leverage": 0.035,
+      "bh_sharpe": 0.274,
+      "bh_max_dd": -0.727,
+      "bh_cum": 0.022
+    },
+    "DYNAMIC_v10": {
+      "label": "DYNAMIC_v10",
+      "sharpe": 0.597,
+      "max_dd": -0.086,
+      "cum_return": 0.078,
+      "active_days": 257,
+      "total_days": 1208,
+      "hit_rate": 0.498
+    },
+    "DYNAMIC_v11": {
+      "label": "DYNAMIC_v11",
+      "sharpe": 0.328,
+      "max_dd": -0.157,
+      "cum_return": 0.049,
+      "active_days": 257,
+      "total_days": 1208,
+      "hit_rate": 0.502
+    }
+  },
+  "v11_gamma_stats": {
+    "gamma_clip_low": 0.1,
+    "gamma_clip_high": 0.9,
+    "gamma_score_win": 126,
+    "gamma_fast_mean_test": 0.5137,
+    "gamma_fast_std_test": 0.0037,
+    "gamma_slow_mean_test": 0.5137,
+    "gamma_slow_std_test": 0.0032,
+    "pct_hi_gamma_fast": 0.0,
+    "pct_lo_gamma_fast": 0.0
+  },
+  "version_history": {
+    "v4": {
+      "P1_ETH_BTC": 0.758,
+      "P2_ETH_SOL": 0.835,
+      "P3_ETH_BNB": 1.251
+    },
+    "v6": {
+      "P1_ETH_BTC": 0.641,
+      "P2_ETH_SOL": 0.927,
+      "P3_ETH_BNB": -1.248,
+      "M1_ALT_macro": 1.387
+    },
+    "v7": {
+      "P1_ETH_BTC": -3.13,
+      "P2_ETH_SOL": 2.237,
+      "P3_ETH_BNB": -9.641,
+      "M1_ALT_macro": 1.387
+    },
+    "v8": {
+      "P1_ETH_BTC": -5.664,
+      "P2_ETH_SOL": 0.546,
+      "P3_ETH_BNB": -16.946,
+      "M1_ALT_macro": 1.387
+    },
+    "v10": {
+      "DYNAMIC_COMBINED": 0.597
+    }
+  }
+}

@@ -556,7 +556,7 @@ class GeometricBSDT:
             lam = self.hybrid_lambda
             lam_max = lam * lam_grav + (1 - lam) * lam_mol
 
-        return alpha / (lam_max + 1e-12)
+        return lam_max / (lam_max + alpha)   # canonical guardian: λ/(λ+α) ∈ [0,1)
 
     # ──────────────────────────────────────────────────────────────
     #  SCORING  (E_BS + Φ^eff + MFLS)

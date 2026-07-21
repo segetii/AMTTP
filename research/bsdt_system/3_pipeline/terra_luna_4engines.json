@@ -1,0 +1,59 @@
+{
+  "comparison": "4_engine_terra_luna",
+  "philosophy": "data_determines_parameters",
+  "engines": {
+    "molecular": {
+      "name": "1. Molecular (DPD)",
+      "engine_file": "gravity_engine.py",
+      "dynamics": "1st order overdamped",
+      "forces": "radial + pairwise (erf/log)",
+      "mean_cos_theta": 0.009247803870585034,
+      "peak_mfls": 114041.00662568232,
+      "peak_lambda_max": 8080.43658309476,
+      "above_cman_frac": 0.05325443786982249,
+      "counterfactual_cos": -0.5597675557472237,
+      "counterfactual_frac_07": 0.0
+    },
+    "newtonian": {
+      "name": "2. Molecular + Newtonian",
+      "engine_file": "gravity_engine_newtonian.py",
+      "dynamics": "1st order overdamped",
+      "forces": "radial + pairwise + Gm\u2081m\u2082/r\u00b2",
+      "mean_cos_theta": -0.11936921655969601,
+      "peak_mfls": 114041.00662568232,
+      "peak_lambda_max": 2632187.6098166197,
+      "above_cman_frac": 1.0,
+      "G_derived": 0.010623529214185967,
+      "mass_range": [
+        0.9361470534666243,
+        1.0825551023000426
+      ],
+      "counterfactual_cos": 0.37761507391430305,
+      "counterfactual_frac_07": 0.0
+    },
+    "orbital": {
+      "name": "3. Orbital (2nd order)",
+      "engine_file": "gravity_engine_orbital.py",
+      "dynamics": "2nd order Velocity-Verlet",
+      "forces": "radial + pairwise + Gm\u2081m\u2082/r\u00b2 + angular momentum",
+      "mean_cos_theta": -0.11936921655969601,
+      "peak_mfls": 114041.00662568232,
+      "G_derived": 0.010623529214185967,
+      "beta": 0.08815738289625669,
+      "mass_range": [
+        0.9361470534666243,
+        1.0825551023000426
+      ],
+      "counterfactual_cos": -0.29010945528572335,
+      "counterfactual_frac_07": 0.0
+    },
+    "navier_stokes": {
+      "name": "4. Navier-Stokes",
+      "engine_file": "NavierStokesBankAnalyser",
+      "dynamics": "Fluid analogy (diagnostic, not simulation)",
+      "forces": "enstrophy + vorticity + spectral cascade + adaptive viscosity",
+      "mean_cos_theta": 0.009247803870585034,
+      "peak_mfls": 114041.00662568232
+    }
+  }
+}

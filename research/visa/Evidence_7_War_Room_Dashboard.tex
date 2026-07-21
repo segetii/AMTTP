@@ -1,6 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.8in]{geometry}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{xcolor}
@@ -10,78 +10,66 @@
 \noindent\textbf{Criteria:} Optional Criteria 3 (Product \& Engineering Impact)\\
 \noindent\textbf{Applicant:} Odeyemi Olusegun Israel\\
 \rule{\textwidth}{0.4pt}
-
-\vspace{0.5cm}
+\vspace{0.1cm}
 \begin{center}
-    \textbf{\huge Evidence 7: The AMTTP ``War Room'' Compliance Dashboard}
-\end{center}
-\vspace{0.5cm}
-
-\section*{1. Enterprise-Ready Product Interface}
-A core differentiator of the AMTTP platform is its bespoke compliance dashboard built with \textbf{Next.js 14 (App Router), TypeScript, and Tailwind CSS}. Designed for R3--R6 enterprise users (Compliance Officers, Risk Analysts, and Super Administrators), the ``War Room'' provides real-time surveillance over every transaction flowing through the decentralised compliance engine.
-
-This is not a prototype or wireframe. It is a fully functional, data-driven administrative interface consuming live API responses from the Python microservice layer, rendering interactive charts, alert feeds, and risk scoring panels.
-
-\vspace{0.3cm}
-\noindent\textbf{War Room Tech Stack:}
-\begin{itemize}
-    \item \textbf{Framework:} Next.js 14 (App Router) + TypeScript + Tailwind CSS
-    \item \textbf{Data Fetching:} TanStack React Query consuming 10+ Python FastAPI microservice endpoints
-    \item \textbf{Charting:} Interactive risk score heatmaps, transaction volume timeseries, alert severity panels
-    \item \textbf{Theme:} Dark mode (\texttt{bg-gray-950}) for extended surveillance sessions
-    \item \textbf{Routing:} Server components by default; \texttt{'use client'} directive only for interactive panels
-\end{itemize}
-\vspace{0.3cm}
-\begin{center}
-\includegraphics[width=0.95\textwidth]{images/warroom_alerts.png}
+    \textbf{\Large OC3-2: UI Integrity Architecture, RBAC Enforcement, and Bybit-Class Attack Prevention}
 \end{center}
 \vspace{0.1cm}
-\textit{Figure 1: Live AMTTP War Room at \texttt{amttp.com/war-room/alerts} --- 100 CRITICAL risk transaction alerts with severity scores, status tracking (New / Escalated / Acknowledged), and pattern classification (velocity anomaly, fan-out, sanctioned address proximity, layering behavior).}
 
-\section*{2. Role-Based Access Control (RBAC)}
-The dashboard enforces a six-tier Role-Based Access Control system (R1--R6), shared via a unified JSON configuration between the Flutter consumer app and the Next.js admin panel. This ensures that end users never see compliance-sensitive data, while senior administrators have full forensic capability.
+\section*{1. Executive Summary}
 
-\vspace{0.3cm}
-\noindent\textbf{RBAC Configuration} (from \texttt{frontend/shared/rbac\_config.json}):
+\textbf{I built:} an enterprise compliance interface with cryptographic UI integrity guarantees, six-tier role-based access control, and AI decision explainability --- sole-authored from first line to live deployment. In February 2025, attackers at Bybit replaced the compliance approval interface with a manipulated version, causing staff to unknowingly authorise a \$1.5 billion theft. Every War Room screen component carries a cryptographic fingerprint; any substitution is detected and blocked before any approval signature is collected. The architecture I designed closes that exact attack class.
 
-\vspace{0.2cm}
+\section*{2. UI Integrity Implementation}
+
+The file \texttt{ui-integrity.ts} provides four layered defences: (1) every screen component carries a unique cryptographic fingerprint; (2) approvals are signed against actual transaction data, not the displayed text; (3) the server independently validates the fingerprint before acting; and (4) a final confirmation is shown in a secure, isolated context. If an attacker replaces any part of the interface, the fingerprints will not match and the transaction is blocked before any approval can be given.
+
+\vspace{0.1cm}
 \begin{center}
+    \fbox{\includegraphics[width=0.97\textwidth]{images/vscode_ui_integrity_header.png}}
+\end{center}
+\noindent\textit{\small Figure 1: \texttt{ui-integrity.ts} lines 1--32 --- header names the Bybit attack vector, lists four prevention layers, implements SHA-256 hashing via Web Crypto API. Any interface substitution breaks every hash.}
+
+\vspace{0.1cm}
+\begin{center}
+    \fbox{\includegraphics[width=0.97\textwidth]{images/vscode_ui_integrity_impl.png}}
+\end{center}
+\noindent\textit{\small Figure 2: \texttt{ui-integrity.ts} lines 160--190 --- four independent hashes (\texttt{sourceHash}, \texttt{domHash}, \texttt{eventHandlersHash}, \texttt{combinedHash}) per UI component. Hashing source code and live DOM independently detects the Bybit attack pattern.}
+
+\vspace{0.1cm}
+\section*{3. Role-Based Access Control}
+\vspace{0.1cm}
+\begin{center}
+\small
 \begin{tabular}{|c|l|l|l|}
 \hline
-\textbf{Role} & \textbf{Label} & \textbf{Mode} & \textbf{Key Capabilities} \\
+\textbf{Role} & \textbf{Label} & \textbf{Interface} & \textbf{Key Capabilities} \\
 \hline
-R1 & End User & Focus (Flutter) & Initiate own transactions only \\
-R2 & PEP End User & Focus (Flutter) & Enhanced monitoring, same UI \\
-R3 & Compliance Officer & War Room (Next.js) & View all transactions, reports \\
-R4 & Risk Analyst & War Room (Next.js) & Detection studio, policies \\
-R5 & Admin & War Room (Next.js) & Manage users, enforcement \\
-R6 & Super Admin & War Room (Next.js) & Emergency override, full access \\
+R1 & End User & Flutter (Focus Mode) & Own transactions only \\
+R2 & PEP End User & Flutter (Focus Mode) & Enhanced monitoring, restricted view \\
+R3 & Compliance Officer & Next.js (War Room) & All transactions, report generation \\
+R4 & Risk Analyst & Next.js (War Room) & Detection studio, policy editing \\
+R5 & Administrator & Next.js (War Room) & User management, enforcement actions \\
+R6 & Super Admin & Next.js (War Room) & Emergency override, full audit access \\
 \hline
 \end{tabular}
 \end{center}
-\vspace{0.2cm}
+\noindent\textit{\small Each role is defined in a shared configuration file used by both the mobile app and the web dashboard. Access restrictions are enforced at the backend server level rather than on the visible interface, meaning they cannot be bypassed by manipulating what appears on screen.}
 
-\noindent\fbox{\begin{minipage}{0.95\textwidth}
-\small
-\texttt{// rbac\_config.json (shared between Flutter \& Next.js)}\\
-\texttt{"R1\_END\_USER": \{ "mode": "FOCUS", "canViewOthersTx": false \}}\\
-\texttt{"R4\_RISK\_ANALYST": \{ "mode": "WAR\_ROOM",}\\
-\texttt{~~"canAccessDetectionStudio": true, "canEditPolicies": true \}}\\
-\texttt{"R6\_SUPER\_ADMIN": \{ "mode": "WAR\_ROOM",}\\
-\texttt{~~"canEmergencyOverride": true, "canManageUsers": true \}}
-\end{minipage}}
-\vspace{0.2cm}
-
-\noindent\textit{Figure 2: Six-tier RBAC system enforced via a single shared JSON configuration consumed by both the Flutter consumer app (R1--R2 Focus Mode) and the Next.js compliance dashboard (R3--R6 War Room Mode).}
-
-\vspace{0.3cm}
-\begin{center}
-\includegraphics[width=0.85\textwidth]{images/warroom_explainability.png}
-\end{center}
 \vspace{0.1cm}
-\textit{Figure 3: Decision Explainability panel --- SHAP-based contributing factors for a CRITICAL risk alert. Shows detected patterns (High Risk Transfer 85\%, Velocity Anomaly 78\%) with an ``Investigate in Graph'' action linking to the graph analysis engine.}
+\begin{center}
+\includegraphics[width=0.97\textwidth]{images/warroom_alerts.png}
+\end{center}
+\noindent\textit{\small Figure 3: War Room Alerts panel (Compliance Officers and above, enforced server-side) --- 100 live critical alerts with severity scores and flag reasons. Role access is denied at the backend, so bypassing the UI restriction gains nothing.}
 
-\section*{3. Technical Significance}
-Building a production-quality compliance dashboard from scratch --- rather than using off-the-shelf tools like Retool or Grafana --- demonstrates deep frontend engineering capability and a commitment to owning the full product stack. Every chart, table, and alert component was hand-coded by the applicant, as evidenced by the GitHub commit history (see Evidence 5).
+\section*{4. Model Explainability and Audit Trail}
+
+If an officer receives a ``CRITICAL --- Block'' decision with no reasoning, they cannot detect a manipulated model. The Explainability panel surfaces the contributing factors and their weighting for every automated decision, satisfying FCA/MiCA audit trail requirements.
+
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.97\textwidth]{images/warroom_explainability.png}
+\end{center}
+\noindent\textit{\small Figure 4: Decision Explainability panel for a CRITICAL alert --- contributing factors and their weights: High Risk Transfer 85\%, Velocity Anomaly 78\%, Sanctioned Address Proximity 65\%, with direct link to the graph network view. Satisfies FCA/MiCA audit trail requirements without additional tooling.}
 
 \end{document}

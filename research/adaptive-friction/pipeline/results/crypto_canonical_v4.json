@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "version": "canonical_v4",
+    "paper_section": "\u00a78.1 TradingDomain",
+    "n_state": 3,
+    "k_factor": 5,
+    "kappa": 0.05,
+    "theta": 3.4742998835983867,
+    "epsilon": 1e-12,
+    "dt": 0.1,
+    "target_rot": 0.2
+  },
+  "verification": {
+    "lw_delta": 0.0026518812280048945,
+    "sigma_eig_min": 0.0018431554826486309,
+    "sigma_eig_max": 2.8213224543067175,
+    "theta_calibrated": 3.4742998835983867,
+    "checklist_pass": true,
+    "fd_max_abs": 4.730367209049291e-10,
+    "fd_max_rel": 4.625207509440059e-10
+  },
+  "performance": {
+    "canonical_v4": {
+      "sharpe": -0.2916672248584815,
+      "cagr": -0.037657282642639456,
+      "max_dd": -0.26752022961777566,
+      "final": 88.0222142146096
+    },
+    "long_only_eqwt": {
+      "sharpe": 1.0905175618956167,
+      "cagr": 0.27468092991235005,
+      "max_dd": -0.6524828594570917,
+      "final": 224.04140505564268
+    }
+  },
+  "signal_summary": {
+    "E_mean": 21.528575320102167,
+    "gamma_mean": 0.7016186670656629,
+    "size_mult_mean": 0.2983813329343371,
+    "lemma67_pass_pct": 1.0,
+    "curv_halve_pct": 1.0
+  }
+}

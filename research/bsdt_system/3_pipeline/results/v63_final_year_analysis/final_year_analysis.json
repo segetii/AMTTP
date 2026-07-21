@@ -1,0 +1,661 @@
+{
+  "periods": {
+    "oos_start": "2023-01-01 00:00:00",
+    "oos_end": "2026-05-31 23:00:00",
+    "final_year_start": "2025-05-31 23:00:00",
+    "prior_year_start": "2024-05-31 23:00:00"
+  },
+  "results": [
+    {
+      "id": "godmode_only",
+      "desc": "V55_Final\u00d70.7 + V55_Calmar\u00d70.3 wstar (champion baseline)",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.82437522240354,
+      "full_oos_final": 1376599.106062187,
+      "prior_year_return": 0.045130542815739805,
+      "final_year_return": 15.321486716886067,
+      "return_accel_vs_prior": 15.276356174070328,
+      "final_year_maxdd": -0.11281593990980981,
+      "final_year_sharpe": 2.7142370592180196,
+      "final_year_log_slope": 3.963663627487223,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.11281593990980987,
+      "last_90d_return": -3.3280339744035103e-06,
+      "last_180d_return": 0.06897496285483018,
+      "positive_months_final_year": 3,
+      "n_months_final_year": 12,
+      "final": 1376599.106062187,
+      "maxdd": -0.20633212191296174,
+      "calmar": 35.47497781197627
+    },
+    {
+      "id": "blend_99_pnl_geo_flip_k16",
+      "desc": "\u03b2=0.99 godmode + 1% geo_flip K=16 v36 book",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.81835274118725,
+      "full_oos_final": 1362924.7358360237,
+      "prior_year_return": 0.04520855243469679,
+      "final_year_return": 15.309936811596554,
+      "return_accel_vs_prior": 15.264728259161856,
+      "final_year_maxdd": -0.11281303230727605,
+      "final_year_sharpe": 2.7140637986512206,
+      "final_year_log_slope": 3.962724490238745,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.11281303230727602,
+      "last_90d_return": -3.3278102523626174e-06,
+      "last_180d_return": 0.06899253766643931,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1362924.7358360237,
+      "maxdd": -0.20617056239740844,
+      "calmar": 35.384858780927864
+    },
+    {
+      "id": "blend_97_pnl_geo_flip_k16",
+      "desc": "\u03b2=0.97 godmode + 3% geo_flip K=16 v36 book",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.80594603257382,
+      "full_oos_final": 1335575.9953836964,
+      "prior_year_return": 0.0453690526492474,
+      "final_year_return": 15.286178980829511,
+      "return_accel_vs_prior": 15.240809928180264,
+      "final_year_maxdd": -0.11280703842415432,
+      "final_year_sharpe": 2.713706878814334,
+      "final_year_log_slope": 3.960790449293207,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.1128070384241543,
+      "last_90d_return": -3.327349064941032e-06,
+      "last_180d_return": 0.06902876875743003,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1335575.9953836964,
+      "maxdd": -0.20583768332168004,
+      "calmar": 35.203329117579244
+    },
+    {
+      "id": "blend_95_pnl_geo_flip_k16",
+      "desc": "\u03b2=0.95 godmode + 5% geo_flip K=16 v36 book (recommended diversifier)",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.793032359525267,
+      "full_oos_final": 1308227.254931369,
+      "prior_year_return": 0.045535819074670414,
+      "final_year_return": 15.261501329385393,
+      "return_accel_vs_prior": 15.215965510310722,
+      "final_year_maxdd": -0.11280079384835043,
+      "final_year_sharpe": 2.713335386402181,
+      "final_year_log_slope": 3.9587782976488555,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.1128007938483504,
+      "last_90d_return": -3.3268685950549326e-06,
+      "last_180d_return": 0.06906651729637225,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1308227.254931369,
+      "maxdd": -0.2054911222579101,
+      "calmar": 35.02005597059955
+    },
+    {
+      "id": "blend_85_pnl_geo_flip_k16",
+      "desc": "\u03b2=0.85 godmode + 15% geo_flip K=16 (DD-first)",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.71964821445327,
+      "full_oos_final": 1171483.5526697335,
+      "prior_year_return": 0.04647787737403708,
+      "final_year_return": 15.122245760078755,
+      "return_accel_vs_prior": 15.075767882704717,
+      "final_year_maxdd": -0.11276519582877215,
+      "final_year_sharpe": 2.711224546759911,
+      "final_year_log_slope": 3.947361551077474,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.11276519582877209,
+      "last_90d_return": -3.32412974224372e-06,
+      "last_180d_return": 0.06928174854326752,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1171483.5526697335,
+      "maxdd": -0.20353592351631325,
+      "calmar": 34.074080432739464
+    },
+    {
+      "id": "geometry_godmode_strict_k10",
+      "desc": "Standalone geometry godmode V55_Calmar k=10 strict direction",
+      "behaviour": "declining",
+      "full_oos_return": 0.1983225027174409,
+      "full_oos_final": 1004.5126734264232,
+      "prior_year_return": 0.40280474232504626,
+      "final_year_return": -0.17161219715099885,
+      "return_accel_vs_prior": -0.5744169394760451,
+      "final_year_maxdd": -0.18379780280435357,
+      "final_year_sharpe": -1.9262360175732263,
+      "final_year_log_slope": -0.24869413019398054,
+      "peak_in_final_year": "2025-08-22 18:00:00",
+      "dd_from_peak_at_end": -0.17535426816776378,
+      "last_90d_return": 0.0022520890546493533,
+      "last_180d_return": -0.007146687447154854,
+      "positive_months_final_year": 2,
+      "n_months_final_year": 12,
+      "final": 1004.5126734264232,
+      "maxdd": -0.2537001078462889,
+      "calmar": 0.005205878100583199
+    },
+    {
+      "id": "geometry_godmode_hybrid_k10",
+      "desc": "Standalone geometry godmode hybrid (geom when fired else wstar)",
+      "behaviour": "still_growing",
+      "full_oos_return": 2.611371638123196,
+      "full_oos_final": 26502.469499469255,
+      "prior_year_return": 0.14966243532942425,
+      "final_year_return": 0.6035201930782088,
+      "return_accel_vs_prior": 0.45385775774878456,
+      "final_year_maxdd": -0.14476170822349158,
+      "final_year_sharpe": 1.2776118235530687,
+      "final_year_log_slope": 0.6068738022582657,
+      "peak_in_final_year": "2026-02-06 00:00:00",
+      "dd_from_peak_at_end": -0.08563090672894869,
+      "last_90d_return": 0.0003153826235788859,
+      "last_180d_return": 0.8389012770586586,
+      "positive_months_final_year": 2,
+      "n_months_final_year": 12,
+      "final": 26502.469499469255,
+      "maxdd": -0.42745157325680405,
+      "calmar": 3.774652493426197
+    },
+    {
+      "id": "blend_95_geom_godmode_strict",
+      "desc": "\u03b2=0.95 godmode + 5% geometry godmode strict",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.800652434925677,
+      "full_oos_final": 1307819.376392749,
+      "prior_year_return": 0.045332071336001256,
+      "final_year_return": 15.309772044536807,
+      "return_accel_vs_prior": 15.264439973200805,
+      "final_year_maxdd": -0.11281241967906828,
+      "final_year_sharpe": 2.7140175024140745,
+      "final_year_log_slope": 3.9627265151013753,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.1128123136001088,
+      "last_90d_return": -3.2416116096944947e-06,
+      "last_180d_return": 0.06897181534555963,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1307819.376392749,
+      "maxdd": -0.20626611460083857,
+      "calmar": 34.884844934241926
+    },
+    {
+      "id": "blend_85_geom_godmode_strict",
+      "desc": "\u03b2=0.85 godmode + 15% geometry godmode strict (DD-first futures)",
+      "behaviour": "post_moonshot_plateau",
+      "full_oos_return": 26.7450005110031,
+      "full_oos_final": 1170259.9170538732,
+      "prior_year_return": 0.04580536145217784,
+      "final_year_return": 15.282277866474796,
+      "return_accel_vs_prior": 15.236472505022618,
+      "final_year_maxdd": -0.11280413773617756,
+      "final_year_sharpe": 2.7135013459339388,
+      "final_year_log_slope": 3.9605242581103006,
+      "peak_in_final_year": "2026-02-19 14:00:00",
+      "dd_from_peak_at_end": -0.11280378208838293,
+      "last_90d_return": -3.0382909915749323e-06,
+      "last_180d_return": 0.06896441046803958,
+      "positive_months_final_year": 4,
+      "n_months_final_year": 12,
+      "final": 1170259.9170538732,
+      "maxdd": -0.20611116779185346,
+      "calmar": 33.636551151303884
+    }
+  ],
+  "monthly_final_year": {
+    "godmode_only": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.008576715139538726
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.022467237584834265
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.4928355230873338
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.0069083126556536145
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.729245832835183e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.626799638362034
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1026498184851796e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": -5.996804097740949e-08
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.0689903717766096
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.3280339744035103e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0
+      }
+    ],
+    "blend_99_pnl_geo_flip_k16": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.008570069673863756
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.02244967889588867
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.49244151486176935
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.00690461200620085
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.726694853851576e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.621606869591144
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1025938215225572e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": 8.919307479260397e-07
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.06900692841731249
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.3278102523626174e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0
+      }
+    ],
+    "blend_97_pnl_geo_flip_k16": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.008556400137627929
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.022413561905980317
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.49163111211402666
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.006896994302221793
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.721443780497658e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.610917793337176
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1024783818314177e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": 2.854303508881273e-06
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.06904106041371438
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.327349064941032e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0
+      }
+    ],
+    "blend_95_pnl_geo_flip_k16": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.00854220136443451
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.022376047646182062
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.49078942044622065
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.006889073717670557
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.715984009417973e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.599803892493332
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1023581072300281e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": 4.898865303415434e-06
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.06907662180020435
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.3268685950549326e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0
+      }
+    ],
+    "blend_85_pnl_geo_flip_k16": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.008462077927689493
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.022164375450952845
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.48604143069662364
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.006844225571632334
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.685071190113632e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.536877811272653
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1016723362899938e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": 1.6556364988096206e-05
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.0692793797568183
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.32412974224372e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0
+      }
+    ],
+    "geometry_godmode_strict_k10": [
+      {
+        "month": "2025-06",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2025-07",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2025-08",
+        "return_pct": -0.07942721179449153
+      },
+      {
+        "month": "2025-09",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -5.771805148047093e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": -0.09365617519299085
+      },
+      {
+        "month": "2025-12",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-01",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-02",
+        "return_pct": -0.009355976869204419
+      },
+      {
+        "month": "2026-03",
+        "return_pct": -0.007331521930873386
+      },
+      {
+        "month": "2026-04",
+        "return_pct": 0.008119503595823918
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0015006082284614308
+      }
+    ],
+    "geometry_godmode_hybrid_k10": [
+      {
+        "month": "2025-06",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2025-07",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2025-08",
+        "return_pct": -0.044592865885299204
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.017222818599551548
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -0.024693911682102887
+      },
+      {
+        "month": "2025-11",
+        "return_pct": -0.04779262788670535
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -3.131070547057746e-06
+      },
+      {
+        "month": "2026-01",
+        "return_pct": -0.010276355003339899
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.8574147112942705
+      },
+      {
+        "month": "2026-03",
+        "return_pct": 0.0
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -1.2382980048020187e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 0.0003166213136551743
+      }
+    ],
+    "blend_95_geom_godmode_strict": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.00857023009685931
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.022450102763709845
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.49238905910488295
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.00690498805853601
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.729751048815345e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.622089188161327
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1026042256556678e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": -5.996556140530629e-08
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.06898713224368458
+      },
+      {
+        "month": "2026-03",
+        "return_pct": -2.809331063335918e-07
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -3.019060933029394e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 5.754317067285797e-08
+      }
+    ],
+    "blend_85_geom_godmode_strict": [
+      {
+        "month": "2025-06",
+        "return_pct": -0.008555009789124934
+      },
+      {
+        "month": "2025-07",
+        "return_pct": -0.02240988844996583
+      },
+      {
+        "month": "2025-08",
+        "return_pct": 0.4913412985667669
+      },
+      {
+        "month": "2025-09",
+        "return_pct": -0.006897178085238598
+      },
+      {
+        "month": "2025-10",
+        "return_pct": -4.73093786279577e-06
+      },
+      {
+        "month": "2025-11",
+        "return_pct": 9.611023763817563
+      },
+      {
+        "month": "2025-12",
+        "return_pct": -1.1024969633233184e-05
+      },
+      {
+        "month": "2026-01",
+        "return_pct": -5.99597277384234e-08
+      },
+      {
+        "month": "2026-02",
+        "return_pct": 0.0689795108699458
+      },
+      {
+        "month": "2026-03",
+        "return_pct": -9.418672606287259e-07
+      },
+      {
+        "month": "2026-04",
+        "return_pct": -2.2921582522039685e-06
+      },
+      {
+        "month": "2026-05",
+        "return_pct": 1.929214599183382e-07
+      }
+    ]
+  },
+  "elapsed_s": 137.7
+}

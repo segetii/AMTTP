@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMTTP Architecture Embed</title>
+<style>
+/* Compact embed - no title, no legend, no footer, minimal padding */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;font-family:'Segoe UI',Arial,sans-serif;}
+
+#diagram{
+  background:#fff;
+  width:610px;
+  padding:0;
+}
+
+/* ── LAYER SHELL ─── */
+.layer{border-radius:5px;overflow:hidden;margin-bottom:0;}
+.layer-hdr{display:flex;align-items:center;justify-content:space-between;padding:4px 8px;color:#fff;font-size:8px;font-weight:700;letter-spacing:.5px;}
+.layer-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:3px;padding:1px 5px;font-size:7px;font-weight:700;letter-spacing:1px;}
+.layer-body{padding:6px;}
+
+.l1{border:1.5px solid #1a3a6b;}.l1 .layer-hdr{background:#1a3a6b;}.l1 .layer-body{background:#eaf0fb;}
+.l2{border:1.5px solid #561090;}.l2 .layer-hdr{background:#561090;}.l2 .layer-body{background:#f6efff;}
+.l3{border:1.5px solid #1d6e42;}.l3 .layer-hdr{background:#1d6e42;}.l3 .layer-body{background:#edf8f2;}
+.l4{border:1.5px solid #c84800;}.l4 .layer-hdr{background:#c84800;}.l4 .layer-body{background:#fff5ee;}
+
+/* ── CONNECTORS ─── */
+.conn{display:flex;flex-direction:column;align-items:center;padding:2px 0;}
+.conn-line{width:1.5px;height:7px;background:#444;}
+.conn-lbl{font-size:7px;color:#555;font-style:italic;text-align:center;line-height:1.2;}
+.conn-arr{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #444;}
+
+/* ── L1 COLUMNS ─── */
+.l1-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.l1-card{background:#fff;border:1px solid #abb8d8;border-radius:4px;overflow:hidden;}
+.l1-card-hdr{background:#1a3a6b;color:#fff;font-weight:700;font-size:8px;text-align:center;padding:4px 5px 2px;}
+.l1-card-sub{background:#1a3a6b;color:#aab8dd;font-size:6.5px;font-style:italic;text-align:center;padding:0 5px 3px;}
+.l1-card hr{border:none;border-top:1px solid #dde5f5;margin:0 5px 3px;}
+.l1-card ul{padding:1px 6px 5px;list-style:none;}
+.l1-card ul li{font-size:7.5px;color:#333;padding:1px 0 1px 8px;position:relative;}
+.l1-card ul li::before{content:'•';position:absolute;left:0;color:#1a3a6b;font-weight:700;}
+
+/* ── L2 ORACLE ─── */
+.l2-box{background:#fff;border:1px solid #c0a0e0;border-radius:4px;padding:6px 10px;}
+.l2-title{font-weight:700;font-size:8.5px;color:#3a0070;text-align:center;margin-bottom:4px;}
+.l2-box hr{border:none;border-top:1px solid #d4b8f0;margin:0 0 4px;}
+.l2-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px 16px;list-style:none;}
+.l2-grid li{font-size:7.5px;color:#333;padding:1px 0 1px 8px;position:relative;}
+.l2-grid li::before{content:'•';position:absolute;left:0;color:#561090;font-weight:700;}
+
+/* ── L3 ORCHESTRATOR ─── */
+.orch-bar{background:#1d6e42;color:#fff;font-weight:700;font-size:8.5px;text-align:center;border-radius:4px;padding:5px 8px 4px;margin-bottom:1px;}
+.orch-facts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #a0d0b0;border-radius:0 0 3px 3px;margin-bottom:6px;overflow:hidden;}
+.orch-fact{font-size:6.5px;color:#166035;text-align:center;padding:2px 3px;border-right:1px solid #a0d0b0;}
+.orch-fact:last-child{border-right:none;}
+.orch-fact::before{content:'•';color:#1d6e42;margin-right:2px;}
+
+.mod-top{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:1px;}
+.mod-lbl{font-size:6.5px;color:#1d6e42;font-style:italic;text-align:center;}
+.mod-arrows{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:2px;}
+.mini-conn{display:flex;flex-direction:column;align-items:center;}
+.mini-line{width:1px;height:8px;background:#555;}
+.mini-arr{width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:4px solid #555;}
+
+/* ── MODULES ─── */
+.modules{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:3px;}
+.mod{border:1.5px dashed #2da05e;border-radius:4px;background:#fff;overflow:hidden;}
+.mod.risk{border-color:#cc2222;}
+.mod.zk{border-color:#7733cc;}
+.mod-hdr{font-size:7px;font-weight:700;color:#1d6e42;padding:4px 5px 1px;line-height:1.2;}
+.mod.risk .mod-hdr{color:#cc2222;}
+.mod.zk .mod-hdr{color:#7733cc;}
+.mod-sub{font-size:6px;font-style:italic;color:#888;padding:0 5px 2px;line-height:1.2;}
+.mod hr{border:none;border-top:1.5px solid #2da05e;margin:0 5px 3px;}
+.mod.risk hr{border-color:#cc2222;}
+.mod.zk hr{border-color:#7733cc;}
+.mod ul{padding:0 5px 4px;list-style:none;}
+.mod ul li{font-size:7px;color:#333;padding:1px 0 1px 8px;position:relative;line-height:1.25;}
+.mod ul li::before{content:'•';position:absolute;left:0;color:#555;}
+
+.mod-out{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin:2px 0 5px;}
+.mod-out-lbl{font-size:6px;color:#1d6e42;font-style:italic;text-align:center;}
+
+/* ── DECISION MATRIX ─── */
+.matrix{border:1.5px solid #e6a817;border-radius:4px;background:#fffcf0;padding:5px 8px;}
+.matrix-title{font-size:7.5px;font-weight:700;color:#c47d00;text-align:center;letter-spacing:.2px;margin-bottom:4px;}
+.matrix hr{border:none;border-top:1px solid #e6d090;margin:0 0 4px;}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:7.5px;color:#333;}
+.matrix-rule{padding:1px 0;}
+.allow{color:#1d7a3a;font-weight:700;}
+.review{color:#c47d00;font-weight:700;}
+.escrow{color:#c84800;font-weight:700;}
+.block{color:#cc2222;font-weight:700;}
+
+/* ── L4 APIGW ─── */
+.apigw-bar{background:#c84800;color:#fff;font-weight:700;font-size:8.5px;text-align:center;border-radius:4px;padding:5px 8px 4px;margin-bottom:1px;}
+.apigw-facts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #e0a878;border-radius:0 0 3px 3px;margin-bottom:6px;overflow:hidden;}
+.apigw-fact{font-size:6.5px;color:#884400;text-align:center;padding:2px 3px;border-right:1px solid #e0a878;}
+.apigw-fact:last-child{border-right:none;}
+.apigw-fact::before{content:'•';color:#c84800;margin-right:2px;}
+
+/* ── ON-CHAIN ─── */
+.onchain{border:1.5px dashed #8833cc;border-radius:5px;padding:5px;margin-bottom:5px;}
+.section-lbl{font-size:7px;font-weight:700;color:#6622aa;margin-bottom:4px;}
+.sc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.sc-box{background:#4a0080;border-radius:3px;overflow:hidden;}
+.sc-box-hdr{background:#36005a;color:#fff;font-size:7px;font-weight:700;text-align:center;padding:4px 3px 3px;}
+.sc-box ul{padding:2px 4px 4px;list-style:none;}
+.sc-box ul li{font-size:6.5px;color:#ddc8ff;padding:1px 0 1px 7px;position:relative;}
+.sc-box ul li::before{content:'•';position:absolute;left:0;color:#cc99ff;}
+
+/* ── PERSISTENCE ─── */
+.persist{border:1.5px dashed #336688;border-radius:5px;padding:5px;margin-bottom:5px;}
+.persist .section-lbl{color:#2a4a6c;}
+.db-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.db-box{background:#1a3a5c;border-radius:3px;overflow:hidden;}
+.db-box-hdr{background:#0d2440;color:#fff;font-size:7px;font-weight:700;text-align:center;padding:4px 3px 1px;}
+.db-box-sub{background:#0d2440;color:#99aacc;font-size:6px;font-style:italic;text-align:center;padding:0 3px 3px;}
+.db-box ul{padding:2px 4px 4px;list-style:none;}
+.db-box ul li{font-size:6.5px;color:#aac0e0;padding:1px 0 1px 7px;position:relative;}
+.db-box ul li::before{content:'•';position:absolute;left:0;color:#6699cc;}
+
+/* ── CLOUD INFRA ─── */
+.cloud-bar{background:#1a5c40;color:#fff;font-weight:700;font-size:8px;text-align:center;border-radius:4px;padding:5px 8px 4px;margin-bottom:1px;}
+.cloud-facts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #80b898;border-radius:0 0 3px 3px;overflow:hidden;}
+.cloud-fact{font-size:6.5px;color:#226644;text-align:center;padding:2px 3px;border-right:1px solid #80b898;}
+.cloud-fact:last-child{border-right:none;}
+.cloud-fact::before{content:'•';color:#1a5c40;margin-right:2px;}
+</style>
+</head>
+<body>
+<div id="diagram">
+
+  <!-- LAYER I -->
+  <div class="layer l1">
+    <div class="layer-hdr"><span>LAYER I &mdash; INTEGRATION &amp; ACCESS</span><span class="layer-badge">EXTERNAL-FACING</span></div>
+    <div class="layer-body">
+      <div class="l1-grid">
+        <div class="l1-card">
+          <div class="l1-card-hdr">AMTTP Open-Source SDK</div>
+          <div class="l1-card-sub">TypeScript / Python Client Library</div><hr>
+          <ul><li>Transaction Construction</li><li>Wallet Signature (EIP-712)</li><li>WebSocket Event Streaming</li><li>Batch Scoring Interface</li></ul>
+        </div>
+        <div class="l1-card">
+          <div class="l1-card-hdr">RESTful API Interface</div>
+          <div class="l1-card-sub">JSON / HTTP + WebSocket</div><hr>
+          <ul><li>POST /evaluate</li><li>POST /score/address</li><li>GET /profiles/{addr}</li><li>SSE /webhook/stream</li></ul>
+        </div>
+        <div class="l1-card">
+          <div class="l1-card-hdr">Web Application Layer</div>
+          <div class="l1-card-sub">Flutter (3010) + Next.js War Room (3006)</div><hr>
+          <ul><li>MetaMask Wallet Integration</li><li>Compliance Dashboard (R1&ndash;R6)</li><li>Detection Studio &amp; Graph Explorer</li><li>zkNAF Proof Verification UI</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><div class="conn-line"></div><div class="conn-lbl">HTTP/WS &mdash; Authenticated Request</div><div class="conn-line" style="height:5px;"></div><div class="conn-arr"></div></div>
+
+  <!-- LAYER II -->
+  <div class="layer l2">
+    <div class="layer-hdr"><span>LAYER II &mdash; GATEWAY &amp; ROUTING</span><span class="layer-badge">API GATEWAY</span></div>
+    <div class="layer-body">
+      <div class="l2-box">
+        <div class="l2-title">Oracle Service &mdash; Express.js TypeScript Gateway (port 3001)</div><hr>
+        <ul class="l2-grid">
+          <li>Modular domain routers: risk/ &middot; kyc/ &middot; compliance/ &middot; dispute/</li>
+          <li>EIP-712 signature validation &amp; JSON-RPC relay to Orchestrator</li>
+          <li>Rate limiting (100 req/s) &amp; API key authentication</li>
+          <li>CORS middleware &amp; structured request / audit logging</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><div class="conn-line"></div><div class="conn-lbl">Authenticated Internal Request</div><div class="conn-line" style="height:5px;"></div><div class="conn-arr"></div></div>
+
+  <!-- LAYER III -->
+  <div class="layer l3">
+    <div class="layer-hdr"><span>LAYER III &mdash; PROTOCOL LOGIC &amp; COMPUTATION (THE SINGULAR STACK)</span><span class="layer-badge">CORE ENGINE</span></div>
+    <div class="layer-body">
+      <div class="orch-bar">Compliance Orchestrator &mdash; Central Decision Coordinator (FastAPI, port 8007)</div>
+      <div class="orch-facts">
+        <div class="orch-fact">Fan-out to downstream services</div>
+        <div class="orch-fact">Aggregate multi-signal decisions</div>
+        <div class="orch-fact">Profile &amp; entity management</div>
+        <div class="orch-fact">API key issuance &amp; RBAC</div>
+      </div>
+      <div class="mod-top">
+        <div class="mod-lbl">&sect;3.1 Identity</div>
+        <div class="mod-lbl">&sect;3.2 Tx Sequencing</div>
+        <div class="mod-lbl">&sect;3.3 ML Risk</div>
+        <div class="mod-lbl">&sect;3.4 ZK Proofs</div>
+      </div>
+      <div class="mod-arrows">
+        <div class="mini-conn"><div class="mini-line"></div><div class="mini-arr"></div></div>
+        <div class="mini-conn"><div class="mini-line"></div><div class="mini-arr"></div></div>
+        <div class="mini-conn"><div class="mini-line"></div><div class="mini-arr"></div></div>
+        <div class="mini-conn"><div class="mini-line"></div><div class="mini-arr"></div></div>
+      </div>
+      <div class="modules">
+        <div class="mod">
+          <div class="mod-hdr">&sect;3.1 Identity Management Module</div>
+          <div class="mod-sub">Sanctions Screening (port 8004)</div><hr>
+          <ul><li>OFAC / EU / UK FATF screening</li><li>KYC status &amp; PEP tracking</li><li>Entity profile management</li><li>Address reputation lookup</li></ul>
+        </div>
+        <div class="mod">
+          <div class="mod-hdr">&sect;3.2 Transaction Sequencing Module</div>
+          <div class="mod-sub">FCA Policy (8003) &middot; GeoRisk (8006) &middot; Monitoring (8005) &middot; Integrity (8008)</div><hr>
+          <ul><li>UK FCA regulatory rule engine</li><li>Jurisdiction risk scoring</li><li>Real-time alerting &amp; streaming</li><li>Merkle proof integrity validation</li></ul>
+        </div>
+        <div class="mod risk">
+          <div class="mod-hdr">&sect;3.3 Graph-Powered Risk Engine (ML/DL)</div>
+          <div class="mod-sub">ML Risk API (8000) &middot; Graph Service (8001) &middot; Explainability (8009)</div><hr>
+          <ul><li>XGBoost / LightGBM ensemble</li><li>GraphSAGE on Memgraph</li><li>Knowledge distillation pipeline</li><li>SHAP / LIME explanations</li></ul>
+        </div>
+        <div class="mod zk">
+          <div class="mod-hdr">&sect;3.4 ZK-NAF Verifier</div>
+          <div class="mod-sub">Zero-Knowledge Service (port 8010)</div><hr>
+          <ul><li>Groth16 ZK-SNARKs / BN254</li><li>KYC credential proof</li><li>Risk score range proof</li><li>Sanctions non-membership</li></ul>
+        </div>
+      </div>
+      <div class="mod-out">
+        <div class="mod-out-lbl">sanctions_hit, kyc_status</div>
+        <div class="mod-out-lbl">rule_alerts, geo_risk</div>
+        <div class="mod-out-lbl">risk_score, explanations</div>
+        <div class="mod-out-lbl">zk_proof_valid</div>
+      </div>
+      <div class="matrix">
+        <div class="matrix-title">COMPLIANCE DECISION MATRIX &mdash; DETERMINISTIC ACTION RESOLUTION</div><hr>
+        <div class="matrix-grid">
+          <div class="matrix-rule">P &lt; 0.4 &and; &not;sanctioned &and; geo=LOW &rarr; <span class="allow">ALLOW</span></div>
+          <div class="matrix-rule">0.4 &le; P &lt; 0.7 &and; &not;sanctioned &rarr; <span class="review">REVIEW</span></div>
+          <div class="matrix-rule">P &ge; 0.7 &and; &not;sanctioned &rarr; <span class="escrow">ESCROW</span></div>
+          <div class="matrix-rule">sanctioned &or; FATF_blacklist &rarr; <span class="block">BLOCK</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><div class="conn-line"></div><div class="conn-lbl">action &isin; {ALLOW, REVIEW, ESCROW, BLOCK}</div><div class="conn-line" style="height:5px;"></div><div class="conn-arr"></div></div>
+
+  <!-- LAYER IV -->
+  <div class="layer l4">
+    <div class="layer-hdr"><span>LAYER IV &mdash; PRODUCTION &amp; DEPLOYMENT</span><span class="layer-badge">INFRASTRUCTURE</span></div>
+    <div class="layer-body">
+      <div class="apigw-bar">API Gateway &mdash; NGINX Reverse Proxy + Cloudflare Tunnel</div>
+      <div class="apigw-facts">
+        <div class="apigw-fact">TLS termination</div>
+        <div class="apigw-fact">Rate limiting (100 req/s)</div>
+        <div class="apigw-fact">Path-based routing (/api, /risk, /geo&nbsp;&hellip;)</div>
+        <div class="apigw-fact">Cloudflare Tunnel (production)</div>
+      </div>
+      <div class="onchain">
+        <div class="section-lbl">&sect;4.1 On-Chain Verification &mdash; Ethereum Smart Contracts (Solidity ^0.8.24, UUPS Proxy, OpenZeppelin)</div>
+        <div class="sc-grid">
+          <div class="sc-box"><div class="sc-box-hdr">AMTTPCore</div><ul><li>Risk Oracle</li><li>Escrow Logic</li><li>Tx Validation</li><li>onlyOracle modifier</li></ul></div>
+          <div class="sc-box"><div class="sc-box-hdr">AMTTTPNFT</div><ul><li>KYC Compliance Badges</li><li>On-chain Compliance ID</li><li>ERC-721 standard</li></ul></div>
+          <div class="sc-box"><div class="sc-box-hdr">DisputeResolver</div><ul><li>Kleros Arbitration</li><li>MetaEvidence protocol</li><li>Appeal management</li></ul></div>
+          <div class="sc-box"><div class="sc-box-hdr">CrossChain</div><ul><li>LayerZero Bridge</li><li>Cross-chain score relay</li><li>Multi-network support</li></ul></div>
+          <div class="sc-box"><div class="sc-box-hdr">zkNAF Circuits</div><ul><li>KYC Credential proof</li><li>Risk Range Proof</li><li>Sanctions Non-Mem.</li><li>BN254 pairing check</li></ul></div>
+        </div>
+      </div>
+      <div class="persist">
+        <div class="section-lbl">&sect;4.2 Data Persistence Layer</div>
+        <div class="db-grid">
+          <div class="db-box"><div class="db-box-hdr">MongoDB</div><div class="db-box-sub">Document Store (27017)</div><ul><li>Profiles &amp; Alerts</li><li>Transaction History</li><li>Compliance Records</li></ul></div>
+          <div class="db-box"><div class="db-box-hdr">Redis</div><div class="db-box-sub">Cache Layer (6379)</div><ul><li>Session Management</li><li>Rate Limit Counters</li><li>Hot Score Cache</li></ul></div>
+          <div class="db-box"><div class="db-box-hdr">Memgraph</div><div class="db-box-sub">Graph Database (7687)</div><ul><li>Entity Relations</li><li>Risk Path Analysis</li><li>GraphSAGE datasets</li></ul></div>
+          <div class="db-box"><div class="db-box-hdr">Helia (IPFS)</div><div class="db-box-sub">Immutable Store</div><ul><li>Audit Log Archive</li><li>Compliance Evidence</li><li>Tamper-proof Records</li></ul></div>
+          <div class="db-box"><div class="db-box-hdr">HashiCorp Vault</div><div class="db-box-sub">Secrets Management</div><ul><li>API Keys &amp; Tokens</li><li>Service Credentials</li><li>Encryption Keys</li></ul></div>
+        </div>
+      </div>
+      <div class="cloud-bar">Cloud Infrastructure &mdash; Container Orchestration</div>
+      <div class="cloud-facts">
+        <div class="cloud-fact">Docker Compose (unified / full-stack / production)</div>
+        <div class="cloud-fact">Supervisord process management</div>
+        <div class="cloud-fact">Prometheus + Grafana observability</div>
+        <div class="cloud-fact">MinIO object storage &amp; HashiCorp Vault</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -42,8 +42,8 @@ for p in [str(THIS_DIR), str(ORIG_BL_DIR), str(UPGRADED_DIR), str(VARIANT_DIR)]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from network_builder   import lw_correlation_network, spectral_radius
-from gravity_engine    import BSDTOperator
+from network_builder   import lw_correlation_network, spectral_radius, leading_eigenvec
+from gravity_engine    import BSDTChannelOperator, analyse_trajectory_full
 from eval_protocol     import (eval_all_variants, CRISIS_WINDOWS_EVAL,
                                build_binary_labels, roc_auprc)
 from robustness_checks import run_all_robustness, latex_robustness_table
@@ -132,6 +132,7 @@ def main(
     print("\n[2/8] Building G-SIB Ledoit-Wolf network...")
     W, rho_star = lw_correlation_network(X_std)
     lmax        = spectral_radius(W)
+    v_W         = leading_eigenvec(W)
     print(f"  rho*={rho_star:.4f}  lambdamax(W)={lmax:.4f}")
 
     # Region-level lambdamax
@@ -146,17 +147,28 @@ def main(
     # 4. MFLS signal
     # ------------------------------------------------------------------
     print("\n[3/8] Fitting BSDT and computing MFLS signal...")
-    bsdt = BSDTOperator()
+    bsdt = BSDTChannelOperator(v_W=v_W)
     bsdt.fit(X_std[norm_mask])
     mfls_signal = np.array([bsdt.mfls_score(X_std[t]) for t in range(T)])
     print(f"  MFLS range: [{mfls_signal.min():.3f}, {mfls_signal.max():.3f}]")
+
+    # Full 4-channel trajectory: admissibility, safety, rho_MFLS, psi_t
+    print("  Running 4-channel admissibility analysis (section 12, XXIV.4)...")
+    traj = analyse_trajectory_full(
+        X_std, mu_ref, bsdt, lam_W=lmax,
+        alpha=0.10, lead_window=4, theta=0.10, M_max=1.0,
+    )
+    print(f"  MFLS_st range: [{traj['mfls_st'].min():.3f}, {traj['mfls_st'].max():.3f}]  (physical-space)")
+    print(f"  Inadmissible A>1: {np.mean(traj['admissibility']>1.0):.1%}   "
+          f"Safe rho>=1: {np.mean(traj['safety']>=1.0):.1%}   "
+          f"mean psi: {np.mean(traj['psi_deg']):.1f} deg")
 
     # Region-level signals
     region_signals = {}
     for region in ["US", "EU", "Asia"]:
         sub = _region_subpanel(X_std, meta, region)
         if sub is not None and sub.shape[1] >= 2:
-            bsdt_r = BSDTOperator()
+            bsdt_r = BSDTChannelOperator()
             bsdt_r.fit(sub[norm_mask])
             sig_r = np.array([bsdt_r.mfls_score(sub[t]) for t in range(T)])
             region_signals[region] = sig_r
@@ -275,6 +287,22 @@ def main(
         "region_auroc": {},
         "bank_meta": meta,
         "runtime_sec": round(time.time() - t0, 1),
+        "admissibility_analysis": {
+            "lead_window_Q": 4,
+            "theta": 0.10,
+            "M_max": 1.0,
+            "g_ch_names": ["C_contagion", "G_geometry", "A_activity", "T_topology"],
+            "g_ch_mean": traj["g_ch"].mean(axis=0).tolist(),
+            "mfls_st_range": [float(traj["mfls_st"].min()), float(traj["mfls_st"].max())],
+            "mfls_ch_range": [float(traj["mfls_ch"].min()), float(traj["mfls_ch"].max())],
+            "admissibility_mean": float(np.mean(traj["admissibility"])),
+            "admissibility_max":  float(np.max(traj["admissibility"])),
+            "frac_inadmissible":  float(np.mean(traj["admissibility"] > 1.0)),
+            "safety_mean":        float(np.mean(traj["safety"])),
+            "frac_safe":          float(np.mean(traj["safety"] >= 1.0)),
+            "rho_mfls_mean":      float(np.mean(traj["rho_mfls"])),
+            "psi_deg_mean":       float(np.mean(traj["psi_deg"])),
+        },
     }
 
     # Region AUROCs
@@ -313,6 +341,15 @@ def main(
     print(f"  Causality:  Linear Granger {causality['summary']['linear_granger_verdict']}")
     print(f"              Threshold {causality['summary']['threshold_verdict']} (p={causality['summary']['threshold_granger_min_p']:.4f})")
     print(f"              Quantile  {causality['summary']['quantile_verdict']} (p={causality['summary']['quantile_min_p']:.4f})")
+    print(f"")
+    print(f"")
+    print(f"  Admissibility (section 12, L=4Q, theta=0.10, M_max=1.0):")
+    print(f"  MFLS_st: [{traj['mfls_st'].min():.3f}, {traj['mfls_st'].max():.3f}]  (physical-space pullback)")
+    print(f"  frac inadmissible A>1: {np.mean(traj['admissibility']>1.0):.1%}   mean A={np.mean(traj['admissibility']):.3f}")
+    print(f"  frac safe rho>=1:      {np.mean(traj['safety']>=1.0):.1%}   mean rho={np.mean(traj['safety']):.3f}")
+    print(f"  mean rho_MFLS: {np.mean(traj['rho_mfls']):.3f}   mean psi: {np.mean(traj['psi_deg']):.1f} deg")
+    print(f"  channel g_ch means: C={traj['g_ch'][:,0].mean():.3f}  G={traj['g_ch'][:,1].mean():.3f}")
+    print(f"                      A={traj['g_ch'][:,2].mean():.3f}  T={traj['g_ch'][:,3].mean():.3f}")
     print(f"")
     print(f"  Output: {RESULTS_DIR}")
     print(f"  Runtime: {time.time()-t0:.1f}s")

@@ -1,0 +1,288 @@
+MANDATORY CRITERIA MC-2: GITHUB CONTRIBUTIONS & CODEBASE
+(Evidence Template for Word Document)
+
+================================================================================
+
+TITLE: GitHub Codebase & Sustained Solo Engineering Contribution
+
+APPLICANT: Olusegun Israel Odeyemi
+EVIDENCE CODE: MC-2
+REPOSITORY: [GitHub URL]
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+What This Evidence Shows:
+- Sustained, independent, full-stack engineering contribution
+- 361+ commits across all application layers
+- Solo developer (verifiable commit authorship)
+- Production-quality code (tested, documented, deployed)
+- Complexity across frontend, backend, smart contracts, DevOps
+
+Repository Statistics:
+Total Commits: 361+
+Lines of Code: [XXXXX+] (across all languages)
+Languages: Solidity, TypeScript, Python, Dart, CSS/SCSS
+Primary Contribution: 95%+ authored by applicant
+Time Period: [Start date] - [Current]
+Commit Frequency: Regular, sustained development
+Code Quality: Security audited, tested, production-ready
+
+================================================================================
+2. REPOSITORY STRUCTURE & BREAKDOWN
+================================================================================
+
+Frontend Layer:
+
+  Flutter (Consumer App)
+  - Path: frontend/amttp_app/
+  - Files: [Number] commits to Flutter codebase
+  - Components: Wallet integration, transaction signing, user interface
+  - State: Riverpod-based, Go Router routing
+  - Contribution: Full application architecture and implementation
+
+  Next.js (Enterprise Dashboard / War Room)
+  - Path: frontend/frontend/
+  - Files: [Number] React components, pages, utilities
+  - Features: RBAC dashboard, compliance monitoring, alert system
+  - State: TanStack React Query, real-time updates
+  - Contribution: Full application design and implementation
+
+Backend Layer:
+
+  FastAPI Services (Python)
+  - Paths: backend/compliance-service/
+  - Services:
+    * Orchestrator (main compliance engine)
+    * Risk Engine (ML-based scoring)
+    * Sanctions Screening
+    * Monitoring (AML patterns)
+    * Policy Enforcement
+    * Graph Analysis
+    * Integrity Checks
+    * Explainability Engine
+    * Zero-Knowledge Proofs (zkNAF)
+  - Commits: [Number] to Python microservices
+
+  Express.js API Gateway (TypeScript)
+  - Path: backend/oracle-service/
+  - Purpose: On-chain/off-chain bridge
+  - Modules: Risk routing, KYC, compliance, dispute resolution
+  - Commits: [Number] to TypeScript backend
+
+Smart Contracts Layer:
+
+  Solidity (38 files)
+  - Path: contracts/
+  - UUPS Proxy Pattern implementation
+  - Cross-chain compatibility
+  - Policy enforcement contracts
+  - Risk attestation contracts
+  - zkNAF integration
+  - Commits: [Number] to contract development
+  - Validation: Slither audited, Echidna fuzzed, Hardhat tested
+
+Infrastructure & DevOps:
+
+  Docker Compose configurations
+  Nginx gateway config
+  Kubernetes manifests (if applicable)
+  GitHub CI/CD workflows
+  Deployment automation
+  MongoDB schema definitions
+
+SDKs & Documentation:
+
+  TypeScript SDK (client-sdk/)
+  Python SDK (packages/python-sdk/)
+  API documentation
+  Architecture guides
+  Integration examples
+
+================================================================================
+3. COMMIT AUTHORSHIP VERIFICATION
+================================================================================
+
+How to Verify:
+
+1. Open repository: [GitHub URL]
+2. Navigate to: Insights > Contributors
+3. Verify: Olusegun Israel Odeyemi [GitHub username]
+   - Shows: 361+ commits, [X%] of total contributions
+   - Timeline: Continuous from [start date] to present
+
+4. Check Commits:
+   - Click through commit history
+   - Verify: Signed commits (GPG signature)
+   - Author: Olusegun Israel Odeyemi <email>
+   - Content: Code changes across all directories
+
+5. Code Review:
+   - Consistent coding style across all layers
+   - Logical architecture and design patterns
+   - Professional documentation and comments
+   - Progressive improvement and refactoring over time
+
+Uniqueness Tests:
+✓ No multiple contributors in primary codebase
+✓ All major features developed by single author
+✓ Coherent architecture (signature of single designer)
+✓ Continuous development timeline (not sudden bulk imports)
+
+================================================================================
+4. CODE QUALITY & MATURITY
+================================================================================
+
+Evidence of Production Readiness:
+
+Testing:
+- ✓ Hardhat integration tests (smart contracts)
+- ✓ Unit tests (backend services)
+- ✓ API integration tests
+- ✓ End-to-end tests (frontend)
+- ✓ Property-based tests (Echidna)
+
+Documentation:
+- ✓ README files (architecture overview)
+- ✓ Inline code comments
+- ✓ API documentation
+- ✓ Deployment guides
+- ✓ Architecture diagrams
+
+Security:
+- ✓ Slither static analysis (zero critical findings)
+- ✓ Echidna fuzzing (50,000+ iterations)
+- ✓ Manual security review
+- ✓ External audit (if completed)
+
+Version Control Best Practices:
+- ✓ Meaningful commit messages
+- ✓ Logical commit organization
+- ✓ Branch strategy (main/develop/feature)
+- ✓ Tagged releases
+
+================================================================================
+5. TECHNICAL SCOPE & COMPLEXITY
+================================================================================
+
+Languages & Frameworks Demonstrated:
+
+Python:
+- FastAPI (async framework)
+- Pydantic (type validation)
+- Asyncio (concurrent programming)
+- Machine learning (scikit-learn, XGBoost, LightGBM)
+- Graph processing (NetworkX, Memgraph)
+
+TypeScript/JavaScript:
+- React & Next.js (full-stack framework)
+- Express.js (backend framework)
+- TanStack Query (state management)
+- Ethers.js (blockchain interaction)
+
+Solidity:
+- UUPS proxy pattern
+- OpenZeppelin libraries
+- Access control patterns
+- Event emission and logging
+
+Dart:
+- Flutter (iOS/Android/Web)
+- Riverpod (state management)
+- Go Router (routing)
+
+DevOps:
+- Docker containerization
+- Docker Compose orchestration
+- Nginx configuration
+- CI/CD workflows (GitHub Actions)
+
+================================================================================
+6. ENGINEERING ACHIEVEMENTS
+================================================================================
+
+Full-Stack Integration:
+- Mobile app ↔ Browser frontend ↔ API gateway ↔ Microservices
+- Microservices ↔ Smart contracts ↔ Blockchain
+- Consistent data models across all layers
+- Unified error handling and logging
+
+Cross-Cutting Concerns:
+- Authentication/Authorization (RBAC across frontend + backend)
+- Logging and monitoring (centralized telemetry)
+- Error handling (graceful degradation)
+- Rate limiting and throttling
+- Caching strategies
+
+Performance Optimization:
+- ML model distillation (CPU-efficient scoring)
+- Query optimization (MongoDB indexing)
+- API response caching
+- Frontend bundle optimization
+
+================================================================================
+7. INDEPENDENT DEVELOPMENT EVIDENCE
+================================================================================
+
+Indicators of Solo Development:
+✓ Consistent naming conventions across all code
+✓ Single code review/merge pattern
+✓ Progressive feature rollout
+✓ Systematic refactoring (architecture improvements over time)
+✓ All major architectural decisions visible in git history
+
+Timeline & Scope:
+- Sustained development over [X years/months]
+- Increasing complexity over time (learning curve visible)
+- New challenges tackled progressively
+- Continuous deployment and iteration
+
+No Institutional Support:
+- No CI/CD setup by external team
+- No architecture designed by consultants
+- No code contributed by contractors
+- Self-taught additional technologies as needed
+
+================================================================================
+8. ASSESSMENT QUESTIONS FOR ASSESSOR
+================================================================================
+
+How does this demonstrate technical leadership?
+→ End-to-end system design, architecture decisions, and execution by single developer
+→ Complexity across multiple domains (frontend, backend, contracts, DevOps)
+→ Production deployment and ongoing maintenance
+
+How does this show potential for UK contribution?
+→ Professional-grade codebase suitable for commercial deployment
+→ Regulatory-aligned (compliance, security, audit trail)
+→ Open-source and community-friendly (documentation, SDKs)
+
+Why is this non-trivial?
+→ 361+ commits is substantial (equivalent to ~2-3 years FTE development)
+→ Multiple technology stacks mastered independently
+→ Production deployment requires systems thinking
+→ Security and compliance requirements demand rigor
+
+================================================================================
+9. SUPPORTING LINKS & VERIFICATION
+================================================================================
+
+GitHub Repository:
+[URL] - Full codebase visible
+
+Key Directories:
+frontend/amttp_app/ - Flutter consumer app
+frontend/frontend/ - Next.js dashboard
+backend/compliance-service/ - Python microservices
+backend/oracle-service/ - TypeScript gateway
+contracts/ - Solidity smart contracts
+tests/ - Comprehensive test suite
+
+Recent Commits:
+[List 5-10 most recent significant commits with links]
+
+Code Examples:
+[Link to key architectural decisions or complex implementations]
+
+================================================================================

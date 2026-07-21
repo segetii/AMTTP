@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMTTP Architecture Wide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;font-family:'Segoe UI',Arial,sans-serif;}
+
+#diagram{
+  background:#fff;
+  width:1120px;
+  padding:8px 8px 8px 8px;
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;
+  gap:0;
+  min-height:570px;
+}
+
+/* ── LAYER COLUMNS ── */
+.layer{border-radius:6px;overflow:hidden;display:flex;flex-direction:column;}
+.l1{border:2px solid #1a3a6b;flex:0 0 192px;}
+.l2{border:2px solid #561090;flex:0 0 162px;}
+.l3{border:2px solid #1d6e42;flex:1;}
+.l4{border:2px solid #c84800;flex:0 0 206px;}
+
+.l1 .lhdr{background:#1a3a6b;}
+.l2 .lhdr{background:#561090;}
+.l3 .lhdr{background:#1d6e42;}
+.l4 .lhdr{background:#c84800;}
+.l1 .lbody{background:#eaf0fb;}
+.l2 .lbody{background:#f6efff;}
+.l3 .lbody{background:#edf8f2;}
+.l4 .lbody{background:#fff5ee;}
+
+.lhdr{color:#fff;font-size:7.5px;font-weight:700;padding:5px 7px 4px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.4px;}
+.lbadge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:3px;padding:1px 5px;font-size:6.5px;letter-spacing:.6px;}
+.lbody{padding:5px;flex:1;display:flex;flex-direction:column;gap:4px;}
+
+/* ── HORIZONTAL ARROW CONNECTOR ── */
+.hconn{width:22px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.hconn-line{flex:1;width:1.5px;background:#888;}
+.hconn-lbl{font-size:6px;color:#666;font-style:italic;writing-mode:vertical-lr;transform:rotate(180deg);letter-spacing:.3px;}
+.hconn-arr{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #888;}
+
+/* ── LAYER I: CLIENT CARDS ── */
+.card{background:#fff;border:1px solid #abb8d8;border-radius:4px;overflow:hidden;flex-shrink:0;}
+.card-hdr{background:#1a3a6b;color:#fff;font-size:7.5px;font-weight:700;padding:3px 6px 2px;}
+.card-sub{background:#1a3a6b;color:#aac0e8;font-size:6px;font-style:italic;padding:0 6px 2px;}
+.card hr{border:none;border-top:1px solid #d5dff5;margin:0 5px 2px;}
+.card ul{padding:2px 6px 4px;list-style:none;}
+.card ul li{font-size:7px;color:#333;padding:1px 0 1px 9px;position:relative;}
+.card ul li::before{content:'•';position:absolute;left:0;color:#1a3a6b;font-weight:700;}
+
+/* ── LAYER II: ORACLE ── */
+.oracle{background:#fff;border:1px solid #c0a0e0;border-radius:4px;padding:5px 7px;flex:1;}
+.oracle-title{font-size:8px;font-weight:700;color:#3a0070;margin-bottom:4px;}
+.oracle hr{border:none;border-top:1px solid #d4b8f0;margin:0 0 3px;}
+.oracle ul{list-style:none;}
+.oracle ul li{font-size:7.5px;color:#333;padding:1.5px 0 1.5px 9px;position:relative;}
+.oracle ul li::before{content:'•';position:absolute;left:0;color:#561090;font-weight:700;}
+
+/* ── LAYER III: ORCHESTRATOR ── */
+.orch{background:#1d6e42;color:#fff;font-size:8px;font-weight:700;text-align:center;border-radius:4px;padding:5px 6px 4px;margin-bottom:4px;}
+.orch-sub{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #a0d0b0;border-radius:0 0 3px 3px;margin-bottom:5px;overflow:hidden;}
+.orch-fact{font-size:6px;color:#166035;text-align:center;padding:2px 3px;border-right:1px solid #a0d0b0;}
+.orch-fact:last-child{border-right:none;}
+
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:5px;}
+.svc{background:#fff;border:1.5px dashed #2da05e;border-radius:4px;padding:4px 5px;overflow:hidden;}
+.svc.risk{border-color:#cc2222;}
+.svc.zk{border-color:#7733cc;}
+.svc-name{font-size:7.5px;font-weight:700;color:#1d6e42;line-height:1.2;}
+.svc.risk .svc-name{color:#cc2222;}
+.svc.zk .svc-name{color:#7733cc;}
+.svc-port{font-size:6px;color:#777;margin-bottom:1px;}
+.svc-tech{font-size:6.5px;color:#444;}
+
+/* Decision matrix */
+.dm{border:1.5px solid #e6a817;border-radius:4px;background:#fffcf0;padding:5px 8px;}
+.dm-title{font-size:7.5px;font-weight:700;color:#c47d00;text-align:center;margin-bottom:3px;letter-spacing:.2px;}
+.dm hr{border:none;border-top:1px solid #e6d090;margin:0 0 3px;}
+.dm-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:7px;}
+.dm-rule{padding:1px 0;}
+.allow{color:#1d7a3a;font-weight:700;}
+.review{color:#c47d00;font-weight:700;}
+.escrow{color:#c84800;font-weight:700;}
+.block{color:#cc2222;font-weight:700;}
+
+/* ── LAYER IV ── */
+.l4-lbl{font-size:7px;font-weight:700;color:#884400;margin-bottom:3px;}
+.sc-row{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:4px;}
+.sc{background:#4a0080;border-radius:3px;overflow:hidden;}
+.sc-name{background:#36005a;color:#fff;font-size:6.5px;font-weight:700;text-align:center;padding:3px 2px 2px;}
+.sc-sub{font-size:6px;color:#ddc8ff;text-align:center;padding:2px 2px 3px;}
+.db-row{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:4px;}
+.db{background:#1a3a5c;border-radius:3px;overflow:hidden;}
+.db-name{background:#0d2440;color:#fff;font-size:6.5px;font-weight:700;text-align:center;padding:3px 2px 2px;}
+.db-sub{font-size:6px;color:#aabbdd;text-align:center;padding:2px 2px 3px;}
+.infra{border:1px solid #e0a878;border-radius:3px;padding:4px 6px;background:#fff;}
+.infra-title{font-size:7px;font-weight:700;color:#884400;margin-bottom:2px;}
+.infra-text{font-size:6.5px;color:#555;line-height:1.4;}
+</style>
+</head>
+<body>
+<div id="diagram">
+
+  <!-- LAYER I -->
+  <div class="layer l1">
+    <div class="lhdr">LAYER I — INTEGRATION &amp; ACCESS <span class="lbadge">:3006 / :3010</span></div>
+    <div class="lbody">
+      <div class="card">
+        <div class="card-hdr">Flutter App</div>
+        <div class="card-sub">Port 3010 · 6 platforms</div>
+        <hr>
+        <ul>
+          <li>Wallet / DeFi UI (Web3)</li>
+          <li>Riverpod state mgmt</li>
+          <li>go_router navigation</li>
+          <li>dart:js_util Web3 interop</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Next.js Dashboard</div>
+        <div class="card-sub">Port 3006 · War Room</div>
+        <hr>
+        <ul>
+          <li>Compliance analytics</li>
+          <li>SHAP/LIME explainability</li>
+          <li>TanStack React Query</li>
+          <li>Dark-theme App Router</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-hdr">TypeScript SDK</div>
+        <div class="card-sub">packages/client-sdk</div>
+        <hr>
+        <ul>
+          <li>ABI &amp; cross-chain routing</li>
+          <li>Risk + explainability API</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-hdr">Python SDK</div>
+        <div class="card-sub">packages/python-sdk</div>
+        <hr>
+        <ul>
+          <li>ML pipeline client</li>
+          <li>Risk API wrapper</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR I→II -->
+  <div class="hconn">
+    <div class="hconn-line"></div>
+    <div class="hconn-arr"></div>
+    <div class="hconn-lbl">HTTPS / REST</div>
+  </div>
+
+  <!-- LAYER II -->
+  <div class="layer l2">
+    <div class="lhdr">LAYER II — ORACLE GATEWAY <span class="lbadge">:3001</span></div>
+    <div class="lbody">
+      <div class="oracle">
+        <div class="oracle-title">Express.js API Gateway</div>
+        <hr>
+        <ul>
+          <li>risk/ — transaction scoring</li>
+          <li>kyc/ — identity checks</li>
+          <li>compliance/ — policy rules</li>
+          <li>dispute/ — Kleros appeals</li>
+          <li>JWT + API-key auth</li>
+          <li>Rate limiting middleware</li>
+          <li>CORS headers</li>
+          <li>Modular Router pattern</li>
+          <li>RBAC R1–R6 enforcement</li>
+          <li>*.service.js architecture</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR II→III -->
+  <div class="hconn">
+    <div class="hconn-line"></div>
+    <div class="hconn-arr"></div>
+    <div class="hconn-lbl">aiohttp fan-out</div>
+  </div>
+
+  <!-- LAYER III -->
+  <div class="layer l3">
+    <div class="lhdr">LAYER III — PROTOCOL LOGIC &amp; COMPUTATION <span class="lbadge">9 MICROSERVICES · PORTS 8000–8010</span></div>
+    <div class="lbody">
+      <div class="orch">Compliance Orchestrator :8007 — parallel fan-out via aiohttp to all microservices; fused composite risk signal returned</div>
+      <div class="orch-sub">
+        <div class="orch-fact">FastAPI + Uvicorn</div>
+        <div class="orch-fact">Pydantic models</div>
+        <div class="orch-fact">asyncio lifespan</div>
+        <div class="orch-fact">CPU-only · portable</div>
+      </div>
+      <div class="svc-grid">
+        <div class="svc risk">
+          <div class="svc-name">ML Risk Engine</div>
+          <div class="svc-port">:8000</div>
+          <div class="svc-tech">XGBoost + GraphSAGE · knowledge distillation · sub-12s inference</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Graph Service</div>
+          <div class="svc-port">:8001</div>
+          <div class="svc-tech">Memgraph GQL · entity graph · relationship analysis</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Policy Engine</div>
+          <div class="svc-port">:8003</div>
+          <div class="svc-tech">FastAPI rules · jurisdictional controls · thresholds</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Sanctions DB</div>
+          <div class="svc-port">:8004</div>
+          <div class="svc-tech">OFAC · UN lists · HMT · real-time lookup</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Monitoring</div>
+          <div class="svc-port">:8005</div>
+          <div class="svc-tech">Prometheus · alert rules · anomaly detection</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">GeoRisk Service</div>
+          <div class="svc-port">:8006</div>
+          <div class="svc-tech">IP geolocation · jurisdiction risk · embargo check</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Integrity Service</div>
+          <div class="svc-port">:8008</div>
+          <div class="svc-tech">Data validation · tamper detection · audit hash</div>
+        </div>
+        <div class="svc">
+          <div class="svc-name">Explainability</div>
+          <div class="svc-port">:8009</div>
+          <div class="svc-tech">SHAP · LIME · per-feature contribution scores</div>
+        </div>
+        <div class="svc zk">
+          <div class="svc-name">ZK-NAF Service</div>
+          <div class="svc-port">:8010</div>
+          <div class="svc-tech">Groth16 / BN254 · proof generation · on-chain verify</div>
+        </div>
+      </div>
+      <div class="dm">
+        <div class="dm-title">DETERMINISTIC DECISION MATRIX</div>
+        <hr>
+        <div class="dm-grid">
+          <div class="dm-rule"><span class="allow">✓ APPROVE</span> — risk &lt; 0.35, no sanctions, ZK valid</div>
+          <div class="dm-rule"><span class="review">⚑ REVIEW</span> — 0.35 ≤ risk &lt; 0.65, flags present</div>
+          <div class="dm-rule"><span class="escrow">⏸ ESCROW</span> — risk ≥ 0.65, high-risk pending review</div>
+          <div class="dm-rule"><span class="block">✗ BLOCK</span> — sanctions match / ZK proof failure</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR III→IV -->
+  <div class="hconn">
+    <div class="hconn-line"></div>
+    <div class="hconn-arr"></div>
+    <div class="hconn-lbl">EVM / Web3</div>
+  </div>
+
+  <!-- LAYER IV -->
+  <div class="layer l4">
+    <div class="lhdr">LAYER IV — PRODUCTION &amp; DEPLOYMENT <span class="lbadge">5 CONTRACTS</span></div>
+    <div class="lbody">
+      <div class="l4-lbl">On-Chain Smart Contracts (UUPS Proxy)</div>
+      <div class="sc-row">
+        <div class="sc"><div class="sc-name">AMTTP Core</div><div class="sc-sub">Oracle · RBAC</div></div>
+        <div class="sc"><div class="sc-name">AMTTP NFT</div><div class="sc-sub">ERC-721</div></div>
+        <div class="sc"><div class="sc-name">Dispute Res.</div><div class="sc-sub">Kleros arb.</div></div>
+        <div class="sc"><div class="sc-name">CrossChain</div><div class="sc-sub">LayerZero</div></div>
+        <div class="sc"><div class="sc-name">zkNAF</div><div class="sc-sub">Groth16</div></div>
+      </div>
+      <div class="l4-lbl">Data Persistence Layer</div>
+      <div class="db-row">
+        <div class="db"><div class="db-name">MongoDB</div><div class="db-sub">:27017</div></div>
+        <div class="db"><div class="db-name">Redis</div><div class="db-sub">:6379</div></div>
+        <div class="db"><div class="db-name">Memgraph</div><div class="db-sub">:7687</div></div>
+        <div class="db"><div class="db-name">MinIO</div><div class="db-sub">S3 blobs</div></div>
+        <div class="db"><div class="db-name">Vault</div><div class="db-sub">Secrets</div></div>
+      </div>
+      <div class="infra">
+        <div class="infra-title">Infrastructure</div>
+        <div class="infra-text">Docker Compose · 17 containers<br>Cloudflare CDN · SSL/TLS<br>Hardhat + Foundry tests<br>OpenZeppelin UUPS proxies</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

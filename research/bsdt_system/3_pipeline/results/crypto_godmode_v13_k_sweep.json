@@ -1,0 +1,2318 @@
+{
+  "meta": {
+    "version": "godmode_v13_k_sweep",
+    "k_grid": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0
+    ],
+    "variants": [
+      "be50_btc_sol",
+      "persist6",
+      "v11_sol_halve",
+      "base_v9"
+    ],
+    "theta": 4.353138641192445,
+    "elapsed": 290.0619065761566
+  },
+  "rows": [
+    {
+      "variant": "be50_btc_sol",
+      "K": 1.0,
+      "final": 750.0017378163195,
+      "return_pct": -0.2499982621836805,
+      "cagr": -0.08291282290749802,
+      "sharpe": -1.0111225643602961,
+      "maxdd": -0.1946108055798307,
+      "calmar": -0.42604429214741935,
+      "pct_halted": 0.6454066329591225,
+      "n_trips": 7,
+      "avg_y": 0.11739530305634348,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 1.5,
+      "final": 1272.0696382928095,
+      "return_pct": 0.2720696382928094,
+      "cagr": 0.0750871192446716,
+      "sharpe": 0.541578498760194,
+      "maxdd": -0.2179028589101301,
+      "calmar": 0.34458987651759015,
+      "pct_halted": 0.8327620190247664,
+      "n_trips": 9,
+      "avg_y": 0.0865870535022912,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 2.0,
+      "final": 1700.206351315011,
+      "return_pct": 0.700206351315011,
+      "cagr": 0.17314002785597626,
+      "sharpe": 0.852197789096547,
+      "maxdd": -0.23789341874050968,
+      "calmar": 0.7278050345933892,
+      "pct_halted": 0.8327834433113377,
+      "n_trips": 9,
+      "avg_y": 0.08587620856888394,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 2.5,
+      "final": 4188.052181544994,
+      "return_pct": 3.188052181544994,
+      "cagr": 0.538656264432555,
+      "sharpe": 1.4641882318529376,
+      "maxdd": -0.16334096290081768,
+      "calmar": 3.2977414536219714,
+      "pct_halted": 0.9124175164967007,
+      "n_trips": 10,
+      "avg_y": 0.06437049909752246,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 3.0,
+      "final": 5634.12741364003,
+      "return_pct": 4.63412741364003,
+      "cagr": 0.6822765698992053,
+      "sharpe": 1.3943035307543596,
+      "maxdd": -0.1833539463924386,
+      "calmar": 3.721090182803624,
+      "pct_halted": 0.9124175164967007,
+      "n_trips": 10,
+      "avg_y": 0.06281481264061262,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 3.5,
+      "final": 8890.117795517364,
+      "return_pct": 7.890117795517364,
+      "cagr": 0.9297141156062403,
+      "sharpe": 1.671966645098137,
+      "maxdd": -0.19946651157410558,
+      "calmar": 4.661003535226683,
+      "pct_halted": 0.9124175164967007,
+      "n_trips": 10,
+      "avg_y": 0.04936613356127799,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 4.0,
+      "final": 9709.573659018799,
+      "return_pct": 8.7095736590188,
+      "cagr": 0.9815903877227874,
+      "sharpe": 1.6326432256923846,
+      "maxdd": -0.21330393210314144,
+      "calmar": 4.601839159946414,
+      "pct_halted": 0.9124175164967007,
+      "n_trips": 10,
+      "avg_y": 0.04067934083556423,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 4.5,
+      "final": 685.1014439864197,
+      "return_pct": -0.3148985560135803,
+      "cagr": -0.10754894408640892,
+      "sharpe": -0.5930056444322858,
+      "maxdd": -0.43380511641729197,
+      "calmar": -0.24791995303013878,
+      "pct_halted": 0.9250149970005999,
+      "n_trips": 10,
+      "avg_y": 0.024090483873791552,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "be50_btc_sol",
+      "K": 5.0,
+      "final": 14084.736456669625,
+      "return_pct": 13.084736456669624,
+      "cagr": 1.2162471040384366,
+      "sharpe": 1.6387388478124691,
+      "maxdd": -0.236283827132692,
+      "calmar": 5.1473988668526935,
+      "pct_halted": 0.9116462421801353,
+      "n_trips": 10,
+      "avg_y": 0.03484516223038234,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 1.0,
+      "final": 1037.0379520480037,
+      "return_pct": 0.03703795204800375,
+      "cagr": 0.011002096201991662,
+      "sharpe": 0.15075580944162242,
+      "maxdd": -0.2098054564947423,
+      "calmar": 0.052439514137552344,
+      "pct_halted": 0.8311123489587797,
+      "n_trips": 9,
+      "avg_y": 0.09538036309737813,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 1.5,
+      "final": 1596.1486041457897,
+      "return_pct": 0.5961486041457897,
+      "cagr": 0.1510591374570065,
+      "sharpe": 0.8615202008733036,
+      "maxdd": -0.1735655774547014,
+      "calmar": 0.870328896272253,
+      "pct_halted": 0.8653269346130774,
+      "n_trips": 10,
+      "avg_y": 0.08131935918995284,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 2.0,
+      "final": 2106.5866046953656,
+      "return_pct": 1.1065866046953654,
+      "cagr": 0.25127757767120285,
+      "sharpe": 0.9860408565104122,
+      "maxdd": -0.21008412868356804,
+      "calmar": 1.1960807284479877,
+      "pct_halted": 0.8653269346130774,
+      "n_trips": 10,
+      "avg_y": 0.0745296731389277,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 2.5,
+      "final": 3757.593489789218,
+      "return_pct": 2.757593489789218,
+      "cagr": 0.4892588284150816,
+      "sharpe": 1.4503329116832013,
+      "maxdd": -0.1387551521873235,
+      "calmar": 3.5260588216181543,
+      "pct_halted": 0.912031879338418,
+      "n_trips": 10,
+      "avg_y": 0.051879354097209916,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 3.0,
+      "final": 4539.141825542326,
+      "return_pct": 3.539141825542326,
+      "cagr": 0.5763779394269353,
+      "sharpe": 1.4114998063075186,
+      "maxdd": -0.15845345525997379,
+      "calmar": 3.6375220627488045,
+      "pct_halted": 0.9117533636129916,
+      "n_trips": 10,
+      "avg_y": 0.046027515973616026,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 3.5,
+      "final": 1322.846257369311,
+      "return_pct": 0.32284625736931094,
+      "cagr": 0.08782217229509026,
+      "sharpe": 0.3316054847784423,
+      "maxdd": -0.4336676571842344,
+      "calmar": 0.20251031138755385,
+      "pct_halted": 0.9250792698603136,
+      "n_trips": 10,
+      "avg_y": 0.029741146004774822,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 4.0,
+      "final": 1500.3648241661551,
+      "return_pct": 0.5003648241661551,
+      "cagr": 0.12982571838068635,
+      "sharpe": 0.37667534574215455,
+      "maxdd": -0.46479608486350993,
+      "calmar": 0.279317581641873,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029976026426136688,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 4.5,
+      "final": 1547.3859778591134,
+      "return_pct": 0.5473859778591135,
+      "cagr": 0.14036422083291566,
+      "sharpe": 0.3857812292118525,
+      "maxdd": -0.4910089898268502,
+      "calmar": 0.28586894281184916,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.02957663353721881,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "persist6",
+      "K": 5.0,
+      "final": 1545.423834045207,
+      "return_pct": 0.5454238340452071,
+      "cagr": 0.13992896970799173,
+      "sharpe": 0.3853456386284563,
+      "maxdd": -0.5273225479588691,
+      "calmar": 0.26535745579175596,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029087813238840826,
+      "counts": {
+        "entries": 2138,
+        "vetoed_force": 1040,
+        "tp": 808,
+        "stop": 1187,
+        "trail_exit": 112,
+        "signal_exit": 29,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 1.0,
+      "final": 1245.792319151413,
+      "return_pct": 0.24579231915141309,
+      "cagr": 0.06835662267100306,
+      "sharpe": 0.33096149469037134,
+      "maxdd": -0.22405456441523722,
+      "calmar": 0.30508917704670674,
+      "pct_halted": 0.7326463278772817,
+      "n_trips": 8,
+      "avg_y": 0.11766985970438495,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 1.5,
+      "final": 755.7730795233725,
+      "return_pct": -0.24422692047662742,
+      "cagr": -0.08079528131992997,
+      "sharpe": -1.1640456902012495,
+      "maxdd": -0.23462957652010275,
+      "calmar": -0.3443525003038461,
+      "pct_halted": 0.7401448281772217,
+      "n_trips": 8,
+      "avg_y": 0.08269453656559166,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 2.0,
+      "final": 2594.4405023615573,
+      "return_pct": 1.5944405023615573,
+      "cagr": 0.33220550817832417,
+      "sharpe": 1.2221072583884656,
+      "maxdd": -0.206101700276073,
+      "calmar": 1.6118523415058452,
+      "pct_halted": 0.8653269346130774,
+      "n_trips": 10,
+      "avg_y": 0.08423487057015965,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 2.5,
+      "final": 2275.431466646765,
+      "return_pct": 1.275431466646765,
+      "cagr": 0.2806426334328871,
+      "sharpe": 1.0457401735710845,
+      "maxdd": -0.23711270231451814,
+      "calmar": 1.1835832947516607,
+      "pct_halted": 0.8710257948410318,
+      "n_trips": 10,
+      "avg_y": 0.07017546310092085,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 3.0,
+      "final": 3656.7701852238706,
+      "return_pct": 2.6567701852238708,
+      "cagr": 0.4771218713393337,
+      "sharpe": 1.3783230914120719,
+      "maxdd": -0.15255137648742978,
+      "calmar": 3.127614331153862,
+      "pct_halted": 0.912031879338418,
+      "n_trips": 10,
+      "avg_y": 0.047221091861081,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 3.5,
+      "final": 1276.0945394763976,
+      "return_pct": 0.2760945394763976,
+      "cagr": 0.07610942257052411,
+      "sharpe": 0.31597151668258894,
+      "maxdd": -0.4317222151335324,
+      "calmar": 0.17629257865959788,
+      "pct_halted": 0.9250792698603136,
+      "n_trips": 10,
+      "avg_y": 0.02992075394782389,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 4.0,
+      "final": 1439.2708017471195,
+      "return_pct": 0.43927080174711963,
+      "cagr": 0.1157824687214355,
+      "sharpe": 0.3637955909166989,
+      "maxdd": -0.4632576946411222,
+      "calmar": 0.24993102124537875,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.030008265166265993,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 4.5,
+      "final": 1462.5913584924533,
+      "return_pct": 0.46259135849245325,
+      "cagr": 0.12119129542210039,
+      "sharpe": 0.3689221817282504,
+      "maxdd": -0.49481146130165166,
+      "calmar": 0.24492418810044217,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029541619217921353,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "v11_sol_halve",
+      "K": 5.0,
+      "final": 1725.6507270453474,
+      "return_pct": 0.7256507270453474,
+      "cagr": 0.1783947864942803,
+      "sharpe": 0.42400656771383866,
+      "maxdd": -0.47842440695359356,
+      "calmar": 0.37287977766482205,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029037722509172165,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 1.0,
+      "final": 1014.3640636792925,
+      "return_pct": 0.014364063679292549,
+      "cagr": 0.004300117685736682,
+      "sharpe": 0.09403002973996333,
+      "maxdd": -0.21014900238943962,
+      "calmar": 0.020462232210685816,
+      "pct_halted": 0.8308981060930671,
+      "n_trips": 9,
+      "avg_y": 0.09738394976757679,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 1.5,
+      "final": 1372.6685732839119,
+      "return_pct": 0.3726685732839119,
+      "cagr": 0.09998987864407072,
+      "sharpe": 0.6487164135217831,
+      "maxdd": -0.19525741982450487,
+      "calmar": 0.5120925941454132,
+      "pct_halted": 0.8629488388036678,
+      "n_trips": 10,
+      "avg_y": 0.07862350692505678,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 2.0,
+      "final": 1655.0195389257187,
+      "return_pct": 0.6550195389257187,
+      "cagr": 0.1636709226767652,
+      "sharpe": 0.800530756751517,
+      "maxdd": -0.2333561397038917,
+      "calmar": 0.7013782576470845,
+      "pct_halted": 0.8327405947381952,
+      "n_trips": 9,
+      "avg_y": 0.08273224546614426,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 2.5,
+      "final": 3721.127183506793,
+      "return_pct": 2.721127183506793,
+      "cagr": 0.48489565320315653,
+      "sharpe": 1.5054549843925673,
+      "maxdd": -0.11782851006991742,
+      "calmar": 4.115265931101291,
+      "pct_halted": 0.912031879338418,
+      "n_trips": 10,
+      "avg_y": 0.052711032304841594,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 3.0,
+      "final": 3925.7419046940877,
+      "return_pct": 2.9257419046940876,
+      "cagr": 0.5090033768207236,
+      "sharpe": 1.363747724220396,
+      "maxdd": -0.18171798867126407,
+      "calmar": 2.8010621322775777,
+      "pct_halted": 0.9117533636129916,
+      "n_trips": 10,
+      "avg_y": 0.04531225545019235,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 3.5,
+      "final": 1300.6041796865604,
+      "return_pct": 0.3006041796865604,
+      "cagr": 0.08228656863847461,
+      "sharpe": 0.32371773818615535,
+      "maxdd": -0.43421214973622013,
+      "calmar": 0.1895077525777732,
+      "pct_halted": 0.9250792698603136,
+      "n_trips": 10,
+      "avg_y": 0.02964146502380622,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 4.0,
+      "final": 1458.3285238708438,
+      "return_pct": 0.4583285238708439,
+      "cagr": 0.12020712633531772,
+      "sharpe": 0.367060748035834,
+      "maxdd": -0.47039287211747616,
+      "calmar": 0.2555462326506026,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029935578894365277,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 4.5,
+      "final": 1500.8706709525286,
+      "return_pct": 0.5008706709525286,
+      "cagr": 0.12994031028542685,
+      "sharpe": 0.3764412721439412,
+      "maxdd": -0.4965995282924187,
+      "calmar": 0.26166015648913893,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.02952822282398043,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    },
+    {
+      "variant": "base_v9",
+      "K": 5.0,
+      "final": 1780.631561274846,
+      "return_pct": 0.780631561274846,
+      "cagr": 0.18956709885163714,
+      "sharpe": 0.4304481013637134,
+      "maxdd": -0.47850131672604496,
+      "calmar": 0.39616839541565874,
+      "pct_halted": 0.9253149370125975,
+      "n_trips": 10,
+      "avg_y": 0.029033862705655222,
+      "counts": {
+        "entries": 2152,
+        "vetoed_force": 1025,
+        "tp": 814,
+        "stop": 1191,
+        "trail_exit": 115,
+        "signal_exit": 30,
+        "breakeven_exit": 0,
+        "be_armed": 0
+      }
+    }
+  ],
+  "selected": {
+    "best_calmar": {
+      "variant": "be50_btc_sol",
+      "K": 5.0,
+      "final": 14084.736456669625,
+      "return_pct": 13.084736456669624,
+      "cagr": 1.2162471040384366,
+      "sharpe": 1.6387388478124691,
+      "maxdd": -0.236283827132692,
+      "calmar": 5.1473988668526935,
+      "pct_halted": 0.9116462421801353,
+      "n_trips": 10,
+      "avg_y": 0.03484516223038234,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    "best_under_25dd": {
+      "variant": "be50_btc_sol",
+      "K": 5.0,
+      "final": 14084.736456669625,
+      "return_pct": 13.084736456669624,
+      "cagr": 1.2162471040384366,
+      "sharpe": 1.6387388478124691,
+      "maxdd": -0.236283827132692,
+      "calmar": 5.1473988668526935,
+      "pct_halted": 0.9116462421801353,
+      "n_trips": 10,
+      "avg_y": 0.03484516223038234,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    "best_under_30dd": {
+      "variant": "be50_btc_sol",
+      "K": 5.0,
+      "final": 14084.736456669625,
+      "return_pct": 13.084736456669624,
+      "cagr": 1.2162471040384366,
+      "sharpe": 1.6387388478124691,
+      "maxdd": -0.236283827132692,
+      "calmar": 5.1473988668526935,
+      "pct_halted": 0.9116462421801353,
+      "n_trips": 10,
+      "avg_y": 0.03484516223038234,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    },
+    "best_final": {
+      "variant": "be50_btc_sol",
+      "K": 5.0,
+      "final": 14084.736456669625,
+      "return_pct": 13.084736456669624,
+      "cagr": 1.2162471040384366,
+      "sharpe": 1.6387388478124691,
+      "maxdd": -0.236283827132692,
+      "calmar": 5.1473988668526935,
+      "pct_halted": 0.9116462421801353,
+      "n_trips": 10,
+      "avg_y": 0.03484516223038234,
+      "counts": {
+        "entries": 2695,
+        "vetoed_force": 1355,
+        "tp": 756,
+        "stop": 1249,
+        "trail_exit": 95,
+        "signal_exit": 26,
+        "breakeven_exit": 567,
+        "be_armed": 1000
+      }
+    }
+  },
+  "yearly": {
+    "be50_btc_sol_K1.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 898.16,
+        "end_eq": 833.77,
+        "profit": -64.4,
+        "return_pct": -0.0717,
+        "sharpe": -1.623,
+        "maxdd": -0.0898
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 833.77,
+        "end_eq": 779.99,
+        "profit": -53.78,
+        "return_pct": -0.0645,
+        "sharpe": -1.096,
+        "maxdd": -0.1151
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 779.99,
+        "end_eq": 754.11,
+        "profit": -25.88,
+        "return_pct": -0.0332,
+        "sharpe": -0.38,
+        "maxdd": -0.085
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 754.11,
+        "end_eq": 750.0,
+        "profit": -4.11,
+        "return_pct": -0.0054,
+        "sharpe": -1.709,
+        "maxdd": -0.0054
+      }
+    ],
+    "be50_btc_sol_K1.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1055.57,
+        "end_eq": 1482.31,
+        "profit": 426.74,
+        "return_pct": 0.4043,
+        "sharpe": 1.478,
+        "maxdd": -0.1
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1482.31,
+        "end_eq": 1389.19,
+        "profit": -93.12,
+        "return_pct": -0.0628,
+        "sharpe": -0.627,
+        "maxdd": -0.1393
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1389.19,
+        "end_eq": 1282.55,
+        "profit": -106.64,
+        "return_pct": -0.0768,
+        "sharpe": -1.101,
+        "maxdd": -0.0864
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1282.55,
+        "end_eq": 1272.07,
+        "profit": -10.48,
+        "return_pct": -0.0082,
+        "sharpe": -1.709,
+        "maxdd": -0.0082
+      }
+    ],
+    "be50_btc_sol_K2.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1179.52,
+        "end_eq": 1974.0,
+        "profit": 794.48,
+        "return_pct": 0.6736,
+        "sharpe": 1.77,
+        "maxdd": -0.1055
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1974.0,
+        "end_eq": 1784.25,
+        "profit": -189.75,
+        "return_pct": -0.0961,
+        "sharpe": -0.971,
+        "maxdd": -0.1351
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1784.25,
+        "end_eq": 1718.94,
+        "profit": -65.31,
+        "return_pct": -0.0366,
+        "sharpe": -0.439,
+        "maxdd": -0.0811
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1718.94,
+        "end_eq": 1700.21,
+        "profit": -18.73,
+        "return_pct": -0.0109,
+        "sharpe": -1.709,
+        "maxdd": -0.0109
+      }
+    ],
+    "be50_btc_sol_K2.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1277.14,
+        "end_eq": 2570.13,
+        "profit": 1292.99,
+        "return_pct": 1.0124,
+        "sharpe": 1.936,
+        "maxdd": -0.1157
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2570.13,
+        "end_eq": 3116.42,
+        "profit": 546.29,
+        "return_pct": 0.2126,
+        "sharpe": 1.108,
+        "maxdd": -0.1499
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3116.42,
+        "end_eq": 4188.05,
+        "profit": 1071.64,
+        "return_pct": 0.3439,
+        "sharpe": 1.152,
+        "maxdd": -0.1004
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 4188.05,
+        "end_eq": 4188.05,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "be50_btc_sol_K3.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1473.1,
+        "end_eq": 3316.04,
+        "profit": 1842.93,
+        "return_pct": 1.2511,
+        "sharpe": 1.918,
+        "maxdd": -0.1323
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 3316.04,
+        "end_eq": 4075.68,
+        "profit": 759.64,
+        "return_pct": 0.2291,
+        "sharpe": 1.058,
+        "maxdd": -0.1601
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 4075.68,
+        "end_eq": 5634.13,
+        "profit": 1558.45,
+        "return_pct": 0.3824,
+        "sharpe": 1.106,
+        "maxdd": -0.1183
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 5634.13,
+        "end_eq": 5634.13,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "be50_btc_sol_K3.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1104.72,
+        "end_eq": 2684.84,
+        "profit": 1580.13,
+        "return_pct": 1.4304,
+        "sharpe": 1.883,
+        "maxdd": -0.1187
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2684.84,
+        "end_eq": 3311.27,
+        "profit": 626.42,
+        "return_pct": 0.2333,
+        "sharpe": 1.002,
+        "maxdd": -0.164
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3311.27,
+        "end_eq": 8890.12,
+        "profit": 5578.85,
+        "return_pct": 1.6848,
+        "sharpe": 2.038,
+        "maxdd": -0.1363
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 8890.12,
+        "end_eq": 8890.12,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "be50_btc_sol_K4.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1088.08,
+        "end_eq": 2674.68,
+        "profit": 1586.6,
+        "return_pct": 1.4582,
+        "sharpe": 1.79,
+        "maxdd": -0.1357
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2674.68,
+        "end_eq": 3321.36,
+        "profit": 646.68,
+        "return_pct": 0.2418,
+        "sharpe": 0.988,
+        "maxdd": -0.1629
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3321.36,
+        "end_eq": 9709.57,
+        "profit": 6388.21,
+        "return_pct": 1.9234,
+        "sharpe": 2.06,
+        "maxdd": -0.1513
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 9709.57,
+        "end_eq": 9709.57,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "be50_btc_sol_K4.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1210.01,
+        "end_eq": 875.48,
+        "profit": -334.53,
+        "return_pct": -0.2765,
+        "sharpe": -2.011,
+        "maxdd": -0.2765
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 875.48,
+        "end_eq": 737.17,
+        "profit": -138.31,
+        "return_pct": -0.158,
+        "sharpe": -2.191,
+        "maxdd": -0.158
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 737.17,
+        "end_eq": 702.32,
+        "profit": -34.85,
+        "return_pct": -0.0473,
+        "sharpe": -0.272,
+        "maxdd": -0.1939
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 702.32,
+        "end_eq": 685.1,
+        "profit": -17.22,
+        "return_pct": -0.0245,
+        "sharpe": -1.709,
+        "maxdd": -0.0245
+      }
+    ],
+    "be50_btc_sol_K5.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1122.67,
+        "end_eq": 3175.39,
+        "profit": 2052.72,
+        "return_pct": 1.8284,
+        "sharpe": 1.75,
+        "maxdd": -0.1696
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 3175.39,
+        "end_eq": 4119.58,
+        "profit": 944.19,
+        "return_pct": 0.2973,
+        "sharpe": 1.06,
+        "maxdd": -0.1624
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 4119.58,
+        "end_eq": 14084.74,
+        "profit": 9965.16,
+        "return_pct": 2.419,
+        "sharpe": 2.084,
+        "maxdd": -0.1784
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 14084.74,
+        "end_eq": 14084.74,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "persist6_K1.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 965.76,
+        "end_eq": 1189.28,
+        "profit": 223.52,
+        "return_pct": 0.2314,
+        "sharpe": 1.308,
+        "maxdd": -0.0938
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1189.28,
+        "end_eq": 1125.42,
+        "profit": -63.86,
+        "return_pct": -0.0537,
+        "sharpe": -0.634,
+        "maxdd": -0.0934
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1125.42,
+        "end_eq": 1042.72,
+        "profit": -82.7,
+        "return_pct": -0.0735,
+        "sharpe": -0.699,
+        "maxdd": -0.1258
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1042.72,
+        "end_eq": 1037.04,
+        "profit": -5.68,
+        "return_pct": -0.0054,
+        "sharpe": -1.709,
+        "maxdd": -0.0054
+      }
+    ],
+    "persist6_K1.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1005.54,
+        "end_eq": 1395.78,
+        "profit": 390.24,
+        "return_pct": 0.3881,
+        "sharpe": 1.563,
+        "maxdd": -0.0885
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1395.78,
+        "end_eq": 1356.46,
+        "profit": -39.32,
+        "return_pct": -0.0282,
+        "sharpe": -0.209,
+        "maxdd": -0.0905
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1356.46,
+        "end_eq": 1391.23,
+        "profit": 34.77,
+        "return_pct": 0.0256,
+        "sharpe": 0.286,
+        "maxdd": -0.1006
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1391.23,
+        "end_eq": 1596.15,
+        "profit": 204.92,
+        "return_pct": 0.1473,
+        "sharpe": 1.44,
+        "maxdd": -0.0821
+      }
+    ],
+    "persist6_K2.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1231.28,
+        "end_eq": 2019.45,
+        "profit": 788.17,
+        "return_pct": 0.6401,
+        "sharpe": 1.688,
+        "maxdd": -0.0916
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2019.45,
+        "end_eq": 1855.73,
+        "profit": -163.73,
+        "return_pct": -0.0811,
+        "sharpe": -0.587,
+        "maxdd": -0.104
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1855.73,
+        "end_eq": 1874.91,
+        "profit": 19.18,
+        "return_pct": 0.0103,
+        "sharpe": 0.153,
+        "maxdd": -0.1031
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1874.91,
+        "end_eq": 2106.59,
+        "profit": 231.68,
+        "return_pct": 0.1236,
+        "sharpe": 1.2,
+        "maxdd": -0.0958
+      }
+    ],
+    "persist6_K2.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1275.11,
+        "end_eq": 2340.75,
+        "profit": 1065.64,
+        "return_pct": 0.8357,
+        "sharpe": 1.768,
+        "maxdd": -0.0848
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2340.75,
+        "end_eq": 3034.94,
+        "profit": 694.19,
+        "return_pct": 0.2966,
+        "sharpe": 1.44,
+        "maxdd": -0.0912
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3034.94,
+        "end_eq": 3757.59,
+        "profit": 722.65,
+        "return_pct": 0.2381,
+        "sharpe": 1.082,
+        "maxdd": -0.1125
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 3757.59,
+        "end_eq": 3757.59,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "persist6_K3.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1360.54,
+        "end_eq": 2697.38,
+        "profit": 1336.84,
+        "return_pct": 0.9826,
+        "sharpe": 1.743,
+        "maxdd": -0.1018
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2697.38,
+        "end_eq": 3623.03,
+        "profit": 925.66,
+        "return_pct": 0.3432,
+        "sharpe": 1.42,
+        "maxdd": -0.1062
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3623.03,
+        "end_eq": 4539.14,
+        "profit": 916.11,
+        "return_pct": 0.2529,
+        "sharpe": 1.018,
+        "maxdd": -0.1342
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 4539.14,
+        "end_eq": 4539.14,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "persist6_K3.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2047.46,
+        "end_eq": 1667.2,
+        "profit": -380.26,
+        "return_pct": -0.1857,
+        "sharpe": -0.667,
+        "maxdd": -0.2862
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1667.2,
+        "end_eq": 1638.09,
+        "profit": -29.1,
+        "return_pct": -0.0175,
+        "sharpe": -0.053,
+        "maxdd": -0.1969
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1638.09,
+        "end_eq": 1348.57,
+        "profit": -289.53,
+        "return_pct": -0.1767,
+        "sharpe": -2.275,
+        "maxdd": -0.1767
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1348.57,
+        "end_eq": 1322.85,
+        "profit": -25.72,
+        "return_pct": -0.0191,
+        "sharpe": -1.709,
+        "maxdd": -0.0191
+      }
+    ],
+    "persist6_K4.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2421.3,
+        "end_eq": 1897.24,
+        "profit": -524.05,
+        "return_pct": -0.2164,
+        "sharpe": -0.682,
+        "maxdd": -0.3232
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1897.24,
+        "end_eq": 1916.76,
+        "profit": 19.51,
+        "return_pct": 0.0103,
+        "sharpe": 0.143,
+        "maxdd": -0.1894
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1916.76,
+        "end_eq": 1533.8,
+        "profit": -382.96,
+        "return_pct": -0.1998,
+        "sharpe": -2.275,
+        "maxdd": -0.1998
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1533.8,
+        "end_eq": 1500.36,
+        "profit": -33.43,
+        "return_pct": -0.0218,
+        "sharpe": -1.709,
+        "maxdd": -0.0218
+      }
+    ],
+    "persist6_K4.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2608.56,
+        "end_eq": 2059.14,
+        "profit": -549.42,
+        "return_pct": -0.2106,
+        "sharpe": -0.573,
+        "maxdd": -0.3227
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2059.14,
+        "end_eq": 2039.77,
+        "profit": -19.37,
+        "return_pct": -0.0094,
+        "sharpe": 0.021,
+        "maxdd": -0.217
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 2039.77,
+        "end_eq": 1586.29,
+        "profit": -453.49,
+        "return_pct": -0.2223,
+        "sharpe": -2.275,
+        "maxdd": -0.2223
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1586.29,
+        "end_eq": 1547.39,
+        "profit": -38.9,
+        "return_pct": -0.0245,
+        "sharpe": -1.709,
+        "maxdd": -0.0245
+      }
+    ],
+    "persist6_K5.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2793.5,
+        "end_eq": 2106.52,
+        "profit": -686.99,
+        "return_pct": -0.2459,
+        "sharpe": -0.623,
+        "maxdd": -0.3557
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2106.52,
+        "end_eq": 2102.4,
+        "profit": -4.11,
+        "return_pct": -0.002,
+        "sharpe": 0.072,
+        "maxdd": -0.2234
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 2102.4,
+        "end_eq": 1588.71,
+        "profit": -513.69,
+        "return_pct": -0.2443,
+        "sharpe": -2.275,
+        "maxdd": -0.2443
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1588.71,
+        "end_eq": 1545.42,
+        "profit": -43.29,
+        "return_pct": -0.0272,
+        "sharpe": -1.709,
+        "maxdd": -0.0272
+      }
+    ],
+    "v11_sol_halve_K1.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1545.67,
+        "end_eq": 1442.05,
+        "profit": -103.61,
+        "return_pct": -0.067,
+        "sharpe": -0.705,
+        "maxdd": -0.1018
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1442.05,
+        "end_eq": 1359.35,
+        "profit": -82.71,
+        "return_pct": -0.0574,
+        "sharpe": -1.261,
+        "maxdd": -0.0814
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1359.35,
+        "end_eq": 1252.61,
+        "profit": -106.73,
+        "return_pct": -0.0785,
+        "sharpe": -1.459,
+        "maxdd": -0.0821
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1252.61,
+        "end_eq": 1245.79,
+        "profit": -6.82,
+        "return_pct": -0.0054,
+        "sharpe": -1.709,
+        "maxdd": -0.0054
+      }
+    ],
+    "v11_sol_halve_K1.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 975.66,
+        "end_eq": 900.09,
+        "profit": -75.57,
+        "return_pct": -0.0775,
+        "sharpe": -0.974,
+        "maxdd": -0.0924
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 900.09,
+        "end_eq": 825.06,
+        "profit": -75.03,
+        "return_pct": -0.0834,
+        "sharpe": -1.577,
+        "maxdd": -0.0834
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 825.06,
+        "end_eq": 762.0,
+        "profit": -63.06,
+        "return_pct": -0.0764,
+        "sharpe": -0.949,
+        "maxdd": -0.0811
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 762.0,
+        "end_eq": 755.77,
+        "profit": -6.23,
+        "return_pct": -0.0082,
+        "sharpe": -1.709,
+        "maxdd": -0.0082
+      }
+    ],
+    "v11_sol_halve_K2.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1190.9,
+        "end_eq": 2357.84,
+        "profit": 1166.93,
+        "return_pct": 0.9799,
+        "sharpe": 2.178,
+        "maxdd": -0.0854
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2357.84,
+        "end_eq": 2210.1,
+        "profit": -147.73,
+        "return_pct": -0.0627,
+        "sharpe": -0.556,
+        "maxdd": -0.1401
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 2210.1,
+        "end_eq": 2220.34,
+        "profit": 10.24,
+        "return_pct": 0.0046,
+        "sharpe": 0.096,
+        "maxdd": -0.1006
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 2220.34,
+        "end_eq": 2594.44,
+        "profit": 374.1,
+        "return_pct": 0.1685,
+        "sharpe": 1.386,
+        "maxdd": -0.0958
+      }
+    ],
+    "v11_sol_halve_K2.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1224.74,
+        "end_eq": 2638.74,
+        "profit": 1414.0,
+        "return_pct": 1.1545,
+        "sharpe": 2.114,
+        "maxdd": -0.1033
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2638.74,
+        "end_eq": 2561.41,
+        "profit": -77.33,
+        "return_pct": -0.0293,
+        "sharpe": -0.156,
+        "maxdd": -0.0964
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 2561.41,
+        "end_eq": 2400.65,
+        "profit": -160.77,
+        "return_pct": -0.0628,
+        "sharpe": -1.122,
+        "maxdd": -0.0879
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 2400.64,
+        "end_eq": 2275.43,
+        "profit": -125.21,
+        "return_pct": -0.0522,
+        "sharpe": -0.891,
+        "maxdd": -0.1012
+      }
+    ],
+    "v11_sol_halve_K3.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1285.29,
+        "end_eq": 2224.75,
+        "profit": 939.46,
+        "return_pct": 0.7309,
+        "sharpe": 1.639,
+        "maxdd": -0.1011
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2224.75,
+        "end_eq": 2918.75,
+        "profit": 694.0,
+        "return_pct": 0.3119,
+        "sharpe": 1.35,
+        "maxdd": -0.1062
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 2918.75,
+        "end_eq": 3656.77,
+        "profit": 738.02,
+        "return_pct": 0.2529,
+        "sharpe": 1.018,
+        "maxdd": -0.1342
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 3656.77,
+        "end_eq": 3656.77,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "v11_sol_halve_K3.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1968.33,
+        "end_eq": 1638.03,
+        "profit": -330.3,
+        "return_pct": -0.1678,
+        "sharpe": -0.59,
+        "maxdd": -0.2705
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1638.03,
+        "end_eq": 1578.44,
+        "profit": -59.6,
+        "return_pct": -0.0364,
+        "sharpe": -0.151,
+        "maxdd": -0.2173
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1578.44,
+        "end_eq": 1300.9,
+        "profit": -277.53,
+        "return_pct": -0.1758,
+        "sharpe": -2.264,
+        "maxdd": -0.1758
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1300.9,
+        "end_eq": 1276.09,
+        "profit": -24.81,
+        "return_pct": -0.0191,
+        "sharpe": -1.709,
+        "maxdd": -0.0191
+      }
+    ],
+    "v11_sol_halve_K4.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2316.05,
+        "end_eq": 1860.69,
+        "profit": -455.36,
+        "return_pct": -0.1966,
+        "sharpe": -0.605,
+        "maxdd": -0.3061
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1860.69,
+        "end_eq": 1836.36,
+        "profit": -24.33,
+        "return_pct": -0.0131,
+        "sharpe": -0.015,
+        "maxdd": -0.2009
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1836.36,
+        "end_eq": 1471.34,
+        "profit": -365.02,
+        "return_pct": -0.1988,
+        "sharpe": -2.264,
+        "maxdd": -0.1988
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1471.34,
+        "end_eq": 1439.27,
+        "profit": -32.07,
+        "return_pct": -0.0218,
+        "sharpe": -1.709,
+        "maxdd": -0.0218
+      }
+    ],
+    "v11_sol_halve_K4.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2484.17,
+        "end_eq": 1961.21,
+        "profit": -522.96,
+        "return_pct": -0.2105,
+        "sharpe": -0.572,
+        "maxdd": -0.3226
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1961.21,
+        "end_eq": 1925.22,
+        "profit": -35.99,
+        "return_pct": -0.0184,
+        "sharpe": -0.039,
+        "maxdd": -0.2084
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1925.22,
+        "end_eq": 1499.36,
+        "profit": -425.86,
+        "return_pct": -0.2212,
+        "sharpe": -2.264,
+        "maxdd": -0.2212
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1499.36,
+        "end_eq": 1462.59,
+        "profit": -36.77,
+        "return_pct": -0.0245,
+        "sharpe": -1.709,
+        "maxdd": -0.0245
+      }
+    ],
+    "v11_sol_halve_K5.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2651.17,
+        "end_eq": 1999.48,
+        "profit": -651.69,
+        "return_pct": -0.2458,
+        "sharpe": -0.623,
+        "maxdd": -0.3556
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1999.48,
+        "end_eq": 1685.64,
+        "profit": -313.84,
+        "return_pct": -0.157,
+        "sharpe": -2.667,
+        "maxdd": -0.157
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1685.64,
+        "end_eq": 1773.99,
+        "profit": 88.35,
+        "return_pct": 0.0524,
+        "sharpe": 0.343,
+        "maxdd": -0.1787
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1773.99,
+        "end_eq": 1725.65,
+        "profit": -48.34,
+        "return_pct": -0.0272,
+        "sharpe": -1.709,
+        "maxdd": -0.0272
+      }
+    ],
+    "base_v9_K1.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 944.65,
+        "end_eq": 1163.78,
+        "profit": 219.13,
+        "return_pct": 0.232,
+        "sharpe": 1.31,
+        "maxdd": -0.0938
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1163.78,
+        "end_eq": 1118.05,
+        "profit": -45.74,
+        "return_pct": -0.0393,
+        "sharpe": -0.454,
+        "maxdd": -0.0954
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1118.04,
+        "end_eq": 1019.92,
+        "profit": -98.12,
+        "return_pct": -0.0878,
+        "sharpe": -1.311,
+        "maxdd": -0.0878
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1019.92,
+        "end_eq": 1014.36,
+        "profit": -5.56,
+        "return_pct": -0.0054,
+        "sharpe": -1.709,
+        "maxdd": -0.0054
+      }
+    ],
+    "base_v9_K1.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 974.88,
+        "end_eq": 1353.85,
+        "profit": 378.98,
+        "return_pct": 0.3887,
+        "sharpe": 1.564,
+        "maxdd": -0.0885
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1353.85,
+        "end_eq": 1300.24,
+        "profit": -53.61,
+        "return_pct": -0.0396,
+        "sharpe": -0.272,
+        "maxdd": -0.1212
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1300.24,
+        "end_eq": 1270.47,
+        "profit": -29.77,
+        "return_pct": -0.0229,
+        "sharpe": -0.236,
+        "maxdd": -0.0807
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1270.47,
+        "end_eq": 1372.67,
+        "profit": 102.19,
+        "return_pct": 0.0804,
+        "sharpe": 1.065,
+        "maxdd": -0.0821
+      }
+    ],
+    "base_v9_K2.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1181.0,
+        "end_eq": 1938.96,
+        "profit": 757.96,
+        "return_pct": 0.6418,
+        "sharpe": 1.691,
+        "maxdd": -0.0916
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1938.96,
+        "end_eq": 1778.44,
+        "profit": -160.52,
+        "return_pct": -0.0828,
+        "sharpe": -0.874,
+        "maxdd": -0.1207
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1778.44,
+        "end_eq": 1673.25,
+        "profit": -105.19,
+        "return_pct": -0.0591,
+        "sharpe": -0.541,
+        "maxdd": -0.1007
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1673.25,
+        "end_eq": 1655.02,
+        "profit": -18.23,
+        "return_pct": -0.0109,
+        "sharpe": -1.709,
+        "maxdd": -0.0109
+      }
+    ],
+    "base_v9_K2.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1209.84,
+        "end_eq": 2222.28,
+        "profit": 1012.45,
+        "return_pct": 0.8368,
+        "sharpe": 1.769,
+        "maxdd": -0.0848
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2222.28,
+        "end_eq": 3005.49,
+        "profit": 783.21,
+        "return_pct": 0.3524,
+        "sharpe": 1.638,
+        "maxdd": -0.1034
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3005.49,
+        "end_eq": 3721.13,
+        "profit": 715.64,
+        "return_pct": 0.2381,
+        "sharpe": 1.082,
+        "maxdd": -0.1125
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 3721.13,
+        "end_eq": 3721.13,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "base_v9_K3.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 1277.76,
+        "end_eq": 2534.62,
+        "profit": 1256.86,
+        "return_pct": 0.9836,
+        "sharpe": 1.744,
+        "maxdd": -0.1018
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2534.62,
+        "end_eq": 3133.43,
+        "profit": 598.81,
+        "return_pct": 0.2363,
+        "sharpe": 1.082,
+        "maxdd": -0.1582
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 3133.43,
+        "end_eq": 3925.74,
+        "profit": 792.31,
+        "return_pct": 0.2529,
+        "sharpe": 1.018,
+        "maxdd": -0.1342
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 3925.74,
+        "end_eq": 3925.74,
+        "profit": 0.0,
+        "return_pct": 0.0,
+        "sharpe": 0.0,
+        "maxdd": 0.0
+      }
+    ],
+    "base_v9_K3.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2014.97,
+        "end_eq": 1640.74,
+        "profit": -374.23,
+        "return_pct": -0.1857,
+        "sharpe": -0.667,
+        "maxdd": -0.2862
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1640.74,
+        "end_eq": 1608.75,
+        "profit": -31.99,
+        "return_pct": -0.0195,
+        "sharpe": -0.083,
+        "maxdd": -0.181
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1608.75,
+        "end_eq": 1325.89,
+        "profit": -282.86,
+        "return_pct": -0.1758,
+        "sharpe": -2.264,
+        "maxdd": -0.1758
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1325.89,
+        "end_eq": 1300.6,
+        "profit": -25.29,
+        "return_pct": -0.0191,
+        "sharpe": -1.709,
+        "maxdd": -0.0191
+      }
+    ],
+    "base_v9_K4.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2378.33,
+        "end_eq": 1863.58,
+        "profit": -514.75,
+        "return_pct": -0.2164,
+        "sharpe": -0.682,
+        "maxdd": -0.3232
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 1863.58,
+        "end_eq": 1860.67,
+        "profit": -2.9,
+        "return_pct": -0.0016,
+        "sharpe": 0.057,
+        "maxdd": -0.1813
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1860.67,
+        "end_eq": 1490.82,
+        "profit": -369.85,
+        "return_pct": -0.1988,
+        "sharpe": -2.264,
+        "maxdd": -0.1988
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1490.82,
+        "end_eq": 1458.33,
+        "profit": -32.5,
+        "return_pct": -0.0218,
+        "sharpe": -1.709,
+        "maxdd": -0.0218
+      }
+    ],
+    "base_v9_K4.5": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2558.24,
+        "end_eq": 2019.42,
+        "profit": -538.82,
+        "return_pct": -0.2106,
+        "sharpe": -0.573,
+        "maxdd": -0.3227
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2019.42,
+        "end_eq": 1975.61,
+        "profit": -43.82,
+        "return_pct": -0.0217,
+        "sharpe": -0.063,
+        "maxdd": -0.2058
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1975.61,
+        "end_eq": 1538.6,
+        "profit": -437.01,
+        "return_pct": -0.2212,
+        "sharpe": -2.264,
+        "maxdd": -0.2212
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1538.6,
+        "end_eq": 1500.87,
+        "profit": -37.73,
+        "return_pct": -0.0245,
+        "sharpe": -1.709,
+        "maxdd": -0.0245
+      }
+    ],
+    "base_v9_K5.0": [
+      {
+        "period": "2023-12-31",
+        "start_eq": 2736.04,
+        "end_eq": 2063.19,
+        "profit": -672.86,
+        "return_pct": -0.2459,
+        "sharpe": -0.623,
+        "maxdd": -0.3557
+      },
+      {
+        "period": "2024-12-31",
+        "start_eq": 2063.19,
+        "end_eq": 1739.34,
+        "profit": -323.84,
+        "return_pct": -0.157,
+        "sharpe": -2.667,
+        "maxdd": -0.157
+      },
+      {
+        "period": "2025-12-31",
+        "start_eq": 1739.34,
+        "end_eq": 1830.51,
+        "profit": 91.17,
+        "return_pct": 0.0524,
+        "sharpe": 0.343,
+        "maxdd": -0.1787
+      },
+      {
+        "period": "2026-12-31",
+        "start_eq": 1830.51,
+        "end_eq": 1780.63,
+        "profit": -49.88,
+        "return_pct": -0.0272,
+        "sharpe": -1.709,
+        "maxdd": -0.0272
+      }
+    ]
+  }
+}

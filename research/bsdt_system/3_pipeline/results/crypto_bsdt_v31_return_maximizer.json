@@ -1,0 +1,186 @@
+{
+  "kelly_estimates": {
+    "SELECTIVE (alpha=1.0, 112d)": {
+      "mean_bps": 5.539061613468584,
+      "std_bps": 30.86747671392981,
+      "sharpe_daily": 2.848625366119787,
+      "full_kelly_K": 58.13449947574867,
+      "half_kelly_K": 29.067249737874334
+    },
+    "BLENDED   (alpha=0.9, 275d)": {
+      "mean_bps": 2.3206628220849503,
+      "std_bps": 20.464299241888146,
+      "sharpe_daily": 1.8001779483860627,
+      "full_kelly_K": 55.41384547647251,
+      "half_kelly_K": 27.706922738236255
+    },
+    "ALWAYS-ON (alpha=0.0, 275d)": {
+      "mean_bps": 2.9034496522082933,
+      "std_bps": 52.48680488296553,
+      "sharpe_daily": 0.8781413623178919,
+      "full_kelly_K": 10.5393548586852,
+      "half_kelly_K": 5.2696774293426
+    }
+  },
+  "best_configs": [
+    {
+      "tag": "SELECTIVE (alpha=1.0, 112d)",
+      "K": 29.0,
+      "final": 260.20020622326075,
+      "pnl_dollar": 160.20020622326075,
+      "cagr": 0.2201757748341766,
+      "sharpe_net": 0.6558397346652288,
+      "max_dd": -0.3995572786234198,
+      "active": 112,
+      "dd_limit": 0.4,
+      "risk_label": "high_risk",
+      "kelly_ratio": 0.49884320431962453
+    },
+    {
+      "tag": "BLENDED   (alpha=0.9, 275d)",
+      "K": 27.0,
+      "final": 235.2651614732034,
+      "pnl_dollar": 135.2651614732034,
+      "cagr": 0.19486364877140594,
+      "sharpe_net": 0.6195270130317131,
+      "max_dd": -0.3998942478896825,
+      "active": 275,
+      "dd_limit": 0.4,
+      "risk_label": "high_risk",
+      "kelly_ratio": 0.4872428500105376
+    },
+    {
+      "tag": "SELECTIVE (alpha=1.0, 112d)",
+      "K": 21.0,
+      "final": 213.25508479634618,
+      "pnl_dollar": 113.25508479634618,
+      "cagr": 0.17068887861375126,
+      "sharpe_net": 0.6458960231272461,
+      "max_dd": -0.29037341073281364,
+      "active": 112,
+      "dd_limit": 0.3,
+      "risk_label": "aggressive",
+      "kelly_ratio": 0.3612312858866247
+    },
+    {
+      "tag": "BLENDED   (alpha=0.9, 275d)",
+      "K": 19.0,
+      "final": 189.52726117727144,
+      "pnl_dollar": 89.52726117727144,
+      "cagr": 0.14230319487266896,
+      "sharpe_net": 0.5909170574044553,
+      "max_dd": -0.29163248947290615,
+      "active": 275,
+      "dd_limit": 0.3,
+      "risk_label": "aggressive",
+      "kelly_ratio": 0.3428745981555635
+    },
+    {
+      "tag": "SELECTIVE (alpha=1.0, 112d)",
+      "K": 14.0,
+      "final": 170.6611108648349,
+      "pnl_dollar": 70.66111086483491,
+      "cagr": 0.11764906538106312,
+      "sharpe_net": 0.6278507858960346,
+      "max_dd": -0.19580397558341048,
+      "active": 112,
+      "dd_limit": 0.2,
+      "risk_label": "moderate",
+      "kelly_ratio": 0.2408208572577498
+    },
+    {
+      "tag": "BLENDED   (alpha=0.9, 275d)",
+      "K": 12.0,
+      "final": 148.82533826288332,
+      "pnl_dollar": 48.82533826288332,
+      "cagr": 0.08625743191837776,
+      "sharpe_net": 0.5345269050581548,
+      "max_dd": -0.19196304592034258,
+      "active": 275,
+      "dd_limit": 0.2,
+      "risk_label": "moderate",
+      "kelly_ratio": 0.21655237778246114
+    },
+    {
+      "tag": "SELECTIVE (alpha=1.0, 112d)",
+      "K": 6.5,
+      "final": 127.52335178043914,
+      "pnl_dollar": 27.523351780439143,
+      "cagr": 0.05189508795539477,
+      "sharpe_net": 0.5651732091704239,
+      "max_dd": -0.09831169450465847,
+      "active": 112,
+      "dd_limit": 0.1,
+      "risk_label": "conservative",
+      "kelly_ratio": 0.1118096837268124
+    },
+    {
+      "tag": "ALWAYS-ON (alpha=0.0, 275d)",
+      "K": 7.5,
+      "final": 115.1595527226749,
+      "pnl_dollar": 15.159552722674903,
+      "cagr": 0.02980752980163137,
+      "sharpe_net": 0.2568690338446236,
+      "max_dd": -0.37882097354683003,
+      "active": 275,
+      "dd_limit": 0.4,
+      "risk_label": "high_risk",
+      "kelly_ratio": 0.7116185099147174
+    },
+    {
+      "tag": "BLENDED   (alpha=0.9, 275d)",
+      "K": 5.5,
+      "final": 113.57939788579236,
+      "pnl_dollar": 13.57939788579236,
+      "cagr": 0.02685098329286717,
+      "sharpe_net": 0.3531394889873833,
+      "max_dd": -0.096630092788459,
+      "active": 275,
+      "dd_limit": 0.1,
+      "risk_label": "conservative",
+      "kelly_ratio": 0.0992531731502947
+    },
+    {
+      "tag": "ALWAYS-ON (alpha=0.0, 275d)",
+      "K": 5.5,
+      "final": 112.07088343791816,
+      "pnl_dollar": 12.070883437918155,
+      "cagr": 0.023997930229594733,
+      "sharpe_net": 0.22191554596957058,
+      "max_dd": -0.27941535533481476,
+      "active": 275,
+      "dd_limit": 0.3,
+      "risk_label": "aggressive",
+      "kelly_ratio": 0.5218535739374595
+    },
+    {
+      "tag": "ALWAYS-ON (alpha=0.0, 275d)",
+      "K": 3.5,
+      "final": 105.21533537652299,
+      "pnl_dollar": 5.215335376522987,
+      "cagr": 0.01063534579747305,
+      "sharpe_net": 0.14697534377297883,
+      "max_dd": -0.17948899076793298,
+      "active": 275,
+      "dd_limit": 0.2,
+      "risk_label": "moderate",
+      "kelly_ratio": 0.3320886379602015
+    },
+    {
+      "tag": "ALWAYS-ON (alpha=0.0, 275d)",
+      "K": 1.5,
+      "final": 95.5879816594479,
+      "pnl_dollar": -4.412018340552095,
+      "cagr": -0.009345829394226568,
+      "sharpe_net": -0.12802076507164292,
+      "max_dd": -0.0994773969586991,
+      "active": 275,
+      "dd_limit": 0.1,
+      "risk_label": "conservative",
+      "kelly_ratio": 0.1423237019829435
+    }
+  ],
+  "init_capital_usd": 100.0,
+  "fees_bps": 5.0,
+  "funding_model": "directional"
+}

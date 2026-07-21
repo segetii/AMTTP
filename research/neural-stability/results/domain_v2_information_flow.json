@@ -1,0 +1,60 @@
+{
+  "domain": "information_flow",
+  "version": "v2",
+  "engine": "FrozenCanonicalV4",
+  "gateway": "tbr0p47_ConfidenceGate + DomainCircuitBreaker",
+  "data_source": "Wikipedia Pageviews REST API (AI articles)",
+  "T": 579,
+  "N": 8,
+  "articles": [
+    "Artificial intelligence",
+    "ChatGPT",
+    "DALL-E",
+    "GPT-3",
+    "Generative artificial intelligence",
+    "Large language model",
+    "Machine learning",
+    "OpenAI"
+  ],
+  "date_range": [
+    "2022-06-01",
+    "2023-12-31"
+  ],
+  "crisis_event": "2022-11-30",
+  "crisis_idx": 182,
+  "v1_alarms": 75,
+  "v2_alarms": 72,
+  "lead_time_v1": 180,
+  "lead_time_v2": 180,
+  "conf_veto_pct": 0.04,
+  "cb_suppress_pct": 0.0,
+  "improvement": {
+    "v1": {
+      "precision": 0.7066666666666667,
+      "recall": 0.13350125944584382,
+      "f1": 0.22457627118644066,
+      "first_alarm": 2,
+      "lead_steps": 180,
+      "n_alarms": 75
+    },
+    "v2": {
+      "precision": 0.6944444444444444,
+      "recall": 0.12594458438287154,
+      "f1": 0.21321961620469085,
+      "first_alarm": 2,
+      "lead_steps": 180,
+      "n_alarms": 72
+    },
+    "precision_delta": -0.012222222222222245,
+    "recall_delta": -0.007556675062972279,
+    "f1_delta": -0.011356654981749814,
+    "lead_improvement": 0,
+    "false_alarm_reduction": 3
+  },
+  "channel_dominance": {
+    "delta_C": 7.881049916373679e-09,
+    "delta_G": 0.9999999842612337,
+    "delta_A": 7.844671552208718e-09,
+    "delta_T": 1.304480217711972e-11
+  }
+}

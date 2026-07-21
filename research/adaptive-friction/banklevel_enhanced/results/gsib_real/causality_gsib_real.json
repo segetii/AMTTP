@@ -1,170 +1,170 @@
 {
   "linear_granger": {
     "lag1": {
-      "F_stat": 3.0623,
+      "F_stat": 1.2332,
       "df1": 1,
       "df2": 72,
-      "p_value": 0.0844,
+      "p_value": 0.2705,
       "rss_r": 4.6484,
-      "rss_u": 4.4587
+      "rss_u": 4.5701
     },
     "lag2": {
-      "F_stat": 1.6967,
+      "F_stat": 2.8647,
       "df1": 2,
       "df2": 69,
-      "p_value": 0.1908,
+      "p_value": 0.0638,
       "rss_r": 4.6117,
-      "rss_u": 4.3956
+      "rss_u": 4.2582
     },
     "lag3": {
-      "F_stat": 2.0313,
+      "F_stat": 1.818,
       "df1": 3,
       "df2": 66,
-      "p_value": 0.118,
+      "p_value": 0.1524,
       "rss_r": 4.5357,
-      "rss_u": 4.1523
+      "rss_u": 4.1895
     },
     "lag4": {
-      "F_stat": 2.3184,
+      "F_stat": 1.5372,
       "df1": 4,
       "df2": 63,
-      "p_value": 0.0667,
+      "p_value": 0.2022,
       "rss_r": 4.5121,
-      "rss_u": 3.9331
+      "rss_u": 4.1108
     }
   },
   "threshold_granger": {
     "q60": {
       "quantile": 0.6,
-      "threshold": 132.2379,
-      "beta_threshold": 0.0003,
-      "t_stat": 0.8712,
-      "p_value_boot": 0.3915,
+      "threshold": 55.191,
+      "beta_threshold": 0.0005,
+      "t_stat": 0.6824,
+      "p_value_boot": 0.5035,
       "regime_n": 30,
       "regime_frac": 0.4
     },
     "q70": {
       "quantile": 0.7,
-      "threshold": 147.8042,
-      "beta_threshold": 0.0004,
-      "t_stat": 0.9789,
-      "p_value_boot": 0.3435,
+      "threshold": 56.8279,
+      "beta_threshold": 0.0001,
+      "t_stat": 0.1939,
+      "p_value_boot": 0.8415,
       "regime_n": 23,
       "regime_frac": 0.307
     },
     "q75": {
       "quantile": 0.75,
-      "threshold": 152.2187,
-      "beta_threshold": 0.0005,
-      "t_stat": 1.2486,
-      "p_value_boot": 0.2015,
+      "threshold": 57.4365,
+      "beta_threshold": 0.0006,
+      "t_stat": 0.8233,
+      "p_value_boot": 0.407,
       "regime_n": 19,
       "regime_frac": 0.253
     },
     "q80": {
       "quantile": 0.8,
-      "threshold": 153.0635,
-      "beta_threshold": 0.0007,
-      "t_stat": 1.5983,
-      "p_value_boot": 0.1135,
+      "threshold": 58.7706,
+      "beta_threshold": 0.0008,
+      "t_stat": 1.0254,
+      "p_value_boot": 0.2915,
       "regime_n": 15,
       "regime_frac": 0.2
     },
     "q85": {
       "quantile": 0.85,
-      "threshold": 153.952,
-      "beta_threshold": 0.0009,
-      "t_stat": 1.9532,
-      "p_value_boot": 0.049,
+      "threshold": 62.7593,
+      "beta_threshold": 0.001,
+      "t_stat": 1.2069,
+      "p_value_boot": 0.217,
       "regime_n": 12,
       "regime_frac": 0.16
     },
     "q90": {
       "quantile": 0.9,
-      "threshold": 157.2493,
-      "beta_threshold": 0.0015,
-      "t_stat": 2.7001,
-      "p_value_boot": 0.009,
+      "threshold": 78.0951,
+      "beta_threshold": 0.0018,
+      "t_stat": 2.15,
+      "p_value_boot": 0.041,
       "regime_n": 8,
       "regime_frac": 0.107
     },
     "best": "q90",
-    "min_p": 0.009
+    "min_p": 0.041
   },
   "quantile_causality": {
     "tau75": {
       "tau": 0.75,
-      "J_stat": 11.380804,
-      "p_value": 0.576,
+      "J_stat": 29.886607,
+      "p_value": 0.505,
       "bandwidth": 0.447
     },
     "tau85": {
       "tau": 0.85,
-      "J_stat": 4.097089,
-      "p_value": 0.602,
+      "J_stat": 10.759178,
+      "p_value": 0.529,
       "bandwidth": 0.447
     },
     "tau90": {
       "tau": 0.9,
-      "J_stat": 1.820929,
-      "p_value": 0.622,
+      "J_stat": 4.781857,
+      "p_value": 0.545,
       "bandwidth": 0.447
     },
     "best": "tau75",
-    "min_p": 0.576
+    "min_p": 0.505
   },
   "exceedance_reg": {
     "tau60pct": {
-      "threshold": 134.3592,
+      "threshold": 55.2316,
       "pct_above": 0.4,
-      "lr_stat": 2.4314,
-      "p_value_chi2": 0.2965,
-      "beta_x": 1.6546
+      "lr_stat": 5.773,
+      "p_value_chi2": 0.0558,
+      "beta_x": 1.8041
     },
     "tau69pct": {
-      "threshold": 149.7462,
+      "threshold": 56.9729,
       "pct_above": 0.307,
-      "lr_stat": 3.0747,
-      "p_value_chi2": 0.215,
-      "beta_x": 1.5922
+      "lr_stat": 4.5268,
+      "p_value_chi2": 0.104,
+      "beta_x": 1.6882
     },
     "tau74pct": {
-      "threshold": 152.7717,
+      "threshold": 58.0474,
       "pct_above": 0.253,
-      "lr_stat": 2.0498,
-      "p_value_chi2": 0.3588,
-      "beta_x": 1.3316
+      "lr_stat": 3.4892,
+      "p_value_chi2": 0.1747,
+      "beta_x": 1.5722
     },
     "tau80pct": {
-      "threshold": 153.5705,
+      "threshold": 59.1914,
       "pct_above": 0.2,
-      "lr_stat": 1.5998,
-      "p_value_chi2": 0.4494,
-      "beta_x": 1.146
+      "lr_stat": 2.9717,
+      "p_value_chi2": 0.2263,
+      "beta_x": 1.5012
     },
     "tau84pct": {
-      "threshold": 154.2178,
+      "threshold": 63.6453,
       "pct_above": 0.16,
-      "lr_stat": 1.4274,
-      "p_value_chi2": 0.4898,
-      "beta_x": 1.0297
+      "lr_stat": 3.446,
+      "p_value_chi2": 0.1785,
+      "beta_x": 1.5447
     },
     "tau89pct": {
-      "threshold": 168.1909,
+      "threshold": 86.9689,
       "pct_above": 0.107,
-      "lr_stat": 1.5012,
-      "p_value_chi2": 0.4721,
-      "beta_x": 0.9248
+      "lr_stat": 2.2646,
+      "p_value_chi2": 0.3223,
+      "beta_x": 1.3134
     }
   },
   "summary": {
-    "linear_granger_min_p": 0.0667,
+    "linear_granger_min_p": 0.0638,
     "linear_granger_verdict": "PASS",
-    "threshold_granger_min_p": 0.009,
+    "threshold_granger_min_p": 0.041,
     "threshold_granger_best": "q90",
     "threshold_verdict": "PASS (upper-regime predictive)",
-    "quantile_min_p": 0.576,
+    "quantile_min_p": 0.505,
     "quantile_verdict": "FAIL",
-    "interpretation": "Linear Granger fails (expected for phase-transition process); threshold test p=0.009; quantile test p=0.576. Upper-regime signal is predictively informative even when standard VAR fails -- consistent with Theorem 2 regime change."
+    "interpretation": "Linear Granger fails (expected for phase-transition process); threshold test p=0.041; quantile test p=0.505. Upper-regime signal is predictively informative even when standard VAR fails -- consistent with Theorem 2 regime change."
   }
 }

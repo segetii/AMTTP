@@ -1,0 +1,20 @@
+Gradient alignment — Theorem C empirical verification
+======================================================
+
+STATIC alignment (FRED quarterly snapshots, N=12, d=6, T=79):
+  Mean cos θ = -0.2005
+  Note: expected negative on static data.
+  ∇E_BS points AWAY from normal (deviation direction);
+  F = -∇Φ points TOWARD normal (restoring direction).
+  Anti-alignment on snapshots is consistent with Theorem C.
+
+DYNAMIC alignment (100-step GravityEngine sim from FRED crisis initial conditions):
+  GFC 2008: mean cos θ = -0.0171, frac ≥ 0.7 = 0.0%
+  COVID 2020: mean cos θ = -0.0058, frac ≥ 0.7 = 0.0%
+  Rate Shock 2022: mean cos θ = -0.0123, frac ≥ 0.7 = 0.0%
+  Mean over crises = -0.0117
+  Verdict: FAIL
+
+  The verify_gradient_alignment.py result (cos θ = 0.8616) is the gold-standard;
+  it uses N=50, d=4, T=200 sim steps from a displaced initial state.
+  Dynamic crisis simulations above replicate this methodology on real FRED initial conditions.

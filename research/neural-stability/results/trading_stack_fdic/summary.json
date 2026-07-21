@@ -1,0 +1,44 @@
+{
+  "domain": "fdic",
+  "T": 140,
+  "N": 7,
+  "d": 6,
+  "date_start": "1990-03-31",
+  "date_end": "2024-12-31",
+  "sectors": [
+    "Mutual Savings Banks",
+    "Stock Savings Banks",
+    "State Commercial Banks",
+    "National Commercial Banks",
+    "Federal Savings Associations",
+    "State Savings Associations",
+    "Foreign Institution Branches"
+  ],
+  "crisis_quarters": 10,
+  "crisis_spans": {
+    "GFC": 3,
+    "Euro": 3,
+    "COVID": 2,
+    "SVB": 2
+  },
+  "baseline_auroc": 0.823076923076923,
+  "baseline_lead": -2,
+  "best_auroc": 0.823076923076923,
+  "best_lead": -2,
+  "best_far": 0.23846153846153847,
+  "best_hr": 0.7,
+  "best_n_alarms": 38,
+  "best_config": {
+    "kappa_max": "10",
+    "omega_a": 0.0,
+    "admiss_c": 0.0,
+    "dd_thr": "off",
+    "beta": 0.0,
+    "k_min": 1.0,
+    "g24_eta": 0.0,
+    "g24_lock_min": 0,
+    "release_thr": 0.0
+  },
+  "delta_auroc": 0.0,
+  "delta_lead": 0
+}

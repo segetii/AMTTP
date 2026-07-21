@@ -1,0 +1,71 @@
+{
+  "domain": "epidemiology",
+  "version": "v2",
+  "engine": "FrozenCanonicalV4",
+  "gateway": "tbr0p47_ConfidenceGate + DomainCircuitBreaker",
+  "data_source": "JHU COVID-19 Confirmed Cases (CSSE)",
+  "T": 1142,
+  "N": 20,
+  "countries": [
+    "US",
+    "India",
+    "France",
+    "Germany",
+    "Brazil",
+    "Japan",
+    "Korea, South",
+    "Italy",
+    "United Kingdom",
+    "Russia",
+    "Turkey",
+    "Spain",
+    "Vietnam",
+    "Australia",
+    "Argentina",
+    "Taiwan*",
+    "Netherlands",
+    "Iran",
+    "Mexico",
+    "Indonesia"
+  ],
+  "date_range": [
+    "1/23/20",
+    "3/9/23"
+  ],
+  "crisis_days": 616,
+  "v1_alarms": 216,
+  "v2_alarms": 124,
+  "lead_time_v1": -17,
+  "lead_time_v2": -17,
+  "conf_veto_pct": 0.42592592592592593,
+  "cb_suppress_pct": 0.0,
+  "improvement": {
+    "v1": {
+      "precision": 0.6064814814814815,
+      "recall": 0.21266233766233766,
+      "f1": 0.3149038461538462,
+      "first_alarm": 31,
+      "lead_steps": 0,
+      "n_alarms": 216
+    },
+    "v2": {
+      "precision": 0.5725806451612904,
+      "recall": 0.11525974025974026,
+      "f1": 0.19189189189189187,
+      "first_alarm": 31,
+      "lead_steps": 0,
+      "n_alarms": 124
+    },
+    "precision_delta": -0.03390083632019114,
+    "recall_delta": -0.09740259740259741,
+    "f1_delta": -0.12301195426195433,
+    "lead_improvement": 0,
+    "false_alarm_reduction": 92
+  },
+  "channel_dominance": {
+    "delta_C": 0.5030383813243862,
+    "delta_G": 0.0021689267163832464,
+    "delta_A": 0.3794715075359231,
+    "delta_T": 0.1153211844232845
+  }
+}

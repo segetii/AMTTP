@@ -1,0 +1,150 @@
+{
+  "model": "Three-Layer Continuous: \u03a9 \u00d7 (MFLS/\u03b3) \u00d7 Direction",
+  "architecture": {
+    "layer_1_timing": "w1 = percentile-rank(\u03a9), gated at Q50",
+    "layer_2_activity": "w2 = percentile-rank(MFLS/\u03b3), gated at Q33. A = MFLS/(\u03b3+\u03b5)",
+    "layer_3_direction": "phase-based: CRASH\u2192momentum, RECOVERY\u2192gradient (v2-confirmed)",
+    "position_formula": "pos = sign \u00d7 w1_gated \u00d7 w2_gated"
+  },
+  "pnl_results": {
+    "v2_binary": {
+      "label": "v2_binary",
+      "sharpe": 0.7384,
+      "sharpe_per_leverage": 6.4453,
+      "max_dd": -0.1186,
+      "cum_return": 0.1936,
+      "active_days": 269,
+      "total_days": 2348,
+      "hit_rate": 0.4944,
+      "tail_acc": 0.7,
+      "tail_pnl": 0.013076,
+      "gross_leverage": 0.1146,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    },
+    "v3_equal_weights": {
+      "label": "v3_equal_weights",
+      "sharpe": 0.6639,
+      "sharpe_per_leverage": 8.8161,
+      "max_dd": -0.0686,
+      "cum_return": 0.1019,
+      "active_days": 269,
+      "total_days": 2348,
+      "hit_rate": 0.4944,
+      "tail_acc": 0.7,
+      "tail_pnl": 0.00788,
+      "gross_leverage": 0.0753,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    },
+    "v4_omega_only": {
+      "label": "v4_omega_only",
+      "sharpe": 0.6191,
+      "sharpe_per_leverage": 6.479,
+      "max_dd": -0.0958,
+      "cum_return": 0.1423,
+      "active_days": 269,
+      "total_days": 2348,
+      "hit_rate": 0.4944,
+      "tail_acc": 0.7,
+      "tail_pnl": 0.010982,
+      "gross_leverage": 0.0956,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    },
+    "v5_activity_only": {
+      "label": "v5_activity_only",
+      "sharpe": 0.6631,
+      "sharpe_per_leverage": 12.0474,
+      "max_dd": -0.0669,
+      "cum_return": 0.049,
+      "active_days": 157,
+      "total_days": 2348,
+      "hit_rate": 0.4904,
+      "tail_acc": 0.8095,
+      "tail_pnl": 0.009102,
+      "gross_leverage": 0.055,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    },
+    "v6_full": {
+      "label": "v6_full",
+      "sharpe": 0.4758,
+      "sharpe_per_leverage": 10.7234,
+      "max_dd": -0.058,
+      "cum_return": 0.0276,
+      "active_days": 157,
+      "total_days": 2348,
+      "hit_rate": 0.4904,
+      "tail_acc": 0.8095,
+      "tail_pnl": 0.007017,
+      "gross_leverage": 0.0444,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    },
+    "v7_full_halfsize": {
+      "label": "v7_full_halfsize",
+      "sharpe": 0.6741,
+      "sharpe_per_leverage": 21.5166,
+      "max_dd": -0.0499,
+      "cum_return": 0.0342,
+      "active_days": 157,
+      "total_days": 2348,
+      "hit_rate": 0.4904,
+      "tail_acc": 0.8095,
+      "tail_pnl": 0.006657,
+      "gross_leverage": 0.0313,
+      "bh_sharpe": 0.7288,
+      "bh_max_dd": -0.3392,
+      "bh_cum_return": 1.8776
+    }
+  },
+  "ic_results": {
+    "v2_binary": {
+      "label": "v2_binary",
+      "n": 269,
+      "ic": -0.1499,
+      "acc": 0.5985
+    },
+    "v3_equal_weights": {
+      "label": "v3_equal_weights",
+      "n": 269,
+      "ic": -0.2744,
+      "acc": 0.5985
+    },
+    "v4_omega_only": {
+      "label": "v4_omega_only",
+      "n": 269,
+      "ic": -0.0648,
+      "acc": 0.5985
+    },
+    "v5_activity_only": {
+      "label": "v5_activity_only",
+      "n": 157,
+      "ic": -0.3006,
+      "acc": 0.6242
+    },
+    "v6_full": {
+      "label": "v6_full",
+      "n": 157,
+      "ic": -0.2673,
+      "acc": 0.6242
+    },
+    "v7_full_halfsize": {
+      "label": "v7_full_halfsize",
+      "n": 157,
+      "ic": -0.1647,
+      "acc": 0.6242
+    }
+  },
+  "key_insight": {
+    "A_interpretation": "MFLS/\u03b3 distinguishes true cascade (high MFLS, low \u03b3) from suppressed instability (high MFLS, high \u03b3). This is not the same as velocity \u2014 it is the force-to-damping ratio.",
+    "w1_x_w2": "Multiplying the two weights concentrates exposure on days where both \u03a9 is elevated AND the system is actively moving against friction. These are the highest-conviction days.",
+    "v6_vs_v2": "v6 should show improved Sharpe/leverage and better tail capture by avoiding days where \u03a9 is elevated but MFLS/\u03b3 is low (suppressed instability \u2014 nothing actually happening)."
+  }
+}

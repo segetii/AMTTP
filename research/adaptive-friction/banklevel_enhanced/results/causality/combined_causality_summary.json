@@ -1,0 +1,31 @@
+{
+  "data": "FDIC bank-level, N=30, T=140Q",
+  "suite_a": {
+    "linear_granger_min_p": 0.712,
+    "linear_verdict": "FAIL (confirms Granger paradox)",
+    "threshold_granger_min_p": 0.484,
+    "threshold_verdict": "FAIL",
+    "quantile_min_p": 0.396,
+    "quantile_verdict": "FAIL"
+  },
+  "suite_b": {
+    "hsic_p": 0.0033,
+    "hsic_verdict": "PASS",
+    "te_x_to_y": 0.01988,
+    "te_y_to_x": 0.0,
+    "te_p": 0.8667,
+    "te_verdict": "FAIL",
+    "ccm_peak_rho": 0.4024,
+    "ccm_convergent": false,
+    "ccm_p": 0.0,
+    "ccm_verdict": "FAIL",
+    "mi_peak_lag": 2,
+    "mi_peak_val": 0.08201,
+    "nn_granger_p": 0.5733,
+    "nn_rss_reduction_pct": 0.41,
+    "nn_verdict": "FAIL",
+    "direction_correct": false,
+    "overall_verdict": "WEAK EVIDENCE"
+  },
+  "runtime_sec": 38.9
+}

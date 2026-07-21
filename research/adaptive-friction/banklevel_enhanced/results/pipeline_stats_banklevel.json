@@ -5,7 +5,7 @@
   "d_features": 6,
   "lw_rho_star": 0.016913544127399687,
   "lambda_max_W": 12.077044249459881,
-  "frac_above_cman": NaN,
+  "frac_above_cman": 0.7428571428571429,
   "mfls_p75_threshold": 30.14829127782219,
   "oos_alarm_date": "",
   "oos_hit_rate": NaN,
@@ -76,5 +76,37 @@
       "specgrp": 4
     }
   ],
-  "runtime_sec": 2.7
+  "runtime_sec": 1.5,
+  "admissibility_analysis": {
+    "lead_window_Q": 4,
+    "theta": 0.1,
+    "M_max": 1.0,
+    "g_ch_names": [
+      "C_contagion",
+      "G_geometry",
+      "A_activity",
+      "T_topology"
+    ],
+    "g_ch_mean": [
+      12.077044249459904,
+      35.46802121787546,
+      11.03770059136509,
+      12.849595842237049
+    ],
+    "mfls_st_range": [
+      27.329754995871607,
+      91.04054334489666
+    ],
+    "mfls_ch_range": [
+      28.376114182705805,
+      94.04841824626189
+    ],
+    "admissibility_mean": 0.022630969559163733,
+    "admissibility_max": 0.044584598037298646,
+    "frac_inadmissible": 0.0,
+    "safety_mean": 0.0011315484779581865,
+    "frac_safe": 0.0,
+    "rho_mfls_mean": 0.9493127745287737,
+    "psi_deg_mean": 17.456476844957365
+  }
 }

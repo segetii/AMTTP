@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "C:\amttp\_diag_v32_2026.py", line 499, in <module>
+    main()
+    ~~~~^^
+  File "C:\amttp\_diag_v32_2026.py", line 359, in main
+    unit26 = unit[sl26]
+             ~~~~^^^^^^
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\series.py", line 1149, in __getitem__
+    key = check_bool_indexer(self.index, key)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexing.py", line 2681, in check_bool_indexer
+    return check_array_indexer(index, result)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexers\utils.py", line 539, in check_array_indexer
+    raise IndexError(
+    ...<2 lines>...
+    )
+IndexError: Boolean index has wrong length: 20530 instead of 47025

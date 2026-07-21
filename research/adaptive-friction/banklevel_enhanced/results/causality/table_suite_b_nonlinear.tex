@@ -1,0 +1,17 @@
+\begin{table}[h]
+\centering
+\caption{Nonlinear causality suite: MFLS signal $\to$ crisis labels. All tests based on permutation/bootstrap nulls. HSIC-Granger tests kernel independence of nonlinear AR residuals; Transfer Entropy (KSG) measures directed information flow; CCM assesses state-space manifold convergence (Sugihara 2012); NN-Granger compares MLP predictive RSS with and without MFLS history.}
+\label{tab:nonlinear_causality}
+\begin{tabular}{lccc}
+\toprule
+Test & Statistic & $p$-value & $H_0$ rejected? \\
+\midrule
+  HSIC-Granger & 0.0032 & 0.003 & {\color{teal}$\checkmark$} \\
+  Transfer Entropy (KSG) $\Delta$TE=0.0199 & --- & 0.867 & {\color{red}$\times$} \\
+  CCM $\rho_{\mathrm{peak}}$=0.402 & slope=-0.0790 & 0.000 & {\color{red}$\times$} \\
+  NN-Granger RSS $\Delta$=0.4\% & F=0.023 & 0.573 & {\color{red}$\times$} \\
+\midrule
+  \multicolumn{4}{l}{Tests passed: 1/4 -- WEAK EVIDENCE} \\
+\bottomrule
+\end{tabular}
+\end{table}

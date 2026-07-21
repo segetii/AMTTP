@@ -1,4 +1,4 @@
-% !TEX program = pdflatex
+﻿% !TEX program = pdflatex
 \documentclass[12pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
@@ -27,55 +27,32 @@
 
 \bigskip
 
-I am a Security Engineer and Technical Founder based in Derby, applying under the Global Talent route in Digital Technology (Exceptional Promise). My work sits where cyber security, applied machine learning, decentralised finance, and regulatory technology meet, and it has already taken concrete form: a publicly accessible, Sepolia-backed compliance platform with measurable engineering depth and a credible commercial thesis.
+I am applying under the Global Talent route (Exceptional Promise) as a security engineer and technical founder working at the intersection of cybersecurity, machine learning, and privacy-preserving verification. My case rests on a stack of independently verifiable outputs: a publicly deployed compliance platform (\textbf{MC-1}), a sole-authored full-stack codebase (\textbf{MC-2}), five upgradeable production smart contracts (\textbf{MC-3}), reproducible ML benchmarks (\textbf{OC3-1}), a live enterprise dashboard (\textbf{OC3-2}), security audit artefacts (\textbf{OC3-4}), four research preprints with documented academic adoption (\textbf{OC4-1, OC4-2, OC4-3}), and a UK patent filing. Together, these establish original innovation and a credible trajectory toward leadership in the UK's digital technology sector.
 
-\textbf{Why the United Kingdom, and why Derby}
+\textbf{Strategic Motivation and the UK Roadmap}
 
-Britain is, in my judgment, the most coherent place in the world to build the kind of system I am building. The FCA's clear posture on digital assets, the country's leadership in regulatory technology, and the depth of its fintech and cyber-security ecosystems combine to make it both a credible market and a credible research environment. Derby, where I already live, gives me proximity to the Midlands' growing tech corridor and to Nottingham and Birmingham, while keeping me close enough to London for industry engagement. I intend to remain in the United Kingdom long term, scaling AMTTP from public testnet demonstration to regulated commercial deployment, and continuing to contribute to UK research output in this space.
+Britain leads globally in regulatory innovation. The \textbf{FCA's} evolving digital-asset framework, HM Treasury's stablecoin proposals, and the Bank of England's wholesale CBDC programme have together created an unmatched demand for the precise category of infrastructure I have built: \textbf{crypto-compliance middleware} that performs pre-settlement, on-chain, privacy-preserving enforcement. AMTTP is engineered as regulator-aligned middleware capable of supporting the \textbf{Travel Rule}, MLR 2017 risk-based monitoring, and \textbf{MiCA} obligations natively at the protocol layer.
 
-\textbf{What I have built: AMTTP}
+My five-year roadmap is to incorporate a UK-headquartered RegTech company in \textbf{Derby}, drawing engineering talent from the Midlands technology corridor while engaging directly with London's regulatory and fintech community. Within that horizon I plan to \textbf{create 8--12 skilled engineering and compliance roles in the UK} (smart-contract, ML, zero-knowledge, and regulatory engineering) and convert AMTTP from a validated open protocol into a licensed \textbf{Compliance-as-a-Service} provider, supplying \textbf{crypto-compliance infrastructure} to UK fintechs, banks, and regulated digital-finance institutions. This directly supports the UK's positioning as a global hub for safe digital finance.
 
-AMTTP, the Anti-Money Laundering Transaction Trust Protocol, is a blockchain-native compliance system designed to make risk decisions \emph{before} transaction finality. Most established digital-asset compliance tooling operates after settlement, when funds have already moved and risk has crystallised. AMTTP closes that gap by combining machine-learning risk scoring, graph-based relationship analysis, sanctions screening, and policy evaluation inside the Ethereum confirmation window, so a transaction can be approved, escrowed, reviewed, or blocked before on-chain settlement.
+\textbf{Innovation: The AMTTP Protocol}
 
-The platform is not a slide-deck architecture. It is a working, publicly accessible Sepolia-backed environment that I designed and built end to end, comprising:
-\begin{itemize}[nosep]
-  \item a cross-platform Flutter consumer application supporting wallet interaction, pre-send Trust Check scoring, disputes, and privacy-proof management;
-  \item a Next.js 14 enterprise ``War Room'' dashboard offering real-time alerting, decision explainability, and compliance reporting;
-  \item a FastAPI compliance orchestrator that fans out to nine specialist microservices---ML Risk, Graph, Policy, Sanctions, Monitoring, GeoRisk, Integrity, Explainability, and ZK-NAF verification---behind a TypeScript Express oracle gateway;
-  \item a blockchain layer of 38 AMTTP-authored Solidity files, deployed through UUPS upgradeable proxies and covering dispute resolution, cross-chain risk propagation, and Groth16 zero-knowledge verification; and
-  \item TypeScript and Python SDK layers that I also authored.
-\end{itemize}
+To address the structural fragmentation in digital-asset compliance, I spent three years in sustained independent research and development to design and build the \textbf{Anti-Money Laundering Transaction Trust Protocol (AMTTP)}. Where conventional tooling acts post-settlement, AMTTP enables risk decisions \emph{before} transaction finality. As an \textbf{independent founder}, working without institutional sponsorship, venture funding, or a delivery team, I architected and delivered the entire system end to end---spanning a consumer-facing application, an enterprise War Room dashboard, a nine-service Python orchestrator, and the underlying smart-contract layer. This is not theoretical work: the platform is live on a Sepolia-backed environment at \textbf{\texttt{amttp.com}}, with public usage attested by independent Cloudflare analytics (\textbf{MC-1, OC3-2}). Holding sole technical leadership of a system of this scope, while it remained publicly operational, evidences a capacity to lead production-grade digital infrastructure at a level rarely demonstrated outside a funded company.
 
-The work has been carried out independently, without institutional funding, formal academic research supervision, or venture backing.
+\textbf{Technical Contribution and Security Excellence}
 
-\textbf{Applied machine learning}
+My focus is the harder edge of compliance: privacy and verifiability. Through \textbf{zkNAF}, I integrated \textbf{Groth16} zero-knowledge proofs so that sanctions checks and KYC confirmations may be performed without exposing personal data on a public ledger. To establish institutional-grade resilience, I subjected the contract layer to \textbf{Slither} static analysis and \textbf{Echidna} property-based fuzzing at deep iteration sequences, and complemented this with a Hardhat integration suite covering deployment, transfer logic, and policy enforcement. These artefacts, together with the audited contract suite (\textbf{MC-3, OC3-4}), evidence engineering discipline well beyond the threshold expected at the Promise stage.
 
-The machine-learning component is operational rather than decorative. I trained and evaluated knowledge-distilled student models on 625{,}168 Ethereum address samples, including 372 confirmed fraud cases---a class imbalance that mirrors real fraud-detection conditions. The production CPU-optimised XGBoost student records ROC-AUC 0.9898; the LightGBM student reaches ROC-AUC 0.9999997 with F1 0.9906; and the ensemble meta-learner reports ROC-AUC 0.9999998 with PR-AUC 0.9997. Distillation was a deliberate engineering choice, not an academic one: it lets the system run on commodity CPUs rather than expensive GPU infrastructure, which is what makes the platform commercially deployable.
+\textbf{Machine Learning, Operational Efficiency, and Intellectual Property}
 
-\textbf{Privacy, cryptography, and security-by-design}
+I designed and evaluated knowledge-distilled ML models on a dataset of \textbf{more than 625{,}000 Ethereum address samples}, producing distilled \textbf{XGBoost} and \textbf{LightGBM} students that retain strong fraud-detection performance while running on commodity CPUs. This eliminates the dependency on specialist GPU infrastructure and addresses the principal commercial barrier to deploying advanced detection in regulated environments (\textbf{OC3-1, OC3-3}). I protected this innovation by filing \textbf{UK Patent Application No.\ 1026066039} on \textbf{4 March 2026}, covering the ML risk-scoring pipeline, blockchain compliance architecture, zero-knowledge identity workflows, and adaptive-friction mechanisms.
 
-I designed AMTTP to be privacy-preserving from the outset. Through zkNAF, my zero-knowledge compliance framework, the system supports sanctions non-membership verification, risk proofs, and KYC-related confirmations without unnecessary data exposure, using Groth16 SNARK verification over BN254 elliptic-curve pairings. This addresses a genuine commercial tension---meeting compliance obligations while minimising data collection---and aligns with FCA expectations and FATF Travel Rule principles. The same security-by-design discipline runs through the contract suite: Slither static analysis, Echidna property-based fuzzing at 50{,}000 iterations with 100-step sequences, and Hardhat integration tests covering deployment, transfer logic, policy enforcement, and cross-contract behaviour.
+\textbf{Academic Uptake and Outside Contribution}
 
-\textbf{Original research}
+Although developed independently of any university, the research underpinning AMTTP has attracted early external recognition. My \textbf{Blind-Spot Decomposition Theory (BSDT)} and three further preprints, covering the Universal Detection Principle, system-stability analysis, and the AMTTP architecture, were adopted in \textbf{April 2026} as recommended readings for the postgraduate course \textbf{CPE 604} by \textbf{Dr Sunday Adeola Ajagbe}, an independent academic with no prior supervisory relationship to me (\textbf{OC4-1, OC4-2, OC4-3}). Course slides and the associated module materials evidence direct integration into a live postgraduate curriculum. This adoption confirms that my contributions hold value beyond my own platform and are already shaping the training of the next generation of engineers.
 
-Alongside the platform, I have produced four research papers:
-\begin{enumerate}[nosep]
-  \item \emph{AMTTP Protocol} (TechRxiv), describing the system architecture;
-  \item \emph{Blind-Spot Decomposition Theory (BSDT)} (Zenodo), an original mathematical framework for hidden model failure modes;
-  \item \emph{Universal Detection Principle (UDP)} (Zenodo), a multi-operator extension of BSDT for anomaly detection; and
-  \item \emph{The Geometry of System Collapse} (Zenodo), a phase-transition treatment of coupled-system instability validated against banking, Terra/Luna, and ERCOT grid data.
-\end{enumerate}
+\textbf{Conclusion: Exceptional Promise}
 
-The first two papers, which have had the longest exposure, have together attracted 365 views and 210 downloads as of 5 May 2026, achieved without institutional promotion. BSDT itself demonstrates classifier-blind-spot correction without retraining, with recall improvements of up to 84.4 percentage points and a flagship 99.94\% false-positive reduction on the Shuttle benchmark. I have kept BSDT as a separate research and optional analytics layer rather than embedding it in the default AML decision path, because the production student models are already strong and I did not want to introduce avoidable regulatory complexity into the core workflow. In April 2026, three of these papers were adopted as recommended readings in the postgraduate course CPE 604 by Dr Sunday Adeola Ajagbe, an independent researcher with no prior supervisory relationship to me---evidence that the work has begun to circulate beyond self-publication.
-
-\textbf{Intellectual property and commercial intent}
-
-On 4 March 2026 I filed UK patent application No.\ 1026066039, an eight-subsystem unified filing covering machine-learning risk scoring, blockchain compliance architecture, zero-knowledge identity workflows, cross-chain propagation, graph anomaly detection, adaptive friction, policy automation, and system-stability analysis. AMTTP is positioned as pre-settlement Compliance-as-a-Service infrastructure for regulated institutions and Virtual Asset Service Providers entering decentralised finance, and it already exposes consumer and enterprise interfaces, role-based access control, explainability tooling, and cross-chain capability through the public demonstration at \texttt{amttp.com}.
-
-\textbf{Why this profile fits Exceptional Promise}
-
-The relevant question for this route is not whether I am already a globally established figure, but whether I show clear potential to become a leading talent in UK digital technology. I believe the evidence supports that conclusion. I have built across Flutter, Next.js, Python microservices, Solidity, cryptography, and machine learning. I have translated original research into a working, demonstrable product. I have done so with the testing, auditing, and privacy posture that regulated infrastructure requires. And I have contributed to the UK ecosystem through publication, patent activity, and product-led innovation in a strategically important sector.
-
-I am seeking endorsement so that I can continue this work in the United Kingdom---advancing AMTTP from public testnet demonstration toward regulated deployment, sustaining the associated research programme, and contributing to Britain's leadership in secure, intelligent, and commercially relevant digital infrastructure.
+My profile is defined by \textbf{sustained independent execution as a founder}. Without a corporate brand or institutional sponsorship, I have produced a coherent body of work---a deployed platform, a public codebase, audited contracts, reproducible ML benchmarks, peer-cited research, and a UK patent filing---that demonstrates a capacity for leadership rather than mere participation. I am seeking endorsement to scale these innovations within the UK ecosystem: to \textbf{incorporate in Derby}, to \textbf{create skilled engineering and compliance roles}, to engage UK fintechs and regulators, and to advance the technical standards of British RegTech. The evidence submitted alongside this statement is not background colour for a narrative; it is the substance of the case.
 
 \end{document}

@@ -791,7 +791,7 @@ class BSDTChannels:
     Composite Scores
     ----------------
     E_BS = Σ δ_i²           (blind-spot energy)
-    MFLS = ‖∇E_BS‖_F        (multi-factor latent score)
+    MFLS = ‖∇E_BS‖_F        (Mahalanobis Field Line Score)
     """
 
     def __init__(self, k: int = 15, eps: float = 1e-8):
@@ -1001,31 +1001,63 @@ class BSDTChannels:
             'det_cov': det_cov,
         }
 
-    def mfls(self, X: np.ndarray) -> np.ndarray:
-        r"""
-        MFLS = ‖∇E_BS‖_F — gradient norm of blind-spot energy.
+    def mfls_state(self, X: np.ndarray) -> np.ndarray:
+        r"""MFLS_state = ‖∇E_BS‖_F — physical state-space gradient norm (§XXIV.4).
+
+        Lower bound: only δ_C and δ_A contribute (δ_G is an indicator
+        function, δ_T is kNN-based — neither is analytically differentiable).
+        [Complete_Derivations §4]
         """
         return np.linalg.norm(self._gradient_vectors(X), axis=1)
 
-    def score(self, X: np.ndarray) -> np.ndarray:
-        """
-        Combined BSDT score = Fisher-weighted channel combination.
+    def mfls_channel(self, X: np.ndarray) -> np.ndarray:
+        r"""MFLS_channel = ‖g_t‖₂ — norm of the 4-channel BSDT state vector (§XXIV.4).
 
-        Uses Fisher variance-ratio weights derived from the reference
-        data (fitted during .fit()) to combine normalised channels.
-        Falls back to 0.5*E_BS + 0.5*MFLS blend if Fisher weights
-        are not available (e.g. too few reference points).
+        g_t = (δ_C, δ_G, δ_A, δ_T) ∈ R⁴.  All 4 channels included;
+        no differentiability required — uses channel values directly.
+        """
+        ch = self.channels(X)
+        C = np.column_stack([ch['delta_C'], ch['delta_G'],
+                             ch['delta_A'], ch['delta_T']])
+        return np.linalg.norm(C, axis=1)
+
+    def rho_mfls(self, X: np.ndarray) -> np.ndarray:
+        r"""ρ_MFLS = MFLS_state / MFLS_channel (§XXIV.4).
+
+        ρ < 1: state does not fully transmit channel risk (contained).
+        ρ = 1: perfect transmission.
+        ρ > 1: state over-amplifies — real collapse risk.
+        """
+        return self.mfls_state(X) / (self.mfls_channel(X) + self.eps)
+
+    def psi_t(self, X: np.ndarray) -> np.ndarray:
+        r"""ψ_t = arccos(min(1, ρ_MFLS)) — misalignment angle (§XXVI.1).
+
+        Correct derivation: R_t = g_t^T Gram g_t = ‖G̃_t‖_F²
+        → cos ψ_t = R_t / (‖G̃_t‖_F · ‖g_t‖) = ρ_MFLS
+        ψ = 0 → full alignment / real collapse risk.
+        ψ > 0 → channel risk partially contained by state geometry.
+        """
+        rho = np.minimum(1.0, self.rho_mfls(X))
+        return np.arccos(rho)
+
+    def mfls(self, X: np.ndarray) -> np.ndarray:
+        """Alias for mfls_state() — retained for backward compatibility."""
+        return self.mfls_state(X)
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        r"""BSDT score = E_BS · ξ₆  where  ξ₆ = min(1, ρ_MFLS²)  (§XXVI.1).
+
+        ξ₆ = cos²(ψ_t) down-weights signals where physical state does not
+        transmit channel risk (ρ < 1).  When ρ ≥ 1 (state over-amplifies)
+        ξ₆ = 1 and the full E_BS score is returned.
+        Replaces stale 0.5·E_BS + 0.5·MFLS_state blend.
         """
         e = self.energy(X)
-        m = self.mfls(X)
-
-        # Normalise each to [0, 1]
-        e_max = max(float(e.max()), self.eps)
-        m_max = max(float(m.max()), self.eps)
-        e_n = e / e_max
-        m_n = m / m_max
-
-        return 0.5 * e_n + 0.5 * m_n
+        xi_6 = np.minimum(1.0, self.rho_mfls(X) ** 2)  # ξ₆ = cos²(ψ_t)
+        s = e * xi_6
+        s_max = max(float(s.max()), self.eps)
+        return s / s_max
 
     # -- MFLS scoring variants ----------------------------------------
     #   ALL variants are closed-form from data statistics.
@@ -2125,10 +2157,6 @@ class GravityModeEngine:
         bsdt_damper.fit(X_ref_init)
         e_ref = bsdt_damper.energy(X_ref_init)
         theta_bs = float(np.median(e_ref)) + 1e-10
-        # MFLS scale factor: match gradient-norm scale to energy scale
-        mfls_ref = bsdt_damper.mfls(X_ref_init)
-        mfls_med = float(np.median(mfls_ref)) + 1e-10
-        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
 
         # ── Euler integration with Lyapunov v2 + ISS tracking ──
         self.stabiliser.reset()
@@ -2139,12 +2167,12 @@ class GravityModeEngine:
             F_pair = self._pairwise_forces(X_work)
             F_radial = -self.alpha * (X_work - self.mu_)
 
-            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
+            # BSDT canonical damping: Xdot = F - gamma(E)*grad_E
+            # gamma(E) = E/(E+theta)  (Complete_Derivations §5, canonical law)
+            # MFLS = ||grad_E|| is a monitoring signal, NOT added to energy.
             e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
             grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
-            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
-            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
-            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
+            gamma_bs = e_bs / (e_bs + theta_bs)      # canonical gamma
             F_damp = -gamma_bs[:, None] * grad_bs    # damping force
 
             F_total = F_pair + F_radial + F_damp
@@ -2841,10 +2869,6 @@ class Mode5GravityEngine:
         bsdt_damper.fit(X_ref_init)
         e_ref = bsdt_damper.energy(X_ref_init)
         theta_bs = float(np.median(e_ref)) + 1e-10
-        # MFLS scale factor: match gradient-norm scale to energy scale
-        mfls_ref = bsdt_damper.mfls(X_ref_init)
-        mfls_med = float(np.median(mfls_ref)) + 1e-10
-        beta_mfls = theta_bs / mfls_med  # data-driven blend weight
 
         # ── Euler integration with Lyapunov v2 + ISS + BSDT ──
         self.stabiliser.reset()
@@ -2855,12 +2879,12 @@ class Mode5GravityEngine:
             F_pair = self._pairwise_forces(X_work)
             F_radial = -self.alpha * (X_work - self.mu_)
 
-            # BSDT + MFLS adaptive damping (eq:bsdamped extended)
+            # BSDT canonical damping: Xdot = F - gamma(E)*grad_E
+            # gamma(E) = E/(E+theta)  (Complete_Derivations §5, canonical law)
+            # MFLS = ||grad_E|| is a monitoring signal, NOT added to energy.
             e_bs = bsdt_damper.energy(X_work)       # (n_sim,)
             grad_bs = bsdt_damper._gradient_vectors(X_work)  # (n,d)
-            mfls_bs = np.linalg.norm(grad_bs, axis=1)  # MFLS per point
-            e_combined = e_bs + beta_mfls * mfls_bs  # blended energy
-            gamma_bs = e_combined / (e_combined + theta_bs)  # adaptive coeff
+            gamma_bs = e_bs / (e_bs + theta_bs)      # canonical gamma
             F_damp = -gamma_bs[:, None] * grad_bs    # damping force
 
             F_total = F_pair + F_radial + F_damp
@@ -3277,9 +3301,6 @@ class Mode6GravityEngine:
         bsdt_damper.fit(X_ref_init)
         e_ref = bsdt_damper.energy(X_ref_init)
         theta_bs = float(np.median(e_ref)) + 1e-10
-        mfls_ref = bsdt_damper.mfls(X_ref_init)
-        mfls_med = float(np.median(mfls_ref)) + 1e-10
-        beta_mfls = theta_bs / mfls_med
 
         # Euler integration with BSDT adaptive damping
         self.stabiliser.reset()
@@ -3290,11 +3311,11 @@ class Mode6GravityEngine:
             F_pair = self._pairwise_forces(X_work)
             F_radial = -self.alpha * (X_work - self.mu_)
 
+            # BSDT canonical damping: gamma(E) = E/(E+theta)
+            # MFLS = ||grad_E|| is a monitoring signal, NOT added to energy.
             e_bs = bsdt_damper.energy(X_work)
             grad_bs = bsdt_damper._gradient_vectors(X_work)
-            mfls_bs = np.linalg.norm(grad_bs, axis=1)
-            e_combined = e_bs + beta_mfls * mfls_bs
-            gamma_bs = e_combined / (e_combined + theta_bs)
+            gamma_bs = e_bs / (e_bs + theta_bs)
             F_damp = -gamma_bs[:, None] * grad_bs
 
             F_total = F_pair + F_radial + F_damp
@@ -3943,6 +3964,416 @@ class HybridGravityEngine:
             'q_pvalues': q_pvalues,
         }
 
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  CANONICAL ODE ENGINE — curvature-adaptive friction (NEW)
+# ═══════════════════════════════════════════════════════════════════
+
+class CanonicalODEEngine:
+    """Canonical ODE engine with curvature-adaptive friction.
+
+    This is a NEW engine that uses the canonical dynamical geometry
+    system (§3–§5, canonical_system_v4) as the particle simulation,
+    with two curvature-adaptive layers applied OUTSIDE the locked ODE
+    vector field — preserving the four inviolable rules of §5.
+
+    Physics
+    -------
+    Each data point x_i is evolved under the canonical ODE:
+
+        ẋ = F_base(x) − g_x − γ_eff(x) · ⟨F, g_x⟩ / (‖g_x‖² + ε) · g_x
+
+    where:
+        F_base(x)  = −α · (x − μ)         mean-reversion field
+        g_x        = ∇E_BS(x)             BSDT gradient (nonlinear)
+        E_BS       = Fisher-weighted BSDT energy (nonlinear, kNN-based)
+        γ(x)       = E_BS(x) / (E_BS(x) + θ_eff)   adaptive gain
+
+    Normal points (low E_BS)  → low γ  → weak friction  → converge to μ.
+    Anomaly points (high E_BS) → high γ → strong friction → repelled.
+
+    Curvature Layers  (outside ODE vector field — Rule 3 preserved)
+    ----------------------------------------------------------------
+    Curvature is computed every ``curv_update_every`` steps as the
+    largest eigenvalue of the marginal Hessian of E_BS (finite
+    differences of the mean BSDT gradient over all particles):
+
+        curv_sys = λ_max(∇²Ē_BS) − 1       (§D.3 curvature indicator)
+
+    Layer 1 — θ-adaptive gain modulation:
+        θ_eff = θ_base × (1 + β · max(curv_sys, 0))
+        High curvature → larger θ_eff → smaller γ → weaker friction
+        → particles can escape curvature wells and saddle regions.
+
+    Layer 2 — Smooth step gate:
+        gate = 1 / (1 + c · max(curv_sys, 0))
+        Applied as a scalar multiplier to the Euler step AFTER the
+        ODE rhs is computed — reduces step size when curvature is high.
+        Smooth replacement for the binary §D.3 ×0.5 gate.
+
+    The two layers compose: near the curvature manifold C_man, γ
+    decreases (Layer 1) AND steps shrink (Layer 2), giving double
+    protection against overshooting curvature wells while keeping
+    the descent direction from the canonical ODE.
+
+    Scoring
+    -------
+    After simulation, final particle positions are scored by
+    ``FusedSystemScorer`` (Morse + Betti + UDL + BSDT fusion).
+
+    Parameters
+    ----------
+    theta : float
+        Base θ for γ = E/(E+θ). Auto-calibrated from median reference
+        E_BS if not provided (set to -1.0 to trigger auto-calibration).
+    alpha : float
+        Radial mean-reversion coefficient for F_base = −α(x−μ).
+    epsilon : float
+        ODE regularisation ε at ‖g_x‖ = 0 (§2.2).
+    eta : float
+        Euler integration step size.
+    iterations : int
+        Number of simulation steps.
+    k_neighbors : int
+        kNN parameter for BSDT energy/gradient computation.
+    curv_beta : float
+        Layer 1 strength — θ scaling factor (0.0 = off, 2.0 = default).
+    curv_c : float
+        Layer 2 strength — step gate factor (0.0 = off, 1.0 = default).
+    curv_update_every : int
+        Steps between true Hessian λ_max re-estimates (default: 5).
+    normalize : bool
+        Standard-scale input data before simulation.
+    max_samples : int
+        Subsample to this many particles for simulation if N > max_samples.
+    use_fused : bool
+        Use FusedSystemScorer for final scoring (recommended).
+    calibrate : str or None
+        FAR-targeted calibration ('platt', 'isotonic', None).
+    target_far : float
+        Target false-alarm rate for calibration.
+    """
+
+    def __init__(self,
+                 theta: float = -1.0,       # -1 = auto from reference median
+                 alpha: float = 0.1,
+                 epsilon: float = 1e-6,
+                 eta: float = 0.05,
+                 iterations: int = 60,
+                 k_neighbors: int = 15,
+                 curv_beta: float = 2.0,
+                 curv_c: float = 1.0,
+                 curv_update_every: int = 5,
+                 normalize: bool = True,
+                 max_samples: int = 3000,
+                 use_fused: bool = True,
+                 calibrate: Optional[str] = None,
+                 target_far: float = 0.05):
+        self.theta = theta
+        self.alpha = alpha
+        self.epsilon = epsilon
+        self.eta = eta
+        self.iterations = iterations
+        self.k_neighbors = k_neighbors
+        self.curv_beta = curv_beta
+        self.curv_c = curv_c
+        self.curv_update_every = curv_update_every
+        self.normalize = normalize
+        self.max_samples = max_samples
+        self.use_fused = use_fused
+        self.calibrate = calibrate
+        self.target_far = target_far
+
+        self.stabiliser = LyapunovStabiliser(min_eta=1e-5)
+        self.fused_scorer = FusedSystemScorer(k=k_neighbors) if use_fused else None
+        self.alarm = MorseTopologyAlarm(k=k_neighbors)
+        self._far_calibrator = None
+        self._bsdt: Optional['BSDTChannels'] = None
+
+        self.scaler_: Optional[StandardScaler] = None
+        self.mu_: Optional[np.ndarray] = None
+        self.X_final_: Optional[np.ndarray] = None
+        self._curv_trace: Optional[List[float]] = None
+
+    # ── System-level curvature  ──────────────────────────────────────
+
+    def _system_curv(self, X: np.ndarray, bsdt: 'BSDTChannels') -> float:
+        """λ_max(∇²Ē_BS) − 1 — marginal Hessian curvature indicator.
+
+        Uses the same finite-difference routine as BSDTChannels.morse_alarm
+        but returns only the curvature manifold indicator scalar (§D.3):
+
+            curv > 0  →  curvature-dominated  →  Layer 1 & 2 activate
+            curv ≤ 0  →  convex-dominated      →  layers transparent
+
+        Operates on the MEAN gradient over all particles, so it is a
+        system-level scalar — O(d × N) per call, not O(N × d²).
+        """
+        d = X.shape[1]
+        eps_fd = 1e-4
+        H = np.zeros((d, d))
+        for k in range(d):
+            e_k = np.zeros(d)
+            e_k[k] = eps_fd
+            gp = bsdt._gradient_vectors(X + e_k).mean(axis=0)
+            gm = bsdt._gradient_vectors(X - e_k).mean(axis=0)
+            H[:, k] = (gp - gm) / (2.0 * eps_fd)
+        H = 0.5 * (H + H.T)
+        lam_max = float(np.linalg.eigvalsh(H)[-1])
+        return lam_max - 1.0   # §D.3 indicator: zero on C_man
+
+    # ── Canonical ODE batched step ───────────────────────────────────
+
+    def _canonical_batch_rhs(self,
+                              X: np.ndarray,
+                              G_mat: np.ndarray,
+                              E_vec: np.ndarray,
+                              theta_eff: float) -> np.ndarray:
+        """Canonical ODE vector field for ALL particles simultaneously.
+
+        Parameters
+        ----------
+        X      : (n, d) current positions
+        G_mat  : (n, d) pre-computed ∇E_BS(X)  (reused from batch call)
+        E_vec  : (n,)   pre-computed E_BS(X)
+        theta_eff : float  effective θ from Layer 1
+
+        Returns
+        -------
+        rhs : (n, d)  Ẋ for each particle
+        """
+        # F_base = −α(x − μ)
+        F_base = -self.alpha * (X - self.mu_)        # (n, d)
+
+        # Modified force F = F_base − g_x
+        F = F_base - G_mat                             # (n, d)
+
+        # Adaptive gain γ_i = E_i / (E_i + θ_eff)  (per-particle)
+        gamma = E_vec / (E_vec + theta_eff)            # (n,)
+
+        # Projection: α_proj_i = ⟨F_i, g_xi⟩ / (‖g_xi‖² + ε)
+        gn2 = np.sum(G_mat * G_mat, axis=1) + self.epsilon   # (n,)
+        Fg  = np.sum(F * G_mat, axis=1)                       # (n,)
+        alpha_proj = Fg / gn2                                 # (n,)
+
+        # Canonical ODE: Ẋ = F − γ · α_proj · g_x
+        rhs = F - (gamma * alpha_proj)[:, None] * G_mat       # (n, d)
+        return rhs
+
+    # ── Main simulation  ─────────────────────────────────────────────
+
+    def fit_score(self, X: np.ndarray,
+                  y: Optional[np.ndarray] = None) -> np.ndarray:
+        """Run canonical ODE simulation with curvature-adaptive layers.
+
+        Phase 1 — Simulation:
+            Canonical ODE + Layer 1 (θ-adaptive) + Layer 2 (step gate).
+            True Hessian curvature recomputed every curv_update_every steps.
+
+        Phase 2 — Scoring:
+            FusedSystemScorer on final particle positions.
+
+        Parameters
+        ----------
+        X : (N, d) array — data points (each is a particle)
+        y : (N,) optional — labels (0 = normal) for subsampling strategy
+
+        Returns
+        -------
+        scores : (N,) anomaly scores ∈ [0, ∞)
+        """
+        if self.normalize:
+            self.scaler_ = StandardScaler()
+            X_all = self.scaler_.fit_transform(X).astype(np.float64)
+        else:
+            X_all = X.astype(np.float64).copy()
+
+        n = len(X_all)
+        normal_mask_all = (y == 0) if y is not None \
+            else np.ones(n, dtype=bool)
+
+        # ── Subsample for simulation if dataset is large ──
+        if n > self.max_samples:
+            rng = np.random.RandomState(42)
+            anom_idx  = np.where(y == 1)[0] if y is not None \
+                else np.array([], dtype=int)
+            other_idx = np.where(y != 1)[0] if y is not None \
+                else np.arange(n)
+
+            if len(anom_idx) >= self.max_samples:
+                n_anom  = min(len(anom_idx), self.max_samples // 2)
+                n_other = self.max_samples - n_anom
+                anom_s  = rng.choice(anom_idx, n_anom, replace=False)
+                other_s = rng.choice(other_idx,
+                                     min(n_other, len(other_idx)),
+                                     replace=False)
+            else:
+                n_other = max(0, self.max_samples - len(anom_idx))
+                other_s = rng.choice(other_idx,
+                                     min(n_other, len(other_idx)),
+                                     replace=False) \
+                          if len(other_idx) > n_other else other_idx
+                anom_s  = anom_idx
+
+            sim_idx     = np.sort(np.concatenate([anom_s, other_s]))
+            X_work      = X_all[sim_idx].copy()
+            normal_mask = normal_mask_all[sim_idx]
+            subsampled  = True
+        else:
+            X_work      = X_all.copy()
+            normal_mask = normal_mask_all
+            subsampled  = False
+
+        self.mu_  = X_work.mean(axis=0)
+        n_sim     = len(X_work)
+
+        # ── Fit BSDT on initial normal positions ──
+        X_ref_init = X_work[normal_mask] if normal_mask.sum() > 5 \
+            else X_work
+        bsdt = BSDTChannels(k=min(self.k_neighbors, len(X_ref_init) - 1))
+        bsdt.fit(X_ref_init)
+        self._bsdt = bsdt
+
+        # ── Auto-calibrate θ_base from reference energy distribution ──
+        e_ref      = bsdt.energy(X_ref_init)          # (n_ref,)
+        theta_base = float(np.median(e_ref)) + 1e-10  \
+                     if self.theta < 0.0 else self.theta
+
+        # ══════════════════════════════════════════════════════════════
+        #  SIMULATION LOOP
+        #
+        #  Every step:
+        #   (A) Batch BSDT energy + gradient for all particles.
+        #   (B) Every curv_update_every steps: compute system-level
+        #       λ_max(∇²Ē_BS) − 1  via true finite-difference Hessian.
+        #   (C) Layer 1: θ_eff = θ_base × (1 + β·max(curv_sys, 0))
+        #   (D) Batch canonical ODE rhs with θ_eff.
+        #   (E) Layer 2: gate = 1 / (1 + c·max(curv_sys, 0))
+        #   (F) Euler step: X_new = X + gate · η · rhs  (Armijo corrected)
+        # ══════════════════════════════════════════════════════════════
+        self.stabiliser.reset()
+        iters = self.iterations if n_sim <= 1000 \
+            else max(20, self.iterations // 2)
+
+        curv_sys       = 0.0   # initialise as convex (no gate active)
+        self._curv_trace: List[float] = []
+
+        for step in range(iters):
+
+            # (A) Batch BSDT quantities
+            E_vec = bsdt.energy(X_work)                    # (n_sim,)
+            G_mat = bsdt._gradient_vectors(X_work)         # (n_sim, d)
+
+            # (B) System curvature update (true Hessian, not proxy)
+            if step % self.curv_update_every == 0:
+                curv_sys = self._system_curv(X_work, bsdt)
+                self._curv_trace.append(curv_sys)
+
+            # (C) Layer 1: θ-adaptive — modulate gain via curvature
+            curv_pos  = max(curv_sys, 0.0)
+            theta_eff = theta_base * (1.0 + self.curv_beta * curv_pos)
+
+            # (D) Canonical ODE rhs (batch, uses θ_eff)
+            rhs = self._canonical_batch_rhs(X_work, G_mat, E_vec, theta_eff)
+
+            # (E) Layer 2: smooth step gate — shrink step in curvature zone
+            gate = 1.0 / (1.0 + self.curv_c * curv_pos)
+
+            # (F) Armijo on radial energy (ISS: BSDT force = bounded perturbation)
+            E_old        = 0.5 * self.alpha * float(
+                np.sum((X_work - self.mu_) ** 2))
+            grad_norm_sq = float(np.sum(rhs ** 2))
+
+            X_candidate = X_work + gate * self.eta * rhs
+            E_new = 0.5 * self.alpha * float(
+                np.sum((X_candidate - self.mu_) ** 2))
+
+            accept, eta_adj = self.stabiliser.accept_step(
+                E_old, E_new, grad_norm_sq, self.eta)
+
+            X_work = X_work + gate * eta_adj * rhs
+
+            # La Salle convergence check
+            displacement = gate * eta_adj * float(
+                np.max(np.linalg.norm(rhs, axis=1)))
+            if self.stabiliser.check_convergence(grad_norm_sq, displacement):
+                break
+
+        self.X_final_ = X_work
+
+        # Phase 2: Fused scoring on final positions
+        X_ref_final = X_work[normal_mask]
+        if len(X_ref_final) < 2:
+            scores_sim = np.linalg.norm(X_work - self.mu_, axis=1)
+        elif self.fused_scorer is not None:
+            self.fused_scorer.fit(X_ref_final, X_sim=X_work)
+            scores_sim = self.fused_scorer.score(X_work)
+        else:
+            self.alarm.fit(X_ref_final)
+            scores_sim = self.alarm.score(X_work)
+
+        # Map scores back to full dataset if subsampled
+        if subsampled:
+            scores = self.fused_scorer.score(X_all) \
+                     if self.fused_scorer is not None \
+                     else self.alarm.score(X_all)
+        else:
+            scores = scores_sim
+
+        # FAR-targeted calibration (optional)
+        if self.calibrate is not None and y is not None:
+            from .calibration import FARTargetCalibrator
+            cal = FARTargetCalibrator(
+                target_far=self.target_far,
+                method=self.calibrate,
+            )
+            cal.fit(scores, y)
+            scores = cal.transform(scores)
+            self._far_calibrator = cal
+
+        return scores
+
+    def _score_new(self, X: np.ndarray) -> np.ndarray:
+        """Score new data using the scorer fitted on final positions."""
+        X = np.asarray(X, dtype=np.float64)
+        if self.scaler_ is not None:
+            X_scaled = self.scaler_.transform(X)
+        else:
+            X_scaled = X.copy()
+        if self.fused_scorer is not None and getattr(
+                self.fused_scorer, '_fitted', False):
+            return self.fused_scorer.score(X_scaled)
+        return self.alarm.score(X_scaled)
+
+    def fit_reference(self, X_ref: np.ndarray,
+                      y_ref: Optional[np.ndarray] = None,
+                      cal_frac: float = 0.2,
+                      random_state: int = 42) -> 'CanonicalODEEngine':
+        """Fit and calibrate for conformal scoring (same protocol as other engines)."""
+        X_ref = np.asarray(X_ref, dtype=np.float64)
+        N     = len(X_ref)
+        n_cal = max(10, int(N * cal_frac))
+        rng   = np.random.default_rng(random_state)
+        perm  = rng.permutation(N)
+        X_fit = X_ref[perm[:-n_cal]]
+        X_cal = X_ref[perm[-n_cal:]]
+        y_fit = np.asarray(y_ref)[perm[:-n_cal]] \
+                if y_ref is not None else None
+        self.fit_score(X_fit, y_fit)
+        self._cal_scores = self._score_new(X_cal)
+        return self
+
+    def conformal_pvalue(self, X: np.ndarray) -> np.ndarray:
+        """Conformal p-values: fraction of calibration scores ≥ score(x)."""
+        scores = self._score_new(X)
+        cal    = np.sort(self._cal_scores)
+        rank   = len(cal) - np.searchsorted(cal, scores, side='left')
+        return (1 + rank) / (len(cal) + 1)
+
+    def curvature_trace(self) -> List[float]:
+        """Return recorded curv_sys values from the last fit_score() call."""
+        return list(self._curv_trace or [])
 
 
 # ═══════════════════════════════════════════════════════════════════

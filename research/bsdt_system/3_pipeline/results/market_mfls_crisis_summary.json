@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "analysis": "Market MFLS - Crisis Period (2005-2024)",
+    "data_source": "SP500 (FRED) | VIXCLS (FRED) | HY_Spread (synthetic volatility-based)",
+    "date_range": "2016-05-19 \u2192 2024-12-31",
+    "n_observations": 2169
+  },
+  "regime_distribution": {
+    "Critical Instability": 109,
+    "Elevated Risk": 325,
+    "Normal": 1735
+  },
+  "energy_thresholds": {
+    "theta": 5.407311584351254,
+    "tau_elevated": 3.1283325602875607,
+    "tau_critical": 8.899003855446132
+  },
+  "instability_correlation": {
+    "corr_regime_to_fwd_drawdown": -0.08533601850656482
+  },
+  "scenario_analysis": {
+    "total_scenarios": 9,
+    "stable_count": 0,
+    "details": [
+      {
+        "shock": 0.5,
+        "gamma_mult": 0.7,
+        "end_distance": 3.3276865704160974,
+        "stable": false
+      },
+      {
+        "shock": 0.5,
+        "gamma_mult": 1.0,
+        "end_distance": 3.3276865613604913,
+        "stable": false
+      },
+      {
+        "shock": 0.5,
+        "gamma_mult": 1.3,
+        "end_distance": 3.3276865523048857,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 0.7,
+        "end_distance": 10.202846407435157,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 1.0,
+        "end_distance": 10.202846355320217,
+        "stable": false
+      },
+      {
+        "shock": 1.0,
+        "gamma_mult": 1.3,
+        "end_distance": 10.202846303205279,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 0.7,
+        "end_distance": 3.312204890883019,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 1.0,
+        "end_distance": 3.3122048819569776,
+        "stable": false
+      },
+      {
+        "shock": 1.5,
+        "gamma_mult": 1.3,
+        "end_distance": 3.3122048730309315,
+        "stable": false
+      }
+    ]
+  },
+  "crisis_events_captured": {
+    "2008_financial_crisis": false,
+    "2011_eurozone_crisis": false,
+    "2020_covid_crash": true
+  },
+  "output_files": {
+    "timeseries_csv": "C:\\amttp\\research\\adaptive-friction\\pipeline\\results\\market_mfls_crisis_timeseries.csv",
+    "summary_json": "C:\\amttp\\research\\adaptive-friction\\pipeline\\results\\market_mfls_crisis_summary.json"
+  }
+}
