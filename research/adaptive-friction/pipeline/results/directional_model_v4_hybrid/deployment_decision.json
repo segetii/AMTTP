@@ -1,0 +1,30 @@
+{
+  "deployable": false,
+  "selected_variant": null,
+  "fallback": "canonical_tanh_momentum",
+  "model": {
+    "sharpe": 1.0795066056173928,
+    "maxdd": -0.12039218110594918,
+    "cagr": 0.22630953629071127,
+    "turnover": 0.07332566994806533,
+    "positive_years": 2
+  },
+  "baseline": {
+    "sharpe": 1.0091265247078933,
+    "maxdd": -0.45488962030297186,
+    "cagr": 0.48208098145883693,
+    "turnover": 0.36193516307706974
+  },
+  "gates": {
+    "sharpe": 1.0,
+    "maxdd": -0.2,
+    "sharpe_vs_baseline_increment": 0.05,
+    "positive_years": 3
+  },
+  "passed": {
+    "sharpe": true,
+    "maxdd": true,
+    "sharpe_vs_baseline": true,
+    "positive_years": false
+  }
+}
